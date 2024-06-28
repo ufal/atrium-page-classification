@@ -1,11 +1,11 @@
-import os
 import pandas as pd
 import layoutparser as lp
 import cv2
+from common_utils import *
 
-
+# PNG files layout extraction
 class PNG_Layout:
-    def __init__(self, output_folder="/lnet/work/people/lutsai/pythonProject/layouts"):
+    def __init__(self, output_folder=os.environ['FOLDER_LAYOUTS']):
         self.layout_output_folder = output_folder
 
         self.png_file_list = []
@@ -20,16 +20,8 @@ class PNG_Layout:
         if not os.path.exists(self.layout_output_folder):
             os.makedirs(self.layout_output_folder)
 
-    def directory_scraper(self, path):
-        for root, dirs, files in os.walk(path):
-            for file in files:
-                if file.endswith(".png"):
-                    self.png_file_list.append(f"{root}/{file}")
-
-        print(f"From directory {path} collected {len(self.png_file_list)} png images")
-        return self.png_file_list
-
-    def png_detect(self, png_file):
+    # PNG layout detection
+    def _png_detect(self, png_file: str):
         image = cv2.imread(png_file)
         # print(image)
         # cv2.imshow("img", image)
@@ -50,14 +42,14 @@ class PNG_Layout:
         print(f"Layout of {png_file.split('/')[-1]} containing {len(df.index)} blocks saved to {layout_file_name}")
         return df
 
-    def folder_to_layouts(self, path):
-        pdf_list = self.directory_scraper(path)
+    # called to process directory path
+    def folder_to_layouts(self, path: str) -> None:
+        pdf_list = directory_scraper(path, self.png_file_list)
 
         for file in pdf_list:
-            self.png_detect(file)
+            self._png_detect(file)
 
 # possible configs for found layout parser (worse than chosen according to manual tests)
-
 
 # hjd_path = "lp://HJDataset/mask_rcnn_R_50_FPN_3x/config"
 # pln_path = "lp://PubLayNet/mask_rcnn_X_101_32x8d_FPN_3x/config"

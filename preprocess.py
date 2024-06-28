@@ -1,5 +1,4 @@
 # from google.cloud import vision
-# import pandas as pd
 import cv2
 import numpy as np
 import math
@@ -9,14 +8,13 @@ import math
 # authfile = '/home/lutsai/.config/gcloud/application_default_credentials.json'
 # gvision = GVisionAPI(authfile)
 
-# [END vision_python_migration_import]
-
 path_yellow = '/lnet/work/people/lutsai/pythonProject/pages/CTX193102237_page_1.png'
 path_dirty = '/lnet/work/people/lutsai/pythonProject/pages/CTX194604301_page_0.png'
 path_draw = '/lnet/work/people/lutsai/pythonProject/pages/CTX198702238A_page_24.png'
 path_bleak = '/lnet/work/people/lutsai/pythonProject/pages/CTX199706756_page_67.png'
 path_skew = '/lnet/work/people/lutsai/pythonProject/pages/CTX198402735_page_0.png'
 
+# preprocessing with OpenCV demo
 
 image = cv2.imread(path_skew)
 # cv2.imshow("img", image)
@@ -51,16 +49,12 @@ cv2.imshow("img_tresh_stack", tresh_concat)
 otsu_concat = np.concatenate((th2, th3), axis=1)
 cv2.imshow("img_otsu_stack", otsu_concat)
 
-
 thresh_closed = cv2.morphologyEx(thresh_gauss_big, cv2.MORPH_CLOSE, np.ones((1, 10)))
 
-# Find contours
 contours = cv2.findContours(thresh_closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[-2]  # [-2] indexing takes return value before last (due to OpenCV compatibility issues).
 
 angles = []  # List of line angles.
 
-# Iterate the contours and fit a line for each contour
-# Remark: consider ignoring small contours
 for c in contours:
     vx, vy, cx, cy = cv2.fitLine(c, cv2.DIST_L2, 0, 0.01, 0.01) # Fit line
     w = image_gray.shape[1]
@@ -70,7 +64,6 @@ for c in contours:
 
 angles = np.array(angles)  # Convert angles to NumPy array.
 
-# Remove outliers and
 lo_val, up_val = np.percentile(angles, (40, 60))  # Get the value of lower and upper 40% of all angles (mean of only 10 angles)
 mean_ang = np.mean(angles[np.where((angles >= lo_val) & (angles <= up_val))])
 
