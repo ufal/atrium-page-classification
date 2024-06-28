@@ -1,0 +1,7 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+107.61447143554688	631.9032592773438	1120.62841796875	818.5924072265625	rectangle	"Při komisi dne 27. V. 195I navštívena obecná chlapecká škola v Modřa-
+nech, kde jest uložena soukromá praehistorická sbírka říd. uč. Kotvy«
+Celáxk. sbírka byla - až na některé méně důležité předměty - ofotogra=
+
+fována, a zá pomoci řídícího učitele Kotvy byl pořízen přiložený seznam celé
+"	4	TextRegion	0.8713527321815491

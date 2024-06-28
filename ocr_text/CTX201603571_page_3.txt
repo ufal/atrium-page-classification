@@ -1,0 +1,19 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+131.70993041992188	311.7006530761719	1070.486328125	576.5640869140625	rectangle	"Zjišťovací archeologický výzkum (dále ZJAV) proběhl na nezastavěných částech parcel č.
+1556/1 a 3 a 1557, které se nalézají v ulici Albertov, Praha 2 — Nové Město (obr. 1; obr. příl. 1,2).
+Pozemky jsou situovány na severní straně komunikace, v mírném svahu ukloněném směrem
+k jihu. Severní část pozemku přechází do prudšího svahu historické hory Větrov s kostelem sv.
+Apolináře. Stávající zástavba má charakter dlouhodobých provizorních staveb, sloužících pro
+
+potřeby Univerzity Karlovy - menza, učebny, kanceláře. Jednoduchá provozní budova situovaná
+
+   
+"	1	TextRegion	0.9999091625213624
+131.2173309326172	228.3625030517578	298.54119873046875	252.6570281982422	rectangle	"1.1. Lokalizace
+"	2	TextRegion	0.9997628331184388
+1060.0848388671875	1537.0078125	1070.8201904296875	1552.840087890625	rectangle		3	TextRegion	0.9996473789215088
+123.86360168457033	1299.5679931640625	1076.2220458984375	1342.810302734375	rectangle	"Obr. 1 Praha 2 — Nové Město, výřez z katastrálního plánu Prahy. Červeně vyznačeny archeologickým výzkumem
+dotčené parcely č. 1556/1 a 3 a 1557, Albertov, (graficky zpracovala S. Babušková, 2015).
+"	4	TextRegion	0.9996325969696044
+129.11761474609375	120.35684204101562	519.86279296875	144.23165893554688	rectangle	"1. Lokalizace a okolnosti výzkumu
+"	5	TextRegion	0.9902222156524658

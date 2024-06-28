@@ -1,0 +1,40 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+168.49099731445312	109.09500885009766	1115.49853515625	911.8645629882812	rectangle	"Po zahájení výkopových prací v sondě 2a se při 4. metru SZ
+těny této sondy (měřeno od JZ) objevilo vně vnitřního příkopu
+jehluboko pod povrchem vrstvy 3 ohniště, podložené velkými opuko-
+ými placáky (objekt III). Při 2. metru téže stěny sondy 2a se na
+ovrchu vrstvy 3 objevila blízko před příkopem podlouhlá vrstvičk:
+mavošedé hlinky (objekt IV) a těsně před vnitřním svahem vnitřní
+říkopu ležela na povrchu vrstvy 3 oválná plocha vypálené mazanic
+objekt V). Při snímání vrstvy 3 v sondě 2b se při JZ stěně sondy
+e vrstvě 3 objevily část plochy dřevěných oharků promíšených
+větle šedým popelem (objekt VI) a dále plocha, kde vrstva 3 byla
+romíšená hrudkami červené hlíny (objekt VII).
+
+V sondách 2a, 2b a 2c se vně vnitřního příkopu (směrem do před
+radí) ukázal ve vrstvě 3 povrch opukové podezdívky, orientované
+d V k Z, pokrytý opukovou destrukcí a doprovázený opukovou destr
+aké při své jižní líci (objekt s kamennou podezdívkou nečíslován
+
+označuji jej, jak uvedeno výše, již interpretačně jako pravděpo
+
+oaobný kněžský dům).
+"	0	TextRegion	0.999995231628418
+146.56414794921875	898.8174438476562	1114.8603515625	1128.7598876953125	rectangle	"dobný kněžský dům),
+
+Ve vnitřním příkopě se ve spodním horizontu vrstvy 3 (z velké
+části na dně příkopu) místy nacházela vrstva ""zteřelé mazanice"",
+zjevně naplavená (která rovněž neobdržela objektové číslo). Na
+
+svahu vnitřního příkopu v sondě 2b se po sejmutí vrstvy 3 ukázala
+"	1	TextRegion	0.9999752044677734
+200.00897216796875	135.7866973876953	222.0632781982422	149.82180786132812	rectangle		2	TextRegion	0.999778926372528
+155.07704162597656	1395.10498046875	1112.7293701171875	1474.545654296875	rectangle	"25/74: ""Sonda 2 /tj. 2a/, místo s kusy do oranžova vypálené hlíny
+u 4, metru, při sz. stěně sondy, úroveň 60 - 70 cm pod
+dneš. povrchem, 29,5.""
+"	3	TextRegion	0.9997760653495787
+554.337890625	52.354225158691406	584.047119140625	67.29296875	rectangle		4	TextRegion	0.9992419481277466
+257.02740478515625	861.7569580078125	1135.0198974609375	901.8568115234376	rectangle	"ují JeJ., Ja« uvedeno Výse, již interpretacčcněé jako pravděpo-
+"	6	TextRegion	0.8987998962402344
+536.5696411132812	54.62161636352539	607.084228515625	67.00012969970703	rectangle	"- 34 -
+"	7	TextRegion	0.8263188600540161

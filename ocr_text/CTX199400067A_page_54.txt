@@ -1,0 +1,87 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+181.90501403808597	1018.7427368164062	1151.0272216796875	1318.34228515625	rectangle	"délka příkopu, zjištěná v sondách 2a - 2c v r. 1974 (v sondě 2c
+bylo už v r. 1974 v jejím Z rohu zjištěno uzavření příkopu),
+obnášela cca 14 m. Dno příkopu, tvořené vrstvou 4, bylo dosaženo
+jen v sondách 2a a 2b, a to z větší části (zatímco v úseku
+vnitřního příkopu v sondě 2c zůstaly v r. 1974 nad jeho dnem le-
+žet nesejmuté spodní horizonty vrstvy 3 a červenohnědá naplavená
+vrstva), Zjištěná hloubka dna příkopu v sondě 2b u její JZ stěny
+obnášela cca 1,8 m pod dnešním povrchem terénu;
+"	0	TextRegion	0.9999947547912598
+203.32032775878903	540.6524047851562	224.4360809326172	558.8243408203125	rectangle		1	TextRegion	0.999881625175476
+158.0302276611328	994.9324340820312	181.0406951904297	1013.3655395507812	rectangle		2	TextRegion	0.9998389482498168
+186.61764526367188	905.1741943359376	1093.5516357421875	985.3379516601562	rectangle	"příkop měl šikmé stěny, v sondě 2a strmější, v sondách 2b a 4
+povlovnější. V Z rohu sondy 2c se příkop uzavíral;
+"	3	TextRegion	0.9996306896209716
+574.502197265625	51.07041931152344	605.0768432617188	66.74137115478516	rectangle		4	TextRegion	0.9995822310447692
+206.08338928222656	1344.483642578125	974.3028564453124	1607.8282470703125	rectangle	"výpo
+
+základní výplň příkopu nade dnem, tvořeným lužickou «
+byla (jak už uvedeno výše) následující:
+
+a) naplavenina na dně příkopu,
+
+b) vrstva 3 z LO, století,
+
+c) destrukce vnitřní hradební zdi z r. 995,
+
+Detailní popis zásypu příkopu, dokumentovaný v řezech
+5, 6 a 10, uvedu v rámci oddílů o výzkumu sondy 2 v s
+"	5	TextRegion	0.9993889331817628
+187.5367126464844	877.0274658203125	270.0221862792969	891.3499145507812	rectangle	"tvar:
+"	6	TextRegion	0.9984057545661926
+212.87559509277344	233.2427673339844	1190.0	799.0873413085938	rectangle	"3) příkop vyhlouben do lužické jílovité vrstvy. Lze předpokládat,
+že se tak stalo v souvislosti se stavbou nejstaršího libického
+opevnění na přelomu 8, a 9, století;
+
+3) V počátečních údobích se dno příkopu zanášelo přirozeným způ-
+sobem a zůstaly na něm ležet zbytky náplavů;
+
+>) v 10. století, tj. v době kdy v sousedství příkopu stála velká
+budova na kamenné podezdívce i krátce po zániku budovy, se pří-
+kop naplnoval velmi kvalitní kulturní vrstvou 3. Z vrstvy 3
+pochází typická keramika 10. stol, včetně tzv. ""keramiky slav-
+niíkovské fáze"". V příkopě fungovala v 10, stol. (v době narůstá
+ní vrstvy 3) dvě ohniště (objekty VI a VII - viz výše);
+
+1) zjevně v září 995 se do zčásti zaplněného příkopu i na okraj
+někdejšího sídelního areálu pravděpodobného kněžského domu
+zřítila vnitřní opuková plenta sousední hradby, Také tato
+destrukce vnitřní hradební zdi (DVHZ), která naplnila dosud
+prázdnou horní část příkopu a ještě vytvořila hromadu spáleného
+kamení nad zaplněným příkopem a v jeho sousedství, obsahovala
+mj. typickou ""keramiku slavníkovské fáze"";
+
+>) v přemyslovském období Libice (995 - 12, stoleti) zůstal
+vnitřní příkop nevyklizen;
+
+f) v 11, a 12, stol, narostla nad zaplněným vnitřním příkopem
+"	7	TextRegion	0.9951671361923218
+156.84869384765625	1332.1629638671875	181.53936767578125	1352.4503173828125	rectangle	"7)
+"	8	TextRegion	0.9945631623268129
+274.4084777832031	771.5844116210938	1141.7030029296875	855.2603759765625	rectangle	"11. a 12. stol, narostla nad zaplněným vnitřním příkopem
+lturní vrstva 2, s charakteristickou příměsí úlomků spálené
+nespálené opuky, pocházející z pobořeného opevnění;
+"	9	TextRegion	0.9932788014411926
+158.69325256347656	875.7562866210938	181.58848571777344	892.9832153320312	rectangle		10	TextRegion	0.9921737909317015
+202.56130981445312	242.9498443603516	225.04495239257807	260.4371032714844	rectangle		11	TextRegion	0.9894121289253236
+195.7417907714844	134.5220947265625	374.6046142578125	149.38462829589844	rectangle	"Ssuperpozice:
+"	12	TextRegion	0.9880778193473816
+158.14503479003906	133.61102294921875	183.06570434570312	151.08438110351562	rectangle	"4)
+"	13	TextRegion	0.9810500741004944
+571.07861328125	53.328006744384766	626.73681640625	65.73178100585938	rectangle	"50
+"	14	TextRegion	0.9121122360229492
+203.21224975585935	722.8507690429688	224.39401245117188	739.2083740234375	rectangle		16	TextRegion	0.8773308992385864
+354.98565673828125	710.3114624023438	1095.9180908203125	772.0833740234375	rectangle	"slovském období Libice (995 - 12. století) zůstal
+příkop nevyklizen;
+"	17	TextRegion	0.8769761323928833
+210.87985229492188	699.8626098632812	1136.2066650390625	840.1900634765625	rectangle	"8 9 PEN S00 K M 0
+
+2) v přemyslovském období Libice (995 - 12. století) zůstal
+vnitřní příkop nevyklizen;
+
+f) v ll. a 12. stol, narostla nad zaplněným vnitřním příkopem
+kulturní vrstva 2, s charakteristickou příměsí úlomků spálen
+i nespálené opuky. nocházející > nohořeného anovnění «
+"	18	TextRegion	0.847518265247345
+203.413818359375	386.6060485839844	226.25762939453125	404.13812255859375	rectangle		19	TextRegion	0.8393305540084839

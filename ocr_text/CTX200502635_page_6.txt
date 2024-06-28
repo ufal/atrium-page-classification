@@ -1,0 +1,81 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+149.9100341796875	1448.8013916015625	696.3189086914062	1502.10986328125	rectangle	"$ 1 zlomek průsvitného skla s tenkou vrstvičkou koroze
+$ 1 zlomek blíže neurčované zvířecí kosti
+"	0	TextRegion	0.9999657869338988
+140.38829040527344	687.3861083984375	1041.829833984375	795.799560546875	rectangle	"Keramický soubor získaný při záchranném archeologickém výzkumu je svým rozsahem
+velmi nepočetný a obtížně chronologicky zařaditelný. Nejstarší keramické fragmenty (14. -15
+
+století) byly získány z vrstvy 0306 vsituaci č. 3. Ostatní stratifikované nálezy (vyjme
+artefaktu z novodobých recentních navážek) lze řadit do časového rozmezí 15.— 17. století.
+"	1	TextRegion	0.9999351501464844
+145.75308227539062	1425.9468994140625	291.5270080566406	1443.7550048828125	rectangle	"Sběr z hromad
+"	2	TextRegion	0.9999089241027832
+144.5531768798828	146.01219177246094	293.35626220703125	165.4526824951172	rectangle	"Sběr z hromad
+"	3	TextRegion	0.9996339082717896
+146.0940704345703	1142.258544921875	258.62066650390625	1158.9879150390625	rectangle	"vrstva 0307
+"	4	TextRegion	0.9995751976966858
+156.00294494628906	1282.5283203125	995.2199096679688	1324.82373046875	rectangle	"2 zlomky blíže neurčovaných zvířecích kostí; jedna z nich nese stopy po zpracování —
+záseky
+"	5	TextRegion	0.9994431138038636
+165.71578979492188	940.34130859375	393.9635620117188	994.625732421875	rectangle	"1 zlomek zvířecí kosti
+1 zlomek dřeva
+"	6	TextRegion	0.99813312292099
+143.39306640625	883.668212890625	265.9028625488281	932.3003540039062	rectangle	"SITUACE 3
+vrstva 0302
+"	7	TextRegion	0.9980002045631408
+163.24551391601562	187.5132751464844	1009.18603515625	434.9005432128906	rectangle	"J dly PleKýCIL ZLOIKU Z JELTE DIVI TLIILY, LVIUY TOGUKCII VyDal
+
+1 atypický zlomek z jemně plavené hlíny s vnější stranou leštěnou, redukční výpal
+
+2 atypické zlomky z jemně plavené hlíny, oxidační výpal
+
+3 atypické jednostranně glazované zlomky, jemně plavená hlína, oxidační výpal
+
+1 atypický oboustranně glazovaný zlomek z jemně plavené hlíny, oxidační výpal
+
+1 zlomek jednoduchého okraje talíře s vnitřní stranou glazovanou (glazura přetažena pi
+okraj), jemně plavená hlína, oxidační výpal
+
+1 oble přehnutý okraj na podhrdlí zdobeno radélkovým dekorem (šikmé obdélníčky),
+jemně plavená hlína, redukční výpal
+"	8	TextRegion	0.9962890148162842
+166.95526123046875	387.2847595214844	997.4755859375	664.1284790039062	rectangle	"4 odle přehnutý okraj na podhrdli zdobeno radělkovým dekorem (Sikmé oddělničky),
+jemně plavená hlína, redukční výpal
+
+1 zlomek páskového ucha oválného průřezu, glazováno na vnější straně s přetažením
+glazury přes okraj ven, jemně plavená hlína, oxidační výpal
+
+4 zlomky odřezávaných den z jemně plavené hlíny, redukční výpal
+
+1 zlomek odřezávaného dna z jemně plavené hlíny, oxidační výpal
+
+1 zlomek oblého zeslabeného okraje pokličky z jemně plavené hlíny, oxidační výpal
+1 zlomek okruží s vnitřním prožlabením a horní plochou šikmo seříznutou
+
+fragment nádobkového kachle s glazovanou (tmavě hnědá gl.) čelní vyhřívací stěnou
+zdobenou architektonickým motivem (sloup); vnitřní část očazena.
+"	9	TextRegion	0.995593011379242
+166.98143005371094	1336.015869140625	983.2463989257812	1374.445068359375	rectangle	"l železný hřebík kruhového průřezu s kruhovou hlavičkou s dochovaným kovovým
+
+ 
+"	10	TextRegion	0.9929540753364564
+169.23666381835938	999.7032470703124	464.6445617675781	1022.5676879882812	rectangle	"2 zlomky zeleného čirého skla
+"	11	TextRegion	0.9910667538642884
+226.09718322753903	373.19140625	1010.8942260742188	435.6460266113281	rectangle	"le přehnutý okraj na podhrdlí zdobeno radélkovým dekorem (šikmé obdélníčky),
+č plavená hlína, redukční výpal
+"	12	TextRegion	0.9881948232650756
+147.5421905517578	1255.7723388671875	418.5849914550781	1279.6214599609375	rectangle	"Sběr z hromad V od zámku
+"	13	TextRegion	0.987169623374939
+142.7058563232422	831.8341064453125	299.79071044921875	850.8598022460938	rectangle	"Ostatní nálezy:
+"	14	TextRegion	0.9765060544013976
+159.1222686767578	1170.3043212890625	383.32177734375	1195.86865234375	rectangle	"hrudka čistého vápna
+"	15	TextRegion	0.9709455370903016
+1039.741943359375	1593.2767333984375	1048.46875	1605.4984130859375	rectangle		16	TextRegion	0.9269752502441406
+163.23825073242188	1081.7462158203125	289.3558349609375	1104.753173828125	rectangle	"1 kančí zub
+"	17	TextRegion	0.877716064453125
+143.16639709472656	1057.478759765625	262.6983642578125	1079.721923828125	rectangle	"vrstva 0306
+"	18	TextRegion	0.8650433421134949
+161.04566955566406	1186.12646484375	482.7056579589844	1219.785400390625	rectangle	"AE B VAB
+
+2 blíže neurčované zvířecí kosti
+"	19	TextRegion	0.8028237223625183

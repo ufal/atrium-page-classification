@@ -1,0 +1,76 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+121.7641830444336	910.037353515625	1144.06787109375	1538.616455078125	rectangle	"PE SE S K
+Při vlastních výkopových pracích jsem se vždy snažila postupovat
+dle přirozeného stratigrafického sledu všech vrstev a jámových aj.
+objektů včetně kůlových jamek, Při zahájení výkopových prací na nové
+libické 'mikrolokalitě""“ jsem často byla zprvu nucena postupovat do
+hloubky po mechanických vrstvách, Po rozpoznání stratigrafického
+charakteru takové mikrolokality bylo možné při pokračování výkopu
+postupovat už po přirozených vrstvách. Způsob terénního výzkumu
+jámových objektů byl kromě toho někdy omezován časovými a finančními
+možnostmi výzkumu, V příznivých případech jsme první část jámy vybí-
+rali po mechanických vrstvách a po dokumentaci řezu v jámě jsme
+V takovém (častém) případě, kdy jáma byla zaplněna odlišitelnými
+vrstvami, vybírali její zbytek (většinou to byla druhá polovina
+
+jámy) po přirozených vrstvách.,
+"	0	TextRegion	0.999996542930603
+144.8645477294922	164.60682678222656	1134.681640625	803.6150512695312	rectangle	"sond kvůli závažným nálezům, což byl právě případ sondy 2, či ko-
+palo-li se na tomtéž pozemku, v areálu téže sídlištní jednotky po
+více let, nesou jednotlivé sondáže v rámci jedné sídlištní jednot-
+ky totéž pořadové číslo a odlišeny jsou připojenými písmeny (v při-
+padě sondy 2 to byly právě uvedené jednotlivé sondy 2a - 2n),
+Výzkum sondy 2 probíhal, jak již uvedeno, postupně v následu-
+jicích etapách: 1974 (27.5. - 27.6.1974 a 15,7, - 22,8, 1974),
+1975 (26.5. - 31.10.1975), 1976 (10.5. - 11.5. 1976, 7.6. - 16.6.
+1976 a 5.7. - 9.7.1976), 1978 (3.7. - 10.7.1978 a 25.7. - 18.8,
+1978) a 1985 (17.7. - 5.8.1985). Specializované měřičské práce
+a část dokumentačních prací (zaměření sond, půdorysy velkých sond
+- fotogrammetrické plány, nivelace, některé řezy) prováděla prů-
+
+běžně dle potřeb výzkumu měřičská skupina AŮ (p. ing. M. Šimana,
+
+     
+"	1	TextRegion	0.9999147653579712
+138.3406219482422	45.97673416137695	1143.064697265625	1478.45703125	rectangle	"=2e=
+
+rodinný domek + garáž + septik, nebo došlo-li vzácně k rozšiřování
+sond kvůli závažným nálezům, což byl právě případ sondy 2, či ko-
+palo-li se na tomtéž pozemku, v areálu téže sídlištní jednotky po
+více let, nesou jednotlivé sondáže v rámci jedné sídlištní jednot-
+ky totéž pořadové číslo a odlišeny jsou připojenými písmeny (v při-
+padě sondy 2 to byly právě uvedené jednotlivé sondy 2a - 2n),
+
+Výzkum sondy 2 probíhal, jak již uvedeno, postupně v následu-
+jicích etapách: 1974 (27.5. - 27.6.1974 a 15,7, - 22,8, 1974),
+
+1975 (26.5. - 31.10.1975), 1976 (10.5. - 11.5. 1976, 7.6. - 16.6.
+1976 a 5.7. - 9.7.1976), 1978 (3.7. - 10.7.1978 a 25.7. - 18.8,
+1978) a 1985 (17.7. - 5.8.1985). Specializované měřičské práce
+
+a část dokumentačních prací (zaměření sond, půdorysy velkých sond
+
+- fotogrammetrické plány, nivelace, některé řezy) prováděla prů-
+běžně dle potřeb výzkumu měřičská skupina AŮ (p. ing. M. Šimana,
+
+p. J. Hub, p. J. Morávek a p. J. Tájek). Ostatní dokumentační práce
+jsem prováděla sama (zaměření a půdorysy malých sond, řezy, fotogra-
+fická dokumentace),
+
+Při vlastních výkopových pracích jsem se vždy snažila postupovat
+dle přirozeného stratigrafického sledu všech vrstev a jámových aj.
+objektů včetně kůlových jamek, Při zahájení výkopových prací na nové
+libické 'mikrolokalitě""“ jsem často byla zprvu nucena postupovat do
+hloubky po mechanických vrstvách, Po rozpoznání stratigrafického
+charakteru takové mikrolokality bylo možné při pokračování výkopu
+postupovat už po přirozených vrstvách. Způsob terénního výzkumu
+jámových objektů byl kromě toho někdy omezován časovými a finančními
+možnostmi výzkumu, V příznivých případech jsme první část jámy vybí-
+rali po mechanických vrstvách a po dokumentaci řezu v jámě jsme
+
+V takovém (častém) případě, kdy jáma byla zaplněna odlišitelnými
+
+ 
+
+sum aan odění 2 o Zaší mákastaíu Sasa zese, ae sukne me s
+"	2	TextRegion	0.9444090723991394

@@ -1,0 +1,11 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+3239.033203125	15.976149559020996	3424.24169921875	63.3173828125	rectangle	"Plán č.2.
+"	0	TextRegion	0.9999738931655884
+1908.391357421875	2291.5419921875	2488.9892578125	2438.920166015625	rectangle	"h vrstva 3 ( 1O,století )
+
+1 tmavá hnědošedá hlína,promíšená zlomky
+zvětralé, do červena vypálené opuky
+
+prásdné plochy jsou sondy kopané později v r.
+1974 (sonda 2d) a v r.1975 (sendy 2e = 2ch)
+"	3	TextRegion	0.9280239343643188

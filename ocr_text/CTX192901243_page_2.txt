@@ -1,0 +1,62 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+74.55919647216797	1831.3101806640625	1011.3247680664062	1877.61767578125	rectangle	"Po podrobném prozkoumání a prodebatování všech eventualit bylo usnese-
+
+K k ze ao dá a PSV E V a a k ao
+"	0	TextRegion	0.9979618787765504
+65.53073120117188	432.2306213378906	92.0888671875	446.5690612792969	rectangle		1	TextRegion	0.9949853420257568
+61.20612716674805	327.1697692871094	1011.9887084960938	375.2141723632813	rectangle	"Dne 5.t.m. prohlédli si ředitel ustavu a podepsaný v průvodu Dra.4.Gnirse
+"	2	TextRegion	0.99461030960083
+95.56822204589844	1868.8890380859373	887.3966674804688	1889.758056640625	rectangle	"| ve výzkumu rašeliniště dále pokračovati a především zjistiti :
+"	3	TextRegion	0.9779635071754456
+70.6957778930664	1452.584716796875	989.0473022460938	1657.277587890625	rectangle	"položenou přímo na povrch rašeliny. / V požome který probíhá středem odkryté
+ho kolového pole není na př. kolů 7 Nutno však ještě zjistiti, zdali nelze
+
+dnes zachovanou výšku kolů vyložiti jinak / ra př. tím, že po opuštění sídliš
+čněly vrcholy kolů nad úroveň rašeliny a tím přirozeněbnáze podlehly zkáze ne
+
+těls kolů v rašelině. Pak ovšem snadno by mohly vodní mrxxRx spousty, které
+"	4	TextRegion	0.9577935934066772
+54.8889274597168	588.2545776367188	967.361083984375	789.9560546875	rectangle	"P v PVV ye S
+ny. Pokud byly zjištěny , tvoří celé skupiny, ne všek pravidelné obrazce. Z
+jich uložení je zřejmo, že jsou úmyslně zaraženy, ne všsk v době vzniku raše
+ny, nýbrž až po jejím vytvoření, v době, kdy rašelinová vrstvs byla již r
+
+vá. Poněvadž žádný z kůlů nesahá do vrstvy hlinité usazeniny, jsou kůly sta:
+"	5	TextRegion	0.9462003111839294
+39.55139923095703	1109.2034912109375	1005.6187744140624	1242.601806640625	rectangle	"ne tremín ante guem. Spadá tedy vznik těchto kolovýc
+staveb do doby mezi mladším neolitenm a sta!
+
+š fm hall sta tt e n, s čímž by ostatně celkově souhlasily i nálezy z j:
+"	6	TextRegion	0.9435276389122008
+39.00043487548828	1304.9769287109375	1052.130615234375	1338.714599609375	rectangle	"Jiná jest otázka, užití staveb a jejich tvaru. Nepravidelné umístění , byť
+"	7	TextRegion	0.9270222783088684
+52.080039978027344	873.2801513671875	1020.3727416992188	999.3424072265624	rectangle	"alespon geologicky určiti stáří staveb. Poněvadž rašelina wznikla v době tep-
+
+lé a vlhké a v době suchého klimatu nebyle již ve stadiu tvoření, nýbrž xmxxkax
+
+ 
+
+mrtvá, lze koly datovati nejdále do doby nat ické a sice nejspíše do jejísh
+
+ 
+"	8	TextRegion	0.912238359451294
+69.4919204711914	1876.4571533203125	86.83971405029297	1885.99267578125	rectangle		9	TextRegion	0.8717081546783447
+64.73492431640625	367.7350769042969	1009.603271484375	413.0921020507813	rectangle	"mákolní stavby ve Františkových lázních. Při prohlídce bylo zjištěno následují-
+"	10	TextRegion	0.8655170798301697
+51.23688888549805	1571.1480712890625	994.3212280273438	1713.5155029296875	rectangle	"čněly vrcholy kolů nad úroveň rašeliny a tím přirozeněbnáze podlehly zkáze než
+těle kolů v rašelině. Pak ovšem snadno by mohly vodní mramxx spousty, které
+
+horní hlinitou vrstvu usadily, je odnésti. Tímto pohybem by se mohl vysvětliti
+"	11	TextRegion	0.8521304130554199
+25.806930541992188	700.7059326171875	1005.3548583984376	814.3733520507812	rectangle	"ny, nýbrž až po jejím vytvoření, v době, kdy rašelinová vrstv“ byla již mrt-
+
+vá. Poněvadž žádný z kůlů nesahá do vrstvy hlinité usazeniny, jsou kůly starší
+"	12	TextRegion	0.8248276114463806
+293.5792236328125	207.5983123779297	810.5859375	271.9679870605469	rectangle	"Františkovy Lá zn ěfokr.Chet/,
+
+ 
+
+VWákolní stavbv.
+
+ 
+"	13	TextRegion	0.8087236285209656

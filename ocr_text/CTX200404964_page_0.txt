@@ -1,0 +1,59 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+135.16371154785156	841.8334350585938	1037.74169921875	1131.1812744140625	rectangle	"DOHLED
+VÝSLEDEK: Hloubení přípojky bylo sledováno postupně, zjištěná situace
+se liší. V ploše ulice a dělícím travnatém pásu výkop protnul vrstvy
+novodobých navážek a planýrek, souvisejících s likvidací náhonu, který
+tudy procházel ještě v 19. století. Na ploše před domem (bývalý dvorek či
+předzahrádka — parc. č. 311/3) byla registrována vrstva charakteru
+náplavu, překrytá novodobou navážkou a podlahou z cihel (dlažba dvora,
+podlaha zaniklé stavby). Pozůstatky středověkého či staršího osídlení
+
+nalezeny nehviv.
+"	0	TextRegion	0.9999668598175048
+140.0620880126953	1176.8123779296875	968.3501586914062	1226.54931640625	rectangle	"ÚZEMÍ ZASAŽENÉ STAVEBNÍ ČINNOSTÍ POSOUDIL: PhDr. Ja:
+
+Eralilb £Gx
+"	1	TextRegion	0.99995756149292
+168.98977661132812	1301.652099609375	1003.7236328125	1461.2244873046875	rectangle	"ER SU M M 0 oo osa
+ARCHEOLOGICKÝ ÚSTAV AKADEMIE VĚD
+ČESKÉ REPUBLIKY - PRAHA
+
+Letenská 4, 118 01 Praha 1 - Malá Strana, tel. 257533782, fax. 257532288
+"	2	TextRegion	0.9998223185539246
+151.1636505126953	625.2442626953125	868.4325561523438	810.6160278320312	rectangle	"INVESTOR: Vladimír Tvaroh, Palackého 87, 537 01 Chrudin
+DODAVATEL: —
+
+NÁZEV A DRUH STAVBY: Kanalizační a vodovo«
+; Chrudimi, Koželužské ulici čp. 103/TII
+
+DOBA STAVBY: VIILIX/03
+
+ZÁCHRANNÝ ARCHEOLOGICKÝ VÝZKUM: PŘEDSTIF
+"	3	TextRegion	0.999734103679657
+149.8332977294922	149.910400390625	1014.8975830078124	293.576904296875	rectangle	"EXPERTNÍ LIST KE STAVBĚ
+
+Dokument je určen pro investora stavby jako doklad realizovaného záchranného
+archeologického výzkumu. Je nedílnou součástí konkrétní stavební akce.
+V souvislosti s jinou stavební aktivitou je neplatný
+"	4	TextRegion	0.9997287392616272
+144.64410400390625	320.9698791503906	679.6138916015625	590.1661987304688	rectangle	"ČÍSLO AKCE: 22/03
+
+LOKALITA: Koželužská ulice
+KATASTRÁLNÍ ÚZEMÍ: Chrudim
+
+OBEC: Chrudim
+
+OKRES: Chrudim
+
+PARCELNÍ ČÍSLO: 311/3, 359/3, 2690/1, 288
+ČÍSLO POPISNÉ: 103/1II
+
+KOORDINÁTY - ZM 1 : 10000:
+"	5	TextRegion	0.997459590435028
+144.2935791015625	1281.720458984375	400.8520202636719	1304.8876953125	rectangle	"DATUM: 2.10.2003
+"	6	TextRegion	0.9914174675941468
+931.3657836914062	689.24365234375	1032.293212890625	713.3215942382812	rectangle	"přípojka
+"	7	TextRegion	0.9860732555389404
+186.96926879882807	618.94482421875	929.7245483398438	689.5882568359375	rectangle	"/ESTOR: Vladimír Tvaroh, Palackého 87, 537 01 Chrudim III
+DAVATEL: —
+"	8	TextRegion	0.868736207485199

@@ -1,0 +1,34 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+150.31161499023438	150.38739013671875	988.560791015625	331.5992431640625	rectangle	"dvorce mohou působit jako zcela samostatný hospodářský subjekt, nebo mohou být
+součásti větších sídelních komplexů snad i jako doklad postupné diferenciace společ-
+nosti. Obědovický dvorec patří mezi posledně zmiňované. Jeho význam tkví především
+
+v možnosti plošně prozkoumat nejen samotnou lokalitu, ale i rozsáhlé oblasti jejího
+"	0	TextRegion	0.9998961687088012
+157.91603088378906	992.1517944335938	975.3621826171876	1412.7967529296875	rectangle	"Třetí sezóna archeologického výzkumu AO MVČ v pískovně ""Na Požárce"" přinesla
+vedle dalších poznatků o neolitickém osídlení především hodnotné výsledky z období
+mladšího pravěku. Na základě průzkumu 41 objektů a 54 kůlových jamek se podařilo
+arčit polohu lineárního dlouhého domu, i když podstatné část půdorysu bula poškoze-
+ia následnou anthropogení aktivitou. Mimo to se podařilo zachytit i část půdorysu
+významného sídlištního areálu - dvorce datovaného do období kultury slezskoplatěni-
+ské. Vedle palisádového žlabu k němu náleží i doklady nadzemních staveb (kůlových
+Jomů), sídlištních objektů a obilnic. Osídlení z mladší doby hradištní je minimální.
+"	1	TextRegion	0.9996448755264282
+151.80186462402344	945.5885620117188	254.1582489013672	968.12939453125	rectangle	"6. Závěr
+"	2	TextRegion	0.9991387128829956
+163.32937622070312	487.5866088867188	976.7935791015624	760.6268310546875	rectangle	"Nejmladší sídlištní aktivita na nalezišti byla doložena pouze ojediněle v objektech č. 91
+1 96 nízko na úbočí nad záplavovým horizontem návrší. V objektech však tvořila pou-
+e příměs. Vedle objektu 54/96 tak patří k dosud ojedinělým dokladům slovanského
+sídlení jehož jádro se předpokládá ve východní části parc.č. 346/1. Četnost mlado-
+radištních nálezů a zároveň jejich umístění do nižších partií svahu vyvolává domněn-
+
+u, že podstatná část stop tohoto pravděpodobně jen epizodického osídlení byla v po-
+"	3	TextRegion	0.998531460762024
+150.6584930419922	354.6744384765625	224.4786376953125	369.8863220214844	rectangle	"zázemí.
+"	4	TextRegion	0.9976988434791564
+144.0613250732422	1400.3720703125	964.959228515625	1479.1094970703125	rectangle	"Bylo získáno 356 nálezových souborů (viz příloha) obsahujících vedle keramiky i ka-
+
+menné nástroje (broušená a štipaná industrie, drtidla) a ekofakty (zvířecí kosti, uhliky)
+"	5	TextRegion	0.9960891008377076
+148.22116088867188	419.5420227050781	421.9229736328125	442.6834411621094	rectangle	"5.5. Slovanské osídlení
+"	6	TextRegion	0.9789056777954102

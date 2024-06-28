@@ -1,0 +1,13 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+973.7748413085938	45.05224609375	1110.4178466796875	58.23422622680664	rectangle	"obrazová příloha č.
+
+ 
+"	2	TextRegion	0.9998929500579834
+1114.71533203125	42.24051284790039	1133.2596435546875	54.97011566162109	rectangle		3	TextRegion	0.9992914199829102
+108.94715881347656	806.578369140625	953.3959350585938	827.9037475585938	rectangle	"1 - fotografie ""Studentského domova"" od jihovýchodu, kolem roku 1925, dnes budova č. o. 3a
+"	4	TextRegion	0.9988517761230468
+114.96257781982422	1572.1365966796875	1065.730224609375	1603.8563232421875	rectangle	"  
+
+2- fotografie ""Studentského domova"" od jihozápadu, kolem roku 1926, dnes budova č. o. 3a, v pozadí koste
+ev Annlinářa (nřavzatn 7 um ahmn -71
+"	5	TextRegion	0.998015284538269

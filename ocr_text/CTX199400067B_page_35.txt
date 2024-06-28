@@ -1,0 +1,55 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+176.0408477783203	208.8221893310547	1121.54150390625	550.2709350585938	rectangle	"Obr. le Sonda 2c (1974), keramické aguamanile: l.část
+obrazové dpkumentace. 1l = torzo hlavičky s levým plastickým
+růžkem a výlevkou (slepeno ze 2 střepů 110/74 a 1 střepu 84/74)
+pohled zpředu; 2 = střep z torza hlavičky s levým plastickým
+růžkem, 110/74 (a - vnitřní strana střepu s částí výlevky,
+
+b - profil, c - vnější strana střepu); 3 = střep ze spodní
+části torza hlavičky, 110/74 (a - vnější strana střepu, b -
+
+= profil, c - vnitřní strana střepu); 4 = kresebná rekonstruk=
+ce aguamanile, pohled na levou stranu zvířátka, Kresba:
+
+U Kix
+"	0	TextRegion	0.9999868869781494
+167.2225341796875	575.0177001953125	1162.054443359375	821.290283203125	rectangle	"Obr. 2. Sonda 2c (1974), keramické aguamanile: 2.část
+obrazové dokumentace. l - torzo zadečku zvířátka s plastickým
+ocáskem, slepené ze 2 střepů č, 110/74 (a - šikmý pohled zeza-
+du, b - šikmý pohled zprava); 2 - profil většího z obou střepů
+ze zadečku zvířátka s plastickým ocáskem, č, 110/74; 3 - kre-
+sebná rekonstrukce aguamanile, pohled na pravou stranu zvířátka,
+Kresba: V.Žišková.
+"	1	TextRegion	0.9999767541885376
+164.33311462402344	1120.770263671875	1103.8489990234375	1470.4884033203125	rectangle	"88/74 z vrstvy 2. Kresba: V.Žižková.
+
+Obr. 5. Sonda 2c (1974). 1 - rekonstruovaný hrnec
+z destrukce vnitřní hradební zdi (117/74); 2 - útlý kostěný
+hrot (stilus 77) č. 143/74 z vrstvy 3 (a = pohled zepředu,
+b - pohled z boku); 3 = kostěné šídlo 116/74 z destrukce
+vnitřní hradební zdi (a - pohled zepředu, b - pohled ze strany)
+4 - kostěné šídlo 117/74 z destrukce vnitřní hradební zdi
+(a - pohled zepředu, b -= pohled z boku). Nádoba zobrazena
+v poměru 1:2, kostěné hroty zobrazeny v měřítku 1:1.
+Fvásha« W Řizžbraes.
+"	2	TextRegion	0.9998648166656494
+169.1102294921875	838.0888061523438	1100.9854736328125	1201.5126953125	rectangle	"Obr. 3. Sonda 2c (1974). 1 - železný stilus, č, 89/74
+(a - pohled ze strany, b = pohled zepředu); 2 - keramické
+aguamanile, 3.část obrazové dokumentace: kresebná rekonstrukce
+aguamanile, pohled na zvířátko zezadu. Kresba: V.Žižková«
+
+Obr. 4. Sonda 2c (1974). 1 - železná lyrovitá ocílka
+
+143/74 z vrstvy 3; 2 = železné nůžky 108/74 z vrstvy 3
+(a - pohled z boku, b = pohled zepředu); 3 - železná podkova
+
+88/74 z vrstvy 2. Kresba: V.Žižková«
+Obr. 5. Sonda 2c (1974). 1 - rekonstruovaný hrnec
+"	3	TextRegion	0.9980364441871644
+705.9730834960938	19.95331382751465	1133.5831298828125	82.51227569580078	rectangle	"A KUFENTATE
+Texťývk obrázkům s nálezy
+Sonda 2a - 2d (1974) - str. 1
+"	4	TextRegion	0.9968763589859008
+525.9622192382812	31.74176406860352	599.7173461914062	47.79642105102539	rectangle		5	TextRegion	0.9904419779777528
+319.6023254394531	140.74935913085938	723.8809814453125	175.5655059814453	rectangle	"o) TEXTYÍK OBRÁZKŮM S NÁLEZY
+"	6	TextRegion	0.9738304018974304

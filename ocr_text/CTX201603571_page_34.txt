@@ -1,0 +1,72 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.6552124023438	1590.973388671875	623.531494140625	1606.475830078125	rectangle		0	TextRegion	0.9999940395355223
+126.9110107421875	360.2501525878906	1040.577392578125	497.9681091308594	rectangle	"Sáček č. 506-10 (sj. 5060-10, obr. příl. 62, 63)
+
+KE: menší soubor zlomků těl hrncovitých nádob (u některých výrazné omletí), provedení
+režné, barvy světle šedobéžové až hnědé, stopově oranžové. M: střednězrnný, oxidačně
+vypálený. V: stopově rytý rýha (možný svazek).
+
+KO: 1x zvířecí kost (druhově neurčeno)
+"	1	TextRegion	0.9999431371688844
+142.64552307128906	115.47867584228516	1014.3226318359376	244.31365966796875	rectangle	"KE: 1x okraj a 1x zlomek těla z hrncové nádoby, provedení režné, barva šedohnědá a
+červenošedá, druhotně očazené až přepálené. M: střednězrnný, na těle výrazná příměs
+křemenných zrn, oxidačně vypálené. OP: kalichovitě profilovaný okraj, spíše pozdní
+varianta bez výraznější profilace krčku.
+
+„Anelku SŠalasná Infetšinwál etritclku wáha Ela
+
+   
+
+CT- Jwy amarfní narás
+"	2	TextRegion	0.9998719692230223
+154.46511840820312	977.7254028320312	919.2430419921876	1101.59228515625	rectangle	" 
+
+daček C. 5U/-11 |5|.
+KE: 1x zlomek těla hrncovité nádoby, provedení režné/leštěné, barvy šedé, na:
+světle hnědé. M: střednězrnný, oxidačně vypálený.
+
+KO: 1x zvířecí kosti (druhově neurčeno)
+
+ST: 1x amorfní porézní kus železné (kovářské) strusky, váha 578g
+
+ 
+"	3	TextRegion	0.9998533725738524
+183.844970703125	632.3436279296875	985.7235717773438	746.2426147460938	rectangle	" 
+
+m mmm © © T PR
+menší soubor zlomků těl hrncovitých nádob, provedení režné a glazované, barvy
+převaze světle béžové, stopově tmavě šedé. M: materiál jemnozrnný, oxidačně
+
+pálený. V: v převaze glazura v barvě medově hnědé, zelené, žlutohnědé, vývalková
+
+ 
+
+ouhbovice.
+"	4	TextRegion	0.9996181726455688
+159.04751586914062	1143.8922119140625	300.2972717285156	1164.441650390625	rectangle	"Datování: NO1
+"	5	TextRegion	0.9993587136268616
+158.56423950195312	908.6776123046876	299.97320556640625	928.8806762695312	rectangle	"Datování: NO1
+"	6	TextRegion	0.9992706179618835
+146.96865844726562	1218.98046875	1054.7845458984375	1372.6556396484375	rectangle	"ZL L SSZ 1 00
+
+KE: menší soubor zlomků okrajů a těl hrncovitých nádob, provedení režné, barvy
+šedohnědé, šedé v menšině načervenalé. M: střednězrnný, část zlomků s podílem tuhy,
+ostřivo slída, zrna křemene, oxidačně vypálený. OP: malý vzhůru vytažený. V: jednoduchá
+kombinace ryté rýhy a vlnice.
+
+KO: 1x zvířecí kost (druhově neurčeno)
+"	7	TextRegion	0.998884379863739
+158.1231689453125	556.95556640625	335.1704406738281	578.7076416015625	rectangle	"Datování: RS4/VS1
+"	8	TextRegion	0.9936151504516602
+164.6446075439453	763.3861694335938	880.1342163085938	859.8001098632812	rectangle	"KO: 6x zvířecí kosti (druhově neurčeno)
+KK: 2x zvířecí kosti se stopou kuchyňského opracování (druhově neurčeno)
+Fe: 1x amorfní kousek s velkou korozní krustou
+
+Am: Tv aetir=
+"	9	TextRegion	0.9900323152542114
+163.9408416748047	291.9837951660156	406.9248046875	318.7754211425781	rectangle	"Datování: RS4 (10/11 st.)
+"	10	TextRegion	0.949328362941742
+164.46627807617188	1354.4283447265625	809.5972900390625	1429.730712890625	rectangle	"KO: 1x zvířecí kost (druhově neurčeno)
+ST: 2x amorfní porézní kusy železné (kovářské) strusky, váha 123g
+Ci:1x drobný zlomek z pecní stěny (vypálený hliněný omaz)?
+"	11	TextRegion	0.9207763671875

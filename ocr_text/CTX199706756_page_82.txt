@@ -1,0 +1,5 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+509.5819091796875	821.6947021484375	1020.72021484375	838.4593505859375	rectangle	"128, část půdorysu neolitického domu
+
+ 
+"	2	TextRegion	0.994659960269928

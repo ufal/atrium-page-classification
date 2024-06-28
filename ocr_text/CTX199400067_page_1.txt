@@ -1,0 +1,50 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+57.56849670410156	1624.069091796875	158.03851318359375	1638.7110595703125	rectangle	"TZ 69-2042-82
+"	0	TextRegion	0.9999938011169434
+73.07147979736328	1293.6268310546875	474.6005859375	1596.92333984375	rectangle	"vrstva 1 (ornice);
+
+vrstva 2 (11.-12.stol.)3
+vrstva 3 (10.stol.);
+destrukce vnitřní hradební
+zdi (28.9.995);
+
+vrstva 4 (lužická kultura)
+vnitřní příkop opevnění;
+nadzemní stavba na kamenné
+podezdívce (asi kněžský
+
+4 zahloubené objekty (dvě.
+pravděpodobné polozemnice,
+l zás.jáma, l malá část
+jámy nenoznaného účeln)í + MX
+"	1	TextRegion	0.9995235204696656
+431.10003662109375	115.3341293334961	690.92724609375	136.95069885253906	rectangle	"Přírodní prostředí naleziště
+"	2	TextRegion	0.998030126094818
+480.8655090332031	1269.18017578125	1016.9595336914062	1561.7052001953125	rectangle	" 
+
+ 
+
+Kovité objekty (druhy nateriálu)
+
+l.artefakty (keramika, včetně kera-
+mického aguamanile; železné arte-
+fakty: mjestilus, ocílka, nůžky,
+pSoKora, šidélko, nože; hrnčířské
+epele ze střepů; přesleny z hlíny,
+střepů a kamene; kamenné artefakty:
+zlomky žernovů, brousky a jejich
+zlomky; kostěné artefakty: stilus?,
+
+); šídla, polotovar brusle; 1 dílek
+
+segmentované perly z čirého skla)
+2 .mazanice. .
+
+p
+"	3	TextRegion	0.9966020584106444
+69.84294128417969	1274.9881591796875	363.7762145996094	1292.0177001953125	rectangle	"Ferovité objekty (počet a typy)
+"	4	TextRegion	0.9391409754753112
+97.4716567993164	566.23876953125	412.3482055664063	595.9100952148438	rectangle	"Labe, Cidlina, studny
+"	5	TextRegion	0.9346707463264464
+498.1684875488281	1047.175048828125	987.413818359375	1075.7264404296875	rectangle	"od studny v sondě 54: cca 200m
+"	6	TextRegion	0.8010776042938232

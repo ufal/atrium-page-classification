@@ -1,0 +1,44 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+160.57232666015625	744.4793701171875	1058.6407470703125	893.1914672851562	rectangle	"Dle základní půdní mapy je půdní pokryv na lokalitě tvořen hnědozemí, dle přehledu BPEJ
+jsou tu zastoupeny modální hnědozemě, luvické kambizemě a luvické černozemě
+(bpej.vumop.cz/index.php). Klimaticky náleží ke třetímu klimatickému regionu (teplý —
+
+mírně vlhký, prům. teplota 8-9“C, úhrn srážek 550-650 mm).
+"	0	TextRegion	0.9999364614486694
+170.9762725830078	196.50830078125	1023.4119262695312	486.6877746582031	rectangle	"Z. Geografický a sídelní kontext naleziště
+
+a) Zkoumaná poloha leží v nadmořské výšce 263 m v mírně zvlněném terénu Čáslavs
+kotliny (podcelek Středolabské tabule; Lipský 2001). Rozkládá se na poli na hřbe
+mírného návrší, které na jihozápadě a západě prudce klesá k potoku Brslenk
+k severovýchodu se velmi pozvolna svažuje. Vzdálenost k vodnímu toku je 210 m. Okol
+terén je částečně intenzivně zemědělsky využíván, severním směrem začíná obytná čtv
+
+směrem k východu je plocha ohraničena zástavbou Jeníkovské ulice pře jejím napojení
+"	1	TextRegion	0.9998397827148438
+171.0377655029297	704.5076904296875	187.64678955078125	719.2550048828125	rectangle		2	TextRegion	0.9997711777687072
+150.18019104003906	569.6946411132812	1064.594482421875	627.8145141601562	rectangle	"Geologické podloží zde tvoří dle geologické mapy ČR (on-line geologická mapa 1:50000)
+
+písčité sliínovce. snonotlitické jílovce a snraš.
+"	3	TextRegion	0.9996084570884703
+170.65150451660156	532.9996337890625	189.72836303710935	548.989013671875	rectangle		4	TextRegion	0.999562919139862
+178.16940307617188	999.5405883789062	1057.962158203125	1427.984375	rectangle	"I přes velmi intenzívní sběratelskou činnost vlastivědného spolku Včela Čáslavská
+v první polovině minulého století a systematickou archeologickou prospekci a záchrannou
+Šinnost archeologických pracovišť v polovině druhé, nebyla archeologická lokalita Na
+Skále do doby zahájení výzkumu v prostoru staveniště nových rodinných domků v roce
+1997 známá. Velice intenzívní osídlení pokračování terasy Brslenky na území města
+nasvědčovalo možnému osídlení i tohoto prostoru, pravděpodobnost výskytu archeologické
+komponenty se zvýšila po zjištění žárového pohřebiště z doby bronzové a neolitického
+sídliště v poloze Váchov - Za nemocnicí, vzdálené od lokality Na Skále cca 500m. V letech
+1997-2002 probíhal záchranný archeologický výzkum nejdříve v trase hlavních komunikací
+
+1 posléze i ve vybrané části plochy pro pozdější zástavbu ( NZ č.j. 8788/2004, 3737/2001,
+
+ 
+
+ 
+
+DAMA
+"	5	TextRegion	0.9973471164703368
+590.928466796875	1614.4400634765625	599.6179809570312	1625.608642578125	rectangle		6	TextRegion	0.9937663078308104
+172.98361206054688	953.65576171875	374.3941040039063	973.8446655273438	rectangle	"3. Historie naleziště
+"	7	TextRegion	0.9935761094093324

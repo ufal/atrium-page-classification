@@ -1,0 +1,12 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+975.6336669921876	44.83594512939453	1118.870849609375	57.51958084106445	rectangle	"obrazová příloha č. 5
+"	1	TextRegion	0.9999722242355348
+1115.0557861328125	42.390872955322266	1133.3988037109375	55.05174255371094	rectangle		3	TextRegion	0.9976660013198853
+326.8927001953125	803.4028930664062	1094.5130615234375	821.3068237304688	rectangle	"polináře P. Marie s jižním svahem od jihovýchodu, vlevo Emauzy, v popředí hradby na
+"	4	TextRegion	0.9949559569358826
+68.56336212158203	1562.966796875	1119.6943359375	1597.8375244140625	rectangle	"2 - pohlednice - okolí dnešní ulice Albertov od jihozápadu, vpravo Karlov, 1899; sledovaná plocha se již nachází
+Mima anímak vlava
+"	5	TextRegion	0.9697631001472472
+105.5533447265625	803.17529296875	1094.7701416015625	840.6453857421875	rectangle	"1- grafika - kostel sv. Apolináře P. Marie s jižním svahem od jihovýchodu, vlevo Emauzy, v popředí hradby na
+Karlově, 1825 (převzato z www.ahmp.cz)
+"	6	TextRegion	0.964840829372406

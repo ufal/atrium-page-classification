@@ -1,0 +1,105 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+186.85079956054688	73.41221618652344	1182.69140625	633.542236328125	rectangle	"zwei weitere Innenpfosten, hart an der HausgrundriBbegrenzung
+(Durchmesser 20 cm). Zwischen diesen beiden Pfosten, aber (et-
+wa 20 cem) auBerhalb der Hauswand, hatte sich schon bei der Unter-
+suchung der fHausumrisse ein Pfostenloch (Taf.III, Pfosten VIII)
+gezeigt, das nach dem seichten Bodenprofil (Abb.....) zu schlie-
+Ben eine schráge Lángswandstůtze von auBen her gewesen sein kann.
+
+Die letzten drei Pfostenlčcher lagen innerhalb des Herd-
+raumes (Taf III, Pfosten XIII,XIV,XV). Pfosten XV kann nur fůr
+die Růckvand des urspringlichen Einraumhauses Bedeutung gehabt
+haben. Ot er beim Hauszubau (zwischen Innenouerwand und Herdanlage)
+stehen gelassen wurde, bleibt fraglich. Pfosten XIV als Innen-
+stiitze vor der Hausrůckwand liegt genau in der Lángsachse der
+Hausanlage (Taf.II und Taf,III Schnitt B C).Welche Bedeutung
+Pfosten AIII an der inneren Kante der Lehmbank in der Sůdwestecke
+des Hauses gehabt hat, l85t sich nicht mehr erschlieben.
+
+3, August 1940,
+"	0	TextRegion	0.9999998807907104
+177.09950256347656	641.5337524414062	1125.736572265625	1153.77490234375	rectangle	" 
+
+Nacř. Abschlu8 der Grabung auf dem StraBenneubauabschnitt
+in Langugeest Parz.335 ergibt sich das Bild eines langgestreckten
+zweiráumigen Rechteckhauses mit růckwártigem Herdraum und einer
+von aufer. zugánglichen Backofenanlage im Hauptraum. Sechzehn
+Pfostenlčcher deuten auf die Haus- bezw. Dachrekonstruktion hin.
+Will man nicht annehmen, da der Dachfirst zum Backofenanbau
+hin abgebogen wurde - wobei Pfosten VII und XI als Widerlager
+fir die Deckenbalken des Hauptraumes und fůir die des Sůdseiten-
+anbaues gleichzeitig gedient hůtten — mu das Fehlen von ein
+oder zwei. Innenpfosten, die dem langen Satteldach sntsprechen,
+festgestellt werden. Da sie sich trotz genauer Bodenprofile
+nicht nachweisen liefBen, miibten sie weniger tief innerhalb der
+Hausschicht angelegt worden sein.
+
+Im gesamten Hausgrundri$ řanšen sich weder Estrich noch
+
+ 
+"	1	TextRegion	0.9999936819076538
+186.0371856689453	1063.431884765625	1143.920166015625	1476.187255859375	rectangle	"   
+
+Hausschicht angelegt worden sein.
+
+Im gesamten HausgrundriB fanden sich weder Estrich noch
+Hůttenwandbewurfstůcke. Daraus sowie aus der Lage der Innen-
+přosten (besonders an der NWordwand) mu angenommen werden, daB
+die Winde nur aus verginglicheren Stoffen,also mittels Holzbalken
+in der Ait eines Blockbaues aufgerichtet waren.
+
+Da an der Ústseite sich fast unmittelbar eine hohe StraBen-
+boschung erhob,an der Nordseite und Westseite aber der Strafien-
+neubau beoreits fertiggestellt ist - an der Siidseite fanden sich
+die friůhgzesbhichtlichen Eisenschmelzofen (vgl.Taf.II) - lá48t
+sich nicht weiter untersuchen, ob in der Něhe noch iiohn- oder
+
+Se m fe m EEJEBOM | ZOMN SSTAMUKUNS | SMMOSENCM JCOMSSME5S vztek | ooaeněíěmeme náš lk havái ské
+"	2	TextRegion	0.9969769716262816
+231.9985198974609	111.0610580444336	1113.02880859375	1384.82373046875	rectangle	"rchmesser 20 cm). Zwischen diesen beiden Ffosten, aber (et-
+
+20 om) auferhalb der Hauswand, natte sich schon bei der Unte:
+hung der Hausumrisse ein Pfostenloch (Taf.III, Pfosten VIII)
+eigt, das nach dem seichten Bodenprofil (Abb.....) zu schlie
+, eine schráge Lángswandstůtze von aulen her gewesen sein kan
+
+Die letzten drei Pfostenlčcher lagen innerhalb des Herd-
+mes (Taf III, Pfosten XIII,XIV,XV). Pfosten XV kann nur fůr
+| Růcknand des ursprůnglichen Einraumhauses Bedeutung gehabt
+en. Ot er beim Hauszubau (zwischen Innenouerwand und Herdanl
+hen gelassen wurde, bleibt fraglich. Pfosten XIV als Innen-
+tze vor der Hausrůckwand liegt genau in der Lángsachse der
+sanlage (Taf.II und Taf.III Schnitt B C).Welche Bedeutung
+sten AIII an der inneren Kante der Lehmbank in der Sůdwestec
+| Hauses gehabt hat, l86t sich nicht mehr erschlieBen.
+
+August 1940,
+
+Nacř. Abschlu8 der Grabung auf dem StraBenneubauabschnitt
+Langugest Farz.335 ergibt sich das Bild eines langgestreckte
+irádumigen Rechteckhauses mit růckwártigem Herdraum und einer
+| au3er. zugánglichen Backofenanlage im Hauptraum. Sechzehn
+stenlčcher deuten auf die Haus- bezw. Dachrekonstruktion hin
+(1 man nicht annehmen, da der Dachfirst zum Backofenanbau
+1 abgebogen wurde - wobei Pfosten VII und XI als Widerlager
+* die Deckenbalken des Hauptraumes und fůr die des Sůdseiten-
+jaues gleichzeitig gedient hůtten — muB das Fehlen von ein
+r zwei. Innenpfosten, die dem langen Satteldach sntsprechen,
+stgestellt werden. Da sie sich trotz genauer Bodenprofile
+ht nachweisen liefBen, mibten sie weniger tief innerhalb der
+isschicht angelegt worden sein.
+
+Im gesamten HausgrundriB fanden sich weder Estrich noch
+ttenwandbewurfstůcke. Daraus sowie aus der Lage der Innen-
+osten (besonders an der Nordwand) muž angenommen werden, daB
+> Wánde nur aus verginglicheren Stoffen,also mittels Holzbalk
+der Ait eines Blockbaues aufgerichtet waren.
+
+Da un der ÚOstseite sich fast unmittelbar eine hohe StraBer
+schung erhob,an der Nordseite und Westseite aber der Stralen-
+seite fanden sich
+
+ 
+
+abau bereits fertiggestellt ist — an der
+"	3	TextRegion	0.8156187534332275

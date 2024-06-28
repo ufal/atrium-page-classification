@@ -1,0 +1,64 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+54.99715042114258	321.0465393066406	520.4745483398438	409.7452392578125	rectangle	"neolit, d. bronzová, knovízská,
+řím, neurč. nravěk
+mladohradištní, VSL, VS2 Z
+"	0	TextRegion	0.9997867941856384
+628.9591064453125	356.2200012207031	736.8246459960938	423.527587890625	rectangle	"ved. výzkumu
+koreferenta
+
+komise
+m
+
+ 
+"	1	TextRegion	0.9997406601905824
+69.85342407226562	1591.9556884765625	145.97213745117188	1601.6048583984375	rectangle	"ST 23 3891 73
+"	2	TextRegion	0.9995012283325196
+897.524169921875	377.1619873046875	1038.602294921875	401.0285034179688	rectangle	"12.5.1987
+"	3	TextRegion	0.9994507431983948
+61.4013786315918	426.9402160644531	171.8280487060547	447.3684692382813	rectangle	"osídlení
+"	4	TextRegion	0.9988334774971008
+177.55361938476562	205.7002868652344	323.4786682128906	228.32179260253903	rectangle	"Kutná Hora
+"	5	TextRegion	0.9987414479255676
+67.3446273803711	293.1783447265625	245.11471557617188	311.7173156738281	rectangle	"Druh a kultura
+"	6	TextRegion	0.998304009437561
+1110.279541015625	19.583097457885746	1156.246337890625	83.38172912597656	rectangle		7	TextRegion	0.9970349073410034
+489.1067199707031	379.97894287109375	601.0184326171875	406.5875244140625	rectangle	"Zpráva
+"	8	TextRegion	0.9964675903320312
+121.1642837524414	1542.4293212890625	1089.846923828125	1560.056396484375	rectangle	"nka: Pište pokud možno strojem. Na konci uveďte datum odeslání a čitelný podpis. Zprávy koreferentů a komisí vyhotovte dvojmo.
+"	9	TextRegion	0.995713472366333
+792.7625732421875	385.145263671875	871.4089965820312	404.8690185546875	rectangle	"a období
+"	10	TextRegion	0.9924154281616212
+81.05088806152344	562.6471557617188	1094.4029541015625	852.5108642578125	rectangle	"ko op o oo „zár zo o oo o o o o oo o o
+nroveden novrchový nrůzkum na katastru Hlízova. Na „oli vymezeném
+silnicí Kolín-Čáslav, železniční tratí, usedlostí Skalka a okrajem
+Hlízova byly nalezeny střeny natřící následujícím kulturám a období:
+Neolit, d. bromzová, knovízská, římská, neurč. nravěk, mladohradišt;
+vrcholný středověk 1, vrcholný středověk 2
+
+Většins nálezů se kumulovala v severním cínu nole.
+"	11	TextRegion	0.9904735684394836
+964.9427490234376	49.88359832763672	1114.268310546875	85.33251953125	rectangle	"Ydědé PK |
+"	12	TextRegion	0.9840604066848756
+571.1558227539062	62.41403579711914	902.4328002929688	234.2960205078125	rectangle	"ME POVY „ěet: 7
+p, 152mm z 124mm). Bomn
++ fěšmn Z, CSmmá, UI
+
+213 ma 7 me dlom-7
+; 238mmě 29 mn Bo7m?
+
+On Áreyla
+"	13	TextRegion	0.911815345287323
+631.9257202148438	418.4851684570313	733.0504760742188	432.6282653808594	rectangle	"ved. oddělení
+"	14	TextRegion	0.9074459075927734
+110.5556869506836	835.274169921875	209.71458435058597	855.2439575195312	rectangle	"Většins
+"	15	TextRegion	0.8906872868537903
+99.4326629638672	742.4853515625	1094.7965087890625	1003.7167358398438	rectangle	"Neolit, d. bronzová, knovízská, římská, neurč. »ravěk, mladohradišt:
+vrcholný středověk 1, vrcholný středověk 2
+Většina nálezů se kumulovsla v severním cínu nole.
+
+Z lokslity a jejího okolí je známa řada »ravěkých, »rotohisto-
+rických i hredištních nálezů ( viz F.Dvořák,Pravěk Kolínska a Kutno.
+horskaj kertotékae nálezů Okresního muzea v Kutné Hoře).
+"	16	TextRegion	0.8816094398498535
+909.9554443359376	1144.7503662109375	1134.9521484375	1170.9769287109375	rectangle	"( OM Kutná Hora)
+"	20	TextRegion	0.8310697078704834

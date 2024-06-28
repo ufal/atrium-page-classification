@@ -1,0 +1,125 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+324.1217346191406	1129.3309326171875	1100.662109375	1198.2509765625	rectangle	"""Sonda 2c, spodní partie destrukce hradby nade vnitř,
+svahem příkopu při jeho začišťování na slavníkovskou
+nnědou, 7.8.""
+"	0	TextRegion	0.9999252557754515
+158.9943084716797	1129.0355224609375	305.0521240234375	1152.1883544921875	rectangle	"22)138/74:
+"	1	TextRegion	0.9998924732208252
+322.4244079589844	165.22877502441406	1127.7567138671875	607.8410034179688	rectangle	"sondy 2D ponechána kam, destrukce, při začišťování U
+opuky, úroven cca 30/40-60/70 cm pod povrchem, 12.6."" G
+
+""Sonda 2b, její jz. část jv. od soklu s destrukcí
+(destrukční kužel), 60 - max. (při jz. hraně sondy)
+80,/90/100 cm, 12.6., 14.6, Směrem do sondy jdeme po
+
+stoupajícím povrchu /slavníkovského horizontu//vnitřní
+stěny nit rího při opu.“ Obr. 26:4. M J/
+""Sonda 2b, opuková destrukce při jz. hraně sondy,
+
+90-100 cm( jdeme- zatím nahrubo - po stěně vnitřního
+příkopu). 14.6., 17.6.“ obr. 11.
+
+""Sonda 2b, dtto, 100-120 při soklu/ 130 při (resp.v)
+jižním rohu sondy, 17.6."" Obr. 12; 134 26:3.
+
+""Sonda 2b, hrubé čištění povrchu vnitřního svahu vnitřn
+ho příkopu - tj. nejspodnější partie opukové destrukce
+
+(hlína promíš, menšími opukovými kameny, též spálenými)
+17,-19.6.""
+
+""Sonda 2b, nejspodnější partie destrukce hradby, nad
+6 P . z
+
+B s aa n Běhy- nk
+
+ 
+"	2	TextRegion	0.9998693466186525
+323.33935546875	929.810546875	1116.093994140625	1121.6405029296875	rectangle	"""Sonda 2c, destrukce aradby, 70-90/100 cm. 29.7., 30.7.
+51.7."" Obr. 5:33 28:
+
+""Sonda 2c, destrukce hradby, 90/100-120 a: 30575:
+31.7., 1.8."" Obr. 5:1, 43 28: 1,3,5,62
+
+'Sonda 2c, destrukce hradby, 120 cm S uněcž
+svahu příkopu (= povrch hnědé slavníkovské pernikové).
+1.7“
+"	3	TextRegion	0.9996930360794068
+155.5303192138672	324.695556640625	306.6566772460937	345.5697937011719	rectangle	"11) 64/74:
+"	4	TextRegion	0.9996626377105712
+158.6465301513672	576.3525390625	304.52294921875	599.2459716796875	rectangle	"14) 74/74:
+"	5	TextRegion	0.9996249675750732
+252.77957153320312	1371.6915283203125	1080.85205078125	1494.96826171875	rectangle	"74:
+
+74:
+
+""Sonda 2c, čištění vnitř.svahu příkopu na povrch
+slavníkovské hnědé vrstvy, 7.8,""
+
+""Sonda 2b, vzorek popelovité výplně v destrukčním
+kuželu vnitřní hradební zdi (vzorek vzat z jz. stěn
+sondv 2b). 21 .a."".
+"	6	TextRegion	0.9993230104446412
+152.5013427734375	982.1279296875	300.7502136230469	1010.8780517578124	rectangle	"20)117/74:
+"	7	TextRegion	0.9989553689956664
+172.3800048828125	133.4420928955078	195.71762084960935	152.17164611816406	rectangle		8	TextRegion	0.998503565788269
+153.48220825195312	1429.6966552734375	294.4299621582031	1456.0252685546875	rectangle	"24)158/74:
+"	9	TextRegion	0.9974510073661804
+567.8436889648438	53.65031814575195	605.5471801757812	69.79662322998047	rectangle	"26
+"	10	TextRegion	0.9972902536392212
+159.71731567382812	216.02186584472656	307.1185302734375	241.24285888671875	rectangle	"10) 60/74:
+"	11	TextRegion	0.997082531452179
+160.15684509277344	1042.4661865234375	309.80322265625	1067.4852294921875	rectangle	"21)123/74:
+"	12	TextRegion	0.9957125186920166
+156.3126983642578	922.770263671875	302.5883178710937	946.4462280273438	rectangle	"19)116/74:
+"	13	TextRegion	0.9936935305595398
+166.41636657714844	659.5391235351562	301.80474853515625	684.7423095703125	rectangle	"5) 75/74:
+"	14	TextRegion	0.9915711879730223
+151.5131072998047	776.7362670898438	312.6698608398437	808.4290771484375	rectangle	"17)110/74:
+"	15	TextRegion	0.9857112765312196
+157.0752716064453	408.0509033203125	301.11212158203125	437.471923828125	rectangle	"12) 65/74:
+"	16	TextRegion	0.9856340289115906
+354.7517395019531	572.276123046875	1113.6658935546875	691.4187622070312	rectangle	"anda 2b, nejspodnější partie destrukce hradby, nad
+achou kaménků uloženou pod vrstvou žlutého písku
+x slavníkovské hnědé vrstvě). 25.6,""
+
+onda 2b, sokl s destrukcí hradby, začišřování povrch
+
+so jd. 8
+"	17	TextRegion	0.9787367582321168
+168.08871459960938	403.9993591308594	297.0248413085937	479.883544921875	rectangle	"2) 65/74:
+
+< oMeEPAs
+"	18	TextRegion	0.9582834243774414
+150.82899475097656	1371.244384765625	302.4682312011719	1395.7398681640625	rectangle	"23)139/74:
+"	19	TextRegion	0.950528085231781
+153.99081420898438	717.0430908203125	306.58843994140625	745.1066284179688	rectangle	"16) 91/74:
+"	20	TextRegion	0.94110107421875
+154.53802490234375	323.3700256347656	198.90252685546875	343.18072509765625	rectangle	"LI)
+"	21	TextRegion	0.9388303756713868
+553.6675415039062	55.97178268432617	626.923095703125	69.18978118896484	rectangle	"- 26 -=
+"	22	TextRegion	0.937820553779602
+353.5007629394531	827.6528930664062	1117.1290283203125	901.42431640625	rectangle	"onda 2c, destrukce hradby, 50-70 cm (směrem dovnitř
+sondy stoupá již slavníkovská hnědá vrstva). 29.7.,
+ky
+"	23	TextRegion	0.9126021862030028
+184.2843017578125	133.1990203857422	313.9841003417969	154.81161499023438	rectangle	"3) 58/74:
+"	24	TextRegion	0.9058924913406372
+153.80911254882812	1370.4642333984375	291.9743347167969	1433.899169921875	rectangle	"23)139/74:
+"	25	TextRegion	0.8990849256515503
+310.2157897949219	630.8109741210938	1096.1064453125	887.3341674804688	rectangle	"(na slavníkovské hnědé vrstvě). 25,6,""
+
+""Sonda 2b, sokl s destrukcí hradby, začišťování povrc
+destrukce, 24.6.""
+
+""Sonda 2c, její jz. část, začišťování povrchu kam.
+destrukce hradby. 19.7., 22.7., 23.7.""
+
+""Sonda 2c, destrukce hradby, povrch destrukce hradby
+- 50 cm, 25.-26,7., 29.7."" | Obr. 28:4,
+
+""Sonda 2c, destrukce hradby, 50-70 cm (směrem dovnitř
+do sondy stoupá již slavníkovská hnědá vrstva), 29,7,
+"	26	TextRegion	0.884182870388031
+159.02313232421875	838.7020263671875	313.9093933105469	865.28173828125	rectangle	"18)111/74: ©
+"	27	TextRegion	0.8464759588241577

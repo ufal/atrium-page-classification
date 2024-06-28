@@ -1,0 +1,25 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+1035.5751953125	42.23771286010742	1135.26806640625	66.29853820800781	rectangle	"Tab. 20
+"	0	TextRegion	0.9999326467514038
+344.76202392578125	1449.10009765625	1034.93359375	1523.82177734375	rectangle	"(1974), pohled od JV. Pohled do vnitř. příkopu
+rostřed kontrolní blok, sejzachovanou destruko
+eb. zdi. Foto J.Justova.
+"	1	TextRegion	0.9998602867126464
+150.15724182128906	691.77001953125	985.6802978515624	763.9407958984375	rectangle	"Sonda 2a, 2c (1974). Pohled do sondy 2c od V. Vlevo vnit
+příkop opevnění, vpředu záp. konec jižní podezdívky budo
+orientované V-Z. Foto J.Justova'.
+"	4	TextRegion	0.9992627501487732
+163.4654083251953	1450.3529052734375	465.5693054199219	1526.0302734375	rectangle	"Sonda 2a-2c (1974), 1
+opevnění. Uprostřed k
+vnitřní hradeb. zdi.
+"	5	TextRegion	0.9970642924308776
+921.2899780273438	1297.1075439453125	1022.23193359375	1347.955810546875	rectangle	"Č. Neg.
+51 140
+"	6	TextRegion	0.9673444628715516
+916.9663696289062	591.6144409179688	1017.2311401367188	645.43310546875	rectangle	"Če Neg.
+51 139
+"	7	TextRegion	0.9188612699508668
+174.45387268066406	1446.7279052734375	728.318603515625	1530.7578125	rectangle	"jonda 2a-2c (1974), pohled od JV. Pohle
+opevnění. Uprostřed kontrolní blok, sejz:
+rmitřní hradeb. zdi. Foto J.Justova.
+"	8	TextRegion	0.8937068581581116

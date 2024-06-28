@@ -1,0 +1,38 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+139.03952026367188	1270.50390625	1044.072021484375	1415.7044677734375	rectangle	"V rámci zjišťovacího archeologického výzkumu NPŮ Prahy č. 2015/21 na Albertově
+; Praze 2 bylo dne 18. 8. 2015 provedeno geologické vyhodnocení sedmi archeologických
+'jišťovacích sond (obr. 3; obr. příl. 4). Uskutečnění geologických prací inicioval vedoucí výzkum
+>hDr. Jaroslav Podliska, Ph.D. (Odbor archeologie NPÚ Praha).
+"	0	TextRegion	0.9999393224716188
+1034.8609619140625	997.7481689453124	1068.35107421875	1014.8670043945312	rectangle		1	TextRegion	0.99989116191864
+131.61973571777344	1185.118896484375	243.5528564453125	1209.967529296875	rectangle	"2.1. Úvod
+"	2	TextRegion	0.9998437166213988
+204.61990356445312	821.8872680664062	252.96060180664065	837.3319702148438	rectangle	"Praze
+"	3	TextRegion	0.9998288154602052
+177.44537353515625	874.8873291015625	1068.4232177734375	911.7774658203124	rectangle	"> Dočasné uložení nálezů: Národní památkový ústav, územní odborné pracoviště v hl. m.
+"	4	TextRegion	0.9996132254600524
+196.61322021484372	149.7474365234375	576.4739379882812	172.29681396484375	rectangle	"Zkoumaný archeologický areál: sídliště
+"	5	TextRegion	0.9991757273674012
+193.51870727539065	619.024658203125	1051.8382568359375	737.1278076171875	rectangle	"Objednatel akce: Univerzita Karlova v Praze, Přírodovědecká fakulta (se sídlem Albert
+2038/6, Praha 2 — Nové Město, 128 43, IČO: 002 16 208, DIČ: CZ00216208, zastoupen
+prof. RNDr. Bohuslavem Gašem, CSc., děkanem)
+"	6	TextRegion	0.9991104006767272
+124.6688232421875	1109.27294921875	569.2913818359375	1135.27978515625	rectangle	"2. Přírodní prostředí (RNDr. Jan Zavřel)
+"	7	TextRegion	0.9976993203163148
+210.04290771484372	566.1383056640625	1051.4996337890625	603.8150024414062	rectangle	"Prováděcí instituce: Národní památkový ústav, územní odborné pracoviště v hl. m. Praze
+"	8	TextRegion	0.9966192245483398
+1059.058837890625	1536.4134521484375	1070.2064208984375	1550.20458984375	rectangle		9	TextRegion	0.9891758561134338
+203.2152862548828	938.005126953125	533.2490234375	959.8267822265624	rectangle	"Praze, depozitář Praha — Bohnice
+"	10	TextRegion	0.9811010360717772
+265.958740234375	756.1651611328125	1059.42138671875	823.9542236328125	rectangle	"ní dokumentace: Národní památkový ústav, územní odborné pracoviště vhl. m
+"	11	TextRegion	0.97239887714386
+200.5255126953125	268.583740234375	512.2869873046875	302.4518127441406	rectangle	"Zkoumané aktivity: síd - sídlištní
+"	12	TextRegion	0.9412642121315002
+203.0943145751953	440.3116149902344	668.54443359375	490.2981262207031	rectangle	"Průběh zpracování výzkumu: 08/2015 — 09/201:
+"	13	TextRegion	0.8915553689002991
+195.59783935546875	383.8877868652344	683.9652099609375	451.9684753417969	rectangle	"Průběh terénní části výzkumu: 10. 8.— 24. 8. 2015
+
+ 
+
+E
+"	14	TextRegion	0.8489305377006531

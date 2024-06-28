@@ -1,0 +1,114 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+185.0306854248047	530.8648681640625	556.3596801757812	879.5753784179688	rectangle	" 
+
+mozem próce modernho města,
+A i kam, nohoře, na tiché pláni vyšehradu
+ské, zanikolí poslední zbylky lenend.
+Archeolog, s několika dělnký, zahájit
+botos rozsáhlé práce, jež jsou vlastně pevým
+podrobným a vědeckým zkoumáním těeto
+'ostor. Česká archeologie, moderní, thcore-
+jezy důkladně vyzbrojená, má u po prvé
+možnosl přikročih u nás k vě'ší práci vý-
+zkumné, má hu no prvé přiležřol uplatníti
+$e v praksi. Dosud-lé možnosti neměla, nebol
+k projek'ům vějšho Mylu scházelo peněz.
+P vzrůstnitel milnos! reaulnce Prahy, tedy
+regulace Vyšehradu, jež se nedá už dlouho
+odkládat, usríšna provádění těchto vykoná=
+wok, nebof uskutečnění réoulace by navždy
+pe lakýmkoliv | vědeckým | výzkumům
+zemi, a navždy by znemožnilo poznání
+historie Vyšehradu, | zejména jejich, dodnes
+neznámých počátků,
+
+ 
+"	1	TextRegion	0.9989585876464844
+222.39334106445312	1394.035888671875	575.8704223632812	1543.2818603515625	rectangle	"Vyšehrad za dlouhá staletí své existence
+dělal mnoho ziněn, někohkrát změn svůj
+ed a jeho dějiny byly často příhě bouř-
+. Vrece 1420 hradiště, o jehož podobě
+1 dnes jen dohody, bylo po porážce Zk-
+nově zlečeno útokem lidu pražského,
+Irancováno a spáteno Rytina Sadele-|
+va z roku 1606, snad nejoutenličičiší,
+
+»razuje ješlě dvouposchoďovou runu hra-
+
+ 
+"	3	TextRegion	0.9968947172164916
+576.6892700195312	1322.595458984375	952.9349365234376	1554.55615234375	rectangle	"     
+
+by románské.
+
+Kostetk, roku 1903 objevený, jesd Iroilodní
+románskou basrskou s přiční lodí, 8 Ifemí
+abs-dorm, Mi pářře a teden Irktvní nesly kon-
+slrukor V zahrádce starého děkanství nale-
+zena a odkryta jedna boční loď a neivč'ší
+část lodi hlevní, severní loď, jest již zastavěna
+domem děketiství. Plánek půdorysu který tu
+přinášíme, ukazuje přesně proporce basihky
+a také jak zdvo jeho kryje se někde v zá-
+tahedech se zámm děkanství, vystávěného po
+bouřích husitských, když na počátku století
+16. vrátilo se Vyšehradská kapstula, - dříve
+"	4	TextRegion	0.9934419393539428
+557.6615600585938	230.85499572753903	945.3141479492188	410.5343933105469	rectangle	"    
+
+pozděj bouráno a ko-
+použilo: ziovu Jinde. inka měletičk
+stavebního a nezvylo po. troskách ou. po-
+mátky. když Vyšehrad byl planýtován pro vo-
+Nenské účely, stavěna ctadala a budovono
+opevnění, Bance. k muž použivěny 1 zdivo
+starobylých Iudov, šonoe, které proh Draze
+měly netsiněiší orcvnění — — a co nad ně
+vyčnívoto, vše bylo strženo.
+Na základě neucčitých zpráv © exisfencí
+
+em a I © HT Sa nake je nl | Činlk sahana pen
+
+ 
+"	5	TextRegion	0.9923451542854308
+185.5215301513672	260.9818115234375	568.1867065429688	572.3930053710938	rectangle	"ptary  VYSEUTau.
+
+ma - Praha 14 listopadu. |!
+Srázná, černá skála s cradelou nahoře
+shířží se zasinušne ve vodě Vkovy po věky ;
+pod ní plynoucí, nebof dávno a dávno pž nes ;
+spatřuje lam zrcadlihose svou slávu. Tunelem
+jí proraženým uhání stenoe hřmoticí trom=
+vai, zvonce čadicch červených pacničků vy-
+zvónějí u přístavu. o tom. kde keys do ne- |
+smirných dálek se prosiroly hluboké, šimnicí )
+černé lesy, leží oblaka špinavého, páchnou- j*
+cho kouře komínů smichovskýmh lováren a |
+ekordy my'u Smelonova, na něž rozpomíná ;;
+se divák, jenž sní fu. zanomemry na přílom- |!
+nosi, drsně a nemšlosrdně přerušeny isou Jo- |
+mozem práce modernho měskn,
+A i lam, nohoře, na tiché pláni vyšehrad=
+k V KS
+
+ 
+
+ 
+    
+"	6	TextRegion	0.991159737110138
+283.76104736328125	1358.3892822265625	476.6717834472656	1370.800537109375	rectangle	" 
+
+před čivět stoleti.
+"	7	TextRegion	0.9832099676132202
+796.218505859375	72.76355743408203	819.8204956054688	112.73634338378906	rectangle		9	TextRegion	0.8775902390480042
+580.5772705078125	1217.8609619140625	949.2351684570312	1336.3668212890625	rectangle	" 
+
+k fo nejprve lok zvaná Lázeň Libu-
+šina, známá zřicenína nod Vičavou na skále
+vyšehradské, dvůr citadely, lek zvaná
+basilika sv Vavřince, obtevená Hcror-
+nem a Mafčkou, nyní znovu odkrylá, a ho-
+nečně koslelk sv. Martina, rotunda
+z doby románské. +
+"	10	TextRegion	0.8631965517997742
+1069.599609375	65.30155181884766	1116.596923828125	109.93560791015624	rectangle		11	TextRegion	0.8084186911582947

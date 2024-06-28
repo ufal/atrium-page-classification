@@ -1,0 +1,17 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+3211.037841796875	8.194995880126953	3388.0068359375	51.92677307128906	rectangle	"Plan č.1
+"	0	TextRegion	0.999940037727356
+2343.64208984375	2176.749755859375	3040.3525390625	2284.232177734375	rectangle	"prázdné plochy označují jednak sokl s destrukcí vnitřní
+hradební zdí v sm. části sondy 2b při dejí hranicí se
+sondou 2a, jednak somdy zkeumané v r.1975 ( 2e = 2eh )
+"	1	TextRegion	0.9994768500328064
+1592.080810546875	2551.683837890625	2134.093505859375	2640.732177734375	rectangle	"tmavý hnědošedý jíl, žíhaný rezavě žlutým
+pískem, promíchaný světlým hnědožlutým
+jemným pískem
+
+mom kalžalašě dě úd k Sh
+"	2	TextRegion	0.982459545135498
+1584.7509765625	2631.119384765625	2104.438232421875	2692.203125	rectangle	"tmavý hnědošedý jíl, promíšený hrudkaní
+rezavě červeného písku a malými zrnky
+zvětralé opuky (7)
+"	3	TextRegion	0.970451295375824

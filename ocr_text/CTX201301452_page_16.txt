@@ -1,0 +1,100 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+121.82807159423828	253.5135040283203	1037.703857421875	852.6011352539062	rectangle	"sestaven projekt předstihového záchranného výzkumu, který předpokládal skrývki
+nadložních, recentními sutěmi kontaminovaných poloh o mocnosti od 20 do 60 cm. NM
+skrývku by navazoval plošný výzkum ve čtvercové síti, přičemž nejprve měl proběhnou
+výzkum pravěké vrstvy vcelém jejím rozsahu a následně komplexní výzkun
+identifikovaných zahloubených objektů. Na závěr byl plánován výzkum vzorku fosilní půd:
+až do úrovně základové spáry projektovaného domu. Celkový objem ohroženýc|
+archeologických terénů činil podle nálezové zprávy ze zjišťovacího výzkumu 246 m
+
+. Obvyklé náklady na provedení předstihového výzkumu této stratigraficky složit
+nálezové situace by se tak pohybovaly v rozmezí 1,230.000,- Kč — 1,968.000,- Kč bez DPF
+(členitá pravěká souvrství 5000 — 8000 Kč/m*, www.arup.cas.cz). Celkové prostředk:
+uvolněné ze státního rozpočtu ČR, na které byla uzavřena dohoda o provedení subdodávky:
+záchranného archeologického výzkumu s Národním památkovým ústavem, činily 520 000,
+Kč včetně DPH (tj. cca 433 333,- Kč bez DPH). Výši disponibilních prostředků musela bý
+
+přizpůsobena metoda záchranného archeologického výzkumu, který se tak soustředil pouze n:
+
+ 
+"	0	TextRegion	0.9993776679039
+444.0653076171875	1593.5123291015625	754.7286987304688	1613.9427490234375	rectangle	"7. Metody výzkumu postup práce
+"	1	TextRegion	0.998976707458496
+119.71434783935548	132.5615692138672	1045.8875732421875	1358.025146484375	rectangle	"2.7. Metody výzkumu a postup práce
+
+Na základě zjišťovacího archeologického výzkumu provedeného v zimě roku 2012 byl
+sestaven projekt předstihového záchranného výzkumu, který předpokládal skrývku
+nadložních, recentními sutěmi kontaminovaných poloh o mocnosti od 20 do 60 cm. Na
+skrývku by navazoval plošný výzkum ve čtvercové síti, přičemž nejprve měl proběhnout
+výzkum pravěké vrstvy vcelém jejím rozsahu a následně komplexní výzkum
+identifikovaných zahloubených objektů. Na závěr byl plánován výzkum vzorku fosilní půdy
+až do úrovně základové spáry projektovaného domu. Celkový objem ohrožených
+archeologických terénů činil podle nálezové zprávy ze zjišťovacího výzkumu 246 m
+
+. Obvyklé náklady na provedení předstihového výzkumu této stratigraficky složité
+nálezové situace by se tak pohybovaly v rozmezí 1,230.000,- Kč — 1,968.000,- Kč bez DPH
+(členitá pravěká souvrství 5000 — 8000 Kč/m*, www.arup.cas.cz). Celkové prostředky
+uvolněné ze státního rozpočtu ČR, na které byla uzavřena dohoda o provedení subdodávky
+záchranného archeologického výzkumu s Národním památkovým ústavem, činily 520 000,-
+Kč včetně DPH (tj. cca 433 333,- Kč bez DPH). Výši disponibilních prostředků musela být
+přizpůsobena metoda záchranného archeologického výzkumu, který se tak soustředil pouze na
+klíčové partie ohrožené archeologické situace vytypované na základě výsledků zjišťovacího
+výzkumu a definitivně určené po provedení skrývky recentního půdního pokryvu.
+
+Ve dnech 17. 5. 2012 — 26. 6. 2012 byla podle pokynů archeologa provedena skrývka
+nadložních půdních horizontů v ploše určené k výzkumu. Po skrývce nadložních vrstev byla
+na ploše výzkumu geodeticky vytýčena čtvercová síť složená ze čtverců 4 x 4 metry.
+
+Jednotlivé čtverce byly označeny tak, aby byla definována jejich prostorová orientace a jejich
+
+  
+
+povrchy ručně začištěny. V rámci čtvercové sítě byly zkoumány čtverce A2, BI, B3 a C2.
+
+ 
+
+Průzkum jednotlivých čtverců byl z části realizován po mechanických a z části po přirozených
+stratigrafických jednotkách, tak aby bylo možné v maximální míře zdokumentovat
+sedimentaci jednotlivých vrstev. Identifikované stratigrafické jednotky byly popsány do
+kontextových formulářů, kam byla zapsána jejich barva, konzistence, složení a v neposlední
+řadě jejich stratigrafická pozice. Jednotlivé čtverce byly kresebně, fotograficky a geodeticky
+
+zdokumentaványv. Pařízená měření a kresehná dokumentace hvla dioitalizavána a znracavána
+"	2	TextRegion	0.9974634647369384
+145.36984252929688	871.525634765625	1030.7225341796875	1370.021484375	rectangle	"  
+
+výzkumu a definitivně určené po provedení skrývky recentního půdního pokryvu.
+
+Ve dnech 17. 5. 2012 — 26. 6. 2012 byla podle pokynů archeologa provedena skrývk
+nadložních půdních horizontů v ploše určené k výzkumu. Po skrývce nadložních vrstev byl
+na ploše výzkumu geodeticky vytýčena čtvercová síť složená ze čtverců 4 x 4 metr
+Jednotlivé čtverce byly označeny tak, aby byla definována jejich prostorová orientace a jejic
+povrchy ručně začištěny. V rámci čtvercové sítě byly zkoumány čtverce A2, BI, B3 a C
+Průzkum jednotlivých čtverců byl z části realizován po mechanických a z části po přirozenýc
+stratigrafických jednotkách, tak aby bylo možné v maximální míře zdokumentov
+sedimentaci jednotlivých vrstev. Identifikované stratigrafické jednotky byly popsány d
+kontextových formulářů, kam byla zapsána jejich barva, konzistence, složení a v neposledi
+řadě jejich stratigrafická pozice. Jednotlivé čtverce byly kresebně, fotograficky a geodetick
+
+zdokumentovány. Pořízená měření a kresebná dokumentace byla digitalizována a zpracovár
+"	3	TextRegion	0.997180700302124
+149.28652954101562	146.534423828125	514.9417724609375	170.62234497070312	rectangle	"Metody výzkumu a postup práce
+"	4	TextRegion	0.9707714319229126
+142.7827911376953	496.74267578125	1026.204833984375	966.6981201171876	rectangle	" 
+
+archeologických terénů činil podle nálezové zprávy ze zjišťovacího výzkumu 246 m
+
+. Obvyklé náklady na provedení předstihového výzkumu této stratigraficky složi
+nálezové situace by se tak pohybovaly v rozmezí 1,230.000,- Kč — 1,968.000,- Kč bez DP
+(členitá pravěká souvrství 5 000 — 8000 Kč/m*, www.arup.cas.cz). Celkové prostředl
+uvolněné ze státního rozpočtu ČR, na které byla uzavřena dohoda o provedení subdodáv!
+záchranného archeologického výzkumu s Národním památkovým ústavem, činily 520 00C
+Kč včetně DPH (tj. cca 433 333,- Kč bez DPH). Výši disponibilních prostředků musela b
+přizpůsobena metoda záchranného archeologického výzkumu, který se tak soustředil pouze 1
+klíčové partie ohrožené archeologické situace vytypované na základě výsledků zjišťovacíl
+výzkumu a definitivně určené po provedení skrývky recentního půdního pokryvu.
+
+Ve dnech 17. 5. 2012 — 26. 6. 2012 byla podle pokynů archeologa provedena skrýv!
+"	5	TextRegion	0.8858615756034851
+218.0673370361328	228.72064208984372	1041.2208251953125	251.47662353515625	rectangle	"Na základě zjišťovacího archeologického výzkumu provedeného v zimě roku 2012 byl
+"	6	TextRegion	0.8441089391708374

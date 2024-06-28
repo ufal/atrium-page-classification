@@ -1,0 +1,64 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+180.82174682617188	185.686279296875	1184.0855712890625	616.2572631835938	rectangle	"za trativod (z ní pocházejí nálezy, uložené v sáčku 118/74,
+
+výše popsaném). V J sousedství trativodu probíhal už vnitřní
+příkop opevnění. Uvedený předpoklad z roku 1974, že totiž základ
+opukové zdi orientovaný V-Z představuje základ kamenné podezdívky
+rozlehlé roubené budovy, potvrdil v následující výkopové sezóně
+1975 objev zbytku severní podezdívky stavby. Už v r. 1974 pod-
+pořily uvedenou interpretaci také objevy zbytků dvou podezdívek
+pro příčky v budově, jakož i odkryv zuhelnatělého zbytku prkenné
+podlahy v prostřední z dosud předpokládaných tří místností v domě
+Uvedený zbytek prkenné podlahy byl vypreparován na povrchu vrstvy
+4 v úhlu mezi S licí J podezdívky a SZ vyzděnou stěnou odvodního
+kanálku, tj. ve východní místnosti,
+"	0	TextRegion	0.9999922513961792
+150.5715789794922	1404.3609619140625	1180.082275390625	1536.34619140625	rectangle	"pravděpodobný kněžský dům, jehož celý půdorys nemohl být odhalen,
+měl (jak doložím podrobněji při popisu výzkumu let 1975 a 1978)
+půdorys tvaru dlouhého obdélníka a dva zjištěné zbytky příček
+naznačují existenci tří místností;
+"	1	TextRegion	0.9998856782913208
+205.0536651611328	1254.4468994140625	225.94503784179688	1272.42919921875	rectangle		2	TextRegion	0.999810516834259
+242.2542724609375	1243.932861328125	1153.71875	1334.0472412109375	rectangle	"patrně poměrně krátce po zániku pravděpodobného kněžského dom:
+došlo k poboření JZ hradby u někdejšího kněžského domu a ke
+zřícení vnitřní hradební zdi, jejíž destrukce pokryla povrch
+uvurořyww
+"	3	TextRegion	0.9995854496955872
+188.2313232421875	654.1793823242188	1185.9273681640625	884.365478515625	rectangle	"základní stratigrafické postavení pravděpodobného kněžského domu,
+které vyplývá z většinou již uvedených zjištění, je následující:
+
+a) pravděpodobný kněžský dům byl založen na povrchu lužické
+vrstvy 4, do níž jsou zahloubeny základy jeho podezdivek
+i vyzděný odvodní kanálek, který podbíhal stavbu. Na povrchu
+vrstvy 4 v interiéru stavby byl zjištěn zbytek prkenné podlahy,
+vně stavby provázela stavbu při její J stěně místy stavební
+suť v podobě drobných opukových kamínků zašlapaných do povrchu
+"	4	TextRegion	0.998847723007202
+159.09640502929688	1373.03759765625	182.60043334960935	1392.3111572265625	rectangle		5	TextRegion	0.9985796213150024
+159.12522888183594	629.7487182617188	185.1975860595703	647.1473388671875	rectangle	"4)
+"	6	TextRegion	0.9979337453842164
+559.0254516601562	57.21271896362305	592.81982421875	72.673095703125	rectangle		7	TextRegion	0.9978548884391784
+198.40277099609372	1375.8114013671875	268.9969177246094	1389.4378662109375	rectangle	"tvar:
+"	8	TextRegion	0.990085244178772
+213.98678588867188	908.8201293945312	1182.1617431640625	1256.557861328125	rectangle	"2) V době existence stavby narostla v jejím interiéru i v okolí
+kulturní vrstva, kterou představuje horizont vrstvy 3 mezi
+povrchem vrstvy 4 a mezi destrukčními kameny ze stavby;
+
+2) po zániku pravděpodobného kněžského domu došlo v jeho areálu
+k nárůstu horního horizontu vrstvy 3, který byl nejmocnější
+V prostoru jižní podezdívky, v prostoru mezi domem a vnitřním
+příkopem a ve vnitřním příkopě. Nabízí se představa záměrného
+(tedy jednorázového) navršení tohoto horního horizontu vrstvy
+3 v době po zániku pravděpodobného kněžského domu. Této předsta
+vě alespon zčásti neodpovídá zjištění minimálně dvou objektů,
+náležejících podle stratigrafie prokazatelně do horního hori-
+zontu vrstvy 3, mladšího než pravděpodobný kněžský dům: jde
+o ohniště III a pícku V;
+
+ 
+"	9	TextRegion	0.9867892861366272
+204.155029296875	1001.5155639648438	227.1786956787109	1021.4091186523438	rectangle		10	TextRegion	0.9634177088737488
+204.8188934326172	917.205078125	227.06211853027344	936.6537475585938	rectangle		11	TextRegion	0.9394089579582214
+203.96908569335935	739.51953125	225.912841796875	757.1517944335938	rectangle		12	TextRegion	0.9184879064559937
+154.79833984375	1374.344970703125	284.004150390625	1389.966796875	rectangle	"5) tvar:
+"	14	TextRegion	0.9015821814537048

@@ -1,0 +1,48 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+85.82382202148438	664.5403442382812	1049.1373291015625	1639.73291015625	rectangle	"„Me ČEM ana. neu mnáam . 5+0 A hy » je „
+
+Ropeluioové hroby.: vykazují jistou variabilitu v uspořádání i not
+nebo nepříliš běžné prvky. Kromě menších prostých hrobů s nevelťo:
+urnou, která byla někdy podložena nebo i kryta přidlicovou deskou
+/nroby č. 70, 73,74/ Měly některé složitější stavbu nebo i výbavu.
+hrob č. 69 byl v mohutném kamenném obložení a měl při jižní stěně
+ohniště,oddělené od hrobu řadou oblázků, hrob č. 71 byl značně'hlt
+a nad urnou krytou i podloženou břidlicovou deskou uěl vrstvu žár.
+ště v němž byly další nádoby a jejich zlomky. Bohatou kéramickou ©
+bavu měly i oba nejjižnější hroby zjištěné průzkumem; jejich vzáje
+nou podobu zvyšuje způsob uložení velkých zlomků průvodní keramik;
+které byly uvnitř nádoby poklopeny, všechny dnem vzhůru, takže tv
+kryt nad většinou spálených kostí; zlomky z týchž nádob byly zčás
+uloženy i pod urnou. V hrobě 69, který je dosud nejsevernějším hr
+nekropole byly naopak velké úlomky několika nádob ploše rozmístěm
+na spálených kostech, uprostřed ve střepu amforky byl uložen shlu
+zových předmětů, překrytých bronzovým plechem . Menší bronzové př
+zejména jehlice a kroužky byly i v dalších hrobech, Zajímavé je v
+ní hrobu 70 v němž byl uložen přeslen a hrudka tuhy“
+
+Kostrové hroby. Nejvýznamnějším kostrovým hrobem letošní sezóny j
+
+X 95a —vamaAnnté zánhšlanou akoí na konci výzkumu, Hrob vybavený mí
+"	0	TextRegion	0.9999972581863404
+51.220252990722656	118.0270004272461	1152.5609130859375	1009.4898071289062	rectangle	"po orbě, Ze sedmi 2j'šřovacích sond byly čtyři positivní — obsahovaly
+tři popelnicové a jeden kostrový hrob. V ostatních byly kůlové jamky
+a břidlicová deska avisující blízkost porušeného hrobu. Extrémí vzdá-
+lenost hrobu 77 zmžx 50 m směrem jižním od prozkoumané plochy a hrobu
+79—-30m směrem severním dávají minimální rozpětí pohřebiště ve směru
+severojižním Zmamím ccs 120-m;- z nichž bylo prokopáno pouze 40m,
+Toto rozpětí rámcově odpovídá rozpětí zjištěnému ve směru V-2, kdy
+směrem na výcho/nelze očekávat větší rozsah s ohledem na strž spada-
+jící k Lučnímu potoku a dále na západ se se zvyšující nadložní vrstvou
+rýsuje výrazná středověká sídlištní vrstva, takže případné další knovíz-
+ské hroby zde byly pravděpodobně porušeny středověkým osídlením,
+Ropeluioové hroby.: vykazují jistou variabilitu v uspořádání i nové
+nebo nepříliš běžné prvky. Kromě menších prostých hrobů s nevelžou
+urnou, která byla někdy podložena nebo i kryta přidlicovou deskou
+/hroby č. 70, 73,74/ Měly některé složitější stavbu nebo i výbavu. Tak
+hrob č. 69 byl v mohutném kamenném obložení a měl při jižní stěně malé
+ohniště,oddělené od hrobu řadou oblázků, hrob č. 71 byl značně hluboký
+
+a nad urnou krytou i podloženou břidlicovou deskou uěl vrstvu žárovi-
+"	1	TextRegion	0.9999450445175172
+149.60350036621094	1618.9976806640625	1136.1484375	1646.57861328125	rectangle	"8 vyzvednutý záchranou akcí na konci výzkumu, Hrob vybavený mísou,
+"	2	TextRegion	0.991616427898407

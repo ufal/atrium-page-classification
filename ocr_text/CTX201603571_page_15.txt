@@ -1,0 +1,120 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+1049.5224609375	1536.82568359375	1070.2967529296875	1552.8482666015625	rectangle		0	TextRegion	0.9998810291290284
+115.28170013427734	149.22747802734375	1073.3135986328125	379.54583740234375	rectangle	"sítě.
+
+V Plavecké ulici byly výkopem pro kabelovou komoru odhaleny zbytky několika jirchářských kádí z dílny datované do
+průběhu 16. — 17. století. Přibližně v této době vznikl na nároží ulic rozlehlý kamenný dům, jehož obvodové zdivo bylo
+dokumentováno v přilehlých výkopech. Nejvýraznější doklady středověkého osídlení přinesla komora na křižovatce
+ulic, zahlubující se od stávajícího povrchu ve výšce 192,3 m přibližně na úroveň 187,7 m n. m. Spodní partie tvořily
+náplavové hlíny vltavské nivy částečně uložené již pod hladinou spodní vody. Nejstarší sídlištní aktivitu zde
+reprezentovaly na kótě 188,5 m nevelké jámovité objekty obsahující keramiku s kalichovitě profilovanými okraji.
+Následný horizont již tvořilo sídlištní souvrství s několika jámovitými objekty a destrukcí zdí, patrně podezdívek,
+spojovaných jílovitou hlínou. Absence datovatelného materiálu v kontextech umožnila situaci zařadit pouze rámcově
+do úseku od 12. — 14. století. Na prezentovaný úsek navázala stavba kabelovodu ve Vyšehradské a Vratislavově ulici
+
+  
+"	1	TextRegion	0.9998000264167786
+110.45377349853516	1399.805419921875	1046.9859619140625	1501.2408447265625	rectangle	"ESK 3, PEP EPEE SE Z
+Na jižním konci Vyšehradské ulice při ulici Na hrobci se výrazně do podoby nadloží zapsal výchoz skalního
+podkladu, nacházející se již 0,8 — 1 m pod současným povrchem. Nejstarší aktivity se zde projevily pouze vrcholně
+středověkou dlažbou nasedající na skalní podklad a osamoceným, do skály zahloubeným objektem protáhlého
+polozemnicového tvaru o měřitelné délce 3,3 m, obsahujícím v zásypu keramiku 12. století. Před ústím výkopu do
+"	2	TextRegion	0.9995477795600892
+880.7249145507812	410.3525085449219	1073.290771484375	427.4154968261719	rectangle	"Jaroslav Podliska, PÚPP
+"	3	TextRegion	0.9994169473648072
+89.95997619628906	115.66471099853516	1092.11083984375	137.49685668945312	rectangle	"datovat přibližně do úseku 18. — 19. století. Početně se do podoby nadloží zapsaly novodobé výkopy pro inženýrské
+"	4	TextRegion	0.9958958625793456
+131.5446319580078	506.80572509765625	471.1237487792969	528.5170288085938	rectangle	"PRAHA 2 — NOVÉ MĚSTO (Podliska 2003b)
+"	5	TextRegion	0.9945863485336304
+89.900146484375	578.5656127929688	1068.700927734375	882.733642578125	rectangle	"Vr..2000 proběhla realizace další etapy kabelizace Nového Města. Stavba navázala na úsek z r. 1999 zakončený v
+Plavecké ulici před vyústěním do Vyšehradské ulice. Akce byla rozdělena na tři stavební úseky realizované
+průběžně, v některých případech i souběžně a nezávisle na sobě. První částí byla stavba ražené štoly v úseku
+křižovatky Vyšehradské s ulicí Svobodovou a Vnislavovou s vyústěním na začátku ulice Vratislavovy.
+
+Ze dna dvojice vstupních šachet o hloubce kolem 7 m (dno 185,5 m n. m.) byla postupně ražena štola o délce cca
+78 m, procházející výrazně nesoudržnými navážkovými a bahnitými terény bývalého koryta Botiče. Během výkopů
+byla za velice náročných podmínek prováděná dílčí dokumentace, při které se podařilo zachytit masivní zbytky
+základových pilířů kamenného mostu s konstrukcí dřevěných roštů a dubových pilotů s okovanou špicí
+spojovaných železnými hřeby, vedoucího přes tok Botiče. Absence přímo datovatelného materiálu neumožnila
+odpovědět na otázku chronologie jednotlivých prvků mostní konstrukce. Na historických vedutách města je
+stavba doložena již na počátku 17. století, což však nevylučuje uvažovat o jejím větším stáří. Z tohoto důvodu byly
+
+odebrány vzorky dřev na budoucí dendrochronologické datování. Výkop vstupní šachty ve Vyšehradské ulici
+S nnváškonvé nnunvěké eniryretuí ce zhutku umlniimnnvých dlrmšeh n reliktem zdi eniwiepiirí ©
+
+ 
+
+noehalil nřováši
+"	6	TextRegion	0.958994209766388
+108.39765167236328	1027.2467041015625	1052.2467041015625	1257.3411865234375	rectangle	"rámcové do období vrcholného středověku a novověku.
+Druhou etapu tvořil výkop liniového úseku o délce přibližně 140 m s trojicí kabelových komor ve Vyšehradské ulici.
+Hloubka výkopů kolísala přibližně od 2 do 3,5 m. Pod současným povrchem ulice bylo zdokumentováno nevýrazné
+historické nadloží tvořené převážně vodorovně uloženým sledem navážkových vrstev se dvěma až třemi horizonty
+převážně valounových dlažeb s vrcholně středověkou až novověkou keramikou. Nejstarší valounková dlažba,
+uložená přibližně na úrovni 192 m obsahovala vedle zlomků kovových předmětů i drobné zlomky keramiky 14. —
+15. století. Vznik uvedené dlažby, zachycené až na výjimky kontinuálně po celé délce výkopu ve Vyšehradské ulici
+přibližně v severojižním směru, lze spojit s etapou vlády Karla IV. a jeho projektem realizace komunikační sítě
+Nového Města po r. 1348. V úseku od křižovatky ulice Vyšehradské s ulicí Na hrobci po vyústění ulice Plavecké se
+pod vrcholně středověkou dlažbou nalézalo nevýrazné sídlištní souvrství (191,8 — 192 m), tvořené převážně
+"	7	TextRegion	0.9573732614517212
+162.65853881835938	643.0808715820312	999.5640869140624	1446.2073974609375	rectangle	"ZE P Z A DE E O P O DP O DD
+ovatky Vyšehradské s ulicí Svobodovou a Vnislavovou s vyústěním na začátku ulice Vratislavovy.
+
+ina dvojice vstupních šachet o hloubce kolem 7 m (dno 185,5 m n. m.) byla postupně ražena štola o délce
+m, procházející výrazně nesoudržnými navážkovými a bahnitými terény bývalého koryta Botiče. Během vý
+1 za velice náročných podmínek prováděná dílčí dokumentace, při které se podařilo zachytit masivní zbytl
+ladových pilířů kamenného mostu s konstrukcí dřevěných roštů a dubových pilotů s okovanou špicí
+jovaných železnými hřeby, vedoucího přes tok Botiče. Absence přímo datovatelného materiálu neumožni
+ovědět na otázku chronologie jednotlivých prvků mostní konstrukce. Na historických vedutách města je
+vba doložena již na počátku 17. století, což však nevylučuje uvažovat o jejím větším stáří. Z tohoto důvod
+brány vzorky dřev na budoucí dendrochronologické datování. Výkop vstupní šachty ve Vyšehradské ulici
+alil převážně navážkové novověké souvrství se zbytky valounových dlažeb a reliktem zdi související s
+tupem na most. Spodní partie již obsahovaly heterogenní písčité hlíny náplavového charakteru, obsahují
+le zbytků dřev i novověké a středověké zlomky keramiky. Na úrovní 187,0 — 187,4 m se objevilo skaln
+loží tvořené břidlicemi s výrazným přírodním zářezem meandrového ohybu Botiče. Historické nadloží v š
+/ratislavově ulici tvořil pravidelný sled navážkových vrstev se třemi úrovněmi valounových dlažeb. Podlož
+kótě 191,4 m tvořila zvětralá břidlice. Postupný nárůst antropogenních vrstev bylo možné datovat pouze
+1cově do období vrcholného středověku a novověku.
+
+hou etapu tvořil výkop liniového úseku o délce přibližně 140 m s trojicí kabelových komor ve Vyšehradské
+ubka výkopů kolísala přibližně od 2 do 3,5 m. Pod současným povrchem ulice bylo zdokumentováno nevý
+orické nadloží tvořené převážně vodorovně uloženým sledem navážkových vrstev se dvěma až třemi hori
+vážně valounových dlažeb s vrcholně středověkou až novověkou keramikou. Nejstarší valounková dlažba,
+žená přibližně na úrovni 192 m obsahovala vedle zlomků kovových předmětů i drobné zlomky keramiky 1.
+století. Vznik uvedené dlažby, zachycené až na výjimky kontinuálně po celé délce výkopu ve Vyšehradské
+Jižně v severojižním směru, lze spojit s etapou vlády Karla IV. a jeho projektem realizace komunikační sítě
+jého Města po r. 1348. V úseku od křižovatky ulice Vyšehradské s ulicí Na hrobci po vyústění ulice Plaveck
+| vrcholně středověkou dlažbou nalézalo nevýrazné sídlištní souvrství (191,8 — 192 m), tvořené převážně
+itými hlínami a několika zahloubenými objekty jámového charakteru. Na základě keramiky lze předběžně
+ovat uvedený horizont do období od 11. do počátku 13. století (kalichovitě profilované a zduřelé okraje).
+dověký horizont převrstvoval a objekty narušoval asi 20 cm mocnou homogenní vrstvu šedé písčité hlíny
+olika drobnými kůlovými jamkami a mělkými a protáhlými objekty s mazanicí a keramikou (torzo dvouetí
+loby) knovízské kultury doby bronzové (191,6 — 191,8 m). Podloží v této části Vyšehradské ulice tvořily k s
+ající písčité, nepatrně zahliněné sedimenty (191,6—191, 4 m).
+
+jižním konci Vyšehradské ulice při ulici Na hrobci se výrazně do podoby nadloží zapsal výchoz skalního
+kladu. nacházející se již 0.8 — 1 m nod současným povrchem. Nejstarší aktivity se zde projevily nouze vrch
+
+ 
+
+ 
+
+ 
+"	8	TextRegion	0.8690077066421509
+94.87918853759766	1143.8946533203125	1066.844482421875	1390.879150390625	rectangle	"uložená přibližně na úrovni 192 m obsahovala vedle zlomků kovových předmětů i drobné zlomky keramiky 14. —
+15. století. Vznik uvedené dlažby, zachycené až na výjimky kontinuálně po celé délce výkopu ve Vyšehradské ulici
+přibližně v severojižním směru, lze spojit s etapou vlády Karla IV. a jeho projektem realizace komunikační sítě
+Nového Města po r. 1348. V úseku od křižovatky ulice Vyšehradské s ulicí Na hrobci po vyústění ulice Plavecké se
+pod vrcholně středověkou dlažbou nalézalo nevýrazné sídlištní souvrství (191,8 — 192 m), tvořené převážně
+písčitými hlínami a několika zahloubenými objekty jámového charakteru. Na základě keramiky lze předběžně
+datovat uvedený horizont do období od 11. do počátku 13. století (kalichovitě profilované a zduřelé okraje). Raně
+středověký horizont převrstvoval a objekty narušoval asi 20 cm mocnou homogenní vrstvu šedé písčité hlíny s
+několika drobnými kůlovými jamkami a mělkými a protáhlými objekty s mazanicí a keramikou (torzo dvouetážové
+nádoby) knovízské kultury doby bronzové (191,6— 191,8 m). Podloží v této části Vyšehradské ulice tvořily k severu
+
+LOOP AMAOOMLY
+
+ 
+
+  
+"	9	TextRegion	0.812700092792511

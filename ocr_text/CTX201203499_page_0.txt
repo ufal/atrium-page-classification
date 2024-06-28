@@ -1,0 +1,90 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+975.0789184570312	72.91255950927734	1080.018310546875	90.97309112548828	rectangle	" 
+
+>. akce 31331
+"	0	TextRegion	0.999988317489624
+104.79521942138672	1094.2296142578125	1089.404541015625	1178.5064697265625	rectangle	"Archeologický dohled při stavbě proběhl dne 14.9.2012 v rámci jednoho výjezdu. Na profilech základových
+pasů pro rodinný dům bylo patrné pouze intaktní podloží tvořené žlutým jílem, na němž se nacházela vrstva
+hnědé ornice a podorničí. K zachycení archeologických situací ani materiálu nedošlo.
+"	2	TextRegion	0.9996782541275024
+368.9533996582031	117.65406799316406	1034.5401611328125	208.0900115966797	rectangle	"ARCHEOLOGICKÝ ÚSTAV AKADEMIE VĚD ČR, Praha, v.v.i.
+118 01 Praha 1 - Malá Strana, Letenská 4
+Pracoviště Kutná Hora, Hloušecká 609, 284 01 Kutná Hora
+tel: 327 511 730 e-mail: archeolooiekhseznam cz
+"	3	TextRegion	0.9995711445808412
+855.457763671875	270.85723876953125	1060.4940185546875	291.3069763183594	rectangle	"V Kutné Hoře 19.9. 2017
+"	4	TextRegion	0.9995402097702026
+46.6113510131836	593.5076293945312	1153.553466796875	663.2095336914062	rectangle	"Akce probíhala při severozápadním okraji intravilánu obce. Z nedalekého okolí stavby pochází četné
+archeologické nálezy z období pravěku i středověku, proto nešlo dopředu vyloučit možnost, že v průběhu
+stavby dojde k poškození důležitých archeologických situací.
+"	5	TextRegion	0.9984038472175598
+110.49407958984376	1405.577392578125	396.06878662109375	1483.437255859375	rectangle	"PhDr. Radka Šumberová, Ph.D.
+
+č Kutná Hora
+
+ 
+
+ 
+"	7	TextRegion	0.9962970614433287
+89.29728698730469	502.5821533203125	997.1463012695312	573.0184326171875	rectangle	"V souladu se zněním zákona č.20/87 Sb. v platném znění byl na základě ohlášení zahájení výkopov
+proveden archeologický dohled při akci: Dobřeň — novostavba rodinného domu na ppč. 1642
+Dobřeň u Kutné Horv.
+"	8	TextRegion	0.9948875308036804
+101.36198425292967	1174.849853515625	1074.7750244140625	1234.26513671875	rectangle	"Vzhledem k negativním archeologickým zjištěním byl prostor stavby po ukončení dohledu uvolněn prc
+dokončení akce.
+
+ 
+"	9	TextRegion	0.9942898750305176
+108.98511505126952	1483.56591796875	454.0553894042969	1504.1256103515625	rectangle	"Zpracoval: Mgr. Filip Velímský, Ph.D.
+"	10	TextRegion	0.9938993453979492
+102.01680755615234	1320.2320556640625	702.2335815429688	1365.1475830078125	rectangle	"Závěrem je možno konstatovat, že byla dodržena všec
+archeologických památek.
+"	11	TextRegion	0.9937657117843628
+150.23036193847656	117.35848236083984	299.086669921875	260.0990905761719	rectangle	" 
+"	12	TextRegion	0.9843736886978148
+214.5737762451172	1317.7528076171875	1075.3157958984375	1347.5484619140625	rectangle	"je možno konstatovat, že byla dodržena všechna zákonná ustanovení o ochraně
+"	13	TextRegion	0.9823828935623168
+65.73284912109375	1220.7855224609375	1091.5107421875	1290.7412109375	rectangle	"VA EAV.
+
+Archeologický dohled při stavbě provedl Mgr. Filip Velímský, Ph.D. (ARÚ AV ČR, Praha, v.v.i., pracoviště
+
+Kutná Hora). Terénní dokumentace je uložena v Archeologickém ústavu AV ČR, Praha, v.v.i., pracoviště
+Kuní Hara
+"	14	TextRegion	0.9790945649147034
+65.69241333007812	430.7087097167969	1082.508056640625	528.8970336914062	rectangle	" 
+
+ 
+
+VĚC: zpráva o provedení archeologického dohledu při akci — Dobřeň — novostavba rodinného domu na
+ppč. 1642/2 v k.ú. Dobřeň u Kutné Hory.
+
+V souladu se zněním zákona č.20/87 Sb. v platném znění byl na základě ohlášení zahájení výkopových prací
+"	15	TextRegion	0.9777930974960328
+321.5480651855469	345.698486328125	467.3707580566406	435.7914733886719	rectangle	"Viga Lrojankov
+Solopysky 38
+284 01 Suchdol
+"	16	TextRegion	0.9502742886543274
+90.20208740234376	1166.6558837890625	1085.21533203125	1304.65380859375	rectangle	"Vzhledem k negativním archeologickým zjištěním byl prostor stavby po ukončení dohledu uvolněn pro
+dokončení akce.
+Archeologický dohled při stavbě provedl Mgr. Filip Velímský, Ph.D. (ARÚ AV ČR, Praha, v.v.i., pracoviště
+
+Kutná Hora). Terénní dokumentace je uložena v Archeologickém ústavu AV ČR, Praha, v.v.i., pracoviště
+Kutná Hora.
+"	17	TextRegion	0.9358891844749452
+45.49964904785156	445.5926818847656	1076.939208984375	491.2801513671875	rectangle	"VĚC: zpráva o provedení archeologického dohledu při akci — Dobřeň — novostavba rodinného domu na
+ppč. 1642/2 v k.ú. Dobřeň u Kutné Hory.
+"	18	TextRegion	0.9329487681388856
+221.20008850097656	446.3099060058594	1082.7928466796875	471.1063537597656	rectangle	"a 0 provedení archeologického dohledu při akci — Dobřeň — novostavba rodinného domu na
+"	19	TextRegion	0.9312775135040284
+107.3440933227539	350.0084228515625	242.8956451416016	448.5251770019531	rectangle	"HS
+Solopysky 38
+284 01 Suchdol
+"	20	TextRegion	0.9053817391395568
+114.6045379638672	345.8794860839844	1038.8662109375	465.5857543945313	rectangle	"Jiri Lrojanek Viga Lrojankova
+Solopysky 38 Solopysky 38
+284 01 Suchdol 284 01 Suchdol
+
+VĚC: zpráva o provedení archeologického dohledu při akci — Dobřeň — novostavba rodinného dom
+
+ 
+"	21	TextRegion	0.8058766722679138

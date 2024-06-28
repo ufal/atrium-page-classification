@@ -1,0 +1,19 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+180.7959899902344	659.7449951171875	416.0090942382813	729.8137817382812	rectangle	"Sonda 2b (1974).
+orientované V-Z,
+vzadu destrukce“
+"	0	TextRegion	0.9999240636825562
+1052.34521484375	39.32120132446289	1144.68359375	66.16925811767578	rectangle	"Tab. 14
+"	3	TextRegion	0.9995812773704528
+426.8385620117188	658.2167358398438	1167.986572265625	739.3773803710938	rectangle	"Vpředu část základu podezdívky (jižní) budovy
+uprostřed zbytek destrukčních sutí budovy ň
+vnitřní hradební zdi. Pohled od SV.Foto J Justova.
+"	4	TextRegion	0.9951016306877136
+142.70294189453125	1402.94873046875	1203.027099609375	1493.088134765625	rectangle	"Sonda 2a-2c (1974). Pohled do
+Vpravo destrukční suti budovy
+
+vnitříního příkopu opevnění od V.
+z 10,""století, orientované V-Z.
+
+Vlevo u JZ stěny sondy 2b leží ve vrstvě 3 ohniště VI a Vll. Foto J.Justova.
+"	5	TextRegion	0.9942820072174072

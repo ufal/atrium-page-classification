@@ -1,0 +1,89 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+152.3046417236328	616.6450805664062	1046.750244140625	879.5808715820312	rectangle	"KOTVY A MAT JA
+
+[0 — Ve Struhách, u čp. 95, ppč. 1539, 1544/1—2 — při stavbě nové budovy kanadského
+jelvyslanectví u Hoyermannovy vily objeveno kulturní souvrství, objekty a movité nálezy
+ultur s lineární a vypíchanou keramikou, jordanovské či michelsberské kultury, knovízské a
+títarské kultury (dva žárové hroby) a kultury bylanské; ve svrchní části souvrství byly
+ialezeny i zlomky keramiky z doby laténské a římské; zřejmě do období staršího eneolitu se
+
+adí soustava linií interpretovaných jako stopy po orbě
+"	0	TextRegion	0.999871015548706
+143.1725616455078	915.4064331054688	1033.196533203125	1137.2120361328125	rectangle	"11 — Mlýnská a Papírenská ul. — pozemky patřící k bývalé Mauthnerově přádelně; někter
+zřady nálezů z období pravěku až raného středověku na Mauthnerových pozemcích byl
+objeveny v jihovýchodním sousedství přádelny: v roce 1912 dělníci narazili na kostrový hro
+kultury s lineární keramikou, čtyři (?) kostrové hroby kultury nálevkovitých pohárů a sna
+
+čtyři kostrové hroby údajně bez výbavy, které by mohly patřit starší únětické kultuř
+"	1	TextRegion	0.9998175501823424
+143.10311889648438	1512.845703125	184.4094696044922	1531.6400146484375	rectangle	"904).
+"	2	TextRegion	0.9994981288909912
+134.8126983642578	1149.0770263671875	1046.3299560546875	1403.0838623046875	rectangle	"12 — Goetheho ul. — na severním konci Goetheho ulice, nedaleko nádraží, měly být objeveny
+sídlištní nálezy kultury s lineární keramikou; při rozšiřování nádraží zjištěna sídlištní jáma
+kultury s vypíchanou keramikou; v roce 1913 údajný nespecifikovaný nález únětické kultury;
+v prostoru nádraží byla zřejmě počátkem minulého století vykopána sídlištní jáma knovízské
+kultury s poměrně atypickou, cizorodou keramikou; ve stejné době byl zničen kostrový hrob
+
+při odkopávání náspu ( 9.
+"	3	TextRegion	0.9993960857391356
+110.86775970458984	154.601318359375	1055.9017333984375	296.7698669433594	rectangle	"© — Ve Struhách čp. 109//b — při stavbě Kanalizace a rekonstrukci mezi zadní Dudovou a
+ulicí roku 1994 nalezeny zlomky nádob kultury s lineární keramikou, dva sídlištní objekty
+mohylové kultury, zlomky knovízské a štítarské keramiky, zbytky halštatské chaty a
+
+keramické střepy z doby římské
+"	4	TextRegion	0.999028205871582
+151.847412109375	249.20770263671875	1037.589111328125	642.6401977539062	rectangle	" 
+
+ 
+
++ 7773 +
+
+   
+
+ceramické střepy z doby římské
+
+) — Ve Struhách čp. 95 — u Hoyermannovy vily roku 1934 nalezena jáma a ohniště kultur
+lineární keramikou; ve 30. letech 20. století před západním průčelím domu prozkoumán:
+zahloubená chata řivnáčské kultury s kotlovitou jámou, která byla překryta mohutnou vrstvot
+z mladší doby bronzové a doby železné; před domem roku 1934 dokumentován kostrový hrol
+cultury zvoncovitých pohárů; u čp. 95 v roce 1934 vykopány dvě jámy a zároveň zjištěl
+costrový hrob únětické kultury; nedaleko vily roku 1933 objevena sídlištní jáma knovízsk:
+cultury s lidskou kostrou, v následujícím roce i později zachyceny knovízské nálezy z kulturn
+
+vrstvy a dalších objektů
+
+ 
+"	5	TextRegion	0.9987587928771972
+319.21343994140625	1590.4022216796875	874.3961791992188	1615.691162109375	rectangle	").4. Předchozí archeologické poznání lokality a jejího okoli
+"	6	TextRegion	0.9930745363235474
+118.67365264892578	1425.976806640625	1063.2781982421875	1475.3887939453125	rectangle	"13 — roh ul. Českomalínské a Heineho — sídlištní nálezy z časně slovanského a zřejmě i
+
+ 
+
+i
+
+ 
+
+O LA.
+
+ 
+
+A AN 412
+
+ 
+"	7	TextRegion	0.9720948338508606
+177.1753387451172	1468.5277099609375	1006.676025390625	1493.5386962890625	rectangle	"rohradištního období učiněny počátkem 20. století
+"	8	TextRegion	0.9550905227661132
+135.3074188232422	1390.5322265625	1054.10107421875	1489.1663818359375	rectangle	"při odkopávání náspu ( ).
+13 — roh ul. Českomalínské a Heineho — sídlištní nálezy z časně slovanského a zřejmě i
+
+starohradištního období učiněny počátkem 20. století
+"	9	TextRegion	0.9548108577728271
+150.23985290527344	595.4766235351562	949.6867065429688	627.8973388671875	rectangle	"vrstvy a dalších objektů
+"	10	TextRegion	0.913659930229187
+277.5932006835937	1388.2122802734375	923.12255859375	1413.017578125	rectangle	"ní náspu (Lutovský — Smejtek a kol. 2005, 211, 223, 420, 539—540)
+"	11	TextRegion	0.903223991394043
+223.7007293701172	891.4191284179688	836.9273681640625	912.1878662109376	rectangle	"vá 2012a; Maříková Vlčková — Čuláková — Mácalová 2012b).
+"	12	TextRegion	0.8557685017585754
+121.21976470947266	1428.5303955078125	1050.741455078125	1452.451416015625	rectangle	"13 — roh ul. Českomalínské a Heineho — sídlištní nálezy z časně slovanského a zřejmě i
+"	13	TextRegion	0.8395989537239075

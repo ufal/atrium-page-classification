@@ -1,0 +1,61 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+126.56764221191406	239.38040161132807	1123.95361328125	400.6553649902344	rectangle	"Nalezové Sltuace (tj. Sačky) Čislo:
+
+6la/74, 6lb/74, 68/74, 76/74, 77/74, 81/74, 99/74, 102/74, 109/74,
+118/74, 119/74, 120/74, 121/74, 130/74, 133/74, 135/74, 136/74,
+137/74, 145/74, 149/74, 150/74, 151/74, 154/74, 155/74, 156/74,
+1577/74.. VB2/7A.
+"	0	TextRegion	0.9999630451202391
+143.98583984375	459.5012512207031	1113.8114013671875	1156.7724609375	rectangle	"o vyjimkou nalezové situace (= sáčku) č. 118/74 jsou tyto
+nálezové situace (=sáčky) zahrnuty výše v popisu vrstvy 3.
+Vysvětlení: v sezóně 1974 byla objevena a sledována největší část
+celkově zjištěného úseku J podezdívky stavby, a to v ondách 2a - 2
+včetně opukových sutí stavebních a destrukčních, tuto podezdívku
+provázejících a zbytků příček v interiéru budovy, Dále byl v roce
+1974 objeven a zkoumán JZ konec vyzděného odvodního kanálku, který
+probíhal pod podlahou domu, Nálezy, které patří ke kněžskému domu,
+pocházejí z toho (většinou spodního) horizontu vrstvy 3, který lež
+mezi povrchem pravěké (lužické) vrstvy 4 a horizontem povrchu opu-
+kových destrukčních sutí náležejících zánikovému horizontu budovy.
+Názorně tento horizont vrstvy 3 z doby existence pravděpodobného
+kněžského domu představují ""sokly“ tvořené vrstvou 3 a ponechané
+pod velkými kameny z destrukční suti pravděpodobného kněžského dom
+
+při snímání vrstvy 3 po povrch vrstvy 4. Na povrchu vrstvy 4 byly
+"	1	TextRegion	0.9994475245475768
+137.71681213378906	1295.1724853515625	1120.466552734375	1622.6490478515625	rectangle	"stavby pravděpodobného kněžského domu. Základ podezdívky pravděpo-
+dobného kněžského domu byl do vrstvy 4 zahlouben,
+
+Nálezy z uvedeného horizontu pravděpodobného kněžského domu jso
+tedy přiřazeny vrstvám 3 a 4 (povrch). Ty nálezové situace (= sáčk:
+z vrstvy 3, které lze přiřadit ke kněžskému domu, byly výše uvedeny
+v rámci popisu vrstvy 3 (v seznamu nálezových situací (= sáčků)
+
+z vrstvy 3). Zde shrnuji nálezové situace (= sáčky) z horizontu
+"	2	TextRegion	0.9911587834358216
+121.53907012939452	674.9170532226562	1109.2110595703125	1523.8638916015625	rectangle	"provázejících a zbytků příček v interiéru budovy, Dále byl v roce
+1974 objeven a zkoumán JZ konec vyzděného odvodního kanálku, ktery
+probíhal pod podlahou domu. Nálezy, které patří ke kněžskému domu,
+pocházejí z toho (většinou spodního) horizontu vrstvy 3, který le;
+mezi povrchem pravěké (lužické) vrstvy 4 a horizontem povrchu opu-
+kových destrukčních sutí náležejících zánikovému horizontu budovy.
+Názorně tento horizont vrstvy 3 z doby existence pravděpodobného
+kněžského domu představují ""sokly“ tvořené vrstvou 3 a ponechané
+pod velkými kameny z destrukční suti pravděpodobného kněžského don
+při snímání vrstvy 3 po povrch vrstvy 4. Na povrchu vrstvy 4 byly
+pak při jižní lici J podezdívky pravděpodobného kněžského domu
+objeveny (zejména v sondě 2a) drobné opukové kamínky, zašlapané
+do povrchu vrstvy 4, které zjevně představují stavební suř z doby
+stavby pravděpodobného kněžského domu. Základ podezdívky pravděpo-
+dobného kněžského domu byl do vrstvy 4 zahlouben,
+
+Nálezy z uvedeného horizontu pravděpodobného kněžského domu jsc
+tedy přiřazeny vrstvám 3 a 4 (povrch). Ty nálezové situace (= sáčk
+
+z vrstvy 3, které lze přiřadit ke kněžskému domu. byvlv výše uvader
+"	3	TextRegion	0.99019593000412
+538.9713745117188	47.74153137207031	576.4661865234375	62.85609436035156	rectangle	"43
+"	4	TextRegion	0.9640209078788756
+520.7031860351562	50.24863052368164	592.6121826171875	63.03896713256836	rectangle	"- 43 .
+"	5	TextRegion	0.8740211129188538
+141.8716278076172	1606.0609130859375	154.90493774414062	1617.320068359375	rectangle		7	TextRegion	0.8485701680183411

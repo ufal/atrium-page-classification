@@ -1,0 +1,49 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+166.64462280273438	859.7136840820312	1127.257080078125	1171.080810546875	rectangle	"jako taková byla zkoumána teprve v sezóně 1975. V roce 1974
+
+byla na většině plochy sond 2a - 2d obnažena (s výše popsanými
+Výjimkami části ploch ve vnitřním příkopě a při vnitřním příkopě)
+někde do ni bylo nedopatřením zasaženo (srv, výše ""Rozhraní vrstv?
+3 a vrstvy 4""). Přímo do vrstvy 4 jsme zasáhli v S rohu sondy 2d
+kde se vrstva 4 objevila a kde jsem ji napřed pokládala za jílovi.
+
+tou výplň jámového objektu:
+"	0	TextRegion	0.9999855756759644
+189.627685546875	1292.4561767578125	1029.3812255859375	1354.511962890625	rectangle	"34/74: ""Sonda 2d, horní partie objektu s jílovitou výplní
+V sev. rohu sondy 2d, úroven cca 70 cm pod povrchem
+
+2: 2
+"	1	TextRegion	0.9997076392173768
+334.2440185546875	399.7864990234375	1043.3680419921875	507.5693664550781	rectangle	"""Sonda
+V záp.
+jbrána
+rezavě
+
+2c, spodní partie hnědé ""slavník."" vrstVY
+části sondy (sev. od příkopu). Částečně
+
+i horní část tmavé jílovité hlíny žihané
+žlutým pískem, 14.8.""
+"	2	TextRegion	0.9996556043624878
+127.70691680908205	529.2957153320312	1130.30078125	629.3794555664062	rectangle	"V popsané úrovni dokončeno v roce 1974 snímání vrstev v sondě 2c,
+
+Vrstva byla zkoumána v následující sezóně 1975 (viz nálezovou
+"	3	TextRegion	0.9996113181114196
+160.10989379882812	411.2100830078125	185.7831573486328	429.8615417480469	rectangle		4	TextRegion	0.9995823502540588
+544.1008911132812	64.43465423583984	578.3309936523438	80.05873107910156	rectangle		5	TextRegion	0.9992884397506714
+184.37677001953125	285.9352111816406	1094.6986083984375	402.7533264160156	rectangle	") 146/74: ""Sonda 2c, spodní partie hnědé ""slavník.""vrstvy
+ve vých. části sondy (místy přebráno do horní části
+tmavé jilovité žíhané rezavě žlutým pískem),
+13.-14.8.""
+"	6	TextRegion	0.9871674180030824
+159.26222229003906	304.1275634765625	185.92893981933597	323.37750244140625	rectangle		7	TextRegion	0.9858649969100952
+323.65380859375	418.2127685546875	413.6211242675781	498.6628112792969	rectangle	" 
+
+v záp.
+ubrána
+rezavě
+"	9	TextRegion	0.96542626619339
+534.2470092773438	66.95784759521484	596.3485107421875	79.28163146972656	rectangle	"54
+"	14	TextRegion	0.8667967319488525
+186.72799682617188	1232.6075439453125	705.2090454101562	1291.7548828125	rectangle	"álezová situace (tj. sáček) číslo:
+"	15	TextRegion	0.8601287603378296

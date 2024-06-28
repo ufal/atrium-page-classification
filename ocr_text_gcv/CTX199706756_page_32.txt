@@ -1,0 +1,5 @@
+IMAGE_NAME	DESCRIPTION	LANGUAGE	BBOX_1	BBOX_2	BBOX_3	BBOX_4
+image	Soup1s külových jamek	cs	(306, 769)	(873, 769)	(873, 790)	(306, 790)
+image	Soup1s		(306, 769)	(474, 770)	(474, 789)	(306, 788)
+image	külových		(492, 770)	(717, 771)	(717, 790)	(492, 789)
+image	jamek		(738, 771)	(873, 771)	(873, 790)	(738, 790)

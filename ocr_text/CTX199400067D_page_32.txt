@@ -1,0 +1,22 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+172.75872802734375	1397.8248291015625	1107.26025390625	1634.6905517578125	rectangle	"Sonda 2b (1974). 1 vrstva 3 z 10.stol., střep libické pro-
+venience rázu starší doby hradištní (nálezová situace 126/74);
+2 rozhraní vrstvy 3 z 10.stol, a vrstvy 2 z doby po r.995,
+přepálený střep libické provenience (nálezová situace 62/74);
+3 - 4 destrukce vnitřní hradební zdi z 28.9.995, 2 přepálené
+střepy zjevně libické provenience (obr. 26:3 - nálezová situ-
+ace 65/74; obr. 26:4 - nálezová situace 60/74), Správné po-
+stavení střepů ukazují šipky se základnou vyznačující vodorov-
+mu rovinu (horní část každého střepu udává směr ipky).
+
+m 2.. 24 NR
+
+ 
+"	2	TextRegion	0.9993513226509094
+351.3648986816406	690.8905639648438	548.733154296875	711.9876098632812	rectangle	"C- M, Au A204
+"	4	TextRegion	0.991672694683075
+1020.9611206054688	30.64749336242676	1129.610107421875	50.06620788574219	rectangle	"Obr. 26
+"	5	TextRegion	0.9834941625595092
+465.3053283691406	146.38455200195312	577.517822265625	189.5380706787109	rectangle	"L 126|+
+"	6	TextRegion	0.9410513639450072
+400.7146911621094	257.5321655273437	480.6269836425781	322.59686279296875	rectangle		8	TextRegion	0.9371519088745116

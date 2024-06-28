@@ -1,0 +1,31 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+88.29559326171875	176.34910583496094	1121.2684326171875	949.5875854492188	rectangle	"staré cesty, podobně jako na Hrádku, zjištěné výzkumem Dr Soudské,
+nebo zda kxíx se zde jedná o věnec mohyly, druhotně překryté planýrkot
+Závěr. Letošní kampaní byl uzavřen systematický výzkum v BřáRRÝHKŘI
+Brdě. Charakter a uspořádání hrobů i rozmístění a ráz ostatních objek.
+tů v mnohém potvrdil i doplnil starší pozorování. Jako zvláště přínosr
+je letos již plně potvrzený birituální ráz pohřebiště. Nejvýznamnější
+poznatky přinesla v letošní sezóně záchraná akce návazná na povrchový
+průzkum, která prokázala minimální rozsah pohřebiště, který je nejmé-
+ně dvojnásobný než bylo původně pře dpokládáno. S ohledem na značný od-
+stup jednotlivých hrobů a zejména skupin byl výzkum velmi náročný.a pc
+kračování v systematickém výzkumu je v současné době nerealizovatelné,
+Domnívám se však, že by byl v následujícím roce vhodný obdobný průzkum
+provedený těsně v. orbě, který by letošní pozorování upřesnil, případr
+prokázal, zda představují dislokované hroby ojedinčlé pohřby na okra-
+
+ji pohřebiště, anebo jeho skutečné, případně i větší rozpětí.,
+"	0	TextRegion	0.9999997615814208
+34.64162063598633	541.939453125	85.60525512695312	555.52197265625	rectangle	" 
+
+OSV
+"	1	TextRegion	0.9997403025627136
+1002.8349609375	98.42550659179688	1014.7994384765624	114.9512710571289	rectangle		2	TextRegion	0.9988712668418884
+64.14278411865234	1273.6593017578125	84.35234069824219	1284.30859375	rectangle	"sv
+"	3	TextRegion	0.979318380355835
+575.7283935546875	1087.9283447265625	1086.4425048828125	1152.226318359375	rectangle	"jb da hle o udá
+"	4	TextRegion	0.9413596987724304
+63.26222610473633	931.5691528320312	84.3812484741211	943.6578369140624	rectangle	"of
+"	5	TextRegion	0.9313819408416748
+573.7603759765625	1148.162353515625	1067.740234375	1178.09765625	rectangle	"Dr Olga Kytlioová-Smotlachová CSo
+"	6	TextRegion	0.8852266669273376

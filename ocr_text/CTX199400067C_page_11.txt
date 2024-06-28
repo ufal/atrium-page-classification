@@ -1,0 +1,22 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+1060.95458984375	40.41103744506836	1121.4295654296875	63.456520080566406	rectangle	"Tab.
+"	2	TextRegion	0.9994623064994812
+131.4470977783203	1404.005859375	1047.1112060546875	1497.7320556640625	rectangle	"Sonda 2c (1974). Povrch destrukce vnitřní hradební zdi v záp
+rohu sondy 20, Pohled od SSZ. Z hormiho horizontu destrukce
+vnitřní hradební zdi vyzvednut zasyp časti polozemnice (22) II
+v sondě 2c. Toto J.Justova“.
+"	3	TextRegion	0.993891716003418
+143.8263397216797	707.8523559570312	973.7421264648438	794.166259765625	rectangle	"Sonda 20 (1974). Pohled od SV. Vpředu dosažen povrch vr
+10. století. V
+
+ý zadu povrch destrukce vnitřní hradební zd
+do něhož při JZ stěně, sondy zahloubena polozemnice (2) T a po
+1221) E
+"	4	TextRegion	0.9692047834396362
+1138.3800048828125	41.10417938232422	1150.3302001953125	60.18537521362305	rectangle		5	TextRegion	0.9471195936203004
+926.2846069335938	1291.12109375	1030.9984130859375	1341.4169921875	rectangle	"č. neg.
+51 116
+"	6	TextRegion	0.8825792074203491
+923.8134765625	639.6163330078125	1035.41796875	687.9373779296875	rectangle	"č. Neg
+BI 115a,
+"	7	TextRegion	0.8758734464645386

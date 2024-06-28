@@ -1,0 +1,23 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+1045.07568359375	48.9769287109375	1144.7579345703125	73.89408874511719	rectangle		2	TextRegion	0.999739706516266
+179.7755584716797	1432.279541015625	503.4691162109375	1525.6702880859375	rectangle	"Sonda 2b (1974). Zával
+orientované V-Z, vprave
+dovy. Pohled od V.
+
+Foto J.Justova.
+"	3	TextRegion	0.9989607334136964
+167.7185821533203	685.7612915039062	449.95904541015625	750.4912719726562	rectangle	"Sonda 2a-2d (1974).
+vané V-Z, v popředí
+Foto J.Justova“.
+"	4	TextRegion	0.998177409172058
+448.6075744628906	683.928466796875	1125.5966796875	739.3653564453125	rectangle	"« Vnější líc jižní podezdívky budovy oriento-
+í zbytky destrukčních sutí budovy. Pohled od J.
+"	5	TextRegion	0.9978150129318236
+146.39414978027344	1429.2666015625	1151.150390625	1520.7960205078125	rectangle	"Sonda 2b (1974), Zával nad základem jižní podezdívky budovy
+orientované V-Z, vpravo část vyzděného kanálku v interiéru bu-
+
+dovy. Pohled od V. Za kanalkem zbytek východní příčky v budově.
+Foto J. Justová.
+"	6	TextRegion	0.9956663846969604
+945.9845581054688	1276.5869140625	1047.5030517578125	1328.6929931640625	rectangle		7	TextRegion	0.9862005710601808
+977.4323120117188	1246.0777587890625	1005.2450561523438	1267.447021484375	rectangle		8	TextRegion	0.9210063815116882

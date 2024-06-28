@@ -1,0 +1,113 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+158.4228515625	808.7579956054688	319.41876220703125	832.1176147460938	rectangle	"39) 130/74:
+"	0	TextRegion	0.9994328618049622
+153.20709228515625	1457.156005859375	316.047119140625	1481.2125244140625	rectangle	"45) 137/74:
+"	1	TextRegion	0.9994233846664428
+339.5478210449219	132.6070098876953	1095.311279296875	304.0604553222656	rectangle	"Sonda 2b, hnědá slavník, /perníký vrstva jižně od
+ásu kamenů nalézajícího se při jižním okraji jámy
+destrukcí, úroven l, fáze - 20 cm pod ni /spodní
+ladina slavník, hnědé vrstvy (= povrch vrstvy tma-
+ého hnědošedého hlinitého jílu, drobně žíhaného na-
+ezle žlutým pískem = vrstva, do níž zahlouben záklac
+
+di Z-V./. 30.7.""
+"	2	TextRegion	0.9988828301429749
+543.1986694335938	44.71760940551758	575.9134521484375	60.00745391845703	rectangle		3	TextRegion	0.998422145843506
+323.0013122558594	240.26205444335935	1102.6954345703125	737.14453125	rectangle	"vého nhnědosedého hlinitého jilu, drobně žihanéno na-
+
+rezle žlutým pískem = vrstva, do níž zahlouben základ
+zdi Z-V./. 30.7.""
+
+""Sonda 2c, povrch vnitř, svahu příkopu (= povrch hněd
+slavník, vrstvy) asi 1,5 m od jz. stěny sondy a 1,5 m
+
+od rozhraní sondy 2a a 2c. 31.7."" prohlubeňy
+
+""Sonda 2b, jižně od pásu kamenů lemujících“jámu
+s destrukční vrstvou při její jižní straně (až po jz.
+stěnu sondy), hnědá slavníkovská vrstva, úroveň
+l. fáze - 20 cm pod ni /po vodorovnou úrove n oŘLušeň
+
+""Sonda 2b, jižně od pásu kamenů lemujících (jámu :
+s destrukční vrstvou při její jižní straně (až po jz.
+stěnu sondy), hnědá slavníkovská vrstva, 20-40 cm pod
+úrovní 1. fáze (bráno po vodorovných vrstvách). 31.7
+1.8., 2.8., 5.8."" Obr. 26:1.
+
+""Sonda 2c, povrch hnědé slavník, vrstvy na vnitřním
+svahu vnitř. příkopu. 1.8.""
+
+""Sonda 2b, prostor jižně od pásu kamenů lemujícího
+jižní obvod nrohlubně s destrukcí. hnědá ""slavníikovask
+"	4	TextRegion	0.998007357120514
+158.68777465820312	508.0827331542969	326.25762939453125	531.1381225585938	rectangle	"56) 126/74: '
+"	5	TextRegion	0.9976842403411864
+316.455810546875	876.7686157226562	1106.204345703125	1389.2098388671875	rectangle	" 
+
+pískem. 2.8., 5.8."" Obr. 23.
+
+""Sonda 2a, sokl 1 bod podlouhlou úzkou plochou pokrytou
+tmavošedou popelovou/sazovitou vrstvou, povrch soklu
+- dno sondy v úrovni l, fáze. 5.8.""
+
+      
+
+""Sonda 2a, plocha jižně od zdi Z-V, po pás kamenů
+
+v prodloužení pásu kamenů při jižním okraji prohlubně
+s destrukcí v sondě 2b, spodni horizont hnědé slavní-
+kovské vrstvy, tj. úroveň l. fáze - povrch jilovité
+vrstvy žíhané rezavě žlutým pískem, max, ale do hl.
+20 cm pod úrovní 1, fáze. 5.8."" Obr. 24; 25.
+
+""Sonda 2a, prostor pásu kamenů v prodloužení pásu
+kamenů při jižním okraji prohlubně s destrukcí v sond
+2b, úroven 2. fáze sondy 2a - 20 cm pod ni (při sev.
+okraji tohoto pásu kamenů již tmavá jílovitá žíhaná
+rezavě žlutým pískem, jižněji ještě hnědá slavnikov.)
+6.-7.8."" Obr 2 25:3
+
+vrokní vrstva
+""Sonda 2b „povrch výplně kanálku vyloženého kameny,
+sev. od zdi Z-V, 6.8,""
+
+""Sonda 2b, spodních 10 cm výplně kanálku vyloženého
+"	6	TextRegion	0.9925370812416076
+161.2320556640625	915.7468872070312	319.6089782714844	943.023193359375	rectangle	"O) 131/74:
+"	7	TextRegion	0.9922677874565125
+166.38125610351562	998.34619140625	324.4695739746094	1021.7501220703124	rectangle	"1) 133/74:
+"	8	TextRegion	0.9859062433242798
+160.97474670410156	399.6771240234375	313.1073608398437	428.3700866699219	rectangle	"5) 125/74:
+"	9	TextRegion	0.978387713432312
+316.30596923828125	1218.8226318359375	1090.951171875	1491.39111328125	rectangle	"cy MEWVSSU ce VSM SWIMWy m S 2 WM PS SZ 7 5 Ova
+okraji tohoto pásu kamenů již tmavá jílovitá žíhaná
+rezavě žlutým pískem, jižněji ještě hnědá slavníkov.
+6.-7.8.""“ Obr. 25:3.
+
+vrchní vrstva
+""Sonda 2b „povrch výplně kanálku vyloženého kameny,
+sev. od zdi Z-V, 6.8,""
+
+""Sonda 2b, spodních 10 cm výplně kanálku vyloženého
+kameny, sev. od zdi V-Z, po povrch tmavé jílovité
+vrstvy žihané rezavě žlutým piskem, 6.8,""
+
+""Sonda 2b, rozebírání ssuti nad základy východního
+eeakii Akladi >di 7-V. A 0 »
+"	10	TextRegion	0.967532217502594
+149.14659118652344	809.4055786132812	188.18206787109372	829.316650390625	rectangle	"39)
+"	11	TextRegion	0.9671990275382996
+161.4637908935547	642.0757446289062	305.4883117675781	698.2713623046875	rectangle	"7) 128/74:
+"	12	TextRegion	0.9580382704734802
+321.18975830078125	687.5581665039062	1132.4805908203125	770.3423461914062	rectangle	" 
+
+""Sonda 2b, prostor jižně od pásu kamenů lemujícího
+jižní obvod prohlubně s destrukcí, hnědá ""slavníkovská""
+Vrstva, úroveň (vodorovná) cca 40 cm pod úrovní 2, fáze
+"	13	TextRegion	0.936632513999939
+155.32980346679688	1369.1328125	310.4801940917969	1401.2296142578125	rectangle	"44) 136/74:
+"	14	TextRegion	0.8686257600784302
+147.3999786376953	1156.00732421875	187.50906372070312	1175.117919921875	rectangle	"42)
+"	15	TextRegion	0.8570310473442078
+167.24325561523438	1154.431640625	320.8042297363281	1182.8709716796875	rectangle	"2) 134/74:
+"	16	TextRegion	0.8398781418800354

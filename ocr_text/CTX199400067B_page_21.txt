@@ -1,0 +1,27 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+95.9949951171875	745.55712890625	1127.2613525390625	910.70458984375	rectangle	"30; 31)
+Kromě výše uvedených nálezů pochází ze sondy 2e 15 jistých
+
+a dalších 11 velmi pravděpodobných zlomků keramického aguamanile.
+15 jistých zlomků je částečně slepeno a bylo možné provést rekonstrul
+"	0	TextRegion	0.9999557733535768
+134.07684326171875	515.3895263671875	283.02642822265625	533.3344116210938	rectangle	"bj. celkem:
+"	1	TextRegion	0.9996604919433594
+111.76345825195312	975.4447021484376	1138.9915771484375	1488.48583984375	rectangle	"Aguamanile bylo vyrobeno z typického libického keramického těs-
+ta, písčitého silně slídnatého (příměs slídového prášku a malých zrní.
+ček slídy) a má hnědošedou, místy červenavou barvu. Na bocích, zadečk
+a okolo hlavičky je ozdobeno typickým dekorem hřebenové vlnovky a hře-
+benových vpichů, Aguamanile mělo tvar beránka, který nesl na hřbetě
+mírně kónicky rozevřenou nálevku a jehož hlavička byla opatřena otvo-
+rem pro vylévání vody. Aguamanile bylo modelované v ruce. Vnitřní po-
+vreh jeho zlomků nese charakteristické stopy úpravy - žlábkovité a
+ostré úzké rýhy. Podle tohoto charakteristického vzhledu vnitřního
+povrchu se mi mezi keramickými zlomky ze sondy 2c podařilo vyhledat
+ještě dalších 11 nezdobených zlomků stejného rázu, o nichž lze před-
+"	2	TextRegion	0.9996381998062134
+675.83056640625	30.912242889404297	1120.965087890625	93.57959747314452	rectangle	"9. Sezpam nálezů: sonda 2a-2d
+Sezona 1974 = str. 26
+"	3	TextRegion	0.9989318251609802
+597.6673583984375	32.931396484375	623.86328125	49.19816589355469	rectangle		4	TextRegion	0.9910507202148438
+352.2084350585937	583.8463134765625	733.510498046875	608.208740234375	rectangle	"l sáčků s ostatními nálezy.
+"	5	TextRegion	0.9797641038894652

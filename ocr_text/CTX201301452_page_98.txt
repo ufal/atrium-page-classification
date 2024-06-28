@@ -1,0 +1,55 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+143.90196228027344	643.4752197265625	200.96543884277344	660.1939697265625	rectangle	"B3001
+"	0	TextRegion	0.9999955892562866
+144.54913330078125	1305.2645263671875	203.75738525390625	1321.93017578125	rectangle	"B3007
+"	1	TextRegion	0.999995231628418
+143.17764282226562	313.0234069824219	202.94241333007807	328.95050048828125	rectangle	"B1001
+"	2	TextRegion	0.9999899864196776
+144.14183044433594	1015.3531494140624	204.22157287597656	1032.1610107421875	rectangle	"B3003
+"	3	TextRegion	0.9999877214431764
+143.81639099121094	851.3452758789062	203.2240753173828	867.2744140625	rectangle	"B3002
+"	4	TextRegion	0.9999833106994628
+143.41140747070312	1181.0059814453125	203.68328857421875	1199.3255615234375	rectangle	"B3005
+"	5	TextRegion	0.9999600648880004
+142.73867797851562	890.3135986328125	1036.5177001953125	924.6075439453124	rectangle	"1 x bělavý až našedlý a narezlý severský silicit glacigenních sediment
+
+ 
+
+típaná industrie -
+"	6	TextRegion	0.9998216032981871
+142.9180908203125	153.64578247070312	1047.3690185546875	256.9845275878906	rectangle	" 
+
+1 x zlomek valounu nazelenalé ruly; hrana hrubě uměle oštipána
+1 x drobnozrnný arkózový slepenec až hrubozrnná arkóza s valouny křemene, buližníku a
+
+zrny živců až kolem 1 cm; zlomek zrnotěrky
+"	7	TextRegion	0.999612271785736
+105.90538024902344	1343.619140625	1046.1873779296875	1370.1829833984375	rectangle	"1 X tmavě červenohnědý až okrový valoun křemence, silně pokrytý vápnitou krustou;
+"	8	TextRegion	0.99824059009552
+425.72161865234375	1591.8447265625	769.23876953125	1615.298828125	rectangle	"2. Geologická a petrografická zpráv
+"	9	TextRegion	0.9972328543663024
+135.7197723388672	694.5346069335938	936.2927856445312	786.2542724609375	rectangle	"4 * Černohalovy ZeleZILY PISKOVÉC — SUroVINY Orousku
+4 x fluviální valouny křemenců, metabazaltů a amfibolitu a jejich zlomky — skart.
+
+4 x proplástky slídnatých křemenců — skart.
+"	10	TextRegion	0.9968382120132446
+158.37026977539062	1422.36767578125	431.0455932617188	1525.1148681640625	rectangle	"x zlomek valounu dtto
+x úlomky břidlic — skart.
+
+x hrudka železitého niskovce
+"	11	TextRegion	0.9928937554359436
+155.1363067626953	1221.0960693359375	725.7574462890625	1245.2884521484375	rectangle	"X zlomek valounu krystalového metatufu a rohovce — skart
+"	12	TextRegion	0.9906685948371888
+217.9128875732422	353.2660827636719	831.0654296875	374.13470458984375	rectangle	"mek středně zrnitého metabazaltu — surovina výtopných kamenů
+"	13	TextRegion	0.9787513613700868
+158.2315216064453	1509.587890625	507.6810607910156	1532.0755615234375	rectangle	"X hrudka železitého pískovce — skart
+"	14	TextRegion	0.9594478607177734
+159.48324584960938	358.3321838378906	978.6054077148438	479.399169921875	rectangle	"X zlomek středně zrnitého metabazaltu — surovina výtopných kamenů?
+x zlomek valounu světle šedého křemence s povrchových tmavě fialovým povla
+
+lomek otloukače či hladítka?
+"	15	TextRegion	0.9112123250961304
+143.14991760253906	1055.6693115234375	542.5669555664062	1120.796630859375	rectangle	"2 x zlomek světlého křemence — skart.
+
+11 x proplástky křemenců a břidlic — skart
+"	16	TextRegion	0.8165913224220276

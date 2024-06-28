@@ -1,0 +1,90 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+127.71966552734376	218.1018829345703	1190.73974609375	962.2935791015624	rectangle	"Archeologický výzkum sondy 2 (2a-2n) probíhal v historickém
+jádru obce na někdejším předhradí, na parcelách č. 25/6, 25/1,
+25/4 a 64, v letech 1974 - 1976, 1978 a 1985. V době zahájení
+výzkumu v r. 1974 byly parcely č. 25/1 a 25/6 zahradou, náležející
+k domu č.p. 63 v Husově ul., na níž byly v letech 1974 - 1976 a 1978
+zkoumány sondy Za - 2 Il (""el""). Rovněž parcela č. 25/4, kde byla
+v r. 1978 prozkoumána malá sonda 2m, byla (a dosud je) zahradou,
+náležející k domu č.p. 60 v Jižní ul. Parcela č, 64, kde v r. 1985
+došlo k výzkumu malé sondy 2n, byla a je dvorem u domu č.p. 63
+V Husově ul. Celý okrsek sondy 2 se nalézá v jižní polovině východ-
+nějšího z obou terasových ostrovů v údolní nivě na soutoku Labe
+a Cidliny, na nichž se slovanské hradiště rozkládalo: na západněj-
+ším z obou terasových ostrovů stálo vnitřní hradiště, na východním
+terasovém ostrově se rozkládalo předhradí, Okrsek sondy 2 dosahuje
+na parcele č. 25/6, na kterou se archeologické výzkumy hlavně soustře-
+
+dilv. až k JZ obvodu východního ftaraacavéha anafteanva  bkda a+4la hradh=
+
+ 
+"	0	TextRegion	0.999957799911499
+164.53890991210938	88.56094360351562	1166.77880859375	1543.461181640625	rectangle	"l. GEOMORFOLOGICKÝ POPIS
+
+Archeologický výzkum sondy 2 (2a-2n) probíhal v historickém
+jádru obce na někdejším předhradí, na parcelách č. 25/6, 25/1,
+
+25/4 a 64, v letech 1974 - 1976, 1978 a 1985. V době zahájení
+výzkumu v r. 1974 byly parcely č. 25/1 a 25/6 zahradou, náležející
+
+k domu č.p. 63 v Husově ul., na níž byly v letech 1974 - 1976 a 1978
+zkoumány sondy Za - 2 l (""el""). Rovněž parcela č. 25/4, kde byla
+
+v r. 1978 prozkoumána malá sonda 2m, byla (a dosud je) zahradou,
+náležející k domu č.p. 60 v Jižní ul. Parcela č, 64, kde v r. 1985
+došlo k výzkumu malé sondy 2n, byla a je dvorem u domu č.p. 63
+
+v Husově ul. Celý okrsek sondy 2 se nalézá v jižní polovině východ-
+nějšího z obou terasových ostrovů v údolní nivě na soutoku Labe
+
+a Cidliny, na nichž se slovanské hradiště rozkládalo: na západněj-
+ším z obou terasových ostrovů stálo vnitřní hradiště, na východním
+terasovém ostrově se rozkládalo předhradí, Okrsek sondy 2 dosahuje
+
+na parcele č. 25/6, na kterou se archeologické výzkumy hlavně soustře
+dily, až k JZ obvodu východního terasového ostrova, kde stála hradba,
+)dtud je regulovaná Cidlina vzdálená min, cca 130 m VOV směrem.
+
+ale názoru R, Turka (Libice, pájecí hradisko X. věku , Praha 1966 -
+- 1968, str. 7) mohla CidlinsYregulací (k níž došlo na počátku naše-
+no století) protékat přibližně stejnými místy jako v raném středově-
+cu; 2. císařské mapování zachytilo řeku Cidlinu u okrsku sondy 2
+
+v min. vzdálenosti cca 60 m na jih od okraje terasového ostrova,
+
+V polovině 70. let našeho století došlo k oddělení parcely č.
+25/6 od parcely 25/1 a ve 2. polovině 70, let byl na parcele č. 25/6
+Jostaven dům č.p. 420 v Jižní ul. s garáží a septikem a zahrada ppč.
+25/6 byla nově upravena, Stavební parcela s domem č.p. 420 obdržela
+
+sislo 488, stavební parcela s novou garáží u domu č.p. 420 dostala
+
+ 
+
+slo 489,
+"	1	TextRegion	0.9975852966308594
+182.8155212402344	145.1420440673828	510.0505981445313	165.7831268310547	rectangle	"« GEOMORFOLOGICKÝ POPIS
+"	2	TextRegion	0.9970550537109376
+112.1697006225586	725.100830078125	1150.752685546875	1462.8150634765625	rectangle	"z WW © S SSS OVY 0 OUT SVU WV UU550% S52 VW 000 OUWUGKU HUGO
+a Cidliny, na nichž se slovanské hradiště rozkládalo: na západněj-
+ším z obou terasových ostrovů stálo vnitřní hradiště, na východním
+terasovém ostrově se rozkládalo předhradí, Okrsek sondy 2 dosahuje
+na parcele č. 25/6, na kterou se archeologické výzkumy hlavně sousti
+dily, až k JZ obvodu východního terasového ostrova, kde stála hradbe
+Odtud je regulovaná Cidlina vzdálená min. cca 130 m VJV směrem.
+Dle názoru R, Turka (Libice, pájecí hradisko X. věku , Praha 1966 -
+- 1968, str, 7) mohla CidlinsYregulací (k níž došlo na počátku naše-
+ho století) protékat přibližně stejnými místy jako v raném středově-
+ku; 2. císařské mapování zachytilo řeku Cidlinu u okrsku sondy 2
+v min. vzdálenosti cca 60 m na jih od okraje terasového ostrova,
+
+V polovině 70. let našeho století došlo k oddělení parcely č.
+25/6 od parcely 25/1 a ve 2. polovině 70, let byl na parcele č, 25/6
+postaven dům č.p. 420 v Jižní ul. s garáží a septikem a zahrada ppč.
+
+25/6 byla nově upravena, Stavební parcela s domem č.p. 420 obdržela
+"	3	TextRegion	0.9838539958000184
+161.5269317626953	1529.851806640625	294.7806091308594	1546.6683349609375	rectangle	" 
+
+íslo 489,
+"	5	TextRegion	0.803722083568573

@@ -1,0 +1,18 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+14.96095085144043	13.443788528442385	329.12322998046875	321.211181640625	rectangle	"0 mrvelnt jem č i p tro c věboe jee
+p k ae dní Máří le
+jo 2 ne vlhá ovl
+Oe Colu ij ve Modlu Rei,
+k om 2
+tedka Jdi té p. a čna urejen
+E rám neřeknu v dohé 1 Uklolo lranot.
+E ooniím (olo. ] sb
+
+10 brno pe
+jh plo jn
+P R bt o olděum E
+
+pruhloviky i prháněk orly zjínjch ot nečiní v
+"	2	TextRegion	0.992741048336029
+48.68209457397461	333.902099609375	330.2275085449219	357.1040954589844	rectangle	" 
+"	3	TextRegion	0.9596419930458068

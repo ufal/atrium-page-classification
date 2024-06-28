@@ -1,0 +1,61 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+169.94216918945312	808.0570678710938	1052.5498046875	1587.593505859375	rectangle	"sil ředitelství AÚ.
+
+Při výzkumu vypomáhali skupina měřická ing.Urbana z AÚ.
+2 dny, ing.Soudný při odborném vyzvednutí a konversaci 1 der
+a fotografka Jílková 1 den. Práce měřické a kresebné, pře-
+devším profilů s vrstvami, prováděny vlastními silami stejně
+jako na pracovišti prováděna současně kresebná dokumentace
+nálezů jak předběžná, tak konečná pro nálezovou zprávu.
+
+ředmětem výzkumu byba 1/ rotunda sv. Petra a 2/ brána
+vnitřního valu u rotundy 3/ prstencovýt příkop kolem rotundy
+V rámci prvního výzkumného úkolu bylo sledováno spojení loni
+objeveného předrománského presbyteria s chrámovou lodí, jak
+doporučeno komisí ze srpna r. 1978. Výzkum v interiéru plně
+potvrdil, že původní triumfální oblouk byl mnohem užší a zá-
+klady vytvářely značně široký prostor. „málo obvyklý u stavet
+té doby. Napojení na dodnes stojící obvodovou ze chrámové
+lodi bylo objektivně prokázáno. Vzhledem k tomu, že také vzit
+lodi i presbyteria k podloží je shodný stratigraficky, je pc
+letošním výzkumu naprosto nepochybné, že rotunda sv.Petra ne
+Budči je předrománského původu a tedy nejstarším stojícím kc
+
+stelem v našich zemích z přelomu 9. a 10. století, jak bylo
+
+1: Pište pokud možno strojem. Na konci uveďte datum odeslání a čitelný podpis. Zprávy koreferentů a komisí vyhotovte
+"	0	TextRegion	0.9999997615814208
+127.16000366210938	616.960205078125	1063.918701171875	832.6981201171875	rectangle	"Výzkumná sezóna v r. 1979 trvala za mého vedení na Budči
+od 17. 4. do 6. 7. 1979 za účasti pracovních sil -8.12,
+Mzdový fond limitovaný částkou 38.000,--Kčs byl překročen
+v rozsahu původně plánované částky vzhledem k tohtížné prá-
+ci v hlubokých sondách a rozsahu prací, což jsem předem ohlá-
+sil ředitelství AÚ,
+"	1	TextRegion	0.999869465827942
+169.89781188964844	354.0117492675781	449.054931640625	490.4169006347656	rectangle	"Hradiště slovanské
+vnitřní areál
+rotunda sv.Petra
+fortifikace a brána
+"	2	TextRegion	0.9996293783187866
+82.5275650024414	313.1120300292969	256.7431335449219	332.4677734375	rectangle	"Druh a kultura
+"	3	TextRegion	0.9995297193527222
+682.4735107421875	383.59869384765625	804.8353881835938	456.4015808105469	rectangle	" 
+"	4	TextRegion	0.9994983673095704
+952.6843872070312	380.7660217285156	1162.788818359375	404.5591430664063	rectangle	"17.4..6.7.197$
+"	5	TextRegion	0.9991666078567504
+173.38775634765625	562.23486328125	625.0430908203125	586.8953247070312	rectangle	" 
+
+ 
+
+Dá v€
+
+ 
+"	6	TextRegion	0.996118187904358
+1119.2418212890625	1610.634765625	1162.5150146484375	1652.728515625	rectangle		7	TextRegion	0.9936807155609132
+852.9492797851562	410.40771484375	940.9508666992188	427.7052917480469	rectangle	"za období
+"	8	TextRegion	0.9926055669784546
+98.90279388427734	1614.1455078125	178.707763671875	1624.1129150390625	rectangle	"ST 23 bóds 76
+"	9	TextRegion	0.991703987121582
+576.7913818359375	407.3176574707031	701.7347412109375	439.9406127929688	rectangle	"Zpráva;
+"	10	TextRegion	0.9486910700798036
+232.96815490722656	34.621826171875	774.814453125	287.611572265625	rectangle		12	TextRegion	0.9346280097961426

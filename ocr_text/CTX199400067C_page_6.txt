@@ -1,0 +1,20 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+996.0103759765624	65.8376235961914	1054.8641357421875	90.35289764404295	rectangle	"Tab.
+"	1	TextRegion	0.9994812607765198
+117.9692153930664	684.6984252929688	1188.4090576171875	788.0503540039062	rectangle	"Sonda 2a-2c (1974). Pohled do vnitřního příkopu opevnění.
+
+VY popředí povrch sutě vnitřní hradební zdi (sonda 2c), uprostřed
+kontrolní blok se sutí vnitř. hrad. zdi (sonda 2b). Pohled od SZ.
+Na. kontrolním bloku s DVHZ. je kůlova jamka 1. Foto J. Justova.
+"	3	TextRegion	0.9929319620132446
+127.58932495117188	1432.978515625	1164.212646484375	1515.879150390625	rectangle	"Sonda 2a-2b.(1974). Pohled do vnitř. příkopu opevnění. Uprostřed
+suč vnitřní hradeb. zdi ponechána na kontrol. bloku. Pohled od SSZ.
+Na kontrolním bloku s DVHZ je kálová jamka 1. Foto J. Jusfova.
+"	4	TextRegion	0.9920761585235596
+1083.0107421875	67.46855926513672	1095.208740234375	87.1253433227539	rectangle		5	TextRegion	0.982710897922516
+164.62289428710938	1437.898681640625	549.9034423828125	1510.4354248046875	rectangle	"Sonda 2a-2b.(1974). Pohled
+suč vnitřní hradeb. zdi pon
+Na kontrolním bloku s DVHZ je
+"	7	TextRegion	0.8551502823829651
+871.0296630859375	1360.125	974.009521484375	1405.99853515625	rectangle	"T
+"	8	TextRegion	0.8064879775047302

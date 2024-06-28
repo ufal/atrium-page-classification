@@ -1,0 +1,42 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+165.0413818359375	1296.1270751953125	1120.049560546875	1412.71337890625	rectangle	"Přesto lze však očekávati,že některé z dosud nezjištěných
+památek,jak na Vyšehradě,tak i v podhradí,budou ještě nalezeny při
+případných stavebních úpravách,pracích kanalisačních a pod.,které
+proto nutno bedlivě sledovat a již předem zajistit odborný dohled
+při 4ich nrovádění.,
+"	0	TextRegion	0.9996663331985474
+103.14656066894533	1093.7984619140625	1142.143798828125	1275.5963134765625	rectangle	"provedeného výzkumu je patrno,že některé z památek,uváděných v
+historických pramenech,nebyly dosud odkryty,
+
+Příčinu dlužno hledat především v technicky obtížném a fi-
+nančně značně nákladném odkrývání jich zbytků,skrytých pod mohut-
+nými náspy pevnostními.U mnohých z těchto památek byly i stopy po
+jejich základech úplně zahlazeny při fortifikačních upravách celé-
+ho terénu Vyšehradu,Pro výzkum zejména důležitý okolní terém kapi-
+tulního chrámu,dnešní vyšehradský hřbitov,nebylo ovšem možno vůbec
+"	1	TextRegion	0.9959402084350586
+881.7898559570312	1496.8929443359375	1103.4964599609375	1547.2752685546875	rectangle	"8./IV.1952.
+/Dr. Jiří Můller/
+"	3	TextRegion	0.9648743271827698
+134.9857177734375	778.7545166015625	1123.679443359375	962.5391845703124	rectangle	"ských hradeb a kasemat i při úpravách sadových byla komise účastna
+odborným dohledem,
+
+V době okupace věnována péče především ochraně výzkumem
+získaných nálezů,ohrožených zabráním budov,kde byly uloženy,pro
+potřebu německých vojenských orgánů a pro službu protileteckou,
+
+Za účasti zástupců komise bylo též provedeno přechodné umí-
+stění Myslbekových sousoší Libuše,Lumíra,Záboje a Slavoje a Šárky
+z pilonů náletem v r.1945 poškozeného Palackého mostu na Vyšehradě
+"	4	TextRegion	0.9623793959617616
+88.20954895019531	165.979248046875	1177.0078125	364.0950927734375	rectangle	"m Pahlatek LEVO PUSLELIL Domeny ÚvVarnostil Vysenreau,pocina-
+jící r.1420 až po nedávnou minulost,věnována při výzkumu predevším
+péče průzkumu nádvoří bývalé zbrojnice,
+
+V domku,zřízeném později na museum vykopávek,zjištěno v pří-
+zemku pokračování eneolitické vrstvy i s podkladem diluviální terasy
+a se stavebními ukázkami doby románské i gotické Nálezy ponechány
+in situ a zřízením betonového stropu umožněno jich shlédnutí při
+návštěvách musea,Sondami zkoumány gotické základy renesanční budovy
+t.zv.purkrabství na cvičišti Sokola,
+"	5	TextRegion	0.9053400754928588

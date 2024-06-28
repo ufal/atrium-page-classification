@@ -1,0 +1,50 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+352.3379211425781	477.6793823242188	750.908203125	728.6728515625	rectangle	"Archáologischer Fund in Smichow. Pr a g. (LBM)
+Bei Erdarbeiten dn der Parkanlage vor dem
+Smichower Bahnhof in Prag wurden zwei Skelett-
+gráber in Hockerlage aus der Zelt vor 4000 Jahren
+čntdeckt. Nach den zahlreichen keramischen Bel-
+ben, die bel den Skelotten gefunden wurden,
+handelt es sich um Hockergráber, die dem von
+Norden her eingewanderten Stamm der Schnur-
+keramiker angehěren. Hóchst interessant war die
+Feststellung, daf der Schádel eines Skelettes zwei-
+mal trepaniert war, das heift, da sích der hier
+Bostattele einer schweren Operation unterzogen
+hat, wobel ihm „mit den damalicen primitiven
+Werkzeugen eln Tell des Schňdelknochené her
+ausgeschnitten wurde. Die unvernarbten Wund-
+
+ 
+
+ 
+"	0	TextRegion	0.9997861981391908
+340.4165954589844	1045.9066162109375	919.2900390625	1116.4683837890625	rectangle	"Nedělní lidové listy,Praha 6.VIII.1944,
+Več.Čes.Slovo,Praha, 5.VIII.1944,
+A=Zet Pondělník, Praha, 7.VIII.1944.
+"	1	TextRegion	0.9983545541763306
+358.290771484375	760.7014770507812	755.4375	898.6156616210938	rectangle	"ránder an diesem Schidel lassen erkennen, daf
+der Kranke an dleser Operation starb. Graber
+solcher Art und aus jener Zeit wurden-im Gebiet
+von Smichow bisher nicht gefunden.-Infolge der
+rechtzeitígen Meldung des Fundes konnte dieser
+Beleg einer chirurgischen Operation fachmánnisch
+Verwertet werden, Der Fund selbst ist weiter ein
+
+wertvoller Beitrag zum Bild der vorgeschichtlichen
+Ma dl uttlí ""ákáoh a arákí :
+"	2	TextRegion	0.9964788556098938
+153.21434020996094	992.1329345703124	668.248046875	1017.7344970703124	rectangle	"Tatáž zpráva v čes.znění uveřejněna
+"	3	TextRegion	0.9834418892860411
+146.2858123779297	221.22889709472656	496.3900451660156	252.0022125244141	rectangle	"2 kostrové hroby šňůrové.
+"	4	TextRegion	0.9777489900588988
+147.79991149902344	109.45965576171876	502.7909240722656	138.48126220703125	rectangle	"„Smíchov
+
+ 
+
+ 
+"	5	TextRegion	0.9355223178863524
+761.0095825195312	171.20501708984375	1000.207275390625	191.09410095214844	rectangle	"ze dne.86w4.1944,
+"	6	TextRegion	0.8815648555755615
+185.6389923095703	329.218505859375	1038.686279296875	351.1254272460937	rectangle	"Zeitungsnotiz /unser amtlicher Bericht/ aus Der Neue Tag
+"	7	TextRegion	0.8402531743049622

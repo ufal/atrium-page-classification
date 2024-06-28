@@ -1,0 +1,65 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+241.5108795166016	869.750244140625	1047.431396484375	915.05908203125	rectangle	"Střep ze zaobleného spodku, drsného šedohnědého, uvnitř hnědočerného povrchu.
+Rozm. 57 x 45 mm.
+"	0	TextRegion	0.9995139837265016
+163.72975158691406	623.411865234375	1064.1329345703125	834.271728515625	rectangle	" 
+
+Průkop protnul patrně kruhovitou jámu, zachycenou v šiřce 226 cm, se stěnami se pozvolna
+kotlovitě sklánějícími k nepatrně prohnutému dnu, které bylo v hloubce 108 cm pod
+povrchem ( z toho 30cm připadá na zahradní humus). Výplň do hl. 86 cm byla bez zvrstvení
+šedočerné barvy, hlinito písčitá s četnými uhlíky a drobty mazanice (1). Pod ní byla 12cm
+silná vrstva šedohnědé jílovité hlíny, místy s uhlíky (4), mající na bazi mající vrstvičku
+vypálenou do červena (3). Dno bylo rovněž vypáleno do červena, mezi vrstvou 3 pak byla
+vrstva černé hlíny prostoupené uhlíky (2). Dno objektu bylo široké 113 cm. Z vrstvy nad
+propálenou vrstvičkou získány zlomky keramiky,
+
+ 
+"	1	TextRegion	0.9992532134056092
+151.40626525878906	1069.8875732421875	1050.213134765625	1122.9951171875	rectangle	"V průkopu byla znatelná vrstva v délce 360 cm, sahající do hloubky 100— 110 cm, tvořená
+šedočernou hlínou, představující patrně část zemnice.
+"	2	TextRegion	0.9992190599441528
+142.01773071289062	1300.2672119140625	1092.0303955078125	1356.4129638671875	rectangle	"Dodatečně zjištěná společně s R.Sedáčkem v JZ rohu stavby. Rýha opět protnula část zemnice
+s Šedočernou výplní. Z vykopaného materiálu byl získán středověký střep.
+"	3	TextRegion	0.9989132881164552
+125.27323150634766	190.7481231689453	1108.8326416015625	461.0655517578125	rectangle	"Při kontrole základových pasů novostavby pana Snítilého v Starých Ždánicích (okr.
+Pardubice) jsme zjistili 25. 8. 2011 narušení archeologických situací. Poněvadž nebylo možno
+pozastavit průběh stavby a výkopy byly zalévány cementem, byly objekty jen zakresleny do
+celkového plánu a pokusili jsme se získat datovací materiál. Lokalita se nachází v intravilánu
+obce, v jeho Z části, SZ od kostela sv. Václava, na parc.č. 1443/2. Východně od naleziště
+protéká potok Čertovka, SV od něj je v současné době rybník, v pomyslném středu staré
+zástavby.Terén se poznenáhlu Z směrem zvedá k celkem ploché krajině, která je typická pro
+celé okolí Starých Ždánic. V prostoru stavby jsme zachytili narušené 4 objekty, z nichž 3 byly
+středověké a jeden recentní. Stavba byla prováděna v mistech staré zbořené hospodářské
+budovy. jejíž základy byly vvbudoványv z lomového kamene. pocházejícího z Kunětické horv.
+
+  
+
+ 
+
+ 
+"	4	TextRegion	0.998600423336029
+128.70269775390625	1182.48779296875	1080.626953125	1240.8701171875	rectangle	" 
+
+ma, protnutá v délce 155 em, hluboká 40 cm (70 cm od povrchu), šedé
+výplně, překrytá jílem. Z výplně pocházejí jen recentní střepy.
+"	5	TextRegion	0.9983178377151488
+169.85479736328125	137.4856414794922	676.4324951171875	168.8167266845703	rectangle	"Zpráva o záchranné akci v Starých Ždánicích
+"	6	TextRegion	0.994686484336853
+173.12161254882812	587.1907348632812	255.42816162109372	607.9548950195312	rectangle	"Objekt
+"	7	TextRegion	0.9945472478866576
+240.83648681640625	1383.4580078125	943.0896606445312	1452.468017578125	rectangle	"Střep ze svislého okraje zásobnice, vodorovně seříznutého, drsného čern
+v materiálu příměs písku a slídy,
+Rozm Gx 59 mm
+"	8	TextRegion	0.9897280335426332
+172.94873046875	530.8074340820312	476.0148315429688	555.4588012695312	rectangle	"Popis archeologických objektů:
+"	9	TextRegion	0.9855729937553406
+291.44537353515625	1383.5321044921875	1057.786865234375	1414.7615966796875	rectangle	"p ze svislého okraje zásobnice, vodorovně seříznutého, drsného černého povrch
+"	10	TextRegion	0.9651296734809875
+246.26597595214844	923.7151489257812	1057.9822998046875	963.1350708007812	rectangle	"Střep ze stěny, se zlomkem 2 pásů vodorovných rýh. Povrch drsný, hnědošedé barvy
+v materiál nříměc nícki a olídv
+"	11	TextRegion	0.9476906657218932
+173.77597045898438	1037.3758544921875	266.5914306640625	1062.5919189453125	rectangle	"Objekt 2
+"	12	TextRegion	0.910555362701416
+213.81158447265625	1386.04248046875	223.62179565429688	1402.1651611328125	rectangle		13	TextRegion	0.8954631090164185
+172.5096893310547	1268.2303466796875	265.2374572753906	1292.6328125	rectangle	"Objekt 4
+"	14	TextRegion	0.828655481338501

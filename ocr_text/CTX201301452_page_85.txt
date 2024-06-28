@@ -1,0 +1,32 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+150.26974487304688	382.4836120605469	1027.370849609375	457.3020629882813	rectangle	"Příloha č. 3— III. vojenské mapování 1877-1880, červeně je vyznačena plocha výzkumu
+
+Příloha č. 4— indikační skica stabilního katastru 1840 — 1842, červeně je vyznačena plocha
+"	0	TextRegion	0.9996991157531738
+176.97592163085938	220.4613037109375	981.4638671875	280.76300048828125	rectangle	"loha č. 1 - I. vojenské mapování (josefské) 1764— 1768 a 1780 — 1783 (rektifikace),
+
+vané ja veenažana mirka wem
+"	1	TextRegion	0.9992343187332152
+155.93804931640625	601.4671630859375	662.7076416015625	622.794189453125	rectangle	"""říloha č. 6— Archeologické nálezy v okolí do 300 m
+"	2	TextRegion	0.9979202151298524
+407.4671936035156	1591.841552734375	789.8914794921875	1615.3336181640625	rectangle	".3. Historické mapy, plány a ikonografie
+"	3	TextRegion	0.9976012110710144
+141.51107788085938	301.3834533691406	1027.7161865234375	357.8548278808594	rectangle	"Příloha č. 2 - II. vojenské mapování (Františkovo) 1836 — 1852, červeně je vyznačena ploch
+
+ 
+"	4	TextRegion	0.9941335320472716
+163.17694091796875	508.0657043457031	917.2566528320312	573.2974243164062	rectangle	"říloha č. 5 - Plán Prahy 1938, list č. 29, http://web2.mlp.cz/mapal938/, červeně
+
+značena nlocha výzkumu
+"	5	TextRegion	0.9930477738380432
+147.9523468017578	217.5071258544922	926.0397338867188	339.8514099121094	rectangle	"Příloha č. 1 - I. vojenské mapování (josefské) 1764 — 1768 a 1780 — 1783 (rektifil
+červeně je vyznačena plocha výzkumu
+
+Příloha č. 2 - II. vojenské mapování (Františkovo) 1836 — 1852, červeně je vyzna
+"	6	TextRegion	0.9878088235855104
+135.86944580078125	146.49191284179688	562.0344848632812	171.580810546875	rectangle	"5.3. Historické mapy, plány a ikonografie
+"	7	TextRegion	0.9713526368141174
+247.028564453125	226.8747100830078	993.4624633789062	256.3428039550781	rectangle	"1-1 vojenské mapování (josefské) 1764 — 1768 a 1780 — 1783 (rektifikace),
+"	8	TextRegion	0.933908998966217
+181.9492034912109	513.7413330078125	945.6824340820312	546.7101440429688	rectangle	"loha č. 5 - Plán Prahy 1938, list č. 29, http://web2.mlp.cz/mapal938/, červeně je
+"	9	TextRegion	0.8960723280906677

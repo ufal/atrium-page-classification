@@ -1,0 +1,20 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+997.9002685546876	51.12122344970703	1089.6368408203125	77.97359466552734	rectangle		0	TextRegion	0.9999756813049316
+138.5436248779297	1405.2664794921875	1080.53076171875	1484.2286376953125	rectangle	"Sonda 2a-2c (1974). Vpravo vnitřní příkop opevnění a kontrol.
+blok s destrukcí vnitř. hradební zdi. Vlevo jižní podezdívka
+budovy orientované V-Z. Pohled od Z. Foto J.Justova.
+"	3	TextRegion	0.9991238713264464
+171.4929656982422	662.3407592773438	1012.1134643554688	738.4398803710938	rectangle	"onda 2a-2c (1974). Pohled (od JV) do vnitř ního příkopu
+pevnění. V popředí kontrol. blok s destrukčí vnitřní
+radební zdi. Foto J.Justova.
+"	4	TextRegion	0.9988325238227844
+153.16326904296875	669.8380126953125	544.3561401367188	743.6016845703125	rectangle	"Sonda 2a-2c (1974). Pohled
+opevnění. V popředí kontrol
+hradební zdi. Foto J.Justov
+"	5	TextRegion	0.9288346171379088
+885.365478515625	561.6092529296875	1024.9249267578125	609.59912109375	rectangle	"Če Neg.
+51 14la, t
+"	6	TextRegion	0.9091175198554992
+896.8178100585938	1195.682861328125	997.637451171875	1244.5731201171875	rectangle	"če neg.
+51 148
+"	7	TextRegion	0.9029818177223206

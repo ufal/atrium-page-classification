@@ -1,0 +1,67 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+144.90499877929688	1351.6553955078125	1048.359130859375	1399.0899658203125	rectangle	"Závěrem je možno konstatovat, že spolupráce investora i dodavatele stavby byla dobrá a byla
+dodržena všechna zákonná ustanovení o ochraně archeologických památek.
+"	1	TextRegion	0.9998915195465088
+137.32818603515625	1243.1436767578125	1071.638916015625	1340.181396484375	rectangle	"5"" e
+Vzhledem k negativním archeologickým zjištěním byl prostor stavby po skončení výzkumu ihned
+uvolněn pro dokončení akce. Podrobná dokumentace k celé akci je uložena v Archeologickém ústavu
+AV ČR Praha, pracoviště Kutná Hora. Archeologický dohled provedl Mgr. Filip Velímský (ArÚ Av
+ČR Praha. pracoviště Kutná Hora).
+"	3	TextRegion	0.9996039271354676
+580.05810546875	150.7543487548828	784.8598022460938	167.88990783691406	rectangle	" 
+"	4	TextRegion	0.9994813799858092
+850.830810546875	331.1463623046875	1039.9571533203125	345.6806640625	rectangle	"v Kutné Hoře 20.6.2006
+"	5	TextRegion	0.9994375109672546
+503.9058227539063	194.04885864257807	854.7515869140625	222.9546661376953	rectangle	"ARCHEOLOGICKÝ ÚSTA!
+"	6	TextRegion	0.9987820982933044
+148.82073974609375	351.7434997558594	267.105712890625	368.64154052734375	rectangle	"č.j. 466/05 KH
+"	7	TextRegion	0.998380184173584
+109.62185668945312	500.9344482421875	1086.319091796875	574.572998046875	rectangle	"   
+
+VĚC: zpráva o provedení záchranného archeologického kumu při akci — Soběšín — kabel NN
+pro parcely č. 88/41, 88/44, 88/57, demontáž venkovního vedení NN na pozemcích p.č.: 88/44,
+88/41, 88/57, 88/58, 88/43 a 88/32 v k.ú
+
+ 
+"	9	TextRegion	0.9977585077285768
+516.78271484375	232.6553955078125	853.033447265625	250.1842041015625	rectangle	"118 01 Praha 1 - Malá Strana, Letenská 4
+"	10	TextRegion	0.9964685440063475
+425.1236572265625	259.9527587890625	954.271484375	302.91485595703125	rectangle	"racoviště Kutná Hora, Hloušecká 609, 284 01 Kutná Hora
+tel.: 327 511 730, e-mail: archeologiekh(d seznam.cz
+
+      
+"	11	TextRegion	0.9953552484512328
+817.8828735351562	1451.95361328125	1056.9884033203125	1472.251708984375	rectangle	"ředitel ARŮ AV ČR Praze
+"	13	TextRegion	0.9913793802261353
+116.54328918457033	1120.3193359375	1059.095703125	1237.3538818359375	rectangle	"Archeologický dohled na lokalitě proběhl v rámci jednoho výjezdu, během kterého byl sledován
+kompletní výkop kabelové rýhy. Výkopy byly prováděny na okraji obce při straně místní komunikace,
+která vede k objektu vepřína a v poli mezi parcelami nově postavených RD. Situování stavby plně
+odpovídala skladba výkopem porušených svrchních geologických vrstev (ornice na jílovotopísčitém
+silně oderodovaném skalnatém nodloží).
+"	14	TextRegion	0.9883254766464232
+1044.4000244140625	29.268556594848636	1131.8416748046875	49.01579284667969	rectangle	"fe Cp
+"	16	TextRegion	0.9779966473579408
+144.4977264404297	537.8699951171875	1062.0194091796875	696.9368896484375	rectangle	"pPřO pPazeeiy ©. 00/51, BO/S, OB7O/7, MEMEOMUGZ VOTOV SKS) VOXICEÉ LVIN 52 PDOZOMECICIK (D.C. DO/,
+88/41, 88/57, 88/58, 88/43 a 88/32 v k.ú. Soběšín.
+
+V souladu se zněním zákona č.20/87 Sb. v platném znění byl na základě písemné objednávky ze dne
+19.6.2006 v průběhu června 2006 proveden archeologický dohled výkopových prací při akci —
+Soběšín — kabel NN pro parcely č. 88/41, 88/44, 88/57, demontáž venkovního vedení NN na
+pozemcích p.č.: 88/44, 88/41, 88/57, 88/58, 88/43 a 88/32 v k.ú. Sobčšín.
+
+Akce probíhala na území s archeologickými nálezy, proto nešlo dopředu vyloučit možnost, že
+
+ 
+"	17	TextRegion	0.947302520275116
+154.18252563476562	1487.864013671875	448.16314697265625	1515.14697265625	rectangle	"vedoucí: PhDr. Radka Šumberová
+"	18	TextRegion	0.9462853074073792
+149.36282348632812	420.7008056640625	316.5973815917969	475.38177490234375	rectangle	"Zbraslavice 34
+7 br:
+
+ 
+
+vice 285 21
+"	19	TextRegion	0.9413337111473083
+147.6395263671875	1488.1453857421875	448.6194763183594	1541.0224609375	rectangle	"vedoucí: PhDr. Radka Šumberová
+zpracoval: Mgr. Filip Velímský
+"	20	TextRegion	0.8799952864646912

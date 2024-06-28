@@ -1,0 +1,54 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+100.5295181274414	151.22781372070312	1164.3363037109375	736.0690307617188	rectangle	"džbánem a koflíkem ve východní části hrobu orientovaného Z=V
+
+měl kamený kryt z plochých slepencových kamenů. Soustava kůlových jam
+při obvodu hrobu dává půdorys chaty se sedlovou střechou mírně tra-
+pezoidnízho tvaru /340x140-90 om/, která byla vybudována nad hřóbem
+Hrob svou polohou zjevně náleží do skupiny zjištěné v severozápadním m
+hu letos prozkoumané plochy a tím zvyšuje možnost, že i oba menší
+obdélníkovižé objekty/ jeden s kamenným krytem, druhý s jakousi sté-
+lou v západní stěně/ jsou pozůstatky kostrových hrobů /dětských/ s
+nedochovanými kostrami, Pro ověření byly z hrobů 78 a 72 odebrány vzor
+ky v desetimetrové síti pro fosfátovou analysu,
+
+(Ostatní objekty. Na prozkoumané ploše se nejčastěji vyskytly
+
+objekty obdélníkovitého až krujového tvaru, obsahující množství uhlíků
+
+P Z A0 9M VU: iba Uk DD 4525 W IMG, VO S85 prác Sk Ko VÁ GA
+"	0	TextRegion	0.999990940093994
+95.47567749023438	1155.7598876953125	1182.0	1629.343994140625	rectangle	"vyplněn keramickými zlomky.
+
+vrstěě nebyl na celé zkoumané ploše jednotný. Byl zejména výrazný ve
+střední části západního okraje zkoumené plochy/sek. 12 d-e/, kde při
+nadložní vrstvě mocné až 50 cm zasahovaly nálezy až k podloží. Obdob-
+ná situace byla zjištěna dále na západ sondami ověřujícími geofysikál-
+ní měření, kde nadložní vrstva stoupla až do mocnosti lm /uřejmě kul-
+tivací zarovnané terénní vlny/. V jedné z uvedených sond byly i zvíře-
+cí /lidské?/ kosti a železné předměty, v jiné hradba ze slepencových
+
+3 Ků5Alinnvýmh kamenů. Zasluhovalo by ověření, jedná-li se o vroubení
+"	1	TextRegion	0.9998836517333984
+137.07310485839844	1624.2198486328125	147.1198272705078	1638.608154296875	rectangle	" 
+"	2	TextRegion	0.9970613121986388
+112.72218322753906	546.1282348632812	1144.18994140625	1188.63525390625	rectangle	"nedochovanými kostrami. Pro ověření byly z hrobů /8 a [Z odebrány vzo:
+ky v desetimetrové síti pro fosfátovou analysu,
+
+(Ostatní objekty. Na prozkoumané ploše se nejčastěji vyskytly
+
+objekty obdélníkovitého až krujového tvaru, obsahující množství uhlík:
+i celé zuhelnatělé vrstvy dřeva/ o. 86-94 o. 93/. Tyto byly na obvo-
+du jednotlivých skupin hrobů.a v jejich blízkosti bylo více kůlových
+jamek, které nedávají určitou sestavu. Zvláštního charakteru - téměř
+ráz pece měl 0. 85 , který byl Zčásti kryt mocnou mažanicovou krou a
+pod výraznou vrstvou uhlíků byla mocná vrstva spálené země. Mimo to
+byly zjištěny menší objekty specifické funkce, š o. 94, u něhož malá
+hranička zuhelnatělého dřeva byla téměř analogická té, která byla u h
+bu 69. Oprotů zjevnému nedostatku keramiky ve většině objektů, malý
+kruhový objekt 91 se jen nepatrně zahluboval do podloží, byl však
+
+wyniněčn karamiakými zlomky.
+"	3	TextRegion	0.9832732677459716
+1012.5818481445312	102.069580078125	1024.8604736328125	119.85693359375	rectangle		4	TextRegion	0.9650439620018004
+126.73773193359376	1614.0128173828125	1083.6214599609375	1642.256103515625	rectangle	"i břidlicových kamenů. Zasluhovalo by ověření, jedná-li se 0 Vroť
+"	5	TextRegion	0.9401759505271912

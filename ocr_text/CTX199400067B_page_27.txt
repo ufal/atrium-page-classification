@@ -1,0 +1,43 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+168.30874633789062	208.872314453125	1118.4268798828125	566.5535278320312	rectangle	"Jak uvedeno výše (srv. zejména str. 10), byly v roce 1974
+zkoumány sondy 2a, 2b, 2c, 2d a jejich výzkum byl dokončen te-
+prve v následující sezóně 1975. Proto bylo možné teprve v roce
+1975 nakreslit celé řezy v sondách 2a = 2d a plány s těmito řezy
+budou z toho důvodu připojeny k nálezové zprávě za rok 1975.
+
+K této nálezové zprávě připojuji 3 plány s půdorysy jednotlivých
+fází výzkumu sond 2a -= 2d v roce 1974 a kopie čtyř odpovídají-
+
+nsh basmnáasmé) 2ia alsd a
+"	0	TextRegion	0.9999887943267822
+151.20407104492188	1242.5089111328125	1118.6640625	1433.5721435546875	rectangle	"Plán 7. Situační plán sondy 2a (4.fáze), 2b (4.fáze) a 2c
+(3.fáze) a celkový přehled sektorů v sondě 2 (a = ch). 22.8.1974.
+
+Plán 8. Terénní + nivelační skica půdorysu sondy 2a + 2b
+ve 4.fázi výzkumu a půdorysu sondy 2c ve 3,fázi výzkumu. 22.8.
+"	1	TextRegion	0.9999628067016602
+204.66539001464844	1102.5421142578125	1102.8092041015625	1196.8792724609375	rectangle	"Plán 6. Terénní + nivelační skica půdorysu sondy 2a + 2b-
+2d ve 3.fázi výzkumu a půdorysu sondy 2c ve 2,fázi výzkumu.
+"	2	TextRegion	0.9997403025627136
+176.43641662597656	1448.602294921875	242.72824096679688	1470.9095458984375	rectangle	"1974.
+"	3	TextRegion	0.9997091889381408
+155.32675170898438	617.35693359375	1136.7027587890625	990.6959838867188	rectangle	"Plán 1. Umístění sond 2a - 2d na parcele č. 25/6.
+
+Plán 2. Situační plán sondy 2a (2.fáze), 2b (2.fáze) a 2c
+(1.fáze) a celkový přehled sektorů v sondě 2 (a = ch). 24.7.1974.
+
+Plán 3, Terénní skica půdorysu sondy 2a + 2b ve 2.fázi vý-
+zkumu a půdorysu sondy 2c v l.fázi výzkumu. 24.7.1974.
+
+Plán 4. Nivelační skica 2,fáze výzkumu sondy 2a + 2b a
+1 fáze výzkumu sondy 2ce 24.7.1974.
+
+Plán 5. Situační plán sondy 2a (3.fáze), 2b (3.fáze), 2c
+"	4	TextRegion	0.997426450252533
+608.024169921875	30.982044219970703	640.848388671875	48.64463806152344	rectangle		5	TextRegion	0.9949378967285156
+217.0343475341797	54.175540924072266	710.903076171875	139.91256713867188	rectangle	". TERÉNNÍ A OBRAZOVÁ DOKUMENTACE
+
+a) TRXTY A KOMENTÁŘ K ODTÁ
+"	6	TextRegion	0.9789828062057496
+182.43212890625	1206.827392578125	304.3133850097656	1231.0439453125	rectangle	"8.8.1974.
+"	7	TextRegion	0.8123933672904968

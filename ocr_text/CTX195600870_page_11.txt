@@ -1,0 +1,46 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+130.00762939453125	1383.46435546875	1125.5008544921875	1487.600830078125	rectangle	"R.1879 byla před proboštstvím umístěna Bendlova jízdní socha
+sv.Václava,přenesená na Vyšehrad z Václavského náměstí,.V posledních
+létech minulého století přibyly k výzdobě Vyšehradu ještě další dvě
+sochy,Brokofova sv.Ludmila a barokní socha sv.Šebastiána,
+"	0	TextRegion	0.9997418522834778
+121.83981323242188	94.29640197753906	948.9774780273438	132.1366424560547	rectangle	"architektonické zlomky a uloženy ve zmíněném lapidariu,
+"	1	TextRegion	0.9993444085121156
+99.25690460205078	138.892578125	1176.8341064453125	470.4600830078125	rectangle	"V rozbořeném stavu,zachyceném na známém prospektu Prahy
+Jiljího Sadelera z.r.1606,zůstal Vyšehrad až do stavby teresiánské
+pevnosti v r.l654,kdy byly zbylé zříceniny srovnány se zemí,
+
+Pevnost byla budována podle italského pevnostního systému
+v podobě pětiúhelníků s bastiony a se zbrojnicí - citadelou v západ-
+ní části pevnosti nad vyšehraúskou skalou.Směrem k Pankráci předsu-
+nut samostatně opevněný prostor,uzavřený Táborskou branou,vystavěnou
+v r.1655,Vnitřní úprava pevnosti doplněna kolem r.1670 t.zv.branou
+Leopoldovou,mylně nazývanou též branou francouzskou,Zobrazení doho-
+tovené pevnosti na mědirytině Folperta Ouden-Allena z r.1685 se znač-
+ně liší od původního fantastického plánu Jos.sv.pána Priamiho z Ro-
+vereta,vypracovaného podle návrhu hr.Inocence Contiho v r.1650,
+Pevnostní náspy s palisádami a kasematy uvnitř hradeb byly zřízeny
+až r.1749 za francouzské okunace.
+"	2	TextRegion	0.9952124357223512
+122.9242172241211	1224.4647216796875	1117.15087890625	1352.5548095703125	rectangle	"Také hřbitov u kapitulního chrámu,měnící se ve významné
+národní pohřebiště,doznává,zejména zásluhou proboštů Štulce a Kar-
+lacha,podstatných změn a nových úprav.Koncem 19.století zřízeny
+podle návrhu arch.Barvitia arkády s hrob a v r.l902 další i
+s kapitukní kryptou,zřízené arch,Wiehlem Úprava národního hřbitova
+
+dawršana 7.1880 atavhaou Slavína aa eashašebas: výedaha: Maiimasem:
+"	3	TextRegion	0.9786493182182312
+129.2947235107422	915.3716430664062	1132.037353515625	1182.002197265625	rectangle	"V r.1978 byla postavena nová zvonice,jejíž základy jsou
+patrně v jižní části dnešního hřbitova za kapitulním chrámem,
+Kolem r.1750 vystavěna děkanem Berghauerem kaple Panny Marie,stojí-
+cí před dnešním vchodem do kostela sv.Jana Stětí,V r.1878 opravena
+a církevnímu poslání vrácena kaple:sv.Mártina.Lepšího komunikačního
+spojení s Prahou dostává se Pankráci novou branou,zřízenou péčí
+hr.Chotka r.1841,řešenou slohově v josefinském pevnostním stylu.
+Od poloviny 19.století jsou rekonstruovány i nově stavěny kanovni-
+cké residence s děkanstvím a proboštstvím,V B.pol.l6,století vysta-
+věn v jihozápadním rohu nádvoří zbrojnice již zmíněný domek,uprave-
+
+ný dnes na museum vykopávek a renesanční budova t,zv.pnpkhrábství,
+p"" V 3"" KAN AMOR EP ÚT čoroí CLA up nap ěkovaky z; 17 Bau Jao tpaně“ u. 3"" aj bye Paája boy“ ok = KONĚ +
+"	4	TextRegion	0.963763952255249

@@ -1,0 +1,17 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+149.88331604003906	1391.990234375	1126.8443603515625	1594.5556640625	rectangle	"Sonda 2c (1974). 1 - rekonstruovaný hrnec z destrukce vnitřní
+hradební zdi (117/74); 2 - útlý kostěný hrot (stilus ??) č.
+143/74 z vrstvy 3 (a - pohled zepředu, b - pohled z boku); 3 -
+kostěné šídlo 116/74 z destrukce vnitřní hradební zdi (a - po-
+hled zepředu, b - pohled ze strany); 4 - kostěné šídlo 117/74
+z destrukce vnitřní hradební zdi (a - pohled zepředu, b - po-
+hled z boku). Nádoba zobrazena v poměru 1:2, kostěné hroty
+
+v měřítku 1:1. Kresba: V.Žižková.
+"	0	TextRegion	0.9999860525131226
+1017.3051147460938	43.006378173828125	1071.6998291015625	60.73701477050781	rectangle	"Obr.
+"	1	TextRegion	0.9988245368003844
+178.734375	1227.575439453125	210.69143676757807	1248.7740478515625	rectangle	"2a
+"	2	TextRegion	0.9948869347572328
+1007.311767578125	1183.46337890625	1036.5472412109375	1204.4100341796875	rectangle		3	TextRegion	0.9921165108680724
+866.62646484375	1186.852783203125	895.4921264648438	1207.9112548828125	rectangle		5	TextRegion	0.9505826830863952

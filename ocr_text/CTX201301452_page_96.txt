@@ -1,0 +1,28 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+157.9025421142578	315.2451171875	1060.74658203125	450.5862121582031	rectangle	"V rámci plošného archeologického výzkumu parcely domu čp. 591 (k. ú. Bubeneč)
+yla zkoumaná plocha vyhodnocena též z hlediska geologického. Pozorování terénních
+
+rofilů v místech dokončovaných archeologických sond potvrdilo závěry učiněné při
+
+ 
+
+Praní atanX vrby fTavkal N12
+"	0	TextRegion	0.999964952468872
+153.78257751464844	224.39036560058597	958.564453125	284.410888671875	rectangle	"4. Geologické poměry — doplněk ke zprávě ze zjišťovacího výzkumu
+"	1	TextRegion	0.9998304843902588
+145.09255981445312	480.109619140625	1032.03271484375	948.5972900390624	rectangle	"Přímý geologický podklad lokality tvoří strukturovaná sprašová návěj, která má vět:
+plošný rozsah (zasahuje dále k severovýchodu) než je znázorněno v geologických mapác
+daného území (např. Kleček 1970). Podklad nejsvrchnější sprašové polohy tvoří hnědá fosil
+(pohřbená) půda pleistocénního stáří — např. v SV stěně sondy A2 pode dnem rozměrnéh
+zahloubeného archeologického objektu — foto 1 nebo v sondě B3. Její přítomnost vypovídá
+klimatických změnách v závěru posledního glaciálního období (wůrm — viselské zalednění
+Existence pohřbeného půdního horizontu souvisí s teplým a vlhkým výkyvem klimati
+Mocnost fosilní půdy dosahuje až 60 cm a je v celém objemu protkána hustou sítí světlých
+tmavých krotovin vzniklých zaplněním chodeb (nor) makroedafonu. Činnost hrabavýc
+živočichů bezpochyby způsobila průnik zemin z výplně archeologických objektů do nižšíc
+částí kvartérního pokryvu (v našem případě do fosilní půdy) a jejich sekundární kontaminac
+
+zr Krorreiů r rené zralá Fraerw er
+"	2	TextRegion	0.9981417655944824
+135.1873016357422	145.7298583984375	542.3887939453125	171.97137451171875	rectangle	"6.2. Geologická a petrografická zpráva
+"	3	TextRegion	0.8153902292251587

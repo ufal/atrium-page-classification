@@ -1,0 +1,35 @@
+IMAGE_NAME	DESCRIPTION	LANGUAGE	BBOX_1	BBOX_2	BBOX_3	BBOX_4
+image	"Meßtischblattpause der Fundstelle:
+Lageskizze:
+Fundumstände, Beifunde, Art und Zeit der Auffindung:
+Graffing
+Fundumstände, Katasterpause:
+Flursagen und Literatur:
+Bemerkungen:"	de	(51, 69)	(870, 69)	(870, 1481)	(51, 1481)
+image	Meßtischblattpause		(51, 72)	(215, 70)	(215, 92)	(51, 94)
+image	der		(225, 71)	(254, 71)	(254, 92)	(225, 92)
+image	Fundstelle		(264, 70)	(356, 69)	(356, 91)	(264, 92)
+image	:		(358, 69)	(365, 69)	(365, 90)	(358, 90)
+image	Lageskizze		(54, 769)	(149, 769)	(149, 790)	(54, 790)
+image	:		(152, 769)	(159, 769)	(159, 790)	(152, 790)
+image	Fundumstände		(58, 1201)	(187, 1200)	(187, 1223)	(58, 1224)
+image	,		(187, 1201)	(192, 1201)	(192, 1223)	(187, 1223)
+image	Beifunde		(198, 1201)	(275, 1201)	(275, 1223)	(198, 1223)
+image	,		(276, 1200)	(279, 1200)	(279, 1222)	(276, 1222)
+image	Art		(286, 1200)	(318, 1200)	(318, 1222)	(286, 1222)
+image	und		(325, 1200)	(358, 1200)	(358, 1222)	(325, 1222)
+image	Zeit		(365, 1200)	(398, 1200)	(398, 1222)	(365, 1222)
+image	der		(406, 1200)	(433, 1200)	(433, 1222)	(406, 1222)
+image	Auffindung		(439, 1199)	(539, 1199)	(539, 1222)	(439, 1222)
+image	:		(540, 1199)	(547, 1199)	(547, 1221)	(540, 1221)
+image	Graffing		(150, 1285)	(244, 1281)	(245, 1307)	(151, 1311)
+image	Fundumstände		(588, 71)	(720, 73)	(720, 94)	(588, 92)
+image	,		(720, 73)	(725, 73)	(725, 93)	(720, 93)
+image	Katasterpause		(735, 73)	(861, 75)	(861, 96)	(735, 94)
+image	:		(863, 75)	(870, 75)	(870, 95)	(863, 95)
+image	Flursagen		(590, 757)	(677, 756)	(677, 778)	(590, 779)
+image	und		(687, 756)	(721, 756)	(721, 778)	(687, 778)
+image	Literatur		(730, 756)	(809, 755)	(809, 777)	(730, 778)
+image	:		(810, 755)	(817, 755)	(817, 776)	(810, 776)
+image	Bemerkungen		(595, 1460)	(713, 1460)	(713, 1481)	(595, 1481)
+image	:		(716, 1460)	(723, 1460)	(723, 1481)	(716, 1481)

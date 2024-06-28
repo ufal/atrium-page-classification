@@ -1,0 +1,70 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+600.4707641601562	1591.0447998046875	623.563720703125	1606.0086669921875	rectangle		0	TextRegion	0.9999980926513672
+992.9720458984376	1394.73828125	1028.7490234375	1411.3067626953125	rectangle		1	TextRegion	0.9998680353164672
+231.24400329589844	1308.3553466796875	285.7182006835937	1323.6217041015625	rectangle	" 
+"	2	TextRegion	0.9997017979621888
+181.22918701171875	242.89463806152344	1033.1201171875	306.8707275390625	rectangle	" 
+
+1. Plocha parcel č. 1556 a 1557 je územím s prokazatelně zjištěnými archeologickými
+
+nálezv (obr. nříl. 59-67.
+"	3	TextRegion	0.9994997978210448
+173.6737060546875	116.1174087524414	1033.418701171875	182.5521697998047	rectangle	"Na podkladě vyhodnocení zjišťovacích archeologických sondáží lze formulovat
+
+ěkteré závěry důležité pro budoucí stavbu.
+"	4	TextRegion	0.9980847835540771
+224.97352600097656	369.24066162109375	1034.94384765625	637.4325561523438	rectangle	"sídlištní objekty a terénní situace. Zjištěny byly ve většině archeologických sond
+pod mocnou polohou novodobých navážek (obr. příl. 5).
+
+Nejvýraznější komponentou historického nadloží místa jsou novodobé navážky,
+které je možné spojit s radikální urbanistickou proměnou místa a výstavbou
+univerzitních objektů v okolí ve 20. století. Jejich mocnost je na celé ploše značná
+
+a pohybuje se od 2 do 3,5 m (obr. příl. 7-10).
+"	5	TextRegion	0.9975574016571044
+242.1118621826172	1027.08984375	1013.0035400390624	1286.6038818359375	rectangle	")bsahově přesnou podobu budoucího záchranného výzkumu je nutné formulov;
+| tzv. projektu, který v dostatečném předstihu před zahájením stavby podrobn
+nastíní jeho cíle, průběh a náklady spojené s jeho realizací.
+
+>rojekt výzkumu může vyhotovit pouze oprávněná archeologická instituc
+místně příslušnou působností. Vše konkrétní k archeologii a provádění výzkum
+
+e řídí podle 8 21-24 Zákona č. 20/1987 Sb., o státní památkové péči, v platnét
+"	6	TextRegion	0.993898630142212
+258.3153991699219	608.2244262695312	1006.1439819335938	996.3956909179688	rectangle	"aohybuje se od 2 do 3,5 m (obr. příl. 7-10).
+
+případě realizace stavby nového objektu na dotyčných parcelách je nut
+čítat snáročným záchranným archeologickým výzkumem a to nejléj
+»ředstihu před započetím vlastních stavebních prací. Předběžně lze sledovan«
+achu rozdělit na část, kde je nutné po mechanické skrývce recentních naváž
+ovést plošný výzkum až na úroveň přírodního podkladu (odhadovaná velikc
+oumané plochy 2736 m“, obr. příl. 6). Na zbytku pozemků pak musí běhe
+kopových prací probíhat stálý archeologický dohled pro případ neočekávané!
+
+lezu (především plocha v severní části sledovaného místa, celková rozloha té
+
+5 —
+"	7	TextRegion	0.9915973544120787
+195.8005828857422	648.5185546875	209.54592895507807	662.5054321289062	rectangle		8	TextRegion	0.9884073138237
+251.9779052734375	117.62960052490234	1041.2852783203125	141.28623962402344	rectangle	"a podkladě vyhodnocení zjišťovacích archeologických sondáží lze formulovat
+"	9	TextRegion	0.979245662689209
+228.7154693603516	336.2525634765625	1036.6260986328125	480.8989562988281	rectangle	"Za nejhodnotnější archeologické nálezy je možné považovat raně středověké
+sídlištní objekty a terénní situace. Zjištěny byly ve většině archeologických sond
+
+pod mocnou polohou novodobých navážek (obr. příl. 5).
+
+ 
+
+Naivýraznějčí knmnanantaiu hictarirkáhn nadlnší mícta jenir nouadnhá navášku
+"	10	TextRegion	0.9780884385108948
+196.4271240234375	1176.36279296875	209.5216827392578	1191.1434326171875	rectangle		11	TextRegion	0.9735471606254578
+196.17100524902344	472.0266418457031	208.24853515625	488.1328125	rectangle		12	TextRegion	0.9379366636276244
+265.0617980957031	1149.9581298828125	1028.5716552734375	1280.599609375	rectangle	" 
+
+jekt výzkumu může vyhotovit pouze oprávněná archeologická instituce
+ístně příslušnou působností. Vše konkrétní k archeologii a provádění výzkumů
+
+řídí podle $ 21-24 Zákona č. 20/1987 Sb., o státní památkové péči, v platném
+"	13	TextRegion	0.9360763430595398
+196.2657928466797	340.55487060546875	208.10232543945312	354.9501037597656	rectangle		14	TextRegion	0.9185759425163268
+196.4409637451172	1044.11376953125	208.43289184570312	1059.1568603515625	rectangle		15	TextRegion	0.8210302591323853

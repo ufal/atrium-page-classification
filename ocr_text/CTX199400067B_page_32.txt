@@ -1,0 +1,69 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+191.00946044921875	1493.7132568359375	1085.4185791015625	1564.634765625	rectangle	"Tab. 24:47, č. neg. 51 147. Sonda 2b (1974). Část zákla-
+du jižní podezdívky budovy orientované V-Z a vyzděného kanálku
+"	0	TextRegion	0.9999790191650392
+586.8807373046875	32.7501335144043	619.1461791992188	50.87667083740234	rectangle		1	TextRegion	0.9991841912269592
+194.5281219482422	177.08670043945312	1077.788330078125	832.5210571289062	rectangle	"jáma č. VIII. Pohled od S.
+
+Tab. 19:38, č. neg. 51 138, Sonda 2a-2c (1974). Pohled
+od V. Západní část jižní podezdívky budovy orientované Z-V,
+vpravo zbytek východní a západní příčky v interiéru budovy«
+Vlevo vnitřní příkop a destrukce vnitřní hradební zdi.
+
+Tab. 20:39, č. nege 51 139. Sonda 2a, 2c (1974). Pohled
+lo sondy 2c od V. Vlevo vnitřní příkop opevnění, vpředu západ
+ní konec jižní podezdívky budovy orientované V-Z,
+
+Tab. 20:40, č. neg. 51 140. Sonda 2a=2c (1974), pohled
+od JV. Pohled do vnitřního příkopu opevnění, Uprostřed kontro
+ní blok se zachovanou destrukcí vnitřní hradební zdi,
+
+Tab. 21:41, č. neg. 51 l4la, be Sonda 2a-2c (1974).
+Pohled (od JV) do vnitřního příkopu opevnění. V popředí kon-
+trolní blok s destrukcí vnitřní hradební zdi.
+
+Tab. 21:42, č. neg. 51 142. Sonda 2a-2c (1974). Vpravo
+vnitřní příkop opevnění a kontrolní blok s destrukcí vnitřní
+
+AmoAahuí A4  Wlaw 54% wm arma srl js mé AsAŽ mn oenko 37
+"	2	TextRegion	0.998748540878296
+713.1488037109375	28.503677368164062	1025.0556640625	80.82324981689453	rectangle	"TextýYk fototabulkám
+Sonda 2a - 2d (1974).
+"	3	TextRegion	0.994532346725464
+205.75450134277344	1310.4215087890625	1109.2257080078125	1443.797607421875	rectangle	"E MOSS o. O
+
+Tab. 23:46, č. neg. 51 146. Sonda 2b (1974). Část zákla-
+u jižní podezdívky budovy orientované V-Z a vyzděného kanálku
+interiéru budovye Pohled od V. Za kanálkem destrukce východní
+"	4	TextRegion	0.98612242937088
+220.49594116210935	966.6301879882812	1077.5286865234375	1417.5838623046875	rectangle	" 
+
+K o O 7777500 6 OG Wo E
+
+ívka budovy orientované V-Z a kontrolní blok s destrukcí
+itřní hradební zdi, Pohled od Z.
+
+Tab. 22:44, č. nege 51 l44a, be Sonda 2a-2c (1974) -
+pohled od ZSZ. Pohled do vnitřního příkopu opevnění, vzadu
+st destrukčních sutí jižní podezdívky orientované budovy,
+© č. V a kontrolní blok s destrukcí vnitřní hradební zdi.
+
+Tab. 23:45, č. neg. 51 145. Sonda 2b (1974). Část zá-
+
+ndu jižní podezdívky budovy orientované V-Z a vyzděného ka-
+Jku v interiéru budovy. Pohled od JZ.
+
+Tab. 23:46, č. neg. 51 146. Sonda 2b (1974). Část zákla
+jižní podezdívky budovy orientované V-Z a vyzděného kanálk
+
+OK a.
+
+ 
+"	7	TextRegion	0.8953677415847778
+162.06813049316406	913.3843994140624	1081.0980224609375	1102.398193359375	rectangle	"Tab. 22:43, č. neg. 51 143. Sonda 2a-2c (1974). Vpředu
+vnitřní příkop opevnění v sondě 2a a 2c, v pozadí jižní pode-
+zdívka budovy orientované V-Z a kontrolní blok s destrukcí
+vnitřní hradební zdi. Pohled od Z.
+
+Tab. 22:44, č. neg. 51 l44a, be Sonda 2a-2c (1974) -
+"	9	TextRegion	0.828696608543396

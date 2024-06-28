@@ -1,0 +1,69 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+123.38579559326172	240.72991943359372	876.1749267578125	275.060791015625	rectangle	"1,/ Ustavení a činnost Komise pro výzkum Vyšehradu,
+"	0	TextRegion	0.998680055141449
+117.34474182128906	546.807373046875	1077.4111328125	642.4251098632812	rectangle	"De = ee
+Uložilo proto Ministerstvo školství a nár.osvěty Státnímu
+
+archeologickému ústavu v Praze,aby v dohodě s příslušnými úřady
+
+a institucemi podjal se této nákladné a odpovědné práce./ Přípis
+
+MŠANO č.j.1?9021/23-V,ze dne 2%.října 1923,/
+"	1	TextRegion	0.9891934990882874
+188.0340881347656	664.6162719726562	1098.284912109375	750.1018676757812	rectangle	"Státní archeologický ústav v Praze přikročil po přeaběž-
+jednání s jednotlivými úřady a institucemi č.j.566/25 z 5./XI.
+
+„/XII.1923 / k ustavení ""Vyšehradské komise Státního archeolo-
+
+dm al dada n k:
+"	2	TextRegion	0.9794995188713074
+128.33221435546875	761.8935546875	1143.997802734375	1495.3826904296875	rectangle	"BYL 3 a » “
+
+Ustavující schůze se konala za předsednictví ředitele Stát-
+ního archeologického ústavu,univ.prof,Dr.Lubora Niederleho dne
+1l.prosince 1925 v zasedací síni Národního musea v Praze,
+
+Schůze s2 zůčastnili delegovaní zástupci Ministerstva škol-
+ství a nár.osvěty / univ.prof.Dr.Vojtěch Birnbaum a přednosta histor.
+odd „Národ,musea Dr.Karel Guth /,Král.kollegiátní kapitoly ss.Petra
+a Pavla na Vyšehradě / prelát Ant.Wiinsch a msg.Eduard Šittler,kanov-
+níci vyšehradští /,Státního památkového úřadu $ řed.min,rada Dr.Lu-
+boš Jeřábek,Dr.V.Wágner a prof.arch.K,Pecánek /,Archeologického sbe-
+ru Národního musea / univ.prof.MBDr Jindřich Matiegka a biskup Dr.k
+Podlaha /„Národního musea v Praze / řed pravěkého odd.Národ,musea
+Dr.Al.Stocký a Dr.Jan Květ /,Klubu za starou Prahu / konservátor
+ak.sochař Jindřich Čapek a arch,Alois Kubíček,stav.rada /,Čsl.vojen-
+ského vědec .ústavu / Dr.Rudolf Tschorn /„Společnosti přátel staro-
+žitností / arch.Kamil Hilbert a mag.rada Rudolf Hlubinka /,„Prehisto-
+rické společnosti / vrch.r.Karel Buchtela,doc.Dr.Josef Schránil
+a Dr.Jaroslav Bóhm /,Státního archeologického ústavu / řed.univ.
+prof.Dr.Lubor Niederle a stát.konservátor J.A,Jíra /,Památkového
+sboru hlav.města Prahy / vicepres.zem.škol,rady Dr.Rud.Politzer
+a Otilie Kovářová-Machová /,Archeologické komise při České akade-
+mii / univ prof.Dr.A.Chýtil a arch.A.Cechner /sRady hlav.města Pra-
+hy / arch.Čeněk Křička a vrch.stav.rada Ing.Jos.Zlatník /,Karlovy
+university / univ.prof.Dr.Jos.Pekař a univ prof.Dr.V.Novotný /,
+Archivu hlav.města Prahy / archivář Dr.V.Vojtíšek /,Ministerstva
+pošt a telegrafů / vrch.stav,rada Ing.Fr.Nyklíček /.
+
+Ustavující schůzí a následující plenární schůzí komise
+konanou dne 30.ledna 1924,byl určen celkový program výzkumu, směr-
+nice pro započetí výzkumných prací a zajištění finančních prostřed-
+ků.Z členů pléna zvolena výkonná komise výzkumu Vyšehradu,jejíž
+předsedou zvolen univ,prof.Dr,L.Niederle,úřadujícím místopředse-
+Čou mso R. Šittlar a členv univ .nrof Dr. V Birnhsum.vrch r.K Buchtala.
+"	3	TextRegion	0.9782757759094238
+85.89509582519531	290.19189453125	1142.12841796875	488.1344909667969	rectangle	"V r.1923 požádala Státní regulační komise pro hlav,město
+Prahu Ministerstvo školství a nár.osvěty / přípisem ze dne 20.října
+1923,č.j.1885/25 / o pořízení výčtu archeologicky význačných pa-
+mátek Vyšehradu,k nimž by mělo býti přihlédnuto při soutěži na pře-
+hledaný Fegolační a zastavovací plán města Prahy,
+
+Žádaný výčet nebylo možno poskytnouti bez důkladného,vědec-
+ky vedeného prozkoumání Vyšehradu a bez doplnění tamních výzkumů
+dřívějších / Dr.Píč,Dr.Matiegka,arch,Wiehl atd.,publikovaných
+
+dj“ RÁ hrdé a Mí nedá dll ska. atak dík si SlS Foods análu kcal času"" lva; kontáašáko sn 8 č a iko oo
+"	4	TextRegion	0.9699468016624452
+478.2808837890625	96.24636840820312	743.5692138671875	131.24310302734375	rectangle	" 
+"	5	TextRegion	0.9350059628486632

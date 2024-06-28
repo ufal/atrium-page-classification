@@ -1,0 +1,3 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+367.4181518554688	771.5921630859375	864.0667724609375	787.6924438476562	rectangle	"LADA. < kN lou ach jamek
+"	0	TextRegion	0.9730383157730104

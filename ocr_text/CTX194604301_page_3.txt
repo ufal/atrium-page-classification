@@ -1,0 +1,116 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+195.56309509277344	215.58889770507807	1120.853515625	1632.1669921875	rectangle	"sich ehe: um einen Tiůrpfosten handeln, sodafš ein Hauseingang
+linkerhand vom Mittelpfosten der Giebelfront anzunehmen ist.
+12.Sept. 1940. .
+
+Tro:z sorgfáltiger Untersuchung zeigen sich(auferhalb
+des Hausgrundes)keine Eckpfosten als Entsprechung zum Mittel-
+přosten /I) der Giebelseite. Unter Mitarbeit“fierrn Gymnasialpro
+i.R. Tschakert - Teplitz und mit Hilfe von Angehorigen des Reic
+arbeitsdienstes 3/373 (Arbeitskommando Bilin) wurde der vordere
+Teil des Hausgrundrisses durch systematische (horizontale) Ab-
+deckung clargelegt. Gefš8Bscherben - frůheisenzeitlicher liachart
+fanden sich weniger im Oberteil, zahlreicher am Boden der
+Wohngruba. Mitten in diesem Teil der Grube verstreut lagen zwéi
+verschlazkte EBisenstiůckchen (84 und B auf Tafel III) und
+ein Mahlsteinbruchstick. In etwa 2,40 m Entfernung von der Sid-
+ostecke zeigte sich an der Sůdwand (Lángseite) der Hausanlage
+eine durch deutliche Verfárbung sich vom umgebenden Letten-
+boden abnebende Ausbauchung von unregelmáBig abgerundeter Form
+(Taf.III:B O). Im Profil war eine mit der Hausgrube verbundene
+(kesselformige) Ausschachtung zu erkennen, welche eine stark
+rotlehmige Hillung und einen fast plattenartigen AbschluB von
+hartgebranntem Lehm aufwies (Taf.V und Abb....). Die Preile-
+gung dieser ""Platte"" brachte breite kágelkumpfartige Aufwólbung
+hartgebrannten Lehms zutage (gróBte Durchmesser 1,05 mal 1,20 m
+welche tief ins Hausinnere hineinragte, Bemerkenswerterweise
+wurden nur hier auBerhalb des Hausgrundrisses Gefůlscherben
+und eine Wandseitenflankierung durch zwei Přosten (Taf. III
+Přostenlocher VI und XII mit Durchmesser von 28 bezw. 38 cm)
+gefunden. Bei der weiteren Abdeckung dieses Wohngrubenteiles
+kamen auch an der Innenseite der Lehmfillung zwei Pfostenreste
+zutage (Taf. III, Pfostenlócher VII und XI). Es durchbricht
+demnach ein kleiner ouerschiffiger Einbau die sůdliche Lángs-
+seite des Langugester Hauses, welcher wohl als Backofenanlage
+zu deuten ist, wobei die Bedienung dieses Ofens von der AuBen-
+seite erfolgte. Auf der ""Ofenplatte"" fanden sich Holzkohle-
+stůckchen und einzelne Gefifischerben verstreut; Bine grobe
+Anzahl von Scherben, der Oberteil eines groBen GefgBes und einc
+zerdrůckte dinnwandige Henkeltasse (Abb.....) lagen an der
+Backoferrůckseite im Inneren des Hauses.
+"	0	TextRegion	0.9999988079071044
+249.2534637451172	620.427001953125	1090.204345703125	1396.2001953125	rectangle	"igruba. Mitten in diesem Teil der Grube verstreut lagen zw
+schlazkte EBisenstickchen (84 und B auf Tafel III) und
+Mahlsteinbruchstiůck. In etwa 2,40 m Entfernung von der Sů
+scke zeigte sich an der Šůdwand (Lángseite) der Hausanlage
+2 durch deutliche Verfůrbung sich vom umgebenden Letten-
+en abhnebende Ausbauchung von unregelmáBig abgerundeter For
+£.III:B O). Im Profil war eine mit der Hausgrube verbunden
+sselfórmige) Ausschachtung zu erkennen, welche eine stark
+lehmige Fillung und einen fast plattenartigen Abschluf von
+tgebranntem Lehm aufwies (Taf.V und Abb....). Die Preile-
+g dieser ""Platte"" brachte breite kágelkumpfartige Aufwolbu
+tgebrannten Lehms zutage (groóBte Durchmesser 1,05 mal 1,2C
+che tief ins Hausinnere hineinragte, Bemerkenswerterweise
+den nur hier auBerhalb des Hausgrundrisses Gefglscherben
+eine Wandseitenflankierung durch zwei Přosten (Taf. III
+stenldcher VI und XII mit Durchmesser von 28 bezw. 38 em)
+unden. Bei der weiteren Abdeckung dieses Wohngrubenteiles
+en auch an der Innenseite der Llehmfůllung zwei Pfostenrest
+age (Taf. III, Pfostenlócher VII und XI). Es durchbricht
+nach ein kleiner ouerschiffiger Einbau die sůdliche Lángs-
+te des Langugester Hauses, welcher wohl als Backofenanlage
+deuten ist, wobei die Bedienung dieses Ofens von der Aubc
+"	1	TextRegion	0.9999954700469972
+181.9884490966797	57.91313552856445	1080.5096435546875	303.9503173828125	rectangle	"Wenige Zentimeter sůdlich vom Pfosten I fand sich, ebenfalls
+hart an der Hauswand (vgl.Taf. III) ein kleines Pfostenloch
+(Durchmesser 24 cm). Als Dachtráger, zur Unterstůtzung von
+Pfosten I, erscheint dieser Pfosten zu schwach. Es důrfte
+sich ehe: um einen Tůrpfosten handeln, sodaf ein Hauseingang
+
+linkerhand vom Mittelpfosten der Giebelfront anzunehmen ist.
+40 Gamn+ 1040. o
+"	2	TextRegion	0.9999839067459106
+174.85289001464844	1022.7714233398438	1106.2652587890625	1543.6441650390625	rectangle	"harigeorannten Jelmo ZUuvase SLO8VE UULULMUSODSL  1,U) 42 1,60
+welche tief ins Hausinnere hineinragte, Bemerkenswerterweise
+wurden nur hier auBerhalb des Hausgrundrisses Gefůlscherben
+und eine Wandseitenflankierung durch zwei Přosten (Taf. III
+Přostenlocher VI und XII mit Durchmesser von 28 bezw. 38 cm)
+gefunden. Bei der weiteren Abdeckung dieses Wohngrubenteiles
+kamen auch an der Innenseite der Lehmfillung zwei Pfostenreste
+zutage (Taf. III, Pfostenlócher VII und XI). Es durchbricht
+demnach ein kleiner ouerschiffiger Einbau die sůdliche Lángs-
+seite des Langugester Hauses, welcher wohl als Backofenanlage
+zu deuten ist, wobei die Bedienung dieses Ofens von der AuBer
+seite erfolgte. Auf der ""Ofenplatte"" fanden sich Holzkohle-
+stůckchen und einzelne Gefifischerben verstreut; Bine grobe
+Anzahl von Scherben, der Oberteil eines groBen GefigBes und eir
+zerdrůckte dinnwandige Henkeltasse (Abb.....) lagen an der
+
+ 
+"	3	TextRegion	0.9985939860343932
+163.67007446289062	368.3050842285156	1156.240234375	1022.5707397460938	rectangle	"des Haus zrundes)keine Eckpfosten als Entsprechung zum ilttel-
+přosten /I) der Giebelseite. Unter Mitarbeit“fierrn Gymnasialprof.
+isR. Tschakert - Teplitz und mit Hilfe von Angehorigen des Reichs-
+arbeitsdienstes 3/373 (Arbeitskommando Bilin) wurde der vordere
+Teil des Hausgrundrisses durch systematische (horizontale) Ab-
+deckung iclargelegt. GefšBscherben - frůheisenzeitlicher liachart —
+fanden sich weniger im Oberteil, zahlreicher am Boden der
+Wohngruba. Mitten in diesem Teil der Grube verstreut lagen zwéi
+verschlazkte EBisenstiůckchen (84 und B auf Tafel III) und
+
+ein Mahlsteinbruchstiůck. In etwa 2,40 m Entfernung von der Sid-
+ostecke zeigte sich an der Sůdwand (Lángseite) der Hausanlage
+eine durch deutliche Verfárbung sich vom umgebenden Letten-
+boden abnebende Ausbauchung von unregelmáBig abgerundeter Form
+(Taf.III:B O). Im Profil war eine mit der Hausgrube verbundene
+(kesselformige) Ausschachtung zu erkennen, welche eine stark
+rotlehmige Hillung und einen fast plattenartigen AbschluB von
+hartgebranntem Lehm aufwies (Taf.V und Abb....). Die Preile-
+
+gung dieser ""Platte"" brachte breite kágelkumpfartige Aufwólbung
+kán huanmbaám Tabas on*asa (owibba Dumahmassnam 1.058 mal 1.9206 m).
+"	4	TextRegion	0.9930316209793092
+52.85627746582031	853.1923217773438	68.6104965209961	862.5007934570312	rectangle		5	TextRegion	0.939376950263977
+59.07502746582031	1356.3564453125	76.89826202392578	1364.837646484375	rectangle		6	TextRegion	0.938624143600464
+57.15508270263672	1434.829345703125	68.66886138916016	1447.7138671875	rectangle		7	TextRegion	0.9038267731666564

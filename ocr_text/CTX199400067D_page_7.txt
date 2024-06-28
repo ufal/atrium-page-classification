@@ -1,0 +1,22 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+174.9436492919922	1413.7930908203125	1178.1634521484375	1645.2044677734375	rectangle	"Sonda 2c (1974), keramické aguamanile: l.část obrazové dokumen=
+tace. l-torzo hlavičky s levým plastickým růžkem a výlevkou
+(slepeno ze 2 střepů 110/74 a l střepu 84/74), pohled zpředu;
+
+2- střep z torza hlavičky s levým plastickým růžkem, 110/74
+
+(a - vnitřní strana střepu s částí výlevky, b - prořil, c - vněj
+ší strana střepu); 3 - střep ze spodní části torza hlavičky,
+rokoka : vnější strana střepu, b - profil, c - vnitřní strana
+střepu); - kresebná rekonstrukce aguamanile 1
+
+stranu zvířátka. Kresba: V.Žižková, a » pohled na levou
+"	0	TextRegion	0.9999381303787231
+89.3921890258789	652.8994750976562	118.05262756347656	674.9906005859375	rectangle	"2a
+"	1	TextRegion	0.99899023771286
+1059.8677978515625	426.3150024414063	1092.84375	450.3070983886719	rectangle	"30
+"	2	TextRegion	0.9986488223075868
+791.0198974609375	436.3570556640625	823.2786254882812	462.19818115234375	rectangle	"3b
+"	3	TextRegion	0.9973963499069214
+623.6896362304688	598.40625	654.9844970703125	623.4387817382812	rectangle		8	TextRegion	0.8626288175582886
+117.3467788696289	382.4944152832031	127.15217590332033	400.5666198730469	rectangle		10	TextRegion	0.8039233088493347

@@ -1,0 +1,18 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+580.2027587890625	1009.5361938476562	679.9202880859375	1342.7227783203125	rectangle	"uhlíky
+kámen
+keramika
+keramika
+mazanice
+uhlíky
+drtidlo-sle
+keramika
+mazanice
+uhlíky
+kámen
+keramika
+mazani ce
+keramika
+
+ 
+"	0	TextRegion	0.9945811629295348

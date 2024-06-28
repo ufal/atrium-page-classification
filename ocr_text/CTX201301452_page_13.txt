@@ -1,0 +1,54 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+143.36387634277344	315.7005310058594	1046.88232421875	887.9867553710938	rectangle	"5
+
+Z hlediska vývoje intravilánu je důležitá zpráva z roku 1313, zmiňující patrně již delší
+dobu existující farní kostel sv. Gotharda, jehož farní status byl zrušen v r. 1620 a obnoven až
+roku 1786. V roce 1801 byl tento kostel klasicistně přestaven. Ke kostelu patřila i fara z roku
+1787 (Gotthardská ulice 3) a hřbitovy (starší zrušený sousedil se Stromovkou, mladší
+založený 1888 leží v ulicích U Hřbitova a Ve Struhách). Kostel sv. Gotharda byl původně
+centrem vsi, jejíž obdélná náves je dodnes urbanisticky zachována v půdorysu Krupkova
+náměstí. V době Karla IV. bylo v oblasti založeno mnoho vinic s roztroušenými, postupně
+zakládanými usedlostmi. Ve středověku tu ještě vznikly dva areály, které souvisely
+s provozem Pražského hradu jako panovnického sídla. Předpokládá se, že starší z nich —
+Královská obora (dnes Stromovka) s královským loveckým hrádkem — byla založena již
+Přemyslem Otakarem II. Rozkvětu se dočkala v období Vladislava Jagellonského (práce
+vletech 1495-1496), i za jeho nástupců a především za Rudolfa II. v období let 1578-1579.
+
+Poslední panovník stál u zrodu mladšího areálu — Císařského mlýna v roce 1589
+"	0	TextRegion	0.9999921321868896
+145.701904296875	1246.429443359375	1044.3802490234375	1510.9510498046875	rectangle	"1880 byl pak úředně uznán nový název Bubeneč
+
+V roce 1839 při pořizování tzv. stabilního katastru byla vytvořena nová katastrální obec
+Bubeneč (v předcházejícím josefském katastru se Bubeneč nacházel na katastru Holešovic).
+Statky, které kdysi náležely nejvyššímu purkrabství, byly již tehdy pod pravomocí českých
+zemských stavů „ ale čtyři domy tvořily zvláštní zboží Přední Ovenec, čtyři
+
+další (huhenečský zámeček damek nra zahradníka zahradní dům s restaurací a hálovna) a
+"	1	TextRegion	0.9996744394302368
+140.63336181640625	145.5358428955078	361.3856506347656	168.6637725830078	rectangle	" 
+
+Historie naleziště
+"	2	TextRegion	0.9994774460792542
+174.27125549316406	218.76019287109372	1047.7607421875	303.233642578125	rectangle	"Bubeneč leží na vyvýšené terase nad vltavskou nivou, která se na východě v okolí
+
+stodržitelského letohrádku ostře lomí. Osídlení lokality sahá do předhistorických dob, jak o
+
+ 
+"	3	TextRegion	0.99897563457489
+132.54136657714844	931.2780151367188	1040.1068115234375	1262.86474609375	rectangle	"KEVILE DISVIIIA ZDLAVA U DUDVELUL DOUTAZI UZ ZTOKU 1177, KUY DIGZSKÝ KILIZU A VISKUL
+Jindřich Břetislav přislíbil dar jeho poloviny klášteru premonstrátů v Teplé, pokud se nevrát
+z výpravy do Svaté země . Tehdy se ovšem ves nenazýval:
+Bubeneč, ale Ovenec či Oveneč, a teprve později byla změněna na Bubeneč. Na rozdíl oc
+dnešní Tróje, která původně nesla jméno Zadní Ovenec, se dnešní Bubeneč označoval jakc
+Přední Ovenec . Zatímco v češtině k této změně došlo (i když sc
+někdy udržel i v češtině název Přední Ovenec), němčina si ponechala starý název, takže ješt
+v 19. století se Bubeneč německy nazývala Vorder Owenetz, později však i Bubentsch. V roce
+
+1880 hvl nak úředně uznán navý název Buheneč
+"	4	TextRegion	0.998149275779724
+142.55335998535156	877.5612182617188	236.90956115722656	895.9200439453125	rectangle	"533-534).
+"	5	TextRegion	0.997988224029541
+493.6331481933594	1590.9913330078125	698.3889770507812	1609.15966796875	rectangle	"2.5. Historie naleziště
+"	6	TextRegion	0.9892232418060304
+226.8859405517578	215.61773681640625	1031.262451171875	239.76312255859372	rectangle	"3ubeneč leží na vyvýšené terase nad vltavskou nivou, která se na východě v oko
+"	7	TextRegion	0.951810657978058

@@ -1,0 +1,15 @@
+IMAGE_NAME	DESCRIPTION	LANGUAGE	BBOX_1	BBOX_2	BBOX_3	BBOX_4
+image	"3
+Pfosten .
+Pfosten V
+Langgasthansanlage Fäustelle 1. Bodemprofile."	de	(450, 43)	(1082, 43)	(1082, 1042)	(450, 1042)
+image	3		(1037, 53)	(1073, 43)	(1082, 78)	(1047, 88)
+image	Pfosten		(578, 949)	(649, 951)	(648, 978)	(577, 976)
+image	.		(682, 953)	(695, 953)	(694, 979)	(681, 979)
+image	Pfosten		(962, 951)	(1026, 950)	(1027, 974)	(963, 975)
+image	V		(1032, 950)	(1047, 950)	(1048, 973)	(1033, 973)
+image	Langgasthansanlage		(451, 1002)	(723, 1005)	(723, 1038)	(451, 1035)
+image	Fäustelle		(732, 1005)	(831, 1006)	(831, 1039)	(732, 1038)
+image	1.		(839, 1007)	(862, 1007)	(862, 1039)	(839, 1039)
+image	Bodemprofile		(867, 1006)	(1022, 1008)	(1022, 1041)	(867, 1039)
+image	.		(1026, 1009)	(1035, 1009)	(1035, 1041)	(1026, 1041)

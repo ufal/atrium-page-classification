@@ -1,0 +1,21 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+128.8951416015625	329.4996337890625	1062.5318603515625	568.2868041992188	rectangle	"522
+
+Obecným cílem předstihového záchranného archeologického výzkumu byla exkavace
+a dokumentace zachycených archeologických situací a nálezů, identifikovaných předchozím
+výzkumem zjišťovacím, vyzdvihnutí movitých nálezů a jejich laboratorní ošetření a
+inventarizace. Výsledkem © záchranného © archeologického © výzkumu je © nahrazení
+
+archeologického pramene in situ zaniklého novou výstavbou pramenem ex situ, který
+
+nřadotaviija nřadbládaná nálaJnv4 onráva
+"	0	TextRegion	0.9998716115951538
+175.0421142578125	227.09417724609372	1043.38525390625	328.8758544921875	rectangle	"Katastr Bubeneč je územím s archeologickými nálezy ve smyslu zákona 20/1987
+rky o státní památkové péči. Předpoklad archeologických nálezů potvrdil zjišťovací
+
+heologický výzkum (kapitola 2.4).
+"	1	TextRegion	0.9998206496238708
+376.9473876953125	1591.6285400390625	806.9502563476562	1613.489501953125	rectangle	"6. Cíl předstihového archeologického výzkun
+"	2	TextRegion	0.9981504082679749
+134.20469665527344	144.7246551513672	620.46728515625	170.89431762695312	rectangle	"2.6. Cíl předstihového archeologického výzkum
+"	3	TextRegion	0.9933858513832092

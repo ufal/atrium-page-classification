@@ -1,0 +1,71 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.27099609375	1590.753173828125	624.0849609375	1607.2137451171875	rectangle		0	TextRegion	0.9999959468841552
+152.7322235107422	771.1015014648438	1052.82568359375	943.4540405273438	rectangle	"Sáček č. S01-13 (sj. S01-13, obr. příl. 59)
+
+KE: menší časově heterogenní soubor zlomků těl, dna z hrncovitých nádob, okraj poklice,
+provedení režné, barvy světle béžové, šedé a glazované. M: jemný u mladšího materiálu,
+u staršího střednězrnný, oxidačně a redukčně vypálené. OP: jednoduše profilovaný,
+zesílený - poklice. V: glazura tmavě zelená.
+
+KO: 2x zvířecí kosti (druhově neurčeno)
+"	1	TextRegion	0.9999080896377563
+160.9553680419922	977.968017578125	321.9920654296875	998.4478149414062	rectangle	"Datování: VS/NO
+"	2	TextRegion	0.9998083710670472
+145.6343231201172	1047.8197021484375	1018.4971313476562	1194.1497802734375	rectangle	"DatEK
+
+ 
+
+U.
+
+ 
+
+2 U.
+
+ 
+
+a
+
+ 
+
+KE: menší časově heterogenní soubor zlomků těl z hrncovitých nádob, provedení režné,
+barvy světle béžové, šedé a glazované. M: jemný u mladšího materiálu, u staršího
+střednězrnný, příměs křemenných zrn, oxidačně vypálený. OP: esovitě profilovaný. V:
+glazura tmavě a medově hnědá.
+
+ 
+"	3	TextRegion	0.9997760653495787
+154.2896728515625	105.05030059814452	1044.2379150390625	361.12841796875	rectangle	"Vysvětlivky ke zkratkám archeologického materiálu: KE — keramika, PK — plastická keramika, TK —
+technická keramika, kachel, TD — technická keramika, dyzna, TT — technická keramika, tyglík, MZ — stavební
+keramika, mazanice, P — stavební keramika, prejz, C — stavební keramika, cihla, Ci — stavební keramika,
+nejednoznačná cihlovina, P— stavební keramika, prejz, D— stavební keramika, dlaždice, OM — omítka, MA—
+malta, DS — dřevo stavební, DP — dřevěný předmět, výrobek, Dř — dřevo neopracované, úlomky, U — uhlík,
+VK- výrobek z kamene, OK — kámen se stopami používání nebo opracování, Ká — kámen, KO — zvířecí kosti
+(kuchyňský odpad), KL — kosti lidské, KP — kostěný předmět, výrobek, KR — kosti opracované, výrobní
+polotovar, odpad, KK — kosti se stopami po kuchyňském opracování, Ku — kůže, FE — výrobky ze železa, BK —
+výrobky ze slitin barevných kovů, DK — výrobek z drahého kovu, ST- struska FE i BK, SK — výrobky ze skla, Př
+- přeslen, E (De, Py, Bo, C14, Ro) environmentální vzorky, Z— vzorky petrografické, Z— vzorky rezerva.
+"	4	TextRegion	0.9988934397697448
+128.53515625	385.0471801757813	1048.532958984375	585.173583984375	rectangle	"Vysvětlivky ke zkratkám u nálezů keramiky - KE: úvodní charakteristika souboru, typové zastoupení
+výrobků, barevnost, M (materiál keramické hmoty), T (technologie výpalu), OP (okrajové profilace
+zastoupené v souboru), V (výzdoba, základní typy). V případě, že některá z posuzovaných kategorií u
+nálezového souboru není uvedena, důvodem je celková absence či výrazná fragmentárnost
+posunovatelných znaků u souboru. Kresebná dokumentace nálezů je uvedeny v hlavičce nálezového
+souboru zkratkou TAB: + číslo, v případě fotodokumentace zkratkou FOTOTAB: + číslo.
+
+DATOVÁNÍ: u jednotlivých nálezových celků je uvedeno buď rámcové časové zařazení do historické epochy
+
+pomocí zkratek využívaných v hlášení pro archeologickou databázi Čech tzv. ADČ (např. P — pravěk, RS4 —
+ea ra aa
+
+     
+"	5	TextRegion	0.9981533885002136
+139.59165954589844	1309.2646484375	909.3499145507812	1406.50146484375	rectangle	" 
+
+KE: 1x zlomek těla hrncovité nádoby, provedení glazované, barvy červenohně:
+M:jemnězrnný, oxidační výpal. V: tmavě hnědá glazura.
+KO: 1x zvířecí kost (druhově neurčeno)
+"	6	TextRegion	0.9980168342590332
+158.87545776367188	714.0060424804688	465.2720031738281	736.57666015625	rectangle	"Základní popis nálezové fondu:
+"	7	TextRegion	0.9941970109939576
+159.9478302001953	1239.4788818359375	399.1080322265625	1264.3319091796875	rectangle	"Datování: VS/NO1/NO2
+"	8	TextRegion	0.8112015724182129

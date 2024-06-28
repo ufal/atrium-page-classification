@@ -1,0 +1,35 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+1096.1270751953125	39.89414978027344	1108.0443115234375	56.96464538574219	rectangle		0	TextRegion	0.99993634223938
+204.20166015625	148.99349975585938	1097.935546875	622.8812255859375	rectangle	"go WL L 0 SU OVO VSDVVÝ AGM: ZLÝVG V Úbhál
+li mohyly pravidelným 0,35-0,50 m širokým průhem hlíny. Te-
+rve po jeho vykopání a očistění vynikla celá elipsovitá stav-
+Ja s pečlivě provedeným zaoblením jako vrcholová dominanta té-
+o mohyly, stejně vysoká z jižní i severní strany (obr. 12).
+'řesně v prodloužení středové podélné osy o 0,50 m východním
+měrem mimo kamenný kryt, který sem z JV části zasahoval jen
+ameny v horní vrstvě, nacházel se velký kus břidlice téměř
+ravidelně otesaný do tvaru kvádru o stranách 40x33x8 om a
+
+)ostavený ne užší delší stranu a směrovaný přesně k východu
+
+a
+"	1	TextRegion	0.999764621257782
+191.4556427001953	708.9688110351562	1151.2315673828125	1461.48828125	rectangle	"obvodu bez kamenů a zde byly při odkrývání odškrabávány tenké
+vrstvy asi do hloubky 30 cm obvodové zídky, a až zde se poča-
+ly objevovat kameny na západní straně a uvnitř (obr. 8). Od
+této hloubky se odebíraly současně s vnitřními kameny po vrst-
+vách i obvodové, Podle toho, jak pevně lpěly kameny ve vodo-
+rovných vrstvách lze usuzovat, že byly původně stavěny na su-
+cho a kladeny jako tašky na střeše, protože to byly spíše ten-
+čí kusy šedé břidlice a hlína se dovnitř dostala až dodatečně
+
+z horního krytu, který byl hlínou zasypán. Ve spodních vrst-
+vách stavby jsou kameny po celé ploše vodorovně kladeny a pev-
+ně do sebe vklihovány. Původní úroveň v této stavbě byla za-
+hloubena asi 0,30-0,40 m pod dnešní vykopanou úrovní ve střed-
+ní části mohyly u hrobu 1. Bylo to zjištěno malou sondou, vyko-
+panou vedle severní strany stavby. Od horní vrstvy až po původ-
+ní úroven byla elipsovitá stavba tvořena 6 vrstvami kamenů
+
+(obr. 9-12). Dno elipsovité stavby představovala podlaha z ně-
+"	2	TextRegion	0.9993197917938232

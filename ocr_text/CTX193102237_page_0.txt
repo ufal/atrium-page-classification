@@ -1,0 +1,9 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+470.4958801269531	1356.9361572265625	893.3521728515625	1378.6798095703125	rectangle	"Dr.L.Horáková -Jansová , 1931
+"	1	TextRegion	0.996699869632721
+340.8123779296875	450.582763671875	832.8535766601562	555.2119140625	rectangle	"Inventář
+
+archeologické sbírky P+ „Hynka Kotvy
+
+ 
+"	4	TextRegion	0.9746112823486328

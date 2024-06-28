@@ -1,0 +1,62 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.3975830078125	1591.44140625	623.1047973632812	1606.8853759765625	rectangle		0	TextRegion	0.999991774559021
+118.46424865722656	1326.1597900390625	1014.3369750976562	1433.56787109375	rectangle	"Sáček č. S11-01 (sj. 511-01, obr. příl. 65)
+
+KE: 2x zlomek těla z hrncových nádob, provedení režné, barva střepu šedooranžová. M:
+střednězrnný, oxidačně vypálený. OP:-. V: rytá šroubovice.
+
+ST: 1x amorfní porézní kousek železné (kovářské) strusky, váha 11g
+"	1	TextRegion	0.9999839067459106
+159.42178344726562	117.6663055419922	347.16668701171875	137.67259216308594	rectangle	"Datování: RS4/VS1
+"	2	TextRegion	0.9998501539230348
+145.4023895263672	352.7817077636719	989.016357421875	523.142333984375	rectangle	"Sáček č. S09-08 (sj. S09-08, obr. příl. 64,65)
+
+KE: menší soubor zlomků okrajů a těl hrncovitých nádob, patrně i tuhová zásobnice,
+provedení režné, barvy červenohnědé, světle béžové a tmavě šedé a šedohnědé. M:
+střednězrnný, částečně s příměsí tuhy a slídy, oxidačně vypálený. OP: jednoduše
+profilovaný a esovitě prohnutý se slabším zduřením.
+
+KO: 6x zvířecí kosti (druhově neurčeno)
+"	3	TextRegion	0.9998231530189514
+142.6708526611328	1127.746337890625	1026.28466796875	1229.3182373046875	rectangle	"DEALER L. 340716 |5/. 31U714, UT. ITI. O2)
+
+KE: 1x zlomek velice omletého těla hrncovité nádoby (možná vazba na keramiku s okraji
+vzhůru vytaženými), provedení režné, barva oranžovošedá. M: střednězrnný s výrazným
+podílem křemenných zrn, oxidačně vypálený.
+"	4	TextRegion	0.999811351299286
+90.4708023071289	203.9888153076172	992.755859375	270.9085388183594	rectangle	"KE: drobný zlomek těla hrncovité nádoby, provedení jednostranně glazované, barvy
+červenobéžové. M: jemnozrnný, oxidačně vypálený. OP: -. V: láhvově zelená glazura.
+"	5	TextRegion	0.9997144341468812
+164.52883911132812	1260.9169921875	305.2598876953125	1281.08544921875	rectangle	"Datování: VS1?
+"	6	TextRegion	0.9995489716529846
+159.3910369873047	293.4178771972656	300.01806640625	314.5173034667969	rectangle	"Datování: NO1
+"	7	TextRegion	0.9991857409477234
+159.9374237060547	1055.68896484375	299.69842529296875	1076.322509765625	rectangle	"Datování: NO1
+"	8	TextRegion	0.9987083673477172
+166.3681182861328	824.578369140625	960.87646484375	994.4662475585938	rectangle	"Sáček č. S10-11 (sj. S10-11, obr. příl. 65)
+
+KE: malý soubor zlomků okraje, těla a páskového ucha z hrncovitých nádob, provec
+režné i glazované, barva střepu světlá šedobéžová, ojediněle tmavě šedostříbrná. I
+jemnozrnný až střednězrnný, oxidačně vypálený, u jednoho zlomku redukce. OP:
+přehnutý okraj. V: zelená glazura.
+
+KK: 1x zvířecí kosti se stopou kuchyňského opracování (druhově neurčeno)
+"	9	TextRegion	0.9983204007148744
+159.79298400878906	762.9188842773438	301.3221130371094	783.8681030273438	rectangle	"Datování: NO2
+"	10	TextRegion	0.9978373646736144
+146.0398712158203	650.900146484375	1016.972412109375	735.732421875	rectangle	"Sáček č. S10-05 (sj. S10-05, obr. příl. 65)
+SK: 1x drobná lékárenská lahvička s tmavě hnědého průhledného skla, s reliéfní značkou
+„S“ a nápisem „SERUM WIEN“, výška 5,8 cm
+"	11	TextRegion	0.997377872467041
+158.54112243652344	586.0164794921875	337.318115234375	607.5101318359375	rectangle	"Datování: RS4/VS1
+"	12	TextRegion	0.9942770600318908
+175.7015838623047	955.5130004882812	886.9716796875	1023.939697265625	rectangle	"Je
+
+ 
+
+VY EJ V E DTS
+1x zvířecí kosti se stopou kuchyňského opracování (druhově neurčeno)
+T: 1x amorfní porézní kousky železné (kovářské) strusky, váha 25g
+
+ 
+"	13	TextRegion	0.9931601285934448

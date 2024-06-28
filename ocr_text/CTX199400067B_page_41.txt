@@ -1,0 +1,36 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+196.73880004882807	640.6270751953125	1138.8092041015625	759.1031494140625	rectangle	"Obr. 34. Sonda 2b ( 1974). Keramika libické provenience:
+zv, keramika slavníkovské fáze z lO.století. 1 = sonda 2b,
+jrstva 3 (72/74); 2 - sonda 2b, vrstva 3 (59/74). Foto: VeJíl=
+"	0	TextRegion	0.9999454021453856
+166.64987182617188	151.385498046875	1124.0943603515625	293.3453063964844	rectangle	"Na obrázcích 32 - 36 jsou fotografie několika keramických
+tors a velkých střepů ze sond 2b = 2d. Tyto kusy byly uložené
+
+lé, v seznamu nálezů jsou evidované na jeho konci (na stra-
+
+m -——
+"	1	TextRegion	0.9996569156646729
+297.3966064453125	802.9051513671875	1117.0364990234375	918.8519287109376	rectangle	"pre 35. Sonda 2b = 2e (1974). Keramika libické proveni-
+zv, keramika slavníkovské|fáze z 10.století. 1 - sonda
+trukee vnitřní hradební zdi (139/74); sonda 2b, vrstva |
+"	2	TextRegion	0.999445617198944
+545.3154296875	32.521690368652344	589.4219970703125	50.74786376953125	rectangle	"106
+"	3	TextRegion	0.9993428587913512
+683.5447998046875	28.21949005126953	1023.010498046875	98.2655258178711	rectangle	"Texty a komentáře
+k obrázkům s nálezy
+Sonda 2a - 2d (1974) —
+"	4	TextRegion	0.9990170001983644
+155.9093017578125	319.7574157714844	1143.4898681640625	599.6404418945312	rectangle	"Obr, 32. Sonda 20 -+ 2d (1974). Keramika libické proveni-
+once z rozhraní střední a mladší doby hradištní. la,b - sonda
+2d, vrstva 3 (103/74)t na vnitřním povrchu ústí jsou 2 žlábky;
+2 - sonda 26, vrstva 3 (141/74). Foto: V.Jílková,
+
+Obre 33. Sonda 2b - 2c (1974). Keramika libické provenien-
+ce: tzv. keramika slavníkovské fáze z 1O.století, 1 = sonda 2b,
+destrukce vnitřní hradební zdi (65/74); 2 - sonda 2c, vrstva 3
+"	5	TextRegion	0.997349739074707
+204.8391265869141	955.5589599609376	1022.5736083984376	1019.8656005859376	rectangle	"Obr. 36. Sonda 2b (1974). 1 - sonda 2b, destrukce ©
+radební zdi (64/74). Foto: V.Jílková,
+"	6	TextRegion	0.9936532974243164
+185.5778961181641	765.4044189453125	253.2822265625	780.7553100585938	rectangle	"ková,
+"	7	TextRegion	0.9581170678138732

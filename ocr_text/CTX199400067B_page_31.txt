@@ -1,0 +1,57 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+585.4143676757812	29.154937744140625	617.7374267578125	48.29026794433594	rectangle		0	TextRegion	0.9980779886245728
+157.1293487548828	991.6553955078124	1131.6568603515625	1538.6943359375	rectangle	"Tab. 17:jj, Č. neg. 51 ljj, Sonda 2a-2c (1974). Vpravo
+část jižní podezdívky budovy orientované V-Z. V profilu patrny
+destrukční i stavební suti budovy a JV půle ohniště č. III,
+podloženého opukovými placáky. Pohled od VJV.
+
+Tab. 17:34, č. neg. 51 134. Sonda 2a, 2e (1974). Část
+základu jižní podezdívky budovy orientované V-Z, Vzadu (v son-
+dě 2c) povrch vrstvy lO.století, těsně pod.ním ohniště č. III
+podložené opukovými placáky. Pohled od JJVo
+
+Tab. 18:35, č. neg. 51 135. Sonda 2a (1974). Vpravo
+část jižní podezdívky budovy orientované V-Z. V profilu patrny
+destrukční i stavební sutě budovy. Pohled od V.
+
+Tab. 18:36, č. neg. 51 136. Sonda 2a-2b, 2d (1974).
+Situace po dosažení povrchu pravěké vrstvy 4. Vpředu kůlová
+jáma č. 4 z mladší doby hradištní, v pozadí část jižní pode-
+zdívkv budovy orientované V=7. Pohled od S97.
+"	1	TextRegion	0.9962140917778016
+721.8184814453125	27.453144073486328	1033.34130859375	83.15807342529297	rectangle	"Textyyk fototabulkám
+Sonda 2a -= 2d (1974) -
+"	2	TextRegion	0.989954113960266
+163.7828826904297	588.3645629882812	1125.489990234375	926.125244140625	rectangle	"VI a VII ve vnitřním příkopu opevnění, Ve stěně sondy suť
+vnitřní hradební zdi. Pohled od SV.
+
+Tab. 16:31, č. neg. 51 131. Sonda 2a-2d (1974). Pohled
+do sondy od SV. Uprostřed základ jižní podezdívky budovy ori-
+entované V-Z, vzadu vnitřní příkop a suř vnitřní hradební zdi,
+Vpředu JZ část sondy 2d s kůlovou jamkou 4.
+
+Tab. 16:32, č. nege 51 132. Sonda 2a-2c (1974). Část
+jižní podezdívky budovy orientované V-Z, v pozadí sokl s pecí
+č. V a suť vnitřní hradební zdi (ponechané = vlevo - na soklu).
+"	3	TextRegion	0.9880794882774352
+172.0596466064453	283.90447998046875	1091.9068603515625	651.7378540039062	rectangle	"Go vVnitřníno příkopu opevnění od V. Vpravo destrukční suti
+budovy z 10.století, orientované V-Z, Vlevo u JZ stěny sondy
+2b leží ve vrstvě 3 ohniště VI a VII.
+
+Tab. 15:29, č. neg. 51 129, Sonda 2b (1974). Vnitřní při
+kop opevnění s ohništi č., VI a VII. Vzadu kontrolní blok s po-
+nechanou sutí vnitřní hradební zdi, Pohled od JV. Vpravo část
+destrukční suti pravděpodobného kněžského domu z lO.století,
+
+Tab. 15:30, č. neg. 51 130. Sonda 2b (1974). Ohniště č.
+VI a VII ve vnitřním příkopu opevnění, Ve stěně sondy suť
+vnitřní hradební zdi. Pohled od SV.
+"	4	TextRegion	0.9758459329605104
+445.5552978515625	154.55767822265625	1086.2728271484375	181.88543701171875	rectangle	"ch sutí budovy, vzadu destrukce vnitřní hra-
+"	5	TextRegion	0.9558392763137816
+202.18283081054688	152.6847381591797	1103.2308349609375	202.52066040039065	rectangle	"bytek destrukčních sutí budovy, vzadu destrukce vnitřní hra-
+lobní 243. Pohled ad SW.
+"	7	TextRegion	0.9083632826805116
+1051.9327392578125	62.64404678344727	1118.7340087890625	79.56295013427734	rectangle	"Str.
+"	8	TextRegion	0.8515004515647888
+567.1790771484375	32.33464431762695	623.3875122070312	47.024200439453125	rectangle		9	TextRegion	0.8115158081054688

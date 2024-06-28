@@ -1,0 +1,72 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+173.62828063964844	765.5719604492188	1062.9984130859375	884.5116577148438	rectangle	"Obj. 2469 — část rozsáhlého útvaru, zachyceného již výzkumem v roce 1997, původně považován
+za příkop, ale pravděpodobně jde o velký hliník nebo soujámí, zkoumán dvěma sondami 200x100
+cm, ve kterých bylo zaznamenáno postupné zahlubování objektu do max. hloubky 110 cm, výplň
+vrstvená v odstínech šedohnědé, bez nálezů.
+"	0	TextRegion	0.9998942613601683
+154.370849609375	144.718994140625	1055.2550048828125	209.41571044921875	rectangle	"(dle sdělení I. Herichové). Tato situace nebyla číslována jako objekt a byla zkoumána
+
+systémem sektorů značených v rámci jednotlivých čtverců (viz celkový plán).
+"	1	TextRegion	0.9998175501823424
+162.0712127685547	620.1302490234375	1046.542236328125	722.7630615234375	rectangle	"Obj. 2468 — kruhovitá jáma se svislými stěnami a rovným dnem (zásobní jáma), výplň šedohnědá,
+na povrchu uprostřed velký kámen, ve dně drobné jamky — stopy po vnitřní konstrukci? Rozměry
+91x87 cm, hloubka 30 cm.
+
+Datace: br. stř/ml
+"	2	TextRegion	0.9997459053993224
+147.86302185058594	466.12646484375	1058.3167724609375	570.3834228515625	rectangle	"Obj. 2467 — kruhovitá jáma s prožlabenými stěnami a rovným dnem (zásobní jáma), výplň
+šedohnědá, místy s uhlíky, ve výplní značné množství keramiky (i části nádob) a kamenů, průměr
+150 cm, hloubka 80 cm.
+
+Datace: hr stříml
+"	3	TextRegion	0.9993133544921876
+590.7860717773438	1613.9058837890625	600.0335083007812	1624.291015625	rectangle		4	TextRegion	0.9991468191146852
+170.47598266601562	272.8349304199219	302.68341064453125	295.3003234863281	rectangle	"Popisy objektů
+"	5	TextRegion	0.9990359544754028
+313.48486328125	1419.27392578125	994.3825073242188	1448.2603759765625	rectangle	"- kůlová jamka. Rozměry: 30x 22 cm, hloubka: 9cm. Výplň tmavě hněd
+"	6	TextRegion	0.9980814456939696
+955.7818603515624	1421.42138671875	1009.4048461914062	1439.921630859375	rectangle	"hnědá,
+"	7	TextRegion	0.9971411228179932
+151.3797607421875	354.36669921875	1058.5272216796875	436.2685546875	rectangle	" 
+
+Obj. 2466 - nepravidelně kruhovitá jáma se šikmými, místy téměř svislými stěnami, náznaky
+propálení stěn, výplň světle šedohnědá, místy čočky žlutého písku, průměr 144 cm, hloubka 40 cm.
+Datace: br. stř/ml
+"	8	TextRegion	0.9969035983085632
+170.60276794433594	944.485107421875	286.8736877441406	982.3137817382812	rectangle	"Obj. 2470
+
+ 
+"	9	TextRegion	0.9950264096260072
+312.7231140136719	1267.9947509765625	999.43701171875	1318.4119873046875	rectangle	"- kůlová jamka. Rozměry: 48x 36 cm, hloubka: 10cm. Výplň tmavě hněds
+"	10	TextRegion	0.9894930124282836
+307.4285888671875	1083.4757080078125	1040.2076416015625	1134.0150146484375	rectangle	"- kůlová jamka. Rozměry: 26x I8cm, hloubka: 8 cm. Výplň světle šedá, u dne
+"	11	TextRegion	0.9843935370445251
+310.6875	944.0699462890624	985.9883422851562	992.3203735351562	rectangle	"- kůlová jamka. Rozměry: 30x28 cm, hloubka: 10cm. Výplň tmavě hnědá
+"	12	TextRegion	0.9817867875099182
+320.5348815917969	1360.4324951171875	943.3359375	1403.0455322265625	rectangle	"- kůlová jamka. Průměr: 30cm, hloubka: 4 cm. Výplň tmavě hnědá.
+"	13	TextRegion	0.976015031337738
+326.58758544921875	1027.1920166015625	1009.5550537109376	1087.2647705078125	rectangle	"kůlová jamka . Rozměry: 26x 24 cm, hloubka: 4 cm. Výplň tmavě hnědá.
+"	14	TextRegion	0.9745057821273804
+316.42291259765625	1175.6005859375	1022.8762817382812	1230.0625	rectangle	"- kůlová jamka. Rozměry: 39x 32 cm, hloubka: 8 cm. Výplň tmavě hnědá,
+"	15	TextRegion	0.97221440076828
+305.6930847167969	1163.84130859375	1028.8800048828125	1274.6165771484375	rectangle	"- kůlová jamka. Rozměry: 39x 32 cm, hloubka: 8 cm. Výplň tmavě hnědá,
+
+ 
+"	16	TextRegion	0.936876118183136
+1038.170166015625	1190.4715576171875	1049.0030517578125	1200.8218994140625	rectangle		17	TextRegion	0.9356422424316406
+1038.4486083984375	1428.0244140625	1048.957275390625	1438.44873046875	rectangle		18	TextRegion	0.925142765045166
+274.36297607421875	351.4678649902344	1046.040771484375	377.6873779296875	rectangle	"- nepravidelně kruhovitá jáma se šikmými, místy téměř svislými stěnami, náznaky
+"	19	TextRegion	0.9189615249633788
+296.0145568847656	1051.6412353515625	1040.319091796875	1177.63232421875	rectangle	"E JE Ye
+
+- kůlová jamka. Rozměry: 26x I8cm, hloubka: 8 cm. Výplň světle šedá, u dne
+"	20	TextRegion	0.8921217322349548
+1038.78125	1279.3121337890625	1048.7918701171875	1289.662353515625	rectangle		21	TextRegion	0.876187264919281
+302.29254150390625	1257.7877197265625	1004.0344848632812	1298.57177734375	rectangle	"- kůlová jamka. Rozměry: 48x 36 cm, hloubka: 10cm. Výplň tmavě hnědá
+"	22	TextRegion	0.8727502822875977
+171.03965759277344	892.3331909179688	246.31597900390625	903.9678344726562	rectangle	"Datace: -
+"	23	TextRegion	0.8554875254631042
+200.2077789306641	946.324951171875	283.7997436523437	972.3244018554688	rectangle	"2470
+
+ 
+"	24	TextRegion	0.8008418679237366

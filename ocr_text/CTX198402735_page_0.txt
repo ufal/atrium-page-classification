@@ -1,0 +1,45 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+104.94163513183594	445.1653747558594	1125.2177734375	1423.739990234375	rectangle	" 
+
+2.7.—29.9.84
+
+V letošní sezóně probíhal výzkum ve dvou etepách. Na jaře bylo před
+ahrnutím staré plochy výzkumu ověřeno několik objektů a v menším odkry
+u byl vypracován jeden popelnicový hrob /69/. Následně provedl doc.
+farek na části plochy přiléhající E proskoumané části geofysikální mě-
+tení. Vlastní výzkumná kampaň probíhala od 2.7. do 29.9.54. Práce první
+jvou měsíců měla charakter systematického výzkumu, který navázal na zá-
+padní okraj plochy skryté v předchozím roce, Směřoval dále na západ $
+selkem bylo prozkoumáno oca 50 Š. Celkem bylo získáno pět popelnicový
+hrobů,a z nichž dva náležejí jihozápadní skupině, zko >umané v předcho-
+zích letech/hrob 69 a (10/4- semostatnou novou skupinu tvoří popelni-
+cové hroby č. 71, M a 4, mezi nimiž byly dva objekty s břidlicovými
+lotnami - snad dětské kostrové proby“ Uvsusná skupina je situována V
+severozápadním rohu prozkouuané plochy. Mimoto bylo prozkoumáno deset
+objektů /0.85-94/ odlišného charakteru a zřejmě i funkce.
+
+Poslední měsíc byl po slizni řepky věnován průzkumu, sledujícímu
+zjistit skutečný rozsah pohřebiště, Sondáž v místech výraznějších anom
+lií „zjištěných geofysikélním měřením / provedeno celkem 20 sond na dva
+měřických čtvercíchý nepřinesla žádené výsledky, takže jsem v dalším s
+
+Ma, oka det
+věřování MAE Místní složité půdní podmínky nejsouYvhodné
+"	0	TextRegion	0.999996781349182
+85.69084167480469	348.9990539550781	385.1881408691406	405.5298767089844	rectangle	"knovízské pohřebiště
+středověké sídliště
+"	1	TextRegion	0.9990516304969788
+1006.2587890625	1608.426513671875	1098.5428466796875	1618.2459716796875	rectangle	"TZ 64 10398 81
+"	2	TextRegion	0.990515947341919
+94.72959899902344	155.1477508544922	567.6517944335938	263.5740051269531	rectangle	"Obechanětén
+
+Trať: Na Přesličkých/Na Hrobích/
+. . Pod Hroby *'
+Okres: p] zeň-sever
+"	3	TextRegion	0.9869688153266908
+68.8799057006836	316.9477233886719	289.5287475585937	336.4005126953125	rectangle	"Kultura a druh nálezu:
+"	4	TextRegion	0.9701160192489624
+71.6208724975586	1545.60009765625	739.6021728515625	1604.4306640625	rectangle	"zkum, který jsme provedli ve vhodných pověv)
+Poznámka: Pište pokd možno strojem. Na konci uveďte datum. odeslání a''čit
+vyhotovte dvojmo.
+"	5	TextRegion	0.9681097269058228

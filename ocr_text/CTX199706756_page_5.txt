@@ -1,0 +1,38 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+140.26971435546875	480.04595947265625	994.8300170898438	590.5450439453125	rectangle	"Nálezy získané výzkumem byly převezeny do prostor archeologického oddělení Muzea
+východních Čech v Hradci Králové, kde jsou nyní po základním laboratorním ošetření
+
+odborně zpracovávány a budou zde i trvale deponovány.
+"	0	TextRegion	0.999976396560669
+169.67970275878906	136.98358154296875	976.9953002929688	429.1809997558594	rectangle	")bjekty byly po začistění vybírány po částech. Vzhledem k takřka jednotné výplní na
+elém řezu objektů bylo možné hlubší z nich vybírat po mechanických vrstvách. Pre-
+istorické osidlení však využívalo především sprašového pokryvu návrší, a proto byly
+bjekty až nezvykle mělké. Výjimku tvořily jen nepočetné jámy se zásobní funkcí cha-
+akteristické svým kruhovým půdorysem, Stejně jako loňského roku bylo zaměření
+
+>dnotlivých objektů provedeno pomocí theodolitu THEO 10 bez vytyčení měřičské
+"	1	TextRegion	0.9999513626098632
+149.87945556640625	1251.013427734375	974.7130126953124	1456.9986572265625	rectangle	"Třetí sezóna výkopových prací zachytila pokračování polykulturního sídliště s doklady
+osídlení od mladší doby kamenné po mladší dobu hradištní. Vzhledem k prostorovému
+umístění zkoumané plochy, kdy temeno návrší bylo skrýváno pouze částečně převažují
+
+objekty z mladších období nad neolitickými jámami. Osídlení z doby hradištní doloženc
+"	2	TextRegion	0.9999065399169922
+148.00987243652344	1033.0174560546875	968.022216796875	1097.7965087890625	rectangle	"Viz také Kalferst,J. 1996: Záchranný výzkum v Obědovicích pískovna I - ""Na Požárce"" sezóna 1996
+
+(kapitola 4). Zpráva o záchranném výzkumu frkn. ulož archiv AO MVČ archlv ARŮ čj 2441/06).
+"	3	TextRegion	0.9998654127120972
+163.34756469726562	776.0850219726562	994.7517700195312	1002.2490844726562	rectangle	"Výzkum je lokalizován do střední části parcely 346/1 v k.ú. Obědovice zhruba do
+nísta západního svahu a nejnižší partie široké deprese na jižním svahu štěrkopiskového
+iřbětu a dle letošních zjištění naleziště pokračuje v dosud nespecifikovaném rozsahu
+
+měrem k východu. Koordináty zkoumané plochy: ZM 1:10 000 13-23-09 (koodináty
+
+ 
+
+389:208, 400:206, 398:194, 391:197 mm, v nadmořské výšce 227-230m.
+"	4	TextRegion	0.9997416138648988
+154.22286987304688	447.0232543945313	187.9425048828125	462.9505615234375	rectangle	"sítě,
+"	5	TextRegion	0.986741840839386
+150.30654907226562	1207.8895263671875	538.2891235351562	1239.71337890625	rectangle	"5. Výsledky výzkumu v r. 1997
+"	6	TextRegion	0.9721056818962096

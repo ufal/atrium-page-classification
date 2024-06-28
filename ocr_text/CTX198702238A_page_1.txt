@@ -1,0 +1,87 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+196.40621948242188	171.29171752929688	1097.9114990234375	1525.1748046875	rectangle	"ju jako mohyla 10, Nacházela se na dnešním JZ obvodu pohřebiš-
+sč, v průseku vykáceném západně od st. silnice a s ní rovno-
+Jěžném ve směru J-S., Kromě hluboce vyježděných kolejí měla po-
+rrch viditelně nepoškozený. Její rozměry byly: průměr 13 ma
+7e 0,90 m. Hormí povrchová vrstva byla travnatá a mechovitá a
+nyla postupně odkopávána nejprve v západní, pak ve východní
+jolovině mohyly po jednotlivých sektorech. Pod povrchovou vrst
+rou se ukázalo drobnější kamení, tvořící kryt téměř v celé již
+ní větší polovině mohyly (obr. 1 a 2). Pařezy pokácených stro-
+ni byly odstraňovány až ve 3. vrstvě, kde byly kameny pevněji
+(pící v zemi. V severní menší polovině mohyly nebyl souvislý
+cemenný kryt (obr. 3:3 a 4:1), pouze hlinitý násyp s kameny,
+cterý se zvolna k gevermímu pevnému bodu snižoval, až téměř
+splýval s okolním terénem, Po provedené dokumentaci byla od-
+straněna horní první vrstva menších kamenů (obr. 5:1,2) po ce-
+
+l é ploše jižní části a pod ní se nacházela druhá vrstva kame-
+
+©
+
+nů pevněji zasazených, jejíž obvod byl menší a tvořily ho vět-
+ší a hlouběji zasazené kameny, zvláště na JV a V obvodu této
+vrstvy Po očistění a nakreslení byly z této druhé vrstvy ode-
+orány nejvýše položené kameny a ponechány pod nimi ležící vět-
+sí a na plocho položené, které bylo možno považovat za třetí
+vrstvu, nejlépe upravenou na rozhraní JZ a JV sektoru a pod
+vrcholem mohyly. V JV sektoru, blíže jižnímu obvodu se objevi-
+Lo kruhovité uspořádání plochých kamenů a v jeho blízkosti ně-
+kolik zlomků keramiky ze zdobené nádobky a posléze další stře-
+DY, pevně držící mezi kameny v hlíně, Celkem se zlomky nachá-
+zely asi na ploše 20x30 cm. Z této části byly odebrány další
+
+kameny a ukázalo se, že směrem od J obvodu ku středové části
+"	0	TextRegion	0.9999326467514038
+163.16329956054688	717.4004516601562	1127.4359130859375	1335.50927734375	rectangle	"kamenný kryt (obr. 3:3 a 4:1), pouze hlinitý násyp s kameny,
+který se zvolna k gevernímu pevnému bodu snižoval, až téměř
+splýval s okolním terénem. Po provedené dokumentaci byla od-
+straněna horní první vrstva menších kamenů (obr. 5:1,2) po ce-
+lé ploše jižní části a pod ní se nacházela druhá vrstva kame-
+
+nů pevněji zasazených, jejíž obvod byl menší a tvořily ho vět-
+
+(ae
+
+í a hlouběji zasazené kameny, zvláště na JV a V obvodu této
+vrstvy. Po očistění a nakreslení byly z této druhé vrstvy ode-
+brány nejvýše položené kameny a ponechány pod nimi ležící vět-
+ší a na plocho položené, které bylo možno považovat za třetí
+vrstvu, nejlépe upravenou na rozhraní JZ a JV sektoru a pod
+vrcholem mohyly. V JV sektoru, blíže jižnímu obvodu se objevi-
+
+lo kruhovité uspořádání plochých kamenů a v jeho blízkosti ně-
+"	1	TextRegion	0.9982505440711976
+197.4886779785156	241.43556213378903	1067.968017578125	832.2970581054688	rectangle	"JSy V PLUBESU VYJKAVEUCUH  ZAPAULJ VU Sve SL4ULVE A 5 114 LOVILO=
+ěžném ve směru J-S. Kromě hluboce vyježděných kolejí měla p
+'rch viditelně nepoškozený. Její rozměry byly: průměr 13 ma
+7. 0,90 m. Horní povrchová vrstva byla travnatá a mechovitá
+yla postupně odkopávána nejprve v západní, pak ve východní
+
+olovině mohyly po jednotlivých sektorech. Pod povrchovou vr
+rou se ukázalo drobnější kamení, tvořící kryt téměř v celé j
+lí větší polovině mohyly (obr. 1 a 2). Pařezy pokácených str
+nů byly odstraňovány až ve 3. vrstvě, kde byly kameny pevněj
+pící v zemi. V severní menší polovině mohyly nebyl souvislý
+cemenný kryt (obr. 3:3 a 4:1), pouze hlinitý násyp s kameny,
+cterý se zvolne k severnímu pevnému bodu snižoval, až téměř
+
+splývel s okolním terénem. Po provedené dokumentaci byla od-
+"	2	TextRegion	0.9941375255584716
+1091.2586669921875	45.69541549682617	1102.64306640625	63.59003829956055	rectangle		3	TextRegion	0.9843953847885132
+178.85031127929688	960.054443359375	1109.4241943359375	1475.6319580078125	rectangle	"nů pevněji zasazených, jejiž obvod byl mensi a Úvorily no veěí-
+ší a hlouběji zasazené kameny, zvláště na JV a V obvodu této
+
+vrstvy. Po očistění a nakreslení byly z této druhé vrstvy ode-
+brány nejvýše položené kameny a ponechány pod nimi ležící vět-
+ší a na plocho položené, které bylo možno považovat za třetí
+
+vrstvu, nejlépe upravenou na rozhraní JZ a JV sektoru a pod
+
+vrcholem mohyly. V JV sektoru, blíže jižnímu obvodu se objevi-
+lo kruhovité uspořádání plochých kamenů a v jeho blízkosti ně-
+kolik zlomků keramiky ze zdobené nádobky a posléze další stře-
+py, pevně držící mezi kameny v hlíně, Celkem se zlomky nachá-
+
+zely asi na ploše 20x30 cm. Z této části byly odebrány další
+"	4	TextRegion	0.9820496439933776

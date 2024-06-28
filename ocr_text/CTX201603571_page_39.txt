@@ -1,0 +1,54 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.24951171875	1590.743896484375	623.556884765625	1606.5877685546875	rectangle		0	TextRegion	0.9999896287918092
+159.94854736328125	1292.190673828125	1029.939697265625	1411.6728515625	rectangle	"Nejmladší terénní situace již vypovídá pouze o lokálním navýšení místa (podsyp
+parkovací plochy, zahradní úpravy) a výstavbě dlouhodobých provizorií v podobě dvojice
+
+patrových staveb situovaných kolmo na dnešní ulici a provozních objektů vrátnice.
+
+ 
+"	1	TextRegion	0.9999617338180542
+156.59768676757812	1043.3255615234375	1019.2341918945312	1264.9375	rectangle	"existujícím stavbám užitkové/hospodářské funkce.
+
+ 
+
+Kotázce doby výstavby stávajícího objektu „menzy“ (ppč. 1557) výzkum bli
+informace nepřinesl. K jeho realizaci došlo s vysokou pravděpodobností v první dekádt
+po roce 1918, jak lze vysledovat na základě studia dostupných plánů a ikonografie (obr
+
+příl. 53-58). V následujícím období pak proběhl poměrně rychlý nárůstu terénu sc
+
+ 
+"	2	TextRegion	0.9981497526168824
+166.58438110351562	111.44725036621094	1033.7901611328125	421.4210205078125	rectangle	" 
+
+heterogenní keramický materiál středověkého až novověkého stáří. Ukázkou dané
+situace mohou být tyto uloženiny v sondách S01 a S02 (sj. S01-13 a S02-13, obr. příl. 12-
+14), kde tvoří zřetelný přechod mezi starším osídlením středověkého stáří a mladší,
+novodobou sídelní komponentou. Po ukončení středověkého osídlení místa byla zdejší
+poloha využívána dlouhodobě pouze jako pole a zahrady s vazbou na osídlení situované u
+Botiče, podél dnešní ulice Na Slupi. S pomocí dostupných písemných ale především
+
+konografických pramenů lze závěr uvedeného období posunout až na počátek 20. století,
+"	3	TextRegion	0.9978413581848145
+168.276611328125	380.5657958984375	1031.2374267578125	1057.820068359375	rectangle	"konografických pramenů lze závěr uvedeného období posunout až na počátek 20. století,
+Jo doby radikální urbanistické proměny území dnešního Albertova.
+
+Na počátku 20. století byl započat proces výstavby univerzitního areálu a jeho
+ednotlivých budov. Do podoby historického nadloží se tyto aktivity zapsaly nárůstem
+erénů obsahující ve velké míře stavební sutě a místy i druhotně přemístěný podložní
+materiál (viz kap. 3.1 této zprávy). Na základě vyhodnocení odhalené stratigrafie
+svrchních partií nadloží lze soudit, že především parcela č. 1556 musela být v prvních
+jekádách 20. století využívána jako místo skládky stavebního a komunálního odpadu.
+Jůvodně patrně svažitějšího terén byl především ve své jižní části postupně zarovnán a
+místy zvýšen až o 3,5 m (obr. příl. 7-10). Časový interval doby nárůstu neumíme
+specifikovat. Z analýzy terénní situace je však jisté, že k celému procesu nárůstu nedošlo
+naráz, ale že během ukládání jednotlivých vrstev se proces akumulace na určitou dobu
+Lastavoval. Argumentem jsou nám vedle zjištěných pochozích úrovní — zpevněný povrch
+situace v sondě S01-04 a 06) také dosud archivně nedohledané zděné konstrukce staveb
+
+skupina zdiv vsondě S07), které lze zatím hypoteticky přisoudit spíše krátkodobě
+
+ 
+
+ím stavbám užitkové/hospodářské funkce.
+"	4	TextRegion	0.9971119165420532

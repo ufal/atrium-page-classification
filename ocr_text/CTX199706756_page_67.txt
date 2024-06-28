@@ -1,0 +1,4 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+764.1666870117188	1390.593017578125	941.5612182617188	1430.427978515625	rectangle	"| k.j. ve dně J části
+| kj ve dně
+"	0	TextRegion	0.8516403436660767

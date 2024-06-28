@@ -1,0 +1,43 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+128.1825714111328	213.8258056640625	1134.7039794921875	545.5452270507812	rectangle	"Na východním z obou terasových ostrovů při soutoku Labe
+s Cidlinou, jehož plochu zaujalo předhradí slovanského hradiska,
+leží nejvýše kulturní vrstvy, které narostly jako důsledek lidské
+přítomnosti na původním geologickém terénu v pravěku (lužická kul-
+tura), v raném, vrcholném a pozdním středověku a v dobách pozdějšíc
+Terén zahrad u domů na předhradí je přeryt do průměrné hloubky cca
+
+20 cm a někde je původní terén na předhradí pokryt novodobými naváž
+"	0	TextRegion	0.9999908208847046
+148.59133911132812	1265.64599609375	1121.470947265625	1586.0018310546875	rectangle	"Moderní shrnutí všech starších archeologických objevů na před-
+hradí slovanského hradiska v Libici nad Cidlinou přinesl R. Turek
+v knize Slavníkova Libice, Praha 1946, na str. 36-39. Kniha však
+mezi libickými nalezišti nezmiňuje komplex usedlosti v Husově ul,
+č.p. 63, kterou od konce 19, stoleti drží Svobodova rodina a které
+náležela před 2. světovou válkou mezi největší statky v obci, Pokt
+
+je mi známo, před r. 1974 vskutku nedošlo v zahradní části Svobodc
+"	1	TextRegion	0.9999548196792604
+174.0935516357422	577.091552734375	1114.9322509765625	1113.925048828125	rectangle	"mů
+
+Spodní geologická vrstva na předhradí je terasový písek, místy
+sek promíšený štěrkem či dokonce vápnitými hroudami a vrstvičkar
+isty je to hrubý štěrkopísek. Na některých místech na předhradí
+oží písek či štěrkopísek hned pod kulturním souvrstvím, jinde se
+ezi svrchním humusovým souvrstvím (kulturními vrstvami) a spodnír
+ísčitým či štěrkopísčitým horizontem na předhradí nalézá ještě
+ůzně mocná vrstva jílu, většinou značně hutného.
+
+V areálu sondy 2 leží mezi horním kulturním souvrstvím a spod-
+ím terasovým pískem vrstva jílu. V areálu pravděpodobného kněž-
+kého domu se dokonce dávno předtím, v období lužické kultury,
+
+il těžil a my jsme zde prozkoumali část hlubokého hliníku
+"	2	TextRegion	0.99974924325943
+187.81906127929688	1183.7364501953125	459.4272155761719	1206.1751708984375	rectangle	"HISTORIE NALEZIŠTĚ
+"	3	TextRegion	0.998736560344696
+156.50326538085938	138.63381958007812	516.8688354492188	165.5752410888672	rectangle	"PODLOŽÍ A PBDNÍ POKRYV
+
+ 
+"	4	TextRegion	0.994030237197876
+144.6816864013672	147.4421844482422	171.12010192871094	162.9649658203125	rectangle		5	TextRegion	0.9012902975082396
+155.29258728027344	1189.4283447265625	175.00515747070312	1204.678466796875	rectangle		6	TextRegion	0.8641433119773865

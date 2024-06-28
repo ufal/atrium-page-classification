@@ -1,0 +1,24 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+3273.06298828125	22.225276947021484	3460.978271484375	68.72028350830078	rectangle	"Plan č.5.
+"	0	TextRegion	0.9999880790710448
+1545.35888671875	2519.5126953125	2162.339599609375	2746.74755859375	rectangle	"Ve VIII objekty
+
+4 kůlová jamka
+h vrstva 3 ( lO,století )
+o vrstva 4 ( lužická kultura )
+
+prázdné plochy označují jednak sokl s destrukcí
+vnitřní hradební zdi v sz. částí sondy 2b při
+její hranící se sondau do k O NN
+
+ 
+"	2	TextRegion	0.8914306163787842
+1563.9581298828125	2632.547607421875	2180.5048828125	2768.07666015625	rectangle	"an ooé SU Z o...
+o vrstva 4 ( lužická kultura )
+
+prázdné plochy označují jednak sokl s destrukcí
+vnitřní hradební zdi v sz. částí sondy 2b při
+
+její hraníci se sondou 2a, jednak sondy zkoumané
+-bm -2 Da
+"	3	TextRegion	0.8882313370704651

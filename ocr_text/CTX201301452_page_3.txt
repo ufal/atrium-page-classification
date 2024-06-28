@@ -1,0 +1,24 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+139.8325958251953	235.85325622558597	1043.120361328125	924.3958740234376	rectangle	"Předmětem této nálezové zprávy je shrnutí výsledků předstihového záchranného
+archeologického výzkumu provedeného před výstavbou na akci „Vila Bubeneč“, na parcele
+číslo 1254 v ulici Juárezova, k. ú. Bubeneč v Praze 6. Terénní práce probíhaly od 17. 5. do 26.
+6.2012. Zpracování výzkumu do předkládané nálezové zprávy bylo zahájeno 28. 6. 2012 a
+bylo ukončeno dne 31. 12. 2012. Stavebníkem ve smyslu $ 22 zákona 20/1987 Sb. ve znění
+pozdějších předpisů je MUDr. Eva Nováková se sídlem Na Míčánce 1918/27, 166 10 Praha 6.
+Výzkum byl v souladu s výše uvedeným zákonem hrazen z prostředků státního rozpočtu ČR.
+Objednatelem výzkumu je Národní památkový ústav, IČ: 75032333, se sídlem Valdštejnské
+nám. 162/3, 118 00 Praha 1, územně odborné pracoviště v hlavním městě Praze. Záchranný
+archeologický výzkum byl realizován na základě Dohody o provedení záchranného
+archeologického výzkumu uzavřené mezi Stavebníkem a Národním památkovým ústavem
+zastoupeným ředitelem územně odborného pracoviště v hlavním městě Praze PhDr.
+Michaelem Zachařem a Dohody o provedení subdodávky záchranného archeologického
+výzkumu mezi Národním památkovým ústavem zastoupeným ředitelem územně odborného
+pracoviště v hlavním městě Praze PhDr. Michaelem Zachařem a Archeo Pro o.p.s. ze dne 17.
+5. 2012. Výsledky archeologického výzkumu provedeného na základě této Dohody shrnuje
+
+předkládaná nálezová zpráva.
+"	0	TextRegion	0.999974012374878
+147.3262939453125	145.6501922607422	250.3731842041016	168.57640075683594	rectangle	"1. ÚVOD
+"	1	TextRegion	0.9998492002487184
+558.7086791992188	1588.548828125	638.3380126953125	1611.3375244140625	rectangle	"|. ÚVOD
+"	2	TextRegion	0.9994434714317322

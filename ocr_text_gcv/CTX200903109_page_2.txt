@@ -1,0 +1,6 @@
+IMAGE_NAME	DESCRIPTION	LANGUAGE	BBOX_1	BBOX_2	BBOX_3	BBOX_4
+image	Příloha 3. Fotodokumentace výkopů	cs	(413, 1596)	(796, 1596)	(796, 1619)	(413, 1619)
+image	Příloha		(413, 1596)	(488, 1596)	(488, 1617)	(413, 1617)
+image	3.		(496, 1596)	(515, 1596)	(515, 1617)	(496, 1617)
+image	Fotodokumentace		(524, 1596)	(714, 1597)	(714, 1618)	(524, 1617)
+image	výkopů		(722, 1597)	(796, 1597)	(796, 1618)	(722, 1618)

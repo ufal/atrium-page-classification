@@ -1,0 +1,17 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+1074.4061279296875	46.52523040771485	1166.1590576171875	74.00602722167969	rectangle	"Tab, 24
+"	2	TextRegion	0.9996576309204102
+209.4891662597656	670.9525146484375	1088.4970703125	734.2769165039062	rectangle	"da 2b (1974). Část základu jižní podezdívky budovy oriento-
+é y-2 a vyzděného kanálku v interiéru budovy. Pohled od JZ.
+o 1 Justova.
+"	3	TextRegion	0.9990690350532532
+160.37242126464844	1380.9703369140625	474.6473388671875	1434.317138671875	rectangle	"Sonda 2b (1974). Část
+a vyzděného kanálku v
+"	4	TextRegion	0.9976575374603271
+454.4915771484375	1381.2938232421875	1129.0184326171875	1442.6348876953125	rectangle	"st jižní podezdívky budovy orientované V-Z
+v interiéru budovy. Pohled od S. Foto J. Justova.
+"	5	TextRegion	0.9939140677452089
+170.68870544433594	671.4402465820312	552.4282836914062	741.6469116210938	rectangle	"Sonda 2b (1974). Část zákle
+vané V-Z a vyzděného kanál)
+Foto J.Justova.
+"	7	TextRegion	0.9193998575210572

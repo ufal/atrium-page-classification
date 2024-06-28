@@ -1,0 +1,61 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+140.97901916503906	1277.1456298828125	1162.4493408203125	1535.1751708984375	rectangle	"již v sezóně 1974 bylo zřejmé, že základ opukové zdi, orientovaný
+od V k Z, i tehdy odhalený JZ konec vyzděného odvodního kanálku,
+tvoří část nestandardní nadzemní budovy. Odvodní kanálek probíhal
+pod základem uvedené zdi (která byla nad kanálkem prokleslá —
+-""propadlá""“ do zásypu kanálku, tvořeného měkkou vrstvou 3) ven
+
+z budovy. Kanálek ústil jižně od základu opukové zdi orientované
+V-Z do prohlubně vysypané opukovými kameny, kterou lze pokládat
+"	0	TextRegion	0.999992847442627
+169.7716064453125	148.37979125976562	1179.2919921875	336.8547058105469	rectangle	"8/74:
+
+""Sonda 2b, rozebírání silné destrukční vrstvy jižně od zdi
+
+Z-V až na dno rozlehlé jámy s touto destrukcí (po tmavý
+hnědoš, hlinitý jíl, drobně žíhaný narezle žlutým pískem)
+
+(o této vrstvě ve větší ploše a značné mocnosti: v podstatě
+vyplňující jámu, z níž asi vytěženo zdivo nějaké menší stavby,
+viz terénní záznamy ad 30.7.) - vých. část této silné destruk-
+ční vrstvy. 29.7., 30,7., 31.7., 1.8., 2,8.""
+"	1	TextRegion	0.999968647956848
+167.57244873046875	851.3265380859375	1182.8016357421875	1220.702880859375	rectangle	"pod4021:
+
+základ jižní podezdívky byl zahlouben do lužické vrstvy 4,
+
+Do lužické vrstvy 4 byl rovněž vyhlouben vyzděný kanálek, který ve
+směru SV-JZ probíhal pod podlahou pravděpodobného kněžského domu
+
+a pod dobře zachovaným základem jižní podezdívky, který byl do
+kanálku prokleslý. Do povrchu vrstvy 4 byla místy zašlapaná opuko-
+vá suř, dobře viditelná zejména v řezu 3, a povrch intaktní lužické
+vrstvy 4 byl jižně od J podezdívky pravděpodobného kněžského domu
+místy pokryt překopanou vrstvou 4 promíšenou drobnou opukovou sutí;
+obé lze interpretovat jako stavební suti z doby stavby pravděpo-
+dobného kněžského domu.
+"	2	TextRegion	0.99994158744812
+136.87155151367188	464.3532409667969	1179.1951904296875	855.4638671875	rectangle	"J podezdívka pravděpodobného kněžského domu probíhala napříč
+sondami (popisováno od Z k V) 2c, 2a a 2b, Od této podezdívky
+vybíhaly k severu zbytky dvou podezdívek, které jistě původně
+nesly patrně roubené stěny, vymezující východní, střední a zá-
+padní místnost v domě, Zbytky pravděpodobné západní příčky v bu-
+dově se táhly ve směru J-S ze sondy 2a do sondy 2c, zbytek pravdě-
+podobné V přičky v budově vybíhal od J podezdívky pravděpodobného
+kněžského domu k severu v sondě 2b. V sondě 2b byl také v roce
+1974 zjištěn JZ konec vyzděného odvodního kanálku, který běžel
+
+pod podlahou budovy od SV k JZ a jehož dno mělo spád k JZ (to bylo
+
+2) podloží: v terénu ověřeno v r.1975)
+"	3	TextRegion	0.9996490478515624
+132.61732482910156	386.24163818359375	343.2052917480469	406.8626708984375	rectangle	"Popis objektu:
+"	4	TextRegion	0.9899988770484924
+547.4566040039062	54.74945068359375	581.8215942382812	69.267822265625	rectangle	"45
+"	5	TextRegion	0.98805969953537
+137.38998413085938	1251.60986328125	160.3875732421875	1269.65087890625	rectangle		6	TextRegion	0.9820719361305236
+136.09275817871094	841.4736938476562	162.23464965820312	860.8933715820312	rectangle		7	TextRegion	0.9802631735801696
+528.0504150390625	57.09755706787109	588.5914306640625	68.67359161376953	rectangle	"45
+"	8	TextRegion	0.925450563430786
+138.86402893066406	1251.811279296875	261.4730529785156	1268.7279052734375	rectangle	"3) druh:
+"	9	TextRegion	0.8375378847122192

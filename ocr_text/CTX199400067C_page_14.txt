@@ -1,0 +1,16 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+993.952880859375	56.976707458496094	1083.8779296875	81.33953094482422	rectangle	"Tab. 11
+"	2	TextRegion	0.999634861946106
+145.37298583984375	1442.5738525390625	1064.7674560546875	1532.0191650390625	rectangle	"Sonda 2a-2c 4297020 Jižní podezdívka budovy orientované V-Z
+a zbytky jejich destrukčních sutí. Vzadu vnitřní příkop a
+kontrolní blok se sutí vnitřní hradební zdi. Pohled od VJV.
+Foto J.Justovo.
+"	3	TextRegion	0.999561846256256
+186.45005798339844	680.44384765625	1019.1468505859376	761.020751953125	rectangle	"sonda 2b (1974). Část jižní podezdívky budovy orientované
+-Z a část vyzděného kanálku v interiéru budovy. Stav po
+sejmutí vrstvy 10. století. Pohled od SV. Foto J. Justova“
+"	4	TextRegion	0.9992913007736206
+925.1751098632812	596.8403930664062	1020.0205078125	643.107177734375	rectangle	"č. Neg.
+51 121
+"	5	TextRegion	0.9862172603607178
+955.8785400390624	564.85205078125	982.0820922851562	584.3018798828125	rectangle		6	TextRegion	0.8218209743499756

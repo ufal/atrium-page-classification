@@ -1,0 +1,11 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+117.0820770263672	659.5933837890625	1046.9375	728.5722045898438	rectangle	"Sonda 2c (1974). Destrukce vnitřní hradební zdi (snímání).
+Pohled od SY. V Z rohu sondy 2e vyzvednut zásyp čdsti polozemnice
+(2) | v sondě 20. Foto J.Justova.
+"	2	TextRegion	0.9997504353523254
+185.4521484375	1380.488525390625	1099.820556640625	1446.647216796875	rectangle	"»nda 2b (1974). Vnější líc jižní podezdívky budovy orientované
+Z “ opředí, zbytky destrukčních sutí budovy. Pohled od JZ.
+nm 3 Jm eFova
+"	3	TextRegion	0.999601423740387
+1020.44873046875	61.657020568847656	1085.245849609375	87.3418960571289	rectangle	"Tab.
+"	4	TextRegion	0.9994811415672302

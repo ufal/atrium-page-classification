@@ -1,0 +1,64 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.2392578125	1591.1807861328125	623.3555297851562	1606.361083984375	rectangle		0	TextRegion	0.999986171722412
+153.5911865234375	398.6710815429688	1032.350341796875	598.502685546875	rectangle	"Archeologická sonda O Velikosti Ve vrchni casti 3,0 X Z m a VE Spodní urovni 2,0 x L
+m se nalézala na západním okraji pozemku č. 1556/3, na ploše asanovaného objektu
+(obr. příl. 1, 2, 3, 4). Úroveň povrchu sondy se nalézala na niveletě 199,60 m n. m., dno
+
+sondě byl dokumentován 1 řez (S04-RJ).
+"	1	TextRegion	0.9999175071716307
+179.36422729492188	864.0192260742188	1031.0416259765625	928.1241455078124	rectangle	"Stratigraficky níže od úrovně 196,5 se již nalézaly holocenní uloženiny v podobě
+
+umáózního zahliněného písku nasedajícího na zahliněný nísek deluviofluviálního nůvodu.
+"	2	TextRegion	0.99980229139328
+160.76318359375	208.20591735839844	190.93492126464844	225.1873016357422	rectangle	"212).
+"	3	TextRegion	0.9997791647911072
+158.65451049804688	1027.66162109375	278.84112548828125	1053.34814453125	rectangle	"Sonda S05
+"	4	TextRegion	0.999729335308075
+162.2430419921875	1097.578125	1039.845458984375	1330.006103515625	rectangle	"Archeologická sonda o velikosti v horní části 4 x 2 m a vdolní partii 2 x 1 m se
+nalézala na severním, nezastavěném okraji pozemku č. 1556/1 v části využívané jako
+parkoviště osobních vozů (obr. příl. 1, 2, 3, 4). Úroveň povrchu sondy se nalézala na
+3,54 m). Celkem v této sondě byl dokumentován 1 řez (S05-RJ).
+
+Stávající povrch zde tvořila 0.2 m silná vrstva drobného štěrku a rozemletého
+"	5	TextRegion	0.9997290968894958
+160.77146911621094	318.9721069335937	277.88726806640625	342.8973083496094	rectangle	"Sonda S04
+"	6	TextRegion	0.999638557434082
+168.146728515625	115.5399169921875	1036.0872802734375	180.71157836914065	rectangle	"Od úrovně 197,54 tato stratigraficky nejstarší člověkem ovlivněná vrstva nasedala
+
+na již přírodní podklad tvořený soudržnou písčitou hlínou s ojedinělými valouny (sj. S03-
+"	7	TextRegion	0.9993821382522584
+156.53652954101562	581.8114013671875	1033.8878173828125	821.5923461914062	rectangle	" 
+
+ná Auné i
+Stávající úroveň povrchu zde byla tvořena zatravněným zahradním substrátem
+
+(S04-01), pod kterým se nalézala 2,6 m mocná poloha heterogenních uloženin s převahou
+
+písčitých hlín, písčitých štěrků a stavební sutě (S04-02 až S04-08; niveleta báze 196,70).
+
+Souvrství navážek překrývalo ve spodní části sondy polohu tmavě hnědošedé
+
+soudržné písčité hlíny s ojedinělými uhlíky (S04-09), kterou opět můžeme označit jako
+"	8	TextRegion	0.997747838497162
+229.82400512695312	118.22644805908205	1030.6671142578125	141.7639617919922	rectangle	"Od úrovně 197,54 tato stratigraficky nejstarší člověkem ovlivněná vrstva nasedala
+"	9	TextRegion	0.9966807961463928
+178.18373107910156	1295.619873046875	1038.97265625	1420.8519287109375	rectangle	"Stávající povrch zde tvořila 0,2 m silná vrstva drobného štěrku a rozemletého
+sfaltu (sj. S05-01), která překrývala tenkou vrstvičku rezavého písku (sj. S05-02), lokálně
+
+orušeného mělkým liniovým výkopem pro kabel (sj. V15, S05-03).
+"	10	TextRegion	0.9053293466567992
+152.5218048095703	395.0629577636719	1051.705078125	885.27783203125	rectangle	"Archeologická sonda o velikosti ve vrchní části 3,8 x 2 m a ve spodní úrovni 2,6x1
+m se nalézala na západním okraji pozemku č. 1556/3, na ploše asanovaného objektu
+(obr. příl. 1, 2, 3, 4). Úroveň povrchu sondy se nalézala na niveletě 199,60 m n. m., dno
+sondě byl dokumentován 1 řez (S04-RJ).
+
+Stávající úroveň povrchu zde byla tvořena zatravněným zahradním substrátem
+(S04-01), pod kterým se nalézala 2,6 m mocná poloha heterogenních uloženin s převahou
+písčitých hlín, písčitých štěrků a stavební sutě (S04-02 až S04-08; niveleta báze 196,70).
+
+Souvrství navážek překrývalo ve spodní části sondy polohu tmavě hnědošedé
+soudržné písčité hlíny s ojedinělými uhlíky (S04-09), kterou opět můžeme označit jako
+homogenizovanou kulturní vrstvu.
+
+Stratigrafickv níže od úrovně 196.5 se již nalézalv holocenní uloženinv v podobě
+"	11	TextRegion	0.8254380822181702

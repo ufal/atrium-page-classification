@@ -1,0 +1,57 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+232.59323120117188	987.8696899414062	1105.9674072265625	1645.0611572265625	rectangle	" 
+
+Durch die Oberfláchenabtragung ist die Kulturgrubenschich
+© noch(unregelmáBig)in 20 — 40 cm Můchtigkeit vorhanden.
+nordli.cher Richtung der scharfen Grubenabgrenzung nachge-
+id fincen sich Spuren von drei nahe aneinander liegenden Pfo:
+hern, zwei davon unmittelbar nebeneinander inmitten des Gru
+mordrandes (Taf.II, Pfosten I-III). Es handelé sich hier
+Il um č.ie Eingangsseite des Hauses (4=2,40 m). Der Nachweis
+les Pfostens (III, Taf.II) in geringer Entfernung vor der
+>gen Osten gerichteten) Hausseite, lt darauf schlieBen,
+
+) das Hausdach hier ber die Nordwand hinausragte (Lůngs-
+mitt C C, auf Taf.IV). Daf dieser Pfosten(III) eine groBe
+3t, dae vorragende Giebcldach zu tragen hatte, erweisen die
+itiefurg (47 cm) und der Durchmesser (44 cm) des Pfosten-
+hes. ler MUittelpfosten der Giebelseite(Pfosten I, Durch-
+sser 4f om) war hart an der Hauswand (aušen) angebracht wor-
+1; ein groóBerer und mehrere kleinere Steine in der Pfosten-
+ibe zejgen die Befestigung des Pfostens im Erdbodena
+"	0	TextRegion	0.9999995231628418
+152.0379638671875	365.3152465820313	1117.890869140625	749.2520141601562	rectangle	"— === ===
+
+Nordwestlich bezw. westlich vom Orte Langugest (Taf.I.)
+schneide: die Strafienneubautrasse Dux-Briix den Fahrweg Lang-
+ugest-Liwitz, die Grundparzelle 335 iberguerend“ Grundbach
+(und líihiibach) und die alte ReichsstraBe (Dux-) Langugest-
+Brůx. Durch den Baggerbetrieb sind auf Parz. 335 Ackerkrume
+und darunterliegende Erdschicht etwa 1 m tief abgetragen. Am
+čstlichen Rande der frasse, ungefihr in der Mitte der Parzelle
+335 (63,90 m vom Fahrweg Langugest-Likwitz Trassenrand-Entfer-
+nung Siidwest) fand sich am 17./18, Juni 1940 der Rest eines
+
+frůhgeschichtlichen Eisenschmelzofens (vgl. eigenen Grabungs-
+ala
+"	1	TextRegion	0.9999723434448242
+179.51092529296875	766.7548828125	1097.438720703125	929.6784057617188	rectangle	"Bei Erweiterung der Abtragungsfláche (auf Grund vermut=
+licher Schmelzofenparallelfunde) stieB ich 5,50 m nordostlich
+auf im Letten sich deutlich abhebende Bodenverfárbung, die
+sich als abgerundete Ecke einer Haus- oder Gartenanlage er-
+
+MY
+"	2	TextRegion	0.9999641180038452
+203.33921813964844	195.64605712890625	950.7119140625	289.98406982421875	rectangle	"'růheiseazeitliche Hausanlage (Grabungsbericht Dr.Gl
+6.Sepibis 20.Sept. 1940
+(StraBenneubau Dux=Briix ).
+"	3	TextRegion	0.9896422028541564
+1109.6175537109375	23.21295738220215	1127.4031982421875	47.31327819824219	rectangle		4	TextRegion	0.9830644726753236
+187.0600433349609	96.41936492919922	515.7216186523438	152.89210510253906	rectangle	"Langugest, Kreis Bilin
+MeBtischolatt 3751/4
+"	5	TextRegion	0.96025413274765
+188.21324157714844	93.87834167480467	517.080078125	124.5199966430664	rectangle	"Langugest, Kreis Bilin
+"	6	TextRegion	0.8923640847206116
+196.26852416992188	958.8516845703124	364.1264343261719	981.39599609375	rectangle	"9.Sept. 1940.
+"	7	TextRegion	0.8730319738388062
+63.144901275634766	1442.994140625	74.3087387084961	1456.5606689453125	rectangle		9	TextRegion	0.8125525712966919

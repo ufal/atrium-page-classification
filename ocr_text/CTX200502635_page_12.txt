@@ -1,0 +1,17 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+547.7235107421875	1609.276611328125	624.4332275390625	1625.7000732421875	rectangle	"HlasARU1
+"	0	TextRegion	0.9999545812606812
+804.1980590820312	1610.0179443359375	1047.6494140625	1625.07177734375	rectangle	"Created on 6/30/2004 5:14:00 PM
+"	1	TextRegion	0.9999508857727052
+116.47642517089844	1609.52099609375	292.6139221191406	1626.005615234375	rectangle	"Created by Radek Siroky
+"	2	TextRegion	0.9999083280563354
+114.28368377685548	100.65239715576172	277.5557861328125	120.69303131103516	rectangle	"KOMPONENTY
+"	3	TextRegion	0.9997408986091614
+79.91222381591797	130.05508422851562	1085.314697265625	227.2714385986328	rectangle	"Rubriky vyplňujte podle heslářů. PŘESNOU DATACI uveďte, jen je-li to možné, a to libovolným srozumitelným výrazem
+v délce do 25 znaků. V rubrice AKTIVITA můžete použít až 5 hesel, oddělených lomítkem, avšak pouze u dále
+nedělitelných komponent. PŘESNOU LOKALIZACI uvádějte pouze tehdy, není-li totožná s lokalizací celé akce. V rubrice
+NADM. VÝŠKA uveďte nadmořskou výšku v metrech (od-do). URČIL vyplňte, nejde-li o určení autora zápisu, a připojte,
+zda jde o určení podle materiálu, nebo druhotného zdroje (literatura, inventární kniha).
+"	4	TextRegion	0.9991783499717712
+124.07874298095705	1318.018798828125	143.30494689941406	1337.22509765625	rectangle		8	TextRegion	0.913825273513794
+125.04420471191406	430.7326049804688	142.94725036621094	450.3310241699219	rectangle		10	TextRegion	0.8861401677131653

@@ -1,0 +1,55 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+178.135986328125	511.3834533691406	1101.611328125	889.5386962890625	rectangle	"Obr. 29. Některé málo obvyklé formy okrajů libické
+mladohradištní keramiky z vrstvy 2, tje z doby po r. 995
+(1 - 6), pražská keramika ze střední-mladší doby hradištní
+z vrstvy 3 z 10.stol. (7 - 8) a libická napodobenina praž-
+ského hrnce s kalichovitým okrajem z destrukce vnitřní hra-
+dební zdi z 289.995 (9). 1 - 2 sonda 2b, vrstva 2 (55/74);
+3 sonda 2c, vrstva 2 (86/74); 4 - 5 sonda 2c, vrstva 2
+(90/74); 6 - sonda 2b, ornice/vrstva 2 (48/74); 17 - 8
+sonda 2b, vrstva 3 (121/74); 9 sonda 2c, destrukce vnitřní
+hradební zdi (117/74). Kresba H.Komárková (7 - 9) a
+
+ko Z *
+"	0	TextRegion	0.9999289512634276
+555.3672485351562	32.65993118286133	598.84521484375	51.42300033569336	rectangle	"105
+"	1	TextRegion	0.9998849630355836
+704.6425170898438	30.748186111450195	1132.63427734375	109.3109359741211	rectangle	"Texty a komentáře
+k obrázkům s nálezy
+Sonda 2a = 2d (1974) = str.
+"	2	TextRegion	0.999858021736145
+193.5869140625	169.28492736816406	1038.002197265625	297.42657470703125	rectangle	"1 - sonda 2b, vrstva 2 (55/74); 2 = sonda 2a, vrstva 2/
+/vrstva 3 (17/74); 3 - sonda 2a, vrstva 3 (134/74); 4-
+- sonda 2b, destrukce vnitřní hradební zdi (52/74).
+Kresba: H.Komárková.
+"	3	TextRegion	0.9997652173042296
+150.26751708984375	312.7815246582031	1065.66943359375	472.4932556152344	rectangle	"Obr. 28. Některé varianty libické ""keramiky slavní-
+kovské fáze"", nalezené v destrukci vnitřní hradební zdi
+v sondě 2ce 1, 3, 5, 6 sonda 2c, DVHZ (117/74); 2 - sond:
+2e, DVHZ (116/74); 4 - sonda 2c, DVHZ (110/74).
+"	4	TextRegion	0.999680995941162
+189.21408081054688	1390.5718994140625	1186.77880859375	1582.0096435546875	rectangle	"""R O
+
+ 
+
+Obr. 31. Sonda 2c (1974), Přechodná rekonstrukce keramic=
+kého aguamanile na jádru ze sochařské hlíny (1979). Jednotlivé
+zlomky aguamanile byly nalezeny v sondě 2c rozptýleně ve vrstvě
+2, v DVHZ a na povrchu vrstvy 3. 1 levá strana torza; 2 po-
+hled na torzo zeshora. Foto J.Spiegel,
+"	5	TextRegion	0.9993481040000916
+207.396240234375	1020.6990356445312	1131.037353515625	1374.2447509765625	rectangle	"rozptýleně v sondě 2c, jsem v roce 1979 umístila na rekonstruo-
+vané jádro vymodelované ze sochařské hlíny. Obrázky dokumentují
+rekonstruované torzo aguamanile z různých stran.
+
+Obr. 30. Sonda 2c (1974). Přechodná rekonstrukce keramic=
+kého aguamanile na jádru ze sochařské hlíny (1979). Jednotlivé
+zlomky aguamanile byly nalezeny v sondě 2c rozptýleně ve vrstvě
+2, v destrukci vnitřní hradební zdi a na povrchu vrstvy 3.
+
+l pravá strana aguamanile;2 pohled na torzo zepředu; 3 zadeček
+
+c | C, M v
+
+ 
+"	6	TextRegion	0.9787196516990662

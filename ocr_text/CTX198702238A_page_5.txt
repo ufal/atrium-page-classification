@@ -1,0 +1,38 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+185.71876525878903	140.3508758544922	317.5605773925781	160.345458984375	rectangle	"Mohyla 10
+"	0	TextRegion	0.9998738765716552
+497.812255859375	212.45870971679688	672.1348876953125	233.81997680664065	rectangle	"Popis nálezů
+"	1	TextRegion	0.9998397827148438
+191.17059326171875	1318.5726318359375	269.2255554199219	1337.1201171875	rectangle	"Hrob
+"	2	TextRegion	0.9997627139091492
+185.14056396484372	536.5568237304688	1093.1595458984375	692.9810791015625	rectangle	"5b/77 - Bronzový tyčinkovitý náramek s kruhovým průřezem ty-
+činky, zdobený 6 skupinami příčných rýžek, $ tyčinky 3 mm a
+celkový 48 mm, Zelená lesklá patina (obr. 14).
+"	3	TextRegion	0.9997169375419616
+194.46975708007807	344.15167236328125	1084.4306640625	492.6054382324219	rectangle	"5a/77 - Bronzový tyčinkovitý náramek s kruhovitým průřezem
+tyčinky na vnitřní streně zploštělý zdobený 5 skupinami příč-
+ných rýžek, o celkovém $ 51 mm a $ tyčinky 4 mm, Zelená lesk-
+"	4	TextRegion	0.9996095299720764
+163.9034881591797	1371.7164306640625	1109.0780029296875	1449.9407958984375	rectangle	"7a/77 - Pět zlomků ze čtyřhranné jehlice s malým zlomkem patr-
+ně zavinuté hlavice o celkové do. 85 mm, š. tyčinky 2 mm,
+"	5	TextRegion	0.9995168447494508
+193.465087890625	801.392578125	1091.213134765625	1129.7598876953125	rectangle	"3/17 - Amforka na nožkovitém podstavci s vyšším, k okraji se
+úžícím hrdlem, s 2 protilehlými uchy na rozhraní, s mírně za-
+obleným spodkem zdobeným rytými vodorovnými, žebříčkovými,
+cikcakovými pásy s dvojitou vodorovnou linií na rozhraní
+
+s příčnými rýžkami. Výška 120 mm, $ okraje hrdla 80 mm, $ pod
+stavce 70 mm, největší šířka spodku 120 mm (obr. 14).
+
+Ano še ZE ml mám „mm mé
+"	6	TextRegion	0.999476969242096
+177.17428588867188	708.6091918945312	1062.162353515625	744.67919921875	rectangle	"5e/77 - Malá bronzová plochá spirálka nejspíše z prstenu 0 $
+"	7	TextRegion	0.9982214570045472
+185.83932495117188	285.2226867675781	269.23101806640625	305.5693359375	rectangle	"Hrob 1
+"	8	TextRegion	0.996593177318573
+218.8292236328125	701.0946655273438	944.9066162109376	776.664794921875	rectangle	"/T1 - Malá bronzová plochá spirálka nejspíše z pr.
+mm (obr. 14),
+"	9	TextRegion	0.9607917070388794
+192.8744201660156	1225.243896484375	203.7062530517578	1240.706298828125	rectangle		10	TextRegion	0.833432137966156
+215.48605346679688	1221.6790771484375	766.4534912109375	1244.4832763671875	rectangle	"okraje 150 mm, $ dna 50 mn (obr. 14).
+"	11	TextRegion	0.801380455493927

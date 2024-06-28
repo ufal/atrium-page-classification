@@ -1,0 +1,9 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+970.7852172851562	44.65480041503906	1124.289306640625	57.26498031616211	rectangle	"obrazová příloha č. 57
+"	1	TextRegion	0.9999771118164062
+126.10479736328124	806.6370239257812	923.716064453125	842.619140625	rectangle	"| - výřez z plánu Prahy z ptačího pohledu z roku 1923 s vyznačenou budovou č. o. 3a
+(převzato z http://towns.hiu.cas.cz)
+"	2	TextRegion	0.9999018907546996
+94.85604095458984	1569.880126953125	1101.1043701171875	1587.8660888671875	rectangle	"2- výřez z plánu Prahy z roku 1938 s vyznačením parcel č. 1556 a 1557 (čevrveně; převzato z www.ahmp.cz)
+"	4	TextRegion	0.9809175729751588
+1111.961669921875	42.33355331420898	1130.7091064453125	54.73970031738281	rectangle		5	TextRegion	0.9689279198646544

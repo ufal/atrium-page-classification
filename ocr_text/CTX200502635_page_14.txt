@@ -1,0 +1,17 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+548.8541870117188	1608.865234375	625.0304565429688	1625.239990234375	rectangle	"HlasARU1
+"	0	TextRegion	0.9999902248382568
+803.8262329101562	1609.633544921875	1046.3050537109375	1624.510986328125	rectangle	"Created on 6/30/2004 5:14:00 PM
+"	1	TextRegion	0.9999741315841676
+115.67121124267578	65.00467681884766	306.6712341308594	85.18486785888672	rectangle	"MOVITÉ NÁLEZY
+"	2	TextRegion	0.999952793121338
+116.28803253173828	1609.25439453125	294.61346435546875	1625.5078125	rectangle	"Created by Radek Siroky
+"	3	TextRegion	0.9999024868011476
+51.474365234375	97.78585815429688	1083.402099609375	179.64529418945312	rectangle	"Movité nálezy uveďte podle komponent a materiálů. V rubrice DRUH NÁLEZŮ/POČET/POZNÁMKA uveďte jednotlivé
+druhy předmětů z daného materiálu s kvantifikací (je-li možná) a event. Poznámkou. Při výčtu předmětů využívejte
+
+v maximální míře uvedená hesla ( v libovolném gramatickém tvaru), jiné výrazy však můžete použít k bližší specifikaci a
+v poznámce. Nestačí-li k výčtu nálezů počet řádků, rozdělte stránku do dvou sloupců.
+"	4	TextRegion	0.997562289237976
+120.21868133544922	193.28697204589844	191.0035552978516	206.4608154296875	rectangle	"ULOŽEN
+"	5	TextRegion	0.9654320478439332

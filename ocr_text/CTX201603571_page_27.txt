@@ -1,0 +1,47 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+600.8826904296875	1590.789306640625	623.5206909179688	1606.4166259765625	rectangle		0	TextRegion	0.999981164932251
+223.2476043701172	119.75770568847656	1020.6304931640624	245.1693115234375	rectangle	"Stratigraficky níže se nalézala další poloha navážkového charakteru složená ;
+ch hlín sčetnou příměsí úlomků cihel, malty a uhlíků, místy proloženýct
+
+pískem a popelem (sj. S10-07 až S10-10, báze 196,64). Celková mocnos
+"	1	TextRegion	0.999945878982544
+160.06814575195312	582.908447265625	277.33892822265625	608.1367797851562	rectangle	"Sonda S11
+"	2	TextRegion	0.9998910427093506
+151.7715301513672	284.2037353515625	1028.6571044921875	481.10638427734375	rectangle	"Nejspodnější antropogenní uloženinu reprezentovala cca 0,6 m mocná kulturní
+vrstva prachovitopísčité hlíny (sj. S10-11), přecházející na bázi v soudržnější písčitou hlínu
+(sj. S10-12, báze 196,24). Příměsemi zde byly drobné uhlíky, zlomky cihlovky a opuky.
+
+Kulturní vrstva nasedala na mírně zvlněný povrch zahliněných písků, které zde
+
+tvnří nříradní nadklad mícta (ci S1nN-13)
+"	3	TextRegion	0.999805510044098
+149.3774871826172	654.739013671875	1045.7510986328125	974.2326049804688	rectangle	"Archeologická sonda o velikosti v horní části 5,0 x 3,0 m a vdolní partii 3,1 x 1,2 m
+se nalézala na jižním nezastavěném okraji pozemku č. 1556/1 (obr. příl. 1, 2, 3, 4).
+Úroveň povrchu sondy se nalézala na niveletě 199,70 m n. m., dno výkopu dosáhlo
+vnejnižším bodu úrovně 196,00 (hloubka 3,6 m). | Celkem vtéto sondě byly
+dokumentovány 4 řezy a 3 půdorysy (S11-RV, RJ, RZ, RS; S11-P01 až P03).
+
+Stávající povrch zde tvořila 0,2 až 0,3 m silná vrstva štěrku a rozemletého asfaltu,
+místy překrytá humózní hlínou zahradního substrátu (sj. S11-12, S11-11).
+
+Recentní souvrství překrývalo na severní straně sondy liniový výkop pro elektrické
+"	4	TextRegion	0.9989925026893616
+153.65428161621094	941.3599243164062	1026.4696044921875	1346.1883544921875	rectangle	"Recentní souvrství překrývalo na severní straně sondy liniový výkop pro elektrické
+kabely (sj. V30, S11-27), který se zahluboval až do 3,00 m mocného heterogenního
+souvrství písčitých hlín, kontaminovaných písků, stavebního a komunálního odpadu (sj.
+S11-13 až S11-23). Svou genezí jde o minimálně dvouetapovou. záležitost, kde
+chronologický předěl tvoří poloha základu zděné konstrukce (sj. 207, V31, povrch koruny
+198,60), který lze předběžně ztotožnit s obvodovou stěnou již asanovaného domku na
+jižní straně pozemku č. 1556/1. Obě polohy jsou svým složením velice podobné. V obou
+případech jde o převážně stavební odpad, kde ve spodní části bylo možné rozlišit zřetelné
+
+polohy s odpadem komunálního původu s přítomností skleněných nádobek laboratorního
+"	5	TextRegion	0.9968721270561218
+166.70431518554688	1435.71240234375	1059.8582763671875	1468.522705078125	rectangle	"ílovotopísčité hlíny (sj. S11-10), která již překrývala v celé ploše sondy polohu půdního
+"	6	TextRegion	0.9236240983009338
+173.97821044921875	1385.56884765625	1060.3072509765625	1455.982421875	rectangle	"Pod uvedenou komponentou se nalézala nevysoká vrstva tuhé černošedé
+
+ 
+
+lovotonísčité hlíny (si. S11-10), která již pnřekrývala v celé nloše sondv nolohu nůdního
+"	7	TextRegion	0.9174512028694152

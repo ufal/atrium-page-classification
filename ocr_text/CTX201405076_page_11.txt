@@ -1,0 +1,71 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+588.7562255859375	1614.1595458984375	603.9619140625	1625.2808837890625	rectangle		0	TextRegion	0.999967098236084
+304.0814208984375	582.685546875	981.254150390625	625.0471801757812	rectangle	"- kůlová jamka. Rozměry: 38x 27 cm, hloubka: 4 cm. Výplň tmavě hnědé
+"	1	TextRegion	0.9987186193466188
+172.02662658691406	1037.38671875	1049.50732421875	1548.052978515625	rectangle	"(Valentová — Šumberová 2006) a doby bronzové (Šumberová 2004).
+
+V průběhu archeologického dohledu a výzkumu byla identifikována a zkoumána další část
+rozsáhlé pravěké sídelní komponenty, náležející k nejdůležitějším archeologickým
+lokalitám Čáslavska. Časově zařadit bylo možno jen několik větších jam, které shodně
+náleží období na přelomu střední a mladší doby bronzové. Množství kůlových jamek patrně
+bude náležet stejnému období, ačkoliv zpravidla neobsahovaly datovatelný materiál.
+Z nepravidelných shluků jamek prozatím nebyly rekonstruovány půdorysy nadzemních
+staveb, lze pouze konstatovat jejich pravděpodobnou severojižní orientaci. Rozsáhlý objekt
+v sektorech 1000-4000 lze snad možno považovat za zaplněnou terénní depresi (konzultace
+1. Herichová), nicméně kumulace nálezů v některých sektorech ukazuje na její zaplňování,
+případně sekundárního využívání také ve střední až mladší době bronzové. Povrchové
+
+sběry jižně od tohoto objektu naznačují, že tímto směrem sídliště již zřejmě nepokračovalo,
+"	2	TextRegion	0.9978256821632384
+321.7355651855469	519.7593383789062	985.80126953125	589.9951782226562	rectangle	"kůlová jamka. Rozměry: 40x 36 cm, hloubka: 4cm. Výplň tmavě hnědá
+"	3	TextRegion	0.9975733160972596
+279.1071472167969	173.4390411376953	990.0654296875	223.0322113037109	rectangle	"7. - kůlová jamka. Rozměry: 20x 14 cm, hloubka: 3 cm. Výplň tmavě hnědá.
+"	4	TextRegion	0.9968848824501038
+306.6826171875	647.060791015625	976.4286499023438	685.5044555664062	rectangle	"- kůlová jamka. Rozměry: 23x 22 cm, hloubka: 8 cm. Výplň tmavě hněd
+"	5	TextRegion	0.9953538179397584
+310.1370544433594	461.1842041015625	977.238037109375	512.4751586914062	rectangle	"- kůlová jamka. Rozměry: 30x 24 cm, hloubka: 4cm. Výplň tmavě hněd
+"	6	TextRegion	0.9950082302093506
+323.14703369140625	762.8726196289062	986.1102294921876	817.7453002929688	rectangle	"kůlová jamka. Rozměry: 26x 20 cm, hloubka: 4 cm. Výplň tmavě hnědá
+"	7	TextRegion	0.9949394464492798
+264.6997985839844	345.9659729003906	980.5370483398438	386.2595520019531	rectangle	"60 - kůlová jamka. Rozměry: 12x 10 cm, hloubka: 3 cm. Výplň tmavě hněd:
+"	8	TextRegion	0.9935089945793152
+311.6193542480469	409.8051452636719	977.6397705078124	453.1245727539063	rectangle	"- kůlová jamka. Rozměry: 18x 14cm, hloubka: 4cm. Výplň tmavě hněd
+"	9	TextRegion	0.9890889525413512
+327.9553527832031	701.3978881835938	984.6588134765624	759.1839599609375	rectangle	"kůlová jamka . Rozměry: 28x 24 cm, hloubka: 5 cm. Výplň tmavě hnědá
+"	10	TextRegion	0.9710469841957092
+299.2690124511719	174.18687438964844	1006.6614990234376	199.2752227783203	rectangle	"- kůlová jamka. Rozměry: 20x 14 cm, hloubka: 3 cm. Výplň tmavě hnědá.
+"	11	TextRegion	0.9384246468544006
+310.048828125	712.7089233398438	985.939208984375	844.9402465820312	rectangle	"- kůlová jamka . Rozměry: 28x 24 cm, hloubka: 5 cm. Výplň tmavě hnědá
+- kůlová jamka. Rozměry: 26x 20 cm, hloubka: 4cm. Výplň tmavě hnědá
+
+- kůlová jamka. Rozměry: 20x18 cm. hloubka: 2 cm. Výplň tmavě hnědá
+"	12	TextRegion	0.9097885489463806
+171.2400360107422	962.5516967773438	505.6747741699219	983.6825561523438	rectangle	"7. Zhodnocení výsledků výzkumu
+"	13	TextRegion	0.9012306332588196
+307.793701171875	827.5383911132812	970.8682250976562	857.3704833984375	rectangle	"- kůlová jamka. Rozměry: 20x18 cm, © hloubka: 2cm. Výplň tmavě hněc
+"	14	TextRegion	0.8938411474227905
+246.66336059570312	1006.2267456054688	1052.1275634765625	1054.1156005859375	rectangle	"í výsledky celého výzkumu byly již publikovány, zejména nálezy z období laténu
+
+ 
+
+6 9NNA S k k,
+
+ 
+
+s»nna
+"	15	TextRegion	0.8857174515724182
+644.2515869140625	829.3590698242188	993.1614990234376	853.61376953125	rectangle	"hloubka: 2cm. Výplň tmavě hnědá.
+"	16	TextRegion	0.8502315282821655
+202.37049865722656	225.4760589599609	1015.3885498046876	292.9697570800781	rectangle	" 
+
+ 
+
+j. 2558. - kůlová jamka. Rozměry: 22x 14 cm, hloubka: 5 cm. Výplň tmavě hnědá.
+tace: PRA,int.NV
+"	17	TextRegion	0.8496260046958923
+207.08685302734372	284.5893859863281	995.7347412109376	343.9580383300781	rectangle	"   
+
+2559. - kůlová jamka. Rozměry: 14x 12cm, hloubka: 3cm. Výplň tmavě hnědá.
+
+ace:
+"	18	TextRegion	0.84135502576828

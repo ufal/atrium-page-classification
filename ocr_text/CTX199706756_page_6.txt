@@ -1,0 +1,43 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+157.86265563964844	903.864013671875	964.2273559570312	1291.5924072265625	rectangle	"Sídlištní objekty kultury s keramikou vypíchanou jsou rozloženy řídce po celé ploše
+výzkumu. Charakteristickým nálezem je rozsáhlejší hliník - tedy nepříliš hluboká jáma
+nepravidelného tvaru. Její hloubka je limitována výškou sprašového nadloží, které byk
+v místě objektu vytěženo. Přítomnost chat nelze jednoznačně prokázat i když množsty
+a kvalita nálezů v okolí objektu 114 je nápadná. Rovněž počet silicitových štípaných
+artefaktů /pazourků/ v obj. 130A přesahuje běžný průměr naleziště a naznačuje mož-
+nou přítomnost dílny na jejich výrobu. Ke kultuře s vypíchanou keramikou patří objek
+
+ty 112, 114, 116, 119 a 130A. Jako příměs byla zjištěna v jamách 122 a 124.
+"	0	TextRegion	0.9988213181495668
+146.91082763671875	151.0868682861328	974.1779174804688	197.0471649169922	rectangle	"opět ojediněle. Charakteristické je řídké rozložení objektů jejichž počet klesá východ-
+"	1	TextRegion	0.9985437393188475
+161.64263916015625	1282.3626708984375	972.6564331054688	1357.53662109375	rectangle	"Mimo keramiku, mazanici a štípané kamenné nástroje byly na sídlišti zjištěny i zlomky
+
+srriZanýmh bomenných náctránh a drtidel
+"	2	TextRegion	0.9981765747070312
+166.51617431640625	837.162109375	652.7416381835938	863.8744506835938	rectangle	".2. Sídliště kultury s vypíchanou keramikou
+"	3	TextRegion	0.9909403324127196
+159.06195068359375	327.97705078125	973.9193725585938	654.2384033203125	rectangle	"Keramika lineární byla zachycena v jamách 105, 107, 109, 121, 122, 123, 124, 126,
+|28, 129 a 130 kde tvořila hlavní nebo jedinou náplň objektu. Mimo to byly lineární
+třepy určeny jako příměs v jamách 92, 95, 114, 115 a 119. Y jejich rozložení po ploše
+vyplývá, že neolitické osídlení bylo především na temeni vyvýšeniny. Malá skupina
+ineárních nálezů na západním konci zkoumané plochy představuje dozvuky sídlištní
+ktivity v okolí lineárního domu zkoumaného v sezóně 1996. Z uspořádání letos zjiš-
+
+ěných objektů lze usuzovat na přítomnost dvou dornů a to jednak v okoli obj. 107 a
+"	4	TextRegion	0.9900640845298768
+144.5091552734375	457.45794677734375	946.6326293945312	767.8795776367188	rectangle	" 
+
+„5 778 . .—. 4 7%
+
+vyplývá, že neolitické osídlení bylo především na temeni vyvýšeniny. Malá skupina
+
+lineárních nálezů na západním konci zkoumané plochy představuje dozvuky sídlištní
+aktivity v okolí lineárního domu zkoumaného v sezóně 1996. Z uspořádání letos zjiš
+těných objektů lze usuzovat na přítomnost dvou domů a to jednak v okoli obj. 107 a
+109, jednak v místě obj. 126 a 128. Větší stavební systémy z kůlových jamek nebyly
+
+letos doloženy. Vedle keramiky s výraznými moravskými prvky obsahovaly objekty
+"	5	TextRegion	0.9772311449050904
+156.6318817138672	269.90350341796875	573.1220703125	296.5323181152344	rectangle	"5.1. Osídlení lidu s keramikou lineárn
+"	6	TextRegion	0.9670253992080688

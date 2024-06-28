@@ -1,0 +1,19 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+130.25404357910156	221.64602661132807	1052.291259765625	477.9562683105469	rectangle	"Morfologická situace území, které je součástí geomorfologického okrsku Pražské
+kotliny (podcelku Říčanské plošiny, celku Pražské plošiny), vyplývá z tvaru sprašové návěje
+tvořící zde přímý geologický podklad. Sledovaná parcela se nachází při okraji colické
+akumulace, jejíž povrch klesá od jihozápadu k severovýchodu a někde v prostoru ul.
+Juárezově vykliňuje. Na základě pozorování ve zjišťovacích sondách lze konstatovat, že
+
+původní terén zde mírně klesal směrem k severovýchodu, a to během holocénu i mladší části
+"	0	TextRegion	0.9999161958694458
+120.06099700927734	508.4763793945313	1038.740966796875	663.174560546875	rectangle	"Skála, kterou dle inženýrsko-geologické mapy I : 5000
+budují jílovité břidlice dobrotivského souvrství ordoviku (stratigrafické oddělen
+dobrotiv), je na parcele překryta vltavskými písčitými štěrky pleistocénního stáří a ji:
+
+zmíněným tělesem vátých hlín.
+"	1	TextRegion	0.9998323917388916
+419.5377197265625	1590.5447998046875	785.3749389648438	1616.0670166015625	rectangle	"2. Geomorfologický a geologický popi:
+"	2	TextRegion	0.9956899285316468
+135.21255493164062	145.277587890625	555.9461669921875	171.56663513183594	rectangle	"2.2. Geomorfologický a geologický popis
+"	3	TextRegion	0.9865282773971558

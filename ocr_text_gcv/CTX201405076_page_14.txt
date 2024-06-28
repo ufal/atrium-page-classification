@@ -1,0 +1,18 @@
+IMAGE_NAME	DESCRIPTION	LANGUAGE	BBOX_1	BBOX_2	BBOX_3	BBOX_4
+image	"TABULKY
+Seznam objektů
+Seznam sáčků
+Základní zpracování materiálu
+Seznam souřadnic
+15"	cs	(169, 147)	(604, 147)	(604, 1625)	(169, 1625)
+image	TABULKY		(171, 148)	(283, 148)	(283, 164)	(171, 164)
+image	Seznam		(170, 187)	(246, 188)	(246, 211)	(170, 210)
+image	objektů		(252, 188)	(323, 189)	(323, 212)	(252, 211)
+image	Seznam		(170, 233)	(246, 233)	(246, 249)	(170, 249)
+image	sáčků		(253, 233)	(307, 233)	(307, 249)	(253, 249)
+image	Základní		(169, 275)	(257, 275)	(257, 297)	(169, 297)
+image	zpracování		(261, 275)	(367, 275)	(367, 297)	(261, 297)
+image	materiálu		(372, 275)	(461, 275)	(461, 297)	(372, 297)
+image	Seznam		(170, 316)	(244, 316)	(244, 334)	(170, 334)
+image	souřadnic		(251, 316)	(343, 316)	(343, 333)	(251, 333)
+image	15		(587, 1614)	(604, 1614)	(604, 1625)	(587, 1625)

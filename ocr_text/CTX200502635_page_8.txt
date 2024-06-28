@@ -1,0 +1,85 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+143.7498779296875	697.6104736328125	263.561279296875	714.301513671875	rectangle	"SITUACE 2
+"	0	TextRegion	0.9998334646224976
+143.6079559326172	201.11720275878903	259.6708679199219	218.77719116210935	rectangle	"SITUACE 1
+"	1	TextRegion	0.9997966885566713
+1038.7340087890625	1593.900146484375	1048.5745849609375	1606.4046630859375	rectangle		2	TextRegion	0.9997764229774476
+133.7943115234375	873.7525634765625	995.1016235351562	1119.8446044921875	rectangle	"ÚZVJ stavební sut S četnými kameny, zlomky cihel - recentní VKOp
+
+0206 dtto 0204 s četnými kameny
+
+0207 světle šedohnědá hlína s četnými hrudkami vápna, zlomky cihel, konzistence tuhá
+0208 tmavě černá spáleništní vrstva (spálené dřevo), místy promíšená s tmavě hnědou hlí
+0209 tmavě hnědá písčitá hlína s hrubou pískovou frakcí, konzistence tuhá
+
+0210 tmavě hnědá hlína s ojedinělými kamínky, konzistence tuhá
+
+0211 červenohnědý hrubý písek, suchý, ulehlý (propálené podloží ?)
+
+0212 hrubý písek — žulová drť, suchý, ulehlý (podloží)
+
+0213 šedohnědá jílovitá hlína s četnými kameny, drobné uhlíky a drobnou nekompaktní f
+
+ara amiokam aa das
+"	3	TextRegion	0.9984708428382874
+135.49314880371094	1213.896240234375	913.3221435546876	1478.762939453125	rectangle	"0302 tmavě hnědá písčitá hlína, s kameny (žula), fragmenty střešní krytiny, zlom
+0303 červenohnědá plastická hlína se zbytky původního drnu, konzistence měkk:
+0304 středně hnědá písčitá hlína a kameny, konzistence kyprá
+
+0305 hnědožlutý písek s čočkami hnědé — černé písčité hlíny, konzistence kyprá
+0306 tmavě černá humusovitá písčitá hlína s čočkami žuly a žlutého písku, kyprá
+0307 hnědožlutá písčitá hlína s čočkami černé a hnědé hlíny, konzistence kyprá
+0308 středně hnědá hlína, kameny, konzistence měkká
+
+0309 hnědožlutý kyprý písek
+
+0310 bělošedá maltová vrstva se zlomky střešní krytiny, konzistence kyprá
+
+M11 tmavwž hnžd4 mlaotiebá hlína c bamanír bFan-ictanna měbb4
+"	4	TextRegion	0.9980940222740172
+143.8119354248047	556.7363891601562	944.4951171875	645.8864135742188	rectangle	"0112 světle hnědošedá jílovitá hlína až jíl, četné kamínky, ojediněle kameny, místy
+kompaktní uhlíky, ojedinělé fragmenty cihel, konzistence tuhá
+0113 světle šedobílá vápenatá vrstva s četnými kamínky a hroudami čistého vápna,
+
+ 
+"	5	TextRegion	0.996721088886261
+138.4145965576172	145.05091857910156	465.5351257324219	171.812744140625	rectangle	"Popis stratigrafických jednotek
+"	6	TextRegion	0.9965919256210328
+134.44712829589844	240.0151824951172	706.4150390625	428.5434875488281	rectangle	"VJ TECENUM navazka
+
+0102 světle žlutohnědý písek (žulová drť), suchý, ulehlý
+0103 světle hnědá písčitá hlína, konzistence tuhá
+
+0104 dtto 0102
+
+0105 dtto 0102
+
+0106 dtto 0103
+
+0107 světle okrová písčitá hlína, heterogenn konzistence t
+„NIM do
+
+ 
+"	7	TextRegion	0.993681788444519
+148.61402893066406	501.0016174316406	572.919921875	547.6526489257812	rectangle	"0110 světle žlutý jemný písek, suchý, ulehlý
+O111 dtto 0102
+"	8	TextRegion	0.9926730990409852
+143.52951049804688	1166.67626953125	263.98358154296875	1184.8126220703125	rectangle	"SITUACE 3
+"	9	TextRegion	0.9905923008918762
+172.04270935058594	392.3365783691406	970.91796875	471.8331604003906	rectangle	"07 světle okrová písčitá hlína, heterogenní, konzistence tuhá; směs vrstev typu 0102
+a 0103, která patrně vznikla jejich promíšením
+08 tmavě hnědá hlína až písčitá hlína, ojediněle kameny (žula), konzistence tuhá
+"	10	TextRegion	0.9900795221328736
+132.3439178466797	1424.006103515625	868.453369140625	1508.2596435546875	rectangle	"V309 hnědozluty Kypry pisek
+
+0310 bělošedá maltová vrstva se zlomky střešní krytiny, konzistence kyprá
+0311 tmavě hnědá plastická hlína s kameny, konzistence měkká
+
+M17 Sntahnědý kbunrý nícek
+"	11	TextRegion	0.9873034358024596
+120.17326354980467	747.953369140625	938.931640625	832.5176391601562	rectangle	" 
+
+0202 tmavě hnědá jílovitá hlína s četnými zlomky cihel a novodobými artefakty
+0203 tmavě hnědá písčitá hlína tuhé konzistence
+0204 světle žlutohnědá písčitá hlína až písek se žulovou drtí a s recentními artefakt:
+"	12	TextRegion	0.9797456860542296

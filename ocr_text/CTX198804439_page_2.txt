@@ -1,0 +1,37 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+210.7583770751953	949.140380859375	1115.685302734375	1224.5433349609375	rectangle	"Výzkum v srpnu navštívili droJolralová a Z.ludera z NM
+v Praze /3.8./ a skupina zájemců ze Sázavy vedená MUDr Študlarc
+vou /148/s Dne 9.8, provedli J.Morávek. JoTájek, J olíinarčíkové
+MoZáleská a VoVonásek fotogrammetrickou dokumentaci a nivelaci
+v sondách 14k/2, 140/1 a l4m/3. Zároveň tyto sondy zaměřili do
+katastrální meny a mrovedli kresby řéžšs
+"	0	TextRegion	0.9999691247940063
+225.7140045166016	266.544921875	1120.736328125	900.4869384765625	rectangle	"srpna a ve druhé půli měsíce jsme zde začišťovali.
+
+Mezi nálezy /vyzvednutými ponejvíce z jam“ jsou vedle ke-
+ramiky a zvířecích kostí /a tradičně náĎtrného počtu úlomků ma-
+zanice/ mjo okraj pražnice z keramické hmoty /obj.274/ i z maza
+nicové hmoty /objo 330a/ přesleny ze střepu /obj.309c/, hlíny
+/obj.282b/ a kamene /objo274-2x, 289b a 319a/, železné nože /ob
+282b, 282b+e, 30la, 308b, vrstva 3/, železné šídlo /vrstva 3/,
+zlomek obroučky /vrstva 3/ a závěsného kování /obj.312b/ vědérk
+ozdobné železné kování /obj.325/, rombická železná šipka s trnei
+/obj.330b/, mírně prohnutý železný hrot: patrně dřík stilu /obj
+/obje3010/, bronzová spona z doby římské /obj. 328/, kostěná
+šídla /obj.274, 289b, 295d, 309e, 319b; ze začišťování v sondě
+14m/4 /, kostěné brusle /obje 309e, 322/ a kostěný korál /obje
+"	1	TextRegion	0.9999456405639648
+390.68402099609375	38.492652893066406	1048.19873046875	62.16683578491211	rectangle	"ášení výzkum Libice /předhradí/ 1988 /srpen/ —-
+"	2	TextRegion	0.9988093376159668
+236.03846740722656	1445.0567626953125	369.2288208007813	1465.94287109375	rectangle	"Na vědomí:
+"	3	TextRegion	0.9951519966125488
+206.8669891357422	132.60325622558594	1123.84033203125	409.7710266113281	rectangle	"skryl bagr ornici 30.8. Při následujícím zahájení začišťování
+po bagru jsme zde vyznačili nové objekty 334-345 a kůlové jamky
+72-730 V sondě l4m/4 proběhla strojová skrývka ornice v polovini
+srpna a ve druhé půli měsíce jsme zde začišťovali.
+
+Mezi nálezy /vyzvednutými ponejvíce z jam“ jsou vedle ke-
+ramiky a zvířecích kostí /a tradičně náĎtrného počtu úlomků ma-
+"	4	TextRegion	0.9697318077087402
+582.4301147460938	1490.4425048828125	1144.816650390625	1515.700439453125	rectangle	"2aník, dreM.Prino, droMoŠolle, droR.Turek
+"	5	TextRegion	0.9305530190467834

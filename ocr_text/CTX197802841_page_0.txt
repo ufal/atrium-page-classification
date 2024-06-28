@@ -1,0 +1,28 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+289.2076416015625	448.155517578125	958.2181396484376	1005.8828735351562	rectangle	"ULT: Neolitické (?), pozdně halštatské a časně
+tředověké sídliště. LOK: Polní trať U Lišků
+
+a pravobřežní terase Úhlavy, kat.č. 242 (za
+omkem čp. 34);Zm 22=11,8 od S a 129 mm od Z s,
+v prostoru písmene ""C"" nápisu Černice). OKOL:
+růzkum a sběr 9. - 10.11.1974. NÁLEZ: Odštěpek
+ruhovaného rohovce (obr. 3:1), soubor pozdně
+alštatské keramiky, zvl. s plastickou výzdobou
+okraje misek (obr, 3:2-5), časně středověké
+lomky (obr. 3:6-7). ULOŽ: AÚ ČSAV exp. Plzeň,
+říročo P 49/74, LIT: Hlášení čj. 811/74 exp.
+lzeň. KOMENTÁŘ: Sídliště pokračuje do svahu
+
+od silnicí Černice-Radobyčice směrem ke kótě
+35 (Val), kde jsme na poli kat.č. 1799 doplni-
+i sběr o nevýraznou pravěkou keramiku (přír.č.
+50/75),
+"	0	TextRegion	0.9999992847442628
+963.9700927734376	16.379878997802734	1048.5130615234375	44.376861572265625	rectangle	"2441/4
+"	1	TextRegion	0.999951720237732
+623.4031982421875	1030.074951171875	960.4898681640624	1050.7841796875	rectangle	"A. Beneš =- P, Břicháček
+"	2	TextRegion	0.9989025592803956
+163.84828186035156	398.08013916015625	561.8499145507812	419.62103271484375	rectangle	"26. ČERNICE, okr. Plzeň-jih
+"	3	TextRegion	0.9717419147491456
+178.29046630859375	125.16796875	591.1510620117188	143.24307250976562	rectangle	"O 1974, str, 27, tab, 3 : 1-
+"	6	TextRegion	0.8256571292877197

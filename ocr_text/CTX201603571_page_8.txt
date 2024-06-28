@@ -1,0 +1,29 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+726.640625	805.74951171875	824.344970703125	817.6505737304688	rectangle	"Pokryvné útvary
+"	1	TextRegion	0.9999041557312012
+107.09581756591795	1349.7723388671875	1073.1339111328125	1504.6483154296875	rectangle	"Podle geologických map a vrtného průzkumu je skalní podklad lokality tvořen výhradně
+mořskými sedimentárními horninami ve formě drobových břidlic až drob s vložkami křemenců,
+které lze ve shodě se staršími geologickými poznatky přiřadit k letenskému souvrství (starší
+
+paleozoikum Barrandienu — ordovik — Beroun). V prostoru zkoumaných parcel je skála pohřbena
+"	2	TextRegion	0.99983012676239
+108.14739227294922	1089.8746337890625	1091.6834716796875	1156.577880859375	rectangle	"Obr. 3 - Geologická situace místa výzkumu s vyznačením sledované plochy parcel č. 1556 a 1557 v rámci zjišťovacího
+archeologického výzkumu (pozemky vymezeny modrým obdělníkem). Výřez podrobné inženýrsko-geologické mapy
+v měř. 1:5000, list Praha 7-2 a legendy (Altmann 2008, upraveno).
+"	3	TextRegion	0.9997106194496156
+1060.43408203125	1536.6214599609375	1071.158447265625	1553.0675048828125	rectangle		4	TextRegion	0.9996786117553712
+788.500732421875	888.7531127929688	1015.690185546875	942.96142578125	rectangle	"písčité stěrky a pisky teras Vitavy (včetně
+holocénních štěrků ). pisky a drobné písčité
+Štěrky teras Botiče
+"	5	TextRegion	0.9994823932647704
+126.44286346435548	1257.081298828125	349.4151306152344	1285.176513671875	rectangle	"2.2. Skalní podklad
+"	6	TextRegion	0.9989792108535768
+792.3295288085938	1000.1432495117188	999.641845703125	1034.853759765625	rectangle	"Minitopisčité a hlinité holocénní náplavy
+s bahnitými a štěrkovými polohami
+"	7	TextRegion	0.9988495111465454
+200.0810394287109	806.0368041992188	291.1972351074219	818.0426025390625	rectangle	"Skalní podklad
+"	8	TextRegion	0.9917672276496888
+311.46484375	888.6340942382812	535.3949584960938	918.3375244140624	rectangle	"vrstvy letenské- drobové břidlice s vložkam
+křemenců, křemenných pískovců a drob
+"	9	TextRegion	0.988892376422882
+149.57400512695312	857.9330444335938	307.9483947753906	945.8370361328124	rectangle		10	TextRegion	0.9644594788551332

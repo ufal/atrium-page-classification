@@ -1,0 +1,22 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+144.10617065429688	1453.684326171875	332.1524353027344	1511.31591796875	rectangle	"NÁRODNÍ PAMÁTKOVÝ ÚSTAV ©
+ÚZEMNÍ ODBORNÉ PRACOVIŠTĚ
+VHLAVNÍM MĚSTĚ PRAZE
+"	0	TextRegion	0.9997933506965636
+111.73767852783205	1174.9498291015625	1045.88720703125	1287.62548828125	rectangle	"Tato práce vzniklá tvůrčím zpracováním výsledků archeologického výzkumu je chráněna
+autorským právem podle zákona č. 247/90 Sb.
+
+Ve smyslu tohoto zákona jsou chráněny i jednotlivé části této práce, jako jsou plánové a
+obrazové přílohy apod. Části práce nebo celek lze uveřejnit pouze se svolením autorů.
+"	1	TextRegion	0.9994157552719116
+133.35586547851562	1400.401123046875	206.0803375244141	1445.1241455078125	rectangle		2	TextRegion	0.9991604089736938
+824.41943359375	1436.9935302734375	1066.4193115234375	1454.7247314453125	rectangle	"PhDr. Jaroslav Podliska, Ph.D.
+"	3	TextRegion	0.997837245464325
+1061.7901611328125	1537.8720703125	1070.024658203125	1552.767333984375	rectangle		4	TextRegion	0.9966713786125184
+807.5988159179688	1447.6219482421875	1070.858642578125	1479.614990234375	rectangle	"ent ooo dát
+: podliska.jaroslav8npu.cz
+
+ 
+
+e-mail
+"	5	TextRegion	0.9696605205535888

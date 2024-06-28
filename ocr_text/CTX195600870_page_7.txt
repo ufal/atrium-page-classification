@@ -1,0 +1,53 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+171.2182159423828	258.3692321777344	1132.4298095703125	388.4954833984375	rectangle	"O výsledku výzkumu bude možno podati podrobnou zprávu až
+po prostudování pracovních denníků,vynesení zaměření nálezů a od-
+krytých stavebních památek,záznamů stratigrafických i starších
+nálezů Bíčových,Matiegkových a j.Avšak již dnes možno přibližně
+nastínit následující obraz vývoje Vyšehradu
+"	0	TextRegion	0.9998329877853394
+152.21241760253906	163.2348175048828	1060.66748046875	192.142578125	rectangle	"2w/ Výsledky výzkumu, provedeného Komisí pro výzkum Vyšehrad:
+
+ 
+"	1	TextRegion	0.9996758699417114
+141.8462371826172	1233.8089599609375	1188.2353515625	1536.1051025390625	rectangle	"Ačkoliv dlužno Vyšehrad přičísti k nejstarším osídleným
+částem Prahy,nelze nálezové doložit ani vznik přemyslovského hra-
+diště v prvé pol,X,století,založeného jako protějšek přemyslovské-
+ho sídla na pražském hradě,připomínaného již v pol,IX.století,až
+na nepatrné,dosud sporné stopy po pilířích dřevěné stavby původní-
+ho knížecího sídla,r,1119 vichrem pobořeného,ačkoliv jeho xaimíRNíx
+existenci ověřuje již nejstarší věrohodná zpráva z konce X.století
+o ražení mince na Vyšehradě Marně byly též hledány stopy po kamen-
+né rotundě sv.Jana Evangelisty,postavené v obvodu knížecího dvorce,
+fin curia regis"" Boleslavem II.v druhé pol.X.století,, i stopy po
+kapli sv.Klimenta z konce IX.století,postavené podle tradice kníže-
+tem Bořivojem mimo vnitřní hradiště,
+"	2	TextRegion	0.9927322268486024
+187.90863037109372	403.5924377441406	1111.031982421875	492.0980224609375	rectangle	"Vyšehradský ostroh, ohraničený na severu,severovýchodě a
+a západě strmhými skalami o výšce 210 m nad mořem,přísluší geo-
+Ogicky k t.zv,letenským drobovým břidlicím ordovického útvaru
+rvohor.
+"	3	TextRegion	0.9913352131843568
+116.5765380859375	622.7114868164062	1182.1824951171875	864.5196533203125	rectangle	"natým stromovím a křovinami,
+
+Vyšehrad byl osídlen již na konci neolithu,kolem r.2.000 před
+naším letopočtem a to lidem kultury starousedlíků pozdní doby kamen-
+né.Výzkumem na tomto eneolitickém sídlišti odkryty úvě chaty,částeč-
+ně zapuštěné vrstvou čífnozemě až do diluviálního nánosu,se stopami
+hlinou vymazaných proutěných stěn,s ohništěm a keramikou,odpadkové
+jámy se zlomky keramiky,kamenné a koštěné industrie a l dětský hrob,
+Nálezy — pokud možno soudit z výzkumu,který bylo možno provésti
+pouze na vlastním hradišti vyšehradském, bez probadání prostoru dneš-
+ního hřbitova a prostoru bývalého středověkého městiště,zastavěného
+
+oo non dl Páka dll | ash dak © ska | toa ská akon oc úd oo E ANN NE“ Zdá Mk SNS
+"	4	TextRegion	0.9676461815834044
+140.56349182128906	935.1854248046876	1166.890869140625	1119.618896484375	rectangle	"Další osidlení,zejména osídlení staroslovanské a očekávané
+nálezy ze starší a střední doby hradištní,nebyly výzkumem potvrze-
+ny.Zdá se však býti nepravděpodobným,že by tak výhodně položené
+sídliště,již od pravěku střežící pražskou kotlinu,obklopeno téměř
+se tří stran tehdy ještě široce rozlitou Vltavou,chráněné na severní
+a východní straně roklemi s pramenitou vodou,nebylo od pozdní
+doby kamenné až na samotný začátek historické doby osídleno,
+
+Vysvětlení dlužno hledati především v značných,stratigrafi-
+"	5	TextRegion	0.8736372590065002

@@ -1,0 +1,70 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+143.4746856689453	148.216064453125	241.28948974609372	164.46389770507812	rectangle	"Prameny:
+"	0	TextRegion	0.9999281167984008
+143.47886657714844	204.9837951660156	1055.1309814453125	314.5768127441406	rectangle	"Friedrich, G. (ed.) 1894-1897: Codex diplomaticus et epistolaris regni Bohemiae. I, Pragae.
+Bureš, M. (ed.) 2012: Nálezová zpráva ze zjišťovacího archeologického výzkumu
+
+provedeného před akcí „Vila Bubeneč“, archiv NZ Archeo Pro o.p.s., č. akce 4/12 AP, Praha.
+"	1	TextRegion	0.999912977218628
+99.20832061767578	803.5560302734375	1066.3175048828125	948.4697875976562	rectangle	"Maříková Vlčková, P. — Čuláková, K. — Mácalová, M. 2012a: Záchranný archeologický
+výzkum v Praze 6-Bubenči, ulice Ve struhách čp. 95, Archeologické výzkumy v Čechách,
+
+Sborník referátů z informačního kolokvia, Zprávy České archeologické společnosti,
+"	2	TextRegion	0.9996871948242188
+144.223388671875	355.0428771972656	255.9105682373047	371.2804870605469	rectangle	" 
+"	3	TextRegion	0.9995642304420472
+171.73190307617188	1420.4937744140625	1003.1731567382812	1464.6353759765625	rectangle	"mmer, J. G. 1845: Das Kónigreich Bóhmen. Dreizehntner Band. Rakonitzer Kreis. Prag
+"	4	TextRegion	0.9990118741989136
+165.94183349609375	385.3509521484375	1055.8092041015625	467.4933776855469	rectangle	"obeš, M. — Kostka, M. — Likovský, J. 2011: Pohřebiště mladšího stupně kultury
+
+levkovitých pohárů v Praze-Bubenči a Dejvicích, Archeologie ve středních Čechách 15,
+"	5	TextRegion	0.9982936978340148
+225.5891876220703	1320.5987548828125	1055.211181640625	1385.4227294921875	rectangle	"1947: A. Profous — J. Svoboda, Místní jména v Čechách. Jejich vznik, původní
+
+a změnv. Díl L Praha
+"	6	TextRegion	0.9980109333992004
+150.77369689941406	1126.0455322265625	1063.8619384765625	1222.18994140625	rectangle	"Pažout, J. 1906: K dějinám statků dříve purkrabských, nyní zemských, Zprávy zemského
+archivu království Českého I, 1906, 131-152
+"	7	TextRegion	0.997621476650238
+243.29736328125	996.4325561523438	1051.1219482421875	1105.369140625	rectangle	"Vlčková, P. — Čuláková, K. — Mácalová, M. 2012b: Praha-Bubeneč, in:
+ický výzkum vPraze vletech 2010211 (paleolit — doba stěhování národů),
+gica Pragensia 21, 208-209.
+"	8	TextRegion	0.9965053796768188
+152.68292236328125	1223.4803466796875	1059.1123046875	1292.7000732421875	rectangle	">olák, P. 2007: Městský úřad Prahy 6, Podrobný inženýrskogeologický průzkum.
+
+""hemcomex Praha a. s.
+"	9	TextRegion	0.9948008060455322
+163.76454162597656	517.8782958984375	926.4359130859376	674.7928466796875	rectangle	"obeš, M. — Kostka, M. — Popelka, M. 2010: Žárové hroby jordanovské kult
+3ubenče a Dejvic, Archaeologica Pragensia 20, 294-316.
+
+rálík, F. et al. 1984: Vysvětlivky k základní geologické mapě ČSSR 1 : 25 000,
+
+-aha cavar Draha
+"	10	TextRegion	0.9934056997299194
+147.4060516357422	599.4533081054688	988.256591796875	683.1704711914062	rectangle	"Králík, F. et al. 1984: Vysvětlivky k základní geologické mapě ČSSR 1 : 25 000, list I
+
+Praha-sever. Praha.
+"	11	TextRegion	0.9903545379638672
+171.5540771484375	718.5184326171875	1000.1115112304688	772.59326171875	rectangle	"iča, K. 2002: Města a městečka v Čechách, na Moravě a ve Slezsku V. Par — Pra, Praha
+"	12	TextRegion	0.9899010062217712
+145.2392120361328	523.5487670898438	1037.8140869140625	599.3751220703125	rectangle	"Dobeš, M. — Kostka, M. — Popelka, M. 2010: Žárové hroby jordanovské kultury z Prahy
+-Bubenče a Dejvic, Archacologica Pragensia 20, 294-316.
+"	13	TextRegion	0.9898248314857484
+154.71255493164062	413.7221374511719	1056.9931640625	499.9202575683594	rectangle	"        
+
+álevkovitých pohárů v Praze-Bubenči a Dejvicích, Archeologie ve středních Čechách 15,
+
+39-162.
+"	14	TextRegion	0.9614654183387756
+284.7388916015625	392.6110229492188	1038.9537353515625	437.1764221191406	rectangle	"- Kostka, M. — Likovský, J. 2011: Pohřebiště mladšího stupně kultur
+"	15	TextRegion	0.8906243443489075
+142.09811401367188	1477.9779052734375	623.0310668945312	1500.3592529296875	rectangle	"Tryml, M. 2004 (ed.) : Kniha o Bubenči. Praha.
+"	16	TextRegion	0.8826932311058044
+253.48171997070312	622.1610107421875	1038.551025390625	650.9857177734375	rectangle	"t al. 1984: Vysvětlivky k základní geologické mapě ČSSR 1 : 25 000, list 12-234
+"	17	TextRegion	0.8263781070709229
+156.65476989746094	1313.37744140625	985.570556640625	1434.05908203125	rectangle	"rofous 1947: A. Profous — J. Svoboda, Místní jména v Čechách. Jejich vznik, pů
+
+ýznam a změny. Díl I. Praha
+
+(mrmemar T fi 1RASo Tano F nitra Zhran Tira ahnímar Boru Dolbrormiémar Frau Dr
+"	18	TextRegion	0.8063362836837769

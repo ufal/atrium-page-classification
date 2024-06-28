@@ -1,0 +1,73 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+182.30862426757807	918.0895385742188	1165.4571533203125	1320.185546875	rectangle	"""4
+
+ee
+ohniště III má velmi šřastnou stratigrafickou pozici, neboť
+
+leží v kulturní vrstvě 3, a to ve značně mocném (silném) úseku
+vrstvy 3, která zde v síle několika desítek cm pokryla základ
+jižní podezdívky pravděpodobného kněžského domu s doprovázející
+destrukcí. Existence ohniště v tomto úseku vrstvy 3 nad základem
+pravděpodobného kněžského domu naznačuje, že vrstva 3 zde nebyla
+navršena jednorázově. Ohniště III patří proto mezi terénní dokla-
+dy pro názor, že k likvidaci předpokládaného kněžského domu zde
+došlo v jistém časovém odstupu (předstihu) před katastrofou
+
+roku 995. Za hmotný doklad katastrofy roku 995 lze pokládat DVHZ,
+spočívající v sondě 2 na povrchu vrstvy 3.
+"	0	TextRegion	0.999969244003296
+190.5435333251953	169.27012634277344	1157.7967529296875	322.6234130859375	rectangle	"vrstvou 3. JV část ohniště III a sokl pod ním byly rozebrané
+25.7.1974, kdy vrstva 3 v soklu pod ohništěm III byla sejmuta
+až po povrch zachovaného základu jižní podezdívky pravděpodobnéh
+
+kněžského domu a po povrch destrukce, lemující jižní líc podezdí
+bu
+"	1	TextRegion	0.9999685287475586
+221.858154296875	346.8441467285156	1099.205322265625	407.7861633300781	rectangle	"SZ přibližná polovina ohniště III byla rozebraná zároveň se
+snímáním vrstvy 3 v sondě 2c,
+"	2	TextRegion	0.9998664855957032
+114.31047821044922	1525.8148193359375	1152.1878662109375	1584.9136962890625	rectangle	"ohniště III představuje torzovitý doklad osídlení areálu, v němž už
+nestál pravděpodobný kněžský dům, zlikvidovaný nedlouho předtím,
+"	3	TextRegion	0.9998314380645752
+281.0537414550781	457.7745361328125	1117.64794921875	753.5379028320312	rectangle	"atum zkoumání objektu: 29,5., 25.7., 7. -9.8.1974;
+úvodní označení objektu v terénní dokumentaci:
+
+1) ""místo s kusy do oranžova vypálené hlíny u 4, metru""
+= legenda k sáčku 25/74 - viz výše);
+
+2) ""ohniště (mazanicové, na povrchu vyhlazené, vypál. do
+červena"" (= legenda na terénní skice z 24.7.1974);
+
+3) ""Místo se spálenou hlinou při 4, metru sondy.“
+(terénní deník, zápis 29.5.19745
+
+4) ""ohniště při sz. stěně sondy 2a"" (terénní deník, zápi
+DE 9 VO AV.
+"	4	TextRegion	0.9996715784072876
+527.129150390625	56.04582595825195	560.43359375	71.3125	rectangle		5	TextRegion	0.9984403252601624
+216.91351318359372	788.16943359375	996.5413208007812	875.0482788085938	rectangle	"c) plány č. : 2,3,4;
+d) fototabulky č.: 1;5:10; 6;7;11:22;12;13:25;16;17; 18:35
+e) obrázky s nálezy č.: 0
+"	6	TextRegion	0.9951836466789246
+260.2171936035156	724.6240234375	313.8791809082031	741.3438720703125	rectangle		7	TextRegion	0.9944326281547546
+157.7179412841797	1479.3812255859375	336.7850646972656	1495.6527099609375	rectangle	"Interpretace:
+"	8	TextRegion	0.9892788529396056
+170.4178466796875	1392.306884765625	670.855712890625	1415.6619873046875	rectangle	"O. století, krátce před rokem 995,
+"	9	TextRegion	0.9772212505340576
+524.330078125	57.96610641479492	584.536865234375	70.01362609863281	rectangle	"36
+"	10	TextRegion	0.9689439535140992
+154.3855438232422	899.958251953125	195.38104248046875	921.9339599609376	rectangle	"11)
+"	11	TextRegion	0.9575294256210328
+215.0803985595703	819.8756103515625	238.24087524414065	839.27392578125	rectangle		12	TextRegion	0.941606879234314
+151.86529541015625	1358.17724609375	279.23602294921875	1377.4537353515625	rectangle	"Datování
+
+ 
+"	13	TextRegion	0.9395917057991028
+260.59246826171875	604.5828247070312	314.9898986816406	620.912353515625	rectangle		14	TextRegion	0.9335706233978271
+215.6923675537109	508.2288208007813	239.0688323974609	528.8817749023438	rectangle		15	TextRegion	0.9262152314186096
+215.54220581054688	319.3533935546875	253.4756317138672	335.56072998046875	rectangle		16	TextRegion	0.9123738408088684
+154.70736694335938	434.9533996582031	194.75636291503903	453.9874267578125	rectangle	"10)
+"	17	TextRegion	0.9115363359451294
+215.3995513916016	856.0579223632812	238.3977813720703	873.4512329101562	rectangle		18	TextRegion	0.8120672702789307
+317.28662109375	351.0887756347656	1091.1612548828125	382.0039978027344	rectangle	"ližná polovina ohniště III byla rozebraná zároveň se
+"	19	TextRegion	0.8085628747940063

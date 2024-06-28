@@ -1,0 +1,51 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+107.80987548828124	712.3941040039062	1059.19189453125	816.205810546875	rectangle	"kůlová jamka 3 stejně jako kůlové jamky l a 2 zjevně netvoří
+součást žádného jasného půdorysu nebo jasného systému zástavby
+v horizontu po r. 995,
+"	0	TextRegion	0.9999885559082032
+121.19364166259766	863.7686767578125	1108.4637451171875	1114.504150390625	rectangle	"V sondě 2d, kam již vůbec nezasahovala DVHZ a kde pod ornicí/
+drnem a vrstvou 2 ležela všude vrstva 3 z LO. stol., jsme při
+skrývání vrstvy 3 odlišili jámy oválného půdorysu - objekt VIII
+a kůlovou jamku 4, obě s výplní rázu vrstvy 2, Objekt VIII a ků-
+lová jamka 4 náleží tedy témuž časovému horizontu, jako výše
+
+popsané obiektv T-TT a kůlavé jamky 1 - z
+"	1	TextRegion	0.9999756813049316
+233.9882049560547	1365.0081787109375	1102.0579833984375	1554.3927001953125	rectangle	" 
+
+o O U PSW""
+
+/74: ""Sonda 2d, O VIII, sev. půle, 70 cm (úroveň rozpozná-
+ní = úroveň 2. fáze) - 90 cm.29,7 ""
+
+/74: ""Sonda 2d, O VIII, sev, půle, 90 cm - spodek tmavošedé
+hlinité výplně s drob. kaménky, 30,7.""
+
+/74: ""Sonda 2d, O VIII, sev. půle, tmavošedá jílovitá výplň
+s hrudkami hnědožlutého jílu nade dnem jámv. 30.7 .*
+"	2	TextRegion	0.9998241066932678
+141.7602996826172	562.54443359375	266.71685791015625	579.4826049804688	rectangle	"Datování:
+"	3	TextRegion	0.999569833278656
+144.6954345703125	490.1334838867188	347.73248291015625	511.5987548828125	rectangle	"10) poznámka: (
+"	4	TextRegion	0.9991025924682616
+134.46392822265625	1511.0076904296875	156.5100860595703	1528.3720703125	rectangle		5	TextRegion	0.9969059824943542
+193.2023162841797	257.2009582519531	1011.1279907226562	334.787353515625	rectangle	"a) datum zkoumání objektu: 22.-24,7.1974;
+b) původní označení objektu v terénní dokumentaci: kůlo
+"	6	TextRegion	0.996548593044281
+166.4603729248047	598.1038208007812	722.5389404296875	618.352294921875	rectangle	">rizont po roce 995, zjevně ll. stoleti
+"	7	TextRegion	0.9953444600105286
+524.4490966796875	38.71168899536133	559.3045043945312	54.94540786743164	rectangle	"2
+"	8	TextRegion	0.9862242937088012
+172.6713409423828	170.67861938476562	898.4656372070312	232.1202545166016	rectangle	"postupně vybrána severní a poté jižní polovina;
+
+R o
+"	9	TextRegion	0.9813891053199768
+201.78375244140625	300.0174255371094	227.37599182128903	319.4249267578125	rectangle		10	TextRegion	0.9688429236412048
+160.04832458496094	143.0832977294922	182.6073455810547	161.28440856933594	rectangle		11	TextRegion	0.9635615944862366
+509.96875	41.48938751220703	583.9157104492188	54.99744415283203	rectangle	"» 21 =
+"	12	TextRegion	0.946575939655304
+201.1544342041016	406.57171630859375	225.87535095214844	425.8141784667969	rectangle		13	TextRegion	0.9310961365699768
+137.9457550048828	1376.8157958984375	299.1620178222656	1510.91552734375	rectangle	"1) 114/74:
+
+2) 115/74:
+"	14	TextRegion	0.8909324407577515

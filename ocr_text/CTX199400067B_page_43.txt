@@ -1,0 +1,32 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.22900390625	33.62945938110352	652.6471557617188	52.32885360717773	rectangle	"108
+"	0	TextRegion	0.9991687536239624
+609.1205444335938	128.2333221435547	710.0269165039062	147.6665802001953	rectangle	"ZKRATEK
+"	1	TextRegion	0.9976904392242432
+204.99029541015625	398.8196716308594	616.425537109375	1033.596435546875	rectangle	"3. = sonda
+
+sit, = situace
+
+naz. = mazanice
+
+luž, = lužická kultura
+
+>I = pražský typ
+
+3tDH = starší doba hradištní
+StĚDH = střední doba hradištn
+ILDH = mladší doba hradištní
+>DH = pozdní doba hradištní
+JH = doba hradištní
+
+3třv, = vrcholný a pozdní stř.
+'aný nov. = raný novověk
+
+'ec, = recentní
+
+.„ s rok
+"	2	TextRegion	0.9973642230033876
+199.5482940673828	342.0347900390625	712.97412109375	369.8393249511719	rectangle	"DVHZ = destrukce vnitřní hradební zc
+"	3	TextRegion	0.9589174389839172
+204.0597686767578	1115.3048095703125	550.2373657226562	1135.894775390625	rectangle	"jov, = novověk, novověký
+"	4	TextRegion	0.887451708316803

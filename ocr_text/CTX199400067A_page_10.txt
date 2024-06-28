@@ -1,0 +1,83 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+187.94993591308597	286.0781555175781	1118.432861328125	1629.611083984375	rectangle	"ee 80979999 28979978 20 25995 358 259g S sme"" 595 W 22.=
+vská Libice“, kde je možné povolit jakékoliv stavby jen po prove
+ní archeologického výzkumu (druhá část rezervace - vnitřní libic
+adiště - je pak zcela chráněna od jakýchkoli zásahů do terénu),
+jí tedy předstihové záchranné výzkumy v Libici, prováděné před
+hájením staveb, ráz plošných výzkumů, přičemž ovšem velikost plc
+y jednotlivých sond závisí na velikosti příslušných staveb, Na
+ech zkoumaných plochách na předhradí se ukázaly archeologické
+jekty a movité nálezy z hradištního období; v některých sondách
+aké v sondě 2) byly rovněž doklady osídlení v období lužické kul
+ry. Archeologické výzkumy na libickém předhradí se vesměs omezuj
+plochy staveb, Výzkum sondy 2 v tomto ohledu byl výjimkou, nebc
+e došlo k postupnému rozšiřování původní sondy při hledání zákla
+avděpodobného kněžského domu a zkoumání jeho sídlištního okrsku
+sousední fortifikace, Přirozeně jsme i zde byli omezeni jak mož-
+stmi, resp. potřebami stavebníků, tak hranicemi pozemku; např.
+nda 2ch, která prořala opevnění ve směru kolmém k jeho průběhu,
+la na JZ ohraničena zahradní zdí, pod kterou a za níž jsme už
+měli možnost zachytit vnější okrajové partie opevnění.,
+
+Označení všech etap uvedených terénních prací jako sonda 2 vy-
+ázelo a vychází ze zavedeného způsobu označování (číslování)
+dnotlivých záchranných výzkumů Archeologického ústavu ČSAV
+Libici od r. 1974, tj. na libickém předhradí a v zázemí hradiště
+
+libické sídlištní aglomeraci). Číslování sond je přirůstkové
+terénní výzkumy v uzavřených sídlištních jednotkách (areál rodir
+ho domu, usedlosti, jedné velké parcely atd.) mají totéž pořadov
+slo. Pokud měla sondáž v takové uzavřené sídlištní jednotce více
+
+stí (tj. v případech více zásahů do země na jednom pozemku: např
+"	0	TextRegion	0.9998194575309752
+167.34938049316406	183.41526794433597	401.7736511230469	204.3933563232422	rectangle	"« METODA VÝZKUMU
+"	1	TextRegion	0.9996578693389891
+128.50128173828125	917.7064208984376	1137.1009521484375	1538.203857421875	rectangle	"a sousední fortifikace. Přirozeně jsme i zde byli omezeni jak mož-
+nostmi, resp. potřebami stavebníků, tak hranicemi pozemku; např.
+sonda 2ch, která prořala opevnění ve směru kolmém k jeho průběhu,
+byla na JZ ohraničena zahradní zdí, pod kterou a za níž jsme už
+neměli možnost zachytit vnější okrajové partie opevnění.,
+
+Označení všech etap uvedených terénních prací jako sonda 2 vy-
+cházelo a vychází ze zavedeného způsobu označování (číslování)
+jednotlivých záchranných výzkumů Archeologického ústavu ČSAV
+v Libici od r. 1974, tj. na libickém předhradí a v zázemí hradiště
+(v libické sídlištní aglomeraci). Číslování sond je přírůstkové
+a terénní výzkumy v uzavřených sídlištních jednotkách (areál rodin-
+ného domu, usedlosti, jedné velké parcely atd.) mají totéž pořadové
+
+číslo. Pokud měla sondáž v takové uzavřené sídlištní jednotce více
+"	2	TextRegion	0.9988229870796204
+140.14910888671875	464.4205932617188	1133.885986328125	1156.9827880859375	rectangle	"Mají tedy předstihové záchranné výzkumy v Libici, prováděné před
+zahájením staveb, ráz plošných výzkumů, přičemž ovšem velikost plo-
+chy jednotlivých sond závisí na velikosti příslušných staveb, Na
+všech zkoumaných plochách na předhradí se ukázaly archeologické
+objekty a movité nálezy z hradištního obdobi; v některých sondách
+(také v sondě 2) byly rovněž doklady osidlení v období lužické kul-
+tury. Archeologické výzkumy na libickém předhradí se vesměs omezují
+na plochy staveb, Výzkum sondy 2 v tomto ohledu byl výjimkou, nebot
+zde došlo k postupnému rozšiřování původní sondy při hledání záklac
+pravděpodobného kněžského domu a zkoumání jeho sídlištního okrsku
+
+a sousední fortifikace. Přirozeně jsme i zde byli omezeni jak mož-
+nostmi, resp. potřebami stavebníků, tak hranicemi pozemku; např.
+sonda 2ch, která prořala opevnění ve směru kolmém k jeho průběhu,
+byla na JZ ohraničena zahradní zdí, pod kterou a za níž jsme už
+
+neměli možnost zachytit vnější okrajové partie opevnění.,
+"	3	TextRegion	0.9959445595741272
+119.7395248413086	311.8741455078125	1182.509033203125	814.562255859375	rectangle	"kovská Libice""“, kde je možné povolit jakékoliv stavby jen po prove-
+dení archeologického výzkumu (druhá část rezervace - vnitřní libické
+hradiště - je pak zcela chráněna od jakýchkoli zásahů do terénu).
+Mají tedy předstihové záchranné výzkumy v Libici, prováděné před
+zahájením staveb, ráz plošných výzkumů, přičemž ovšem velikost plo-
+chy jednotlivých sond závisí na velikosti příslušných staveb, Na
+všech zkoumaných plochách na předhradí se ukázaly archeologické
+objekty a movité nálezy z hradištního obdobi; v některých sondách
+(také v sondě 2) byly rovněž doklady osidlení v období lužické kul-
+tury. Archeologické výzkumy na libickém předhradí se vesměs omezují
+
+na plochy staveb, Výzkum sondy 2 v tomto ohledu byl výjimkou, neboť
+"	4	TextRegion	0.9361497163772584
+534.2431640625	69.5783920288086	553.97705078125	83.63282012939453	rectangle		5	TextRegion	0.8555583953857422

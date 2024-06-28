@@ -1,0 +1,7 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+165.34194946289062	1402.3011474609375	1027.10986328125	1506.83544921875	rectangle	"Sonda 2a + 2b (1974), vrstva 3 z 10.stol., povrch opukové
+destrukce při jižní líci jižní podezdívky pravděpodobného
+kněžského domu, ňálezová situace 99/74. 1 - 2 výběr
+libické keramiky. Foto V. Jílkova“
+"	0	TextRegion	0.9999406337738036
+763.2991943359375	1117.6707763671875	776.4921875	1139.8994140625	rectangle		2	TextRegion	0.9926799535751344

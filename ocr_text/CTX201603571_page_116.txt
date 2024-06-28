@@ -1,0 +1,37 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+387.8881530761719	1033.2708740234375	680.1886596679688	1046.923095703125	rectangle	"Západní kresebně nedokumentovaný řez
+"	0	TextRegion	0.999929666519165
+1495.5223388671875	1080.8095703125	1584.097412109375	1095.6224365234375	rectangle	"Stránka 3 z 7
+"	1	TextRegion	0.9989113807678224
+90.25777435302734	1080.94775390625	443.7716979980469	1097.34716796875	rectangle	"Archeologický výzkum č. 2015/21 - Albertov 3a
+"	2	TextRegion	0.9987407326698304
+396.4305419921875	461.8001708984375	670.7110595703125	477.0179748535156	rectangle	"Severní kresebně nedokumentovaný řez
+"	3	TextRegion	0.9961124062538148
+321.8558654785156	570.6883544921875	730.6023559570312	692.38427734375	rectangle	"Spodní část severního kresebně nedokumentovaného řezu
+Spodní část západního kresebně nedokumentovaného řezu
+Dno sondy S02
+Dno sondy S02
+"	4	TextRegion	0.9892367720603944
+874.2822875976562	285.07147216796875	1001.9959106445312	732.1594848632812	rectangle	"pohled od severu
+pohled od západu
+ohled od východu
+pohled od severu
+pohled od severu
+pohled od západu
+pohled od jihu
+ohled od východu
+pohled od severu
+pohled od západu
+pohled od jihu
+ohled od východu
+pohled od jihu
+pohled od jihu
+
+pohled od severu
+
+  
+"	5	TextRegion	0.9593997001647948
+393.8076171875	731.3447875976562	669.4662475585938	748.138916015625	rectangle	"Západní kresebně nedokumentovaný řez
+"	6	TextRegion	0.9479037523269652
+896.2723999023438	213.32798767089844	968.1990966796876	223.82766723632807	rectangle	"Orientace
+"	7	TextRegion	0.9192721843719482

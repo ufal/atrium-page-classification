@@ -1,0 +1,68 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+141.40679931640625	1100.430908203125	1039.0341796875	1427.0115966796875	rectangle	"Až na výjimky, můžeme původ většiny kamenných nálezů nesoucích na svém povrch
+pracovní stopy označit za místní. Křemence tvoří mezivrstvy v břidlicích i samostatní
+výchozy v nejbližším okolí parcely. Jedná se skalecké křemence dobrotivského souvrstv
+ordoviku. Valouny použité většinou jako brousky pocházejí ze štěrkopískových fluviálnícl
+teras Vltavy pleistocénního stáří. Tyto uloženiny budují podklad sprašové návěje přímc
+v oblasti zájmové plochy nebo vystupují jako součást svahovin nebo vlastních nepřekrytýcl
+terasových akumulací (např. na nedalekém vrchu Pecka). Svahoviny či rozsáhlé sediment
+
+zaniklého Dejvického potoka zde hojně obsahují i další potenciální surovinu brousků -
+"	0	TextRegion	0.9999281167984008
+143.3170166015625	146.6062774658203	206.651611328125	163.67112731933594	rectangle	"B3008
+"	1	TextRegion	0.9997400641441344
+99.346435546875	185.1845703125	1046.993896484375	227.9690093994141	rectangle	"1 x zelenošedý plochý protáhlý valoun laminovaného metatufu; na části povrchu drobné
+"	2	TextRegion	0.9994587302207948
+128.52821350097656	263.58349609375	1052.6043701171875	335.3656616210937	rectangle	"1 x šedobílá až slabě červenohnědá středně až hrubě zrnitá arkóza s nepříliš hojnými zrny
+
+živců do průměru okolo 2 mm, zrna křemene až kolem 0,5 cm; část povrchu obroušena —
+"	3	TextRegion	0.9982757568359376
+432.333251953125	1592.4287109375	766.2252197265625	1614.2921142578125	rectangle	"2. Geologická a petrografická zpráv
+"	4	TextRegion	0.9973033666610718
+199.5624237060547	591.3935546875	1053.47802734375	746.6556396484375	rectangle	"lochý valoun blíže neurčeného metasedimentu s oj. hojnými zrny křemene kolem 1 mm
+ucími v celistvé základní hmotě — část povrchu nevýrazně ohlazena
+navě šedá hrubozrnná arkóza až arkózový slepenec, oj. zrna živců a křemene až 0,5 cm;
+
+k zrnotěrky, barva sekundární od působení ohně
+"	5	TextRegion	0.9925494194030762
+262.42254638671875	758.6718139648438	1047.4234619140625	835.3793334960938	rectangle	"okrový, bělošedý až narezlý hrubě zrnitý ignimbrit (paleoryolit), prostoupený
+
+žilkami o tloušťce okolo 1 až 2 cm, hrubě porézní, z deluvia; část povrchu
+"	6	TextRegion	0.9856632351875304
+193.72349548339844	423.2630920410156	1062.3135986328125	505.822021484375	rectangle	"nčlavý až slabě narezlý jemnozrnný kaolinický pískovec, pevný, jemně porézní; na části
+
+chu probroušené žlábky — brousek
+"	7	TextRegion	0.9639247059822084
+152.75244140625	177.4575958251953	988.93408203125	274.1134033203125	rectangle	"| x zelenošedý plochý protáhlý valoun laminovaného metatufu; na části povrchu d
+
+1mělé rýhy
+
+   
+"	8	TextRegion	0.9590038657188416
+164.24685668945312	475.2286987304688	1061.0018310546875	591.3607177734375	rectangle	"»vrchu probroušené žlábky — brousek
+x světle růžová středně až hrubě zrnitá arkóza s hojnými drobnými růžovými živci, oj. zrna
+
+'emene až kolem 1 cm — zlomek zrnotěrky
+"	9	TextRegion	0.9533225297927856
+150.6742401123047	304.73321533203125	1049.3023681640625	369.5084533691406	rectangle	"živců do průměru okolo 2 mm, zrna křemene až kolem 0,5 cm; část povrchu obroušena —
+
+zlomek zrnotěrky
+"	10	TextRegion	0.9451364874839784
+177.37083435058594	528.8829956054688	981.7517700195312	851.3002319335938	rectangle	"světle ruzova stredné az Nrudě Zrnita arkoza S hojnými droonými ruzovýmui ZiveI, ©
+mene až kolem I cm — zlomek zrnotěrky
+
+plochý valoun blíže neurčeného metasedimentu s oj. hojnými zrny křemene kolem
+voucími v celistvé základní hmotě — část povrchu nevýrazně ohlazena
+
+tmavě šedá hrubozrnná arkóza až arkózový slepenec, oj. zrna živců a křemene až 0
+mek zrnotěrky, barva sekundární od působení ohně
+< světle okrový, bělošedý až narezlý hrubě zrnitý ignimbrit (paleoryolit), prostc
+
+istvými žilkami o tloušťce okolo 1 až 2 cm, hrubě porézní, z deluvia; část p
+"	11	TextRegion	0.9356874227523804
+144.5752410888672	1015.1011962890624	528.3624267578125	1043.4886474609375	rectangle	"Provenience kamenných surovin
+"	12	TextRegion	0.9286897778511048
+280.5990600585937	509.5263366699219	1042.160400390625	567.7362670898438	rectangle	"ová středně až hrubě zrnitá arkóza s hojnými drobnými růžovými živci, oj. zrna
+
+a To olea vemte
+"	13	TextRegion	0.8982118368148804

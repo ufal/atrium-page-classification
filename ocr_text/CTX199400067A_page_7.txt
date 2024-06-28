@@ -1,0 +1,52 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+126.70388793945312	170.01771545410156	1112.8441162109375	586.2904052734375	rectangle	"va statku (na parcelách č, 25/1 a 25/6) k terénnímu archeologickém
+výzkumu ani k neodborným zásahům do země, V hlavním okrsku sondy 2
+na parcele č. 25/6 potvrdil tento předpoklad do značné míry náš
+archeologický výzkum v 1. 1974 - 1976 a 1978; plocha sond 2a - 2j
+a 21 (""el""), která zaujímala 3,18 a, tj. cca 35 % plochy parcely
+25/6 (o rozloze 9a), ukázala při výzkumu intaktní situaci. Zdá se,
+že také sousední zahrada ppě. 25/1, na níž jsme položili jen malou
+sondu 2k, neni do hloubky dotčená lidskými zásahy mladšími než
+
+11. - 12, století,
+"	0	TextRegion	0.9999701976776124
+160.5992431640625	627.3851318359375	1120.37939453125	1489.2987060546875	rectangle	"vinou Situaci lze předpokládat na dvoře statku č.p. 63 na parcele
+« 64 (která je dnes rozdělená na ppě. 64/1 a 64/2). Zde sice malá
+onda 2n ukázala v r, 1985 rovněž neporušenou archeologickou situac
+však je zde třeba předpokládat neodborné terénní zásahy vzhledem
+blízkosti statku včetně hospodářských stavení, V r. 1973 provedl
+« Turek na parcele č. 24/1l, která v ostrém úhlu vybíhá do parcely
+« 64 v její IV části, souběžně se svým systematickým výzkumem
+nitřního libického hradiště malou záchrannou akci. O této záchran-
+2 akci jsem zpravená pouze z ústního vyprávění dr. R. Turka a čle-
+ů Svobodovy rodiny, především p. ing. Petra Svobody. P. ing. P. Sv
+>da mne v listopadu 1992 informoval jak o poloze sondy na parcele
++ 24/1, tak o podnětu k této sondáži, kterým byla tehdy stavba
+aráže p. Tůmy na parcele č. 24/1l, a o terénním zjištění v sondě,
+»nda měla být podle informace ing. P. Svobody hluboká cca 1,2 m,
+atrně se tam nenašly skoro žádné nálezy a na dně sondy se objevily
+»ovodobé měděné dráty, P. ing. P. Svoboda mi též v listopadu 1992
+či psaní této nálezové zprávy korigoval a doplnil zde uvedené
+
+jaje o jeho rodné usedlosti,
+
+Ma so
+
+ 
+"	1	TextRegion	0.9996684789657592
+199.5359039306641	1478.11328125	1077.89111328125	1599.89697265625	rectangle	"arcela č. 25/4, tj, zahrada u sousedního domu pí. H, Jíšové
+žní ul. č.p. 60, na níž jsme v r, 1978 uskutečnili malý výzk
+
+ndě 2m, náležela až do 60, let ke komplexu Svobodova statku.
+"	2	TextRegion	0.9994565844535828
+132.46295166015625	610.8636474609375	1146.7178955078125	993.8883056640624	rectangle	"Jinou situaci lze předpokládat na dvoře statku č.p. 63 na parcele
+č. 64 (která je dnes rozdělená na ppč. 64/1 a 64/2). Zde sice malá
+sonda 2n ukázala v r. 1985 rovněž neporušenou archeologickou situaci
+avšak je zde třeba předpokládat neodborné terénní zásahy vzhledem
+k blízkosti statku včetně hospodářských stavení, V r. 1973 provedl
+R. Turek na parcele č. 24/1l, která v ostrém úhlu vybíhá do parcely
+č. 64 v její JV části, souběžně se svým systematickým výzkumem
+
+Vnitřního libického hradiště malou záchrannou akci. O této záchran-
+"	3	TextRegion	0.9648683667182922
+131.81671142578125	1582.762939453125	146.01991271972656	1594.2515869140625	rectangle		4	TextRegion	0.915600597858429

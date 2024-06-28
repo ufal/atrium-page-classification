@@ -1,0 +1,66 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+130.1229248046875	669.8489990234375	1190.0	1260.531005859375	rectangle	"vnitřní hradební zdí (opukovou plentou).
+
+Byla-li příčinou účelného zlikvidování pravděpodobného kněžského
+domu ve slavníkovské době přestavba a zesilení sousední fortifikace,
+lze dobře vysvětlit, že do tělesa nové mohutnější hradby se dostaly
+spolu se zeminou z okoli i zbytky z areálu zrušeného kněžského domu,
+mezi nimi také střípky z rozbitého aguamanile a ztracené železné
+pisátko, Po požáru opevnění, zřícení vnitřní hradební zdi a částeč-
+ném rozvalení hradby při dobytí Libice v září 995 se opět přemístily
+zlomky aguamanile i stilus a část jich se spolu s úlomky kamení z po-
+bořené hradby dostala do mladší kulturní vrstvy z 11, - 12, stoleti,
+
+O následujících sezónách 1975, 1976, 1978 a 1985, které zodpově-
+
+děly patrně většinu ze souboru otázek o pravděpodobném kněžském domě
+
+     
+"	0	TextRegion	0.9999903440475464
+151.80384826660156	197.95794677734372	1136.541259765625	721.8941650390625	rectangle	"dobného kněžského domu již v průběhu 2, poloviny 10. stol, (tedy
+dříve než v době pádu slavníkovské Libice v roce 995), po které
+nezbyly žádné doklady neplánovaného či přímo násilného zániku
+(např. ohně), mohla souviset s rozšiřováním sousedních hradeb
+
+v rámci velmi pravděpodobného zesilování obranyschopnosti slavní-
+kovského sídla v průběhu 2. poloviny 10, stol. Předpoklad byl pod-
+pořen výsledkem výzkumu sondy 2 ch v r. 1978 (o kterém pojedná sa-
+mostatná nálezová zpráva): v sondě 2ch se podařilo odkrýt zbytky
+starší užší hradby s roštovou konstrukcí a prkennou zadní stěnou,
+nad ní pak zbytky širší hradby s komorovou konstrukcí a mohutnou
+
+vnitřní hradební zdí (opukovou plentou).
+"	1	TextRegion	0.9999855756759644
+536.027587890625	40.20595169067383	565.4133911132812	55.691741943359375	rectangle		2	TextRegion	0.9998248219490052
+147.0277099609375	127.1485595703125	1183.9354248046875	1313.1539306640625	rectangle	"Už v roce 1974 se zdálo, že vlastně předčasná likvidace pravděpo-
+dobného kněžského domu již v průběhu 2, poloviny 10. stol, (tedy
+dříve než v době pádu slavníkovské Libice v roce 995), po které
+nezbyly žádné doklady neplánovaného či přímo násilného zániku
+(např. ohně), mohla souviset s rozšiřováním sousedních hradeb
+
+v rámci velmi pravděpodobného zesilování obranyschopnosti slavní-
+kovského sídla v průběhu 2. poloviny 10, stol. Předpoklad byl pod-
+pořen výsledkem výzkumu sondy 2 ch v r. 1978 (o kterém pojedná sa-
+mostatná nálezová zpráva): v sondě 2ch se podařilo odkrýt zbytky
+starší užší hradby s roštovou konstrukcí a prkennou zadní stěnou,
+nad ní pak zbytky širší hradby s komorovou konstrukcí a mohutnou
+vnitřní hradební zdí (opukovou plentou).
+
+Byla-li příčinou účelného zlikvidování pravděpodobného kněžského
+domu ve slavníkovské době přestavba a zesilení sousední fortifikace,
+lze dobře vysvětlit, že do tělesa nové mohutnější hradby se dostaly
+spolu se zeminou z okoli i zbytky z areálu zrušeného kněžského domu,
+mezi nimi také střípky z rozbitého aguamanile a ztracené železné
+pisátko, Po požáru opevnění, zřícení vnitřní hradební zdi a částeč-
+ném rozvalení hradby při dobytí Libice v září 995 se opět přemístily
+zlomky aguamanile i stilus a část jich se spolu s úlomky kamení z po-
+bořené hradby dostala do mladší kulturní vrstvy z 11, - 12, stoleti,
+
+O následujících sezónách 1975, 1976, 1978 a 1985, které zodpově-
+děly patrně většinu ze souboru otázek o pravděpodobném kněžském domě
+
+a sousedním opevnění, budou podány samostatné nálezové zprávy,
+"	3	TextRegion	0.9991855025291444
+156.36557006835938	1259.9310302734375	167.42428588867188	1272.300048828125	rectangle		4	TextRegion	0.9494843482971193
+531.1082153320312	42.20880126953125	583.15283203125	54.56431579589844	rectangle	"60
+"	5	TextRegion	0.9248313903808594

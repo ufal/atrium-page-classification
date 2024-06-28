@@ -1,0 +1,78 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+153.27450561523438	980.2931518554688	1123.774658203125	1294.908203125	rectangle	" 
+
+Železný stilus (z nálezové situace 89/74) pochází ze severního
+rohu sondy 2c, kde byl nalezen zjevně ve vrstvě 2 v hl, cca 30 cm
+pod dnešním povrchem, patrně cca 12 cm nad povrchem vrstvy 3
+(soudě dle řezu 21, vzdáleného od místa nálezu stilu 15 cm; srv,
+též výše popis vrstvy 2/vrstvy 3 na počátku kapitoly 7. Popis te-
+
+rénní situace, kde je u nálezové situace 89/74 připojena terénní
+"	0	TextRegion	0.999942421913147
+114.0712432861328	1336.3167724609375	1118.8743896484375	1516.3662109375	rectangle	"Kromě okrsku pravděpodobného kněžského domu se v sondě 2 už
+v roce 1974 ukázaly relikty opevnění (část vnitřního příkopu
+a destruovaná vnitřní hradební zed), které v následujících výzkum-
+
+ných sezónách vedly k průkopu sousední hradbou (v sondě 2ch).
+"	1	TextRegion	0.9998927116394044
+465.8209533691406	44.62914657592773	498.7391357421875	59.97626876831055	rectangle	"59
+"	2	TextRegion	0.999722421169281
+124.99942779541016	489.2796325683594	1112.833740234375	971.763427734375	rectangle	"Čnimi kameny z pravděpodobného kněžského domu,
+
+Všech 26 (15 nesporných a li velmi pravděpodobných) zlomků
+aguamanile bylo nalezeno v sondě 2c. Až na jediný trochu větší
+zlomek ze zadečku zvířátka (s částí charakteristicky k tělíčku
+beránka přitisknutého ocasu) z destrukce vnitřní hradební zdi
+(nálezová situace 110/74) byly všechny střepy z aguamanile malé
+(rozšlapané) a pocházejí jak z vrstvy 2 (92/74), tak z vrstvy 2
+včetně povrchu vrstvy 3 (90/74), resp. z povrchu DVHZ (84/74,
+85/74) a převážně z DVHZ (jak z jejího povrchu: 91/74, tak z masy
+DVHZ: 110/74,111/74); srv, také níže evidenci zlomků aguamanile
+
+na kanoc3j ae>nam:i: málasň
+"	3	TextRegion	0.9991546869277954
+154.60757446289062	1298.998046875	248.13299560546875	1316.1217041015625	rectangle	"skica).
+"	4	TextRegion	0.9968794584274292
+148.34852600097656	165.74851989746094	1152.641845703125	522.8060302734375	rectangle	"th- hui hd bebobubotááá o ad
+k pravděpodobnému kněžskému domu není doložena primární nálezovou
+
+situací, tj. objevem zlomků liturgického předmětu a psacího náčiní
+v horizontu z doby provozu pravděpodobného kněžského domu, Tímto
+
+horizontem z doby provozu kněžského domu je, jak bylo uvedeno výše
+(v popisu pravděpodobného kněžského domu v kapitole 7. Popis terén-
+ní situace), spodní část vrstvy 3 mezi povrchem vrstvy 4 a destruk-
+
+čními kameny z pravděpodobného kněžského domu,
+"	5	TextRegion	0.986984372138977
+446.683837890625	46.37336349487305	518.3118896484375	59.02881622314453	rectangle	"- 59 -
+"	6	TextRegion	0.98023784160614
+150.92881774902344	261.7024230957031	1113.705078125	1255.4495849609375	rectangle	"ání: café: k E cí o ooo o oo o > do o E ooo o o
+v horizontu z doby provozu pravděpodobného kněžského domu, Tímto
+horizontem z doby provozu kněžského domu je, jak bylo uvedeno výš
+(v popisu pravděpodobného kněžského domu v kapitole 7. Popis teré
+ní situace), spodní část vrstvy 3 mezi povrchem vrstvy 4 a destru
+čními kameny z pravděpodobného kněžského domu,
+
+Všech 26 (15 nesporných a li velmi pravděpodobných) zlomků
+aguamanile bylo nalezeno v sondě 2c. Až na jediný trochu větší
+zlomek ze zadečku zvířátka (s částí charakteristicky k tělíčku
+beránka přitisknutého ocasu) z destrukce vnitřní hradební zdi
+(nálezová situace 110/74) byly všechny střepy z aguamanile malé
+(rozšlapané) a pocházejí jak z vrstvy 2 (92/74), tak z vrstvy 2
+včetně povrchu vrstvy 3 (90/74), resp. z povrchu DVHZ (84/74,
+85/74) a převážně z DVHZ (jak z jejího povrchu: 91/74, tak z masy
+DVHZ: 110/74,111/74); srv, také níže evidenci zlomků aguamanile
+na konci seznamu nálezů,
+
+Železný stilus (z nálezové situace 89/74) pochází ze severního
+rohu sondy 2c, kde byl nalezen zjevně ve vrstvě 2 v hl, cca 30 cm
+pod dnešním povrchem, patrně cca 12 cm nad povrchem vrstvy 3
+(soudě dle řezu 21, vzdáleného od místa nálezu stilu 15 cm; srv,
+
+též výše popis vrstvy 2/vrstvy 3 na počátku kapitoly 7. Popis te-
+
+     
+
+nab Az az 5 zá
+"	7	TextRegion	0.9089351296424866

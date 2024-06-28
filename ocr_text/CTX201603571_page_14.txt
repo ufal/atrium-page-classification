@@ -1,0 +1,108 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+1050.1568603515625	1536.474853515625	1071.1474609375	1552.6583251953125	rectangle		0	TextRegion	0.9999710321426392
+119.121337890625	1338.392333984375	1070.30419921875	1495.5111083984375	rectangle	"POD SLOVANY, PLAVECKÁ - KABELOVOD
+
+V rámci kabelizace Nového Města byl v r. 1999 realizován úsek o délce cca 300 m se 7 kabelovými komorami o
+rozměrech cca 4 x 3 m. Současná niveleta povrchu sledovaných ulic je produktem asanačních úprav bývalého
+Podskalí na přelomu 19. a 20. století. Původní úroveň terénu se v 19. století nalézala v průměru o 1 až 2 m níže.
+Tomuto stavu odpovídá i podoba zastiženého nadloží, tvořená výhradně souvrstvími přemístěných terénů (navážek)
+spolu s početnými stavebními destrukcemi původní řídké zástavby. U stavebních konstrukcí se jednalo především o
+obvodové zdi nebo přilehlé příčky domů z opuky a cihel spojovaných maltou. Stáří původní odkryté zástavby lze
+"	1	TextRegion	0.99989116191864
+100.76885986328124	155.91452026367188	1056.5062255859375	480.2405395507813	rectangle	"ECT PPTE V PLT P O P VY E
+
+Nejrozsáhlejší lidská aktivita je spojena se začleněním této lokality do „vyšehradského podhradí“. V 11. století
+byla na zkoumané lokalitě velmi intenzívní železářská výroba, po které zůstaly zachovány četné nálezy
+výhní, nístějových slitků, strusek a kousků bahenní rudy. Vedle často nalézaných objektů, v literatuře
+interpretovaných jako vyhřívací kovářské pece, je zde několik rozsáhlých těžebních jam na písek, nezbytný při
+výrobě železa. Jámy byly sekundárně zasypány výrobním odpadem. Samotná pyrotechnologická činnost byla
+soustředěna na nejvyšším stupni vltavské terasy, kde byla chráněna před povodněmi, menší těžební jámy na
+písek se nacházely i na nižších stupních teras Botiče, často zaplavovaných. Velmi záhadný a poměrně
+rozsáhlý objekt byl nalezen na severozápadní hranici výzkumu, takže nebylo bohužel možné ho prozkoumat ho
+celý. Více než 2m hluboký objekt byl zaplněn střídajícími se vrstvami vypáleného jílu a železitého písku s
+četnými úlomky bahenní rudy a různých strusek. Po delší úvaze byl tento objekt interpretován jako pražírna,
+tj. místo kde byla sušena a pražena bahenní ruda, která byla zřejmě těžena v okolí lokality a původně se
+nacházela v tekutém skupenství. Zatím velmi opatrně je pyrotechnologická aktivita, související se zpracováním
+železa, spojována s okruhem keramiky s kalichovitou profilací, teprve po déletrvajícím zpracování bude možné
+"	2	TextRegion	0.9998596906661988
+115.41665649414062	861.010009765625	1050.92138671875	1169.8914794921875	rectangle	"zkoumané plochy přetrval až do současnosti.
+Závěrem je nutné nastínit několik zajímavých témat, ke kterým jistě přispějí výsledky záchranného výzkumu. Již
+samotné zpracování geologického posudku je velmi náročné, ale zcela nezbytné při další rekonstrukci
+geomorfologie vyšehradského podhradí. Výsledky archeologického výzkumu přinesly nesmírně zajímavé poznatky
+ke studiu pravěkého osídlení této části Nového Města. Zcela zásadní význam má poznání této lokality pro
+výzkum technologie výroby železa i barevných kovů v raném a vrcholném středověku. Nedílnou součástí
+tohoto tématu je i organizace výroby a její úloha v raně středověkém státě a v jeho transformaci. Ke
+zpracování a vyhodnocení velkého množství různých pyrotechnologických objektů, produktů i výrobního odpadu
+je nezbytné vytvořit širší interdisciplinární badatelský tým. Není příliš nadsazené tvrdit, že pro výše zmíněné
+okruhy problémů zatím nebyla k dispozici tak významná lokalita. O jejím významu v raném i vrcholném
+středověku svědčí i nálezy mincí, mezi kterými se podle numismatického posudku J. Militkého nacházejí nejen
+četné a zajímavé denárové a brakteátové dražby z Čech, ale i mince zahraniční provenience (např. Salzburg,
+Pasov). Dalšími tématy z mladších období mohou být nálezy sekundárně použitých gotických článků,
+
+ 
+"	3	TextRegion	0.9996933937072754
+104.93497467041016	504.3962707519531	1050.29541015625	863.7254028320312	rectangle	"2
+Během 12. století došlo ke změně metalurgické výroby (výroba barevných kovů, stříbra), mění se i typ
+nalezených objektů, nově přibývají zahloubené domy. Ve výplni zahloubené části všech domů se nacházely
+různě zbarvené skelnaté strusky s převažujícími odstíny červené, červenohnědé, nahodile zelenomodře
+zbarvené. Již pro prvních analýzách bylo zjištěno, že tyto strusky mají vysoký obsah olova. Snad je zde
+potvrzena souvislost s předpokládanou výrobou stříbra na lokalitě, jejímž dokladem, i když nikoliv jasným
+důkazem, je nález dvou kusů stříbra, které podle tvaru ztuhly v pánvi jako finální produkt tavby. Možnost, že
+se nejedná o dovezený polotovar, určený k dalšímu zpracování, je dále podepřena nálezem mnoha drobných
+okují a kapiček stříbra, obalených mědí, které se spolu s jedním kusem stříbra nacházely v jednom z domů.
+Bohužel nebyl nalezen takový objekt, který by bylo možné s určitostí považovat za tavicí pec. Během 13.
+století dochází k zániku tohoto unikátního sídliště s metalurgickou aktivitou, datovaným keramikou se
+zduřelým okrajem. Od této doby již lokalita nikdy nenabyla takového významu, zejména po založení Nového
+Města a pozdějšího zpustošení vyšehradského podhradí husity, se zde nacházely pouze zahrady a polnosti,
+celkově lze další aktivity až do konce 18. století charakterizovat jako zemědělské. V 19. století byly zde
+vybudovány drobné průmyslové objekty, z nichž největší byla barvírna kůží a tento charakter využití námi
+
+Sbarmnná nlarhyr nřobnnl m5 Am enrnenneti
+
+ 
+"	4	TextRegion	0.999606430530548
+762.9492797851562	1223.2354736328125	1057.945068359375	1240.4871826171875	rectangle	"Michaela Selmi Wallisová, NPÚ HMP
+"	5	TextRegion	0.9980762004852296
+110.79400634765624	115.6983413696289	1066.696533203125	156.20652770996094	rectangle	"nápadná chudost hrobové výbavy a otázkou tak zůstává možný vztah pohřebiště k samotnémuVyšehradu, na
+který mrtví hleděli přes Botič (orientace východ-západ).
+"	6	TextRegion	0.9976183772087096
+127.01602172851562	1281.8717041015625	465.2477416992188	1303.321044921875	rectangle	"PRAHA 2 — NOVÉ MĚSTO (Podliska 2003a
+"	7	TextRegion	0.9933639764785768
+155.13006591796875	436.0088806152344	895.2403564453125	1077.567138671875	rectangle	"cházela v tekutém skupenství. Zatím velmi opatrně je pyrotechnologická aktivita, souvisej
+eza, spojována s okruhem keramiky s kalichovitou profilací, teprve po déletrvajícím zprac
+'o domněnku potvrdit.
+
+hem 12. století došlo ke změně metalurgické výroby (výroba barevných kovů, stříbra
+lezených objektů, nově přibývají zahloubené domy. Ve výplni zahloubené části všech a
+ně zbarvené skelnaté strusky s převažujícími odstíny červené, červenohnědé, naho
+arvené. Již pro prvních analýzách bylo zjištěno, že tyto strusky mají vysoký obsah ol
+tvrzena souvislost s předpokládanou výrobou stříbra na lokalitě, jejímž dokladem, i kc
+kazem, je nález dvou kusů stříbra, které podle tvaru ztuhly v pánví jako finální produkt t
+nejedná o dovezený polotovar, určený k dalšímu zpracování, je dále podepřena nálezem
+ují a kapiček stříbra, obalených mědí, které se spolu s jedním kusem stříbra nacházely |
+hužel nebyl nalezen takový objekt, který by bylo možné s určitostí považovat za tavic
+letí dochází k zániku tohoto unikátního sídliště s metalurgickou aktivitou, datovany
+uřelým okrajem. Od této doby již lokalita nikdy nenabyla takového významu, zejména po
+šsta a pozdějšího zpustošení vyšehradského podhradí husity, se zde nacházely pouze z«
+kově lze další aktivity až do konce 18. století charakterizovat jako zemědělské. V 19.
+budovány drobné průmyslové objekty, z nichž největší byla barvírna kůží a tento char
+numané plochy přetrval až do současnosti.
+
+věrem je nutné nastínit několik zajímavých témat, ke kterým jistě přispějí výsledky záchran
+motné zpracování geologického posudku je velmi náročné, ale zcela nezbytné při
+
+omorfologie vyšehradského podhradí. Výsledky archeologického výzkumu přinesly nesmírně
+studiu pravěkého osídlení této části Nového Města. Zcela zásadní význam má poznán
+zkum technologie výroby železa i barevných kovů v raném a vrcholném středověku. |
+hoto tématu je i organizace výroby a její úloha v raně středověkém státě a v jeho
+racování a vyhodnocení velkého množství různých pyrotechnologických objektů, produktů i
+nezbytné vytvořit širší interdisciplinární badatelský tým. Není příliš nadsazené tvrdit, že
+
+ 
+
+ 
+
+ 
+
+ 
+"	8	TextRegion	0.9777380228042604

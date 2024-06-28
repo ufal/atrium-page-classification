@@ -1,0 +1,5 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+285.3661193847656	794.7406005859375	1014.9470825195312	854.0073852539062	rectangle	"9 Úbjekt 115 s torzem slezskoplatěnického koflíku
+
+MRI Cam dní | málem m AA lankem  £ madeknm 00
+"	2	TextRegion	0.9399306178092957

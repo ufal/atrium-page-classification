@@ -1,0 +1,35 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+138.98069763183594	721.4652099609375	1190.0	967.2669067382812	rectangle	"Výzkum sondy 2, stejně jako ostatní předstihové záchranné výzkumy
+na libickém předhradí, vyplynul z režimu archeologické rezervace
+""Slavníkovská Libice"", deklarovaného ve výnosu ministerstva školství
+a kultury č.j. 36.568/61-V/2 ze dne 31. srpna 1961 o zřízení archeolo-
+
+gické památkové rezervace ""Slavníkovská Libice""“, Areál sondy 2 leží
+"	0	TextRegion	0.9999394416809082
+124.20901489257812	1030.837158203125	1152.1422119140625	1486.268798828125	rectangle	"V poloviné 70. let doslo V Libici k nucené parcelaci větších
+zahrad, které se rozkládaly na libickém předhradí při jeho JZ obvodu
+Na nově vzniklých oddělených parcelách, které leží na samém JZ okra-
+ji předhradí v tehdy Zadní, nyní Jižní ulici, stavěli postupně je-
+jich noví majitelé rodinné domky s příslušenstvím, Před zahájením
+těchto staveb Archeologický ústav zkoumal od r. 1974 plochy stave-
+nišř. Po prvním předstihovém záchranném výzkumu roku 1974 v areálu
+nynějšího rodinného domu č.p. 401 na parcele č. 14/2 (kde jsme zkou-
+mali sondu 1), následoval v témž roce výzkum druhého ústavního te-
+
+rénního pracoviště na libickém předhradí - sondy 2 v areálu někdej-
+"	1	TextRegion	0.999900221824646
+128.728759765625	173.0649871826172	1159.342529296875	551.7730102539062	rectangle	"Ve 2. polovině 60. let ji od pí. M. Svobodové odkoupila pí, H.
+Jíšová s manželem, Na parcele č, 25/4 zřejmě nikdy nedošlo k odborné
+mu archeologickému výzkumu. Dle ústních sdělení sousedů pí. H. Jíšov
+z let 1975 - 1978, kdy Archeologický ústav ČSAV v Praze a orgány pa-
+mátkové péče jednaly s pi. H. Jíšovou o umožnění malé archeologické
+sondáže na zahradě ppě. 25/4, jsem informována, že manželé Jíšovi
+vyhloubili na parcele č, 25/4 po jejím odkoupení od pí. M, Svobodové
+
+ve 2. polovině 60. let septik, aniž by před jeho stavbou umožnili
+"	2	TextRegion	0.9998995065689088
+177.9491424560547	648.2399291992188	522.750732421875	672.31884765625	rectangle	", OKOLNOSTI A CÍL VÝZKUM
+"	3	TextRegion	0.9863077998161316
+527.7722778320312	58.746700286865234	591.1592407226562	68.66861724853516	rectangle		4	TextRegion	0.9512733221054076
+150.9011688232422	653.521484375	172.84735107421875	667.8475341796875	rectangle	" 
+"	5	TextRegion	0.8844416737556458

@@ -1,0 +1,77 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+182.9269561767578	836.2211303710938	1115.5147705078125	958.261474609375	rectangle	"z období narůstání vrstvy 3 pochází z výzkumu v roce 1975 pouze
+kůlová jamka 5 (srv, níže), která ležela v sondě 2b na svahu
+vnitřního příkopu, Její vztah k pravděpodobnému kněžskému domu
+
+E k E 6
+"	0	TextRegion	0.9999779462814332
+148.9371795654297	185.4288482666016	1186.0	627.2931518554688	rectangle	"pozitivně zjištěná délka základu jižní podezdívky pravděpodobného
+kněžského domu, resp. jejího úseku odhaleného v roce 1974 v son-
+dách 2c, 2a a 2b, činila cca llm, Základ byl zčásti rozebraný,
+četné opukové kameny, tvořící základ, byly rozpadlé, Nejlépe
+zachovaný úsek jižní podezdívky, resp. její části odhalené v roce
+1974, ležel nad JZ vyústěním vyzděného odvodního kanálku: zde
+základ tvořily opukové kvádříky nestejné délky a široké kolem
+
+50 cm, Šířka zjištěného JZ konce odvodního kanálku činila v úrovni
+podlahy pravděpodobného kněžského domu cca 80 cm, Stěny kanálku,
+vyložené opukovými ""placáky“, byly směrem nahoru nálevkovitě ro-
+zevřené. Užší ploché dno bylo široké 50 cm a leželo v hl, cca
+
+25 cm pod podlahou domu, Zbytky obou příček v budově byly od sebe
+
+v>adálanéá sera 4 m.
+"	1	TextRegion	0.9999477863311768
+122.5020523071289	696.5533447265625	1150.3006591796875	808.46826171875	rectangle	"jak již uvedeno, v době života pravděpodobného kněžského domu
+narostl v jeho areálu spodní horizont vrstvy 3, nahoře ohraničený
+horizontem destrukčních kamenů z doby zániku stavby;
+"	2	TextRegion	0.9999316930770874
+186.5677947998047	1217.237060546875	1136.1571044921875	1608.73974609375	rectangle	" 
+
+-M F = O SIMM SU. S35 MSS
+
+jižní podezdívky pravděpodobného kněžského domu v sondě 2a,
+
+ 
+
+průběžně až do skončení výzkumu 22.8.1974;
+
+původní označení objektu v terénní dokumentaci:
+
+""zed Z- V"", ""zed V - Z""; kromě toho jsem na terénní skice,
+zhotovené 24.7.1974 a zobrazující situaci 2. fáze v sondách
+
+2a a 2b a situaci l. fáze v sondě 2c, použila číselné označení
+pro některé relikty z pravděpodobného kněžského domu, a to:
+
+- označení ""objekt VI“ pro úsek jižní podezdívky pravděpodobné
+ho kněžského domu v sondách 2a a 2b,
+
+- označení ""objekt VII"" pro opukovou suř z destrukčního hori-
+zontu stavby, která doprovázela základ jižní podezdívky při
+její jižní (vnější) 143
+"	3	TextRegion	0.9998722076416016
+148.0911102294922	986.202880859375	1012.6864624023438	1142.35791015625	rectangle	"9) způsob zkoumání pravděpodobného kněžského domu:
+zbytky pravděpodobného kněžského domu včetně jeho staveb!
+a destrukčních sutí byly postupně obnažovány v rámci snít
+Vrstvy 3 a při začišřování povrchu vrstvy 4;
+"	4	TextRegion	0.9998525381088256
+147.47232055664062	148.22520446777344	170.80616760253906	167.6477508544922	rectangle	"6)
+"	5	TextRegion	0.9992173910140992
+527.7640380859375	45.98480224609375	566.85791015625	60.01562881469727	rectangle	"47
+"	6	TextRegion	0.9989720582962036
+140.97718811035156	998.4432983398438	165.6488494873047	1017.3831787109376	rectangle		7	TextRegion	0.998760223388672
+142.28883361816406	806.66552734375	167.19207763671875	826.793701171875	rectangle		8	TextRegion	0.9983856678009032
+183.96051025390625	1311.915771484375	206.4278717041016	1330.2529296875	rectangle		9	TextRegion	0.9967879056930542
+142.4682159423828	663.4978637695312	167.39089965820312	682.940673828125	rectangle		10	TextRegion	0.9716842174530028
+180.05979919433594	1156.300048828125	350.76202392578125	1174.8897705078125	rectangle	"dokumentace:
+"	11	TextRegion	0.9354113340377808
+477.7650146484375	1553.9537353515625	1133.4659423828125	1610.42626953125	rectangle	"t VII“ pro opukovou suť z destrukčního hori-
+
+terá doprovázela základ jižní podezdívky při
+jší) líci.
+"	12	TextRegion	0.901669442653656
+173.99180603027344	150.3538360595703	304.977783203125	166.7823944091797	rectangle	") rozměry:
+"	13	TextRegion	0.8369996547698975
+124.1319580078125	1154.0797119140625	165.4736328125	1174.0693359375	rectangle	"10)
+"	14	TextRegion	0.8036342263221741
