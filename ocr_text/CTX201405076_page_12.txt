@@ -1,0 +1,41 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+589.0504150390625	1613.830322265625	603.6602172851562	1625.5955810546875	rectangle		0	TextRegion	0.9999630451202391
+181.3939666748047	955.0374755859376	1012.2431030273438	1070.555908203125	rectangle	"sumberová,R. 2004: Sídliště mohylové a lužické kultury v Čáslavi — Na Skále, okr.Kutná Ho:
+Jine Siedlung der Hůgelgráber- und Lausitzer Kultur in Čáslav — Na Skále, Archeolog
+
+rýzkumy v jižních Čechách — Supplementum 1, 535-540, České Budějovice.
+"	1	TextRegion	0.9999362230300904
+163.58053588867188	1105.5609130859375	1056.357666015625	1178.5303955078125	rectangle	"Valentová, J. — Šumberová, R. 2006: Nová laténská sídliště v Podoubraví, okr.Kutná Hora
+— Neue latěnezeitliche Siedlungen im Wassergebiet der Doubrava, Bez.Kutná Hora, Pravěk
+"	2	TextRegion	0.9998899698257446
+173.46395874023438	659.1961669921875	1039.9185791015625	707.4946899414062	rectangle	"e) Oficiální komise na výzkumu neproběhla, nicméně konzultace průběhu výzkum
+
+ 
+
+Lola SL (T DASA TO TTL T
+"	3	TextRegion	0.9998132586479188
+132.3033447265625	437.2705078125	1065.00830078125	517.4032592773438	rectangle	"c) Z hlediska archeologické památkové péče je třeba sledovat veškeré stavební aktivity
+
+v prostoru Na Skále s požadavkem zajištění předstihového archeologického výzkumu u
+"	4	TextRegion	0.9997345805168152
+173.8170623779297	882.7010498046875	1008.1194458007812	926.009765625	rectangle	"Lipský, Z. 2001: Geomorfologické členění Kutnohorska, Kostelec nad Černými lesy —
+Praha
+"	5	TextRegion	0.9996832609176636
+171.35296630859375	575.6334228515625	192.79916381835935	592.6160278320312	rectangle		6	TextRegion	0.9995904564857484
+162.57659912109375	139.97874450683594	1048.2373046875	202.4935302734375	rectangle	"jak lze ostatně soudit i z negativního výsledku archeologického dohledu při stavbě
+
+nedalekého areálu Innro.
+"	7	TextRegion	0.9995317459106444
+170.7949676513672	276.60870361328125	191.2119140625	293.3164367675781	rectangle		8	TextRegion	0.9989377856254578
+160.21835327148438	264.12921142578125	984.4498291015624	334.1957397460937	rectangle	"b) Plocha komunikace byla prozkoumána a uvolněna pro pokračování s
+
+v současnosti je komunikace dokončena a slouží svému účelu.
+"	9	TextRegion	0.9978467226028442
+172.8084716796875	853.9512329101562	261.4392395019531	868.6348266601562	rectangle	"Literatura
+"	10	TextRegion	0.9970092177391052
+168.40989685058594	469.41412353515625	1063.517578125	530.35205078125	rectangle	"v prostoru Na Skále s požadavkem zajištění předstihového archeologického výzkumu u
+"	11	TextRegion	0.9231604933738708
+165.21597290039062	314.593505859375	819.6151123046875	341.5380859375	rectangle	"v současnosti je komunikace dokončena a slouží svému účelu.
+"	12	TextRegion	0.8875492811203003
+554.6481323242188	272.6851806640625	1046.4439697265625	296.5818786621094	rectangle	"oumána a uvolněna pro pokračování stavby,
+"	13	TextRegion	0.801994264125824

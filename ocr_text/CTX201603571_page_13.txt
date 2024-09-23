@@ -1,0 +1,102 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+121.99674224853516	120.5330581665039	1089.4503173828125	260.1292724609375	rectangle	"přiřadit pozůstatky osady zpracovatelů kovů z 10. až 13. století, archeologicky prozkoumané
+vletech 2004 — 2005 na parcelách pč. 1428/1, 1428/2, 1429/3 a 1429/4 v ulici Na Slupi (Selmi
+Wallisova 2007), dále pak pozůstatky osídlení dokumentované na stavbě kabelovodu ve
+
+Vučahradcká 111 (Dodliclkn 2002: 2NN2hy
+"	0	TextRegion	0.9999501705169678
+1049.0693359375	1536.382080078125	1070.718017578125	1553.2261962890625	rectangle		1	TextRegion	0.9999183416366576
+131.42172241210938	1350.0767822265625	1038.890380859375	1474.552001953125	rectangle	"   
+
+=
+
+ 
+
+   
+
+lidská aktivita na této lokalitě je opět spojena s pohřebištěm, pocházejícím z raného středověku. '
+tomto případě je naopak zřejmé, že naším výzkumem byla zachycena jen okrajová část pohřebiště, jeho
+centrum se nacházelo východně od severovýchodní hranice zkoumané plochy, podle sklonu terénu m
+vyvýšenině, která je dnes snížena. Na základě několika kusů záušnic, které jsou stále v péči konzervátorů
+je raně středověké pohřebiště prozatím datováno do první poloviny 9. století. Jistou zvláštností j
+
+ 
+"	2	TextRegion	0.9998795986175536
+129.83090209960938	282.4031066894531	1065.6075439453125	554.5965576171875	rectangle	"Po vzniku Nového Města po roce 1348 se zdejší zástavba zastavila na čáře dnešní ulice Na
+Slupi. Podél ní se nalézaly vedle církevních areálů i měšťanské domovní objekty. Pozemky
+situované východněji od ní sloužily po dlouhá desetiletí spíše k zemědělským účelům a nebyly až
+na solitérní objekty zastavovány. Radikální proměnou prošlo místo až na počátku 20. století, kdy
+byla tato oblast zregulována a postupně zastavěna univerzitními objekty (hlavní etapa výstavby
+
+1904-1925). Při jejich výstavbě nebyl prováděn žádný archeologický výzkum.
+"	3	TextRegion	0.9998034834861756
+113.55292510986328	1066.480224609375	1050.4202880859375	1331.0206298828125	rectangle	"vysoký stupeň zachovalosti archeologických terénů.
+Nejstarší sídlištní nálezy pocházejí z konce neolitu a konce doby bronzové (štítarská kultura). Pravěké nálezy se
+koncentrovaly na vyšším stupni vltavské terasy, dále se nacházely přemístěné ve svahovinách na východní hranici
+zkoumané plochy a v několika vrstvách nivy Botiče. Velmi významný a částečně i neočekávaný je objev
+kostrového pohřebiště z doby laténské. Nález sedmi kostrových hrobů je prvním hmatatelným důkazem o
+přítomnosti Keltů v této části Prahy, kterou mnozí badatelé sice předpokládali, ale jen na základě nepřímých
+dokladů (např. laténské nádoby bez nálezových okolností). Přesné datování hrobů v době, kdy je teprve výbava
+hrobů konzervována není zcela možná, jistou indicií jsou zatím torgues, nánožní kruhy a náramky z dutých
+polokoulí, sapropelitový náramek a absence nádob a zbraní. Všechny laténské hroby byly orientovány ve
+směru sever-jih. Otázkou zůstává původní rozsah pohřebiště, na základě nálezových okolnosti lze předpokládat,
+že se celý pohřební areál sestával jen z několika hrobů, výskyt dalších hrobů mimo zkoumanou plochu je spíše
+"	4	TextRegion	0.9992392063140868
+145.64578247070312	600.9823608398438	882.9808349609375	627.4306640625	rectangle	"'ýběr z publikovaných zpráv o archeologických nálezech a výzkumech v okolí
+"	5	TextRegion	0.9988144636154176
+87.3818130493164	755.8577880859375	1051.760009765625	1084.3052978515625	rectangle	"NA SLUTÍ- ppe. 1420/1, 1428/2, 1429/3 a 1429/4.
+Výsledky zjišťovacího výzkumu, který provedl J. Podliska v létě roku 2004, dávaly tušit, že celoplošný
+záchranný výzkum na výše zmíněných parcelách bude mimořádně zajímavý a jeho výsledky budou přínosné
+pro poznání nejen této části Nového Města pražského, ale přispějí i k poznání zásadních otázek spojených s
+fungováním ekonomiky raně středověkého přemyslovského státu. Zkoumaná plocha se nachází v blízkosti
+Vyšehradu (tzv. „vyšehradské podhradí“), při úpatí novoměstského opevnění z doby Karla IV.
+
+Výzkum proběhl na mimořádně geologicky rozmanité ploše, sestávající se ze skalního výchozu, několika teras
+Vltavy a Botiče, nivy Botiče a dalších složek. Intenzita lidské činnosti tedy byla velmi různorodá jak v čase, tak v
+prostoru. Z hlediska dlouhodobého osídlení byly samozřejmě nejvhodnější plochy na nejvyšším stupni botičské
+i vltavské terasy, kam nedosahovaly časté záplavy potoka Botiče. Velká očekávání, vložená v předpokládané
+výsledky výzkumu podtrhla i skutečnost, že vzhledem k charakteru zástavby v širším okolí našeho výzkumu
+nelze již v budoucnosti očekávat tak rozsáhlý plošný zásah do archeologických terénů. Zkoumané parcely byly
+do roku 2004 zastavěny parazitní zástavbou, která byla jen výjimečně podsklepena, což umožnilo předpokládat
+vysoký stupeň zachovalosti archeologických terénů.
+
+ 
+
+ 
+  
+"	6	TextRegion	0.99709153175354
+144.0753936767578	697.8599243164062	607.7041015625	716.8237915039062	rectangle	"RAHA 2 — NOVÉ MĚSTO (Selmi Wallisová, Michaela 2007)
+"	7	TextRegion	0.9948858618736268
+132.8998260498047	836.4642333984375	968.6154174804688	1383.2734375	rectangle	"E
+
+ 
+
+77 1 1 7 0
+fungováním ekonomiky raně středověkého přemyslovského státu. Zkoumaná plocha se nachází v
+Vyšehradu (tzv. „vyšehradské podhradí“), při úpatí novoměstského opevnění z doby Karla IV.
+
+Výzkum proběhl na mimořádně geologicky rozmanité ploše, sestávající se ze skalního výchozu, něko
+Vltavy a Botiče, nivy Botiče a dalších složek. Intenzita lidské činnosti tedy byla velmi různorodá jak v ča
+prostoru. Z hlediska dlouhodobého osídlení byly samozřejmě nejvhodnější plochy na nejvyšším stupn
+i vltavské terasy, kam nedosahovaly časté záplavy potoka Botiče. Velká očekávání, vložená v předp
+výsledky výzkumu podtrhla i skutečnost, že vzhledem k charakteru zástavby v širším okolí našeho
+nelze již v budoucnosti očekávat tak rozsáhlý plošný zásah do archeologických terénů. Zkoumané pa
+do roku 2004 zastavěny parazitní zástavbou, která byla jen výjimečně podsklepena, což umožnilo přec
+vysoký stupeň zachovalosti archeologických terénů.
+
+Nejstarší sídlištní nálezy pocházejí z konce neolitu a konce doby bronzové (štítarská kultura). Pravěké
+koncentrovaly na vyšším stupni vltavské terasy, dále se nacházely přemístěné ve svahovinách na východ
+zkoumané plochy a v několika vrstvách nivy Botiče. Velmi významný a částečně i neočekávaný
+kostrového pohřebiště z doby laténské. Nález sedmi kostrových hrobů je prvním hmatatelným dů
+přítomnosti Keltů v této části Prahy, kterou mnozí badatelé sice předpokládali, ale jen na základě r
+dokladů (např. laténské nádoby bez nálezových okolností). Přesné datování hrobů v době, kdy je teprx
+hrobů konzervována není zcela možná, jistou indicií jsou zatím torgues, nánožní kruhy a náramky
+polokoulí, sapropelitový náramek a absence nádob a zbraní. Všechny laténské hroby byly orienti
+směru sever-jih. Otázkou zůstává původní rozsah pohřebiště, na základě nálezových okolnosti lze před
+že se celý pohřební areál sestával jen z několika hrobů, výskyt dalších hrobů mimo zkoumanou ploch
+nepravděpodobný.
+
+Další lidská aktivita na této lokalitě je opět spojena s pohřebištěm, pocházejícím z raného stře«
+
+ 
+"	8	TextRegion	0.9294412732124328

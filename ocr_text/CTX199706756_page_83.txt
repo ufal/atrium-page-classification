@@ -1,0 +1,7 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+439.0696105957031	814.8182373046875	1020.1736450195312	837.800537109375	rectangle	"V pozadí část půdorysu nelitického domu
+"	2	TextRegion	0.9861809611320496
+249.9128875732422	814.5763549804688	1031.45263671875	876.2565307617188	rectangle	"3 Objekt 95, v pozadí část půdorysu nelitického domu
+
+4. Sou jámí 120, 121A — zásobní jámy
+"	3	TextRegion	0.9275533556938172

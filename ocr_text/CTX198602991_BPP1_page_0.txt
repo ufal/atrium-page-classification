@@ -1,0 +1,18 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+147.66238403320312	511.52154541015625	1070.856689453125	725.990966796875	rectangle	"dk TL A
+
+1983 - KULT; Středověk, hradištní. LOK: Státní zámek Mělník. OKOL: Komíseve věci plánova-
+ných terénních úprav v souvislosti s provozem Restaurácí a jídelen, NÁLEZ: Byla projednána otázka úprav
+sklepů, během níž prakticky nedojde k narušení archeologických zájmů, Současně byli účastníci seznámení
+se zamýšlenou další etapou úprav /teplovodní vedení, zřízení kuchyríské provozovny/, které by výrazně za-
+sáhly archeologicky klíčové prostory, Jelikož na tuto etapu nebyl dosud vyhotoven projektový úkol, uplat-
+mili zástupci AŮ požadavek včasného předložení jeho návrhu k vyjádření v rámci schvalovacíhořízení, LIT:
+
+  
+"	0	TextRegion	0.9999542236328124
+707.4268798828125	751.5592651367188	785.0707397460938	767.4920654296875	rectangle	"T. Durdík
+"	1	TextRegion	0.999897599220276
+1057.193359375	137.43284606933594	1105.68603515625	203.2753753662109	rectangle		2	TextRegion	0.9918862581253052
+1052.7376708984375	797.0226440429688	1076.550537109375	802.822021484375	rectangle		3	TextRegion	0.9518860578536988
+66.30500793457031	1003.39599609375	411.6385498046875	1042.1015625	rectangle	"BZO 1982-1983 p 4
+"	4	TextRegion	0.9323856234550476

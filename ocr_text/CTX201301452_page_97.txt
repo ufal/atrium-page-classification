@@ -1,0 +1,63 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+144.576171875	1402.565185546875	204.66519165039065	1419.2205810546875	rectangle	"A2015
+"	0	TextRegion	0.9999822378158568
+145.5961456298828	1071.4505615234375	206.0767059326172	1088.71484375	rectangle	"A2012
+"	1	TextRegion	0.9999711513519288
+144.48829650878906	1279.249267578125	203.3468780517578	1296.302734375	rectangle	"A2013
+"	2	TextRegion	0.9999572038650512
+144.7732391357422	574.3829956054688	206.4360809326172	591.8403930664062	rectangle	"A2002
+"	3	TextRegion	0.9999234676361084
+144.19973754882812	946.848876953125	202.874755859375	964.3460083007812	rectangle	"A2004
+"	4	TextRegion	0.9998915195465088
+175.2101287841797	231.1429748535156	969.747802734375	292.5266418457031	rectangle	"Po dokončení výzkumu a laboratorním ošetření nálezů došlo k petrografickému
+
+boru kamenných nálezů. Vzorky byly pozorovány makroskopickvy a pomocí lupv.
+"	5	TextRegion	0.9995594620704652
+146.13671875	451.0341491699219	203.0342254638672	468.0425415039063	rectangle	"A2001
+"	6	TextRegion	0.999543309211731
+127.93536376953124	1438.0714111328125	967.3558349609376	1500.8411865234375	rectangle	"1 x plochý rozpadlý fluviální valoun křemence, částečně očazený a tepelně pozměněn?
+
+1 X hrudka světle červeného rozpadavého jemnozrnného pískovce
+"	7	TextRegion	0.9993429780006408
+157.40097045898438	1108.936767578125	1046.3797607421875	1149.766357421875	rectangle	"X tmavě fialové železité pískovce, zrnitostně nevytříděné, zvrstvené; potenciální surovina
+"	8	TextRegion	0.9993423819541932
+143.6371612548828	361.9832763671875	297.2812194824219	385.3968505859375	rectangle	"Popis vzorků
+"	9	TextRegion	0.9987377524375916
+163.337646484375	1442.3492431640625	968.9363403320312	1467.9034423828125	rectangle	"x plochý rozpadlý fluviální valoun křemence, částečně očazený a tepelně pozměněn“
+"	10	TextRegion	0.9983043670654296
+149.9958953857422	491.161376953125	474.6432495117188	514.3346557617188	rectangle	"1 x valounek amfibolitu — skartace
+"	11	TextRegion	0.997165858745575
+173.19871520996094	617.736083984375	1033.772705078125	737.1886596679688	rectangle	"světle béžový proplástek navětralého křemence; část povrchu uměle obroušena — brousek
+světle šedý jemně slídnatý křemenec; povrch nevýrazně obroušen — zlomek brousku
+
+x zlomek protáhlého fluviálního valounu namodrale tmavě šedého metatufu či rohovce
+"	12	TextRegion	0.9951117634773254
+160.43228149414062	1191.009033203125	699.5592041015625	1221.2020263671875	rectangle	"x fialový středně zrnitý železitý pískovec, drolivý — skar
+"	13	TextRegion	0.9906617999076844
+150.47146606445312	984.9657592773438	943.2792358398438	1025.543212890625	rectangle	"| x světle hnědý severský silicit glacigenních sedimentů; štípaná industrie — čepelka
+"	14	TextRegion	0.9895413517951964
+420.8763122558594	1589.1397705078125	769.8984375	1617.9227294921875	rectangle	".2. Geologická a petrografická zpráv
+"	15	TextRegion	0.9877009987831116
+146.06382751464844	262.05572509765625	974.9338989257812	303.62164306640625	rectangle	"rozboru kamenných nálezů. Vzorky byly pozorovány makroskopicky a pomocí lupy.
+"	16	TextRegion	0.9587832093238832
+145.98904418945312	146.25643920898438	652.4180908203125	174.80801391601562	rectangle	"B. Petrografický rozbor kamenných nálezů
+"	17	TextRegion	0.9027445316314696
+155.40821838378906	616.0535888671875	923.5703735351562	891.5097045898438	rectangle	"x světle béžový proplástek navětralého křemence; část povrchu uměle obroušen
+x světle šedý jemně slídnatý křemenec; povrch nevýrazně obroušen — zlomek br
+x zlomek protáhlého fluviálního valounu namodrale tmavě šedého metatufu
+epravidelné stopy obrusu — zlomek brousku
+x zlomky valounů křemenců a křemene — zlomky otloukačů?
+x světle rezavý jemnozrnný železitý pískovec, valoun — skartace
+
+3 x valounky a zlomky fluviálních valounů + proplástky křemenců — skart.
+"	18	TextRegion	0.8590615391731262
+144.52085876464844	741.0962524414062	798.373046875	882.2789306640625	rectangle	"nepravidelné stopy obrusu — zlomek brousku
+4 x zlomky valounů křemenců a křemene — zlomky otloukačů?
+1 x světle rezavý jemnozrnný železitý pískovec, valoun — skartace
+
+23 x valounky a zlomky fluviálních valounů + proplástky křemenců
+"	19	TextRegion	0.8471986055374146
+144.9343719482422	1318.47119140625	477.8700256347656	1342.2696533203125	rectangle	"1 x zlomek valounu bazaltu — skart
+"	20	TextRegion	0.8443698883056641
+231.93382263183597	1112.056396484375	1049.7196044921875	1134.2691650390625	rectangle	"rě fialové železité pískovce, zrnitostně nevytříděné, zvrstvené; potenciální surovina
+"	21	TextRegion	0.8195769190788269

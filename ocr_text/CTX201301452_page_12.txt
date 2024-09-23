@@ -1,0 +1,28 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+146.35821533203125	1522.9649658203125	423.07177734375	1539.9610595703125	rectangle	"! Umístění na mapě je jen přibližné.
+"	0	TextRegion	0.9998503923416138
+320.25543212890625	1590.69140625	878.7894897460938	1613.4073486328125	rectangle	".4. Předchozí archeologické poznání lokality a jejího okolí
+"	1	TextRegion	0.9988911747932434
+105.17304229736328	145.42340087890625	1057.8321533203125	237.3004150390625	rectangle	"31 — Českomalínská ul. — vletech 1923-1931 při prodlužování tehdejší Jiráskovy ulice
+
+zachycena kulturní vrstva a jámy (s kostrovým pohřbem v jedné z nich) knovízské kultury
+
+“ y
+"	2	TextRegion	0.9983964562416076
+132.87521362304688	268.0160522460937	1046.033447265625	352.37030029296875	rectangle	"32 — Puškinovo nám. čp. 493 — na staveništi domu údajně nalezeno a zničeno více koster ve
+
+skrčené poloze — hypoteticky hroby kultury se šňůrovou keramikou nebo únětické (
+"	3	TextRegion	0.9975826740264891
+131.68231201171875	390.8538208007813	1044.3480224609375	480.7300415039063	rectangle	"33 — Štursova ul. — na staveništi domu ing. Lapnera roku 1927 objeven hrob kultury
+
+zvoncovitých pohárů; v ulici vykopány objekty únětické kultury (
+"	4	TextRegion	0.9961718916893004
+323.3187255859375	514.608154296875	1041.5531005859375	551.2296752929688	rectangle	"nu sýpkou“ — kroku 1905 při stavbě vil zmíněny střepy a nádobky
+"	5	TextRegion	0.984865665435791
+138.26783752441406	559.3678588867188	764.371826171875	581.2609252929688	rectangle	"knovízské kultury
+"	6	TextRegion	0.9617227911949158
+158.44479370117188	519.36962890625	454.5318908691406	538.81103515625	rectangle	"4 — „za panskou sýpkou“ -
+"	7	TextRegion	0.9304026365280152
+142.61695861816406	520.1124877929688	165.5432891845703	535.46435546875	rectangle		8	TextRegion	0.8895620107650757
+156.56651306152344	353.3526916503906	411.0745544433594	375.5074768066406	rectangle	"- Smejtek a kol. 2005, 421)
+"	9	TextRegion	0.8750793933868408

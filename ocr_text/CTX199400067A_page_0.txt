@@ -1,0 +1,9 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+363.8668212890625	481.6486206054688	941.6669311523438	702.45361328125	rectangle	"LI BICE nad Cidlinou, okr4 Nymburk
+sonda 2a- 2
+
+okrsek pravděpodobného kněžského domu
+na předhradí slovanského hradiště
+
+výzkum 1974
+"	1	TextRegion	0.9975816011428832

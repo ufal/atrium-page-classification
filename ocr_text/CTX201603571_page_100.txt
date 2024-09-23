@@ -1,0 +1,13 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+974.24658203125	44.93486022949219	1116.1473388671875	57.50996017456055	rectangle	"obrazová příloha č. 5
+"	1	TextRegion	0.999974489212036
+1114.1529541015625	42.61140823364258	1133.1866455078125	54.63235855102539	rectangle		3	TextRegion	0.9989493489265442
+2.6324501037597656	805.4227905273438	1155.6861572265625	823.936279296875	rectangle	"1 - výřez z plánu Prahy Císařského otisku stabilního katastru z roku 1842 s přibližným vyznačením parcel č. 1556
+"	4	TextRegion	0.9876888990402222
+116.0598602294922	806.5315551757812	1039.14013671875	836.8961791992188	rectangle	"1- výřez z plánu Prahy Císařského otisku stabilního katastru z roku 1842 s přibližným vyznačením parce
+A 4587 (řanranš)
+"	5	TextRegion	0.895826518535614
+130.31126403808594	1569.34521484375	989.2969360351562	1588.0142822265625	rectangle	" 
+
+výřez z plánu Prahy z let 1842-1845 s přibližným vyznačením parcel č. 1556 a 1557 (červeně)
+"	6	TextRegion	0.8029692769050598

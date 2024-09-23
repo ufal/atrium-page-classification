@@ -1,0 +1,26 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+600.527587890625	1591.20751953125	623.527099609375	1605.7816162109375	rectangle		0	TextRegion	0.999997854232788
+173.65072631835938	797.4844360351562	680.2474975585938	818.5311889648438	rectangle	"CD s digitální verzí nálezové zprávy ve formátu pdf
+"	1	TextRegion	0.9998347759246826
+135.592529296875	463.1397399902344	891.1049194335938	492.7729187011719	rectangle	"B/ Evidence terénní dokumentace, inventář nálezů, CD přílohy
+"	2	TextRegion	0.9997121691703796
+174.1806182861328	113.03883361816406	930.54833984375	356.5444030761719	rectangle	"62. Výběrová dokumentace nálezů, č. sáčků S06-09, S06-10
+63. Výběrová dokumentace nálezů, č. sáčků S06-10, S07-10
+64. Výběrová dokumentace nálezů, č. sáčků S09-06, S09-08
+65. Výběrová dokumentace nálezů, č. sáčků S09-08, S10-05, S10-11, S10-12, S1
+66. Výběrová dokumentace nálezů, č. sáčků S11-02, S11-03
+67. Výběrová dokumentace nálezů, č. sáčků S11-03, S11-10
+"	3	TextRegion	0.9989307522773744
+179.694091796875	550.1365356445312	466.7830810546875	775.0801391601562	rectangle	"6
+
+ 
+
+>
+Evidence a popis fotografií.
+Evidence a popis uloženin.
+Evidence a popis výkopů.
+Evidence a popis zdí.
+
+Inventář nálezů.
+"	4	TextRegion	0.9820770025253296
+160.84864807128906	799.6455078125	172.57534790039062	814.20458984375	rectangle		5	TextRegion	0.8699791431427002

@@ -1,0 +1,65 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+118.64425659179688	148.6793212890625	1061.2410888671875	349.7286376953125	rectangle	"20 — Rooseveltova ul. čp. 507 — žárový hrob jordanovské kultury a džbánek patrně
+z rozrušeného hrobu objeven roku 1921 nebo krátce předtím; na staveništi domu v roce 1921
+prozkoumáno 12 hrobů únětické kultury a množství sídlištních objektů (jámy, některé
+s lidskými pohřby, „obytné“ — snad zahloubené chaty /?/, hrnčířské pece) knovízské kultury
+obklopených příkopem elipsovitého tvaru (
+"	0	TextRegion	0.9998931884765624
+108.38561248779295	1266.5960693359375	1054.5947265625	1415.4993896484375	rectangle	"29 — Českomalínská ul. čp. 516 — na parcele architekta Petráka v letech 1929 či 1931 získán
+zlomek nádoby kultury s lineární keramikou; počátkem 20. let 20. století prozkoumáno šest
+sídlištních jam starší únětické kultury, roku 1921 nalezen cedníček a závaží únětické kultury a
+
+prozkoumány dvě sídlištní jámy knovízské kultury (
+"	1	TextRegion	0.9997887015342712
+125.96810913085938	928.0926513671876	1058.228515625	1002.0018310546876	rectangle	"26 — Rooseveltova ul., u čp. 256 — v letech 1908—1910 nalezeny zlomky keramiky únětické
+kultury; v letech 1906—1908 keramika knovízské kultury (
+"	2	TextRegion	0.9995911717414856
+145.5337677001953	678.1830444335938	1054.358154296875	848.5228881835938	rectangle	"stejně starý kostrový pohřeb v jámě ( ).
+24 — Rooseveltova ul., u čp. 169 — z místa komunikace proti Urbanově vile zachycena jáma
+
+se zlomky keramiky schussenriedské kultury; u vily měl být nalezen mladoúnětický koflík;
+
+proti vile roku 1900 objevena nádoba knovízské kultury s dětskou kostřičkou (
+"	3	TextRegion	0.9995848536491394
+145.90467834472656	1465.753173828125	1039.4752197265625	1515.435302734375	rectangle	"30 — Českomalínská ul., před čp. 516 — vroce 1923 dokumentována knovízská sídlištn
+
+ 
+"	4	TextRegion	0.999201238155365
+141.94137573242188	1015.4041748046876	239.946533203125	1035.05224609375	rectangle	"420, 538).
+"	5	TextRegion	0.9984921216964722
+127.72855377197266	1125.8466796875	1050.473388671875	1206.8402099609375	rectangle	"28 — Českomalínská ul. čp. 775 — na parcele architekta Orta roku 1924 vykopána sídlištní
+
+jáma knovízské kultury a další — s lidskou kostrou — potom v roce 1924 (
+"	6	TextRegion	0.9983187913894652
+103.09716033935548	466.1561584472656	1066.778076171875	560.9154663085938	rectangle	"22 — Rooseveltova ul., před čp. 23 — v chodníku před protější Stutzovou vilou vykopán
+
+hromadný hrob únětické kultury a mezi vilou a čp. 507 nalezena sídlištní jáma starší únětické
+"	7	TextRegion	0.997533082962036
+158.3126220703125	1051.45654296875	1047.6068115234375	1099.5084228515625	rectangle	"7 — Rooseveltova ul. čp. 381 a 585 — na bývalé parcele pana Zimy zjištěna kulturní vrstva
+"	8	TextRegion	0.9900533556938172
+272.1488037109375	437.532470703125	754.2208251953125	458.7530822753906	rectangle	"Ilištní jámy (
+"	9	TextRegion	0.9861273765563964
+143.64883422851562	595.0736694335938	1058.0462646484375	679.826904296875	rectangle	"23 — Rooseveltova ul., u čp. 381 — v roce 1912 prozkoumán dětský kostrový hrob kultury
+
+s lineární keramikou; roku 1923 zjištěn sídlištní objekt knovízské kultury a později nalezen
+"	10	TextRegion	0.9789028167724608
+131.33660888671875	379.4157104492188	1015.1639404296876	456.9873046875	rectangle	"21 — ul. U Zeměpisného ústavu — v severní části ulice roku 1931 dokumentovány (
+
+knovízské sídlištní jámy ( ).
+"	11	TextRegion	0.9767728447914124
+150.47616577148438	1224.1219482421875	301.3040771484375	1242.353271484375	rectangle	"a kol. 2005, 539)
+"	12	TextRegion	0.9656869769096376
+319.96112060546875	1589.436279296875	868.062744140625	1615.7960205078125	rectangle	".4. Předchozí archeologické poznání lokality a jejího okol
+"	13	TextRegion	0.96409010887146
+238.1842041015625	560.0551147460938	586.72314453125	581.2498779296875	rectangle	"„utovský — Smejtek a kol. 2005, 420
+"	14	TextRegion	0.9388743042945862
+149.1108856201172	850.31103515625	492.2947387695313	872.352783203125	rectangle	"Smejtek a kol. 2005, 298, 420, 538),
+"	15	TextRegion	0.9143139123916626
+143.503173828125	964.3402099609376	983.0071411132812	1017.6943969726562	rectangle	"kultury; v letech 1906—1908 keramika knovízské kultury (
+"	16	TextRegion	0.8912429809570312
+134.7048797607422	1040.430419921875	1005.2490844726562	1182.320068359375	rectangle	"27 — Rooseveltova ul. čp. 381 a 585 — na bývalé parcele pana Zimy zjištěna kulturní vr
+knovízské kultury ( ).
+28 — Českomalínská ul. čp. 775 — na parcele architekta Orta roku 1924 vykopána sídl
+"	17	TextRegion	0.8866347074508667
+144.3816680908203	1430.3375244140625	280.6841735839844	1449.64892578125	rectangle	"421-422, 539)
+"	18	TextRegion	0.870547354221344

@@ -1,0 +1,86 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+457.90570068359375	1592.0584716796875	748.4472045898438	1611.620849609375	rectangle	").2. Fotografická dokumentace
+"	0	TextRegion	0.9985879063606262
+152.96380615234375	124.76686096191406	587.7037963867188	980.4390869140624	rectangle	"Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+
+XVII:1 — čtverec BI od severozápadu
+XVII:2 — čtverec BI od jihovýchodu
+XVINI:1— čtverec BI od severovýchodu
+XVIII:2 — řez B1B2 ve čtverci BI
+XIX:1 — detailní pohled na řez BIB2
+XIX:2 — detailní pohled na řez BIB2
+XX:1 — řez CIB1 ve čtverci B1
+
+XX:2 — detailní pohled na řez CIB1
+XXI:1 — řez C2C1 ve čtverci BI
+XXI:2 — detailní pohled na řez C2C1
+XXII:1— řez C2C1 ve čtverci BI
+XXII:2 — detailní pohled na řez C2C1
+XXIII:1 — řez B2C2 ve čtverci BI
+XXIII:2 — detailní pohled na řez B2C2
+XXIV:1 — čtverec B3 od východu
+XXIV:2 — mazanicová kra B3007
+XXV:1 — čtverec B3 od severu
+XXV:2 — čtverec B3 od západu
+XXVI:1 — mazanicová kra B3007
+XXVI:2 — mazanicová kra B3007
+
+VYHIT.A
+
+ 
+"	1	TextRegion	0.9930071830749512
+173.5016326904297	635.818359375	590.9605712890625	1537.888427734375	rectangle	"S 58 F F 8 F F F F F 9 9 9 9 9 U OH
+
+„ XXIII:1 — řez B2C2 ve čtverci Bl
+„ XXIII:2 — detailní pohled na řez B2C2
+„ XXIV:1 — čtverec B3 od východu
+. XXIV:2 — mazanicová kra B3007
+
+XXV:1 — čtverec B3 od severu
+XXV:2 — čtverec B3 od západu
+
+. XXVI:1 — mazanicová kra B3007
+
+XXVI:2 — mazanicová kra B3007
+XXVII:1 — mazanicová kra B3007
+
+. XXVII:2 — čtverec B3 od jihozápadu
+
+„ XXVIII:1 — čtverec B3 od jihovýchodu
+
+„ XXVIII:2 — detailní pohled na čtverec B:
+„ XXIX:1 — detailní pohled na čtverec B3
+
+. XXIX:2 — řez B3B4 ve čtverci B3
+
+XXX:1 - řez B4C4 ve čtverci B3
+XXX:2 -— řez C4C3 ve čtverci B3
+XXXI:1 — řez C3B3 ve čtverci B3
+
+„ XXXI:2 — detailní pohled na řez C3B3
+. XXXII:1 — čtverec C2 od jihozápadu
+
+„ XXXII:2 — čtverec C2 od jihovýchodu
+. XXXIII:1 — čtverec C2 od jihu
+
+„ XXXIII:2 — čtverec C2 od západu
+"	2	TextRegion	0.9842464923858644

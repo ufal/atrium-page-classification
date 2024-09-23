@@ -1,0 +1,17 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+1021.8506469726562	52.02644729614258	1090.811279296875	79.37065124511719	rectangle	"Tab. :
+"	0	TextRegion	0.999893307685852
+189.73057556152344	659.2320556640625	1079.9779052734375	743.1962280273438	rectangle	"Sonda 2a-2e (1974). Destrukční sutě nad jižní podezdívkou
+budovy orientované V-Z. V pozadí (sonda 2c) začištěn povrch,
+destrukce vnitřní hradební zdi. Pohled od VSV. Foto J.Justova.
+"	2	TextRegion	0.9993890523910522
+929.7341918945312	599.3706665039062	1020.3938598632812	642.1759643554688	rectangle	"Če Neg.
+51 101
+"	4	TextRegion	0.9973784685134888
+161.77142333984375	1432.9261474609375	1072.0174560546875	1510.25439453125	rectangle	"Sonda 2a-2c (1974). Destrukční sutě nad jižní podezdívk
+budovy orientované V-Z. V pozadí (sonda a začištěn ovrch
+destrukce vnitřní hradební zdi. Pohled od VSV. Foto J. Justova.
+"	5	TextRegion	0.997192680835724
+928.412353515625	1323.1748046875	1022.5044555664062	1371.583984375	rectangle	"Č. Neg.
+51 102
+"	6	TextRegion	0.990212380886078

@@ -1,0 +1,73 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+154.9356689453125	1326.242431640625	1041.2716064453125	1471.9722900390625	rectangle	"JESTEnO, TOGUKCM VYDal
+
+1 zlomek jednoduchého oboustranně rozšířeného okraje s horní plochou šikmo seříznutou,
+jemně plavená hlína s ojedinělým výskytem makroskopického ostřiva, oxidační výpal
+
+1 zlomek ovaleného okraje s vnitřním prožlabením, jemně plavená hlína, redukční výpal
+
+| 1 zlomek ovaleného okraje s vnitřním prožlabením a vnější spodní stranou hráněnou,
+Jemně nlavená hlínv. oxidační výnal
+"	0	TextRegion	0.9998733997344972
+150.95892333984375	942.1697387695312	1028.64794921875	1006.6098022460938	rectangle	"p 1 zlomek zdobený kombinací rytých rýh a radélkového dekoru (z něj dochována pouze
+nepatrná část), jemně plavená hlína, redukční výpal
+
+ 
+"	1	TextRegion	0.9994164705276488
+146.35226440429688	232.0531463623047	254.8347320556641	250.2899932861328	rectangle	"vrstva 0306
+"	2	TextRegion	0.9993553757667542
+144.5020751953125	149.70364379882812	928.2333374023438	209.2012176513672	rectangle	"© 1 zlomek z těla pokličky, jemně plavená hlína, redukční výpal
+© © 1 zlomek jednoduchého okraje talíře s polevou krémové barvy, oxidační výpal
+"	3	TextRegion	0.9993035793304444
+143.69383239746094	915.910888671875	255.66909790039065	932.680419921875	rectangle	"vrstva 0307
+"	4	TextRegion	0.9991004467010498
+1039.8336181640625	1595.0882568359375	1049.3109130859375	1608.0780029296875	rectangle		5	TextRegion	0.9988356232643129
+167.54879760742188	1286.2791748046875	1043.1614990234375	1330.0853271484375	rectangle	"1 zlomek kyjovitého jednostranně rozšířeného okraje z jemně plavené hlíny, oboustranně
+leštěno. redukční výpal
+"	6	TextRegion	0.9986475110054016
+138.6239471435547	1083.3880615234375	422.7643737792969	1107.0430908203125	rectangle	"Sběr z hromad V od zámku
+"	7	TextRegion	0.9985936284065248
+179.021728515625	860.6807250976562	722.73583984375	884.8848876953125	rectangle	"2 atypické zlomky z jemně plavené hlíny, oxidační výpal
+"	8	TextRegion	0.9954185485839844
+166.02346801757812	1115.009765625	939.805419921875	1260.94140625	rectangle	"2 atypické zlomky z jemně plavené hlíny, oboustranně leštěné, redukční výpal
+1 atypický zlomek z jemně plavené hlíny, redukční výpal
+
+1 zlomek dna odřezávaného strunou z jemně plavené hlíny, oxidační výpal
+
+1 zlomek dna z jemně plavené hlíny, redukční výpal
+
+1 zlomek kyjovitého jednostranně rozšířeného okraje z jemně plavené hlíny, rec
+"	9	TextRegion	0.9928263425827026
+153.48167419433594	733.6207885742188	914.0455932617188	860.2550048828125	rectangle	"JSE
+5 atypických zlomků z jemně plavené hlíny, redukční výpal
+
+4 atypické zlomky z jemně plavené hlíny, redukční / oxidační výpal
+
+2 atypické zlomky z jemně plavené hlíny na vnitřní straně nesoucí stopy po r
+tvarování nádoby, redukční / oxidační výpal
+"	10	TextRegion	0.9876256585121156
+146.9424591064453	261.07135009765625	1025.553466796875	335.3109436035156	rectangle	"e I zlomek polokulovité pokličky s nízkým knoflíkem na horní straně nesoucím jasně
+zřetelné stopy po odříznutí a otvor (vyrobený po vypálení) o průměru 1 mm ahl.9 mm;
+jemně plavená hlína, redukční výpal
+"	11	TextRegion	0.9860515594482422
+129.72052001953125	336.21710205078125	1034.3050537109375	541.7694702148438	rectangle	"+
+
+ 
+
+ 
+
+JE
+
+* 4 zlomky den z jemně plavené hlíny. Z toho : I zl. silnostěnné nádoby s krupičkovitým
+povrchem, redukční výpal; 1 zl. s ojedinělým výskytem makroskopického ostřiva,
+
+oxidační výpal; 1 zl. s makroskopickým ostřivem, vrstevnatý oxidační / redukční výpal ;
+
+zl. s vyšším podílem makroskopického ostřiva, redukční / oxidační výpal
+
+1 zlomek páskového prožlábnutého ucha na horní straně zdobeného čtyřmi souběžnými
+
+svislými rytými rýhami, jemně plavená hlína, redukční výpal
+
+© © 1 zlomek zdobený dvěmi širšími rytými vodorovnými rýhami, jemně plavená hlína,
+"	12	TextRegion	0.9664387106895448

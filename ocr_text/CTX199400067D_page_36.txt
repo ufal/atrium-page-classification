@@ -1,0 +1,13 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+183.04519653320312	1362.1246337890625	1056.5616455078125	1510.1796875	rectangle	"Sonda 2c (1974). Přechodná rekonstrukce keramického
+aguamanile na jádru ze sochařské hlíny (1979). Jednotlivé
+zlomky aguamanile byly nalezeny v sondě 2c rozptýleně
+
+ve vrstvě 2, v destrukci vnitřní hradební zdi a na povrchy
+vrstvy 3. i pravá strana agůamanile; 2 pohled na torzo
+zepředu; 3 zadeček zvířátka. Foto J Spiegel.
+"	1	TextRegion	0.9997946619987488
+1030.12890625	1246.922119140625	1043.2032470703125	1274.9962158203125	rectangle		4	TextRegion	0.9715264439582824
+1015.2274169921876	36.67273712158203	1075.0357666015625	52.71653366088867	rectangle	"Obr.
+"	5	TextRegion	0.9639575481414796
+515.9514770507812	1241.4962158203125	526.8729248046875	1265.8992919921875	rectangle		6	TextRegion	0.9016337394714355

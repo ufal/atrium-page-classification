@@ -1,0 +1,47 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+688.8081665039062	26.546689987182617	1007.0015258789062	79.75775146484375	rectangle	"Textývk fototabulkám
+Sonda 2a - 2d (1974) -
+"	0	TextRegion	0.9984397292137146
+173.38145446777344	1056.621826171875	1144.822265625	1527.2320556640625	rectangle	"výzkumu. Sondou probíhá od Z k V základ jižní podezdívky pravdě-
+podobného kněžského domu z 10.století. Vpravo okraj vnitřního
+příkopu. Pohled od Z. Foto: M.Šimana - J.Morávek.
+
+Tab. 27:53, č. neg. 81 259. Sonda 2a-2d (1974). V popředí
+sonda 2a+2b ve 3.fázi výzkumu, vlevo vzadu sonda 2c ve 2.fázi,
+vpravo vzadu sonda 2d ve 3.fázi. Uprostřed část jižní podezdívky
+pravděpodobného kněžského domu, vpředu destrukční suti domu na
+okraji vnitřního příkopu. Vlevo sokl s destrukcí vnitřní hradeb-
+ní zdi. Pohled od JJV. Foto: M.Šimana - J.Morávek,
+
+Tab. 28:54, č. neg. 81 260, Sonda 2a-2b (1974) ve 3,fázi
+výzkumu. Sondou od V k Z probíhá základ J podezdívky pravděpodob-
+ného kněžského domu. Vpředu leží destrukční suti domu na okraji
+vnitřního příkopu. Pohled od J., Foto: M.Šimana = J.Morávek.
+"	1	TextRegion	0.9972779154777528
+197.1120758056641	481.0943908691406	1091.3687744140625	920.3217163085938	rectangle	"aořizené z iotogrammetrické věže, které zhotovili ve dnech 8.6
+A 22.8.1974 ing.M.Šimana, J.Morávek a J.Tájek. Tyto snímky zčé
+bi zobrazují situace, předvedené již na předchozích tabulkách,
+avšak snímky jsou pořízeny z příznivější pozice.
+
+Tab. 26:50, č. neg. 8l 256. Sonda 2a-2c (1974). V popřec
+jonda 2a+2b ve 3,fázi výzkumu, vzadu sonda 2c ve 2,fázi výzkur
+'ondou 2a+2b probíhá od V k Z základ jižní podezdívky pravděpe
+lobného kněžského domu z 10.století. Vlevo okraj vnitřního pří
+copu. Pohled od V. Foto: M.Šimana - J.Morávek,
+
+Tab. 26:51, č. neg. 81 257. Sonda 2a-2b (1974), 3.fáze
+'ýzkumu. Od V k Z sondou probíhá základ jižní podezdívky pravd
+"	2	TextRegion	0.996954083442688
+177.73812866210938	157.95892333984375	1112.1796875	350.2419128417969	rectangle	"W interiéru budovy, Pohled od JZ«
+
+Tab. 24:48, č. neg. 51 148. Sonda 2b (1974), Část jižní
+podezdívky budovy orientované V-Z a vyzděného kanálku v inte-
+riéru budovy. Pohled od S.
+
+Tab. 25:49, č. neg. 51 149. Sonda.2c (1974) - její se-
+"	3	TextRegion	0.9959838390350342
+294.2582092285156	314.5475769042969	1076.05224609375	384.8048095703125	rectangle	"abe 25:49, č. neg. 51 149. Sonda.2c (1974) - její se-
+ást po sejmutí vrstvy 10O.století. Pohled od JZ.
+"	4	TextRegion	0.9907535314559937
+586.1715698242188	28.233566284179688	644.2911987304688	42.80207443237305	rectangle		5	TextRegion	0.989339292049408
+589.6566162109375	26.63338661193848	623.0180053710938	45.05330276489258	rectangle		6	TextRegion	0.9886301755905152

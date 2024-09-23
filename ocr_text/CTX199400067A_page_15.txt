@@ -1,0 +1,45 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+134.47018432617188	803.2303466796875	966.6016845703124	1053.8375244140625	rectangle	"Nálezové situace (tj. sáčky) čislo:
+
+1) 46/74: ""Sonda 2b, vrstva 0-20 cm, 4.6., 5.6.""
+2) 83/74: ""Sonda 2c, ornice (0-20 cm). 15.7.""“
+3) 95/74: ""Sonda 2d, ornice (0-20 cm), 22.7.""
+
+Ornice v sondě 2 byla, jak uvedeno výše, mocná cca l0 - 3
+(srv. řezy v sondě 2), Nalézala se ve všech částech sondy
+"	0	TextRegion	0.9999401569366456
+142.07655334472656	1138.889892578125	962.6165771484376	1262.1700439453125	rectangle	"lálezové situace (tj. sáčky) čislo:
+
+1) 47/74: ""Sonda 2b, její sv. půle, vrstva 20-40 cm. 6.€
+2) 48/74: ""Sonda 2b, jeji jz půle, 20-40 cm, 6.-7.6."" O
+"	1	TextRegion	0.9989738464355468
+133.04684448242188	1357.3336181640625	1093.5152587890625	1507.819091796875	rectangle	"Nálezové situace (tj. sáčky) číslo:
+1) 16/74: ""Sonda 2 / tj. 2a / (u pí. Svobodové), její. sv. konec
+(poslední 3 m délky sondy), 20-40 cm, 27.5.
+
+2) 50/74: ""Sonda 2b, východní část sondy:
+40-60 em. 10.6,""
+"	2	TextRegion	0.9987913966178894
+111.72012329101562	199.21755981445312	1135.8587646484375	689.5994262695312	rectangle	"v r. 1974, byly získány nálezy, uložené v sáčcích č. 16/74- 19/74,
+23/74 - 30/74, 46/74 - 79/74 a 81/74 - 166/74 (tj. celkem 132
+
+sáčků = nálezových situací). Příslušná čísla nálezových situací
+
+(= sáčků) uvádím v popisech jednotlivých vrstev a objektů, kde za
+číslem nálezové situace = sáčku cituji v uvozovkách te-
+rénní záznam ke každé nálezové situaci. Z terénních záznamů, resp.
+ze seznamu sáčků, překresluji i situační - lokalizační skici, pokud
+byly k jednotlivým položkám v terénu při sáčkování připojeny. Hloub-
+kové údaje v popisech nálezových situací jsou (není-li uvedeno jinak
+
+měřeny od dnešního povrchu terénu v době výzkumu, který byl nivelová
+"	3	TextRegion	0.9985159039497375
+143.97828674316406	1470.6759033203125	168.15106201171875	1490.5592041015625	rectangle		4	TextRegion	0.9577398896217346
+196.66026306152344	1084.347412109375	1039.009765625	1116.025146484375	rectangle	"nice (drn)+ vrstva 2 (přemyslovsk
+"	5	TextRegion	0.8548824191093445
+121.43436431884766	1140.7574462890625	884.2589111328125	1207.5233154296875	rectangle	"Nálezové situace (tj. sáčky) číslo:
+
+1Y 47/74 + ""Sonda 2b. její sv. nůle., wrstva 20-40 cr
+"	6	TextRegion	0.8323813676834106
+172.88381958007812	177.1238555908203	201.60971069335935	192.98829650878903	rectangle		7	TextRegion	0.8208323121070862
+511.8739929199219	67.44844055175781	541.769287109375	86.24101257324219	rectangle		8	TextRegion	0.808844268321991

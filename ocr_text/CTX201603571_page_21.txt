@@ -1,0 +1,71 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.5115356445312	1591.326904296875	622.1880493164062	1606.376220703125	rectangle		0	TextRegion	0.9999662637710572
+160.0696258544922	669.8698120117188	278.29718017578125	695.1019897460938	rectangle	"Sonda S03
+"	1	TextRegion	0.9999560117721558
+152.54237365722656	784.9759521484375	1034.9107666015625	967.0592651367188	rectangle	"Archeologická sonda o velikosti ve vrchní části 5,6 x 1,4 m a ve spodní partii 2x1 m
+se nalézala na severním, nezastavěném okraji pozemku č. 1556/3 (obr. příl. 1, 2, 3, 4).
+Úroveň povrchu sondy se nalézala na niveletě 200,88 m n. m., dno výkopu dosáhlo
+
+vnejnižším bodu úrovně 197,06 (hloubka 3,82 m). | Celkem vtéto sondě byly
+
+Arlkiimantaámy J Ža>v (CNI BI DW
+"	2	TextRegion	0.9999457597732544
+184.6530914306641	995.7577514648438	1025.9495849609375	1151.59619140625	rectangle	"Stávající úroveň povrchu zde byla tvořena zatravněným zahradním substrátem
+03-01), pod kterým se nalézala 0,7m mocná poloha stavebního odpadu (S03-02), který
+
+e vyplňoval rozměrný jámovitý výkop s plochým dnem (V06).
+
+ 
+
+Pod objektem se nacházelo značně heterogenní souvrství písčitých hlín s vysokým
+"	3	TextRegion	0.993432879447937
+152.7424774169922	1023.274169921875	1019.06884765625	1342.9404296875	rectangle	"7770
+
+   
+
+(S03-01), pod kterým se nalézala 0,7m mocná poloha stavebního odpadu (S03-02), kter
+zde vyplňoval rozměrný jámovitý výkop s plochým dnem (V06).
+
+Pod objektem se nacházelo značně heterogenní souvrství písčitých hlín s vysokýn
+podílem stavebního odpadu (sj. S03-03 až S03-07; báze 198,04; celková mocnost včetní
+sj. S03-02 je 2,5 m), které na své bázi přecházelo v uloženiny s vyšším obsahem jílovit:
+složky (sj. S03-08 až S03-10), včetně výplně mělkého objektu (V07).
+
+Navážky překrývaly od nivelety 198,14 homogenizovanou kulturní vrstvu zí
+"	4	TextRegion	0.9926303625106812
+147.4183349609375	292.8030090332031	1048.4254150390625	577.0595092773438	rectangle	"soudržné prachovité hlíny (sj. S02-13), obsahující drobné kousky opuky, cihlovky a malty.
+Tato kulturní, homogenizovaná vrstva překrývala nevelký zahloubený objekt (V14), který
+narušoval poslední vrstvu antropogenního souvrství v dané sondě (sj. S02-15).
+
+Pod vrstvou S02-15 se následně nacházela poloha podložního náplavu v podobě
+mírně zahliněného písku (sj. S02-16), překrývající na niveletě 196,92 m prachovitou hlínu
+(sj. S02-17). Tuto uloženinu bylo možné vyhodnotit jako holocenní půdu, zřetelně
+
+obsahující antropogenní příměs v podobě mazanicové drtě.
+"	5	TextRegion	0.9881626963615416
+170.50286865234375	1285.931884765625	1046.60888671875	1383.1363525390625	rectangle	" 
+
+PV
+
+   
+
+280 K
+
+ 
+
+Navážky překrývaly od nivelety 198,14 homogenizovanou kulturní vrstvu ze
+
+oudržné jílovotopísčité hlíny (sj. S03-11) s podílem drobných antropogenních příměsí o
+"	6	TextRegion	0.9839787483215332
+150.70143127441406	129.6493682861328	1043.9132080078125	427.3190002441406	rectangle	"S Vysokým poaem stavebního, Vmensiné aomovního oapaau (5). SVI-V5 až SUZ-2VU,
+celková mocnost včetně sj. S02-02 je 2,7 m; niveleta báze 197,82).
+
+Navážky překrývaly výkop s kolmou stěnou (V13), který na svém dně obsahoval
+konstrukci zděné kanalizace (202). Výkop porušoval více než 0,5 m mocnou polohu
+soudržné prachovité hlíny (sj. S02-13), obsahující drobné kousky opuky, cihlovky a malty.
+Tato kulturní, homogenizovaná vrstva překrývala nevelký zahloubený objekt (V14), který
+
+narušoval poslední vrstvu antropogenního souvrství v dané sondě (sj. S02-15).
+"	7	TextRegion	0.981682300567627
+268.871337890625	117.66281127929688	1010.9017333984376	142.31436157226562	rectangle	"podílem stavebního, v menšině domovního odpadu (sj. S01-03 až S02-1
+"	8	TextRegion	0.8754978179931641

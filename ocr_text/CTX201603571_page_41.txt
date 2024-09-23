@@ -1,0 +1,46 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.1078491210938	1591.5289306640625	622.3409423828125	1605.8902587890625	rectangle		0	TextRegion	0.9999902248382568
+157.378662109375	182.94932556152344	995.585693359375	251.36712646484372	rectangle	"Altmann, J. 2008: Podrobná inženýrsko-geologická mapa v měřítku 1 : 5000, list mapy
+Praha 7-2 (reambulovaná mapa J. Šolce /1970/). Praha.
+"	1	TextRegion	0.99996817111969
+155.2476806640625	828.9168701171875	1037.5703125	910.9961547851562	rectangle	"Selmi Wallisová, M. 2007: Praha 2 — Nové Město, Na Slupi ppč. 1428/1, 1428/2, 1429/3 a
+1429/4. In: Zd. Dragoun a kol., Archeologický výzkum v Praze v letech 2005 — 2006,
+Pražský sborník historický XXXV, 361-364.
+"	2	TextRegion	0.9999629259109496
+138.396728515625	711.7489624023438	1036.552734375	798.1832885742188	rectangle	"Podliska, J. 2003b: Praha 2 - Nové Město, Vyšehradská a Vratislavova ulice. In: Zd.
+Dragoun a kol., Archeologický výzkum v Praze v letech 1999 — 2000, Pražský sborník
+historický XXXII, 341-343.
+"	3	TextRegion	0.999906063079834
+141.02183532714844	416.6844787597656	1007.5569458007812	502.2999572753906	rectangle	"Král, J. a kolektiv 2010: Praha 2— Albertov, Kampus Albertov. Podrobný inženýrsko-
+geologický průzkum pro výstavbu budov Biocentra a Globcentra. Praha, nepublik. zpráv:
+pro Univerzitu Karlovu.
+"	4	TextRegion	0.999853491783142
+150.62966918945312	595.2720336914062	1075.788818359375	673.7548217773438	rectangle	"Podliska, J. 2003a: Praha 2 - Nové Město, Pod Slovany, Plavecká - kabelovod. In: Zd.
+Dragoun a kol., Archeologický výzkum v Praze v letech 1999 — 2000, Pražský sborník
+historický XXXII, 340-341.
+"	5	TextRegion	0.9998459815979004
+156.95648193359375	270.8241271972656	976.0797729492188	327.1703186035156	rectangle	"Baťková, R. a kol. 1998: Umělecké památky Prahy. Nové Město - Vyšehrad. Praha.
+"	6	TextRegion	0.9985155463218688
+161.1564178466797	1136.1573486328125	962.6127319335938	1384.1199951171875	rectangle	"Situace výzkumu. Výřez z katastrální mapy Prahy s vyznačením archeologicky
+sledovaných bodů (sondy S01 — S12, žlutě), měřítko 1:1000.
+
+Situace výzkumu. Výřez z ortofotomapy Prahy s vyznačením archeologicky
+sledovaných bodů (sondy S01 — S12, žlutě), měřítko 1:1000.
+
+Situace výzkumu. Výřez z katastrální mapy Prahy s niveletami povrchu, měřítko
+
+Situace výzkumu. Výřez z katastrální mapy Prahy se zaměřením sond, řezů a zdč
+"	7	TextRegion	0.9970054030418396
+151.62240600585938	120.39336395263672	518.9498291015625	143.0075225830078	rectangle	"9. Použité prameny a literatura
+"	8	TextRegion	0.9959737658500672
+164.3902130126953	1058.3541259765625	630.1172485351562	1085.7271728515625	rectangle	" 
+
+loha
+"	9	TextRegion	0.987534761428833
+169.69967651367188	533.0501708984375	758.6368408203125	583.088134765625	rectangle	"„utovský, M. — Smejtek, L. a kol. 2005: Pravěká Praha. Praha.
+"	10	TextRegion	0.9702118635177612
+144.92919921875	324.61785888671875	1016.4552001953124	381.8273010253906	rectangle	"Houba, M. 2012: Historický vývoj území Albertova a vysokoškolského areálu v Praze
+Praha.
+"	11	TextRegion	0.9649209976196288
+160.49935913085938	1230.34912109375	173.97348022460938	1245.76806640625	rectangle		12	TextRegion	0.9203248023986816
+161.1690673828125	1142.9381103515625	172.9025115966797	1157.0091552734375	rectangle		13	TextRegion	0.844989001750946

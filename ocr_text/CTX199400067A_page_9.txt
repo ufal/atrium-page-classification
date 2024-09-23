@@ -1,0 +1,53 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+142.40846252441406	1358.1661376953125	1093.1478271484375	1502.3135986328125	rectangle	"Tato nálezová zpráva sděluje výsledky první sezóny výzkumu
+v areálu sondy 2 v roce 1974, tj. výsledky první etapy výzkumu
+
+v sondách 2a - 2d a zjištění ze staveniště studny na parcele č,
+"	0	TextRegion	0.999984622001648
+119.53297424316406	661.62158203125	1129.8653564453125	1294.5284423828125	rectangle	"- 1976 a 1978. V letech 1975 - 1976 jsme prokopali rozšířenou plo-
+chu s domem č.p. 420 (sondy 2a-2ch, 2 1(""el"")), garáž (sonda 2j)
+včetně vjezdu do garáže z niže ležící Zadní (nyní Jižní) ulice
+(sonda 2i) a jámu na vápno, využitou poté jako septik (sonda 2k).
+V r. 1978 jsme získali možnost uskutečnění malé sondáže na sousední
+zahradě pí. H. Jíšové, kam pokračoval základ pravděpodobného kněž-
+ského domu (sonda 2m), V r. 1985 jsme na dvoře u domu pí. M, Svo-
+bodové a p. ing. P. Svobody č.p. 63 prozkoumali staveniště studny
+(sonda 2n). Mimo plochy uvedených sond jsem v r. 1974 provedla už
+po skončení výzkumné sezóny (dne 2. 11. 1974) stavební archeologici
+dohled při hloubení studny k domu manž, B. a J. Veselých. Plocha
+této studny, nalézající se na téže parcele č. 25/6 jako dům č.p.
+420, byla kruhovitá o G 1,4 m, Studna, vzdálená 11 m na SV od S rot
+
+sondv 2c. neobdržela sondové číslo a označuji ji názvem ""studna na
+"	1	TextRegion	0.9999090433120728
+145.3869171142578	290.03662109375	1111.1702880859375	998.4920654296876	rectangle	"o
+
+420 (pravděpodobně kněžský dům z 10. stol., který stál u hradeb)
+se AÚ obrátil na stavebníky s žádostí o umožnění prozkoumání tohot
+důležitého okrsku na jihu libického předhradí, Díky velkému pochor
+ní celé Svobodovy rodiny pro historii Libice a pro zdejší archeolc
+gický výzkum, zejména pí. Marie Svobodové, p. ing. Petra Svobody,
+pí. Bohdany Veselé - Svobodové a p. Jiřího Veselého, mohla být zkc
+maná plocha rozšířena a výzkum mohl pokračovat i v letech 1975 -
+- 1976 a 1978. V letech 1975 - 1976 jsme prokopali rozšířenou plo-
+chu s domem č.p. 420 (sondy 2a-2ch, 2 1(""el"")), garáž (sonda 2j)
+včetně vjezdu do garáže z niže ležící Zadní (nyní Jižní) ulice
+(sonda 2i) a jámu na vápno, využitou poté jako septik (sonda 2k).
+V r. 1978 jsme získali možnost uskutečnění malé sondáže na sousedi
+zahradě pí. H. Jíšové, kam pokračoval základ pravděpodobného kněž
+
+ského domu (sonda 2m), V r. 1985 jsme na dvoře u domu pí. M, Svo-
+
+MEDEA dám, SŠ ZÁ AK ŘE S a S S
+"	2	TextRegion	0.9995842576026917
+112.93973541259766	207.5814514160156	1163.819580078125	648.639404296875	rectangle	"a Jiřího Veselých (č.p. 420) a plochu garáže včetně vjezdu a septi-
+ku. Po objevu mimořádných nálezů na potomnim staveništi domu č.p.
+420 (pravděpodobně kněžský dům z 10. stol., který stál u hradeb)
+se AÚ obrátil na stavebníky s žádostí o umožnění prozkoumání tohoto
+důležitého okrsku na jihu libického předhradí, Díky velkému pochope-
+ní celé Svobodovy rodiny pro historii Libice a pro zdejší archeolo-
+gický výzkum, zejména pí. Marie Svobodové, p. ing. Petra Svobody,
+pí. Bohdany Veselé - Svobodové a p. Jiřího Veselého, mohla být zkou-
+
+maná plocha rozšířena a výzkum mohl pokračovat i v letech 1975 -
+"	3	TextRegion	0.9102030396461488

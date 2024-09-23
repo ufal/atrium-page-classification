@@ -1,0 +1,42 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+157.2021026611328	438.0602111816406	1056.2325439453125	822.1702270507812	rectangle	"Vzhledem k tomu, že akce probíhala na pozitivně doložené archeologické lokalitě,
+byla skrývka ornice v prostoru plánované komunikace na jižním okraji současné zástavby
+prováděna strojem UDS s rovnou lžící. Ornice o mocnosti 30-50 cm byla odstraněna na
+ploše o rozměrech 10x80m. Na místě bylo zjištěno, že v uvedeném prostoru se rozkládá
+další část dlouhodobě využívaného pravěkého sídliště, které bylo zkoumáno při stavebních
+akcích od roku 1997. Okamžitě bylo zahájeno ruční začišťování plochy a záchranný
+výzkum jednotlivých objektů. Objekty byly zkoumány po jednotlivých sektorech a
+mechanických vrstvách. Rozsáhlé zahloubené útvary (zřejmě hliníky, resp. terénní deprese)
+
+byly vzhledem k rozměrům zkoumány systémem sond a jejich výplň nebyla vybrána
+"	0	TextRegion	0.9999513626098632
+171.1135711669922	404.4068908691406	190.3700714111328	421.6136779785156	rectangle		1	TextRegion	0.9999130964279176
+176.52459716796875	1118.470703125	1047.270751953125	1478.4549560546875	rectangle	"Skrytá plocha byla rozměřena na čtverce 1000-8000, v rámci kterých byly zkoumány
+jednotlivé objekty. Celkem byly v trase komunikace zkoumány 104 archeologické objekty,
+dalších 16 začištěných situací bylo z evidence vyřazeno vzhledem k recentnímu charakteru.
+Větší část objektů náleží do kategorie kůlových jamek jako pozůstatků nadzemních
+struktur (převážně ve čtvercích 4000-8000). Dále byly zkoumány objekty, které můžeme
+zařadit zřejmě do kategorie zásobních jam (při východním okraji čtverců 5000-7000), dva
+objekty patří k rozsáhlým zahloubeným útvarům, původně zřejmě sloužícím jako hliníky.
+Obj. 2469 v Z části plochy navazoval na rozsáhlý objekt zkoumaný v roce 1997, u situace
+
+ve východní části nlochv nelze vvloučit. že primárně se jedná o zaplněnou terénní depresi
+"	2	TextRegion	0.9998589754104614
+169.92544555664062	915.9990844726562	187.54835510253903	931.6630249023438	rectangle		3	TextRegion	0.9997337460517884
+180.97439575195312	229.5975341796875	1059.3526611328125	331.9203186035156	rectangle	"Cílem výzkumu bylo, kromě záchrany ohrožených archeologických památek,
+sledování intenzity a struktury osídlení při jižním okraji rozsáhlé polykulturní lokality,
+
+ořípadně zachycení okraje využívané plochy.
+"	4	TextRegion	0.9994584918022156
+170.7019805908203	192.53428649902344	189.24337768554688	209.176513671875	rectangle		5	TextRegion	0.9993914365768432
+590.3020629882812	1614.6158447265625	599.5077514648438	1626.0728759765625	rectangle		6	TextRegion	0.9991869330406188
+169.15066528320312	147.24423217773438	433.02001953125	168.8499298095703	rectangle	"4. Cíle a metoda výzkumu
+"	7	TextRegion	0.9882040023803712
+660.1805419921875	953.834228515625	1051.9820556640625	974.8168334960938	rectangle	"P. Květina totální stanicí Topcon-
+"	8	TextRegion	0.9574662446975708
+184.230712890625	953.303466796875	704.232177734375	1014.9306030273438	rectangle	"Zaměření celého výzkumu prováděl P. I
+
+yTS210/GTS310, který zhotovil i plány výzkumu.
+"	9	TextRegion	0.9241621494293212
+174.31094360351562	1081.2113037109375	405.4217529296875	1102.22802734375	rectangle	"5. Popis terénní situace
+"	10	TextRegion	0.8732998371124268

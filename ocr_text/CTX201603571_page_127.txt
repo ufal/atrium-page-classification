@@ -1,0 +1,36 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+82.64214324951172	1081.4935302734375	437.84710693359375	1098.4317626953125	rectangle	"Archeologický výzkum č. 2015/21 - Albertov 3a
+"	0	TextRegion	0.9997888207435608
+1485.67578125	1081.6741943359375	1587.9400634765625	1096.6396484375	rectangle	"Stránka 6 z 15
+"	1	TextRegion	0.9990874528884888
+272.1971130371094	351.1171569824219	996.7915649414062	388.95263671875	rectangle	"Tmavě hnědošedý soudržný silně zahliněný písek. Četně valouny do 3 cm, nahodile uhlíky do 0,5
+cm a zlomky křemenců do 2 cm.
+"	2	TextRegion	0.9974008798599244
+277.01373291015625	257.4146423339844	765.4083862304688	271.7535400390625	rectangle	"Šedá tvrdá směs šterku a rozemletého asfaltu. Velmi četně kameny.
+"	3	TextRegion	0.996807336807251
+286.69390869140625	610.88916015625	938.4456787109376	648.4635009765625	rectangle	"větle šedá drobivá maltová drt“. Četně cihly a opuka do 10 cm, nahodile promíseno šedou
+ísčitou hlínou.
+"	4	TextRegion	0.9955713152885436
+258.4264831542969	788.6806640625	978.25390625	811.4237060546875	rectangle	"Světle hnědošedá drobivá písčitá hlína. Četně břidlice do 10 cm, ojediněle malta, opuka a cihly do
+"	5	TextRegion	0.990380048751831
+1045.4573974609375	212.45968627929688	1147.5570068359375	224.5696258544922	rectangle	"Interpretace
+"	6	TextRegion	0.9879451990127563
+291.1056213378906	479.5037841796875	932.6409301757812	519.5053100585938	rectangle	"krově hnědý středně ulehlý zahliněný písek. Četně valouny do 8 cm, mírně malta do 5 cm,
+hlovina do 1 cm, nahodile uhlíky do 1 cm.
+"	7	TextRegion	0.986977756023407
+253.964111328125	965.8648681640624	974.8988647460938	994.974365234375	rectangle	"Heterogenní směs šedohnědé písčité hlíny a okrového zahliněného písku. Ojediněle opuka, malta
+a cihlovina do 5 rm.
+"	8	TextRegion	0.9833840131759644
+270.3556823730469	854.2286376953125	957.3715209960938	885.4733276367188	rectangle	"Světle šedá drobivá maltová drt“. Četně cihly a opuka do 10 cm, Nahodile promíseno šedou
+písčitou hlínou.
+"	9	TextRegion	0.9673059582710266
+284.5555419921875	543.8458251953125	956.5007934570312	575.3123779296875	rectangle	" 
+
+sedohnědá soudržná písčitá hlína. Nahodile cihly, malta a valouny do 10 cm, ojediněle opuka do
+m.
+"	10	TextRegion	0.9477073550224304
+275.7865600585937	919.7745971679688	839.7383422851562	939.1242065429688	rectangle	"Tmavě šedá soudržná písčitá hlína. Nahodile malta, cihlovina a opuka do 2 cm.
+"	11	TextRegion	0.867449164390564
+273.9403991699219	415.19769287109375	967.4708251953124	449.1844177246094	rectangle	"Tmavě černošedá soudržná silně písčitá hlína. Mírně valouny do 3 cm, nahodile maltovina , uhlíky
+a zlomky opuky do 2 cm.
+"	12	TextRegion	0.8100269436836243

@@ -1,0 +1,83 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+193.5315093994141	264.6806030273437	1129.930419921875	384.4542236328125	rectangle	"Obr. 22. Sonda 2a + 2b (1974), destrukce při jižní líci
+jižní podezdívky pravděpodobného kněžského domu, ve vrstvě 3
+z 10.stol., nálezová situace 109/74. 1 - 6 výběr libické ke-
+
+py S
+"	0	TextRegion	0.99993634223938
+186.22738647460935	1164.8436279296875	1101.3399658203125	1418.05322265625	rectangle	"Následující obrázky 27 - 29 předvádějí některé varianty
+libické a pražské keramiky (tj. hradištní keramiky libické a
+pražské provenience, nalezené při výzkumech Archeologického
+ústavu v Libici), kterými jsem při probírání nálezů popsaných
+v této nálezové zprávě doplnila ""typář""“ hradištní keramiky
+"	1	TextRegion	0.9999302625656128
+210.20578002929688	1443.695068359375	1067.5992431640625	1564.8199462890625	rectangle	"Obr. 27. Ukázky libické keramiky rázu střední-mladší
+oby hradištní (1 - 3; 2 - 3 jsou střepy z plecí a výdutí 16
+1) a okraj tuhové zásobnice mladší doby hradištní (4).
+"	2	TextRegion	0.9998596906661988
+159.81594848632812	776.7022705078125	1130.8873291015625	1153.4149169921875	rectangle	"ramiky, 5 výběr pražské keramiky.
+
+Obr. 26. Sonda 2b (1974). 1 vrstva 3 z 10.stol., střep
+libické provenience rázu starší doby hradištní (nálezová situ-
+ace 126/74); 2 rozhraní vrstvy 3 z 10.stol. a vrstvy 2 z doby
+po r. 995, přepálený střep libické provenience (nálezová situ-
+ace 62/74); 3 - 4 destrukce vnitřní hradební zdi z 28.9.995,
+
+2 přepálené střepy zjevně libické provenience (obr. 26:3 =
+
+- nálezová situace 65/74; obr. 26:4 - nálezová situace 60/74).
+
+Správné postavení střepů ukazují šipky se základnou vyznačující
+vodorovnou rovinu (horní část každého střepu udává směr šipky).
+"	3	TextRegion	0.999669909477234
+542.7447509765625	28.94563865661621	586.7705078125	48.33713150024414	rectangle		4	TextRegion	0.9993128776550292
+723.5429077148438	8.926850318908691	885.82421875	26.134632110595703	rectangle	"14 komentare
+"	5	TextRegion	0.9985584616661072
+175.3168182373047	152.64459228515625	1106.3560791015625	233.68292236328125	rectangle	"jižní podezdívky pravděpodobného kněžského domu, ve vrstvě 3
+
+z 10.stol., nálezová situace 109/74. 1 —- 4 výběr libické ke-
+ramikv.
+"	6	TextRegion	0.998253047466278
+677.062255859375	32.02923583984375	1088.0360107421875	81.54183197021484	rectangle	"TextyVk obrázkům s nálezy
+Sonda 2a - 2d (1974) - str.
+"	7	TextRegion	0.9973013997077942
+175.89151000976562	403.3748168945313	1078.635009765625	811.6156005859375	rectangle	"Obr. 23. Sonda 2a + 2b (1974), spodní horizont vrstvy :
+z 10.stol., nálezová situace 130/74. 1 - 8 výběr libické ke=
+ramiky. Správné postevení střepu 2 ukazuje šipka se základn«
+
+Obr. 24. Sonda 2 apoání horizont vrstvy 3 z l0.stol.,
+nálezová situace 133/74. l, 3 - 7 výběr libické keramiky;
+2 zlomek východočeské (""chrudimské"") keramiky. Správné posta-
+vení střepu 7 ukazuje šipka se základnou.
+
+Obr. 25. Sonda 2a (1974), spodní horizont vrstvy 3
+z 10.stol., nálezová situace 133/74. 1 - 4 výběr libické ke-
+ramiky, 5 výběr pražské keramiky.
+"	8	TextRegion	0.9970056414604188
+174.85369873046875	460.3045959472656	1100.339111328125	1280.8984375	rectangle	"z 10.stol., nálezová situace 130/74. 1 - 8 výběr libické ke=
+ramiky. Správné poteíní střepu 2 ukazuje šipka se základnou
+
+Obr. 24. Sonda 2 apoání horizont vrstvy 3 z 10.stol.,
+nálezová situace 133/74. l, 3 - 7 výběr libické keramiky;
+2 zlomek východočeské (""chrudimské"") keramiky. Správné posta-
+vení střepu 7 ukazuje šipka se základnou.
+
+Obr. 25. Sonda 2a (1974), spodní horizont vrstvy 3
+z 10.stol., nálezová situace 133/74. 1 - 4 výběr libické ke-
+ramiky, 5 výběr pražské keramiky.
+
+Obr. 26. Sonda 2b (1974). 1 vrstva 3 z 10.stol., střep
+libické provenience rázu starší doby hradištní (nálezová situ-
+ace 126/74); 2 rozhraní vrstvy 3 z 10.stol. a vrstvy 2 z doby
+po r. 995, přepálený střep libické provenience (nálezová situ-
+ace 62/74); 3 - 4 destrukce vnitřní hradební zdi z 28.9.995,
+2 přepálené střepy zjevně libické provenience (obr. 26:3 =
+- nálezová situace 65/74; obr. 26:4 - nálezová situace 60/74).
+Správné postavení střepů ukazují šipky se základnou vyznačujíc
+vodorovnou rovinu (horní část každého střepu udává směr šipky)
+
+Následující obrázky 27 - 29 předvádějí některé varianty
+libické a pražské keramiky (tj. hradištní keramiky libické a
+
+aE o A a oto a o ok c Šk Z n n n a o k
+"	10	TextRegion	0.9258666038513184

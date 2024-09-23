@@ -1,0 +1,61 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.4619750976562	1591.46875	623.6823120117188	1606.6697998046875	rectangle		0	TextRegion	0.9999890327453612
+171.49429321289062	1362.5316162109375	1026.7332763671875	1426.427001953125	rectangle	"Pro označení uloženin byl použit tvar, kde písmeno „S“ znamená sondu a číslice
+
+nořadové označení sondv. zbvtek nak pořadové číslo uloženinv v dané sondě (nanř. S01 -
+
+ 
+"	1	TextRegion	0.9998716115951538
+158.24032592773438	1328.306396484375	196.22293090820312	1344.2340087890625	rectangle		2	TextRegion	0.9991664886474608
+149.2874755859375	593.677490234375	1020.0611572265624	1180.76953125	rectangle	"VD IV PVV 5 A PTS V LSD E
+součástí dokumentace byl i popis odhalených přírodních kontextů.
+
+Rozsah výzkumu byl vymezen plochou nezastavěných částí parcel č. 1556/1, 3 :
+1557. Na předem definovaných místech byly strojovou mechanizací vyhlouben»
+rozměrné sondy, a to až do úrovně přírodního podkladu pozemku (sondy S01-S12). P
+ukončení exkavace byly sondy postupně začištěny, včetně dosaženého dna a geodetick:
+(výškově i polohově), kresebně (1:20) a fotograficky dokumentovány. Pouze lokálně došlc
+kručnímu rozebrání antropogenních terénů, dochovaných buď při stěně výkopu
+případně v ploše v místech zahloubeného výkopu/objektu. Na závěr výzkumu byl:
+vybraná místa s dochovanou archeologickou situací ovzorkována za účelem získán
+archeologického datovacího materiálu. Po ukončení výzkumu proběhlo opětovné
+zasypání všech sond výkopkem a uvedení místa do přibližně původního stavu.
+
+V průběhu dokumentace byla každá zjištěná stratigrafická jednotka ihned po svén
+
+určení očíslována a detailně popsána pomocí formalizovaného popisu. Makroskopick'
+"	3	TextRegion	0.9989840388298036
+161.07643127441406	382.9956359863281	1030.142333984375	656.677978515625	rectangle	"Výzkum byl prováděn standardními odbornými postupy určenými pro výzkum
+stratifikovaných archeologických situací v dlouhodobě osídlených sídelních areálech. Při
+těchto výzkumech je kladen důraz na vertikální stratigrafii historického nadloží a
+komplexní zachycení co nejvíce podstatných informací, které lze využít pro rekonstrukci
+všech dějů (především antropogenních), které proběhly v daném místě. Důležitou
+
+součástí dokumentace byl i popis odhalených přírodních kontextů.
+"	4	TextRegion	0.9977213740348816
+985.2102661132812	229.51498413085935	1032.4193115234375	243.06915283203125	rectangle	"sond
+"	5	TextRegion	0.9930298924446106
+135.46090698242188	1067.9390869140625	1026.51708984375	1322.3218994140625	rectangle	"zasypání všech sond výkopkem a uvedení místa do přibližně původního stavu.
+
+V průběhu dokumentace byla každá zjištěná stratigrafická jednotka ihned po svém
+určení očíslována a detailně popsána pomocí formalizovaného popisu. Makroskopicky
+rozlišitelné části nadloží, odrážející především antropogenní aktivity a přírodní uloženiny,
+jsou souhrnně označovány jako stratigrafické jednotky (sj.). Dle charakteristických
+
+vlastností je možné rozeznat uloženiny (vr. - vrstvy), výkopy (V), stavební konstrukce (Z -
+"	6	TextRegion	0.9924072623252868
+558.6982421875	228.32278442382807	646.8541259765625	244.5947265625	rectangle	"výzkumu
+"	7	TextRegion	0.9797620177268982
+179.52606201171875	259.4955749511719	1035.94384765625	370.0308227539063	rectangle	"jokumentovat podobu antropogenních terénů v místech projektované stavby a na
+akladě zjištěných informací definovat podobu a rozsah budoucího záchranného
+
+""chealagcického výzkumu nřed vlastní stavbou.
+"	8	TextRegion	0.9750111699104308
+151.7234649658203	143.55982971191406	461.0970764160156	177.5060272216797	rectangle	"4. Cíle a metoda výzkumu
+"	9	TextRegion	0.9710595607757568
+414.06982421875	226.1812744140625	533.3563232421875	244.81358337402344	rectangle	"zjišťovacího
+"	10	TextRegion	0.9545019865036012
+737.9775390625	226.4957733154297	909.8404541015624	244.62152099609372	rectangle	"prostřednictvím
+"	11	TextRegion	0.933040738105774
+171.89688110351562	144.38914489746094	458.1583862304688	221.02243041992188	rectangle	"I. Cíle a metoda výzkumu
+"	12	TextRegion	0.9070351719856262

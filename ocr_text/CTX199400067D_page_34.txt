@@ -1,0 +1,8 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+182.3120574951172	1474.9410400390625	1074.289794921875	1585.690185546875	rectangle	"Některé varianty libické ""keramiky slavníkovské fáze“,
+nalezené v destrukci vnitřní hradební zdi. l, 3, 5,6 sond:
+2e, DVHZ (117/74); 2 - sonda 2c, DVHZ (116/74); 4 - sonde
+2c, DVHZ (110/74). Kresba: H.Komárková,
+"	0	TextRegion	0.9999597072601318
+994.5700073242188	1396.7086181640625	1010.4846801757812	1423.9102783203125	rectangle		1	TextRegion	0.9915674328804016
+371.7952880859375	837.259765625	392.2540893554688	865.4437866210938	rectangle		3	TextRegion	0.8945697546005249

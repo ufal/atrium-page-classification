@@ -1,0 +1,149 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+803.721923828125	1610.1998291015625	1048.127197265625	1624.774169921875	rectangle	"Created on 6/30/2004 5:14:00 PM
+"	0	TextRegion	0.9999730587005616
+547.36669921875	1609.21533203125	626.4547729492188	1625.4068603515625	rectangle	"HlasARU1
+"	1	TextRegion	0.9999722242355348
+116.35963439941406	151.97271728515625	178.7957763671875	170.54177856445312	rectangle	"AKCE
+"	2	TextRegion	0.9998714923858644
+104.73193359375	178.18209838867188	1019.509521484375	230.96649169921875	rectangle	"Zaškrtněte některou z možností , nebo vyplňte podle heslářů. V rubrice DRUH AKCE můžete uvést max. tři hesla (
+oddělená lomítkem. V rubrice ANALÝZY uveďte libovolný počet hesel , oddělených lomítkem.
+"	3	TextRegion	0.999862790107727
+257.2098388671875	60.66679763793945	950.7180786132812	152.65118408203125	rectangle	"ZPRÁVA O ARCHEOLOGICKÉ AKCI
+
+ystém ARCHIV — ARÚ AVČR Praha , odd. prostorové archeologie
+"	4	TextRegion	0.9996906518936156
+808.8058471679688	621.885498046875	1059.058837890625	678.9102172851562	rectangle	"Pozn. : Souřadnice všech bodů
+jedné akce je nutno udat od Z:J
+s.č. jednoho listu
+"	5	TextRegion	0.9996871948242188
+115.759521484375	1609.94921875	292.166015625	1625.567138671875	rectangle	"Created by Radek Siroky
+"	6	TextRegion	0.9995470643043518
+575.8106689453125	154.57241821289062	653.9337158203125	172.49659729003906	rectangle	"Soubor:
+"	7	TextRegion	0.9988608360290528
+121.5300064086914	776.6214599609375	638.4614868164062	856.7532958984375	rectangle	" 
+
+Základní údaj , blíže označí naleziště / akci.Podle možností
+uveďte traťové jméno, ppč. , jméno majitele pozemku, údaj o
+původu nálezu atd.
+
+Rozveďte v POZNÁMCE.
+
+ 
+"	8	TextRegion	0.9983856678009032
+125.01399230957033	554.5750122070312	618.622314453125	574.188232421875	rectangle	"LOKALIZACE /OKOLNOSTI / JINÉ OZNAČENÍ (max. 110 znaků)
+"	9	TextRegion	0.9983567595481871
+107.24053955078124	1065.9815673828125	864.330322265625	1084.8638916015625	rectangle	"POZNÁMKA (Doplňující popis naleziště či nálezu ; pokračujte na volném vloženém listě. )
+
+ 
+"	10	TextRegion	0.9973279237747192
+664.3554077148438	570.8765258789062	765.7672119140625	685.7265014648438	rectangle	"ZM25
+X zM10
+1:1000
+JINÝ:
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+"	11	TextRegion	0.99667489528656
+116.07848358154295	260.5946960449219	243.00289916992188	432.4137268066406	rectangle	"x
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Hlášení)
+RZ-BZO)
+lál. Zpr.)
+Liter.)
+Mater.)
+
+(
+(
+(N:
+(
+(
+(Jin.zd.)
+"	12	TextRegion	0.9936683773994446
+118.44332885742188	588.9848022460938	564.1447143554688	621.2299194335938	rectangle	"Areál hospodářského dvora zámku, plynofikace a stavba
+kanolizace.
+"	13	TextRegion	0.984054148197174
+844.8067626953125	732.220947265625	1067.1197509765625	855.6420288085938	rectangle	"PŘESNOST LOKALIZACE
+1 přesně (geodeticky)
+D2 s rozptylem cca 25 m
+3 s rozptylem 200-300 m
+4 pouze kat.území
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+"	14	TextRegion	0.983836591243744
+666.1303100585938	734.4942626953125	820.3980102539062	847.85400390625	rectangle	"LEO
+[I v daném Bodě
+X na dané linii
+
+[v Ploše mezi body
+D v Okruhu bodu
+"	15	TextRegion	0.9823379516601562
+667.4199829101562	724.5817260742188	781.1615600585938	738.3667602539062	rectangle	"NALEZIŠTĚ JE
+"	16	TextRegion	0.9789671301841736
+131.34341430664062	873.9940185546875	455.6694946289063	895.4736328125	rectangle	"SOUŘADNICE (mm od Z : J sekční čáry)
+"	17	TextRegion	0.9514790177345276
+106.54312133789062	1483.537841796875	957.15966796875	1537.6043701171875	rectangle	"NÁLEZOVÉ ZPRÁVY (U či. nález. zpráv připojte ""NZ"" , u čj. mimo ARÚ do závorky zkratku institu
+NZ 284/04 (ZIP o.p.s.); NZ čj. P282/00 (Archaia Příchovice)
+
+ 
+"	19	TextRegion	0.9130561947822572
+99.9979019165039	1253.045654296875	941.705810546875	1304.279052734375	rectangle	"LITERATURA (Výběr , zejména původní publikace a novější materiálové práce s dalšími odkazy)
+
+ 
+
+| Příjmení , jm. autora(ů) , rok publ. „str. , zkratka citace ( názvu časopisu , názvu monografie )
+"	20	TextRegion	0.8818893432617188
+808.2545166015625	588.2352294921875	881.3607788085938	605.31640625	rectangle	"22-14-16
+"	21	TextRegion	0.8728952407836914
+163.5485076904297	1484.844970703125	993.0679931640624	1506.04052734375	rectangle	"JEZOVÉ ZPRÁVY (uči. nález. zpráv připojte ""NZ"" , u čj. mimo ARŮ do závorky zkratku instituce )
+
+ 
+"	22	TextRegion	0.863818347454071
+169.06410217285156	1100.1363525390625	858.2570190429688	1118.761474609375	rectangle	"ranný archeologický výzkum v areálu hospodářského dvora chanovického zámku
+"	23	TextRegion	0.8478237390518188

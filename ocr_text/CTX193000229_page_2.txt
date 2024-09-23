@@ -1,0 +1,17 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+83.148193359375	168.5283966064453	1103.140380859375	1241.6414794921875	rectangle	"Coal já 4 -=
+zv fm w v. Peny
+plronval A. OUJPOTĚM: .
+
+Lípa ra rené POOH
+
+“ Om m] 6 22
+
+| Zálora bn Á
+porce JE, Som0
+
+K „P kte a
+"	0	TextRegion	1.0
+541.5709228515625	146.69728088378906	1021.4979858398438	262.7562255859375	rectangle	"JO Ehlnhvac
+de A psem
+"	1	TextRegion	0.8510362505912781

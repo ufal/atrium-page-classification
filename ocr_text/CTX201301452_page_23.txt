@@ -1,0 +1,53 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+162.71249389648438	1167.524169921875	1045.8868408203125	1290.8145751953125	rectangle	" 
+
+Nadložní vrstvy (B3001, B3002 = A2001 = C2003 = B1003, B3007, B3003 = A2002,
+2006) a zahloubený objekt A2025 (výplň A2026) jsou recentního stáří a představují
+
+orizont terénních úprav pozemku. Obsahují redeponované artefakty pravěkého až
+"	0	TextRegion	0.9998061060905457
+144.91343688964844	145.2502899169922	244.8804931640625	168.7181396484375	rectangle	"3.4. Závěr
+"	1	TextRegion	0.9997527003288268
+120.8773422241211	228.5025787353516	1051.303466796875	400.966552734375	rectangle	"Předstihový záchranný archeologický výzkum realizovaný z důvodu plánované
+
+výstavby projektu „Vila Bubeneč“ byl proveden v průběhu května až června letošního roku na
+parcele č. 1254 domu čp. 591 v katastrálním území Praha-Bubeneč.
+
+V rámci archeologického výzkumu byly prozkoumány čtyři čtverce (A2, B1, B3 a C2)
+"	2	TextRegion	0.9991601705551147
+549.4566650390625	1590.53271484375	644.1932373046875	1611.041015625	rectangle	"3.4. Závěr
+"	3	TextRegion	0.9976927042007446
+1028.6728515625	1274.5504150390625	1050.7655029296875	1288.6378173828125	rectangle		4	TextRegion	0.9959099292755128
+134.11244201660156	436.5642700195313	1050.1160888671875	805.5286865234375	rectangle	"Nejstarší zachycený sídlení horizont tvoří osídlení kulturou s nálevkovitými poháry,
+kterou na předmětné lokalitě representuje prostorově rozsáhlý zahloubený objekt
+B3004=A2018 (patrně hliník), s několika úrovněmi výplní (A2009, B3008 = A2003, A2012,
+A2013, A2015, A2024, B3004=A2018) zkoumaný ve čtverci A2 a B3. Složi
+
+ 
+
+stratigrafická situace zachycená v tomto objektu napovídá, že po svém zániku patrně sloužil
+jako odpadní jáma s pomalou sedimentací nejrůznějších druhů uloženin [Tab. XV:2].
+
+Druhý sídelní horizont je zastoupen sídelní aktivitou v průběhu doby halštatské, kterou
+na předmětné lokalitě representuje vrstva B3009 = A2003 a zahloubené objekty A2017,
+B1004 a B1006 (výplně A2014, A2007, B1005, B1007). Objekty A2017 [Tab. XVI:1] je
+"	5	TextRegion	0.9939932227134703
+155.11087036132812	616.1056518554688	1012.3147583007812	1197.898193359375	rectangle	"tratigrafická situace zachycená v tomto objektu napovídá, Že po svém zániku patrně slot
+ako odpadní jáma s pomalou sedimentací nejrůznějších druhů uloženin [Tab. XV:2].
+
+Druhý sídelní horizont je zastoupen sídelní aktivitou v průběhu doby halštatské, kte
+a předmětné lokalitě representuje vrstva B3009 = A2003 a zahloubené objekty A20
+31004 a B1006 (výplně A2014, A2007, B1005, B1007). Objekty A2017 [Tab. XVI:1
+nožné dle půdorysné dispozice interpretovat jako konkávní zásobní jámu, zatímco výk:
+31004 a B1006 [Tab. XVI:2] patrně tvoří blíže neinterpretovatelný totožný objekt.
+
+Osídlení v době římské tvoří poslední komponentu, která byla v rámci předstihov
+rcheologického výzkumu zachycena. Jedná se o dva objekty A2021 a C2004 [T
+CXXII:2] (výplně A2004, C2005) zahloubené do halštatské vrstvy B3009 = A2003 a
+robarvené spraše (půdního typu?) C2006. V objektu C2004 byly kromě běžn
+eramických tvarů ještě identifikovány fragmenty žebrované keramiky, jejíž tvar je pat
+dvozen od římských bronzových nádob, díky tomuto faktu je možné tento objekt datovat
+once 2. až začátku 3. století našeho letopočtu.
+
+Nadlanžní vrotvv (RA3NN1. RINM — ANN = DVM RIMM, RIM ROM = AM
+"	6	TextRegion	0.992552638053894

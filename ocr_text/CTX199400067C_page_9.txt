@@ -1,0 +1,17 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+1023.407470703125	46.8661994934082	1086.614013671875	71.65802001953125	rectangle	"Tab.
+"	1	TextRegion	0.9997267127037048
+383.0809326171875	1422.1312255859375	1144.6221923828125	1474.528076171875	rectangle	"974). JV půle ohniště č. III (podloženého opukovými
+hraní sond 2a a 2c. Pohled od V. foto J.Justova.
+"	3	TextRegion	0.9978391528129578
+155.31492614746094	1423.8692626953125	459.89697265625	1476.1805419921875	rectangle	"Sonda 2a, 2c (1974).
+placáky) na rozhraní
+"	4	TextRegion	0.9955453872680664
+168.89955139160156	677.2733764648438	972.6295166015624	773.9277954101562	rectangle	"Jonda 2a-2c (1974). Část základu jižní podezdívky budov;
+I-Z, s destrukčními sutěmi okolo. Na rozhraní sond 2a a
+ohniště č. IIIpodloženého opukovými placáky. Pohled od Z.
+"	5	TextRegion	0.9450237154960632
+165.7584228515625	683.3781127929688	538.73583984375	762.9264526367188	rectangle	"Sonda 2a-2c (1974). Část z
+V-Z, s destrukčními sutěmi
+ohniště č. IIIpodloženého o
+"	6	TextRegion	0.907442569732666

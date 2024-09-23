@@ -1,0 +1,47 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+146.09722900390625	149.31802368164062	277.26629638671875	175.16822814941406	rectangle		0	TextRegion	0.999630093574524
+420.4132995605469	585.13818359375	868.4832763671875	876.4131469726562	rectangle	"výzkumu
+2.7. Metody výzkumu a postup prací
+3. NÁLEZOVÁ SITUACE
+
+3.1. Popis nálezové situace
+
+3.2. Popis zahloubených objektů
+
+3.3 Přehled stratigrafických jednotek
+3.4. Závěr
+"	1	TextRegion	0.999414324760437
+499.2287292480469	473.6089782714844	545.2429809570312	489.4664916992188	rectangle	"okolí
+"	2	TextRegion	0.9957665205001832
+421.2368774414063	203.2688751220703	1063.6282958984375	309.0513000488281	rectangle	"2. PŘÍRODNÍ A ARCHEOLOGICKÝ KONTEXT,
+POUŽITÉ METODY A CÍLE
+
+ 
+"	3	TextRegion	0.9908478260040284
+431.5794677734375	149.7153778076172	536.0438842773438	174.62998962402344	rectangle	"1. ÚVOD
+"	4	TextRegion	0.9851981997489928
+486.6884765625	278.8311767578125	912.9489135742188	436.3399353027344	rectangle	"2.1. Lokalizace naleziště
+2.2. Geomorfologický a geologický popis
+2.3. Zaměření zkoumané plochy
+
+9 A DřaMahaví seahanlasinloZ smamrmnmí Jalo
+"	5	TextRegion	0.9756585955619812
+464.1943054199219	539.22412109375	1046.3267822265625	628.7364501953125	rectangle	"2.6. Cíl předstihového záchranného archeologického
+
+výzkumu
+
+ 
+"	6	TextRegion	0.9352698922157288
+494.648681640625	429.3426818847656	1044.2132568359375	453.4687194824219	rectangle	"2.4. Předchozí archeologické poznání lokality a jejího
+"	7	TextRegion	0.9177590608596802
+444.0860290527344	961.53125	903.8895263671876	1216.261474609375	rectangle	"5.1. Terénní a kresebná dokumentace
+
+5.2. Fotografická příloha
+
+5.3. Historické mapy, plány a ikonografi
+. TEXTOVÉ PŘÍLOHY
+
+6.1. Seznam movitých nálezů z výzkumu
+
+6.2. Geolosická a petrocrafická zpráva
+"	8	TextRegion	0.8783398270606995

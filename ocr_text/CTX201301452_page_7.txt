@@ -1,0 +1,14 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+120.53895568847656	229.2435760498047	1052.133056640625	387.9178466796875	rectangle	"V průběhu předstihového záchranného výzkumu byla provedena výškopisná a
+polohopisná měření čtvercové sítě a zachycených archeologických situací a památek. Veškerá
+měření byla pořízena totální stanicí a zpracována do grafických příloh a celkového plánu
+
+zkoumané plochy [Plán č. 1, 2] a plánů jednotlivých zkoumaných čtverců [Plán č. 3-13).
+"	0	TextRegion	0.9999730587005616
+452.9215698242188	1593.842041015625	740.797607421875	1611.5025634765625	rectangle	"1.3. Zaměření zkoumané ploch:
+"	1	TextRegion	0.9977524876594543
+1038.8956298828125	234.17837524414065	1049.222412109375	246.72396850585935	rectangle		2	TextRegion	0.990990400314331
+142.56727600097656	143.85972595214844	470.2096557617188	171.46742248535156	rectangle	"2.3. Zaměření zkoumané plochy
+
+ 
+"	3	TextRegion	0.988719642162323

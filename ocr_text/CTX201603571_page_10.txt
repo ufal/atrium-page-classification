@@ -1,0 +1,43 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+118.53760528564452	907.8867797851562	971.9528198242188	949.6312866210938	rectangle	"3.1. Historie lokality ve výpovědi písemných a ikonografických pramenů
+"	0	TextRegion	0.9999732971191406
+900.7093505859375	690.9418334960938	1061.8519287109375	709.9878540039062	rectangle	"RNDr. Jan Zavřel
+"	1	TextRegion	0.99988055229187
+1049.4639892578125	1536.360107421875	1071.70458984375	1553.182373046875	rectangle		2	TextRegion	0.999879002571106
+188.3512725830078	552.0576171875	1047.3194580078125	613.64990234375	rectangle	"Mladší zeminy uložené nad půdou, svahovými sedimenty a nejstaršími objekty již mají
+
+Šuiící charakter navášak naha záměrně znavněných navrchů
+"	3	TextRegion	0.9990948438644408
+124.97655487060548	171.83241271972656	1062.2774658203125	556.6419677734375	rectangle	"severovýchodu k jinozapadu mezi sondami 504 a SLi.
+
+Půdu i čisté fluviální náplavy pohřbily mladší svahové sedimenty charakteru nažloutle
+šedého, okrového až narezlého zahliněného písku či písčité hlíny (S01-21, S02-16, S05-17, S05-
+18, S06-11), resp. světle hnědého písku až drobného písčitého štěrku (S01-18), někde se zrny
+propálené hlíny a drobnými klasty navětralých letenských břidlic. Zastiženy byly ve čtyřech ze
+sedmi geologicky vyhodnocených sond. Jedná se o holocenní uloženiny deluvio-fluviální povahy.
+Erozní pochody, při kterých došlo k mobilizaci zemin uložených ve výše položených partiích
+blízkého okolí, lze patrně spojit se zvyšující se intenzitou lidské činnosti v průběhu středověku
+
+(zemědělství, pastevectví, výrobní činnost).
+"	4	TextRegion	0.9972413778305054
+121.90676879882812	1008.77099609375	1093.020263671875	1472.3175048828125	rectangle	"PADLA PSA VA SV ME OPEL 27 1430 EG VSA
+které se zde začalo formovat po jeho vzniku v 2. pol. 10. století (Baťková 1998). První osadníci
+tehdy využili bezpečných míst v blízkosti řeky Vltavy a jeho pravostranného přítoku potoka
+Botiče. Dostupné historické prameny pro uvedené období nezmiňují žádný doklad o stálém
+osídlení sledovaného místa. Tento stav patrně přetrval i po roce 1348, kdy bylo toto místo
+zahrnuto do obvodu Nového Města pražského. V blízkém okolí vznikly objekty několika
+církevních institucí, které daly tomuto místu na několik staletí ráz spíše „zelené periferie“ města
+v podobě uzavřených stavebních areálu se zahradami, sady, vinicemi a ostatními polnostmi.
+Historické osídlení se dlouhodobě vázalo na komunikaci probíhající v trase dnešní ulice Na Slupi.
+Podél ní vznikala po lokaci Nového Města drobnější domovní zástavba místních obyvatel,
+
+doplněná souvislejší skupinou objektů již zmíněných církevních institucí. Západně od Albertova
+"	5	TextRegion	0.9943718910217284
+131.08436584472656	815.861083984375	342.1227111816406	840.1054077148438	rectangle	"3. Historie lokality
+"	6	TextRegion	0.9942628741264344
+131.95928955078125	688.89306640625	356.84844970703125	712.5355834960938	rectangle	"V Praze dne 23. 9. 2015
+"	7	TextRegion	0.9757100939750672
+125.83406066894533	117.00685119628906	966.3652954101562	189.4791259765625	rectangle	"možné spojit s existencí dílčí mělké erozní rýhy, která probíhala přibližně ve směru od
+
+severovýchodu k jihozápadu mezi sondami S04 a S11.
+"	8	TextRegion	0.96888530254364

@@ -1,0 +1,46 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+110.5955810546875	654.0927124023438	1109.37109375	1218.296875	rectangle	"Rekonstrukci aguamanile jsem provedla následujícím způsobem:
+ze sochařské hlíny jsem vymodelovala jádro v předpokládaném objemu.
+tvaru vnitřku nádobky a na toto jádro jsem do předpokládaných míst
+odpovídající správné polohy umístila (přitiskla) jednotlivé nesporn
+zlomky z aguamanile (resp, malá již slepená torza z aguamanile). Po
+té bylo takto rekonstruované aguamanile fotografováno ( J.Spiegel )
+kresleno (V.Žižková) a kopírováno (Z.Nudera). Při tomto pokusu o re
+konstrukci aguamanile došlo k poškození čísel nálezových situací
+
+=sáčků (která jsou napsána na všech libických nálezech) na třech
+z těchto 15 nesporných zlomků aguamanile (viz níže).
+Popis zlomků aguamanile (resp. jeho slepených malých torz):
+1) část hlavičky beránka s jedním plasticky vvmodelovaným rmahe
+"	0	TextRegion	0.9999254941940308
+130.78823852539062	193.20785522460935	1136.186279296875	629.802001953125	rectangle	"nožné provést kresebnou rekonstrukci, Zároveň p.Z.Nudera z Prehisto-
+rického odd.Národního muzea v Praze zhotovil sádrové kopie této pře-
+chodné rekonstrukce; jedna kopie je deponovaná v Národním muzeu, dru-
+há je vystavená v Pamětní síni slavníkovské Libice v budově libického
+Obecního úřadu. Kresebná rekonstrukce (nakreslená pí.V,Žižkovou) byla
+publikovaná v Archeologických rozhledech (J.Justová, Archeologický
+výzkum na libickém předhradí v letech 1974-1979. Předběžná zpráva.
+AR XXXII 1980, 251) a v milleniové publikaci LIVBVZ METROPOLIS (J.
+Justová, Výzkum libického předhradí. In: LIVBVZ METROPOLIS, Libice
+
+B MĚ DA NÍM: SE
+"	1	TextRegion	0.999904990196228
+51.23771286010742	1263.2100830078125	1136.7174072265625	1499.7462158203125	rectangle	"W760) VULO wow"" Jj
+2) 1 zlomek nálevky (90/74); obr. 1:4, 2:3, 3:2;
+3) část nálevky s přilehlou částí hřbetu beránka (slepeno ze
+
+dvou střepů; číslo sáčku, a to 85/74, se zachovalo jen na jednom
+z těchto dvou slepených střepů); obr. 1:4, 2:3, 3:23
+
+4) část zadečku beránka s plastickým ocáskem (slepeno ze dvou
+střepů, oba mají číslo sáčku 110/74); obr. 1:4, 2:1-3, 3:2;
+
+5) 3 torza z boků zvířátka, ozdobená hřebenovými vlnovkami
+
+M heahanaméÉmí „as ahore
+"	2	TextRegion	0.9978858828544616
+569.6145629882812	33.09082794189453	597.8094482421875	50.2154655456543	rectangle		3	TextRegion	0.9926747679710388
+689.7404174804688	25.48328018188477	1091.5125732421875	76.99717712402344	rectangle	", Sezgam nálezů: sonda 2a=2d
+Sezona 1974 - str. 27
+"	4	TextRegion	0.9858492612838744
+119.90979766845705	1494.6705322265625	131.26791381835938	1508.1943359375	rectangle		5	TextRegion	0.9078946709632874

@@ -1,0 +1,14 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+171.7031707763672	1405.03369140625	1138.4779052734375	1585.76611328125	rectangle	"Sonda 2c (1974), keramické aguamanile: 2.část obrazové doku-
+mentace. l - torzo zadečku zvířátka s plastickým ocáskem,
+slepené ze 2 střepů č. 110/74 (a - šikmý pohled zezadu, b - šik-
+mý pohled zprava); 2 - profil většího z obou střepů ze zadečku
+zvířátka s plastickým ocáskem, č.110/74; 3 - kresebná rekon-
+
+strukce aguamanile, pohled na pravou stranu zvířátka.
+Kresba: V.Žižková,
+"	0	TextRegion	0.9998549222946168
+1054.7103271484375	494.7047729492188	1087.050048828125	519.8917846679688	rectangle		1	TextRegion	0.999165415763855
+95.42740631103516	594.0760498046875	108.22100830078124	617.9699096679688	rectangle		2	TextRegion	0.9967252612113952
+996.1273803710938	50.76834487915039	1051.6661376953125	68.2341537475586	rectangle	"Obr.
+"	3	TextRegion	0.996187388896942

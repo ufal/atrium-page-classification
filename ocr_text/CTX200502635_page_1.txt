@@ -1,0 +1,38 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+120.1941146850586	691.4564208984375	1060.6749267578125	858.6917114257812	rectangle	" 
+
+Na přelomu 18. a 19. stol. zámek rychle střídal majitele a pustnul. Písemné prameny
+uvádí, že roku 1811 objekt, v té době ve velmi špatném stavu, koupil plzeňský podnikatel
+František Becher. Ten nechal sejmout jedno patro, zámek opravil a pokryl těžkou krytinou.
+Úpravám se nevyhnul ani chanovický hospodářský dvůr. Částečně ho nechal přestavět na
+konci 19. stol. nový majitel Eduard Rytíř z Doubků. Poslední známá úprava hospodářského
+dvora byla projekčně připravována v roce 1901. (Anderle — Ebel 1996)
+"	0	TextRegion	0.998611330986023
+120.70133209228516	419.40478515625	1080.1016845703125	667.5181884765625	rectangle	"V písemných pramenech se Chanovice objevují ve 2. polovině 14. století. Z této doby
+pochází též nejstarší dochovaná gotická část sídla. K výrazné přestavbě objektu došlo v
+prvních desetiletích 16. století za Chanovských z Dlouhé Vsi, kdy stavba nabyla dnešní
+půdorysné podoby. Areál byl ohrazen novou, značně silnou obvodovou zdí, respektující v
+některých úsecích starší konstrukce. Roku 1670 byla Chanovicím odpuštěna část berní
+povinnosti, což snad naznačuje, že obec v této době postihla jakási živelná pohroma.
+
+Do podoby sídla výrazně zasáhla barokní přestavba, ke které došlo někdy okolo
+poloviny 18. století za majitele Ferdinanda Jáchyma Rumerskirchena. Dílčí zásahy do stavby
+nastaly patrně také po ničivém požáru roku 1781, při kterém vyhořel kostel, fara, škola a
+"	1	TextRegion	0.998513638973236
+102.258056640625	165.0022430419922	1065.7490234375	397.1515197753906	rectangle	" 
+
+Objekt zámku v Chanovicích (okr. Klatovy) se nalézá spolu s pozdně románským
+kostelem sv. Kříže na severozápadním okraji obce. Byl postaven na nevýrazné ostrožně, jejíž
+páteř vytvářejí výchozy žulové skály. Ze tří stran sídlo obklopuje zpustlý park s rybníkem
+vjeho dolní části. Na severovýchodní straně pak k zámku přiléhá areál hospodářského dvora.
+
+Nejstarším dokladem existence chanovického sídla je pozdně románský kostel Povýšení
+sv. Kříže. Jako vlastnický kostel se patrně vázal na zde již existující feudální sídlo.
+Předpokládá se, že leželo v místech pozdějšího poplužního dvora, dnes dochovaného
+v klasicistní přestavbě. V průběhu 13. stol. bylo sídlo přeneseno na skalnatou ostrožnu, do
+
+ 
+"	2	TextRegion	0.9973913431167604
+1039.207763671875	1593.8929443359375	1048.082763671875	1607.5823974609375	rectangle		3	TextRegion	0.9972584247589112
+145.13150024414062	146.73777770996094	420.4668273925781	173.0194549560547	rectangle	" 
+"	4	TextRegion	0.9359285831451416

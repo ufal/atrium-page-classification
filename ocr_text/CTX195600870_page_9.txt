@@ -1,0 +1,61 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+143.6667022705078	666.5343627929688	1111.2249755859375	761.1756591796875	rectangle	"Hledané základy další románské kaple sv.Maří Magáaleny,z r.
+1130,stopy po opevnění románského hradiště,připomínaném v r.1109,
+dále základy kaple sv.Markéty z r.1255,domu kustodova z r.1264 a J.
+nebyly při výzkumu nalezeny,
+"	0	TextRegion	0.9989609718322754
+147.04922485351562	1409.235595703125	1130.5716552734375	1540.255615234375	rectangle	"MM ŠLA VULIVUELU UV DGB4 4 SUL,
+
+Také kapitulní kostel,časem již sešlá basilika,je počínaje
+r.1570 přestavován na trojlodní chrám s řadou postranních kaplí,
+upomínající na podobné církevní stavby té doby v západní Evropě,
+Vně vlastního hradu vyrůstají rovněž nové stavby i další kaple a
+kostely,některé však až po smrti Karla IV,Tak v r.1328 je připoní-
+"	1	TextRegion	0.99677711725235
+102.9557647705078	510.0193786621094	1169.0936279296875	624.7494506835938	rectangle	"zlatem,
+
+Systematickým výzkumem i sondami odkryto i několik střecově-
+kých cest,vedoucích ke kapli.Jeána z nich,dlážděná oblázky ,vtlačenými
+do jílu,veála od východu ,druhá,těsně za apsidou směřovala v hloubce
+téměř tří metrů do tehdejšího průlomu v hradební zdi v levo od brány
+
+© TOA atd sí „APS
+
+   
+"	2	TextRegion	0.9909496903419496
+126.75052642822266	141.17776489257812	1155.570556640625	264.1525573730469	rectangle	"v téměř neporušeném stavu až do dnešní doby,stojí pod baštou sv.Rocha
+před Leopoldovou branou. Byla vystavěna petrně jako hřbitovní kaple.
+Výzkumem v „kapli byla pod dnešní dlažbou odkryta starší dlažba barok-
+
+ní a pod ní dvě dlažby románské ,mazanicová,červeně opálená a speaní,
+dusaná z „jílu s oblázky
+
+  
+"	3	TextRegion	0.9834142327308656
+260.31549072265625	1058.1544189453125	1146.48291015625	1170.1112060546875	rectangle	"Nového významu dostává se Vyšehradu teprve stavební činností
+|„„započatou již v r.1348,dvě léta po jeho nastoupení.KarelIV,
+Vyšehrad gotickou hradbou s věžemi a cimbuřími a připojuje
+) důležitý obranný bod k hradebnímu okruhu tehdy stavebně
+rané Prahv.
+"	4	TextRegion	0.9516050815582277
+131.3304901123047	230.297119140625	1132.0633544921875	427.0027770996094	rectangle	"— S EM"" M 75 S M: n P: S 2 P
+dusaná z jílu s oblázky. f
+
+Stavbou dnešní průjezdní vyšehradské silnice v létech 1841
+až 1842 doznala Jak kaple sv.Martina,tak i její okolí značných změn,
+Původní vchod do kaple,se stopami barokní úpravy,na západní straně
+byl v r.1842 zazděn,ónešní vchod opatřen r.1880 nynějším portálem,
+zřizovaná silnice zaříznuta v hluboký úvoz,čímž značně ohroženy
+základy kaple,stojící na samém okraji silnice,takže již v r.L9D5
+bylo nutno přikročit k jejímu zabezpečení,
+"	5	TextRegion	0.9361103177070618
+124.33816528320312	786.225830078125	1166.8489990234375	998.1362915039062	rectangle	"Podle historických zpráv možno soudit,že románská úprav“ Vyše-
+hradu byla skončena počátkem 12,století,Stevební úpravy Soběslavovy
+týkaly se patrně převážnou měrou objektů církevních,hlavně kostela
+kapitulního,zvětšeného o zastřešené arkádové předdvoří a o kryptu.
+Kostel byl sice značně poškozen požárem r.1258,na konci l5.století
+byl však již znovu opraven a opatřen atriem,Nevelný zájem panovníků,
+sídlících opět na hradě pražském,vedl k pustnutí vyšehradského hradu,
+který r.1322 dostává se do rukou kapitoly.Palácová rotunda sv.Jana
+Evangelisty,připomínaná již na sklonku X.století a ještě ve stol.
+"	6	TextRegion	0.9339630603790284

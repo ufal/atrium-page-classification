@@ -1,0 +1,84 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+155.63711547851562	359.15826416015625	1092.34228515625	1089.3983154296875	rectangle	"majiteli pozemků mohl dále pokračovat v letech 1975, 1976 a
+978. Výzkum v sondách 2a - 2d v roce 1974 byl o to větším překva
+ením, že po negativním výsledku záchranné akce dr. R. Turka v ro
+973 (o ní viz výše v kapitole 3. Historie naleziště) se v areálu
+sedlosti Svobodovy rodiny neočekávaly závažné nálezy. Navíc bylo
+řekvapením zjištění naprosté intaktnosti místa, neboť na zahradéá
+pěč. 25/6 a 25/1 byla po zániku zdejšího osídlení na konci mladší
+oby hradištní (tj. na konci raného středověku) patrně jediným
+orušením terénu orba, resp. přerývání terénu a sázení stromů,
+Výzkum v r. 1974 objevil podstatnou část okrsku nestandardní
+elké nadzemní budovy, nejspíše dřevěné, která stála na kamenné
+odezdívce, uvnitř byla členěná na minimálně 3 místnosti, na její
+odlaze se zachovaly zbytky prken a pod níž fungoval odvodňovací,
+esp. odpadní kanálek s vyústěním do trativodu jižně od domu. Vý-
+
+hodozápadní orientace stavby, jejíž dlouhá osa byla nápadně odkl
+
+ 
+
+E: Zlí oC S SE MK
+"	0	TextRegion	0.9991637468338012
+154.2862091064453	168.81890869140625	590.2459716796875	193.91436767578125	rectangle	"3 ZHODNOCENÍ VÝSLEDKŮ VÝZKUMU
+"	1	TextRegion	0.9987275004386902
+124.39221954345705	1150.7398681640625	1117.9443359375	1536.8297119140625	rectangle	"kb“ be dog. me. Že agináno cy
+
+(obr. 13 23 3:2. 30; 31), (obr. 3:1) O
+kaya železného psácí o rydla - stiluf Že celý objekt mohl patřit
+
+příslušníkům duchovního stavu. Domnívám se tudíž, že je pravděpo-
+
+ 
+
+U. aké
+
+dobné, že zde od přelomu 9. a 10. stol. do 2. poloviny l0, stol,
+
+stál dům kněží nedalekého (a libického nejstaršího) chrámu P, Marie
+Zajimavé je, že nepatrný odklon dlouhé východozápadní osy pravděpoc
+ného kněžského domu k jihovýchodu zcela koresponduje se stejně odkl
+něnou dlouhou osou otonského chrámu, postaveného v polovině 10, věk
+
+ve Slavníkově rezidenci na vnitřním hradišti,
+"	2	TextRegion	0.9928897619247437
+566.470458984375	54.79594802856445	600.4359130859375	71.16634368896484	rectangle	"58
+"	3	TextRegion	0.9911585450172424
+117.9605484008789	672.364501953125	1115.5264892578125	1262.173583984375	rectangle	"       
+
+doby hradištní (tj. na konci raného středověku) patrně jediným
+porušením terénu orba, resp. přerývání terénu a sázení stromů,
+Výzkum v r. 1974 objevil podstatnou část okrsku nestandardní
+velké nadzemní budovy, nejspíše dřevěné, která stála na kamenné
+podezdívce, uvnitř byla členěná na minimálně 3 místnosti, na jejíž
+podlaze se zachovaly zbytky prken a pod níž fungoval odvodňovací,
+resp. odpadní kanálek s vyústěním do trativodu jižně od domu. Vý-
+chodozápadní orientace stavby, jejíž dlouhá osa byla nápadně odklo
+něná od trasy sousedního opevnění, směřujícího zde od SZ k JV, naz
+načuje spolu s objevem zlomků keramického aguamanile v podobě beréál
+(obr. 13 2; 3:2; 30; 31) (obr. 3:1)
+Kaa Zolezněho psacihě rýdla o otita 26 celý objekt mohl patřit
+
+příslušníkům duchovního stavu. Domnívám se tudíž, že je pravděpo-
+"	4	TextRegion	0.9872850775718688
+137.7206573486328	174.2158203125	155.90110778808594	189.7576446533203	rectangle		5	TextRegion	0.9693748354911804
+550.9563598632812	56.04616165161133	619.6222534179688	69.85734558105469	rectangle	"- 58 -
+"	7	TextRegion	0.9415236115455629
+107.15750122070312	850.4895629882812	1141.193359375	1479.6015625	rectangle	"velké nadzemní Dudovy, nejspise dřevěné, která stála na kamenné
+podezdívce, uvnitř byla členěná na minimálně 3 místnosti, na jejíž
+podlaze se zachovaly zbytky prken a pod níž fungoval odvodňovací,
+resp. odpadní kanálek s vyústěním do trativodu jižně od domu. Vý-
+chodozápadní orientace stavby, jejíž dlouhá osa byla nápadně odklo-
+něná od trasy sousedního opevnění, směřujícího zde od SZ k JV, naz-
+načuje spolu s objevem zlomků keramického aguamanile v podobě berán-
+(obr. 13 2; 3:2; 30; 31) (obr. 3:1)
+
+Kaa Zolezněho psacihě rýdla o otita 26 celý objekt mohl patřit
+příslušníkům duchovního stavu. Domnívám se tudíž, že je pravděpo-
+dobné, že zde od přelomu 9. a 10. stol. do 2. poloviny l0, stol,
+stál dům kněží nedalekého (a libického nejstaršího) chrámu P, Marie,
+Zajímavé je, že nepatrný odklon dlouhé východozápadní osy pravděpodo
+ného kněžského domu k jihovýchodu zcela koresponduje se stejně odklo
+
+něnou dlauhou asau aotanského chrámu. nastaveného w nalavině 10. věku
+"	8	TextRegion	0.827097475528717

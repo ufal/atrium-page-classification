@@ -1,0 +1,23 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+1008.2225341796876	49.58080291748047	1104.83447265625	76.12873840332031	rectangle	"Tab. 17
+"	1	TextRegion	0.9998341798782348
+145.85606384277344	1386.1890869140625	816.532470703125	1485.784912109375	rectangle	"orientované V-Z. Vzadu (v sondě 20) povrch vr:
+těsně pod ním ohniště č. III podlo
+
+Sonda 2a, 2c (1974). Část základu Š pov podez.
+ené opuk. |
+od JIV. Foto J.Justova.
+"	2	TextRegion	0.999567449092865
+96.85668182373048	659.2203369140625	1097.939208984375	761.7852783203125	rectangle	"SOnda 2a-2c (1974). Vpravo část jižní podezdívky budovy
+orientované V-Z. V profilu patrny destrukční i stavební suti bu-
+
+dovy a JV půle ohniště č, III, podloženého opukovými placáky.
+Pohled od VJV. Foto J.Justová.
+"	4	TextRegion	0.9965428709983826
+341.1640625	1389.444580078125	1075.9346923828125	1468.2669677734375	rectangle	"[-Z. Vzadu (v sondě 20) povrch vrstvy 10. století,
+1 ohniště č. III podložené opuk. placáky. Pohled
+
+M Go
+
+(1974). Část základu Š pov podezdívky budovy
+"	5	TextRegion	0.8069943189620972

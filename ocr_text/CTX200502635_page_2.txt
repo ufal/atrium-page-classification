@@ -1,0 +1,31 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+1039.41845703125	1594.13720703125	1047.5244140625	1607.55224609375	rectangle		0	TextRegion	0.9846855401992798
+121.11222839355467	168.66868591308594	1058.6741943359375	447.72760009765625	rectangle	" 
+
+Záchranný archeologický výzkum v Chanovicích vyvolala stavba kanalizace
+v prostoru hospodářského dvora místního zámku. V areálu tohoto feudálního sídla jsou
+dlouhodobě prováděny stavební práce, a to za nepřetržitého archeologického dozoru a
+výzkumu vykonávaného odborným pracovištěm Okresního muzea v Klatovech. Provedení
+záchranného archeologického výzkumu této části se ujala společnost ZIP o.p.s. Plzeň.
+Výzkum navazoval na první etapu výstavby kanalizace (Burešová-Kočár 2000).
+
+Záchranný archeologický výzkum zde započal 11. 10. 2001. Stavební aktivity se
+neomezily pouze na prostor hospodářského dvora, ale výkop pro kanalizaci pokračoval podél
+zámku až přes přilehlý park kobjektu kulturního domu. Výkop byl v celé své délce
+prohlédnut a po zjištění stavu archeologických situací byly v jeho stěně vyměřeny tři profily.
+"	1	TextRegion	0.9753978848457336
+112.37440490722656	525.8786010742188	1052.103759765625	605.9872436523438	rectangle	" 
+
+m .
+V prostoru © hospodářského © dvora byly  vprofilech © plynovodního © výkopu
+dokumentovány dva úseky (situace 1 a 2) s odlišnou stratigrafií (dny 11. 10., 17. 10. a 19.10.
+2001). Situace číslo 3 (JZ profil) v prostoru před věží byla dokumentována dne 7. 4. 2002.
+
+ 
+
+£
+"	2	TextRegion	0.9609005451202391
+141.78648376464844	146.6741485595703	554.7035522460938	174.29624938964844	rectangle	" 
+
+2. Okolnosti, průběh a metoda výzkumu
+"	3	TextRegion	0.9565022587776184

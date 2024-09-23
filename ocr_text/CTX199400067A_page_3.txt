@@ -1,0 +1,75 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+231.5922393798828	460.0331726074219	1026.630126953125	1492.447021484375	rectangle	"METODA VÝZKUMU «.............406.
+ZAMĚŘENÍ sosss53s0s0%600060086 680606 6le0.000:0.006.e.00e (8
+POPIS TERÉNNÍ SITUACE ...............0000000000ne 8-
+
+Sezóna 1974: sondy 28 — 2d 4..........44..00r000e 8 =
+Ornice (drn) ...............c...cc..c00cse
+Ornice (drn) + vrstva 2 (přemyslovská) ......
+Vrstra:č (přemyolovaká) osovsouuzšíěvěšěšeííícce JÍ
+Vrstva 2 (přemyslovská) / vrstva 3 (10.století).. 13
+Objekt I 4.......+.0+++
+l O A E
+KŮloVÁ: jamka L —.wwwee:<es0/es's;s:0'e/9js el6sjeje/eisistěejěě7e0ě IT
+Kůlová jamka 2 ................+..........0<s
+Kůlová; jamka! 3; ses sls'ess se ěiss663.686.6ě66
+Objekt VIII «...........4. ose čl
+Kůlová jamka 4 ..... 20... 0. 0000ccce 23
+P""
+Destrukce vnitřní hradební zdi (DVHZ) .......+.e« 25
+DVHZ / vratva 2 / VP8tVA. 3 «0000cc000000+0ovcccce 2Ť
+DVHZ / VT8atva J «..... 0400000000000 ce
+
+20.0.0000 ce 6-
+
+      
+
+   
+
+2200.00 00000cce l4
+
+ 
+
+  
+ 
+  
+ 
+ 
+ 
+  
+ 
+ 
+
+Objekt III +....00...c+..
+
+Objekt IV %9%96%ssšsěšě 37
+
+Objekt V 4......... 38
+Objekt VI ..
+Objekt VII «................<..c.0c..000se00 cc Úl
+
+Pravděpodobný kněžský dům ............«4++«« .43 =
+
+Kůlová jamka 5 oss. sss.. 222
+"	0	TextRegion	0.9999953508377076
+199.2464599609375	274.4901123046875	1039.177734375	581.2398071289062	rectangle	"1.
+2
+Je
+4.
+De
+6,
+7.
+
+GEOMORFOLOGICKÉ POPIS .............+0.0o0c0c0ce
+PODLOŽÍ A PŮDNÍ POKRYV ................0.4000000e
+HISTORIE NALEZIŠTĚ ....................0..00000e
+OKOLNOSTI A CÍL VÝZKUMU „...............044040400
+METODA: VÝZKUMU 1 0006000000000 08V VSV Vas sš6 E
+POPIS TERÉNNÍ SITUACE ....... o.. %o<u Ls.. 222220
+
+0 © 0 PR NN F
+"	1	TextRegion	0.9990503191947936
+493.76861572265625	180.39108276367188	612.9332885742188	197.45005798339844	rectangle	"Obsal
+"	2	TextRegion	0.9898353219032288
+785.23486328125	1637.8892822265625	815.5769653320312	1655.8089599609375	rectangle		3	TextRegion	0.985178291797638
+596.2723388671875	35.60222244262695	608.9236450195312	51.67338943481445	rectangle		4	TextRegion	0.8951045870780945

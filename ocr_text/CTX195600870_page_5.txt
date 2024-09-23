@@ -1,0 +1,36 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+149.01902770996094	628.3090209960938	1178.2406005859375	726.1240234375	rectangle	"Usnesením užší komise bylo rozhoánuto - s výhradou schválení
+plenem širší komise — svěřiti výzkumem získané nálezy a odkryté pamá-
+tky po skončení výzkumných prací museu hlav.města Prahy,ve schůzi
+konané dne 20.dubna 1952,
+"	0	TextRegion	0.9988412261009216
+210.49334716796875	114.47266387939452	1123.3966064453125	278.1287841796875	rectangle	"Stavební Opravy a vnitřní úpravy v budově nad Libušinou lázní,
+kde zřízeno museum vykopávek,
+
+Konservace zdiva a vnitřní úpravy zbytků Karlovy brány,
+Renovace barokního dřevěného krytu studny v nádvoří,
+Konservace zdiva a stavební úpravy v kostelíku sv.Jana Stětí,
+kde zřízeno lapidarium a pracovna komise,
+
+Umístění obou portálů z vyhořelé zbrojnice jako vchodu cihlovov
+"	1	TextRegion	0.9983013868331908
+1064.275634765625	569.7933349609375	1133.741455078125	584.7504272460938	rectangle	"Kase-
+"	2	TextRegion	0.9978195428848268
+61.31412506103516	319.23736572265625	1091.92578125	457.0103149414063	rectangle	"Při opravě pevnostních hradeb byla komise pověřena odborným
+aohledem a z její iniciativy provedeno vyčištění a úpravy kasemat
+i jich zpřístupnění veřejnosti.Pod dohledem a podle návrhů komise
+provedeny též sadové úpravy Vyšehradu,
+
+Zástupci Komise pro výzkum Vyšehradu účastnili se též všech
+řadních komicf hlaw měeta Prahy 4adnaj1nfnah a natáskánh Voyšahradn.
+"	3	TextRegion	0.9893168807029724
+110.61727142333984	481.43695068359375	1109.3245849609375	604.4056396484375	rectangle	"Nutno s povděkem konstatovat,že držitelé zkoumaných objektů,
+obec Pražská a Kapitola vyšehradská věnovali značné částky na kon-
+servaci výzkumem odkrytých památek,S nevšední ochotou byly také
+k provedení výzkumných prací uvolněny letní cvičiště a přilehlý kase
+mat. propůjčené obcí Pražskou vvšehradskému Sokolu.
+"	4	TextRegion	0.9756994247436525
+145.99440002441406	657.6796875	239.50363159179688	727.3427734375	rectangle	"plenem.
+tky po
+konané
+"	5	TextRegion	0.9011074900627136

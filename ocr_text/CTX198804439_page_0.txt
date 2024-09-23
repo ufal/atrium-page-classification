@@ -1,0 +1,57 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+153.33102416992188	967.8875122070312	1159.39013671875	1441.803466796875	rectangle	"žaké v srpnu 1995 se libický výzkum soustředil, stejně Ako
+v červenci, na výkopové práce v sondě 14, tj. v areálu postupně budo-
+vané Základní školy na parcele č. 49/1 v S polovině libického před-
+hradí /tzv. Volkovo pole/. V srpnu t.r. jsme dokončili práce
+v sondách 14k/2 /střední část pavilonu A/, l4m/1l a l4m/3 /jižní úsek
+kanalizace/, l4n /vstupní schodiště do pavilonu A/ a l40/1-2 /SZ
+část pavilonu A/. Pokračovali jsme ve výkopech v sondě © l4m/2
+/střední část výkopu pr; kanalizaci/ a zahájili jsme práce v sondách
+14m/4-5 /S úsek trasy kanalizace/ a l4p /nájezd pro jeřáb firmy
+Montostav do základové jámy pavilonu C, umístěný při SSV stěně pavi=-
+"	0	TextRegion	0.9999959468841552
+187.3385467529297	1497.3748779296875	1108.6112060546875	1575.5020751953125	rectangle	"V sondě 14k/2 jsme v srpnu dokončili prozkoumání jámového
+>jektu 3053 z doby bronzové a hradištních jam 286, 287, 500a, 50la-
+"	1	TextRegion	0.9997422099113464
+64.12783813476562	686.5868530273438	573.7169189453125	710.9666137695312	rectangle	"plošný odkryv, srpen 1988, J.Justová
+"	2	TextRegion	0.9995197057724
+107.05025482177734	121.95087432861328	813.937255859375	186.53741455078125	rectangle	"o předstihovém záchranném výzkumu na předhradí
+slovanského hradiska v Libici nad Cidlinou
+"	3	TextRegion	0.998763918876648
+906.5907592773438	860.6121215820312	1058.823974609375	884.5889892578125	rectangle	"21.9.1988..
+"	4	TextRegion	0.9985905289649964
+1103.890869140625	1603.248291015625	1182.0	1613.1771240234375	rectangle	"VuzdAží
+"	5	TextRegion	0.9955192804336548
+29.5935115814209	47.85743713378906	426.1414184570313	103.9947738647461	rectangle	"AJLÁŠENÍ
+"	6	TextRegion	0.9935805797576904
+54.16156768798828	250.35546875	202.46820068359372	264.1447448730469	rectangle	"Katastrální území
+"	7	TextRegion	0.992932915687561
+59.58716583251953	665.5577392578125	233.8473358154297	681.4749145507812	rectangle	"Druh akce, rok, outor
+"	8	TextRegion	0.9890372157096864
+893.1629638671875	53.95499420166016	907.5255126953124	68.11348724365234	rectangle		9	TextRegion	0.9851427674293518
+830.24072265625	869.8259887695312	883.4363403320312	882.983154296875	rectangle	"Datum
+"	10	TextRegion	0.9837568998336792
+401.78900146484375	519.0864868164062	809.08154296875	648.0889282226562	rectangle	"Kontext I ,sídliště rovinné
+
+neopevněné /d.bronzová/
+
+II.sídliště rovinné
+opevněné /starší-mladší
+doba hradištní/
+"	11	TextRegion	0.981145441532135
+813.125	739.262451171875	1114.53759765625	795.3367309570312	rectangle	"Uložení | depozitář ©
+v Libici nad Cidlinou
+"	12	TextRegion	0.9745185375213624
+159.43289184570312	1457.1038818359375	277.6865234375	1477.8076171875	rectangle	"lonu C/.
+"	13	TextRegion	0.9718176126480104
+798.3255004882812	323.15289306640625	1111.1636962890625	423.6187744140625	rectangle	"Slovní lokalizace předhradí
+slovanského hradiště,
+parcela č. 49/1
+/tzv. Volkovo pole/
+"	14	TextRegion	0.9328529238700868
+59.39903259277344	584.3167114257812	253.7203063964844	611.6734619140625	rectangle	"raný středověk
+"	15	TextRegion	0.8896233439445496
+59.66967391967773	555.5820922851562	236.48440551757807	575.4717407226562	rectangle	"doba bronzová
+"	16	TextRegion	0.8673738241195679
+427.3400268554688	358.7710266113281	703.5545043945312	379.3619995117188	rectangle	"| 398 mm Z, 117 mn J
+"	17	TextRegion	0.8270604014396667

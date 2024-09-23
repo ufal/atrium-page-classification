@@ -1,0 +1,62 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+584.4605712890625	1613.145263671875	608.44140625	1625.7958984375	rectangle	"100
+"	0	TextRegion	0.9999890327453612
+152.38070678710938	172.75296020507812	463.15631103515625	931.8051147460938	rectangle	"0 - černá uhlíkatá
+
+1 - černošedá s uhlíky
+
+2 - černohnědá s uhlíky
+
+3 - světlá hnědá
+
+4 - světlá hnědá se spraší
+
+5 - světlá hnědá s vápnitými konk
+6 - hnědá promíšená pískem
+7 - hnědá promíšená spraší
+
+8 - hnědá promíšená spraší a písk
+9 - hnědá s uhlíky
+
+0 - tmavá hnědá
+
+1 - hnědočerná
+
+|2 - světlá hnědošedá
+
+3 - hnědošedá
+
+[4 - hnědošedá s uhlíky
+
+5 - hnědožlutá
+
+[6 - světlá šedá
+
+7 - okrová/oranžová
+
+|7a - okrová s bílými zrny
+
+[8 - okrová spraš
+
+19- žlutá spraš
+
+19a - světle žlutý písek
+
+0 - žlutá promíšená
+
+11 - žlutá s hrudkami vápna
+
+2 - žlutošedá
+
+3 - propálená sypká oranžová
+)4 - nisek se snraší
+"	1	TextRegion	0.9998103976249696
+141.64637756347656	991.1968994140624	289.5660400390625	1122.786865234375	rectangle	"Ke- keramika
+Ka - kameny
+Ko- kosti
+
+Ma - mazanice
+U -nhlíky
+"	2	TextRegion	0.9995872378349304
+143.3640899658203	143.1334228515625	401.9806823730469	173.83790588378906	rectangle	"Kód výplní — Čáslav Skála
+"	3	TextRegion	0.9949818253517152

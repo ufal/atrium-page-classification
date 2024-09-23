@@ -1,0 +1,59 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+110.14273834228516	151.689697265625	1059.3046875	277.4510803222656	rectangle	" 
+
+14 — Heineho ul. čp. 257 — proti vile roku 1908 nalezeny tři sídlištní jámy únětické kultury;
+při výstavbě vily zjištěn výskyt střepů nádob knovízské kultury; při stavbě garáže a nového
+
+oplocení vroce 2002 dokumentovány dva zahloubené sídlištní objekty štítarské kultury
+"	0	TextRegion	0.9999616146087646
+151.529052734375	595.3353881835938	1004.26416015625	815.4003295898438	rectangle	"I8 — Rooseveltova ul. čp. 166 — roku 1998 zjištěna sídlištní jáma únětické kultury
+idlištních (zásobních) jam knovízské kultury, zahloubená chata s jámou uprostřed a c
+áma (hliník) ze starší doby římské, dvě zahloubené chaty a dvě jámy z časně slovansl
+»bdobí; pravěké objekty překrývala kulturní vrstva; 9 sídlištních jam a 2 kůlové jamky.
+
+latovány obecně do období zemědělského pravěku, 3 jámy a svrchní souvrství |
+
+Maran Zá mladalbí (
+"	1	TextRegion	0.9998624324798584
+149.15428161621094	897.1870727539062	1046.299072265625	1448.8037109375	rectangle	"  
+
+19 a 25 — Rooseveltova ul., východní a střední část — bez bližších údajů sídlištní nálezy
+kultury s vypíchanou keramikou, z východní části ulice dva jordanovské žárové hroby
+objevené kolem roku 1920; uváděn je hrob kultury nálevkovitých pohárů, k němuž by snad
+mohl patřit i nález džbánu a amfory; ve střední části ulice na někdejších parcelách pan Zimy,
+Buršíka aj. 9 hrobů či nálezů z rozrušených hrobů kultury se šňůrovou keramikou pochází
+z let 1921-1923; nalezen zde byl zlomek měděné hřivny únětické kultury; v roce 1908
+zachycena jáma z přechodného věteřovsko-mohylového období; nalezena také keramika
+mohylové kultury (mj. část zásobnice z roku 1912), ve 20. a 30. letech 20. století řada
+knovízských a štítarských artefaktů z jam a kulturních vrstev; sídlištní nálezy bylanské
+kultury; roku 1998 nalezena římská mince (bronzový redukovaný follis ražený v letech 331 a
+333—334) na rohu ulic Rooseveltovy a U Zeměpisného ústavu; čtyři keramické nádoby ze
+staršího stupně doby stěhování národů tvořily nejspíše výbavu zničeného hrobu; při kopání
+kanalizace na počátku 20. století získány sídlištní nálezy časně slovanského a zřejmě i
+
+starohradištního období (
+"	2	TextRegion	0.9996379613876344
+142.8628692626953	848.767333984375	201.9294586181641	871.2582397460938	rectangle	"1951]).
+"	3	TextRegion	0.9990963935852052
+327.3329162597656	309.0375061035156	1047.09716796875	358.2322998046875	rectangle	"čp. 280 — při stavbě vily v Heineho ul. 5 objevena jáma knovízské kultury
+"	4	TextRegion	0.9981259703636168
+176.3917999267578	803.848388671875	1041.9935302734375	841.6796875	rectangle	"zověkému období (
+"	5	TextRegion	0.9974128603935242
+141.4272003173828	405.4578552246094	1047.303955078125	551.6783447265625	rectangle	"40 — KLEINCRO Ul. CD. 2/4 — Proti GOMU TOKU 1710 nalezen patíné NIMeK VOLETOVSKÉ KULUrTy, na
+staveništi vily zjištěna jáma knovízské kultury
+17 — Rooseveltova ul. čp. 23 — v zahradě vily v letech 1919 a 1922 prozkoumány dva hroby
+
+kultury se šňůrovou keramikou; tamtéž vykopáno několik hrobů únětické kultury
+"	6	TextRegion	0.995936155319214
+316.6527404785156	1590.33349609375	875.2080078125	1616.0633544921875	rectangle	"2.4. Předchozí archeologické poznání lokality a jejího okoli
+"	7	TextRegion	0.9889954328536988
+137.73477172851562	1427.594970703125	1011.9136352539062	1473.1392822265625	rectangle	"starohradištního období (
+"	8	TextRegion	0.9683540463447572
+181.57565307617188	1468.4498291015625	811.9775390625	1491.5914306640625	rectangle	"—539, 667, 819, 895; Dobeš — Kostka — Popelka 2011, 298-303).
+"	9	TextRegion	0.9488136172294616
+320.499267578125	393.3097534179688	1029.0552978515625	425.0269470214844	rectangle	"čp. 274— proti domu roku 1910 nalezen patrně hrnek věteřovské kultury;
+"	10	TextRegion	0.9441537857055664
+137.33950805664062	384.8892517089844	1058.8011474609375	460.6175842285156	rectangle	"16 — Heineho ul. čp. 274— proti domu roku 1910 nalezen patrně hrnek věteřovské kultury; na
+
+staveništi vily zjištěna jáma knovízské kultury
+"	11	TextRegion	0.904137134552002

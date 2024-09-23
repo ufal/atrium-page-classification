@@ -1,0 +1,36 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+193.0271759033203	607.5675659179688	1087.2542724609375	1369.3660888671875	rectangle	"Na spodu elipsovité stavby, jejíž dno bylo téměř vydlážděno
+
+břidlicovými deskami, v hlíně, která tam asi samovolně propa-
+dala se shora, ale mohla tam být původně i nasypána, byl s ve!
+kou pravděpodobností uložen žárový hrob 2, z něhož se v tomto
+prostředí zachovaly jen 2 zlomky spálených kostiček, neurčité
+zlomky rozpadlé keramiky a zlomky bronzových předmětů, z nich:
+zůstala jen patina a rozpadl se i povrch břidlicových desek.
+
+Vzorky hlíny sebrané z této spodní vrstvy stavby pro P205 by-
+ly sice sterilní, ale pozůstatky zde nalezené, lze těžko jina.
+vysvětlit než jako žárový hrob 2. Podle toho, že zlomky bron-
+zové tyčinky se jeví jako čtyřhranná jehla od jehlice, bylo b:
+možno, včetně dvou malých tutulů, zařadit tento hrob do star-
+šího období mohylové kultury a mohl by tedy být považován za
+
+starší než se jeví nádoby z hrobu 1 pod kamenným krytem v JV
+
+části mohyly. Zdá se, že i elipsovitá hrobová stavba byla po-
+
+stavena první v této mohyle pro svou centrální polohu.
+"	0	TextRegion	0.9999983310699464
+179.10357666015625	137.10243225097656	1085.54736328125	581.78271484375	rectangle	"vrstva e v ní u západního obvodu nalezena 5 cem dlouhá bronzo-
+vá tyčinka, která byla vybrána ve zlomcích, z nichž nezůstalo
+více než patina. Ještě o něco blíže k východnímu obvodu nale-
+zeny 2 bronzové tutuly, které se také rozpadly a kousek bron-
+zové tyčinky jako předcházející. Mezi mazlavou vlhkou hlínou
+v této části pův. úrovně na kamenech se objevily také dva ne-
+patrné zlomky keramiky a na jiných místech v okolí zlomky, pa
+trně také keramiky, ale rozpadající se v prášek stejně vlhký
+jako hlína. U nich nalezeny ještě dva zlomky drobných spále-
+
+hodí: SSE ZEKEZNOSP ZK
+"	1	TextRegion	0.9999884366989136
+1090.91943359375	52.2603645324707	1102.3499755859375	69.80839538574219	rectangle		2	TextRegion	0.998897910118103

@@ -1,0 +1,76 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.6245727539062	1591.41845703125	623.49560546875	1607.080078125	rectangle		0	TextRegion	0.9999960660934448
+160.56129455566406	117.67149353027344	298.9753112792969	137.52154541015625	rectangle	"Datování: VS1
+"	1	TextRegion	0.999915599822998
+159.95803833007812	880.6082763671875	264.5755310058594	899.8300170898438	rectangle	" 
+
+Datovái
+"	2	TextRegion	0.999903678894043
+144.81016540527344	949.7534790039062	1041.6561279296875	1067.1409912109375	rectangle	"satek C. 511-140 (5. 5411-10, ODr. pril. 07)
+
+KE: 2x menší, omletý zlomek těla hrncovité nádoby a z těla kameninové lahve, provedení
+režné u kameniny transparentně glazované, barva světle béžová a šedobéžová. M:
+jemnozrnný, oxidačně vypálený u kameniny materiál jemný a plavený, redukčně
+wwnálaný
+"	3	TextRegion	0.999886155128479
+137.15113830566406	1257.1337890625	1043.784912109375	1308.8428955078125	rectangle	"KE: 1x zlomek z dna hrncovité nádoby provedení režné, barva střepu béžově oranžová, na
+lomu taktéž. M: střednězrnný, oxidační vypal.
+"	4	TextRegion	0.9997250437736512
+147.39559936523438	185.9467620849609	1030.88525390625	307.5423278808594	rectangle	"saček ČC. 5141-02 (sj. 511-02, obr. pril. 66)
+
+KE: malý soubor drobných zlomek těl a dna hrncových nádob, provedení režné, barva
+střepu šedá, šedohnědá, oranžová. M: jemnozrnný až střednězrnný, redukční vypal. OP: -.
+V: rytá šroubovice.
+
+ST: 2x amorfní norézní kousky železné (kovářské. stonově nístějové) strusky. váha 61o
+"	5	TextRegion	0.9997155070304872
+992.2313842773438	1408.8350830078125	1028.912841796875	1425.6995849609375	rectangle		6	TextRegion	0.9995506405830384
+162.7930908203125	1350.0015869140625	301.0848693847656	1368.3271484375	rectangle	"Datování: NO1
+"	7	TextRegion	0.9994300007820128
+158.68353271484375	447.0970458984375	1030.06689453125	607.6097412109375	rectangle	"Sáček č. S11-03 (sj. 511-03, obr. příl. 66,67)
+
+KE: menší soubor zlomků z těl hrncovitých nádob, provedení režné, barva světle šedá,
+hnědošedá, stopově šedooranžový sendvič. M: jemnozrnný až střednězrnný, oxidačně
+vypálený. OP: -. V: jednoduchá, rytá vlnice.
+
+KO: 4x zvířecí kosti (druhově neurčeno)
+
+KK: 2x zvířecí kosti se stopou kuchyňského opracování (druhově neurčeno)
+"	8	TextRegion	0.9993727803230286
+151.0997314453125	656.357666015625	1011.5419311523438	700.4774780273438	rectangle	"rex nevelký zkorodovany tycinkový zlomek
+ST: 23x amorfní porézní kousky železné (kovářské, stopově nístějové) strusky, váha 610g
+"	9	TextRegion	0.9989948868751526
+164.1546173095703	285.3320007324219	1004.1983032226562	346.9768371582031	rectangle	"  
+
+5
+ST: 2x amorfní porézní kousky železné (kovářské, stopově nístějové) strusky, váha 61g
+Ká: 1x železná ordovická ruda-limonit (natavená)
+"	10	TextRegion	0.9985873699188232
+156.5341339111328	1172.313720703125	352.2919921875	1193.5433349609375	rectangle	"Datování: NO1/NO2
+"	11	TextRegion	0.9981820583343506
+159.10272216796875	381.7049560546875	339.676025390625	402.298095703125	rectangle	"Datování: RS4/VS1
+"	12	TextRegion	0.9955711960792542
+158.96685791015625	732.4517211914062	337.2647705078125	753.8716430664062	rectangle	"Datování: RS4/VS1
+"	13	TextRegion	0.9923572540283204
+154.59776306152344	811.6475219726562	594.8259887695312	844.0791015625	rectangle	"  
+
+x středně velké kusy opálených diabasů.
+"	14	TextRegion	0.9753281474113464
+193.44183349609372	573.7817993164062	875.724365234375	628.5077514648438	rectangle	"„SPA EV AV
+2x zvířecí kosti se stopou kuchyňského opracování (druhově neurčeno?
+1x
+"	15	TextRegion	0.9422202706336976
+163.85325622558594	1075.876220703125	557.2537841796875	1133.703125	rectangle	"E
+Fe:2x zkorodované zlomky čepele nože?
+Ká:1xzlomek černého uhlí
+
+ 
+"	16	TextRegion	0.9110245108604432
+313.2481994628906	583.86962890625	866.0440063476562	610.7153930664062	rectangle	"sti se stopou kuchyňského opracování (druhově neurčenc
+"	17	TextRegion	0.908100962638855
+258.0377502441406	119.04277801513672	297.1815795898437	135.88565063476562	rectangle	"VS1
+"	18	TextRegion	0.8859977126121521
+163.7543182373047	790.4636840820312	459.427978515625	819.7554321289062	rectangle	"Sáček č. S11-09 (sj. S11-09
+"	19	TextRegion	0.8049822449684143
+295.48638916015625	1261.7845458984375	1020.8619384765624	1286.722900390625	rectangle	"z dna hrncovité nádoby provedení režné, barva střepu béžově oranžová, ne
+"	20	TextRegion	0.8007990717887878

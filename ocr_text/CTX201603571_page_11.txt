@@ -1,0 +1,55 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+1049.43603515625	1537.1160888671875	1069.2921142578125	1553.13134765625	rectangle		0	TextRegion	0.9997921586036682
+127.47118377685548	149.1289825439453	1078.90625	619.16845703125	rectangle	"kláštera z 2. pol. 14. stol. (1360), později novogoticky upravena podle návrhu Bernharda
+Gruebera z r. 1858. V téže ulici pak severněji rozložený klášter alžbětinek u kostela P. Marie
+Sedmibolestné (čp. 448), barokní novostavba z I. 1726-32 postavená podle projektu Kiliána
+Ignáce Dientzenhofera. Na severní straně od Albertova se na výrazném skalním hřbetu hory
+Větrov nalézá gotický kostel sv. Apolináře z doby kolem roku 1360, vystavěný společně s objekty
+kolegiátní kapituly, v baroku upravený do dnešní podoby (dnes čp. 447, budova nemocnice).
+Posledním východně položeným historickým areálem byl klášter řeholních kanovníků sv.
+Augustina s kostelem Panny Marie a Karla Velikého na Karlově (čp. 453) založený Karlem IV.
+v roce 1350. Na dostupných vyobrazeních a plánech tohoto místa z 2. pol. 18. až 19. století se na
+sledovaném místě nalézají vždy polnosti v podobě zahrad či zemědělsky obhospodařovaných
+
+polí (obr. příl. 53-58).
+"	1	TextRegion	0.9996545314788818
+124.50498962402344	1121.2908935546875	1072.8511962890625	1443.7421875	rectangle	"S výstavbou prvních objektů univerzity se začalo na počátku 20. století. První ústavy byly
+kolaudovány mezi roky 1904 - 1906 na severní straně nové ulice Albertov (část objektu dnešního
+Fyziologického ústavu čp. 2029 a Hygienického ústavu čp. 2028). Zastavovací plán byl
+koncipován tak, že při pohledu ke Karlovu byly v levé části ústavy německé univerzity a v pravé
+části ústavy české univerzity. Urbanistický koncept byl založen na šachovnicové síti ulic s hlavní
+komunikační osou v podobě ulice Albertov. Ze zastavovacího plánu je patrná i původní struktura
+
+komunikací. Vomáčkův návrh zástavby však v pozdější době nebyl úplně dodržen. To se týká
+
+ 
+"	2	TextRegion	0.9985536932945251
+133.00741577148438	641.5109252929688	1063.9715576171875	953.7977294921876	rectangle	"Dnešní urbanistická podoba území Albertova je úzce spjata s ideou univerzitního kampu
+z konce 19. století. Vtomto období, kdy došlo roku 1882 k rozdělení Karlo-Ferdinadovy
+univerzity na dvě samostatné vysoké školy českou a německou, se výrazně zvýšila potřeba
+nových univerzitních prostor a objektů. Vhodným územím se pro uvedenou ideu stala oblast na
+
+Horním Novém Městě vymezená na severu Karlovým náměstím, na východě Sokolskou a na jihu
+
+  
+
+skalním hřbetem sbíhajícím od Karlova do údolí Botiče. Nově koncipovaný univerzitní areál vyše
+
+z urbanistického konceptu přednosty místodržitelského odboru pro stavby pozemní Rudolfa
+
+   
+"	3	TextRegion	0.993300437927246
+139.0699462890625	710.6263427734375	1063.0367431640625	1144.5465087890625	rectangle	"   
+
+jniverzity na dvě samostatné vysoké školy českou a německou, se výrazně zvýšila potřebe
+nových univerzitních prostor a objektů. Vhodným územím se pro uvedenou ideu stala oblast ne
+Jorním Novém Městě vymezená na severu Karlovým náměstím, na východě Sokolskou a na jihu
+skalním hřbetem sbíhajícím od Karlova do údolí Botiče. Nově koncipovaný univerzitní areál vyše
+. urbanistického konceptu přednosty místodržitelského odboru pro stavby pozemní Rudolfa
+Vomáčky a jeho spolupracovníků Bohumila Novotného a Augusta Kožíška (Houba 2012, 14)
+Základem uvedeného území se stal pozemek Na Slupi získaný darem kolem roku 1894. Vlastn
+název zastavovaného území „Albertov“ byl odvozen od jména vynikajícího českého chirurge
+= duarda Alberta (1841-1900), působícího ve Vídni.
+
+S výstavbou prvních objektů univerzity se začalo na počátku 20. století. První ústavy byly
+"	4	TextRegion	0.9813717603683472

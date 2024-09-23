@@ -1,0 +1,47 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+153.2056427001953	551.6013793945312	1113.7281494140625	908.1720581054688	rectangle	"Některé nálezové situace, zejména ty, které byly odkrývány
+na začátku výzkumu sondy 2 mechanickým způsobem, se nalézaly na
+rozhraní odlišných vrstev, resp. přesahovaly z jedné vrstvy do
+druhé. To uvádím níže v jejich popisu; k tomuto určení (poloha
+jedné nálezové situace ve více vrstvách) jsem dospěla po promítnu
+hloubkového údaje původního popisu nálezové situace (=sáčku) na
+
+nejblíže ležící stratigrafický řez v sondě,
+
+   
+
+hoaslanh oábílmdlmní samaožemmnÉá m „3
+"	0	TextRegion	0.9999333620071412
+136.45474243164062	112.45181274414062	1142.7613525390625	518.13134765625	rectangle	"Tyto horizonty byly přirozeně rozpoznány až při jejich postupném
+odhalování v průběhu první výzkumné sezóny (1974) v sondě 2,
+K očíslování základních vrstev 1 - 4 jsem přistoupila teprve na
+začátku sezóny 1975 (viz deník Libice 1975, zápis ze 4, 6. 1975
+na str. 5-7 deníku; srv. též terénní záznam v terénním sešitě
+Libice 1975, str, 42-43), Proto jsou popisy jednotlivých nálezových
+situací z první sezóny výzkumu sondy 2 v r. 1974 značně obsáhlé,
+
+neboř charakterizují jednotlivé vrstvy jejich vlastnostmi, nikoliv
+"	1	TextRegion	0.9997900128364564
+139.43673706054688	989.3323364257812	1129.734375	1593.860107421875	rectangle	"V sondě 2a + 2b jsme pod vrstvou 2 a pod DVHZ a pod horním ho-
+rizontem vrstvy 3 odkryli dobře zachované části základu opukové
+podezdívky, směřující od V k Z. V JZ sousedství této podezdívky
+probíhal zhruba souběžně s JZ obvodem předhradí vnitřní příkop
+opevnění, který do sondy 2a + 2b zasahoval svým vnitřním svahem,
+Za účelem sledování dalšího průběhu orientované podezdívky jsme v
+r. 1974 založili v SZ pokračování sondy 2a + 2b sondu 2c (6 x 9,2 I
+Už od začátku výzkumu se zdálo, že základ objevené orientované
+podezdívky může představovat část jižní stěny nezvykle velké budov
+Kvůli zjištění základu S stěny předpokládané budovy jsme v r. 1974
+založili ještě v SV prodloužení sondy 2a sondu 2d ( 2x 5m),
+Práce v sondách 2a - 2d pokračovaly i v r, 1975, kdy byly ukončeny
+
+(o sezóně 1975 bude vyhotovena další nálezová zpráva).
+"	2	TextRegion	0.9996488094329834
+153.8004608154297	520.446533203125	238.2406311035156	537.2659912109375	rectangle	"čísly.
+"	3	TextRegion	0.9988081455230712
+535.8656616210938	41.33030700683594	570.2749633789062	57.600704193115234	rectangle	"10
+"	4	TextRegion	0.9976266026496888
+180.03262329101562	899.4342041015625	1107.7279052734375	956.65771484375	rectangle	"Uvedená základní stratigrafie platí s malými obměnami v celém
+
+ne zasekaka Je
+"	5	TextRegion	0.9811043739318848

@@ -1,0 +1,38 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+279.7299499511719	999.7052612304688	964.7037353515624	1031.15380859375	rectangle	"Narezle šedý sypký štěrk, četně promísený hroudy jílu. Nahodile polohy okrového písku, ojediněle
+cihly, malta a opuka.
+"	0	TextRegion	0.9996034502983092
+286.9389953613281	716.677490234375	937.3859252929688	747.3345336914062	rectangle	"jměs barev - soudržná heterogení směs maltové drti a písčité híny. Četně cihly, mírně opuka a
+roudy malty.
+"	1	TextRegion	0.99956613779068
+1516.755126953125	999.1575317382812	1585.49609375	1014.4678955078124	rectangle	"13.8.2015
+"	2	TextRegion	0.9992949962615968
+86.51732635498047	1082.4578857421875	425.5189208984375	1098.455078125	rectangle	"Archeologický výzkum č. 2015/21 - Albertov 3a
+"	3	TextRegion	0.9987598657608032
+1482.5693359375	1080.57861328125	1587.212890625	1097.51513671875	rectangle	"Stránka 7 z 15
+"	4	TextRegion	0.9985089898109436
+1045.090087890625	212.12356567382807	1146.9876708984375	224.5313262939453	rectangle	"Interpretace
+"	5	TextRegion	0.9940306544303894
+271.8788146972656	856.77587890625	915.2506103515624	876.8970947265625	rectangle	"Světle hnědošedá sypká silně písčitá hlína. Četně maltová drt“, mírně úlomky cihel a opuky.
+"	6	TextRegion	0.9925561547279358
+265.39013671875	479.2095336914063	809.9828491210938	499.312744140625	rectangle	"Hnědá soudržná silně písčitá hlína. Nahodile zrna do červena propálené hlíny
+"	7	TextRegion	0.9886117577552797
+225.71307373046875	258.0943603515625	911.6796264648438	285.1816711425781	rectangle	"Hnědošedá soudržná prachovito písčitá hlína. Nahodile valouny do 5 cm a uhlíky do 1 cm.
+Ojediněle opuka a cihlovina 3 cm.
+"	8	TextRegion	0.9856359958648682
+288.4708557128906	929.0523071289062	850.9074096679688	947.5504760742188	rectangle	"měs barev - sypká směs cihel a opuky promísená maltovou drtí a písčitou hlínou.
+"	9	TextRegion	0.9845118522644044
+1006.4111328125	998.3900756835938	1179.4312744140625	1034.568603515625	rectangle	"navážka - přemístěné
+kontaminované podloží
+"	10	TextRegion	0.9786076545715332
+280.30596923828125	646.234130859375	747.3406372070312	661.8754272460938	rectangle	"Šedá tvrdá směs šterku a rozemletého asfaltu. Velmi četně kameny.
+"	12	TextRegion	0.9433341026306152
+988.265869140625	784.6619262695312	1187.85546875	818.1614990234375	rectangle	"navážka - patrně přemístěné
+podloží
+"	13	TextRegion	0.9199592471122742
+272.1226806640625	573.7420043945312	739.3533935546875	594.5330200195312	rectangle	"Hnědošedá drobivá humózní hlína, velmi četně kořínky a kamínky.
+"	14	TextRegion	0.8527514338493347
+279.7196960449219	365.75732421875	821.95263671875	386.6655578613281	rectangle	"Tmavě šedá soudržná písčitá hlína. Nahodile valouny do 3 cm a uhlíky do 1 cn
+"	15	TextRegion	0.8451308012008667
+317.92059326171875	257.6277160644531	906.583740234375	273.84503173828125	rectangle	"ošedá soudržná prachovito písčitá hlína. Nahodile valouny do 5 cm a uhlíky do 1 cm.
+"	16	TextRegion	0.806248128414154

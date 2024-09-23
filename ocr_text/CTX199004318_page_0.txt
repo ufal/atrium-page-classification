@@ -1,0 +1,47 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+82.36986541748047	647.12744140625	1017.1908569335938	845.9296264648438	rectangle	"py, železná sekera, zlomek kam. nástroje; mikrolokalita d - 4i9-od-Zy-300-mm-odJ-orče, parc.č. 857, k.
+slezskoplatěnická - 4. stup., středověk - 13.-14. stol., střepy; mikrolokalita e - 390—ed-2y-392-mm-od+-
+s.č., parc.č. 857, k. slezskoplatěnická - 1. stup., laténská, d. hradištní, středověk, střepy; mikrolo-
+kalita £ - 380-0d-Zy-378-mi-od J-eče, parc.č. 857, 921, 928, 933, 934, 942, 943, 952, k. slezskoplatě-
+mická - 1.-4. stup., laténská a středověk, střepy, mazanice, přeslen. ULOŽ: AO KMVČ Hradec Králové,
+
+př.č. 31-36/87. LIT: Zpravodaj KMVČ 1 - 1987, 13.
+V. Vokolek
+"	0	TextRegion	0.999902367591858
+963.8436889648438	49.333763122558594	1102.7177734375	81.474365234375	rectangle		1	TextRegion	0.9981287121772766
+640.6640014648438	835.5723266601562	727.8328247070312	852.7491455078125	rectangle	"V. Vokolek
+"	2	TextRegion	0.9964637160301208
+125.13176727294922	362.0022277832031	1118.4515380859375	525.04736328125	rectangle	"b/ KULT: Slezskoplatěnická, laténská, středověk, LOK: Nal. 4, mikrolokality a-f, viz ZM
+13-42-18, 270-301 m n.m. OKOL:; Povrchový sběr J. Bočka, NÁLEZ: Mikrolokali tamě—hody338 -mm
+OdJ-orěm, slezskoplatěnická, laténská, středověk - střepy, 13. stol, ; mikrolokalita b42d-edé-330-mmm
+od-j-érěm parc.č. 857, 863, k. slezskoplatěnická, středověk - 15. stol. , střepy; mikrolokalita c - údž-ed=
+Zy316-80d-J-arčm parc.č. 857, 921, 928, k. slezskoplatěnická - 4. stupeň, středověk- 13. stol. , stře-
+"	3	TextRegion	0.994966208934784
+797.8311157226562	1614.9385986328125	974.1514282226562	1632.7965087890625	rectangle	"o provcescno
+"	4	TextRegion	0.9932536482810974
+65.17729187011719	241.922607421875	1101.5260009765625	348.1808776855469	rectangle	"1986 - a/ KULT: Středověk. LOK: Nal. 3, bývalý lom na opuku, parc. č. 227, 229, 245, 247, ZM
+| 13-42-18, 240 od Z, 3786nm od ] s.č., 284 m n.m, OKOL: Povrchový sběr. NÁLEZ
+ULOŽ: AO KMVČ Hradec Králové, př.č. 30/87. LIT: Zpravodaj KMVČ 1 - 1987, 13. KOMENTÁŘ: Jedná
+
+í patrně z Chrudimi. Pr3
+
+ 
+
+Střepy /13. stol. /.
+
+  
+
+Se o pseudolokalitu, nálezy ze zavážky lomu pocháze
+"	5	TextRegion	0.9925757646560668
+109.85845947265624	891.8978271484375	1007.97412109375	978.212890625	rectangle	"©/ KULT: Pravěk, středověk. LOK: Nal.č. 5, parc.č. 976, 980/1, 985, 990, ZM 13-42-18,
+27 od Z, 356 mm od J s.č., 261 m n.m. OKOL: Povrchový sběr. NÁLEZ: Střepy /středověk 13. stol./.
+LOŽ: AO KMVČ Hradec Králové, př.č. 37/87. LIT: Zpravodaj KMVČ 1 - 1987, 13. P/ Z/
+"	6	TextRegion	0.9882569909095764
+172.37066650390625	542.4522094726562	190.3921356201172	550.081298828125	rectangle		7	TextRegion	0.9865598678588868
+255.2642974853516	1206.272705078125	955.5639038085938	1340.77587890625	rectangle	"L Má, Md3 105, 4%, S90, R 1 mr“ (p
+V S40, S30, 34, 80, M4 256, TE
+
+AM Inf 3.
+"	8	TextRegion	0.9544531106948853
+186.87950134277344	204.5096435546875	473.4305725097656	223.06488037109372	rectangle	"93. KOČI - TOPOt, okr. Chrudin
+"	10	TextRegion	0.8403317928314209

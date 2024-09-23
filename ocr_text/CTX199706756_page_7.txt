@@ -1,0 +1,37 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+156.06106567382812	714.6674194335938	966.5074462890624	1374.960693359375	rectangle	"| alisada, respektivé jeji nalezená Čast netvotila ukončený tvar. Byla zachycena DOuze
+západní a část severního průběhu oválného opevnění přerušeného v severozápadním
+'ohu úzkým vchodem rozděleným dvěma kůly na tři zhruba stejně široké průchody.
+Zástavba vnitřní plochy se soustřeďuje po obchodu areálu a tvoří ji soubor mělkých
+»bjektů. Ve východní palisádou neohraničené partii výzkumu jsou mezi objekty za-
+namenány 1 specializované objekty, ať již zásobního charakteru s typickým kruhovým
+nůdorysem (např. obj. 95, 121A) nebo menší jámy s netradičními nálezy - mazanico-
+rým blokem (obj. 97) nebo spodní částí drtidla (obj.98). Tímto způsobem je možné
+adhadnout nejen východní hranici dvorce (procházející patrně čtverci 272, 283, 294,
+304 a 313) alei hranici jižní (čtverce 300, 311, 312 a 313). Zároveň se tím jeví i jisté
+mitřní členění dvorce na západní obytnou a východní hospodářskou část. Mimo to Ize
+jistou mírou pravděpodobnosti vymezit i prostor dvou kůlových staveb první z nich ji
+ituovaná těsně k palisádě do čtverců 288 a 289 druhá je v ploše, ve čtvercích 291,
+
+92, 302 a 303. Hustotu osídlení nepřímo dokládá i nález torza velké zásobní nádoby +
+"	0	TextRegion	0.99998140335083
+151.95228576660156	218.43739318847656	953.0306396484376	299.783447265625	rectangle	"Na rozdíl od loňské sezóny byly nezřetelné stopy po eneolitickém osídlení doloženy j
+
+jako příměs v objektu 101 a v kůlové jamce 77.
+"	1	TextRegion	0.99989652633667
+156.749755859375	1424.1719970703125	957.3597412109376	1499.0712890625	rectangle	"Nálezy slezskoplatěnických dvorců jsou nepříliš častým druhem zkoumaných lokalit,
+
+jedle řemeslně zaměřených areálů jsou známy i dvorce zemědělské, Tyto zemědělské
+"	2	TextRegion	0.9996298551559448
+146.97654724121094	395.6188049316406	955.4846801757812	609.74658203125	rectangle	"Jako nejintenzivnější a zároveň i nejvýznamější se při letošním výzkumu ukázalo osí-
+dlení v období popelnicových polí. I když y jeho starší fáze - tj. kultura lužická byla
+rozpoznána pouze v jednom z objektů, mladší stupeň - kultura slezskoplatěnická se
+mimo standartních sídlištních jam a kůlových jamek prezentovala především nálezem
+
+čáet malicádaváhoa Šlaho: vymezrrtiiefha areál camnetatné hnenadářeké tadnatky = Avar
+"	3	TextRegion	0.999172866344452
+148.36566162109375	652.1962280273438	170.31239318847656	663.7144775390625	rectangle		4	TextRegion	0.9990988969802856
+144.86117553710938	154.34544372558594	426.5933532714844	177.91964721679688	rectangle	"5.3. Eneolitické osídlení
+"	5	TextRegion	0.9807486534118652
+157.09725952148438	339.7914428710937	677.9326171875	376.0367736816406	rectangle	"5.4. Sídliště lidu s kulturou popelnicových poli
+"	6	TextRegion	0.8731513619422913

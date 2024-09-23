@@ -1,0 +1,66 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.296875	1590.8001708984375	623.9324951171875	1606.640380859375	rectangle		0	TextRegion	0.9999033212661744
+160.92605590820312	1295.0394287109375	276.0311889648437	1319.322509765625	rectangle	"Sonda S12
+"	1	TextRegion	0.9998470544815063
+162.59271240234375	1362.8583984375	1031.0025634765625	1426.078125	rectangle	"Archeologická sonda o velikosti v horní partii 4,0 x 2,6 m a vdolní partii 3,2 x 1,2
+
+ 
+
+m byla situována v jihovýchodním rohu pozemku č. 1556/1 (obr. příl. 1, 2, 3, 4). Úroveň
+"	2	TextRegion	0.9995469450950624
+169.2922821044922	399.5749816894531	1038.5076904296875	1066.494140625	rectangle	"   
+
+iaánánák A nd „She ei n ea Mu Auheánku“ Aádnáné
+ce svému dnu a obdobnou hloubkou do 0,4 m.
+
+Druhé seskupení zahloubených objektů se nalézalo vrohu severozápadním.
+Jelkem zde bylo evidováno 5 výkopů (sj. V22, 24, 27, 28, 29). Stratigraficky nejvýše
+rystupovala trojice kůlových jamek (V27, 28, 29) o průměru do 0,1 m a hloubce kolem
+),35 m, které se zahlubovaly do starších objektů V22 a V24. Stratigraficky starším než
+skupina kůlových jamek byla nepravidelně oválná jáma smírně šikmými stěnami a
+slochým dnem V22, zaplněná hnědošedou písčitou hlínou s příměsí propálené hlíny (sj.
+11-01). Tato jáma porušovala nejstarší ze skupiny objektů situovaný podél západní stěny
+sondy (sj. V24). Do prostoru zkoumaného výkopu zde zasahoval pouze svojí částí. Tvarově
+lo o složený výkop jámového tvaru s vypálenými stěnami a rovným dnem o hloubce
+colem 0,4 m, na který od jihu navazovala mělčí zahloubená část opět s rovným dnem.
+/ýplň objektu byla tvořena hnědošedou soudržnou prachovitopísčitou hlínou (sj. S11-03),
+>bsahující nahodile čočky vypálené hlíny, uhlíky a diabasové kameny o velikosti kolem 10
+až 15 cm. Na základě tvaru a charakteristického výpalu stěn lze tento objekt
+
+nterpretovat jako pec s předpecním prostorem.
+"	3	TextRegion	0.9986566305160522
+153.2064971923828	115.67572784423828	1018.36376953125	461.0553894042969	rectangle	"substrátu (sj. S11-24, povrch 196,50), do kterého se zahlubovaly dvě prostorově odlišn.
+skupiny jámových objektů (niveleta úrovně zahloubení 196,42 až 196,50).
+
+V severovýchodním rohu sondy se jednalo o superpozici nevelké kůlové jamky ©
+průměru 0,1 m a hloubky 0,4 m (sj. V25), která se zahlubovala do výplně pravděpodobní
+oválné jámy s mírně šikmými stěnami a rovným dnem (V23), vyplněné tuhou písčito:
+hlínou s drobnou antropogenní příměsí (S11-02). V těsné blízkosti ji doplňoval meně
+zahloubený výkop kůlového vzhledu (V26) s výrazně rozevřenou horní hranou, zužující s
+
+ke svému dnu a obdobnou hloubkou do 0,4 m.
+"	4	TextRegion	0.9961345195770264
+178.45867919921875	1056.2913818359375	1045.6796875	1168.4683837890625	rectangle	"P Va JEA P PEP
+Všechny výkopy se zahlubovaly do vrstvy holocenní půdy v podobě ulehlého
+
+ahliněného písku (sj. S11-24), přecházející vokrově mramorované hlinité písky
+"	5	TextRegion	0.9926533699035645
+206.26010131835935	1365.1795654296875	1034.94140625	1391.63427734375	rectangle	"Archeologická sonda o velikosti v horní partii 4,0 x 2,6 m a vdolní partii 3,2 x 1,2
+"	6	TextRegion	0.9674455523490906
+177.39781188964844	447.0910339355469	1028.6092529296875	780.4135131835938	rectangle	" 
+
+Druhé seskupení zahloubených objektů se nalézalo vrohu severozápadním.
+elkem zde bylo evidováno 5 výkopů (sj. V22, 24, 27, 28, 29). Stratigraficky nejvýše
+vstupovala trojice kůlových jamek (V27, 28, 29) o průměru do 0,1 m a hloubce kolem
+35 m, které se zahlubovaly do starších objektů V22 a V24. Stratigraficky starším než
+cupina kůlových jamek byla nepravidelně oválná jáma s mírně šikmými stěnami a
+lochým dnem V22, zaplněná hnědošedou písčitou hlínou s příměsí propálené hlíny (sj.
+
+11-01). Tato jáma porušovala nejstarší ze skupiny objektů situovaný podél západní stěny
+
+     
+
+M
+
+   
+"	7	TextRegion	0.8998091220855713

@@ -1,0 +1,43 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+272.99371337890625	1511.62744140625	1155.7957763671875	1534.7269287109375	rectangle	"Románská rotunda sv.Martina,jediná stavební památka,zachovamá
+"	0	TextRegion	0.9972432851791382
+139.04747009277344	683.6119995117188	1158.0692138671875	1094.7322998046875	rectangle	"Jodi.Jednotlivé podélné lodé jsou na východní straně zakončeny kruho-
+vitou apsidou,z nichž hlavní,obě postranní přečnívající,zabíhá pod
+zeů sousední zahrady,Severní boční loč je zachována v sousední budo-
+vě čp.l4.,do jejíž stavby byla pojata a kde lze sledovati její zdivo
+až do I.patra.Obě boční lodě byly klenuté,patrně klenutými pásy,
+podpírajícími plochý strop a od hlavní lodi oddělené čtyřbokými pilí-
+ři.V hlavní lodi byl plochý dřevěný strop,Vnitřní stěny byly omítnu-
+ty a zdobeny malbou Vnější strana ukazuje členění stěn stavby lisena-
+mi,vyrůstajícími z jednoduchých trnožů,
+
+Původní podlaha z dusaného jílu byla později pokryta román-
+skými dlaždicemi,z nichž některé byly černě polévány. Dlaždice jsou
+čtvercové „zdobené propletenou páskou a šestihranné s reliefními z00-
+morfními obrazci Některé z dlaždic jsou zdobeny poprsím lidské po-
+doby s korunou na hlavě,s obráceně vytlačeným nápisem ""Nero"",
+
+Basilika byla na svou dobu značně rozměrná,neboť délka hlavní
+lodi i s apsidou měří 20,64mjí,bočních lodí 17m,šířka 11.70m a příční
+loč 13.80m,tlouštka zdí 0,95m.Basilika byla částečně odkryta již
+v r.1003.
+"	1	TextRegion	0.9354010224342346
+147.42173767089844	572.54833984375	1172.189208984375	913.8109130859376	rectangle	"R ep SSS 27 VSS OA 4 S00 SLLO05 EU
+potřebu vyšehradské farnosti a je patrně totožný s někdejším kostelem
+sv.Vavřince a Klimenta,Jeho pozůstatky odkryty v zahradě domu čp.l4,
+v Soběslavově ulici,v t.zv.starém děkanství,
+
+Kostel byl stavěn jako trojlodní basilika s jednou příční
+lodí.Jednotlivé podélné lodě jsou na východní straně zakončeny kruho-
+vitou apsidou,z nichž hlavní,obě postranní přečnívající,zabíhá pod
+zeů sousední zahrady,Severní boční loč je zachována v sousední budo-
+vě čp.l4,,do jejíž stavby byla pojata a kde lze sledovati její zdivo
+až do I.patra.Obě boční lodě byly klenuté,patrně klenutými pásy,
+
+odpírajícími plochý strop a od hlavní lodi oddělené čtyřbokými pilí-
+ři.V hlavní lodi byl plochý dřevěný strop,Vnitřní stěny byly omítnu-
+ty a zdobeny malbou Vnější strana ukazuje členění stěn stavby lisena-
+mi,vyrůstajícími z jednoduchých trnožů,
+
+Původní podlaha z dusaného jílu byla později pokryta román-
+"	2	TextRegion	0.8278784155845642

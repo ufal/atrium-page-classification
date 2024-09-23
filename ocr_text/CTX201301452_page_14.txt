@@ -1,0 +1,48 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+146.6099395751953	1129.9967041015625	1036.2813720703125	1438.6134033203125	rectangle	"Původní sicburgovská tapetárna se po roce 1880 proměnila na továrnu na nábytek
+kartounka v roce 1872 na přádelnu. Od 80. let 19. století vypukl stavební boom v souvislost
+s hospodářským rozmachem. 1889 byla vybudována v Papírenské ulici bavlnová přádeln:
+s dělnickými domy, tamže 1893 továrna na laky Garantol a bělidlo Mořice Hoeniga, 188:
+vulici Ve Struhách továrna na umělá hnojiva, v Korunovační č. 6 Houdkova továrna n:
+fysikální stroje. Prudce se rozrostla i zástavba. V roce 1900 se na bubenečském katastr
+
+nacházelo 189 domů s5538 obyvateli . To vše nakonec vyústil
+
+u nonvýšaní Diihanía na měectn nícařaem ErantHičbam Incafam T 26 Zima 1004 a bnnaňšně tah.
+"	0	TextRegion	0.9998331069946288
+136.61611938476562	139.50616455078125	1031.4832763671875	706.212890625	rectangle	"Císařský mlýn spadaly pod jurisdikci pražského hradu. Ke kostelu patřila fara, byla tu i škol:
+Dále se tu nacházel vrchnostenský hospodářský dvůr (to byl onen první díl Středního Ovence
+a hostinec. Na východ od centra osady ležel emfyteutický rustikální dvůr a letohrádek s
+zahradou. Bubeneč je líčen jako již řadu let oblíbené výletní místo obyvatel Prahy, z nich
+někteří tu mají i své venkovské domy, někteří si je pronajímají. Královská obora, která ovšet
+v té době již byla anglickým parkem, za což se zasloužili poslední čtyři nejvyšší purkrabí, j
+popisována jako veřejný park se třemi vchody, s rybníčkem, letohrádkem, restaurac
+s tanečním sálem (bývalý lovecký zámeček Kryštofa Vratislava z Mitrovic z konce 17. stolet
+přestavěný 1791 na výletní restauraci), okrasnou zahradou se skleníkem atd. Činí se i zmínk
+o hostinci Na Slamníku a s ním spojenými tradičními slavnostmi. Císařský mlýn, toho čas
+v soukromých rukách emfyteutickým pronájmem, je vylíčen jako industriální centrum s pilot
+Taussigovou kartounkou a papírnou Schallowetz und Wilde
+
+Před koncem patrimoniálního období zasáhly do podoby Bubenče ještě dva významn
+
+momenty: zahájení výstavby železnice do Drážďan vroce 1846 (dokončeno 1850)
+"	1	TextRegion	0.9989792108535768
+496.3160095214844	1591.8258056640625	697.8784790039062	1609.3565673828125	rectangle	"2.5. Historie naleziště
+"	2	TextRegion	0.9987630844116212
+147.62741088867188	746.2811279296875	1047.6214599609375	1084.3958740234375	rectangle	"     
+
+Císařském mlýně a v roce 1851 se dočkala vlastní továrny (čp. 60).
+
+Obdobné aktivity pak pokračovaly i po revolučním roce 1848. Nadále fungovala stará
+papírna bratří Šalovců, kterou zakoupila rodina Bellmanů a po požáru vr. 1862 ji znovu
+vystavěla. Vyráběl se tu cigaretový a hedvábný papír, poprvé v Rakousku. V Císařském
+mlýně působila pod vedením bratří Sieburgů továrna na ruční potisk tapet a kartounů.
+Bubeneč se tak stával významným průmyslovým centrem, což se projevilo i v nárůstu
+obyvatel: v roce 1850 tu žilo již 877 osob. S rozmachem Bubenče souviselo i zřízení místní
+
+železniční stanice a poštovního úřadu, další železnice včetně tunelu v Královské oboře (1868)
+"	3	TextRegion	0.9969865679740906
+144.94033813476562	1099.7041015625	314.2405700683594	1118.4068603515625	rectangle	"(Tryml 2004, 55).
+"	4	TextRegion	0.9887580871582032
+194.8921813964844	1420.8734130859375	1035.3634033203125	1467.2374267578125	rectangle	"rýšení Bubenče na město císařem Františkem Josefem I. 26. října 1904 a konečně jeh.
+"	5	TextRegion	0.9652844071388244

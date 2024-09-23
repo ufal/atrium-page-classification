@@ -1,0 +1,37 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+157.97532653808594	1447.882568359375	974.8887939453124	1605.960693359375	rectangle	"Sonda 2a - 2d (1974). V popředí sonda 2a+2b ve 3.fázi v
+vlevo vzadu sonda 2c ve 2.fázi, vpravo vzadu sonda 2d v
+Uprostřed část jižní podezdívky pravděpodobného kněžské
+vpředu destrukční suti domu na okraji vnitřního příkopu
+sokl s destrukcí vnitřní hradební zdi. Pohled od JJV.
+Foto: M.Šimana - J. Morávek,
+"	2	TextRegion	0.9987963438034058
+1078.4722900390625	30.972206115722656	1109.8896484375	48.620697021484375	rectangle		3	TextRegion	0.9980079531669616
+1008.0361938476562	1328.63037109375	1037.858642578125	1348.7353515625	rectangle	"53
+"	4	TextRegion	0.9958934783935548
+146.07945251464844	644.3056640625	1003.976806640625	751.9419555664062	rectangle	"Sonda 2a - 2b (1974) ve 3.fázi výzkumu. Sondou probíhá od
+základ jižní podezdívky pravděpodobného kněžského domu z
+letí. PR
+
+avo o- vnitřního příkopu. Pohled od Z.
+Foto: imana - J.Morávek,
+"	5	TextRegion	0.995522141456604
+1005.494140625	30.519773483276367	1107.7178955078125	49.91504287719727	rectangle	"Tab. 27
+"	6	TextRegion	0.9926839470863342
+176.24371337890625	650.4262084960938	489.0819091796875	746.4956665039062	rectangle	"šonda 2a - 2b (1974) v
+základ jižní podezdívk
+letí. VPgSvo =- vni
+Foto: imana - J.Mor
+"	7	TextRegion	0.9780718088150024
+965.0367431640624	519.7301025390625	1066.4635009765625	566.5869140625	rectangle	"č. neg.
+81 258
+"	8	TextRegion	0.9667595028877258
+437.9573974609375	647.7157592773438	1120.9132080078125	733.1007080078125	rectangle	"4) ve 3.fázi výzkumu. Sondou probíhá od Zk V
+dívky pravděpodobného kněžského domu z 10.sto-
+
+vnitřního příkopu. Pohled od Z.
+ Mandeab
+"	10	TextRegion	0.9439882636070251
+979.27978515625	1370.4447021484375	1067.0550537109375	1424.70263671875	rectangle	"č.neg.
+81 259
+"	11	TextRegion	0.8113755583763123

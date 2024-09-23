@@ -1,0 +1,99 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+140.86131286621094	689.6326293945312	1116.8172607421875	1246.8397216796875	rectangle	"všech částech sondy 2, zkoumaných v r. 1974, tj. v sondách 2a - 2d.
+3yla nestejně mocná. Nejsilnější byla ve vnitřním příkopě opevnění,
+tj. v JZ částech sond 2a - 2c, kde dosáhla síly až 60 cm, Nejslabší
+oyla na SV konci výkopu roku 1974, tj. v sondě 2d, zejména na SV
+«onci sondy 2d, kde síla vrstvy 3 obnášela cca 20 cm. Pracovní ozna
+čení vrstvy 3 v terénu během výzkumu 1974 bylo následující: ""slavní
+«ovská“ (domnívala jsem se tehdy, že pochází z 2. poloviny 10. stol
+""hnědá slavníkovská“, ""slavníkovská hnědošedá“, ""hnědá slavníkovská
+oerníková“ (""kuchyňským "" výrazem ""perníková“ jsem vyjadřovala
+jemnost a měkkost až drobivost vrstvy 3); srv. výše citované záznam
+z terénu k příslušným nálezovým situacím (= sáčkům). Stejně jako
+
+vstva 2 měla i vrstva 3 své varianty, které obsahuje seznam vrstev
+"	0	TextRegion	0.9999668598175048
+290.90338134765625	125.6875991821289	1127.7152099609375	549.02099609375	rectangle	"""Sonda 2b, větší (severní) z obou spálených dřev při
+sv. stěně sondy, severně od zdi Z-V a západně od ka-
+nálku. 21.8. Viz fotoplán 3. fáze sondy 2b.""
+
+""Sonda 2b, menší (jižní) z obou spálených dřev při sv.
+stěně sondy, severně od zdi Z-V a západně od kanálku,
+21.8. Viz fotoplán 3. fáze sondy 2b.""
+
+""Sonda 2c, čištění vých. úseku svahu prohlubně při jZ.
+stěně sondy, a to v souvislosti s čištěním povrchu za-
+chované části destrukční ssuti vně budovy (tj. jižně
+
+od zdi Z-V), při jv. stěně sondy 2c. 21.8,""
+
+""Sonda 2c, nad jamkou s kameny při vých. obvodu plochy
+červenohnědé maz, v prohlubní při jz. stěně sondy (foce-
+no na bar, diapositiv). 20.8.""
+
+""Sonda 2c, jamka s kameny při východním obvodu plochy
+červenohnědé mazanice v orohlubni nři jz. stěně sondy.
+"	1	TextRegion	0.9999505281448364
+150.4792938232422	427.0341796875	296.1734924316406	449.8683471679688	rectangle	"2) 164/74:
+"	2	TextRegion	0.9994969367980956
+151.13966369628906	510.2283630371094	296.9829406738281	534.236083984375	rectangle	"3) 166/74:
+"	3	TextRegion	0.9973612427711488
+576.875732421875	59.34514617919922	609.1572875976562	75.35578155517578	rectangle		4	TextRegion	0.9968230724334716
+110.65078735351562	1187.635009765625	1125.47314453125	1570.48974609375	rectangle	"z terénu k příslušným nálezovým situacím (= sáčkům), Stejně jako
+vstva 2 měla i vrstva 3 své varianty, které obsahuje seznam vrstev
+Pud Připoj £ plán z a ake Va BO koměná 6 Ráno mé Aj Wz3, 0 )3 Peklo sem
+Při snímání vrstvy 3 se v této vrstvě objevovala torza sídlišt-
+ních objektů:ohniště, základ opukové zdi a opukové destrukce, vespoc
+místy naplavená vrstva, Tato sídlištní situace, kterou vzápětí po-
+
+píši, se nalézala spolu s vrstvou 3 jak v SZ sousedství vnitřního
+
+příkopu opevnění (zbytky pravděpodobného kněžského domu, některá
+
+Ahmnážeží  sab « mědbmní fmabatmá Alamž taš | Sa 2 0 a 0
+
+ 
+"	5	TextRegion	0.995152235031128
+90.0063705444336	526.142333984375	1173.5992431640625	1552.056884765625	rectangle	"E NSU S UMUSKMM MŽ MOMUMGNSSSY S POE PS 2 Pty
+červenohnědé mazanice v prohlubni při jz. stěně sondy.
+21.8.""
+
+Velmi kvalitní kulturní vrstva 3 z 10. století se nalézala ve
+všech částech sondy 2, zkoumaných v r. 1974, tj. v sondách 2a - 2d.
+Byla nestejně mocná. Nejsilnější byla ve vnitřním příkopě opevnění,
+tj. v JZ částech sond 2a - 2c, kde dosáhla síly až 60 cm, Nejslabší
+byla na SV konci výkopu roku 1974, tj. v sondě 2d, zejména na SV
+konci sondy 2d, kde síla vrstvy 3 obnášela cca 20 cm. Pracovní ozna-
+čení vrstvy 3 v terénu během výzkumu 1974 bylo následující: ""alavní-
+kovská“ (domnívala jsem se tehdy, že pochází z 2. poloviny LO. stol.),
+""hnědá slavníkovská“, ""slavníkovská hnědošedá“, ""hnědá slavníkovská
+perníková“ (""kuchyňským "" výrazem ""perníková“ jsem vyjadřovala
+jemnost a měkkost až drobivost vrstvy 3); srv. výše citované záznamy
+z terénu k příslušným nálezovým situacím (= sáčkům), Stejně jako
+vstva 2 měla i vrstva 3 své varianty, které obsahuje seznam vrstev
+Pud Připoj £ plán vz a ke Va GBP koměná © Fáin mně Ač z3, 0) 3 Tele sedmá
+
+Při snímání vrstvy 3 se v této vrstvě objevovala torza sídlišt-
+ních objektů:ohniště, základ opukové zdi a opukové destrukce, vespod
+místy naplavená vrstva, Tato sídlištní situace, kterou vzápětí po-
+píši, se nalézala spolu s vrstvou 3 jak v SZ sousedství vnitřního
+
+příkopu opevnění (zbytky pravděpodobného kněžského domu, některá
+"	6	TextRegion	0.9933590292930604
+152.2021026611328	319.79302978515625	299.1546325683594	343.2613830566406	rectangle	"1) 162/74:
+"	7	TextRegion	0.9876717329025269
+132.8411407470703	426.9005432128906	170.23631286621094	446.2942199707031	rectangle	"62)
+"	8	TextRegion	0.9693891406059264
+132.45851135253906	510.5365295410156	170.2474365234375	529.8407592773438	rectangle	"63)
+"	9	TextRegion	0.9370883703231812
+133.59642028808594	320.2078857421875	171.1675567626953	339.3775329589844	rectangle		10	TextRegion	0.9326240420341492
+153.4232177734375	235.68394470214844	298.17822265625	260.0948791503906	rectangle	"0) 157/74:
+"	11	TextRegion	0.9281584620475768
+347.8175048828125	504.8867492675781	1099.3831787109375	563.3544921875	rectangle	"onda 2c, jamka s kameny při východním obvodu plochy
+rvenohnědé mazanice v prohlubni při jz. stěně sondy.
+
+=
+"	12	TextRegion	0.919992744922638
+572.7025146484375	61.114383697509766	632.5992431640625	74.39253234863281	rectangle	"33
+"	13	TextRegion	0.9161408543586732
+554.3319702148438	62.282958984375	613.2747802734375	74.46943664550781	rectangle		14	TextRegion	0.8144429326057434

@@ -1,0 +1,22 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+174.97152709960938	423.7702331542969	1044.1883544921875	563.6580810546875	rectangle	"Podchycené objekty (mimo obj.3) lze podle nečetného keramického materiálu datovat do
+století a představují jádro staré vsi, které se rozprostíralo kolem vodního pramene (rybník
+vodoteče (Čertovka) a kostela, Zprávy o současném kostele sv. Václava (mimochodem
+stavebně úplně stejného jako kostel v Opatovicích n.L.) pocházejí až z 14 stol., ale četné
+nálezy z intravilánu a především z okolí jasně ukazují, že obec byla založena již dříve.
+"	0	TextRegion	0.9998579025268556
+184.6702423095703	675.7718505859375	427.8807678222656	699.5918579101562	rectangle	"V Pardubicích, 29.1.2013.
+"	1	TextRegion	0.999440610408783
+179.14625549316406	142.12074279785156	366.3211059570313	167.6632843017578	rectangle	"Nálezy ze sběru:
+"	2	TextRegion	0.9986883997917176
+238.8533172607422	207.6443634033203	1033.4615478515625	273.9219055175781	rectangle	"Střep ze spodku a dna lištovitě nepravidelně zdůrazněného, drsného šedého povrc
+Vyrobeno na kruhu a tvrdě vypáleno.14.stol.
+Rozm G0x 54 mm
+"	3	TextRegion	0.9921475052833556
+182.1550445556641	840.4485473632812	347.8784484863281	865.0921020507812	rectangle	"Petra Žaloudková
+"	4	TextRegion	0.9877856969833374
+233.00473022460935	288.4917907714844	1071.7393798828125	332.0187683105469	rectangle	"4 střepy ze spodku a dna, drsného šedivě hnědého povrchu, vnitřek hnědočerný, dno
+neznatelné.
+"	5	TextRegion	0.9831099510192872
+231.01129150390625	371.5025939941406	712.6339721679688	398.0260620117188	rectangle	". 3 střepy ze stěn, drsného hnědošedého povrchu.
+"	6	TextRegion	0.955674648284912

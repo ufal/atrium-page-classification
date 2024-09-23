@@ -1,0 +1,48 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.149169921875	1591.360595703125	623.5909423828125	1606.9215087890625	rectangle		0	TextRegion	0.9999876022338868
+159.9944305419922	816.6694946289062	278.8377990722656	841.4876098632812	rectangle	"Sonda S10
+"	1	TextRegion	0.999941349029541
+158.30026245117188	890.2542724609375	1024.3851318359375	1101.6551513671875	rectangle	"Archeologická sonda o velikosti v horní partii 4,0 x 2,6 m a vdolní partii 2,8 x 1,0
+m byla situována na západní straně pozemku č. 1556/3, v místech interiéru asanovanéhc
+domu (obr. příl. 1, 2, 3, 4). Úroveň povrchu sondy se nalézala na niveletě 199,18 m n. m.,
+
+Souhrnně byl v této sondě dokumentován 1 řez (S10-RJ).
+"	2	TextRegion	0.9998425245285034
+164.8719024658203	312.6811218261719	1022.9656982421876	604.9428100585938	rectangle	"iu Se eh
+
+ 
+
+Stavební sutě ve spodní partii překrývaly situaci superpozice dvojice objektů V02
+a V03. Stratigraficky mladším byla kůlová jamka (sj. V02, S09-07), která se zahlubovala dc
+výplně rozměrově blíže neurčitelného výkopu se zvlněným dnem (sj. V03). Rozměrny
+výkop se zahluboval již do podložního písčitého sedimentu (sj. S09-09). Jeho výplň tvořil:
+dvojice vrstev, z nichž výše uložená písčitá hlíny obsahovala drobné kousky cihlovky, č
+
+vypálené hlíny a nehojně uhlíky (sj. S09-06), spodní pak jen ojedinělé drobné uhlíky (sj
+
+ 
+"	3	TextRegion	0.9997596144676208
+160.9572296142578	1098.6864013671875	1025.7060546875	1402.3258056640625	rectangle	"Svrchní partii historického nadloží v místě sondy tvořil zahradní substrát (sj. S10-
+01), překrývající polohu písčité hlíny s příměsí zlomků cihel a malty (sj. S10-02).
+
+Recentní souvrství překrývalo torzo liniové zděné konstrukce, probíhající napříč
+sondou vose S-J (sj. 203, V17, niveleta koruny 198,64). Smíšené zdivo z cihel a opuky
+spojované chudou maltou se zahlubovalo do polohy písčité hlíny s podílem kamenitých
+komponent (břidlicová drť, sj. S10-03). Jeho základová spára nasedala na niveletě 198,30
+
+na souvrství novodobého stavebního (sj. S10-04 a S10-06) a komunálního odpadu (sj.
+"	4	TextRegion	0.9992795586586
+158.98025512695312	1414.7598876953125	232.7017059326172	1432.09130859375	rectangle	"S10-05).
+"	5	TextRegion	0.9991727471351624
+189.6865692138672	117.85508728027344	1022.7596435546876	200.45079040527344	rectangle	"Stávající povrch zde tvořila místy až 0,6 m silná vrstva štěrku a rozemletéhc
+
+altu (sj. S09-02), které v okrajové části překrývala humózní hlína zahradního substrátu
+"	6	TextRegion	0.9988890290260316
+195.1724090576172	245.46263122558597	1021.2117309570312	313.5783386230469	rectangle	"Recentní souvrství překrývalo opět výrazně heterogenní polohu stavebních sutí c
+
+cnosti až 2,9 m (sj. S09-03 až S09-05, báze 196,5).
+"	7	TextRegion	0.9980497360229492
+209.1558532714844	643.5758666992188	1028.3465576171875	682.4578857421875	rectangle	"Výkopem porušené podloží zde tvořil narezle okrový silně zahliněný písek (sj. S09-
+"	8	TextRegion	0.9966651797294616
+256.7571716308594	248.08094787597656	1007.6310424804688	279.4733581542969	rectangle	"centní souvrství překrývalo opět výrazně heterogenní polohu stavebních sutí
+"	9	TextRegion	0.8313736319541931

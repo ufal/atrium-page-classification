@@ -1,0 +1,18 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+43.44768142700195	299.3433837890625	1160.9415283203125	640.2241821289062	rectangle	"ej mene L Přola Rub, Sg ndelnl zobe B
+: Z es a 00 rodu 2-6 ceu 4
+ne CL Meolaolé: J del , lo pol? ko a větev ly
+P R tel s olea „dat prala le: sedne ee
+"" ldsea zna Lze Old 3 oalřím Pee
+7 rálzne“ Alona odkám PO m. bo lh 1 bř by
+sP jež P shkoný 4 rem jo a i
+
+e.1 305 7 lem.
+"	0	TextRegion	0.9999216794967652
+90.71310424804688	1576.8238525390625	424.5733642578125	1602.147705078125	rectangle	" 
+   
+
+Bericht E. n Orisakten
+
+C“
+"	1	TextRegion	0.99892395734787

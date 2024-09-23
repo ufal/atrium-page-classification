@@ -1,0 +1,33 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+13.67189884185791	633.7549438476562	1115.9786376953125	1094.4310302734375	rectangle	"kud mi okr.dsvět. inspektor z Horšovského Týna předal nálezy»keramiky.
+Osada Ostrov dříve Bezvěrov náležející ka t. obci Mutěnín je pohraničn
+osada za Poběžovicemi. Při kopání základů pro stavbu stájí st.statku s
+našlo větší množství keramiky středovšké. Byla nalezena na dvou místec
+vždy nehluboko, asi 40 om pod dnešním povrchem a asi pod 20 cm silnoů
+vestvou ornice. Místa s keramikou byly patrně jámy, jejichž části se r
+sovaly v průkopech pro základy a byly stejně tmavě zbarveny jako vrehnn
+ornice. Kromě keramiky obsahovaly i velké množství větších kusů kamenů
+
+a to pískovců a slepenců. Na jednom místě byly i větší kusy spáleného
+
+Ařara.
+"	0	TextRegion	0.9999535083770752
+42.04772186279297	374.0305786132813	120.47817993164062	384.9767456054688	rectangle	"Literatura
+"	1	TextRegion	0.9996708631515504
+20.42970085144043	1128.0120849609375	1176.244873046875	1458.3997802734375	rectangle	"Větší zlomky keramiky jsou světlé barvy, místyjje povrch začernajý,
+a hlína má velkou příměs slídy. Některé zlomky z okrajů jsou silně pro-
+filované. Několik zlomků ze stěn pochází z jedné nádoby, od níž se našla
+i část dna, které mí zachovanou hrnčířskou značku ve tvaru kolečka se
+čtyřmi paprsky« Podle lask. určení Dr Hejny mohou se klást zlomky z té-
+to nádoby do 13.stol. Zlomky s profilovanými okraji do 19. až L6.stol.
+
+Z oblasti osady Ostrov u Mutěnína nebyly dosud podobné nálezy zaznamenány.
+"	2	TextRegion	0.999497413635254
+44.90821075439453	255.4296112060547	157.72218322753906	269.2652893066406	rectangle	"ČÍSLO MAPY
+"	3	TextRegion	0.9994165897369384
+90.23086547851562	1086.9979248046875	171.58462524414062	1106.0411376953125	rectangle	"dřeva.
+"	5	TextRegion	0.9969931840896606
+38.15019989013672	36.774261474609375	88.56562042236328	50.67086410522461	rectangle	"OBEC
+"	6	TextRegion	0.995267391204834
+39.10415649414063	140.49566650390625	199.0658416748047	155.87905883789062	rectangle	"ČÍSLO PARCELY
+"	7	TextRegion	0.991741180419922

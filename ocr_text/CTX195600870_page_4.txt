@@ -1,0 +1,68 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+71.65690612792969	925.6998291015624	1110.282470703125	1090.437744140625	rectangle	"Zájem širší veřejnosti značně vzbuzen pořádáním prohlídek
+výzkumu Vyšehradu s odborným výkladem členů komise a v posledních
+létech výzkumu zejména otevřením musea vyšehradských vykopávek
+v budově nad Libušinou lázní a lapidaria v kostelíku sv.Jana Stětí,
+románské basiliky i ostatních,výzkumem odkrytých památek,
+
+Každoročně pozváni též kprohlídkám výzkumu zástupci intereso-
+
+PRSY 70 odypár V* 0 Vypsat ne Pos"" kA oaupé pa o iýkkh E ina n E D> px raut zevní
+
+ 
+"	0	TextRegion	0.9964093565940856
+386.6401062011719	121.80751037597656	723.0076293945312	367.0863342285156	rectangle	"      
+
+-A E o...
+
+1829.........
+1950,.......
+1951...
+1952...
+1955...
+
+ 
+
+ 
+
+ 
+
+1956...
+1957...
+1938...
+
+... ....... .....
+
+L
+"	1	TextRegion	0.9904925227165222
+168.971923828125	1408.8790283203125	1157.1641845703125	1579.2303466796875	rectangle	"k O MBAPISSTS PPV E MY 00- SE U SAY
+nichž dlužno zejména jmenovati::
+Konservace a oprava zdiva t.zv.Libušiny lázně,
+Konservace a vnitřní opravy v kapli sv.Martina /též odstranění
+Jízdy těžkými povozy,zavedení jednosměrné jízdy Vyšehradem a
+zřízení od kaple odisolované tiché asfaltové vozovky /
+Zřízení betonového krytu nad románskou basilikou u čp.l4,
+Konservace zdiva a betonový kryt nad románským mostem pod Štul-
+"	2	TextRegion	0.9686346054077148
+102.75533294677734	380.8111877441406	1094.440185546875	619.4804077148438	rectangle	"Na r.1924.první rok výzkumu, opatřeny prostředky finanční
+jednak subvencemi »poskytnutými Ministerstvem školství a nár.osvěty
+v částce 35, 000.--Kč a Ministerstvem veřejných prací v částce
+10,000,--Kč, jednak podporami ,získanými péčí Komise pro výzkum
+Vyšehradu v částce 79,188,05 Kč,poskytnutýmix Presidentem repu-
+bliky 25.000,--Kč, obcí Pražskou 25.000,--Kč,Historickou sekcí
+Archeologické komise při České akademii 1. 000.-—-Kč, Živnostenskou
+bankou 20,000,--Kč.Na vstupném při prohlídkách výzkumu vybráno
+6.449,--Kč,při propagačních přednáškách 1.362.60 Kč,
+
+v dalších Tétesh. a da. r. Aeka-nohkomá nanikoaky na $ískám
+"	3	TextRegion	0.9632604122161864
+133.07601928710938	695.0469970703125	1073.0966796875	918.9630126953124	rectangle	"K propagaci výzkumu Vyšehradu uspořádala Komise pro výzkum
+Vyšehradu cyklus přednášek se světelnými obrazy v přednáškové sín
+přírodovědeckého ústavu university na Albertově s tímto pořadem:
+26.listěpadu 1994 Msg.E,Šittler: Historický vývěj Vyšehradu.
+3.prosince 1924; Msg.E.Šittler: Staré vyobrazení Vyšehradu a jeho
+do dnes zachované památky,
+1U.prosince 1924 K.Buchtela: Česká hradiště a jejich kultura,
+17.prosince 1924 Dr.K,Guth: Výkopy na Vyšehradě r.1924,
+2l.prosince 1924 Dr.Z.Wirth: Pevnost Vyšehrad.
+"	4	TextRegion	0.9127116799354552

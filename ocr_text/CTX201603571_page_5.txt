@@ -1,0 +1,49 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+136.3834228515625	116.80021667480467	1082.138671875	232.0708770751953	rectangle	"Archeologické terénní práce proběhly v termínu od 10. 8. do 24. 8. 2015. Zpracování a
+vyhodnocení této etapy výzkumu následovalo bezprostředně po ukončení terénní části akce
+
+v průběhu srpna a září 2015 a bylo zakončeno předáním nálezové zprávy o výsledcích ZJAV
+"	0	TextRegion	0.999903917312622
+185.09228515625	1241.2115478515625	1081.031494140625	1315.9403076171875	rectangle	"Výstupy z databáze nálezových kontextů, pomocné grafické práce a tiskové výstupy pro
+NZ: Mgr. Stanislava Babušková, Egon Dimar (Ivana Urbánková), Bc. František Flek (NPÚ
+URADI
+"	1	TextRegion	0.9998977184295654
+183.4464111328125	1454.360595703125	885.1728515625	1478.0194091796875	rectangle	"Fotodokumentace vybraných nálezů: Egon Ditmar (Ivana Urbánková)
+"	2	TextRegion	0.999516487121582
+180.4615478515625	1365.0096435546875	1072.9256591796875	1392.38232421875	rectangle	"» Laboratorní ošetření nálezů a jejich evidence: Dana Samoelová, Eva Bláhová (Ivana
+"	3	TextRegion	0.9994363188743592
+124.7811279296875	468.5748596191406	1060.6484375	608.1837768554688	rectangle	"Archeologický výzkum byl proveden pracovníky odboru archeologie NPU HIVÍP ve
+spolupráci sfirmou Osina Archeo s.r.o., která zajišťuje technický servis terénní fáze
+archeologických výzkumů NPÚ HMP a firmou Ivana Urbánková, která má na starosti závěrečné
+
+zpracování a vyhodnocení výsledků.
+"	4	TextRegion	0.9993939399719238
+1059.2562255859375	1537.1260986328125	1069.8682861328125	1552.6829833984375	rectangle		5	TextRegion	0.9989181756973268
+327.811767578125	978.9801635742188	1066.3115234375	1004.4856567382812	rectangle	"ntace a fotogrammetrie: Egon Ditmar (Osina Archeo), Jaroslav Podliska
+"	6	TextRegion	0.998666286468506
+187.9182586669922	820.6834716796875	1068.0224609375	878.4589233398438	rectangle	"Terénní, dokumentační a pomocné geodetické práce: Egon Ditmar — zkratka E. D., Jiří
+Švach (Osina Archeo)
+"	7	TextRegion	0.99840646982193
+172.61282348632812	677.6814575195312	1095.744140625	721.7684326171875	rectangle	"e Vedoucí výzkumu a autor nálezové zprávy: PhDr. Jaroslav Podliska, Ph.D. (NPÚ HMP) —
+»kroten | D
+"	8	TextRegion	0.9984057545661926
+190.30743408203125	978.1293334960938	1117.9228515625	1023.5775146484376	rectangle	"Fotodokumentace a fotogrammetrie: Egon Ditmar (Osina Archeo), Jaroslav Podliska
+(NPÚ HMP)
+"	9	TextRegion	0.995556890964508
+126.67035675048828	361.6002807617188	480.42333984375	391.01458740234375	rectangle	"1.3. Složení výzkumného týmu
+"	10	TextRegion	0.9955223798751832
+171.2399444580078	1121.2806396484375	952.4539184570312	1186.54833984375	rectangle	"e Digitalizace terénní a plánové dokumentace: Egon Ditmar (Ivana Urbánková)
+"	11	TextRegion	0.9949539303779602
+212.50387573242188	1186.17822265625	749.8936157226562	1216.6827392578125	rectangle	"Jložení dat do databáze AV: Jiří Švach (Ivana Urbánková)
+"	12	TextRegion	0.989894688129425
+305.5655822753906	679.9495239257812	1059.14697265625	704.5219116210938	rectangle	"ýzkumu a autor nálezové zprávy: PhDr. Jaroslav Podliska, Ph.D. (NPÚ HMP) -
+"	13	TextRegion	0.983856201171875
+188.9359588623047	1063.9359130859375	885.765380859375	1105.2462158203125	rectangle	"Technická zpráva o zaměření výzkumu: Egon Ditmar (Ivana Urbánková,
+"	14	TextRegion	0.981650173664093
+192.32180786132807	764.627685546875	920.24658203125	831.4661865234375	rectangle	"Příprava rozpočtu pro ZAV: PhDr. Jaroslav Podliska, Ph.D. (NPÚ HMP)
+"	15	TextRegion	0.973159909248352
+154.9947052001953	1362.336181640625	1064.98583984375	1415.84130859375	rectangle	"« Laboratorní ošetření nálezů a jejich evidence: Dana Samoelová, Eva Bláhová (Ivana
+Urbánková)
+"	16	TextRegion	0.9607580304145812
+186.06857299804688	917.6512451171876	650.244873046875	949.5870361328124	rectangle	"Geodetické práce: Jakub Hlavatý (Osina Archec
+"	17	TextRegion	0.9328576922416688

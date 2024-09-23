@@ -1,0 +1,44 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+145.02926635742188	837.3386840820312	271.8730163574219	856.8709716796875	rectangle	"6. Literatura
+"	0	TextRegion	0.999946355819702
+122.10843658447266	613.1090698242188	1066.63525390625	708.5100708007812	rectangle	"Zjištění záchranného archeologického výzkumu dokladují, že zejména v areálu zámku
+a v jeho okolí lze při jakýchkoliv terénních zásazích očekávat četné archeologicky pozitivní
+
+situace. Z tohoto důvodu je provádění všech terénních prací nutné realizovat v součinnosti
+o arohanlnoichren Tyra ryb
+"	1	TextRegion	0.9999016523361206
+141.78025817871094	974.3018798828124	1062.030517578125	1025.0941162109375	rectangle	"Burešová M. — Kočár P. 2000: Chanovice - areál zámku, Nálezová zpráva o
+záchranném archeologickém výzkumu při stavbě kanalizace. (Archiv ZIP o.p.s. čj. P282/00).
+"	2	TextRegion	0.9998505115509032
+130.79510498046875	283.947509765625	1049.391845703125	608.4667358398438	rectangle	"společností Archaia Příchovic rešová — Kočár 2000).
+
+Zachycení zdiva v jižní části situace 3 představuje významné zjištění pro osvětlení
+fortifikace staršího sídla. Ze stratigrafické situace lze toto zdivo z lomového kamene o šířce
+cca 60 cm, které je z vnější strany zahloubeno do podloží, považovat za vyzdění obraného
+příkopu, který byl odkryvem zjištěn na východní straně a geofyzikálním měřením i na
+severovýchodní části zámku, zde byl příkop později dokumentován v rámci záchranného
+archeologického výzkumu společnosti Archaia Příchovice (Burešová — Kočár 2000).
+Z celkového pohledu na situaci 3 lze konstatovat, že příkop v zachycené horní partii byl
+zavážen jednorázově (vrstvy 0307, 0305, 0306, nejistý je způsob vzniku jen částečně odkryté
+vrstvy 0311). Vrstva 0304 poté zcela překrývá a minimalizuje stopy po příkopu a jeho
+vyzdění (0313). Výše uložené vrstvy jsou pak důsledkem postupného zvyšování terénu
+v pozdním novověku.
+
+ 
+
+ 
+"	3	TextRegion	0.999568521976471
+156.17872619628906	889.9559936523438	1064.615478515625	940.4429931640624	rectangle	"Anderle J. — Ebel M. 1996: Chanovice — zámek, Stavebně historický průzkum, Atelier
+istorické architektury Plzeň.
+"	4	TextRegion	0.9995423555374146
+1039.0982666015625	1593.8543701171875	1048.5999755859375	1607.3414306640625	rectangle		5	TextRegion	0.999163031578064
+123.96379089355467	168.39361572265625	1066.5869140625	312.82623291015625	rectangle	" 
+
+Nejstarší datovatelnou stratigrafickou jednotku je vrstva 0306 v situaci č. 3, ze které
+byly získány zlomky okrajů rámcově datovatelné do 14.-15. století. Zjištění učiněná
+v prostoru hospodářského dvora dále potvrzují a dokladují využívání prostoru a změny jeho
+nivelity, které zde byly zachyceny a dokumentovány při výzkumu v roce 2000, prováděného
+společností Archaia Příchovice (Burešová — Kočár 2000).
+"	6	TextRegion	0.9983028173446656
+143.8136749267578	145.620849609375	359.2411193847656	172.3577117919922	rectangle	" 
+"	7	TextRegion	0.9909849166870116

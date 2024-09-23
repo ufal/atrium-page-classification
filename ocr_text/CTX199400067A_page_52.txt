@@ -1,0 +1,64 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+143.1959686279297	838.736328125	1178.8470458984375	1204.5263671875	rectangle	"pravděpodobný kněžský dům datují nálezy z vrstvy 3, zejména z jejího
+spodního horizontu po úroveň destrukčních kamenů z likvidačního ho-
+rizontu stavby, Je to zejména keramika vyspělého středohradištního
+rázu, např. typické hrncovité tvary rázu vyspělé střední doby hra-
+dištní s vývalky na plecích a také tzv. keramika slavníkovské fáze,
+tj. zejména hrnce s dominantním ornamentem v podhrdlí a na těle
+pokryté vodorovnými rýhami, Soudím proto, že pravděpodobný kněžský
+dům byl postaven v 1. polovině 10. století, fungoval i ve slavníkov-
+ském období, a (podle stratigrafických pozorování ve vztahu k dest-
+rukci vnitřní hradební zdi) nedožil konce slavníkovské éry.
+"	0	TextRegion	0.999990940093994
+187.17393493652344	460.4761047363281	1186.679931640625	699.9035034179688	rectangle	"žá
+
+S
+
+objev části základů velké budovy na kamenné podezdívce, v jejímž
+areálu se nalezly mimořádné nálezy svědčící pro přítomnost du-
+chovních (hliněné aguamanile v podobě beránka, železné psací
+rydlo - stilus), jakož i objev dobře zachovaných zbytků opevnění,
+byly důvodem k rozšíření sondy a pokračování archeologického
+výzkumu v areálu pravděpodobného kněžského domu v letech 1975,
+"	1	TextRegion	0.9999853372573853
+561.28369140625	40.16044998168945	592.4967041015625	54.92934036254883	rectangle		2	TextRegion	0.99987530708313
+177.7801055908203	1440.60986328125	866.4656372070312	1574.3106689453125	rectangle	"álezové situace (tj. sáčky) číslo:
+jmenovitě pouze sáčky č. 148/74, 163/74 a 165/74
+
+ysvětlení: nálezy z vnitřního příkopu jsou při
+"	3	TextRegion	0.9997941851615906
+233.7901763916016	153.4772491455078	1114.754150390625	337.7469177246094	rectangle	"a obé toto číslování už dále nebylo používáno (při defini-
+tivním očíslování objektů v sondě 2a - 2c obdržela tato
+objektová čísla VI a VII obě výše popsaná ohniště, zjištěné
+ve vnitřním příkopě v sondě 2b při její JZ stěně);
+
+| plány č.: 2-8; 24:42,22-
+
+o ě = z Ví cí S SE Z B V SZ E SO S U l S
+"	4	TextRegion	0.9996992349624634
+229.9838714599609	300.7261657714844	1132.9508056640625	421.8908996582031	rectangle	") plány č.: 4783 24:42,22-2
+
+) fototabulky č.: 4,2,4,5:10,6,1:13,9:48, 10-1+,15:29, 16-18, 19:38, 20:39,
+
+) obrázky s nálezy č.: 15; 16; It; 18; 19) 203213 22) 23; 24; 25;
+29:%,8.
+"	5	TextRegion	0.9985389709472656
+160.8133087158203	793.342041015625	289.9181213378906	810.3071899414062	rectangle	"Oatování
+
+ 
+"	6	TextRegion	0.9901785850524902
+162.26031494140625	442.8489990234375	203.864501953125	464.1051330566406	rectangle	"41)
+"	7	TextRegion	0.9848272800445556
+174.0521697998047	1236.98681640625	754.0365600585938	1309.9949951171875	rectangle	"[Interpretace a rekonstrukce:
+
+pude uvedena v nálezové zprávě o sezóně .
+"	8	TextRegion	0.9756165742874146
+179.43707275390625	444.9741516113281	346.8716735839844	463.0679321289063	rectangle	"1) poznámka:
+"	9	TextRegion	0.9661238789558412
+208.31903076171875	375.2563781738281	228.9065704345703	390.3374328613281	rectangle		10	TextRegion	0.9539454579353333
+191.7873992919922	1283.06591796875	810.5712890625	1308.280517578125	rectangle	"jde uvedena v nálezové zprávě o sezóně 1975
+"	11	TextRegion	0.8706624507904053
+209.3090362548828	335.8176574707031	231.40206909179688	359.1161499023437	rectangle		12	TextRegion	0.8527052402496338
+550.7344970703125	42.46512222290039	612.5997924804688	54.07199096679688	rectangle	"48
+"	13	TextRegion	0.8301274180412292
+161.62091064453125	1382.6270751953125	175.76708984375	1397.427978515625	rectangle		14	TextRegion	0.8056248426437378

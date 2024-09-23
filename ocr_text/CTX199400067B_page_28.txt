@@ -1,0 +1,53 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+211.8827972412109	535.4074096679688	1112.7562255859375	657.1845092773438	rectangle	"Tab. 1:1, č. neg. 51 101. Sonda 2a=2c (1974). Destrukční
+utě nad jižní podezdívkou budovy orientované V=Z, V pozadí
+sonda 2c) začištěn povrch destrukce vnitřní hradební zdi.
+
+„hla AA voru
+"	0	TextRegion	0.9999727010726928
+221.4475860595703	692.1436157226562	1093.6754150390625	813.4710083007812	rectangle	"Tab, 1:2, če neg. 51 102. Sonda 2a=2c (1974). Destrukční
+tě nad jižní podezdívkou budovy orientované V-Z. V pozadí
+onda 2c) začištěn povrch destrukce vnitřní hradební zdí.
+
+MA 4 ae
+"	1	TextRegion	0.9999425411224364
+169.1273193359375	219.89801025390625	1133.5570068359375	507.0631713867188	rectangle	"Legenda k fototabulkám vychází z popisů jednotlivých
+záběrů na archivních kartách, uložených ve Fotoarchivu Archeo=
+logického ústavu v Praze, které někde doplňuje (zejména o defi-
+nitivní čísla objektů, někde také o detaily terénních situací).
+Pravděpodobný kněžský dům z 1O.stol, je v těchto textech označo-
+
+ván jako ""budova orientovaná V=Z"" nebo jako ""orientovaná budova“
+"	2	TextRegion	0.9998804330825806
+167.01260375976562	843.9904174804688	1110.6414794921875	1042.0306396484375	rectangle	"Tab. 2:3, č. neg. 51 103, Sonda 2a=2c (1974). Destrukční
+sutě nad jižní podezdívkou budovy orientované V-Z. Vpředu po-
+vrch destrukce vnitřní hradební zdi (ponechané v sondě 2b =
+= vpravo = na kontrol, bloku). Pohled od Z.
+
+Tab. 2:4, č. nege 51 104. Sonda 2a=2b (1974). Destrukční
+"	3	TextRegion	0.9966448545455932
+191.49078369140625	120.19343566894533	964.5872802734376	168.10462951660156	rectangle	"b) TEXTYVK TABULKÁM S FOTOGRAFICKÝMI SNÍMKY Z TERÉNU
+"	4	TextRegion	0.994187831878662
+578.9080810546875	15.349007606506348	634.322509765625	34.59463119506836	rectangle	"- 1-
+"	5	TextRegion	0.9837618470191956
+665.8941650390625	22.00668334960937	1046.7169189453125	79.81840515136719	rectangle	"Textyyk ototabulkám
+Sonda 2a = 2d (1974) = st
+"	6	TextRegion	0.9717921614646912
+154.1494903564453	1417.115234375	1095.2291259765625	1539.75634765625	rectangle	"Z 5 Sg Se. ee
+
+Tab. 4:7, če. neg. 51 107. Pohled do sondy 2b (1974) od
+SV. Vpředu jižní podezdívka budovy orientované V-Z a její de-
+strukční suti, vzadu vnitřní příkop opevnění,
+"	7	TextRegion	0.9681604504585266
+179.1857147216797	1122.75537109375	1096.8387451171875	1474.686279296875	rectangle	"Tab. 3:5, če neg. 51 105a, b. Sonda 2a=2c (1974). Pohled
+do vnitřního příkopu opevnění, V popředí povrch sutě vnitřní
+hradební zdi (sonda 2c), uprostřed kontrolní blok se sutí
+vnitřní hradební zdi (sonda 2b). Pohled od SZ.
+
+Tab. 3:6, č. neg. 51.106. Sonda 2a=2b (1974). Pohled do
+vnitřního příkopu opevnění, Uprostřed suf vnitřní hradební zdi
+ponechána na kontrolním bloku. Na kontrolním bloku s DVHZ je
+kůlová jamka l. Pohled od SSZ.
+
+Tab. 4:7, če nege 51 107. Pohled do sondy 2b (1974) od
+"	8	TextRegion	0.9617090225219728

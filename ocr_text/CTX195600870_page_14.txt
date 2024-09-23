@@ -1,0 +1,97 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+500.3143615722656	157.4048309326172	880.2982177734375	400.1642456054688	rectangle	"[jjeveno hu několik menších přístovků, jeder
+h | oůlleubovitého pídorysu, 8 starý hřbitov, pro-
+„|stírojicí se na všech stranách sky. A ji
+y [soma polohá koster hu nalezených je velm
+ohorokteristická pro prvé doby | křesfamsty
+v Čechách | Obráceny isou všechny hlavos
+k zápodu, takže prázdné oční důlky lebel
+edí k východu, a podle polohy | metvýci
+možno neklamně zisk v kterém ročnín
+údobí byk pochovávám.  Nebof pohřbívajíc
+řídvh se mkohv východem acoarafickým, ek
+skutečným východem slunce. Pro datován
+nálezů jsou Gůležné mšloděry. malé penízky
+
+jež byty vkládány do úst nebo sevřenýci
+něaší bi-h Až mměděni
+"	0	TextRegion	0.9989399313926696
+137.180419921875	596.4464721679688	494.2573852539063	832.30224609375	rectangle	"Nová pozorování doplnila skvěle poznal.
+v Herainovy a Matěkovy, kieří nalezk told
+larý kryl podlahy kos!elní, Haždsce lněné
+ervené, černě polévané, zdobené primrv.
+jim, ranně románským ornomen'em s pkastic:
+
+z loemvěck lečeným houremi podrv.
+ch zvířt avokolypřci oh tlv, pták Nol
+id). jedna forma dločděky je zobrazením
+oprsí kdského s žezicm a jakousi králo
+kou korimou, a možno na ní zpětně čísti ná-
+rs NERO — Zištěno, že presbylář byl noc
+losin. podloou © bamliky zvýšen o čtyř
+řunně, lesané z černého pískovce. nak cek
+udova byla skověna z opuky. přdesávané du
+
+ 
+
+ 
+
+ 
+"	3	TextRegion	0.9909276962280272
+128.7682647705078	1204.711669921875	502.90924072265625	1466.0316162109375	rectangle	"kvádrů. (chorciktorishcké řádkové zdavo ro-
+Imónské). Nalezeny laké zbytky omifky, která
+bravděpodobrě byla potnalovina pruhy červe-
+nýnu a Žkstýma, celý kostelík. zachvá-
+cený kdysi požárem, jehož stopy hu nole-
+zeny, byl prostý a holý, lénět mě než ktn=
+strukce bež jakókohv výzdoby skaultturální,
+Ochotot vyšehradské kaprsty bylo umož-
+něno 1 nové probodání budovy slorého dě-
+kanství, nod částí basriky stojcího Jeho zda,
+které vykonávkám značně utroěly, jso dnes
+podchylávány a podezdivány, aby se zabrá-
+ro možnému zřícení. Choulostivé zdivo opu-
+kové bylo pečhvě konservováno, nebot zů-
+slane již odkryo, V zahrádce děkanství se
+ovšem kopalo dále a ne bez výsledků Oh-
+"	4	TextRegion	0.9822980165481568
+516.6325073242188	852.2717895507812	886.1358032226562	1134.8262939453125	rectangle	"Drutým místem, které se stalo výcho-
+dištóm vykopávek, | je rohinda, kostelík
+sv. Martina, kol niž nalezen byl rovněž
+hřbitov ze století 12., slorá, oblázková smnrce
+a cosly, kleré molhou snad pozděj přísnět
+k řešení potohoprsá slorého Vyšchradu Ko-
+páno bylo i uvnifř rolundy samé, odkryta
+baroková podlaha ž poloviny 18. sřoleli, pod
+ní zbytek podkahy Minčné a posléze došlo s
+už % vyšlaponé kamenně dlážděné podlaze
+staré jako kostel sám. Vchod, portál rotundy
+nebyl v místech, kdež jest nový, dnešní, ale
+byl otevřen, jako bo vždy bývalo, na sírahě
+východní.
+
+Záklády stavby, pocházející z doby inžén.
+sivnho stavebního ruchu za Karla IV. nat.
+"	7	TextRegion	0.9449615478515624
+133.12689208984375	1201.5367431640625	499.4209899902344	1337.548828125	rectangle	"tvádrů  (chorciterishcké  tádkové zdivo ro-
+nánské). Nalezeny laké zbytky omitky, která
+srovděpodobrě byla pobaloví oa pruhy červe-
+nýnu a žbotýma, celý ki zachvá-
+zený kdys: požárem, ochot stopy lu nole-
+teny, byl bs a holý, lénět mé než ktn=
+trukoe bež jakókohv výzdoby skauliturální,
+
+3 Ochotod vyšehradské kabrkty bylo: utnož-
+"	9	TextRegion	0.9027442336082458
+89.69174194335938	1616.03857421875	654.8714599609375	1662.338623046875	rectangle	"[káleno ja“ lb
+04 poaoatalob 4 ů
+f auleš ala.) Bohuu — WR, Vla
+"	10	TextRegion	0.8756455183029175
+140.57589721679688	154.3213348388672	705.8504028320312	243.3426513671875	rectangle	"Proby vyhnaná. Bylo tenkrát bez přístřeší jieveno hu několik mem
+tejí členové bydlk rozotyleně v soukromých | půlku ubovitého přídorysu
+vlech po Praze Proto vystavěir tento dům, |s'írající se na všech st
+němž nak byly skrývány mnohé dokumenty | sama poloha koster tu
+arciuv kapitulní, ohorokteristická
+
+   
+"	11	TextRegion	0.8643041849136353

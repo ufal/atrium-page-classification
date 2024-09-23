@@ -1,0 +1,61 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+145.59017944335938	930.311767578125	1104.4351806640625	1295.6744384765625	rectangle	"ae Se 07
+
+Obr. 7. Sonda 2c (1974), polozemnice (?) I z doby po r.
+995, nálezová situace 106/74. 1 - 6 výběr libické keramiky
+
+Obr. 8. Sonda 2c (1974), polozemnice (?) I z doby po r.
+995, nálezová situace 106/74, 1 - 7 výběr libické keramiky,
+
+Obr. 9. Sonda 2c (1974), polozemnice (??) II z doby po
+r. 995, nálezová situace 100/74. 1 - 10 výběr libické keramiky
+Správné postavení střepu 2 ukazuje šipka se základnou.
+
+Obr. 10, Sonda 2b (1974), destrukce vnitřní hradební zdi
+(D8R.0. 005). nálasavé ajtnana S8/7A. V = 7 výhěn 1ihjakéá karam
+"	0	TextRegion	0.9999585151672364
+201.60189819335935	1363.4423828125	1086.6309814453125	1433.83837890625	rectangle	"Obr. 11. Sonda 2b (1974), destrukce vnitřní hradební zdi
+28.9.995), nálezová situace 64/74. 1 - 6 výběr libické kera-
+"	1	TextRegion	0.9997841715812684
+172.11044311523438	737.1655883789062	1102.8487548828125	925.0890502929688	rectangle	"Následují texty legend k obrázkům č. 6 - 26:
+Obr. 6. Sonda 2c (1974), polozemnice (7) I z doby po r.
+
+995, nálezová situace 101/74. 1 - 6 výběr libické keremiky«
+Správné postavení střepu 2 ukazuje šipka se základnou vyznaču-
+fc vodorovnou rovinu
+"	2	TextRegion	0.9996391534805298
+202.87417602539065	1481.5074462890625	1092.25146484375	1547.443115234375	rectangle	"Obr. 12. Sonda 2b (1974), destrukce vnitřní hradební zdi
+28.9.995), nálezová situace 65/74. 1 - 4 a 6 výběr libické
+"	3	TextRegion	0.9995854496955872
+536.50341796875	30.374897003173828	583.5185546875	49.16277313232422	rectangle	"2102
+"	4	TextRegion	0.9993569254875184
+735.2820434570312	8.938950538635254	882.2328491210938	24.661531448364254	rectangle	"„a komentař
+"	5	TextRegion	0.9989263415336608
+186.8157501220703	152.1208953857422	1140.406982421875	501.8990478515625	rectangle	"Obrázky č. 6 = 26 mají informovat o rázu keramiky z charakte-
+ristických nálezových situací z 94/10, -= 11.(-12.?) stol. v son-
+dě 2, resp. v jejích horizontech, prokopaných v r. 1974. Uvedené
+charakteristické nálezové situace dokumentuji pomocí fotografií
+vybraných střepů, k nimž nejsou připojeny profily. V legendách
+k obrázkům č. 6 - 26 uvádím provenienci keramiky: libická kera=
+
+u východočeská keramika  Přplazovené keramika,
+mika (která je v naprosté převaze), pražsk keramika,fK třídění
+
+hradišt*©ní bkaramikv -= Tihjae arw.« ITnatavé T.. Hnadišž*ní bkoramika
+"	6	TextRegion	0.9988070726394652
+685.51220703125	28.862607955932617	1098.546875	81.2402572631836	rectangle	"TextyVk obrázkům s nálezy
+Benda 2a - 2d (1974) - str.
+"	7	TextRegion	0.9982940554618835
+190.2655792236328	399.7930908203125	1110.1307373046875	668.346435546875	rectangle	"k obrázkům č. 6 -+ 26 uvádím provenienci keramiky; libická kera=
+u východočeská keramika 1 Přihlazovená keramik
+nika (která je v naprosté převaze), pražsk keramika,fK třídění
+nradištní keramiky z Libice srv.: Justová, J., Hradištní keramil
+z Libice nad Cidlinou (Keramické typy a hledání jejich původu),
+in: Sborník Západočeského muzea v Plzni Historie VIII. K poctě
+
+osmdesátých narozenin Marie Doubové-Andrlové. Západočeské muzeu
+"	8	TextRegion	0.9962748289108276
+181.51564025878903	1323.5750732421875	252.11351013183597	1342.9752197265625	rectangle		9	TextRegion	0.991524338722229
+183.28526306152344	1444.095458984375	249.0714263916016	1462.8165283203125	rectangle	"miky
+"	10	TextRegion	0.9896317720413208
+181.13211059570312	1171.2332763671875	205.7843475341797	1184.0286865234375	rectangle		12	TextRegion	0.8869422078132629

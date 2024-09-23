@@ -1,0 +1,71 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+126.1917724609375	360.9002990722656	1114.705322265625	525.6724853515625	rectangle	"= 8.  . 7-55"" ©
+
+16) l68/74:""2.11.74 záchr. akce Libice n. C, u Svobodů výkop pro
+studnu o 9 1,4 m, ve vzdálenosti llm severovýchodně od
+severního rohu sondy 2 c „.. 20-35/40 cm kult. vrstva
+(tmavá hnědošedá hlína, promíšená místy drobnými opuk,
+
+kamínky) s nálezy +.. sáček ... 168 ... spodních 10 cm
+kulturní vrstvy""“.
+"	0	TextRegion	0.9999476671218872
+86.22315979003906	580.82470703125	1113.1409912109375	870.676025390625	rectangle	"Při výzkumu v sondě 2 byly zjištěny různé Varianty vrstvy 2
+z Il. - 12. stol., které se liší svými příměsmi nebo zbarvením,
+Tyto varianty vrstvy 2 jsou popsány v Seznamu vrstev a výplní,
+bude v NZ za vok 1475, stu. komentář k planům ma str. 92 tčto NZ)
+který připojen k plánůmy (položky 2 - 7)sfVrstva 2 se nalézala
+pod ornicí / drnem na celé ploše sond 2a - 2d, zkoumaných v r, 1974
+
+které byly situované v prostoru opevnění pobořeného v r. 995 a v
+
+o M S
+"	1	TextRegion	0.9999223947525024
+144.761962890625	1056.220947265625	932.9915161132812	1101.358154296875	rectangle	"Z rozhraní obou vrstev pocházejí následující sáčky:
+"	2	TextRegion	0.9997430443763732
+298.8194885253906	1503.134521484375	1131.40478515625	1541.415771484375	rectangle	"tmavošedá vrstva s drobnými kaménky, hl. 30 cm pod dnešní
+nDovrchnem. 22.7 ."".
+"	3	TextRegion	0.9987196922302246
+172.6312713623047	1396.081298828125	286.3909606933594	1417.1943359375	rectangle	") 89/74:
+"	4	TextRegion	0.9982075691223145
+242.4683074951172	1185.30615234375	1128.5609130859375	1412.6448974609375	rectangle	"74:
+
+74:
+
+""Sonda 2 /tj. 2a/, 4-9,2 m (bez opuky), 70-90 (50-70)
+cm. 29.5., 30.5."".
+
+""Sonda 2b, sv. část sondy až po okraj vnitřního příkopu
+/slavníkovská vrstva""/, 60-80/90 cm. 12,-14.6., 17.6.-
+-19.6. !! + zejména při sv. okraji sondy spodní partie
+Vrstvy s drob, opukovým kamením, jež nad ""slavníkovskou“
+a destrukč. kuželem (tato vrstva s drob. opuk, kameny
+jde při sv. okraji sondy níže - viz profil"", Obr. 26:2,
+
+""Sonda 2c, jeií sev. roh
+"	5	TextRegion	0.9961085915565492
+72.48466491699219	172.6981658935547	1118.5155029296875	362.731201171875	rectangle	"8 Z SNS Ve O OTA on0ln0: ORMOonoKCl SRO NOE POKOZÍ. SOU MMO O MOO C0
+
+hnědé slavníkovské vrstvy, 23.7,"".
+
+15) 167/74:""2.11.74 záchr, akce Libice n, C, u Svobodů výkop pro
+studnu o S 1,4 m, ve vzdálenosti ll m severovýchodně
+od severního rohu sondy 2c ... 20-35/40 cm kult, vrstva
+(tmavá hnědošedá hlína, promíšená místy drobnými opuk.
+kamínky) s nálezy ... sáček ... 167 ... bez posledních
+lO cm kult, vrstvy"".
+"	6	TextRegion	0.995704710483551
+325.72119140625	1447.3782958984375	469.2805786132813	1468.3997802734375	rectangle	"Fe stylus)
+"	7	TextRegion	0.9924212098121644
+234.59664916992188	111.4901123046875	1097.603515625	214.0545959472656	rectangle	"/14: ""Sonda 2d, tmavá vrstva s drobnými kaménky (poslavní-
+
+kovská), 40-50/60 cm (cca v 50/60 cm horní hladina
+hnědé slavníkovské vrstvy. 23.7."",
+"	8	TextRegion	0.991470754146576
+150.66909790039062	1397.3236083984375	175.23448181152344	1415.98779296875	rectangle		9	TextRegion	0.968107521533966
+1045.0904541015625	588.0759887695312	1057.0631103515625	603.58056640625	rectangle		10	TextRegion	0.9663766026496888
+153.6796875	1120.28369140625	178.37818908691406	1139.659423828125	rectangle		11	TextRegion	0.8594691753387451
+954.1495971679688	971.4218139648438	965.8740234375	986.3456420898438	rectangle		12	TextRegion	0.857650101184845
+243.41421508789065	968.5203857421876	950.292236328125	1048.889404296875	rectangle	"va 2(přemyslovská)/vrstova
+
+(10. stol.
+"	13	TextRegion	0.8082451224327087

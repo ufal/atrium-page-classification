@@ -1,0 +1,42 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+213.1412353515625	118.3252944946289	1106.260986328125	369.19329833984375	rectangle	"304 a 308b. V prostoru mezi objekty 286, 287 a 304 jsme sejmuli
+starší kulturní vrstvu 3 a začistili povrch pod ní ležícího sta-
+vého půdního horizontu /vrstva 4/, na němž jsme objevili malé já
+516 a 317 z doby bronzové. Na rozhraní sond 14k/2 a 140/1 jsme
+lokončili vyzvednutí obsahu hradištních jam a soujámí 282a-c, 28
+"	0	TextRegion	0.9999666213989258
+193.2598571777344	1124.4332275390625	1148.6932373046875	1533.3074951171875	rectangle	"Bebe ILDOJEULA SKLÝV4A UOLIILGV V UVC 29076 2 EU S
+čištění plochy jsme prozkoumali zde se nelézající hradištní jámu
+313. V nově otevřené sondě l4p došlo ke skrývce ornice bagrem
+v polovině srpna. Do konce měsíce jsme zde stačili ručně odstranit
+zbytky ornice a začistit povrch vrstvy j v jižní polovině sondy.
+Objevili jsme zde nové objekty 318-333 a kůlové jamky 69-71.
+
+Tyto objekty, zjistěné v sondě l4p v srpnu, jsou vesměs hmdiš t=
+ního stáří: v srpnu jsme zkoumali jámy 318, 319a+b, 322-325,
+
+327320. 3308=b a 33la-=bo
+"	1	TextRegion	0.999771535396576
+169.82041931152344	591.1920776367188	1151.628662109375	1031.41064453125	rectangle	"27 ye P M M SO W 5 SOM = P 7
+kameny/, 306a=b, 307, 310 a 3150
+
+V sondě l4n jsme v srpnu dokončili výzkum tam se nacházejí-
+cích hradiš tních jam a soujámí 302a=-c a 309 a-e. Na ploše mzi ob-
+jekty 302 a 309a+b jsme skryli vrstvu 3 a začistili povrch pod ní
+ležící vrstvy 4, který byl už nálezově sterilní,
+
+V sondě l4m/1l jsme práce ukončili prokopáním hmdiš tních
+jem 255, 257 a 258-259. V sondě l4m/3 jsme výzkum uzavřeli dokon-
+čením vyzvednutí obsehu hrediš tních jam 274, 3l2a=b a 514 a žláb-
+k$ 272273. V sondě l4m/2 jsme m okopali nále zově chudou jámu 271
+"	2	TextRegion	0.9996318817138672
+306.59930419921875	1569.5732421875	1006.7967529296876	1593.884033203125	rectangle	"la V konci sondy l4m/2 a v navazující sondě l4m/5
+"	3	TextRegion	0.9993957281112672
+379.2957763671875	33.746376037597656	1073.804443359375	57.73096466064453	rectangle	"Hlášení výzkum Libice /předhradí/ 1968 /srpen/ -
+"	4	TextRegion	0.9989739656448364
+375.0406188964844	428.0198669433594	1126.3170166015625	613.515380859375	rectangle	"č 140/1 jsme skončili výzkum prokopáním jámového ob-
+
+doby bronzové a hradištních jam 282b+e, 291, 294 /oh-
+-e, 297+298 /je to jedna dlouhá jáma s pecí na J konci
+m k peci od S, kde se k peci svažoval kanálek obloženy
+"	5	TextRegion	0.995961368083954

@@ -1,0 +1,7 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+150.01837158203125	1114.8714599609375	989.4757690429688	1275.7408447265625	rectangle	"Tato práce, která vznikla tvůrčím zpracováním výsledků archeologického výzkumu, je
+chráněna autorským právem podle zákona č. 247/90 Sb. Ve smyslu tohoto zákona jsou
+chráněny i jednotlivé části této práce, jako např. skicy, náčrty, závěr a pod. ($ 9 cit.
+
+zákona). Části neba práci celou lze uveřejnit nouze se svolením autora.
+"	0	TextRegion	0.9998536109924316

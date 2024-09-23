@@ -1,0 +1,77 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.669189453125	1591.396484375	622.1389770507812	1606.77880859375	rectangle		0	TextRegion	0.9999914169311525
+146.0104522705078	804.4346313476562	1032.446044921875	909.0360107421876	rectangle	"DALEK 6. U4-13 |5|. SU -19, ODŤ. DTIL OU)
+
+KE: 1x zlomek okraje hrncovité nádoby, provedení režné, světle načervenale šedé barvy,
+na jádru tmavě šedý. M: jemnozrnný, oxidačně vypálený. OP: kalichovitě profilovaný,
+s rýhami na vnější straně okraje. V: ryté rýhy.
+"	1	TextRegion	0.9999457597732544
+144.92393493652344	1020.700927734375	1011.7024536132812	1087.0657958984375	rectangle	" 
+
+KE: 2x zlomek těla hrncovité nádoby, provedení režné, barvy světle šedohnědě. M:
+střednězrnný, s vyšším podílem křemenných zrn, oxidačně vypálený. V: rytá tenká rýha.
+"	2	TextRegion	0.9999282360076904
+156.48538208007812	395.6536865234375	1020.4293212890624	499.6080932617188	rectangle	"DALEM L. 91-10 |5]. UI- 10, UT. JIPII 2,
+
+KE: 3x zlomek okraje a těl hrncovitý nádob/zásobnice, provedení režné, barvy světle
+Šedohnědě, u tuhovaného zlomku stříbrnošedé. M: jemnozrnný a střednězrnný, s vyšším
+podílem tuhy, oxidačně vypálený. OP: malý vzhůru vytažený, bíle engobovaný.
+"	3	TextRegion	0.9999041557312012
+161.6292724609375	117.21353149414062	351.39166259765625	137.08673095703125	rectangle	"Datování: NO1/NO2
+"	4	TextRegion	0.9998941421508788
+152.0419464111328	1399.6026611328125	933.1681518554688	1457.3587646484375	rectangle	" 
+
+KE: 1x zlomek těla hrncovité nádoby, provedení glazované, barvy světle béžové.
+jemnězrnný, oxidační vypal. V: medově hnědá glazura.
+
+  
+"	5	TextRegion	0.9998083710670472
+138.22268676757812	1182.992919921875	1011.0581665039062	1290.165771484375	rectangle	"daček C. 5UZ-l5 1|S|. 5UZ-15, ODr. příl. OU)
+
+KE: menší soubor zlomků těl hrncovitých nádob, provedení režné, barvy hnědošedé. M:
+střednězrnný, oxidačně vypálený. V: stopově rytý rýha (možný svazek).
+
+Mz:2x drobné zlomky vypáleného hliněného omazu (pecní stěna?)
+"	6	TextRegion	0.9989445805549622
+167.53759765625	602.2432250976562	891.8065185546875	683.2385864257812	rectangle	"z
+KE: 1x omletý zlomek těla nádoby, provedení režné, barvy hnědé. M: středn
+oxidačně vypálený.
+
+PN 1 kan! brnet (Ariihnyžš mariržšann)
+
+ 
+
+M CI DE
+"	7	TextRegion	0.9987972974777222
+160.24024963378906	732.6922607421875	323.7982482910156	753.1864013671875	rectangle	"Datování: RS/VS?
+"	8	TextRegion	0.9987962245941162
+162.82699584960938	189.00173950195312	872.2970581054688	281.7315368652344	rectangle	"DALEK 6. SU
+
+ 
+
+4 13V
+
+   
+
+L
+
+KE: 1x omletý zlomek těla nádoby, provedení režné, barvy hnědé. M: střec
+oxidačně vypálený.
+
+: 1x omletý zlomek střešní krytiny (prejz)
+
+ 
+"	9	TextRegion	0.9976988434791564
+160.01719665527344	1320.188720703125	293.7568054199219	1340.1617431640625	rectangle	"Datování: RS4
+"	10	TextRegion	0.997003734111786
+159.56619262695312	938.8067016601562	293.8675842285156	959.1152954101562	rectangle	"Datování: RS4
+"	11	TextRegion	0.9961397051811218
+159.19129943847656	527.5960083007812	337.9789733886719	548.4299926757812	rectangle	"Datování: RS4/VS1
+"	12	TextRegion	0.9925661087036132
+159.81480407714844	1114.112060546875	292.64898681640625	1134.4088134765625	rectangle	"Datování: RS4
+"	13	TextRegion	0.9913103580474854
+164.75283813476562	322.4668273925781	368.7754211425781	345.2354431152344	rectangle	"Datování: RS/VS? /NO
+"	14	TextRegion	0.9812451601028442
+114.18913269042967	202.5259552001953	972.7117309570312	253.15203857421875	rectangle	"KE: 1x omletý zlomek těla nádoby, provedení režné, barvy hnědé. M: střednězrnný,
+oxidačně vypálený.
+"	15	TextRegion	0.8723130226135254

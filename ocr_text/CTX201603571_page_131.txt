@@ -1,0 +1,26 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+281.2394104003906	490.794189453125	923.3090209960938	533.071533203125	rectangle	"Světle hnědá a tmavohnědá drobivá heterogenní směs písčité hlíny malty a popela. Četně
+stavební suť, malta, opuka, cihly a valouny do 20 cm. Ojediněle pecky zelenožlutého jílu.
+"	0	TextRegion	0.9998196959495544
+274.5038452148437	667.5105590820312	950.0786743164062	702.3859252929688	rectangle	"Narezle světle šedohnědá soudržná silně písčitá hlína. Ojediněle drobné valounky do 1 cm a
+uhlíky do 0,5 cm.
+"	1	TextRegion	0.9995267391204834
+1474.61572265625	1081.319091796875	1588.3057861328125	1097.0145263671875	rectangle	"Stránka 10 z 15
+"	2	TextRegion	0.9995225667953492
+84.13268280029297	1081.8314208984375	430.8680114746094	1098.530517578125	rectangle	"Archeologický výzkum č. 2015/21 - Albertov 3a
+"	3	TextRegion	0.9991888403892516
+281.3628234863281	827.4788208007812	953.0488891601562	866.891845703125	rectangle	"Světle šedá měkká písčitá hlína promísená maltovou drtí. Velmi četně cihly do 30 cm. Nahodile
+opuka a hroudy malty do 10 cm.
+"	4	TextRegion	0.9991687536239624
+282.8481140136719	557.6727905273438	932.2698364257812	594.9274291992188	rectangle	"Vazelenale tmavě šedá, místy černá, soudržná písčitá hlína. Mírně pecky cihloviny do 2 cm,
+nahodile uhlíky do 1 cm, ojediněle pecky nazelenalého jílu do 15 cm.
+"	5	TextRegion	0.994550883769989
+281.6322937011719	985.4636840820312	985.7689208984376	1025.4805908203125	rectangle	"Šedý sypký popel. Četně skleněné střepy (tabulkové sklo i nádoby), nahodile cihly, opuka a malta
+o 10 cm. Ojediněle železná plechovka.
+"	6	TextRegion	0.9941482543945312
+1044.9422607421875	212.49322509765625	1145.8819580078125	224.32408142089844	rectangle	"Interpretace
+"	7	TextRegion	0.9905802607536316
+278.15362548828125	256.9750366210937	637.1461181640625	272.6090087890625	rectangle	"Narezle okrový středně ulehlý velmi zahliněný písek.
+"	8	TextRegion	0.9833210706710817
+290.1159362792969	620.6146240234375	803.0486450195312	638.7247314453125	rectangle	"edohnědá soudržná prachovitopísčitá hlína. Ojediněle uhlíky do 0,5 cm.
+"	9	TextRegion	0.9692521691322328

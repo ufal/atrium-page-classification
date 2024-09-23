@@ -1,0 +1,57 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+119.78705596923828	139.70333862304688	1128.7850341796875	762.0986938476562	rectangle	"které zaplnily příkop po jeho vyhloubení,ato jak postupně
+
+(vrstva 3 a ohniště VI a VIIve vrstvě 3 v příkopě), tak poté
+
+naráz (DVHZ). Výjimku představují výše uvedené a níže popsané
+
+3 sáčky (nálezové situace) z ohraničených vrstev velmi jemné
+
+tuhé růžovohnědé až červenohnědé hlinky, která se po vyschnutí
+zbarvila do bělošeda a nacházela se nade dnem příkopu. Tyto vrstvy
+jemné hlinky jsem v průběhu výzkumu sondy 2 označovala pracovně
+jako ""vrstva červenohnědé mazanice""“, ""vrstva zteřelé mazanice“ či
+""růžovohnědá""zteřelá mazanice""“ vysychající do bělošeda“ nebo ""šedo-
+hnědá ""zteřelá mazanice"" s červenavým nádechem"", neboř jsem se domn
+vala, že jde o rozpadlou mazanici. Teprve po získání dalších zkuše-
+ností s výzkumem vnitřního příkopu opevnění libického předhradí,
+
+zejména v sondě 28 na V obvodu přadhradí v roce 1981, jsem poznala
+
+   
+
+mami- o o o ko S a R ,
+
+ 
+"	0	TextRegion	0.999866247177124
+229.3247985839844	887.8875732421875	1134.28662109375	1053.6673583984375	rectangle	"3/74: ""Sonda 2c, povrch kry nevypálené mazanice na dně příkopu
+v hnědé ""slavník."" vrstvě, při jz. stěně sondy. 14.8.""
+
+/74: ""Sonda 2c, čištění povrchu plochy červenohnědé maz,
+v prohlubní při jz. stěně sondy. 21.8. Vzorky této maz.:
+sáček 165/74.""
+"	1	TextRegion	0.9997734427452089
+208.75900268554688	1053.713134765625	1111.84033203125	1100.115234375	rectangle	"55/74: ""Sonda 2c, vzorky z plochy červenohnědé maz. v prohlubn
+při jz. stěně sondy, 21.8.""
+"	2	TextRegion	0.9993649125099182
+174.16604614257812	1417.1805419921875	533.0445556640625	1437.396728515625	rectangle	"Vnitřní příkop opevnění
+
+ 
+"	3	TextRegion	0.9974127411842346
+555.8351440429688	53.98693084716797	592.02587890625	69.51264190673828	rectangle	"49
+"	4	TextRegion	0.9971789121627808
+161.8787841796875	1329.968505859375	866.0494384765625	1368.7921142578125	rectangle	"vnitřní příkop byl zahlouben do lužické vrstvy
+"	5	TextRegion	0.9949447512626648
+172.84982299804688	1055.807861328125	299.8882751464844	1078.3203125	rectangle	"165/74:
+"	6	TextRegion	0.9924907088279724
+141.48355102539062	1057.5950927734375	165.2021026611328	1074.589111328125	rectangle		7	TextRegion	0.9837161302566528
+538.369140625	56.34830093383789	603.2286987304688	69.0101547241211	rectangle	"49
+"	8	TextRegion	0.9807948470115662
+141.12571716308594	972.4287109375	165.60934448242188	989.9315795898438	rectangle		9	TextRegion	0.9610468745231628
+139.2701873779297	1297.3009033203125	163.7306365966797	1316.810546875	rectangle		10	TextRegion	0.9512537121772766
+146.599609375	1191.3355712890625	670.9946899414062	1307.80029296875	rectangle	"l) umístění v ploše výzkumu:
+při JZ stěně sondy 2a, 2b a 2c;
+
+2, nadlaší.
+"	11	TextRegion	0.9365301132202148
+140.03807067871094	1382.19384765625	163.46453857421875	1401.3175048828125	rectangle		12	TextRegion	0.8455016016960144

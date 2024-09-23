@@ -1,0 +1,84 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+137.7442169189453	1399.65087890625	1054.0997314453125	1493.333740234375	rectangle	"Archeo Pro o.p.s. je na základě povolení k provádění archeologických výzkumů uděleném Ministerstvem
+kultury České republiky pod č.j. 7059/2006 ze dne 25. 09. 2006 oprávněnou organizací podle $ 21, odst. 2
+Zákona 20/87 Sbírky o státní památkové péči ve znění pozdějších předpisů a má uzavřenou dohodu s Akademií
+věd České republiky ze dne 24. 10. 2006 o rozsahu a podmínkách provádění archeologických výzkumů.
+"	0	TextRegion	0.999982476234436
+141.3009796142578	928.0128173828124	352.3845520019531	975.041015625	rectangle	"Odborná spolupráce
+Zprávu podává:
+"	1	TextRegion	0.999862790107727
+144.0727081298828	1039.844482421875	379.422607421875	1060.1585693359375	rectangle	"V Praze dne 31. 12. 2012
+"	2	TextRegion	0.9995433688163756
+137.90682983398438	148.4425811767578	553.0535888671875	179.17591857910156	rectangle	"denční list nálezové zprávy
+
+ 
+"	3	TextRegion	0.9995396137237548
+117.48040008544922	206.740234375	1052.1964111328125	319.0893859863281	rectangle	"Nálezová zpráva zarcheologického výzkumu, kterou vyhotovuje organizace oprávněná k provádění
+archeologických výzkumů, je součástí zprávy o výsledcích výzkumu dle $ 21 odst. 4 Zákona 20/87 Sbírky o
+státní památkové péči ve znění pozdějších předpisů a slouží také jako potvrzení o provedeném záchranném
+archeologickém výzkumu a o splnění podmínek $ 22, odst. 2 Zákona 20/87 Sbírky o státní památkové péči ve
+znění pozdějších předpisů stavebníkem.
+"	4	TextRegion	0.999528169631958
+144.76986694335938	630.45947265625	505.649658203125	703.5875854492188	rectangle	"Smlouva/dohoda ze dne:
+Číslo akce u oprávněné organizace:
+Doba výzkumu:
+"	5	TextRegion	0.9981842637062072
+145.86212158203125	355.7211303710937	402.0777282714844	537.3641357421875	rectangle	"Katastrální uzemi:
+Administrativní název ob«
+Městská část:
+
+Ulice, trať:
+
+Parcelní číslo:
+
+Číslo popisné:
+
+Stavebník:
+"	6	TextRegion	0.9980480670928956
+144.00143432617188	736.4007568359375	332.0111389160156	782.496337890625	rectangle	"Vedoucí výzkumu:
+Výzkumný tým:
+"	7	TextRegion	0.9971683621406556
+143.54769897460938	566.6140747070312	267.71734619140625	589.3668823242188	rectangle	"Objednatel:
+"	8	TextRegion	0.9953437447547911
+569.2493286132812	562.5759887695312	1023.6553344726562	947.3145751953124	rectangle	"Národní památkový ústav se sídlem Valdštejnsk
+náměstí 3, ÚOP v hl. m. Praze
+
+17.5.2012
+
+27/12AP
+
+17.5.2012 — 27. 6. 2012 (terénní část)
+
+28. 6.2012— 31. 12. 2012 (zpracování výzkum
+PhDr. Michal Bureš
+
+Luděk Dvořák, terén
+
+Lukáš Drápela, terén, zpracování
+
+Mgr. Jan Pařez, PhD., písemné a ikonografické
+prameny
+
+Bc. Michaela Krumplová, laboratoř
+
+Pavel Danko, mechanizace
+
+RNDr. Jan Zavřel
+"	9	TextRegion	0.991907835006714
+121.48246002197266	1306.6153564453125	1049.0355224609375	1375.91064453125	rectangle	"Archeo Pro o.p.s, Zlatnická 1122/11, 110 00 Praha I, IČ: 27448657, tel.: ++420224829055, e-mail:
+infoaarcheodu.cz, www.archeodu.cz., zapsaná v. rejstříku obecně prospěšných společností vedeném u
+Městského soudu v Praze oddíl O, č. vložky 420.
+
+  
+"	10	TextRegion	0.9909570217132568
+589.0112915039062	513.6961059570312	1007.8475952148438	558.8582153320312	rectangle	"[UDr. Eva Nováková se sídlem Na Míčánce
+18/27, 166 10 Praha 6
+"	11	TextRegion	0.94034743309021
+613.2982177734375	1202.658935546875	855.3238525390625	1249.1597900390625	rectangle	"PhDr. Michal Bureš
+ředitel Archeo Pro 0.p.s.
+"	12	TextRegion	0.9181541800498962
+460.0856323242188	1307.911865234375	1043.931640625	1355.728271484375	rectangle	"11, 110.00 Praha 1, IČ: 27448657, tel.: ++420224829055, e-mail:
+ná v. rejstříku obecně prospěšných společností vedeném u
+
+ 
+"	13	TextRegion	0.8143524527549744

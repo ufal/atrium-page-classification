@@ -1,0 +1,34 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+139.31289672851562	791.6879272460938	867.906982421875	839.649658203125	rectangle	"6) 53/74: ""Sonda 2b, jižní roh sondy:
+40-60 cm, s opukou - velké kameny, 10.6
+"	0	TextRegion	0.999936580657959
+232.43626403808597	1062.585693359375	1096.1993408203125	1139.8388671875	rectangle	"74: ""Sonda 2b, povrch kamenné destrukce ponechané na 1,5 m
+širokém soklu při sz. hraně sondy 2b, úroveň cca 30- 40
+cm pod dnešním povrchem. 10.6., 11, 6.""
+"	1	TextRegion	0.999861478805542
+517.291748046875	49.06032180786133	548.5849609375	63.73201751708984	rectangle		2	TextRegion	0.999461829662323
+144.85240173339844	253.0911407470703	1076.24853515625	608.8316650390625	rectangle	"álezové situace (tj. sáčky) čislo:
+1) 18/74: ""Sonda 2 /tj. 2a/, její jz. půle, 30-50 cm
+(z vrstvy s množstvím opuky). 27.5,""
+2) 19/74: ""Sonda 2 /tj. 2a/, její jz. půle, 50-70 cm
+(z vrstvy s množstvím opuky tj. cca 0-3 m), 28.5, 29,
+3) 26/74: ""Sonda 2 /tj. 2a/, 0-4 m (hlína promíš, opukou),
+70-90 cm, 29,5, 30.5,""
+""Sonda 2 /tj. 2a/, 0-2 m (hlína promíš, opukou),
+90-110 cm. 30.5.""
+5) 52/74: ""Sonda 2b, jižní roh sondy:
+/bez opuky/ s menším množstvím opuky 10,6."" Obr 2%: 4
+4060 em ©
+
+4) 29/74:
+"	3	TextRegion	0.9984005093574524
+142.97813415527344	536.7990112304688	164.431396484375	555.2656860351562	rectangle		4	TextRegion	0.9961048364639282
+141.9950714111328	788.5460815429688	164.6815185546875	807.8875122070312	rectangle		5	TextRegion	0.9863953590393066
+129.89508056640625	1422.5662841796875	822.1665649414062	1460.9920654296875	rectangle	"8) 57/74: ""Sonda 2b, vrstva 40-60/70 cm, 10.6,'
+"	6	TextRegion	0.9852626323699952
+138.95358276367188	1425.2174072265625	162.22543334960938	1443.2186279296875	rectangle		7	TextRegion	0.956561267375946
+261.2598876953125	548.69580078125	1073.197265625	597.6724853515625	rectangle	"vOHUa <U, Jižní ron Sonay:
+/bez opuky/ s menším množstvím opuky 10,6."" Obr. 2%:4
+"	8	TextRegion	0.9080343842506408
+141.1121063232422	1059.13623046875	163.5384521484375	1079.0166015625	rectangle	"Z)
+"	10	TextRegion	0.8725023865699768

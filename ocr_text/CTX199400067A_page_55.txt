@@ -1,0 +1,52 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+188.34445190429688	366.5708923339844	1133.674072265625	1131.3746337890625	rectangle	"situace 10, věku u zdejších hradeb;
+
+způsob zkoumání vnitřního příkopu:
+
+z vnitřního příkopu jsme postupně odstraňovali výše uvedené
+vrstvy, které jej zaplnily během 9. a 10, stoleti, V rámci vrstv
+3 jsme zvlášť zkoumali doklady osídlení z doby jejiho narůstání
+(ohniště VI a VII a kůlová jamka 5). V sezóně 1974 jsme v sondě
+2a došli až na původní svah příkopu, tvořený vrstvou 4, kromě
+soklu tvořeného vrstvou 3, ponechaného těsně nad svahem vnitřníh
+příkopu okolo pece V (ta byla zkoumána až v r, 1975). V sondě 2b
+jsme v r. 1974 došli až na původní svah vnitřního příkopu kromě
+plochy nejstarších naplavenin (plocha ""m"" na plánu půdorysu 4.
+fáze sondy 2b z 22.8.1974) a přirozeně kromě soklu s OVHZ, pone-
+chaného v Z části Sondy 2b při její hranici se sondou 2a (tento
+sokl s DVHZ byl rozebrán také až v r. 1975). V sondě 2c nebylo
+v r. 1974 dosaženo nikde původního svahu příkopu tvořeného lu-
+žickou vrstvou 4; z příkopu v sondě 2c zůstaly v r. 1974 nevyzve
+nuté spodní naplavená vrstva (je to plocha ""n"" na plánu půdorysu
+3. fáze sondy 2c z 22.8.1974) a spodní horizont vrstvy 3 (plocha
+Uh"" a ""ch"" na plánu půdorysu 3. fáze sondy 2c z 22,8.1974),
+
+dokumentace:
+a) datum zkoumání vnitřního nříkonu:« v nrůhěhu relé výsbkumná
+"	0	TextRegion	0.9999998807907104
+202.3580322265625	1156.1090087890625	1141.4429931640625	1474.5552978515625	rectangle	"kampaně 1974 v sondě 2;
+
+původní označení objektu v terénní dokumentaci:
+
+na terénní skice z 24.7.1974, která zachycuje l. fázi výzkumu
+sondy 2c a 2. fázi výzkumu sond 2a - 2b, jsem vnitřní příkop
+označila jako objekt IV. Nadále jsem však toto označení pro
+vnitřní příkop neužívala a při definitivním označení objektů
+obdržela označení ""objekt IV"" vrstvička velice jemné tmavošedé
+hlinky mezi ohništěm III a pecí V v sondě 2a (popis viz výše),
+Vnitřní příkop opevnění v sondě 2 nemá tedy objektové číslo;
+"	1	TextRegion	0.99993634223938
+168.82435607910156	147.48117065429688	1149.0941162109375	252.61553955078125	rectangle	"1975 a 1978, kdy byl dokončen výzkum vnitřního příkopu v sondách
+2a - 2c (1975) a 2ch (1978), tj. v nálezových zprávách o sezó-
+nách 1975 a 1978;
+"	2	TextRegion	0.9999215602874756
+147.44384765625	420.7430114746094	172.3213348388672	441.8019714355469	rectangle		3	TextRegion	0.99969220161438
+519.8450317382812	51.73992156982422	545.5518188476562	67.76447296142578	rectangle		4	TextRegion	0.9988619089126588
+190.9369659423828	1189.384033203125	214.94161987304688	1208.8419189453125	rectangle		5	TextRegion	0.9909752011299132
+391.51995849609375	1112.71923828125	1057.2724609375	1164.4564208984375	rectangle	"nání vnitřního příkopu: v průběhu celé výzkumn
+NE PSV
+"	6	TextRegion	0.9687111973762512
+147.54493713378906	265.67901611328125	174.91339111328125	286.1754455566406	rectangle		7	TextRegion	0.94586443901062
+163.04757690429688	265.2128601074219	262.453369140625	287.11651611328125	rectangle	")) kůly:
+"	8	TextRegion	0.9394259452819824
+1127.4735107421875	308.60943603515625	1138.5240478515625	324.09637451171875	rectangle		9	TextRegion	0.9238967299461364

@@ -1,0 +1,49 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+225.5147857666016	1342.2183837890625	1105.844970703125	1460.537841796875	rectangle	"Výzkum Vyšehradu vyžádal si nákladu přes 850.000 Kč,z nichž
+é částky bylo nutno vynaložiti jak na odkopání navážek a něko-
+etrových fortifikačních náspů,kryjících zkoumané stavební pa-
+„tak i na konservaci odkrytého zdiva,
+
+Vydání na výzkum v jednotlivých létech 1094 a% 10728 vykazují
+
+ 
+"	0	TextRegion	0.9993463158607484
+408.6888732910156	1492.5809326171875	873.8798828125	1589.7899169921875	rectangle	"1924.............6+++B54.865.2
+1925.... E:
+1926.... ...++0 56.966.8
+1927.. *...0e 44,225,5
+
+   
+  
+  
+"	1	TextRegion	0.998753309249878
+1078.4049072265625	1650.3597412109375	1103.421142578125	1669.0916748046875	rectangle		2	TextRegion	0.9848667979240416
+148.35031127929688	487.6194152832031	1114.21630859375	666.2106323242188	rectangle	"Výzkum Vyšehradu byl proveden v létech 1924 až 1958,vlastní
+výzkumné práce v létech 1924 až 1955,práce zabezpečovací,konservace
+odkrytého zdiva a výzkumem získaných nálezů v létech 1956 až 1958.
+
+Postupně De prozkoumány tyto Oe
+
+V r.1924 až 1927 prozkoumáno okolí a vnitřek románské kaple
+sv.Martina,probadána t,zv.Libušina lázeň nad vyšehradským tunelem
+
+a nad ní odkryté základy budovy v hradním nádvoří,odkryta románská
+hasilika n-oi Čn.14 v Sohěslavově ulie1i a nad haailikou nalérajfcf
+"	3	TextRegion	0.9767991900444032
+63.20034790039063	123.69216918945312	1148.74658203125	446.9737243652344	rectangle	"Výkonná komise pověřila odborným vedením výzkumných prací
+vrch.r.Buchtelu,Dr.Gutha,řed.Dr.Stockého a msg.Šittlera,Tato užší
+komise,jejíž předsedou zvolen msg,Šittler,byla v dalších létech,kdy
+výzkum byl prováděn,doplněna dalšími členy,ústř r. Hlubinkou,min.r.
+Ing.Nyklíčkem,Dr.Bóhmem,vrch,stav.r.Ing,Almrem a Dr.Miillerem.
+
+Komise,zvaná dále - ""Komise pro výzkum Vyšehradu"" - zahájila
+svoji činnost schůzí,konanou dne 10,března 1924,jíž určeny disposice
+k- výzkumu a schváleno svěření technických prací stavební firmě
+Ing.Jar.Švarc a spol,Výzkumné práce byly započaty dne %.května 1924
+a to současně na úvou místech: před rom,rotundou sv,Martina a nad
+t.zv.Libušinou lázní,Odborným dohledem na pracovištích pověřeni
+Dr.Bóhm a Dr. Filip./ V dalších létech tuto funkci zastávali Dr.Svo-
+boda,Dr.Grbič,Dr.Pasternak,Dr.Jansová-Horáková,as.Vacek a od r.
+
+9000 -X Am « 020 Fm Afii3 3 =
+"	4	TextRegion	0.9646026492118835

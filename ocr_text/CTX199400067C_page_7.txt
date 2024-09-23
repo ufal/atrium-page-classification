@@ -1,0 +1,14 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+161.7931671142578	703.0669555664062	772.6043701171875	777.5994262695312	rectangle	"Pohled do sondy 2b (1974) od SV. Vpředu ji
+orientováné V-Z a její destrukční suti, vz
+opevnění. Foto J. Justova.
+"	0	TextRegion	0.9998935461044312
+158.1947021484375	1459.3817138671875	1197.638427734375	1542.796142578125	rectangle	"Sonda 2a-2c (1974). V Z destrukční suti budovy orientované
+V-Z. Stav po odstranění destrukce vnitř. hradeb. zdi, jež „ponechána
+na kontrol. bloku (v pozádí). Pohled od SV. Foto J. Justová.
+"	3	TextRegion	0.9990209341049194
+759.8357543945312	711.611572265625	1091.2481689453125	755.5782470703125	rectangle	"jižní podezdívka budovy
+vzadu vnitřní příkop
+"	4	TextRegion	0.996247947216034
+1074.0718994140625	68.47605895996094	1140.5574951171875	93.56340789794922	rectangle	"Tab.
+"	5	TextRegion	0.994110643863678

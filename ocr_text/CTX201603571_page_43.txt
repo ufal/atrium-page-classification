@@ -1,0 +1,69 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+600.8084106445312	1590.9718017578125	623.0122680664062	1606.4229736328125	rectangle		0	TextRegion	0.99999737739563
+171.24594116210938	992.68505859375	974.7017822265624	1181.36767578125	rectangle	"kostelem sv. Apolináře z roku 1740
+54.1- plán F. A. L. Hergeta z roku 1791, 2 - plán J. Jůttnera z roku 1815
+55. 1- císařský otisk stabilního katastru z roku 1842, 2 - plán Prahy z let 1842-1845
+
+56. 1 - grafika kostela sv. Apolináře s jižním svahem z roku 1825, 2 - pohlednice oko
+
+ 
+
+Anačmn; Alhartm > real 1000
+"	1	TextRegion	0.9991509914398192
+157.88694763183594	1273.47021484375	805.046875	1449.137939453125	rectangle	"dě. 1- 1OLOSTalle „1 UUETSKETO Uormova KOVEM TOKU 1929, £ 710
+„Studentského domova“ kolem roku 1926
+
+59. Výběrová dokumentace nálezů, č. sáčků S01-13, S01-18
+
+60. Výběrová dokumentace nálezů, č. sáčků S02-13, S02-15
+
+61 Výběrová dokumentace nálezů č sáčků S04-09 S05-16 S05-1
+"	2	TextRegion	0.9954105019569396
+166.9602508544922	1208.4771728515625	909.1057739257812	1319.8759765625	rectangle	"57.1- plán Prahy z ptačího pohledu z roku 1923, 2 - plán Prahy z roku 1938
+58. 1 - fotografie „Studentského domova“ kolem roku 1925, 2 - fotografie
+
+„Studentského domova“ kolem roku 1926
+"	3	TextRegion	0.988307774066925
+194.18028259277344	149.26345825195312	655.329345703125	792.8844604492188	rectangle	". Terénní dokumentace sondy S12, řez S12-RJ, r
+. Výběr z fotodokumentace, zahájení výzkumu, |
+. Výběr z fotodokumentace sondy S01.
+
+. Výběr z fotodokumentace sond S01, S02.
+
+. Výběr z fotodokumentace sond S02, S03.
+
+. Výběr z fotodokumentace sondy S03.
+
+„ Výběr z fotodokumentace sond S04, S05.
+
+„ Výběr z fotodokumentace sondy S05.
+
+. Výběr z fotodokumentace sondy S06.
+
+. Výběr z fotodokumentace sond S06, S07.
+
+. Výběr z fotodokumentace sondy S07.
+
+. Výběr z fotodokumentace sond S07, S08.
+
+. Výběr z fotodokumentace sondy S09.
+
+. Výběr z fotodokumentace sondy S10.
+
+, Výběr z fotodokumentace sondy S11.
+"	4	TextRegion	0.984525501728058
+179.20364379882812	131.0218048095703	908.1397094726562	309.37750244140625	rectangle	"dek. POTOTITIT UOKUTTICTLaALE SUM OL, PUUOTyS LPV, PCTKO LZ
+
+35. Terénní dokumentace sondy S12, řez S12-RJ, měřítko 1:20.
+
+36. Výběr z fotodokumentace, zahájení výzkumu, bagrování zjišťovacích son.
+37. Výběr z fotodokumentace sondy S01.
+
+38. Výběr z fotodokumentace sond S01, S02.
+"	5	TextRegion	0.9631096720695496
+181.24778747558597	1433.6639404296875	906.9179077148438	1460.1968994140625	rectangle	"51. Výběrová dokumentace nálezů, č. sáčků S04-09, S05-16, S05-18, S06-08
+"	6	TextRegion	0.9333863258361816
+287.604248046875	940.8502807617188	1041.0546875	1008.6434326171876	rectangle	"J. D. Hubera z roku 1769, 2 - grafika kláštera alžbětinek s kostelem P. Marie a
+
+m cv Analináře 7 roku 1740
+"	7	TextRegion	0.9308831691741944

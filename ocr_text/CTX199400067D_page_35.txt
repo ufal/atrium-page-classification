@@ -1,0 +1,18 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+254.69317626953125	1269.0484619140625	1089.743408203125	1503.1700439453125	rectangle	"cteré málo obvyklé formy okrajů libické mladohradištní
+ramiky z vrstvy 2, tj. z doby po r. 995 (1 - 6), pražská
+ramika ze střední-mladší doby hradištní z vrstvy 3 z 10.
+>l. (7 - 8) a libická napodobenina pražského hrnce s kali-
+»ovitým okrajem (9). 1 - 2 sonda 2b, vrstva 2 (55/74);
+sonda 2c, vrstva 2 (86/74); 4 - 5 sonda 2c, vrstva 2
+)/14); 6 sonda 2b, ornice/vrstva 2 (48/74); 7 - 8 sonda
+, vrstva 3 (121/74); 9 sonda 2c, destrukce vnitřní hra-
+
+ní zdi (117/74). Kresba H.Komárková (7 - 9) a J.Justová
+"	0	TextRegion	0.9999797344207764
+930.043212890625	1120.362060546875	949.644775390625	1144.6756591796875	rectangle		1	TextRegion	0.9899683594703674
+180.7372589111328	1129.3369140625	195.2538604736328	1155.1212158203125	rectangle		3	TextRegion	0.9793532490730286
+1052.014892578125	35.204830169677734	1116.4654541015625	55.00075149536133	rectangle	"Obr.
+"	5	TextRegion	0.961932361125946
+1117.8370361328125	36.14034652709961	1147.9444580078125	55.77243041992188	rectangle		7	TextRegion	0.9017788171768188
+179.34893798828125	850.6980590820312	193.02810668945312	874.1044311523438	rectangle		8	TextRegion	0.8474377393722534

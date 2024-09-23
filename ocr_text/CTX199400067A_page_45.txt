@@ -1,0 +1,72 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+149.2089385986328	614.0853881835938	1111.0435791015625	934.0546875	rectangle	"ohniště VI náleží zjevně do téhož časového horizontu, jako výše
+uvedené ohniště III a pec V i jako ohniště VII, které popíši
+vzápětí. Všechna tato ohniště leží ve vrstvě 3, a to zjevně v hor-
+ním horizontu vrstvy 3, který narostl (nebo byl navršen) až po
+zániku pravděpodobného kněžského domu. Ohniště III a také pec V
+ležely přímo nad zánikovým horizontem pravděpodobného kněžského
+domu, zatímco ohniště VI a níže uvedené ohniště VII ležely zjevně
+v témž horizontu, avšak dále od pravděpodobného kněžského domu,
+
+čí E o ní LASSE
+"	0	TextRegion	0.9999954700469972
+220.07000732421875	183.01412963867188	806.532470703125	368.6426696777344	rectangle	")
+))
+:)
+))
+.)
+
+datum zkoumání objektu: 21.8.1974;
+původní označení objektu v terénní dok
+plány č. : 5,6;
+
+fototabulky č.: 14: 24-28; 15: 29-30; 16:
+obrázky s nálezy č.: O
+"	1	TextRegion	0.9997393488883972
+155.00439453125	390.09478759765625	346.24530029296875	411.3131408691406	rectangle	"Ll) poznámka:
+"	2	TextRegion	0.9983396530151368
+225.9239044189453	1210.8458251953125	1163.2291259765625	1311.154296875	rectangle	"2/74: ""Sonda 2b, plocha - tj. její povrch s kusy rezavě červené
+písčité hlíny a struskou při jz. stěně sondy (nezasahuje
+mimo sondu !), hl. cca 130 cm pod dneš, povrchem,
+
+2.8., 5.8. ""
+"	3	TextRegion	0.9979682564735411
+147.7656707763672	473.1044006347656	270.5574951171875	490.2482604980469	rectangle	"Datování
+
+ 
+"	4	TextRegion	0.997401475906372
+152.21725463867188	1466.2952880859375	552.6377563476562	1547.847412109375	rectangle	"L) umístění v ploše výzkumu:
+u JZ stěny sondy 2b;
+"	5	TextRegion	0.997292459011078
+542.2314453125	45.89863967895508	575.463623046875	60.76231002807617	rectangle	"41
+"	6	TextRegion	0.9819824695587158
+179.49044799804688	162.5030975341797	383.9362182617188	178.95602416992188	rectangle	"3) dokumentace:
+"	7	TextRegion	0.963912308216095
+184.68118286132807	1306.938232421875	1091.10791015625	1383.8714599609375	rectangle	"160/74: ""Sonda 2b, vzorek červené hlíny z /ohniště/ IX. 21.8..
+l61/74: ""Sonda 2b, rozebírání /ohniště/ IX, 21.8,""
+"	9	TextRegion	0.9620264768600464
+156.26553344726562	518.0657958984375	776.5198364257812	569.2059326171875	rectangle	"LO, stoleti, zjevně nedlouho před rokem 995
+"	10	TextRegion	0.935209333896637
+122.90745544433594	1188.586669921875	1111.988525390625	1370.5546875	rectangle	"1)
+
+2)
+z)
+
+132/74:
+
+160/74:
+161/74.
+
+""Sonda 2b, plocha - tj. její povrch s kusy rezavě červe
+písčité hlíny a struskou při jz. stěně sondy (nezasahuj
+mimo sondu !), hl. cca 130 cm pod dneš, povrchem,
+2.8., 5.8. ""
+
+""Sonda 2b, vzorek červené hlíny z /ohniště/ IX. 21.8..""
+
+""Canda 22h. Fasahjrán“í /fnhn3iž+37 TY 91 a «4
+"	11	TextRegion	0.9292590022087096
+145.0623016357422	1215.963623046875	170.2268524169922	1234.8465576171875	rectangle		12	TextRegion	0.928001880645752
+145.8440399169922	1360.3692626953125	167.6723175048828	1379.3118896484375	rectangle		13	TextRegion	0.8679233193397522
+147.28541564941406	387.8600769042969	184.2054443359375	406.9334411621094	rectangle	"11)
+"	14	TextRegion	0.838657021522522

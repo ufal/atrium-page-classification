@@ -1,0 +1,3 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+1111.505859375	969.9667358398438	1308.068359375	987.38134765625	rectangle	"Bůh vom Saloslun.
+"	1	TextRegion	0.9883005619049072

@@ -1,0 +1,4 @@
+IMAGE_NAME	DESCRIPTION	LANGUAGE	BBOX_1	BBOX_2	BBOX_3	BBOX_4
+image	Soupis sáčků	cs	(418, 838)	(747, 838)	(747, 866)	(418, 866)
+image	Soupis		(418, 843)	(586, 841)	(586, 864)	(418, 866)
+image	sáčků		(607, 840)	(747, 838)	(747, 861)	(607, 863)

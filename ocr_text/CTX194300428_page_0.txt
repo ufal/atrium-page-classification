@@ -1,0 +1,123 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+686.5680541992188	524.4503173828125	976.1052856445312	782.0474853515625	rectangle	" 
+
+obce Osek, ležící jižně od Hradiště.
+Proti němu hlavní důvody vedl již
+Tomek v ÓÓM. z roku 185%, v č. 4
+
+ 
+"	0	TextRegion	0.9998571872711182
+1317.7496337890625	520.72998046875	1602.94287109375	782.980224609375	rectangle	"Cosi tisíciletého, dávno zapome-
+nutého, mluví k nám řečí vzdále-
+mých, barbarských melodií, stano-
+me-li před vchodem do Hradiště.
+Misto, které nám připomíná, že i bozi
+jsou smrtelní, že hynou jako duhové
+květy pradávných jar. A pozvědne-
+me-li zrík s Hradiště k posvátní
+mu Křemenáči u Břas, vzpomeneme,
+jak lidé na Křemenáč přinášeli
+bohům za oběť nejvzácnější dary
+aby si ma mích vyprosili jejich
+
+Z-ková místa mají svou
+která je oblétá jako
+V. Barchánek,
+
+ 
+
+ 
+
+   
+"	1	TextRegion	0.9998018145561218
+58.67120361328125	505.7213134765625	350.128173828125	669.3460083007812	rectangle	"Ademe-li po silnici od Břas k obci
+Březině, zříme před sebou zalesněný
+
+Do něho vedou dva vchody, kde val
+s obou stran na ochranu vchodu
+ndvýbá dovnitř.
+"	2	TextRegion	0.9996515512466432
+377.9683837890625	711.0560913085938	665.1445922851562	779.0006103515625	rectangle	"Před válkou, roku 1914, prováděl
+jsem vykopávky na Hradišti spo-
+lečně s prof, dr. Jár, Ph me
+kořist byla bohatší, některé
+"	3	TextRegion	0.9994211196899414
+77.20708465576172	766.1769409179688	351.48065185546875	778.3187255859375	rectangle	"fe všech stran, zojména se strany
+"	4	TextRegion	0.9994157552719116
+59.49380874633789	250.5056610107422	396.26849365234375	294.1017761230469	rectangle	"Smichow, Smetanagasse 15. - Fernruf 412.82
+Smíchov, Smetanova ul. 15. - Telefon 412-82
+"	5	TextRegion	0.9993358254432678
+999.8562622070312	659.7589721679688	1290.370849609375	777.3197021484375	rectangle	"A kraje at zvolna, postupně
+zmovu rozmí dávno vyhaslé ohně
+pravěkých táborů, pohřebních hra-
+
+nie a rozmetaných obětišť, a tak sé
+jen pomalu rozptyluje tma, která
+zalila nejstarší, nepsané dějiny na-
+šich zemí. Nevíme ještě dnes, jaké
+"	6	TextRegion	0.999242901802063
+372.3108520507813	548.098876953125	668.8276977539062	699.8667602539062	rectangle	"První, kdo na Hradišti březinském
+kopal « je popsal, byl V. Krolmus
+roku 183%, Následujícího roku s ním
+zde prováděli vykopávky Kalina
+z Jůthensteina a hrabě Kašpar
+Sternberg, majitel březinského a
+radnického panství. Některé před-
+
+ 
+"	7	TextRegion	0.9984139204025269
+683.8775024414062	416.0210266113281	978.005615234375	523.2216796875	rectangle	"mám dodnes ve svých sbírkách a ji
+né jsem odevzdal museu,
+Hlavní vykopávky jistě na
+Hradišti provedeny y, takže
+lze očekávati ještě ipnohem vydat-
+nější kořist.
+
+ 
+"	9	TextRegion	0.9982870221138
+60.16902542114258	678.1438598632812	349.86932373046875	753.709716796875	rectangle	" 
+"	10	TextRegion	0.9978741407394408
+67.7017822265625	161.74867248535156	393.7597351074219	200.071533203125	rectangle	"Mitteleuropiiische Zeitungsausschnittskanzlc
+Středoevropská výstřižková kancelář
+"	11	TextRegion	0.997462511062622
+1003.9390869140624	603.0811157226562	1292.3807373046875	646.857177734375	rectangle	"Po druhó bylo žiradiště asi osa-
+zeno našimi předky na úsvitě čes-
+kých dějin, a to velmí záhy.
+"	12	TextRegion	0.9966844916343688
+363.3888549804688	418.72760009765625	662.7796630859375	541.2901000976562	rectangle	"mnohde přirozenou
+věnou. Uvnitř. Hradiště lze dobře
+VEST n ener Na
+
+: budova, nejspíše
+Polední útočiště pří dobývání ran.
+"	13	TextRegion	0.9957619309425354
+1009.2863159179688	456.0818786621094	1294.1265869140625	596.5722045898438	rectangle	"Podle keramiky, kterou jsem na
+Hradišti nalezl, bylo Hradiště obydle-
+o a dek
+
+byvatelé, usedli poděl řeky
+o idovali svým četným zemře-
+lým honosné mobyly v místech u
+Sv. Kříže, který jest poblíže Hra-
+diště.
+"	14	TextRegion	0.9882022738456726
+83.9741439819336	452.53759765625	328.090576171875	489.0079650878906	rectangle	"  
+
+HRADIŠTĚ BŘE,
+UT RADNIC.
+"	15	TextRegion	0.9736360907554626
+1317.5130615234375	432.2925720214844	1611.74560546875	510.1354064941406	rectangle	" 
+
+ 
+
+žádáti od mohutného epenáče
+výrazného pahorku přotí Hradišti
+u osady Břas, který patrně sloužil
+pradávným obyvatelům Hradiště za
+obětiště. ,
+
+ 
+"	16	TextRegion	0.9169267416000366
+1513.82080078125	762.0938110351562	1606.438232421875	774.1170654296875	rectangle	" 
+"	17	TextRegion	0.914068341255188
+1321.26513671875	763.3838500976562	1404.25634765625	775.8155517578125	rectangle		19	TextRegion	0.8407673835754395

@@ -1,0 +1,30 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+1027.71044921875	44.19160461425781	1124.65771484375	75.20066833496094	rectangle	"Tab. 13
+"	2	TextRegion	0.9997032284736632
+196.1170959472656	1403.67431640625	1137.1600341796875	1489.1602783203125	rectangle	"onda 2a-2b (1974). V popředí základ jižní podezdívky budovy
+rientované V-Z, za ní část jejích destrukčních sutí. V pozadí
+
+nitřní příkop opevnění a sutě vnitř. hradeb. zdi. Pohled od S,
+PYPEMB TST
+"	3	TextRegion	0.9993894100189208
+166.71923828125	633.6189575195312	946.0748291015624	738.6914672851562	rectangle	"Sonda 2a-2c (1974). Část základu jižní podezdívky bu
+orientované V-Z. V pozadí (sonda 20) dosažena úroveň
+vrstvyJz,10, stol, Pohled od VSV.. Vpravo od podezoivky
+zbytku západní příčky v budově. Foto J.Justova.
+"	4	TextRegion	0.995119571685791
+179.67733764648438	1407.88525390625	433.832763671875	1490.0714111328125	rectangle	"Sonda 2a-2b (1974
+orientované V-Z, :
+
+vnitřní příkop op:
+€n+o 71 1 př p op!
+"	5	TextRegion	0.9694674611091614
+578.4328002929688	592.6719970703125	1067.69189453125	715.7996826171875	rectangle	"AČ, NEGO
+SL 125a, b
+
+kladu jižní podezdívky budovy,
+
+sonda 2c) dosažena úroveň povrchu
+
+ad VSV. Vpravo od pooezolivky čast
+FxMkA ""1 baetnyvn.
+"	6	TextRegion	0.8320453763008118

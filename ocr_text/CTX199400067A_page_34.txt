@@ -1,0 +1,87 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+278.78228759765625	900.5569458007812	1117.7850341796875	1307.8460693359375	rectangle	" 
+
+""Sonda 2c, slavnikovská hnědá vrstva v okolí ohniště
+nad základem kam, zdi Z-V, 29.7.""
+
+""Sonda 2b, čištění pásu kamenů při jižním obvodu velké
+a mocné destr. vrstvy (resp, jámy s destr.) jižně od
+zdi Z-V a východně od bloku s destrukcí, 29,7,.,30.7.""
+
+""Sonda 2b, definitivní jemné čištění pásu kamenů při
+jižním obvodu velké a mocné destr.vrstvy (resp. jámy
+s destrukcí) jižně od zdi Z-V a východně od bloku
+
+s destrukci hradby. 30.7., 31.7., 1,8., 2.8.""
+
+""Sonda 2b, hrubé čištění východního úseku pásu kamenů
+při jižním okraji jámy s destrukcí jižně od zdi Z-V
+
+a východně od bloku s destrukcí hradby. 30.7.
+
+Zabrána též část slavník, hnědé /perník/ vrstvy při
+jv. stěně sondy, jižně od pásu kamenů, o ploše cca
+1,5 x 1,5 m, po úroveň spodku pásu kamenů, 30.7.“""
+"	0	TextRegion	0.9997641444206238
+156.826171875	1053.7430419921875	310.88299560546875	1076.75390625	rectangle	"31)120/74:
+"	1	TextRegion	0.99954754114151
+420.7245788574219	1436.037353515625	591.223876953125	1533.7947998046875	rectangle	"pás kamenů
+při jižním
+okráji jam
+s destruke“
+"	2	TextRegion	0.9980127811431884
+296.4532470703125	332.398193359375	1134.802001953125	539.0880126953125	rectangle	"nda 4d, slavníkovské hnědošedá vrstva, 50/60 - cca 7(
+cm, 23,-24,7,""
+""Sonda 2d, začišřŤování po horizont 70/80 cm (v němž
+vyznačeny objekty ve slavník, vrstvě). 24.7.""
+
+: ""Sonda 2c, 0 I, 70-80 cm = již hnědá slavník, vrstva
+pod. kam. destrukcí hradby. 26.7.,29.7.""
+
+""Sonda 2c, povrch hnědé slavník. vrstvy na dně O I,
+hl. 70 am. Fa náškby 28.3 4 ihre 49.
+"	3	TextRegion	0.997624695301056
+238.13999938964844	123.6185302734375	1185.407958984375	436.84222412109375	rectangle	"4/74:
+
+9/74:
+2/74:
+3/74:
+
+5/74:
+
+""Sonda 2c, jv. půle sv. části sondy 2c (tj. prostoru
+mimo destrukci hradby), čištění povrchu slavníkovské
+vrstvy. 22.7."" 0br.17;18.
+""Sonda 2a + 2b, čištění povrchu kam. destrukce p
+jižní líciy-z (ve slavník. vrstvě).22.7., 23.7.,24.7.""
+""Sonda 2b, obnažování a začišřování jižního okraje 20.
+destrukce v jižním sousedství zdi V-Z. 23,-24,7."" Obr.I53Y.
+""Sonda 2d, slavníkovská hnědošedá vrstva, 50/60 - cca 70
+cm, 23,-24,7,""
+
+""Sonda 2d, začišřŤování po horizont 70/80 cm (v němž
+vyznačeny objekty ve slavník, vrstvě). 24.7.""
+
+ 
+
+ 
+"	4	TextRegion	0.9946637153625488
+168.33084106445312	502.5501403808594	302.7363586425781	528.0464477539062	rectangle	"7)108/74:
+"	5	TextRegion	0.9939938187599182
+539.3118286132812	51.46733093261719	572.55712890625	67.85612487792969	rectangle		6	TextRegion	0.9911482334136964
+154.52586364746094	443.1435546875	310.0840759277344	468.0093688964844	rectangle	"26)107/74:
+"	7	TextRegion	0.9831044673919678
+160.8861541748047	1162.0701904296875	320.1949157714844	1186.1141357421875	rectangle	"32)121/74:
+
+ 
+"	8	TextRegion	0.979666531085968
+159.2577667236328	202.8238525390625	305.3275451660156	230.79129028320312	rectangle	"22) 99/74:
+"	9	TextRegion	0.9702889919281006
+157.2556610107422	258.5689392089844	305.3801574707031	297.8771667480469	rectangle	"23)102/74:
+"	10	TextRegion	0.967475414276123
+157.58770751953125	384.0162963867188	309.35333251953125	414.5445251464844	rectangle	"25)105/74:
+"	11	TextRegion	0.9545441269874572
+157.07659912109375	908.260498046875	303.94439697265625	934.23828125	rectangle	"29)112/74:
+"	12	TextRegion	0.9491390585899352
+160.30445861816406	322.107177734375	308.1612548828125	358.24761962890625	rectangle	"24)103/74:
+"	14	TextRegion	0.9245180487632751

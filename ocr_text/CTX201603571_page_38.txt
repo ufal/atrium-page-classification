@@ -1,0 +1,61 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.6067504882812	1590.8792724609375	623.7769775390625	1606.9014892578125	rectangle		0	TextRegion	0.9999924898147584
+175.31585693359375	598.0906982421875	1012.5306396484376	725.1864624023438	rectangle	"Zlomky keramiky byly získány i z kontextu výškově nevýrazných vrstev (mocno:
+olem 0,3 m) uložených v některých sondách na povrchu podloží (obr. příl. 7-10). Jednal
+
+e kontexty se zřetelným podílem antropogenních příměsí (uhlíky, keramika, zvířecí kos
+"	1	TextRegion	0.9999639987945556
+164.82342529296875	763.3161010742188	1031.806396484375	1056.780517578125	rectangle	"Celkově byla raně středověká keramika získána z 8 sond (S01, 02, 04, 05, 06, 07,
+09, 10, 11) z celkového počtu 12 zjišťovacích sondáží. Jejich distribuce pokrývala takřka
+celou sledovanou plochu od nejsevernější sondy S01 po nejjižnější S11 (obr. příl. 5).
+Společně skeramikou se vtěchto kontextech objevovala i železná struska, jejíž
+přítomnost můžeme spojit s výrobou a zpracováním železa, která probíhala na daném
+místě či v blízkém okolí (S04, 05, 06, 07, 09, 11, celková váha strusky vyzvednutá ze
+
+sledované plochy činila cca 1,7 kg).
+"	2	TextRegion	0.99980229139328
+165.25698852539062	1068.756591796875	1023.2608642578124	1275.81103515625	rectangle	"Souhrnně je možné považovat získané nálezy za intencionální, tedy v daném místě
+člověkem uložené. Jejich nevýrazné množství však vypovídají, že se z hlediska hustoty
+osídlení jedná o místo situované na okraji sídelní plochy, tj. periferie ve vztahu k polohárr
+blíže toku Botiče, případně místo slokální a časově přerušovanou sídlištní aktivitou
+
+nezemědělského charakteru (usedlost. dílna ai.).
+"	3	TextRegion	0.9996845722198486
+149.14370727539062	1273.30615234375	1051.1251220703125	1454.9405517578125	rectangle	"HEZEMEGEISKÉTO CTTař akler U (USeuiost, Uld aj.)
+
+Po epizodě raně středověkého osídlení zde následovala časově dlouhodobější
+etapa spojená se zemědělským využíváním místa, bez známek stabilního osídlení či
+zástavby. Tento horizont je zastoupen místy až 0,6 m mocnou značně homogenizovanou
+
+kulturní vrstvou, která vedle různých antropogenních příměsí obsahuje obzvláště časově
+"	4	TextRegion	0.999612271785736
+158.9202880859375	735.808837890625	230.52456665039065	751.959716796875	rectangle	"a další).
+"	5	TextRegion	0.9991106390953064
+167.6036376953125	212.741455078125	1016.3880615234376	575.1006469726562	rectangle	"pochybách, že se jedná pecní (pyrotechnologické) zařízení určené k výrobě a zpracovár
+železa (tavící či vyhřívací pec). Přítomnost keramiky v zásypech objektů umožnila datova
+dobu jejich existence a zániku do širšího intervalu závěru raného středověku (2. pol. 10
+stol až počátek 13. stol.). Podstatně rozsáhlejším objektem byl výkop s nepravidelnýr
+dnem V03 dokumentovaný na stěně sondy S09 (S09-RJ, obr. příl. 26). Vzhleder
+k možnému rozměru zjišťovací sondy nebylo možné zjistit jeho celkový rozsah. Z jeh
+výplně byla získána opět kolekce raně středověké keramiky, které dominovaly fragment
+tuhové zásobnice, dále pak kousky železné strusky, zlomky vypálené pecní stěny
+
+nevelký soubor zvířecích kostí.
+"	6	TextRegion	0.9873113632202148
+174.10963439941406	113.59724426269533	1014.3347778320312	443.4370727539063	rectangle	"dhaleného na západní straně této sondy. Vypálené stěny jámového zahlouben
+řítomnost diabasů, železné strusky a železné rudy vjeho výplní nás nenechávají n
+ochybách, že se jedná pecní (pyrotechnologické) zařízení určené k výrobě a zpracovát
+eleza (tavící či vyhřívací pec). Přítomnost keramiky v zásypech objektů umožnila datové
+obu jejich existence a zániku do širšího intervalu závěru raného středověku (2. pol. 1.
+tol až počátek 13. stol.). Podstatně rozsáhlejším objektem byl výkop s nepravidelný!
+
+nem V03 dokumentovaný na stěně sondy S09 (S09-RJ, obr. příl. 26). Vzhledet
+
+  
+
+možnému rozměru z
+
+ 
+
+vací sondy nebylo možné zjistit jeho celkový rozsah. Z jeh
+"	7	TextRegion	0.9845908880233764

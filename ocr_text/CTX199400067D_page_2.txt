@@ -1,0 +1,31 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+75.715576171875	657.75244140625	1135.632568359375	785.7542724609375	rectangle	"Sonda 2a - 2c (1974). V popředí sonda 2a + 2b ve 3.fázi výzkumu,
+
+vzadu sonda 2c ve 2.fázi výzkumu, Sondou 2a+2b probíhá od V k Z
+
+základ jižní pod r svačpodonnéh= kněžského domu z 10.sto-
+ti
+
+etí. Vlevo okraj vnitřního příkopu. Pohled od V.
+oto: M.Šimana -= J.Morávek,
+"	2	TextRegion	0.9972503781318665
+120.4481430053711	1370.1385498046875	1121.795166015625	1459.17431640625	rectangle	"Sonda 2a - 2b (1974), 3.fáze výzkumu, Od V k Z sondou probíhá
+základ jižní podezdívky pravděpodobného kněžského domu. Vlevo
+okraj vnitřního příkopu, Pohled od V. Foto: M.Šimana - J Morávek.
+"	3	TextRegion	0.9963980913162231
+1042.88916015625	39.18692779541016	1098.3824462890625	56.23964309692383	rectangle	"Tab.
+"	4	TextRegion	0.9899929165840148
+1107.1771240234375	39.046119689941406	1136.7120361328125	57.139591217041016	rectangle		5	TextRegion	0.9889421463012696
+915.4384765625	673.3912353515625	1097.8743896484375	744.6066284179688	rectangle	"fázi výzkumu,
+íhá odVkZ
+lomu z 10.sto-
+"	6	TextRegion	0.969909965991974
+960.3931884765624	481.9098510742188	991.2868041992188	503.0572814941406	rectangle		7	TextRegion	0.9553018808364868
+917.2493896484376	526.1382446289062	1016.5391235351562	575.6138916015625	rectangle	"č. neg.
+81 256
+"	8	TextRegion	0.9496246576309204
+971.87255859375	1237.630615234375	999.5335083007812	1260.0931396484375	rectangle		9	TextRegion	0.9486501812934875
+167.11801147460938	1376.5723876953125	580.8228149414062	1450.2816162109375	rectangle	"Sonda 2a - 2b (1974), 3.fáze
+základ jižní podezdívky pravd
+okraj vnitřního příkopu. Pohl
+"	10	TextRegion	0.8756092190742493

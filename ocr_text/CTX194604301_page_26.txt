@@ -1,0 +1,3 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+40.45869064331055	793.7498779296875	295.268310546875	811.2366943359375	rectangle	"siehe:Fundbericht.
+"	3	TextRegion	0.9708616733551024

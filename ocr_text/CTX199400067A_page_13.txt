@@ -1,0 +1,47 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+163.30496215820312	1435.210205078125	1129.612060546875	1538.68408203125	rectangle	"5. lužická kulturní vrstva (na níž spočívala vrstva 3), většinou
+
+vořená hnědošedým hlinitým jílem, žíhaným narezle žlutým pískem
+"	0	TextRegion	0.9999215602874756
+102.71925354003906	1022.61865234375	1136.4228515625	1385.1767578125	rectangle	"vrstva 2 (zkráceně: V.2);
+
+3. mohutná opuková destrukce s nápadnými stopami požáru, datova-
+telná do r. 995, vklíněná mezi přemyslovskou vrstvu 2 a starší
+vrstvu 3 z 10. stol, Běžela v pásu od SZ k JV souběžně s JZ obvodem
+předhradí; = destrukce vnitřní hradební zdi (zkráceně: DVHZ);
+
+4. velmi kvalitní hlinitá kulturní vrstva většinou hnědošedé
+barvy, z 10. stol. (překrytá na jihozápadě sondy 2a + 2b destrukcí
+
+Vnitřní hradební zdi a severovýchodněji vrstvou 2), = vrstva 3
+"	1	TextRegion	0.9998806715011596
+124.52178955078124	138.26873779296875	1116.7723388671875	577.4131469726562	rectangle	"signalizovalo přítomnost destrukce opevnění, V SV části sondy 2a
+spočívalo pod ornicí kulturní souvrství s četnými nálezy. Proto jsi
+po dosažení maximální hloubky 90 cm (v SV úseku mezi metry 3 - 9,2
+m, měřeno od JZ) až 110 cm (v JZ úseku mezi metry O - 3 m, kde ka-
+menná destrukce šla směrem k JZ stěně sondy do hloubky) v sondě 2a
+přerušili práce a výkop jsme rozšířili o sondu 2b (o rozměrech
+
+6,5 x 9,2 m) na celou plochu původní verze půdorysu domu č.p. 420,
+V sondě 2b jsme pracovali do úrovně prozkoumání sondy 2a a dále
+
+jsme zkoumali obě sondy zároveň,
+"	2	TextRegion	0.9990516304969788
+154.62318420410156	528.0613403320312	1122.6729736328125	780.255126953125	rectangle	"sme zkoumali obě sondy zároveň,
+
+Sonda 2a + 2b zachytila velmi podstatné části sídlištního okrsku
+ravděpodobného kněžského domu z 10, stol., který stál na předhradí
+| JZ hradby. Sonda 2a + 2b zachytila , popisováno v hlavních rysech
+d dnešního povrchu do hloubky (tj, ve sledu proti chodu času)
+
+ze oa | Ss ——
+
+   
+"	3	TextRegion	0.9978814721107484
+169.0297088623047	833.3897705078125	1072.9569091796875	1012.3648681640624	rectangle	"L, Ornice (Grn) = Vrstva 4 Azkracene: V.l);
+2. poslavníkovská (přemyslovská) kulturní vrstva z ll, a 12.
+ol., tj. tmavošedá hlinitá vrstva s charakteristickou příměsí
+
+z
+„omků spálené i nespálené opuky, rozvlečené |pobořené hradby =
+"	4	TextRegion	0.9947351217269896

@@ -1,0 +1,24 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+86.68023681640625	318.1263732910156	1023.9705200195312	758.3930053710938	rectangle	"1982-83 - KULT: Středověk. LOK: Okolí hájenky ""Prokop"" . OKOL : Těžba stříbra a barevných ko-
+vů, zjišťovací výzkum, NÁLEZ: K doplnění poznatků o pravěké a středověké těžbě zlata, stříbra a barev-
+ných kovů na Příbramsku pokračoval AŮ v rámci hospodářské smlouvy sn.p. Geoindustriíve výzkumu u Bo=
+hutfna-Vysoké Pece, Byl soustředěn západně od obce do lesa, cca 300 m za hájenkou ""Prokop“, kde již po
+předchozích letech jsme zkoumali terénní doklady po hornické práci, V r. 1983 byl výzkum zaměřen na žlab
+s výdřevou a na odvaly v jeho okolí, Podle stratigrafických pozorování análezů keramiky /též tyglíků / jsme
+zjistili, že těžba a hutnění rud obsahujících stříbro a barevné kovy se tam provozovala v několika údobích
+od 13. do sklonku 15, stol, Archeologický výzkum učinil též projgeology závažný objev nálezem stříbroolov=
+maté rudy ve vrstvě s keramikou ze 14. a 15. stol, Výskyt tétohorniny, která je známa pouze ze šachty Dr-
+kolnov=Lilka, nebyl ve zkoumaném prostoru dosud zaznamenán, Proto tam n.p, Geoindustrie provede vrt
+za zjištěním, zda žíla byla zcela nebo jen částečně ve středověku vytěžena. Analýzy výzkumem získaných
+strusek provedl n.p. Rudné doly v Příbrami, Z výzkumu terénních dokladů po těžbě a hutnění kovů u Bohu-
+tína i na dalších lokalitách vyplývá, že hornická archeologie získává zkoumáním nejen nové historické poz-
+natky o těžbě rud, ale zjištěné výsledky jsou i geologům jednou z opor pro vyhledávání ne zcela vytěžených
+ložisek kovů, ULOŽ: Zatím AÚ ČSAV. ,
+"	0	TextRegion	0.9999040365219116
+125.15460968017578	274.7938537597656	359.7637939453125	292.3755187988281	rectangle	"5, BOHUTIN, okr. Příbran
+"	1	TextRegion	0.9996292591094972
+700.3876953125	773.4620361328125	791.2343139648438	790.093017578125	rectangle	"J. Kudrnáč
+"	2	TextRegion	0.996632993221283
+93.3992691040039	797.1712036132812	351.9679260253906	819.0402221679688	rectangle	"DEO 1:82.1993
+"	3	TextRegion	0.9949127435684204
+1072.88916015625	120.83844757080078	1116.415283203125	186.1895446777344	rectangle		4	TextRegion	0.9859817028045654

@@ -1,0 +1,18 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+1024.2952880859375	60.63914489746094	1120.5013427734375	87.31587219238281	rectangle	"Tab. 15
+"	0	TextRegion	0.999778926372528
+165.7770538330078	660.9732666015625	1076.597412109375	755.4674072265625	rectangle	"Sonda 2b (1974). Vnitřní příkop opevnění s ohništi č. VI a VI
+Vzadu kontrolní blok s ponechanou sutí vnitřní hradební zdi.
+
+Pohled od JV. Vpravo čast destrukční suti pravděpodobného kněžského
+
+domu z 40. století. Foto J.Justova“
+"	3	TextRegion	0.9988170862197876
+894.2911376953125	1232.943359375	996.0946044921876	1287.1905517578125	rectangle	"če .
+Si 136
+"	4	TextRegion	0.9672868847846984
+160.945068359375	1409.6044921875	1052.9781494140625	1490.361572265625	rectangle	"“
+Sonda 2b (1974). Ohniště č. VI/We vnitřním příkopu opevnění
+Ve stěně sondy suť vnitř ní hradební zdi. Pohled od SV.
+Foto J.Justov
+"	5	TextRegion	0.9514178037643432

@@ -1,0 +1,30 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+164.56724548339844	996.5182495117188	1164.82080078125	1204.5616455078125	rectangle	"zabezpečení vnitřního opevnění hradu,
+
+Jednou z význačných památek gotických je zbytek mohutné vý-
+chodní brány,t.zv.brány Karlovy,jejíž podobu zachytil známý prospekt
+Prahy Jiljího Sadelera z r.1606,Brána stála ještě po r,1680,jak svěd-
+čí měděrytina Folperta van Ouden-Allena,vytištěná r.1685 ve Vídni,
+
+Po sboření brány zachována pouze přízemní partie její východní části
+s náznaky klenutí a s přilehlým zbytkem městských hradeb v délce asi
+200m.Zachovaná část brány byla po provedení výzkumu konservována a
+
+zabezpečena mříží,
+"	0	TextRegion	0.9875267148017884
+131.2912139892578	130.60755920410156	1162.7215576171875	328.4184875488281	rectangle	"nána kaple Božího Těla,v r.1355 kaple sv.Kříže,1380 kaple sv.Petra,
+v 2.pal.l4,století kostel sv.Jana Stětí,v r.1561 a 1396 vodovod
+
+1575 dům žáků,Ve východní části Vyšehradu,kde vyrůstají domy měšťan-
+ské, jsou připomínány v r.1400 rychta,r.1412 škola a j.V podhradí,
+
+v tehdejších Psářích,byl již před r.1364 zřízen špitál a kostel
+Pokory Panny Marie i kaple sv,Hyrolita,z r.1395 je zmínka o králov-
+ské lázni pod severním svahem Vyšehradu,
+
+Z gotických stavebních památek byly výzkumem od
+
+za: 2 a ht km Sán ká sss dl álkí S Pakoda Vkesáa NĚ Sa 8"" P oo
+
+ 
+"	1	TextRegion	0.9544697999954224

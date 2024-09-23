@@ -1,0 +1,3 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+1159.7161865234375	959.1107788085938	1330.1229248046875	974.30859375	rectangle	"Bf von Osli.
+"	0	TextRegion	0.9998038411140442

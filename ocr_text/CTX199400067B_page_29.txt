@@ -1,0 +1,44 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+170.04425048828125	980.955078125	1117.1724853515625	1499.83544921875	rectangle	"do vnitřního příkopu opevnění (na kontrolním bloku uprostřed
+zachována destrukce vnitřní hradební zdi; vzadu v sondě 2c
+tato destrukce skrývána). Pohled od JV,
+
+Tab. 8:15, č. neg. 51 1l5a, b. Sonda 2c (1974). Pohled
+od SV. Vpředu dosažen povrch vrstvy 10,století, Vzadu povrch
+destrukce vnitřní hradební zdi, do něhož při JZ stěně sondy
+zahloubena polozemnice (7) I a polozemnice (??) II.
+
+Tab. 8:16, č. neg. 51 116. Sonda 2c (1974). Povrch de-
+strukce vnitřní hradební zdi v západním rohu sondy 2c. Pohled
+od SSZ., Z horního horizontu destrukce vnitřní hradební zdi vy-
+zvednut zásyp části polozemnice (??) II v sondě 2c.
+
+Tab. 9:17, č. nege 51 117a, b. Sonda 2c (1974). Destruk-
+ce vnitřní hradební zdi (snímání), Pohled od SV. V Z rohu sondy
+2c vyzvednut zásyp části polozemnice (?) I v sondě 20,
+"	0	TextRegion	0.9993091821670532
+543.6170654296875	34.87086868286133	579.5831298828125	54.30377197265625	rectangle		1	TextRegion	0.9970071911811828
+700.31201171875	14.940837860107422	1030.8995361328125	76.18501281738281	rectangle	"A Komentar
+TextyVk fototabulkám
+Sonda 2a -= 2d (1974) -
+"	2	TextRegion	0.99045068025589
+154.9033966064453	250.6507568359375	1108.9959716796875	815.6110229492188	rectangle	"ku (v pozadí). Pohled od SV.
+
+Tab. 5:9, č. neg. 51 109. Sonda 2a (1974). Pohled do
+vnitřního příkopu opevnění (od SSZ).
+
+Tab. 5:10, č. neg. 51 110a, be Sonda 2a, 2c (1974).
+Vpředu (sonda 2a) část jižní podezdívky orientované budovy,
+s destrukčními sutěmí v okolí. Vzadu začištěn povrch suti
+vnitřní hradební zdi. Pohled od V.
+
+Tab. 6:11, č. neg. 51 llla, b. Sonda 2a-2c (1974). Část
+základu jižní podezdívky budovy orientované V-Z, s destrukční-
+mi sutěmi okolo. Na rozhraní sond 2a a 2e JV část ohniště č,
+III, podloženého opukovými placáky. Pohled od Z,
+
+Tab., 6:12, č. neg. 51 112. Sonda 2a, 2c (1974). JV půle
+ohniště č, III (podloženého opukovými placáky) na rozhraní
+sond 2a a 2c. Pohled od V,
+"	3	TextRegion	0.9801284670829772
+186.4408721923828	1483.868408203125	212.54737854003903	1500.60595703125	rectangle		4	TextRegion	0.8269479274749756

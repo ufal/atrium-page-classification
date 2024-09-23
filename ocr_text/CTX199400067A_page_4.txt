@@ -1,0 +1,41 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+595.8580932617188	33.308135986328125	623.1484985351562	50.39376449584961	rectangle		0	TextRegion	0.9977430105209352
+217.9787750244141	183.1554412841797	1049.20947265625	501.2548522949219	rectangle	"Hozhraní Vrstvy ) A VDrsívy 4 ecoces0ce:e:00so0ce D4
+Vratva 4 oc... cc. 0.cc0c0.occ0ce .... 54
+Seznam vrstev, objektů a kůlových jamek, objeve-
+
+ných v sondách 2a - 2d při výzkumu v roce 1974.. 55
+
+8, ZHODNOCENÍ VÝSLEDKŮ VÝZKUMU ................+0+e 58
+9. SEZNAM NÁLEZŮ ..............4004e00000000ccnnnce Ol
+
+ 
+
+Keramické aguamanile «..............+...0+++cc+e 86
+Keramická torza a 2 charakteristické střepy ++.. 90
+"	1	TextRegion	0.9911973476409912
+977.3328247070312	215.1165313720703	1005.5964965820312	237.0365753173828	rectangle		2	TextRegion	0.986354410648346
+195.0070953369141	708.8284912109375	970.8826904296876	780.50390625	rectangle	"11. PŘÍLOHY .................440404404000000000 noc
+12. SEZNAM POUŽITÝCH ZKRATEK 2.2.2222
+"	3	TextRegion	0.9761781096458436
+223.35401916503903	345.5978088378906	1031.0755615234375	716.4348754882812	rectangle	"DO | AZUB V DAD VLADVMU oc000c0ccocococococc0e JO =
+
+jo SEZNAM NÁLEZŮ ............0.400400000000s00nnnce Ól =
+
+Keramické aguamanile «..............+++..+++++<e 86 =
+Keramická torza a 2 charakteristické střepy «+«« 90 -
+
+Je TERÉNNÍ A OBRAZOVÁ DOKUMENTACE ............4040e 92 =
+
+a) Texty a komentář k plánům ..............+.+0e 92
+
+b) Texty a komentář k tabulkám s fotografickými
+snímky Z terénu «......c..++.c+0+c+0+00+0c+00e 93 =
+
+©) Texty a komentáře k obrázkům s nálezy «+««+«« 100 ©
+
+U cí
+"	4	TextRegion	0.918232262134552
+195.932861328125	511.4017333984375	237.8681182861328	530.6074829101562	rectangle	"210.
+"	6	TextRegion	0.8481422066688538
+1139.9090576171875	630.9111328125	1146.954345703125	639.6099243164062	rectangle		7	TextRegion	0.8298506736755371

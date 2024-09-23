@@ -1,0 +1,14 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+206.99057006835935	1298.3599853515625	1077.55078125	1459.266357421875	rectangle	"Ukázky libické keramiky rázu střední-mladší doby hradištní
+(1 - 3; 2 - 3 jsou střepy z plecí a výdutí láhví) a okraj
+tuhové zásobnice mladší doby hradištní (4). 1 - sonda 2b
+vrstva 2 (55/74); 2 - sonda 2a, vrstva 2/vrstva 3 (17/74);
+3 - Sonda 2a, vrstva 3 (134/74); 4 - sonda 2b, destrukce
+vnitřní hradební zdi (52/74).
+
+Kresba: H.Komárkavéá.
+"	0	TextRegion	0.9999819993972778
+218.3478546142578	1143.088623046875	237.48182678222656	1173.9146728515625	rectangle		1	TextRegion	0.99794203042984
+1033.902099609375	53.65982055664063	1136.5399169921875	72.0098876953125	rectangle	"Obr. 27
+"	2	TextRegion	0.9970951080322266
+688.042236328125	827.01171875	706.2437133789062	849.114501953125	rectangle		4	TextRegion	0.9858044981956482

@@ -1,0 +1,116 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+457.8525085449219	1592.052001953125	746.2595825195312	1611.4185791015625	rectangle	").2. Fotografická dokumentace
+"	0	TextRegion	0.9986658096313475
+139.68719482421875	145.76783752441406	463.0117492675781	170.7931365966797	rectangle	"Fotografická dokumentace
+"	1	TextRegion	0.998460054397583
+154.72134399414062	697.4412841796875	589.635498046875	1528.5894775390625	rectangle	"ad
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+
+V — POTICU Id KULALIICKU LLaASITTLy V
+VII:1— detailní pohled na keramické frag
+VII:2 — čtverec A2 od jihovýchodu
+VIII:1— čtverec A2 od severovýchodu
+VIII:2 — čtverec A2 od severovýchodu
+IX:1 — čtverec A2 od západu
+
+IX:2 — čtverec A2 od jihu
+
+X:1 — čtverec A2 od jihu
+
+X:2— čtverec A2 od jihovýchodu
+
+XI:1 — čtverec A2 od severovýchodu
+XI:2 — detailní pohled na objekt A2017
+XII:1 — čtverec A2 od jihovýchodu A201
+XII:2 — detailní pohled na objekt
+
+XIII:1 — čtverec A2 od severozápadu
+XIII:2 — řez B2A2 ve čtverci A2
+
+XIV:1 — řez B3B2 ve čtverci A2
+
+XIV:2 — detailní pohled na řez B3B2
+XV:1 — detailní pohled na řez B3B2
+XV:2 — řez A3B3 ve čtverci A2
+
+XVI:1 — řez A2A3 ve čtverci A2
+
+XVI:2 — čtverec B1 od jihozápadu
+"	2	TextRegion	0.9669464826583862
+167.8164825439453	218.2209014892578	652.4774780273438	936.0277709960938	rectangle	"ab. I:1 — plocha výzkumu po skrývce od jihu
+
+ab. I:2 — plocha výzkumu po skrývce od východu
+ab. II:1 — plocha výzkumu po skrývce od severu
+ab. II:2 — plocha výzkumu po skrývce od západu
+ab. III:1 — plocha výzkumu od jihu
+
+ab. III:2 — plocha výzkumu od jihu
+
+ab. IV:1 — zkoumaná plocha od jihozápadu
+
+ab. IV:2 — zkoumaná plocha od jihozápadu
+
+ab. V:1— zkoumaná plocha od jihu
+
+ab. V:2 — kamenitá výplň ve čtverci A2
+
+ab. VI:1— detailní pohled na kamenitou výplň
+
+ab. VI:2 — pohled na keramické fragmenty ve výpln
+ab. VII:1 — detailní pohled na keramické fragmenty
+ab. VII:2 — čtverec A2 od jihovýchodu
+
+ab. VIII:1 — čtverec A2 od severovýchodu
+
+ab. VIII:2 — čtverec A2 od severovýchodu
+
+ab. IX:1 — čtverec A2 od západu
+
+L TEA
+
+ 
+"	3	TextRegion	0.9295887351036072
+145.5439910888672	233.84739685058597	640.1952514648438	592.1182250976562	rectangle	"Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+Tab.
+
+1:1 — plocha výzkumu po skrývce od jihu
+
+1:2 — plocha výzkumu po skrývce od východu
+II:1— plocha výzkumu po skrývce od severu
+II:2 — plocha výzkumu po skrývce od západu
+III:1 — plocha výzkumu od jihu
+
+III:2 — plocha výzkumu od jihu
+
+IV:1 — zkoumaná plocha od jihozápadu
+
+IV:2 — zkoumaná plocha od jihozápadu
+
+V:1— zkoumaná plocha od jihu
+"	4	TextRegion	0.8285784125328064

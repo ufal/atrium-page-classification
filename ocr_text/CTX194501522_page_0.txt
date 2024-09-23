@@ -1,0 +1,46 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+48.56617736816406	261.8320617675781	151.94485473632812	276.30078125	rectangle	"ČÍSLO MAPY
+"	0	TextRegion	0.999870538711548
+188.23898315429688	593.3255615234375	652.6548461914062	1015.7211303710938	rectangle	"/lomek nádoby, dobře vypálený, ne-
+ravidelného tvaru, na vnitřní stre-
+
+ně černý, na vnější straně nehnědlý,
+dobený rytým a vypíchaným ornamentem,
+(omy jsou ostré, částečně čerstvé. U
+jedné strany je patrný zbytek nízkého,
+ulatého, pupkovitého výčnělku. Od něho
+sikmo se rozbíhají dvě ryté čáry. Prosto
+ra mezi nimi je vyplněna rytými čárkami.
+Volný prostor mimo tuto zdobenou pásku
+je na jedné streně vyplněn dvěma krátký-
+ni rovnoběžnými čárkami, na druhé streně
+je l vryp ostrých hran a od výčnělku se
+rozbíhající rytá čára.
+
+3íla O.8 - 1 om, síla s vývalkem 2 om,
+Á vývalku as 2.50 om, šířka rytých čer
+as 1.5 - 2 mm.
+"	1	TextRegion	0.9998412132263184
+111.42139434814452	1092.3968505859375	158.45872497558594	1112.8770751953125	rectangle	"159/
+"	2	TextRegion	0.9994953870773317
+47.28654479980469	387.8361511230469	125.02362060546876	398.48046875	rectangle	"Literatura
+"	3	TextRegion	0.9994947910308838
+104.63679504394533	609.1259765625	152.8739013671875	628.4462890625	rectangle		4	TextRegion	0.999311089515686
+179.3548126220703	1071.6011962890625	704.3277587890625	1354.6673583984375	rectangle	"Zlomek nádoby tvaru pětiuhelníku s knof-
+líkovým, nízkým, na jedné straně převis-
+lým výčnělkem, který má horní plochu mír-
+ně promáčklou. Kolem výčnělku je provede-
+ne ozdoba a to vrypem nehtů vždy dvou
+prstů. Vypálení dobré. Spodní strena tmavé
+barvy s četnými zrny křemene, horní okrové
+barvy. Vlastní stěna je šedavá.
+
+Rozměry: 3 x 4.5 x 3.6 x 5.7 x 5.7 om,
+
+S výčnělku 2.6 x 2.40 cm, počet vrypů 6 pá-
+rů, síla 0.80 - 1 em, síla s výčnělkem
+"	5	TextRegion	0.9987897276878356
+43.312461853027344	143.9748077392578	179.12350463867188	161.5740203857422	rectangle	"ČÍSLO PARCELY
+"	6	TextRegion	0.9985613226890564
+697.8388061523438	674.9985961914062	935.4973754882812	854.3646240234375	rectangle	" 
+"	8	TextRegion	0.81660395860672

@@ -1,0 +1,71 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.060546875	1591.5218505859375	623.0119018554688	1606.6124267578125	rectangle		0	TextRegion	0.9999833106994628
+144.0587921142578	1248.0244140625	1046.001953125	1446.9273681640625	rectangle	"Archeologická sonda o velikosti v horní části 4,1 x 3,2 m a vdolní partii 2,8 x 1,4 m
+se nalézala na východním, nezastavěném okraji pozemku č. 1556/1 v části využívané
+částečně jako parkoviště osobních vozů (obr. příl. 1, 2, 3, 4). Úroveň povrchu sondy se
+
+(hloubka 4,1 m). Celkem v této sondě byl dokumentován 1 řez (S09-RJ).
+"	1	TextRegion	0.999942660331726
+163.6226806640625	1159.724365234375	284.2268371582031	1184.142822265625	rectangle	"Sonda S09
+"	2	TextRegion	0.9999022483825684
+159.47366333007812	407.2855224609375	277.4854736328125	430.8797302246094	rectangle	"Sonda S08
+"	3	TextRegion	0.9995018243789672
+170.86911010742188	187.2711334228516	1012.1798095703124	304.1575622558594	rectangle	"Dno uvedeného jámového výkopu se již zahlubovalo do podložních náplav
+| podobě okrově zahliněného písku (sj. S07-12, niveleta povrchu 196,32), který přecház
+
+rewnký nicčitý cadimant (ci S07-123,
+"	4	TextRegion	0.9993133544921876
+156.81027221679688	478.6496276855469	1019.6348876953124	743.7745361328125	rectangle	"Archeologická sonda o velikosti v horní části 4,8 x 3,4 m avdolní partii3x1,2n
+se nalézala přibližně ve středu nezastavěného pozemku č. 1556/1, který byl v dob“
+výzkumu využíván jako parkoviště (obr. příl. 1, 2, 3, 4). Úroveň povrchu sondy se nalézal:
+(hloubka 4,1 m). Celkem v této sondě byl dokumentován 1 řez (S08-RJ).
+
+Stávající povrch zde tvořila místy až 0,6 m silná vrstva štěrku a rozemletéh«
+
+ 
+
+P
+
+ 
+"	5	TextRegion	0.9991505146026612
+152.1719512939453	897.6053466796875	1052.729736328125	1061.1099853515625	rectangle	"Výkop porušoval stratigraficky nejstarší antropogenní uloženinu v podobě 0,5 m
+mocné vrstvy hnědošedé soudržné prachovitopísčité hlíny s nahodilými uhlíky (sj. S08-
+06). Tato kulturní vrstva již nasedala na niveletě 196,34 na povrch přírodního náplavu
+
+v podobě ulehlého zahliněného písku (si. S08-07).
+"	6	TextRegion	0.9970288872718812
+184.8051605224609	115.5441665649414	1029.0687255859375	178.25582885742188	rectangle	"nísovitým dnem (V20) zaplněný písčitou hlínou s nahodilými uhlíky a ojedinělými
+
+amky opuky a malty (sj. S07-10).
+"	7	TextRegion	0.9944955706596376
+157.671630859375	625.2127075195312	1020.3380126953124	903.7261352539062	rectangle	" 
+
+ 
+
+ 
+
+  
+
+2 7
+
+ 
+
+(hloubka 4,1 m). Celkem v této sondě byl dokumentován 1 řez (S08-RJ).
+
+Stávající povrch zde tvořila místy až 0,6 m silná vrstva štěrku a rozemletéhc
+asfaltu (sj. S06-01, S06-02), která překrývala výrazně homogenizovanou polohu navážek
+tvořených v převaze stavební sutí o mocnosti až 2,6 m (báze 196,80). S uvedenýn
+stratigrafickým celkem souvisel do podloží se zahlubující jámový výkop, opět zaplněn:
+
+sypkou směsí stavebního odpadu (sj. V01, S08-05).
+"	8	TextRegion	0.9942764639854432
+292.7272033691406	117.83819580078124	1022.651611328125	141.71910095214844	rectangle	"dnem (V20) zaplněný písčitou hlínou s nahodilými uhlíky a ojedinělým
+"	9	TextRegion	0.9908145070075988
+152.05316162109375	133.73336791992188	993.2838745117188	202.17431640625	rectangle	"A TIMO VILY 57 IDIOT AVL) SGH (eFOWTK70 YETI VAK © ZTGSETAZASITYÝTETE MASTEÝ C ISMS
+
+zlomky opuky a malty (sj. S07-10).
+"	10	TextRegion	0.9494220614433287
+173.63697814941406	159.61984252929688	1008.9429931640624	218.61428833007807	rectangle	"lomky opuky a malty (sj. S07-10).
+
+Dna uvedeného jámaového výkonu se již zahluhovalo do nadložních nánla:
+"	11	TextRegion	0.8550392389297485

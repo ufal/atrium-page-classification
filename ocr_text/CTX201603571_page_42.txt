@@ -1,0 +1,64 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+600.5172729492188	1591.314453125	623.6240844726562	1606.124267578125	rectangle		0	TextRegion	0.9999984502792358
+184.4524688720703	1053.5556640625	812.5100708007812	1447.23974609375	rectangle	"5.
+6.
+7.
+8.
+9.
+0.
+1.
+2.
+
+2
+
+sb. PETETTI VOKUTETLACE SOTI4y 3U/, PUUOTys U /-PVJ4, PTTETTKO L.,
+
+Terénní dokumentace sondy S08, řez S08-RJ, měřítko 1:20.
+Terénní dokumentace sondy S09, řez S09-RJ, měřítko 1:20.
+Terénní dokumentace sondy S10, řez S10-RJ, měřítko 1:20.
+Terénní dokumentace sondy S11, řez S11-RJ, měřítko 1:20.
+Terénní dokumentace sondy S11, řez S11-RS, měřítko 1:20.
+Terénní dokumentace sondy S11, řez S11-RV, měřítko 1:20.
+Terénní dokumentace sondy S11, řez S11-RZ, měřítko 1:20.
+Terénní dokumentace sondy S11, půdorys S11-P01, měřítko 1:.
+
+Taoránní Ankiumantara candv S11 nůdarve S11-PN7 měřítkn 1-
+"	1	TextRegion	0.991947591304779
+185.2992401123047	123.31379699707033	947.9442138671876	296.1933288574219	rectangle	"Situace výzkumu. Výřez z katastrální mapy Prahy s vyznačením distribuce raně
+středověkých nálezů na ploše výzkumu, měřítko 1:500.
+Situace výzkumu. Výřez z katastrální mapy Prahy s vyznačením návrhu rozsaht
+
+záchranného archeologického výzkumu, 1:500.
+"	2	TextRegion	0.9836106300354004
+181.7173614501953	359.5754089355469	823.4721069335938	1357.3282470703125	rectangle	" 
+
+3. Generální řez GR03, 1:200.
+
+10. Generální řez GR04, 1:200.
+
+|1. Legenda k plánové dokumentaci.
+
+12. Terénní dokumentace sondy S01, řez S01-RJ, měřítko 1:20.
+13. Terénní dokumentace sondy S01, řez S01-RV, měřítko 1:20.
+14. Terénní dokumentace sondy S02, řez S02-RJ, měřítko 1:20.
+[5. Terénní dokumentace sondy S03, řez S03-RJ, měřítko 1:20.
+16. Terénní dokumentace sondy S03, řez S03-RV, měřítko 1:20.
+17. Terénní dokumentace sondy S04, řez S04-RJ, měřítko 1:20.
+18. Terénní dokumentace sondy S05, řez SO5-RJ, měřítko 1:20.
+[9. Terénní dokumentace sondy S06, řez S06-RJ, měřítko 1:20.
+20. Terénní dokumentace sondy S06, řez S06-RV, měřítko 1:20.
+31. Terénní dokumentace sondy S06, půdorys S06-P01, měřítko 1:2
+22. Terénní dokumentace sondy S07, řez S07-RJ, měřítko 1:20.
+23. Terénní dokumentace sondy S07, řez S07-RZ, měřítko 1:20.
+24. Terénní dokumentace sondy S07, půdorys S07-P01, měřítko 1:2
+25. Terénní dokumentace sondy S08, řez S08-RJ, měřítko 1:20.
+26. Terénní dokumentace sondy S09, řez S09-RJ, měřítko 1:20.
+27. Terénní dokumentace sondy S10, řez S10-RJ, měřítko 1:20.
+28. Terénní dokumentace sondy S11, řez S11-RJ, měřítko 1:20.
+29. Terénní dokumentace sondy S11, řez S11-RS, měřítko 1:20.
+30. Terénní dokumentace sondy S11, řez S11-RV, měřítko 1:20.
+
+34 Toránní Anbimantara can C11 %a5 C11.D7 měříkbm 1:30
+"	3	TextRegion	0.9821211695671082
+160.7713165283203	120.22492218017578	172.8357391357422	136.25320434570312	rectangle		4	TextRegion	0.8399999141693115
+161.3647003173828	208.68426513671875	174.7804412841797	224.1802978515625	rectangle		5	TextRegion	0.8246412873268127

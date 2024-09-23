@@ -1,0 +1,43 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.7879028320312	1590.95068359375	622.951416015625	1606.2777099609375	rectangle		0	TextRegion	0.9999924898147584
+146.0174102783203	1267.386474609375	1046.7884521484375	1411.17138671875	rectangle	"Archeologická sonda o velikosti 3,8 x 1,2 m se nalézala na jižním, nezastavěném
+
+okraji pozemku č. 1557 (obr.příl. 1, 2, 3, 4). Úroveň povrchu sondy se nalézala na niveletě
+
+Celkem v této sondě byly dokumentovány 2 řezy (SO1-RJ, RV).
+"	1	TextRegion	0.999981164932251
+159.0449676513672	177.11094665527344	1013.2702026367188	302.1368103027344	rectangle	"Pro potřeby zaměření polohy archeologického výzkumu byl použit digitalizovaný mapovy
+podklad katastru nemovitostí, do kterého byly zaměřeny sondy S01, S02, S03, S04, S05,
+
+S06, S07, S08, S09, S10, S11, S12 a vyneseny řezy a půdorysy dokumentované v měřítku
+"	2	TextRegion	0.9999731779098512
+161.67453002929688	1193.777099609375	282.31396484375	1219.4547119140625	rectangle	"Sonda S01
+"	3	TextRegion	0.9999312162399292
+988.1824951171876	930.7940063476562	1028.3232421875	947.6989135742188	rectangle		4	TextRegion	0.9999045133590698
+159.90359497070312	1086.8829345703125	426.62884521484375	1110.7401123046875	rectangle	"6. Popis terénní situace
+"	5	TextRegion	0.9998173117637634
+169.42391967773438	665.9290771484375	983.3006591796876	855.5667724609375	rectangle	"nodnota činila 199,00, 200,00 a 201,00 m n. m.
+
+Celková polohopisná situace výzkumu je zobrazena v měřítku 1:1000 (obr. příl. 1) a
+oplněna pro reálnou ilustraci prostředí výřezem z ortofotomapy Prahy (obr. příl. 2).
+20 grafické úpravě byly vytvořeny tiskové výstupy v potřebném měřítku. Měřická dat:
+
+sou uložena v archivu archeologického odboru NPÚ ÚOP Praha.
+"	6	TextRegion	0.9992642998695374
+179.03756713867188	347.0443115234375	1011.5860595703124	662.5128173828125	rectangle	"a zkoumané ploše bylo geodeticky zaměřeno celkem 19 vertikálních řezů historickým
+adložím lokality a v ploše dokumentováno celkem 5 půdorysných situací. Pro
+olohopisné zaměření byla použita totální stanice Topcon GPT — 2006 a měřická pásma.
+ýškové měření bylo provedeno technickou nivelací za pomoci nivelačního přístroje
+>kkia C-41 a 5 m teleskopické latě a připojeno na bod ČSJNS/Bpv osazený na obvodové
+Ji domu čp. 2038 v ulici Albertov na Novém Městě, Praha 2 (n.v. 202,18 m n. m.). Pro
+
+otřeby výzkumu byly na zkoumané ploše osazeny pomocné výškové body, jejichž
+"	7	TextRegion	0.999165415763855
+159.76809692382812	118.21409606933594	502.31494140625	139.73599243164062	rectangle	"měřil: J. Hlavatý, E. Ditmar, J. Švach
+"	8	TextRegion	0.9942300319671632
+212.15936279296875	610.6112670898438	988.0035400390624	673.63427734375	rectangle	"by výzkumu byly na zkoumané ploše osazeny pomocné výškové body, jejichž
+
+ 
+
+100 NN JIMANN JN M
+"	9	TextRegion	0.9474701285362244

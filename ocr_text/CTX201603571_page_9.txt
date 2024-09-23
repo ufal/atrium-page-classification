@@ -1,0 +1,49 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+122.39249420166016	359.4845275878906	1045.768798828125	569.26513671875	rectangle	"Podle podrobné inženýrsko-geologické mapy 1 : 5000, list Praha 7-2 (Altmann 2008, ob.
+příl. 3) je kvartérní pokryv lokality tvořen písky a drobnými písčitými štěrky teras Botiče. Kvůli
+nedostatku archivních geologických dokumentačních bodů v době sestavování citované mapy
+zde nejsou zachyceny navážky, jejichž mocnost ověřená při výzkumu dosahuje až kolem 3,5
+
+metru (např. zjišťovací sondy č. S04, S07, S09, S11).
+"	0	TextRegion	0.9999566078186036
+141.01165771484375	1362.3819580078125	1058.4530029296875	1470.3533935546875	rectangle	"Přesto, že zdejší půdu nelze řadit k nejkvalitnějším, představovala vzhledem k poměrům
+/ širším okolí zemědělsky dobře využitelný podklad. V místech sond S06 a S07 došlo při kvartérn
+
+»rozi k únlnému odstranění půdního pokrvvu. Ahsenci půdv je v těchto místech pravděnodobní
+"	1	TextRegion	0.9999420642852784
+1059.694580078125	1536.78759765625	1071.3704833984375	1552.278076171875	rectangle		2	TextRegion	0.9998780488967896
+108.80326080322266	117.7944564819336	1021.8403930664062	173.90618896484375	rectangle	"pod fluviálními kvartérními uloženinami a navážkami. Mocnost těchto pokryvných útvarů se
+
+ 
+
+7vvěnje ve <měrii ad zoveriu k jihu v 7áviclacti na reliéfu <kalního nadlaš
+"	3	TextRegion	0.9995224475860596
+124.66094207763672	274.63427734375	373.9549255371094	301.2057800292969	rectangle	"2.3. Pokryvné útvary
+"	4	TextRegion	0.9993941783905028
+128.60755920410156	566.2630004882812	1056.3409423828125	924.7304077148438	rectangle	"Archeologicky sterilního povrchu nejmladších geologických horizontů bylo dosaženo
+všemi geologicky vyhodnocenými sondami s výjimkou sondy S02. Svrchní polohy fluviálních
+uloženin měly charakter okrových hlinitých, resp. čistých sypkých písků (vrstvy č. S01-19, S04-11
+S05-19, S06-11, S11-25) místy hnědě mramorovaných, často s rourkami po kořenech vegetace.
+Někdy se v jejich mocnosti projevily nepravidelně horizontálně zvlněné tmavé proužky železitýci
+sraženin (podzolu). Povrch uvedených náplavů se nacházel ve výškách přibližně mezi 196,0 (S07
+a 197,8 m n. m. (S01). Podle charakteru a zjištěných nivelet můžeme tyto sedimenty ztotožnit
+
+s nejvyššími polohami jednoho z terasových stupňů Botiče. Náleží patrně k druhé nejmladší
+"	5	TextRegion	0.9991853833198548
+139.3036346435547	953.328125	1041.958984375	1264.594482421875	rectangle	"Na podkladu tvořeném hlinitopísčitými náplavy se během holocénu vyvinula slabě
+numózní půda ve formě hnědé až šedohnědé prachovito-písčité hlíny o tloušťce okolo 20 cm
+vrstvy č. S01-20, S02-17, S04-10, S05-18, S11-24), která u báze pozvolna přecházela do
+luviálního substrátu. Ze sedmi posuzovaných sond se půdní horizonty dochovaly v pěti z nich.
+ejich svrchních partiích se místy vyskytly drobné zvětralé keramické zlomky a zrna propálené
+llíny. Svrchní hranice půdy představovala úroveň povrchu terénu před osídlením daného míst
+
+; mladším pravěku či raném středověku. Z této platformy, která se pohybovala přibližně mezi
+"	6	TextRegion	0.9955590963363647
+131.12625122070312	1326.765869140625	206.68060302734372	1344.5093994140625	rectangle	"objektů.
+"	7	TextRegion	0.9872403740882874
+130.94085693359375	145.47897338867188	958.43017578125	189.5874786376953	rectangle	" 
+
+zvyšuje ve směru od severu k jihu v závislosti na reliéfu skalního podlo:
+"	8	TextRegion	0.92625629901886
+129.31829833984375	118.02938079833984	1025.736572265625	144.78721618652344	rectangle	"pod fluviálními kvartérními uloženinami a navážkami. Mocnost těchto pokryvných útvarů se
+"	9	TextRegion	0.811760663986206

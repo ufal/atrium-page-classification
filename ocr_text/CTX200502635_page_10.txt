@@ -1,0 +1,38 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+140.9169921875	146.8389892578125	287.8021545410156	168.4439697265625	rectangle	"Seznam příloh
+"	0	TextRegion	0.9999276399612428
+1032.77880859375	1593.940673828125	1046.0616455078125	1607.7188720703125	rectangle		1	TextRegion	0.9999222755432128
+558.9440307617188	1442.948974609375	1044.8778076171875	1518.120849609375	rectangle	"Vedoucí výzkumu: Mgr. Petr Kočár
+Odborná spolupráce. Michal Tetour
+á spolupráce: Michal Hauer, Bc. Alexander Klozar
+"	2	TextRegion	0.9995325803756714
+146.23313903808594	631.1383666992188	460.62408447265625	742.37841796875	rectangle	"Text nálezové zprávy. doc
+Tabulka nálezů. xls
+Dokumentace Profil 1-6. bmp
+Dokumentace Architektonických
+"	3	TextRegion	0.9970313310623168
+191.9654235839844	308.1394958496094	1035.943115234375	374.1168823242188	rectangle	". Plán hospodářského dvora s vyznačením dokumentovaných situací a s vyneseným
+příkopem zjištěným geofyzikálním průzkumem v roce 1999.
+Ciara 15
+"	4	TextRegion	0.9959298968315125
+138.53712463378906	587.3751220703125	372.6329345703125	608.0440673828125	rectangle	"Přílohy na CD-ROM:
+"	5	TextRegion	0.995008111000061
+204.29075622558597	446.2052612304688	436.02581787109375	468.3959655761719	rectangle	"Archtitektonické prvky
+"	6	TextRegion	0.9941745400428772
+182.71029663085935	215.9935607910156	1051.5762939453125	304.24432373046875	rectangle	"JE
+
+ 
+
+EL PATTI DLA VV 2 V AE
+Výřez mapy 1 : 10 000 s vyznačeným průběhem inženýrských sítí.
+
+Situační zakreslení inženýrských sítí s vyznačením archeologicky kontrolovaných
+úseků.
+"	7	TextRegion	0.9909399747848512
+212.73825073242188	418.1449279785156	387.90423583984375	464.144287109375	rectangle	"Tabulka nálezů.
+Archtitektonické p
+"	8	TextRegion	0.9212738871574402
+217.05923461914065	421.3760681152344	369.53228759765625	445.1106262207031	rectangle	"Tabulka nálezů.
+"	9	TextRegion	0.9057661294937134
+207.87887573242188	199.43817138671875	605.4536743164062	220.85256958007807	rectangle	"Hlášení Archeologickému ústavu AV ČR
+"	10	TextRegion	0.8392683267593384

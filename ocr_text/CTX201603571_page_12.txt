@@ -1,0 +1,56 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+1049.502197265625	1536.8660888671875	1070.5322265625	1552.99755859375	rectangle		0	TextRegion	0.9999419450759888
+106.8451919555664	150.26051330566406	1097.7242431640625	765.5542602539062	rectangle	"ústavů, které byly v následujících desetiletích 20. století různě dostavovány a upravovány.
+Obdobný osud měl mít i pozemek č. 1556 a 1557, na kterém měla podle regulačního
+plánu vyrůst taktéž plnohodnotná univerzitní budova. Přibližně na počátku 20. let 20. století,
+přesné datum vzniku se nepodařilo zatím dohledat, zde byla vystavěna  trojkřídlá,
+nepodsklepená, pouze částečně do terénu zapuštěná budova na půdorysu obráceného „U“ se
+zděným přízemím a dřevěným patrem. Její primární využití je pouze teoreticky a dosud
+nepotvrzeně spojováno s českými legionáři (lazaretní budova?). Již v průběhu druhé poloviny 20.
+století je však tento objekt uváděn pod označením „Studentský dům“, který byl a do současnosti
+je využíván jako provozní budova univerzity. Stavební vzhled objektu a nepřidělené číslo popisné
+nás nenechávají na pochybách, že šlo od samého počátku o provizorní stavbu, u níž byl záměr ji
+v blízké budoucnosti nahradit plnocenným univerzitním objektem. K uvedenému záměru však
+od doby jejího vzniku do současnosti nedošlo. V průběhu 20. století byl stavebně upraven nejen
+objekt stávající, ale celý areál také doplněn o další jednoduché stavby a užitkové plochy
+
+situované na jižně položené parcele 1556/1-4 (vrátnice, parkoviště, západně situovaný objekt při
+"	1	TextRegion	0.9984436631202698
+114.1455535888672	1027.3653564453125	1097.986328125	1466.37744140625	rectangle	"£ dostupných preniedau a databazi archeologické cinnosti není na uzemi anesnino
+Albertova do současnosti evidován žádný nález archeologické povahy. Nejbližší doklady
+historického osídlení se však nalézají nedaleko od sledovaného místa, cca 170 - 250 m západně,
+v blízkosti bývalého toku potoka Botiče (Na Slupi) a v pásu podél Vltavy vzdáleném od místa
+výzkumu cca 600 m (ul. Vyšehradská Lutovský — Smejtek a kol. 2005, 448, 569, 770, 931; Na Slupi
+Lutovský — Smejtek a kol. 2005, 569, 770). Z těchto polohy byly v minulosti získány archeologické
+doklady osídlení časově spadající již do průběhu mladšího pravěku (doba bronzová 13. -10. st.
+př. n. I., knovízské sídlištní nálezy ve Vyšehradské ul. a Na Slupi; doba laténská 4. — 3. st. př. n.l.,
+keltské hroby v ulici Na Slupi) a následně do úseku raného středověku (Vyšehradská, Na Slupi).
+
+Raně středověké osídlení se v této části města začalo formovat zejména po vzniku
+
+  
+
+nřamuelauckáhoa Wučahradii 43. nalauviněá 10. c+* Mla>i naluúsnamně: nálasw 3 táta dahu Isa
+"	2	TextRegion	0.9979019165039062
+132.3269805908203	932.3944091796876	554.8656616210938	963.9444580078124	rectangle	"3.4. Archeologické poznatky o lokalit
+"	3	TextRegion	0.99687659740448
+118.10757446289062	119.36663055419922	1077.1953125	404.5025634765625	rectangle	"V průběhu let 1904 až 1925 vzniklo na uvedeném území celkem 9 univerzitní objektů —
+ústavů, které byly v následujících desetiletích 20. století různě dostavovány a upravovány.
+
+Obdobný osud měl mít i pozemek č. 1556 a 1557, na kterém měla podle regulačního
+plánu vyrůst taktéž plnohodnotná univerzitní budova. Přibližně na počátku 20. let 20. století,
+přesné datum vzniku se nepodařilo zatím dohledat, zde byla vystavěna  trojkřídlá,
+nepodsklepená, pouze částečně do terénu zapuštěná budova na půdorysu obráceného „U“ se
+
+zděným přízemím a dřevěným patrem. Její primární využití je pouze teoreticky a dosud
+"	4	TextRegion	0.9546931385993958
+135.82379150390625	504.2004089355469	1056.5133056640625	830.98876953125	rectangle	"je využíván jako provozní budova univerzity. Stavební vzhled objektu a nepřidělené číslo popisn
+nás nenechávají na pochybách, že šlo od samého počátku o provizorní stavbu, u níž byl záměr
+v blízké budoucnosti nahradit plnocenným univerzitním objektem. K uvedenému záměru vša
+od doby jejího vzniku do současnosti nedošlo. V průběhu 20. století byl stavebně upraven neje
+objekt stávající, ale celý areál také doplněn o další jednoduché stavby a užitkové ploch
+situované na jižně položené parcele 1556/1-4 (vrátnice, parkoviště, západně situovaný objekt pi
+vstupu, zbořený v roce 2011 a objekt umístěný na východní straně pozemku, dnes využívaný pr
+
+natřahuy Dříradnwárdarká falitlty IK batodar rhomia a ganlagial
+"	5	TextRegion	0.9523733258247375

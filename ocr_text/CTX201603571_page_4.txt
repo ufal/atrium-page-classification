@@ -1,0 +1,31 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+1059.7796630859375	1537.6259765625	1071.1318359375	1551.5391845703125	rectangle		1	TextRegion	0.999873161315918
+155.9861297607422	122.01024627685548	1075.005615234375	213.76759338378903	rectangle	"ZJAV byl realizován formou rozměrných, podle terénní situace svahovaných sond (S01-
+
+2), rovnoměrně rozložených na nezastavěné ploše sledovaných pozemků (obr. 2). Sondy byly
+
+ha l eM ná hanna (Realm kamer CD Aby Mělo oD
+"	2	TextRegion	0.9998401403427124
+114.74236297607422	1111.677001953125	1076.4591064453125	1465.9693603515625	rectangle	"Zjišťovací archeologický výzkum byl realizován pracovníky odboru archeologie Národního
+památkového ústavu, územního odborného pracoviště v hl. m. Praze (dále NPÚ HMP) na základě
+dohody o podmínkách provedení zjišťovacího archeologického výzkumu, uzavřené dne 23. 6.
+2015 mezi zhotovitelem a objednatelem akce Univerzitou Karlovou v Praze, Přírodovědeckou
+fakultou (se sídlem Albertov 2038/6, Praha 2 — Nové Město, 128 43, IČO: 002 16 208, DIČ:
+CZ00216208, zastoupenou prof. RNDr. Bohuslavem Gašem, CSc., děkanem). Postup a cenová
+kalkulace na ZJAV byla zpracována v projektu výzkumu NPÚ HMP ze dne 25. 3. 2015.
+
+Hlavní důvodem realizace archeologické akce je příprava projektu novostavby
+
+ 
+
+A [sb D
+
+ 
+"	3	TextRegion	0.999762237071991
+132.1273651123047	1038.873291015625	624.0082397460938	1065.658935546875	rectangle	"Okolnosti a časové vymezení výzkumu
+"	4	TextRegion	0.9989400506019592
+97.34577178955078	907.5758666992188	1098.048095703125	952.8507690429688	rectangle	" 
+
+Obr. 2 Pozemky č. 1556 a 1557 na Albertově, Praha 2— Nové Město. Stav před zahájením výkopových prací. Záběr
+na plochu parkoviště, v pozadí budovy UK, na horizontu věž kostela sv. Apolináře, (foto J. Podliska, 2015).
+"	5	TextRegion	0.9503034353256226

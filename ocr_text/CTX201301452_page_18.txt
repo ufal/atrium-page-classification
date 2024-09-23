@@ -1,0 +1,11 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+114.65155792236328	223.4410552978516	1066.9921875	374.000244140625	rectangle	"V rámci předstihového archeologického výzkumu bylo zkoumáno antropogenní
+souvrství, a dále pak zahloubené objekty sídlištního charakteru. Rozsah výzkumu byl
+z důvodu omezených finančních prostředků omezen na 4 sondy o straně 4 metry a posléze pak
+
+na dohled v rámci zemních prací stavby.
+"	0	TextRegion	0.9995946288108826
+141.78009033203125	145.56109619140625	412.8999938964844	171.32870483398438	rectangle	"3.1. Popis nálezové situace
+"	1	TextRegion	0.9968885779380798
+475.9856567382813	1592.1151123046875	718.9072265625	1611.4398193359375	rectangle	"3.1. Popis nálezové situace
+"	2	TextRegion	0.9940432906150818

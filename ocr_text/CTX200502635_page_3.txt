@@ -1,0 +1,75 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+126.1885986328125	1007.4406127929688	1057.9512939453125	1351.847412109375	rectangle	"obrazové přilohy).
+
+Humusovitá vrstva prorostlá kořenovým systémem (0301) překrývala recentní navážky
+(0302). Tyto navážky nasedaly na černohnědou vrstvu se zbytky původního drnu (0303).
+Vrstva 0301 dále překrývala vkop pro kanalizační šachtu (0308), který porušoval vrstvy
+(0302, 0303, 0304, 0309 a 0306). Až 80 cm mocná vrstva kypré středně hnědé hlíny s kameny
+(0304) překrývala vrstvu žlutohnědého kyprého písku — podloží ? — (0312), vrstvu
+hnědožlutého písku s čočkami jílu (0305), tmavé černé humózní písčité hlíny s čočkami žuly a
+žlutého písku (0306) a zdivo z lomového kamene kladeného na žlutý a šedý tuhý jíl (0313).
+K této stratigrafické jednotce se svažovaly vrstvy hnědožluté kypré hlíny spískem a
+s čočkami černé a hnědé hlíny (0307) a vrstva tmavé hnědé plastické hlíny s kameny (0311)
+Zdivo bylo dokumentováno pouze v profilu výkopu a jeho průběh lze předpokládat v rozmezí
+Z-V až SZ-JV. Spodní část výkopu u zdiva vyplňovala vrstva měkké tmavé hnědé plastické
+hlíny s kameny (0311).
+"	0	TextRegion	0.9999622106552124
+112.90320587158205	604.1583862304688	1069.229248046875	894.3970947265625	rectangle	"Dokumentován byl J profil v prostoru před rohem hospodářských budov. Terénní
+situace zde byla porušena četnými recentními zásahy (0201, 0202, 0203, 0204, 0205 a 0206) a
+za intaktní lze považovat vrstvy 0207, 0208, 0210, 0211, 2012 a 0213. V jižní části
+dokumentovaného profilu nasedaly recentní navážky 0201, 0202, 0203 na vrstvu
+šedohnědého jílu s četnými kameny, drobnými uhlíky a drobnými fragmenty mazanice
+(0213). Pod ní byla zjištěna černá vrstva spáleného dřeva, místy promíšená s tmavě hnědou
+hlínou (0208). Pod touto spáleništní vrstvou (0208) se nacházela tuhá tmavá hnědá hlína
+s ojedinělými kameny (0210) překrývající suchý hrubý písek — podloží — (0212) a vrstvu
+červenohnědého suchého hrubého písku (0211) — snad propálené podloží.
+
+Vrstvy (0207, 0208, 0210, 0213) souvisejí s postupným narůstáním komunikační
+
+     
+"	1	TextRegion	0.9999328851699828
+138.76419067382812	1412.777099609375	1052.4381103515625	1490.745849609375	rectangle	"V dalších sledovaných úsecích procházel výkop vrstvou heterogenní hlíny, v úsecích při
+rybníku pak novodobými recentními navážkami 20. století. Ve výkopu na rohu tělocvičny
+byly nalezeny tři kamenné architektonické prvky (obrazová příloha 8).
+"	2	TextRegion	0.9999308586120604
+141.48704528808594	174.80235290527344	396.5972290039063	198.391357421875	rectangle	"3. Rozbor terénní situace
+"	3	TextRegion	0.9998437166213988
+1039.0572509765625	1594.24853515625	1048.560546875	1607.0438232421875	rectangle		4	TextRegion	0.9995396137237548
+101.5835189819336	284.41461181640625	1063.700439453125	416.0119934082031	rectangle	"Pod vrstvou recentních navážek (0101) se nacházely písčité vrstvy vyrovnávající terén
+(0102, 0103, 0104, 0105 a 0106). Vrstva heterogenní písčité hlíny (0107) pravděpodobně
+souvisí s masivním srovnáním reliéfu terénu. Vrstvy 0103, 0104, 0105, 0106 a 0107 nasedaly
+na vrstvu tmavé hnědé hlíny (0108) překrývající drobnou vrstvičku písku (0109).
+
+Prostor z jedné strany ohraničený jedním kamenem a ze strany druhé pěti kameny (snad
+"	5	TextRegion	0.9961144924163818
+131.3218536376953	282.4320678710937	1050.8408203125	550.4646606445312	rectangle	"Pod vrstvou recentních navážek (0101) se nacházely písčité vrstvy vyrovnávající terén
+(0102, 0103, 0104, 0105 a 0106). Vrstva heterogenní písčité hlíny (0107) pravděpodobně
+souvisí s masivním srovnáním reliéfu terénu. Vrstvy 0103, 0104, 0105, 0106 a 0107 nasedaly
+na vrstvu tmavé hnědé hlíny (0108) překrývající drobnou vrstvičku písku (0109).
+
+Prostor z jedné strany ohraničený jedním kamenem a ze strany druhé pěti kameny (snad
+relikt na sucho loženého zdiva) vyplňovala tvrdá jílovitá hlína s ojedinělými kamínky a
+fragmenty cihel a místy s kompaktními uhlíky (0112). Tato stratigrafická jednotka zcela
+překrývala tvrdou světlou šedobílou vápnitou vrstvu obsahující četné kusy čistého vápna
+(0113). Souvrství 0112 a 0113 by mohlo svědčit o existenci vápenné jámy související s blíže
+neurčitou výstavbou v prostoru hospodářského dvora, resp. zámeckého areálu.
+
+ 
+"	6	TextRegion	0.9947277903556824
+181.08111572265625	972.1798095703124	1048.1158447265625	1010.4907836914062	rectangle	"Dokumentován byl JZ profil v prostoru zámeckého parku v blízkosti věže (viz.
+aan nřjlaby)
+"	7	TextRegion	0.9782005548477172
+143.57278442382812	588.7244873046875	233.8217315673828	607.73193359375	rectangle	"Situace 2
+"	8	TextRegion	0.9773899912834167
+144.04611206054688	257.5920715332031	231.7655029296875	275.965576171875	rectangle	"Situace 1
+"	9	TextRegion	0.96674782037735
+144.39903259277344	947.134033203125	233.8520965576172	968.8766479492188	rectangle	"Situace 3
+"	10	TextRegion	0.9384928941726683
+150.70726013183594	856.3944702148438	1046.148193359375	915.2206420898438	rectangle	" 
+
+o. Z PE
+Vrstvy (0207, 0208, 0210, 0213) souvisejí s postupným narůstáním komunikační
+úrovně a vyrovnáváním terénních nerovností prostranství za hradním příkopem.
+
+   
+"	11	TextRegion	0.8233503699302673

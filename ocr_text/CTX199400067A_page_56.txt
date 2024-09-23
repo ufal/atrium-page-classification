@@ -1,0 +1,52 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+135.1871337890625	750.745361328125	1198.8074951171875	975.7886962890624	rectangle	"Vnitřní příkop opevnění byl založen zjevně zároveň s vybudováním
+nejstaršího opevnění předhradí na přelomu 8, a 9. století, Nebyl
+zjevně pravidelně čištěn, neboř jeho spodní část nade dnem zaplnila
+zčásti vrstva náplavů a v LO. století narostla na náplavech kulturní
+vrstva 3. V r. 995 se na povrch vrstvy 3 do příkopu zřítila vnitřní
+hradební zed a příkop už nikdy nebyl vyklizen,
+"	0	TextRegion	0.9999903440475464
+202.76663208007807	315.904541015625	1155.0548095703125	639.9933471679688	rectangle	" 
+
+v rámci číslování terénních útvarů na výše zmíněné terénní
+skice z 24.7.1974 (s l. fází sondy 2c a 2. fází sondy 2a - 2b)
+jsem přidělila objektové číslo V plošce drobného opukového
+kamení ležícího na půdorysu tvaru nepravidelného protáhlého
+trojúhelníka při JZ stěně sondy 2b u 3. metru řezu 6 ve vrstvě
+3 asi 10 cm pod jejím povrchem (viz též řez 6). Nadále jsem
+však už pro uvedenou plošku kamenů v horním horizontu vrstvy 3
+objektové číslo V nepoužívala a označení ""objekt V"" obdržela
+při definitivním očíslování objektů pec v sondě 2a,
+"	1	TextRegion	0.9999877214431764
+238.3993988037109	171.8668975830078	1190.9088134765625	256.25054931640625	rectangle	" 
+
+E 5:2:5
+d) fototabulky č.: 1,3,4,5:9,3:d4,11:22,12:24, 13-16,19:38, 20-22 ;
+e) obrázky s nálezy č.: jmenovitě O, srv. však DVHZ a vrstvu 3.
+
+ZN  Oomsoem el ní
+"	2	TextRegion	0.9999768733978271
+172.02040100097656	1072.349853515625	1103.5457763671875	1111.262451171875	rectangle	"shrnutí bude připojeno za popis sezóny 1975 v příslušné nálezo
+"	3	TextRegion	0.9972259402275084
+191.55474853515625	1350.9862060546875	801.0768432617188	1425.789794921875	rectangle	"Nálezové situace (tj. sáčky) číslo:
+
+O (z kůlové jamky 5 nebyly vyzvednuty žádn
+"	4	TextRegion	0.9951660633087158
+548.2713012695312	32.20021438598633	577.7318725585938	48.192718505859375	rectangle		5	TextRegion	0.9936116337776184
+177.4476318359375	296.0299377441406	374.7215881347656	313.6813659667969	rectangle	"11) poznámka:
+"	6	TextRegion	0.9899689555168152
+179.6771697998047	716.4047241210938	305.9241638183594	735.1622314453125	rectangle	"Datováni
+
+ 
+"	7	TextRegion	0.9897284507751464
+172.28366088867188	1386.147216796875	916.8788452148438	1426.9737548828125	rectangle	"O (z kůlové jamky 5 nebyly vyzvednuty žádné nálezy
+"	8	TextRegion	0.9862101674079896
+182.5338897705078	1030.595458984375	369.5283508300781	1047.6331787109375	rectangle	"Interpretace:
+"	9	TextRegion	0.9717231392860411
+183.75082397460935	1116.62890625	282.0414123535156	1132.2652587890625	rectangle	"zprávě,
+"	11	TextRegion	0.9087511301040648
+181.1830139160156	1402.26806640625	946.9705810546876	1423.17626953125	rectangle	"O (z kůlové jamky 5 nebyly vyzvednuty žádné nálezy).
+"	12	TextRegion	0.8977882862091064
+227.9879913330078	1271.8282470703125	527.1829223632812	1286.169677734375	rectangle	"il oová jamka
+"	13	TextRegion	0.8520005941390991
+183.11080932617188	1271.4007568359375	197.68255615234372	1288.2152099609375	rectangle		14	TextRegion	0.8307615518569946

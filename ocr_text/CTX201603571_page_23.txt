@@ -1,0 +1,56 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.2251586914062	1590.761474609375	622.77294921875	1606.67431640625	rectangle		0	TextRegion	0.9999758005142212
+160.5037841796875	758.3234252929688	277.7208557128906	782.2991333007812	rectangle	"Sonda S06
+"	1	TextRegion	0.9999510049819946
+145.8745880126953	114.24182891845705	1029.1146240234375	322.71807861328125	rectangle	"Stratigraficky níže se nalézala mocná poloha heterogenních písčitých hlín a písku
+s vysokým podílem stavebního odpadu o celkové mocnosti 2,2 m (sj. S05-04 až S05-12).
+
+Pod touto navážkou na východní straně sondy byl zastižen výkop pro zděný kanál
+(202), jehož povrch se nalézal na niveletě 196,34 m (sj. V13, S05-13). Těleso kanálu lze
+
+ztotožnit s obdobnou konstrukcí zastiženou v sondě S02.
+"	2	TextRegion	0.9998332262039183
+165.97032165527344	823.7349243164062	1028.735107421875	1046.282470703125	rectangle	"Archeologická sonda o velikosti v horní části 4,4 x 2,4 m a vdolní partii 3,3 x 1,2 m
+se nalézala na východním, nezastavěném okraji pozemku č. 1556/1 v části využívané
+
+částečně jako parkoviště osobních vozů (obr. příl. 1, 2, 3, 4). Úroveň povrchu sondy se
+
+ 
+"	3	TextRegion	0.9995922446250916
+144.26229858398438	1102.3251953125	1029.2606201171875	1414.24853515625	rectangle	"otavajici DOVrch zde Woriiá misty az U5 M Sina vrstvá NuUmozní miny, Prekryvajicí
+směs štěrku a rozemletého asfaltu (sj. S06-01, S06-02).
+
+Recentní souvrství překrývalo výrazně mocnou polohu mírně ukloněných a
+výrazně heterogenních písčitých hlín až přemístěných štěrků s vysokým podílem
+stavebního odpadu o celkové mocnosti 2,3 m (sj. S06-03 až S05-07, báze 197,34).
+
+Stratigraficky níže se nalézalo již vodorovně uložené souvrství šedohnědých
+
+písčitých hlín (sj. S06-08 a S06-09), nahodile obsahující vedle drobných kamínků i podíl
+
+ 
+
+antropogenních příměsí (např. železná struska, vypálená hlína — mazanice). Z povrchu
+"	4	TextRegion	0.9995599389076232
+166.58546447753906	302.374755859375	1029.8243408203125	653.5397338867188	rectangle	"ztotožnit s obdobnou konstrukci zastizenou v sondě 902.
+
+Výkop pro kanál porušoval vrstvu písčité hlíny, z jejíž báze se zahluboval mělký
+jámový výkop (sj. V16, S05-15), porušující opět nevýraznou polohu písčité hlíny s příměsí
+drobných valounů a uhlíků (sj. S05-16). Uvedené souvrství na niveletě 196,84 nasedalo na
+přírodní podklad tvořený písčitým sedimentem (sj. S05-17). Stratigraficky níže přírodní
+sediment překrýval cca 0,2 m mocnou polohu písčité hlíny s příměsí nevelkých čoček
+propálené hlíny (sj. S05-18), kterou lze na základě složení označit za vyvinutou holocenní
+půdu, obsahující antropogenní příměs. Pod půdou se již opět nalézal přírodní podložní
+
+A míebas (ej CNC 101
+
+ 
+
+l m m s mala omni
+"	5	TextRegion	0.9992536902427672
+214.97683715820312	1087.2178955078125	1027.92822265625	1150.939208984375	rectangle	" 
+
+Stávající povrch zde tvořila místy až 0,5 m silná vrstva humózní hlíny, překrývající
+
+štěrku a rozemletého asfaltu (si. S06-01, S06-02).
+"	6	TextRegion	0.8255124092102051

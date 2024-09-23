@@ -1,0 +1,98 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+273.6366577148437	792.794677734375	990.4754028320312	855.6790161132812	rectangle	"4 - kůlová jamka. Rozměry: 51x 24cm, hloubka: 4cm. Výplň tmavě hnědá.
+A,int.NV
+"	0	TextRegion	0.9998372793197632
+588.4293823242188	1614.046142578125	602.0209350585938	1625.1885986328125	rectangle		1	TextRegion	0.9995334148406982
+320.2027587890625	500.240478515625	982.8299560546876	537.377685546875	rectangle	"- kůlová jamka. Rozměry: 42x 30 cm, hloubka: 5cm. Výplň tmavě hnědá
+"	2	TextRegion	0.999492883682251
+312.3934631347656	1033.1170654296875	976.5345458984376	1079.1163330078125	rectangle	"- kůlová jamka. Rozměry: 30x 24 cm, hloubka: 2cm. Výplň tmavě hněd
+"	3	TextRegion	0.9989166259765624
+328.5985412597656	739.0621948242188	995.7718505859376	775.45263671875	rectangle	"kůlová jamka. Rozměry: 18x 16cm, hloubka: 4 cm. Výplň tmavě hnědá.
+"	4	TextRegion	0.9988920092582704
+294.8088684082031	174.07850646972656	1005.849365234375	211.9473419189453	rectangle	"- kůlová jamka. Rozměry: 42x 26 cm, hloubka: 4cm. Výplň tmavě hnědá.
+"	5	TextRegion	0.9988071918487548
+235.6558837890625	1449.5709228515625	1001.81640625	1491.921142578125	rectangle	"2555 | - kůlová jamka. Rozměry: 32x 26 cm, hloubka: 3 cm. Výplň tmavě hnědá.
+"	6	TextRegion	0.9977679252624512
+210.5255889892578	903.9339599609376	997.2120361328124	973.9163818359376	rectangle	"stánád
+2546 | - kůlová jamka. Rozměry: 34x 24cm, hloubka: 5cm. Výplň tmavě hnědá.
+ace: PRA,int.NV
+"	7	TextRegion	0.9976220726966858
+325.8623962402344	436.01849365234375	979.4334716796876	487.7686767578125	rectangle	"kůlová jamka. Rozměry: 17x 16cm, hloubka: 4 cm. Výplň tmavě hněd:
+"	8	TextRegion	0.9970840811729432
+234.22178649902344	1384.890869140625	994.658447265625	1449.9005126953125	rectangle	"2554 | - kůlová jamka. Rozměry: 24x 24cm, hloubka: 5cm. Výplň tmavě hnědá.
+: PRA,int.NV
+
+ 
+"	9	TextRegion	0.996917963027954
+316.4090270996094	1512.15673828125	990.246826171875	1536.513427734375	rectangle	"- kůlová jamka. Rozměry: 55x 40 cm, hloubka: 8 cm. Výplň tmavě hnědá.
+"	10	TextRegion	0.9967503547668456
+326.79425048828125	1271.44482421875	982.9511108398438	1325.2398681640625	rectangle	"kůlová jamka. Rozměry: 16x 14cm, hloubka: 4 cm. Výplň tmavě hnědé
+"	11	TextRegion	0.9967079162597656
+333.1383972167969	673.0248413085938	979.9793090820312	727.6959838867188	rectangle	"cůlová jamka. Rozměry: 20x 16 cm, hloubka: 4 cm. Výplň tmavě hněd:
+"	12	TextRegion	0.996012568473816
+874.1275634765625	234.8768768310547	1048.0675048828125	254.08567810058597	rectangle	"-světle šedá skvrna
+"	13	TextRegion	0.995917022228241
+328.9078063964844	556.94189453125	981.9683837890624	611.680419921875	rectangle	"kůlová jamka. Rozměry: 35x 25 cm, hloubka: 3 cm. Výplň tmavě hněd:
+"	14	TextRegion	0.995435893535614
+318.4587097167969	1148.0628662109375	978.8630981445312	1204.233642578125	rectangle	"- kůlová jamka. Rozměry: 46x 35 cm, hloubka: 3cm. Výplň tmavě hněd:
+"	15	TextRegion	0.9945013523101808
+317.8058166503906	318.40264892578125	992.9357299804688	370.6619873046875	rectangle	"- kůlová jamka. Rozměry: 26x 18 cm, hloubka: 3 cm. Výplň tmavě hnědá.
+"	16	TextRegion	0.9943673014640808
+311.8741760253906	1328.1796875	988.723876953125	1377.150634765625	rectangle	"- kůlová jamka. Rozměry: 28x 16cm, hloubka: 4 cm. Výplň tmavě hnědá
+"	17	TextRegion	0.9938198924064636
+320.23681640625	1212.2470703125	977.4052734375	1248.432861328125	rectangle	"kůlová jamka. Rozměry: 43x 23 cm, hloubka: 4cm. Výplň tmavě hněd
+"	18	TextRegion	0.9892112016677856
+242.4663848876953	1515.7191162109375	284.4175720214844	1531.8209228515625	rectangle	"2556
+"	19	TextRegion	0.9811191558837892
+259.5204162597656	843.7537231445312	988.5790405273438	920.8151245117188	rectangle	"AMV
+
+545 © - kůlová jamka. Rozměry: 37x 24cm, hloubka: 3 cm. Výplň tmavě hnědá
+"	20	TextRegion	0.9799762964248656
+322.9693603515625	1092.312255859375	986.7124633789062	1138.1724853515625	rectangle	"kůlová jamka . Rozměry: 48x 40 cm, hloubka: 8 cm. Výplň tmavě hnědá
+"	21	TextRegion	0.9795258045196532
+299.6936340332031	1000.2684936523438	1000.53564453125	1111.3126220703125	rectangle	"     
+
+- kůlová jamka. Rozměry: 30x 24 cm, hloubka: 2cm. Výplň tmavě hnědá.
+
+- kůlová jamka . Rozměrv: 48x 4() cm. hloubka: 8 cm. Výnlň tmavě hnědá.
+"	22	TextRegion	0.9793093204498292
+262.3331298828125	971.3095703125	970.1256713867188	1015.750244140625	rectangle	"347 - kůlová jamka. Rozměry: 30x20 cm, © hloubka: 4cm. Výplň tmavě hněc
+"	23	TextRegion	0.9764273166656494
+310.9889831542969	377.3830261230469	988.2527465820312	419.12896728515625	rectangle	"- kůlová jamka . Rozměry: 36x 24 cm, hloubka: 4cm. Výplň tmavě hnědá
+"	24	TextRegion	0.975229024887085
+332.5880126953125	613.5232543945312	980.8685302734376	667.3352661132812	rectangle	"kůlová jamka. Rozměry: 30x 22 cm, hloubka: 3cm. Výplň tmavě hněd
+"	25	TextRegion	0.9745393991470336
+287.8916931152344	301.0461120605469	992.5388793945312	402.22271728515625	rectangle	"|- kůlová jamka. Rozměry: 26x 18 cm, hloubka: 3 cm. Výplň tmavě hnědá.
+
+- kůlová jamka . Rozměry: 36x 24 cm, hloubka: 4cm. Výplň tmavě hnědá
+
+ 
+"	26	TextRegion	0.961778163909912
+272.873779296875	915.10546875	985.1405639648438	1055.2603759765625	rectangle	"16. - kůlová jamka. Rozměry: 34x 24 cm, hloubka: 5 cm. Výplň tmavě hnědá
+A int.NV
+17. - kůlová jamka. Rozměry: 30x20 cm, © hloubka: 4 cm. Výplň tmavě hnědá
+
+18 — - kůlová jamka. Rozměry: 30x 24 cm, hloubka: 2 cm. Výplň tmavě hnědá
+"	27	TextRegion	0.9149104356765748
+227.06427001953125	846.5416259765625	988.521240234375	998.1093139648438	rectangle	"2545. - kůlová jamka. Rozměry: 37x 24cm, hloubka: 3 cm. Výplň tmavě hnědá
+c:
+
+2546 | - kůlová jamka. Rozměry: 34x 24cm, hloubka: 5 cm. Výplň tmavě hnědá
+e: PRA,int.NV
+
+2547. - kůlová jamka. Rozměry: 30x20 cm, © hloubka: 4cm. Výplň tmavě hnědá
+"	28	TextRegion	0.8543989658355713
+309.4631652832031	649.2020263671875	1000.69677734375	753.8516235351562	rectangle	"- kůlová jamka. Rozměry: 20x 16 cm, hloubka: 4 cm. Výplň tmavě hnědá.
+
+- kůlová jamka. Rozměrv: I8x 16cm. hloubka: 44cm Výnlň tmavě hnědá.
+"	29	TextRegion	0.8209773898124695
+195.8155517578125	169.40687561035156	1005.7391357421876	274.7507629394531	rectangle	"jj. © 2534. - kůlová jamka. Rozměry: 42x 26 cm, hloubka: 4cm. Výplň tmavě hnědá.
+itace:
+3j. 2535 - kůlová jamka. Rozměry: 64x44 cm, hloubka: 0 cm. Výplň -světle šedá sk
+
+naurchrn nadln5í — nebanána
+"	30	TextRegion	0.8164745569229126
+302.6373291015625	535.8307495117188	992.9602661132812	644.31689453125	rectangle	"- kůlová jamka. Rozměry: 35x 25 cm, hloubka: 3cm. Výplň tmavě hnědá.
+
+- kůlová jamka. Rozměry: 30x 22 cm, hloubka: 3 cm. Výplň tmavě hnědá.
+"	31	TextRegion	0.8124423623085022

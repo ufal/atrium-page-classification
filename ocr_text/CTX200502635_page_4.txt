@@ -1,0 +1,75 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+144.75912475585938	875.4078369140625	259.576416015625	891.8197021484375	rectangle	"vrstva 0208
+"	0	TextRegion	0.99997079372406
+144.84527587890625	1099.6922607421875	255.97280883789065	1116.5821533203125	rectangle	"vrstva 0213
+"	1	TextRegion	0.9999557733535768
+145.15029907226562	307.9985656738281	980.3302612304688	375.9459533691406	rectangle	"« 1 zlomek keramiky zdobený nízkým plastickým žebrem, na vnější straně glazováno.
+jemně plavená hlína, oxidační výpal
+vrstva N1ARK-N1N
+"	2	TextRegion	0.9998416900634766
+145.51803588867188	987.6026611328124	256.7486267089844	1005.408935546875	rectangle	"vrstva 0210
+"	3	TextRegion	0.9998389482498168
+146.7085723876953	1440.8475341796875	256.47906494140625	1457.7200927734375	rectangle	"vrstva 0304
+"	4	TextRegion	0.9998353719711304
+135.5955352783203	1464.3172607421875	891.5960693359375	1523.3184814453125	rectangle	"«  Satypických keramických zlomků z jemně plavené hlíny, redukční výpal
+© 1 zlomek odřezávaného dna z jemně plavené hlíny, redukční výpal
+"	5	TextRegion	0.9997995495796204
+142.116943359375	1240.7431640625	265.4956970214844	1280.492919921875	rectangle	"SITUACE 3
+vrstva MM
+"	6	TextRegion	0.9997989535331726
+143.65159606933594	647.508544921875	256.2294616699219	665.0069580078125	rectangle	"vrstva 0207
+"	7	TextRegion	0.999789535999298
+129.0218048095703	1011.0645141601562	1025.5184326171875	1061.4122314453125	rectangle	"« © l atypický zlomek keramiky z jemně plavené hlíny s příměsí makroskopického ostřiva,
+oxidační výpal
+"	8	TextRegion	0.9991596937179564
+163.43551635742188	897.676513671875	971.8733520507812	970.1817016601562	rectangle	"1 atypický zlomek keramiky s kolkem (?) kruhového tvaru s mírně promáčknutým
+okrajem, keramická hmota jemně plavená, redukční výpal
+"	9	TextRegion	0.9989904761314392
+156.03794860839844	1125.7569580078125	812.5313720703125	1217.7169189453125	rectangle	"2 zlomky odřezávaných den, jemně plavená hlína, redukční výpal
+11 atypických zlomků z jemně plavené hlíny, redukční výpal
+2 zlomky odřezávaných den, jemně plavená hlína, redukční výpal
+"	10	TextRegion	0.9987636804580688
+136.38072204589844	1298.8406982421875	1048.0994873046875	1356.3201904296875	rectangle	"© © 1 zlomek jednoduchého okraje se šikmo seříznutou horní plochou, jemně plavená hlína,
+redukční výpal
+"	11	TextRegion	0.9987008571624756
+139.30007934570312	387.3465881347656	980.402587890625	441.382568359375	rectangle	"« © 2atypické zlomky na vnější straně glazované, jemně plavená hlína, oxidační výpal
+vrstva 0112
+"	12	TextRegion	0.9985748529434204
+154.9696807861328	555.4298706054688	731.3609619140625	617.0181274414062	rectangle	" 
+
+— 1atypický zlomek z jemně plavené hlíny, oxidační výpal
+| 2 zlomky dlaždic z cihlářské hlíny
+"	13	TextRegion	0.9985678195953368
+151.96778869628906	1347.8267822265625	778.933349609375	1410.4263916015625	rectangle	" 
+
+> latypický zlomek jednostranně glazovaný, oxidační výpal
+> 3 zlomky střešní krytiny z cihlářské hlíny
+"	14	TextRegion	0.9975332021713256
+141.14739990234375	505.68701171875	263.2036437988281	544.3671264648438	rectangle	"SITUACE 2
+vrstva M05
+"	15	TextRegion	0.997359573841095
+145.58705139160156	787.5819702148438	1029.80810546875	832.0853881835938	rectangle	"* 1 atypický zlomek keramiky z jemně plavené hlíny, vnější strana leštěná, tvrdý redukční
+výnal
+"	16	TextRegion	0.996713399887085
+156.95494079589844	248.91033935546875	258.9190673828125	297.4075622558594	rectangle	"ITUACE 1
+rstva 0107
+"	17	TextRegion	0.995528519153595
+1039.044189453125	1594.236572265625	1047.5460205078125	1607.6138916015625	rectangle		18	TextRegion	0.9954858422279358
+141.7345428466797	145.16006469726562	399.2506103515625	169.56626892089844	rectangle	" 
+"	19	TextRegion	0.994459867477417
+163.1485595703125	667.379638671875	869.3058471679688	763.5462646484375	rectangle	" 
+
+1 zlomek nádobkového kachle s glazovanou čelní vyhřívací stěnou
+2 drobné fragmenty cihel
+3 atypické zlomky keramiky z jemně plavené hlíny s příměsí makroskop
+"	20	TextRegion	0.9877213835716248
+148.11436462402344	717.3194580078125	1019.9334716796876	784.6971435546875	rectangle	"9 4 ULODÍIC IPASITCTLY CILICL
+« 3atypické zlomky keramiky z jemně plavené hlíny s příměsí makroskopického ostřiva,
+oxidační výpal
+"	21	TextRegion	0.957291543483734
+205.51187133789065	1014.1858520507812	1007.128662109375	1039.82421875	rectangle	"typický zlomek keramiky z jemně plavené hlíny s příměsí makroskopického ostřiva
+"	22	TextRegion	0.9377827048301696
+160.71080017089844	1297.2498779296875	1014.0938720703124	1325.8582763671875	rectangle	"1 zlomek jednoduchého okraje se šikmo seříznutou horní plochou, jemně plavená hlína,
+"	23	TextRegion	0.9146294593811036
+158.41920471191406	276.88836669921875	252.36380004882807	296.9199523925781	rectangle	"rstva 0107
+"	24	TextRegion	0.8957383036613464

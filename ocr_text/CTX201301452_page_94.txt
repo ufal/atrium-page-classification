@@ -1,0 +1,128 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+594.33544921875	1092.87109375	1097.632080078125	1111.722900390625	rectangle	"3.1. Seznam movitých nálezů z archeologického výzkumu
+"	0	TextRegion	0.9998955726623536
+183.07118225097656	171.6257781982422	742.9686279296875	1077.4912109375	rectangle	" 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+    
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+výzkumu fvýzk. Jvýzkumu — [Katastr [Lokalita
+
+27/12AP 2012|PhDr. Bureš [Praha 6 - Bubeneč Juárezova
+ro [27/12AP 2012|PhDr. Bureš. |Praha 6 - Bubeneč Juárezova
+ro [27/12AP 2012|PhDr. Bureš [Praha 6 - Bubeneč Juárezova
+ro [27/12AP 2012|PhDr. Bureš [Praha 6 - Bubeneč Juárezova
+ro [27/12AP 2012|PhDr. Bureš [Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. Bureš [Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. Bureš [Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. Bureš [Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. Bureš [Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. Bureš [Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. Bureš [Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. Bureš [Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. Bureš [Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. Bureš [Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. (Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. (Praha 6 - Bubeneč Juárezova
+ro 12AP 2012|PhDr.
+ro |27/12AP 2012|PhDr. (Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. (Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. (Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. (Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. (Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. (Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. (Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. (Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. (Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. (Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. (Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. (Praha 6 - Bubeneč Juárezova
+ro [27/12AP 2012|PhDr. (Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. (Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. (Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. (Praha 6 - Bubeneč Juárezova
+ro |27/12AP 2012|PhDr. (Praha 6 - Bubeneč Juárezova
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+"	1	TextRegion	0.9825725555419922

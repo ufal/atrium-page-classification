@@ -1,0 +1,43 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+163.2393035888672	527.0966186523438	1097.9072265625	1006.9703979492188	rectangle	"PSA BYE VSRR AV a
+
+ 
+
+Vzhledem k novým poznatkům značného významu, zejména co se týče
+charakteru předrománské rotundy. lze doporučit pro příští tok
+výzkum celé chrámové lodi, spojený s průzkumem vnitřních stěn,
+Poněvadž však jde o závažný zésah do církevního objektu dosud
+živého po stráhce církevní i národní jako živého památníku mi-
+nulosti i současnosti, prosím, Abych b byl spolu s odpovědnými
+činiteli Památkového střediska pověřen požádat majitele a uži-
+vatele objektu, abg převzal úkol investora obnovy této stavební
+památky. Lze toho přirozeně dosáhnout pouze za podstatné fi-
+nanční podpor y se sbrany příslušnýchpamátkářských činitelů,
+Poněvadž výzkumem bude odstraněna současná podlaha, bylo by
+třeba uvažovat o provisorní dřevěné podlaze na způsob řešení
+situace v kněžišti.
+
+ 
+"	0	TextRegion	0.9999998807907104
+159.2596893310547	164.58163452148438	1098.304931640625	435.7233581542969	rectangle	"3/ Bylo jistým překvapením, že severní hradební křídlo u brány
+je porušeno hlubším příkopem. Jeho keramický obsah i směr svědči
+o tom, že navazuje na již lóni na dyou místech Starého hřbitova
+objevené části příkopu. Jde tedy o nejmladší fázi fortifikační
+diferenciace hradiska pomocí prstencovitého příkopu v poloměru
+asi 16 - 17 m. od pláště rotundy. Vzhledem k stratigrafickým
+souvislostem lze dbvodový příkop datovat asi do 12. století,
+
+ 
+"	1	TextRegion	0.9999865293502808
+144.64990234375	981.0891723632812	1100.4212646484375	1138.18310546875	rectangle	"sliuace V KneZistl.
+
+Konečně upozorňuji vedení AÚ na potřebu před tak rozsáhlým vý-
+zkumem, nikoliv časově ale rozsahem zásshu do interiéru koste-
+la, požádati o expertizu inž. statika, jak již jsem též z pod-
+nětu komise žádal sám letos Krajské památkové středisko i Surpmc
+"	2	TextRegion	0.9998273849487304
+340.5498046875	465.4263916015625	1093.400146484375	505.8321228027344	rectangle	"byla řešena i otázka charakteru nejstaršího opevněn
+"	3	TextRegion	0.9996840953826904
+167.06298828125	110.49984741210938	683.959228515625	134.0384063720703	rectangle	"horizontu 10, a 12. století náleží,
+"	4	TextRegion	0.997732639312744
+166.36767578125	184.1591339111328	190.7564392089844	204.7528381347656	rectangle		9	TextRegion	0.8932738900184631

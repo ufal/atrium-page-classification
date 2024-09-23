@@ -1,0 +1,80 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+421.4992370605469	330.6202087402344	783.1731567382812	702.1691284179688	rectangle	"přizval si'dr. Rud. Tárka, archeologa Nár
+musea, s nímž zabezpečil Cenné nálezy pro
+Nár. museum v Praze a pro museum v Čes.
+Skalici, Dle zjištění těchto odborníků patří
+objevené žárové pohřebiště ve Velké Jese-
+nici t. zv, »kultuře lužické«, Provedené šet-
+ření a výzkumy nasvědčují tomu,že jde o
+pohřebiště značně rozlehlé, Jednotlivé hro-
+by, uložené celkem mělko pod povrchem,
+jsou položeny v do pravidelných, vzájem“
+ně rovnoběžných řadách, V každém hrobě,
+vedle vlastní popel „ vždy s vrchu po-
+kryté jinou, í a dnem vzhůru obrácenou
+okřínovitou: nádobou. jsou 2—4 menší ná-
+dobky s milodary. i pohřebiště možno
+odhadnouti na 3.400 i více let. Velká vědecká
+důležitost nálezu je v tom, že sídliště lidu
+s-touto kulturou jsou na východě Čech cel-
+kem dosud neznáma a že tvar některých
+nalezených nádob jeví určité úchylky proti
+Podobným nálezům z krajů jiných,
+
+ 
+ 
+ 
+  
+  
+
+ 
+
+ 
+
+ 
+"	1	TextRegion	0.999807059764862
+37.52607727050781	338.7515869140625	411.9155883789063	510.8104553222656	rectangle	"Jde-iř sĎ od slanice Velká Jesenice silnicí
+přes. ves s (úhlednými výstavnými staveními,
+přijde se za hospod: ářské stavení rolníka Fr.
+Čápa, čp. 6 i 60 m od stavení V pro-
+středním pí 1, ěny starobylé nálezy,
+o nichž se rozepsaly denní i krajinské listy,
+Jako o pozoruhodnosti prvého řádu, Jedná se
+opravdu o zvláštnost, neboť jde o žárové
+hroby ze starší doby bronzové,
+
+ 
+ 
+"	2	TextRegion	0.9993984699249268
+35.62019729614258	512.4219970703125	391.0522766113281	588.3175659179688	rectangle	"Shodou okolností letos, jako již jiná léta
+trávil ve Velké Jesenici dovolenou dr. Ferd.
+Prantl ze Zemského musea v Praze, jenž ke
+spolupráci při odhalování vzácného nálezu
+
+   
+"	3	TextRegion	0.9989293217658995
+430.8409423828125	699.7579345703125	780.1363525390625	891.1168212890625	rectangle	"9, o ohon bd dod ném doba l SKL
+
+Tyto objevy nejsou na Českóskalicku,
+resp. v okolí Velké Jesenice žádnou zvlášt-
+ností, Bohužel, že pro neznalost skutečností
+přišlo mnoho věcí na zmar. Hroby jsou to-
+tiž poměrně nízko v zemi, 35—45 cm, takže
+mnohdy byly porušovány při orbě či pod.
+Nyní bude věnována celému okolí Velké Je-
+senice mimořádná pozornost, takže jistě
+bude zachráněno vše, co tajuplné starobylé
+pohřebiště skrývá,
+
+ 
+"	4	TextRegion	0.9980390667915344
+279.2851867675781	871.7639770507812	401.6459045410156	886.8511962890625	rectangle	", archivu N, P.
+"	6	TextRegion	0.9826996326446532
+186.93978881835935	0.9904559850692748	372.5223083496094	110.61721801757812	rectangle	"STŘEDOEVROPSKÁ
+, VÝSTŘIŽKOVÁ KANCELÁŘ
+
+„ARGUL
+
+SMÍCHOV, SMETANOVA 1.
+TELEFON 412-82.
+"	8	TextRegion	0.8258423805236816

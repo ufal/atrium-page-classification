@@ -1,0 +1,21 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+330.103759765625	1389.4488525390625	1219.3326416015625	1464.6630859375	rectangle	"o (1974). Část základu jižní podezdívky budovy oriento-
+V pozadí (sonda 26) dosažena úroveň povrchu vrstvy
+« Pohled od VSV. Toto J. Justová.
+"	2	TextRegion	0.9995452761650084
+165.9857635498047	1389.6326904296875	421.2105102539063	1459.3829345703125	rectangle	"Sonda 2a-20 (1974
+vané Z-V. V pozač
+z 10. stol. Pohle
+"	3	TextRegion	0.999427855014801
+1059.374755859375	67.17093658447266	1159.540283203125	94.27345275878906	rectangle	"Tab. 12
+"	4	TextRegion	0.9933472871780396
+182.96055603027344	688.8576049804688	1156.8277587890625	753.3764038085938	rectangle	"Sonda 24-20 M Jižní podezdívka r orientované V-Z.
+
+Vzadu (v sondě 20) dosažen povrohé Pohled od VJV. Foto J Justovo!.
+'„rsTvVu
+"	5	TextRegion	0.9800808429718018
+701.2560424804688	1396.62451171875	1126.1048583984375	1452.8082275390625	rectangle	"žní podezdívky budovy oriento-
+
+ena úroveň povrchu vrstvy
+uaotovo.
+"	6	TextRegion	0.9772164821624756

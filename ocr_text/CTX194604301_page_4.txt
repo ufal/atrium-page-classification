@@ -1,0 +1,47 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+212.3560485839844	131.08888244628906	1087.5479736328125	624.7695922851562	rectangle	"didill hh VUŠÍMVO IU SUI UVSL  ULIU UZ. ZU C L Wle  UULVUI ALOE. VEL
+des StraBenneubaues (vgl. Gleisanlage auf Abb....) verzoger-
+ten zuniichst die weitere Freilegung des Langugester Hausgrun
+risses; erst am 18. September konnte die Grabungsarbeit wie-
+der aufgenommen werden. 4ls Abschluli der Nordseite des lang-
+zestreckten (5,80 m langen) Hauses kam auf einer Fliche von
+1,20 mal 1,80 m eine Steinsetzung auf einem schwachen, rotge
+brannten Lehmsockel zutage (Abb.....). Zwischen den hochkant
+gestellten Steinen (Abb....)  fand sich zum Teil auf einem U
+terlager aus kleineren Steinen, Holzkohlenreste, angebrannte
+Tierknozhen und Gefáfischerben. Es handelt sich also hier um
+einen i1 der Nordostecke der Hausanlage planvoll errichteten
+Herd. Im gegeniiber war in der Sidwestecke des Hauses eine
+etwa 90 om lange und 25 cm hohe Lehmbank angebracht worden
+
+2m A-
+"	0	TextRegion	1.0
+217.4851531982422	710.200439453125	1145.84228515625	1261.22412109375	rectangle	"ZO M O OOM OOM 2
+lenverfiirbung abgedeckt und zur FPhotoaufnahme versšubert
+(Abb......). Es zeigt sich daher, daB das růckwěrtige Drit-
+
+bel der Hausanlage 8 - 10 cm hčher liegt.(Taf.VI). Eine Boden-
+slanierung 3,60 m vom Ostrand (etwa 2,20 m vom Westrand) des
+lausgrundrisses (Taf.III, Schnitt D E) ergibt.(aufer dem Pfo-
+stenprošil XI) die Lingenerstreckung des Hauptraunes. Es
+scheint demnach an ein einršumiges Haus (3,60 mal 2,90 m)
+spáter ein růckwártiger Zubau erfolgt zu sein, in welchem der
+ierd seine Aufstellung fand. Wahrscheinlich wurde nun erst
+
+ler Bacl:ofen im Hauptraum eingebaut. Das verlšngerte Dach wur-
+ie durch FPfosten an der neuen Hausrůckseite gestůtzt. Es fand
+sich nur an der Nordostecke ein Ffostenloch (Durchmesser 22 mal
+26 cm); der entsprechende Pfosten an der Siidwestecke lief sich
+licht nechweisen, was vielleicht auf die hier sehr tiefschiůr-
+fende StraGenbaubaggerung zurickzufůhren ist,
+"	1	TextRegion	0.9999879598617554
+191.33985900878903	1292.6732177734375	1145.8609619140625	1625.181640625	rectangle	"War man bei Untersuchung der Backofenanlage auf zwei
+Innenpfcsten gestolen, so konnten solche noch an anderen Stel-
+len des Hausinneren erwartet werden, Deshalb wurden von der
+Giebelfront beginnend in Abstěnden von 10 zu 10 cm Profile
+durch den Hausboden angelegt (Taf, VIII - XII). Die ersten
+drei Ouerprofile bereits wiesen Innenpfosten an der Nordost-
+und an der Sůdostseite nach (Taf. III, Pfosten IV und V). In
+Abstěnden von 1,70 m und 2,60 m westlich von der Hauseingangs-
+seite, mn der nordlichen Lángsseite des Hauses fanden sich
+"	2	TextRegion	0.9999675750732422

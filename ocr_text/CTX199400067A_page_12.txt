@@ -1,0 +1,44 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+137.79180908203125	762.0989990234375	1155.0689697265625	1004.0424194335938	rectangle	"Geodetický tým AÚ (p. ing. M. Šimana, p. J. Hub, p. J. Morávek,
+p. J. Tájek) zaměřil výzkum sondy 2 kromě polohy malých sond 2ch,
+2j, 2k a 2 1(""el""), které jsem zaměřila sama, Příslušná dokumentace
+je uložena v měřickém elaborátu v archivu map a plánů v AÚ v Praze,
+
+Detaily sondy (půdorysy velkých částí sondy, některé řezy) byly
+
+ 
+"	0	TextRegion	0.9999815225601196
+134.19761657714844	179.30984497070312	1170.9449462890625	583.856201171875	rectangle	"označovala objekty římskými číslicemi, vrstvy a kůlové jamky arabský-
+mi číslicemi, Původní očíslování objektů v terénu se v některých
+případech liší od jejich definitivního očíslování (srv. popis
+
+kůlové
+jednotlivých objektů) a některgyjamky byly očíslované teprve doda-
+tečně (srv. popis jednotlivých kůlových jamek). Při výzkumu sondy
+2m v r. 1978 a sondy 2n v r. 1985 jsem v terénu vždy v rámci dané
+sezóny označovala objekty již arabskými čísly; při definitivním
+
+očíslování těchto objektů v sondách 2m a 2n jsem navázala na římské
+
+EE A8 2 O k
+"	1	TextRegion	0.999910831451416
+148.2169189453125	1267.4029541015625	1140.8006591796875	1620.2237548828125	rectangle	"Zjišťovací sonda 2a (o šířce 2 m a délce 9,2 m) byla založena
+na doporučení koreferenta výzkumu PhDr. Rudolfa Turka, DrSc.,
+při SZ stěně původně plánovaného půdorysu rodinného domu č.p. 420
+(po provedení rozšířeného výzkumu sond 2a - 2j a 2 L(""el"") v areálu
+domu č.p. 420 posunul p. J. Veselý stavbu domu dále k SV). Po skry-
+tí ornice (drnu), mocné cca 15 - 35 cm (povrch terénu byl místy
+hrbolatý) se v sondě 2a ukázala intaktní situace z doby hradištní,
+
+V JZ polovině sondy se objevovalo velké množství opuky, které
+"	2	TextRegion	0.999894380569458
+158.8391876220703	678.7893676757812	178.3171844482422	694.7553100585938	rectangle		3	TextRegion	0.9930784106254578
+182.9195098876953	672.1693725585938	315.2967834472656	696.79443359375	rectangle	"„ ZAMĚŘENÍ
+"	4	TextRegion	0.9911434650421144
+156.8265380859375	1099.47705078125	180.49929809570312	1115.6341552734375	rectangle		5	TextRegion	0.9591724872589112
+393.9636840820313	1093.501220703125	505.4504699707031	1120.7772216796875	rectangle	"© SITUACE
+"	6	TextRegion	0.9300852417945862
+155.92352294921875	1606.27392578125	168.30575561523438	1619.9876708984375	rectangle		7	TextRegion	0.913475215435028
+572.3861694335938	58.37097930908203	587.4478149414062	72.75021362304688	rectangle		8	TextRegion	0.8853851556777954
+349.5726013183594	1167.232666015625	720.5106811523438	1192.1484375	rectangle	"Sezóna 1974: sondy 2a - 2c
+"	9	TextRegion	0.8763698935508728

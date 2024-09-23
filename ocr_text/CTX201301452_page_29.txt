@@ -1,0 +1,28 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+423.09521484375	1593.092041015625	774.6260986328125	1611.298583984375	rectangle	"5.1. Terénní a kresebná dokumentace
+"	0	TextRegion	0.9989827275276184
+160.07603454589844	263.9437866210937	689.6063842773438	752.825439453125	rectangle	". 2— polohopisná situace sond
+
+ 3— polohopisná situace čtverce A2
+
+„4— řez A2A3 a A3B3 ve čtverci A2
+
+„ 5— řez B3B2 a B2A2 ve čtverci A2
+
+. 6— polohopisná situace čtverce BI
+
+.7— řez B2C2, C2C1, CIB1 a B1B2 ve čtverci B1
+. 8— polohopisná situace čtverce B3, úroveň 1
+„ 9— polohopisná situace čtverce B3, úroveň 2
+„. 10 — řez B4C4 a C4C3 ve čtverci B3
+
+„11 — řez C3B3 a B3B4 ve čtverci B3
+
+„ 12 — polohopisná situace čtverce C2
+
+. 13— řez D2C2, C2C3, C3D3 a B4C4 ve čtverci C
+"	1	TextRegion	0.9984777569770812
+139.5310516357422	145.59982299804688	528.7654418945312	170.92965698242188	rectangle	"5.1. Terénní a kresebná dokumentace
+
+ 
+"	2	TextRegion	0.9958972930908204

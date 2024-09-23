@@ -1,0 +1,101 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+170.9029083251953	1094.38818359375	323.50555419921875	1116.5496826171875	rectangle	"4) 151/74:
+"	0	TextRegion	0.9994581341743468
+169.14080810546875	1503.900634765625	319.332275390625	1525.6650390625	rectangle	"8) 155/74:
+"	1	TextRegion	0.9992727637290956
+160.89080810546875	1226.5419921875	326.4420471191406	1248.5960693359375	rectangle	"55) 152/74:
+"	2	TextRegion	0.9990111589431764
+316.68145751953125	1506.4615478515625	1096.690185546875	1550.6417236328125	rectangle	"""Sonda 2b, mezi a pod velkými destrukčními kameny
+při sev. líci zdi Z-V, v záp. sousedství kanálku. 21
+"	3	TextRegion	0.9987892508506776
+169.97256469726562	1010.5633544921876	321.8080444335937	1034.345458984375	rectangle	"3) 150/74:
+"	4	TextRegion	0.9987117052078248
+168.15643310546875	1419.26904296875	319.10382080078125	1441.446044921875	rectangle	"7) 154/74:
+"	5	TextRegion	0.998696744441986
+311.96392822265625	908.2708129882812	1092.296142578125	1068.384033203125	rectangle	"o
+
+""Sonda 2c, obnažování povrchu destrukční ssuti jižně
+od jižní líce zdi V-Z, a to v asi 0,5 m širokém pásu
+při jv. stěně sondy, 14.8., 15.8,""
+
+""Sonda 2b, rozebírání pásu kamenů při jižním okraji
+
+prohlubně s destrukcí, mezi kameny a těsně pod nimi,
+16 a
+"	6	TextRegion	0.9984092116355896
+559.1497802734375	59.68783950805664	589.6201782226562	76.31289672851562	rectangle		7	TextRegion	0.9983507394790648
+158.5655059814453	1333.668212890625	319.1380615234375	1358.067626953125	rectangle	"56) 153/74:
+"	8	TextRegion	0.9976953864097596
+337.32440185546875	790.6544189453125	1123.8804931640625	927.8353271484376	rectangle	"povrchu - povrch tmavé jílovité hlíny žíhané rezavě
+žlutým pískem, 12.8,""
+
+""Sonda 2c, spodní partie hnědé ""slavník,"" vrstvy
+
+v sev, sousedství základu zdi V-Z při jv. stěně sondy,
+13.-14.8.""
+
+ 
+"	9	TextRegion	0.9925671815872192
+163.22080993652344	926.522216796875	325.4659729003906	952.5864868164062	rectangle	"52) 149/74:
+"	10	TextRegion	0.9889963865280152
+268.9915771484375	153.132080078125	1116.220703125	359.095458984375	rectangle	"/74: ""Sonda 2b, prostor jižně od pásu kamenů lemujícího
+jižní obvod prohlubně s destrukcí, hnědá slavníkov,
+vrstva, začišťování úrovně 3. fáze, 6.8,""
+
+/74: ""Sonda 2c, slavníkovská hnědá vrstva, prvních 20 cm,
+7.8., 8.8., 9.8.""
+
+/74: ""Sonda 2c, slavnikovská hnědá vrstva, prvních 20 cm,
+při okraji příkopu (v jeho severním sousedství), 9,8,
+
+PPA s
+"	11	TextRegion	0.9845954775810242
+310.0372314453125	1396.84375	1089.047119140625	1505.2449951171875	rectangle	"KP aAUVY « SVU 4762 40.
+
+""Sonda 2b, výplň kanálku při severní líci zdi Z-V
+(pod destrukcí velkých opukových kamenů při severní
+líci zdi). 21.8.""
+"	12	TextRegion	0.977316915988922
+865.4352416992188	760.836669921875	1112.8966064453125	812.0131225585938	rectangle	"3, 20 cm od jejího
+ny žihané rezavě
+"	13	TextRegion	0.9687402844429016
+338.016845703125	1092.5697021484375	1109.78564453125	1368.097900390625	rectangle	"""Sonda 2b, drobná kamenná ssuť pod pásem kamenů při
+jižním okraji prohlubně s destrukcí, po povrch tmavé
+jílovité vrstvy žíhané rezavě žlutým pískem (do níž
+semo tamo zašlapány kamínky z na ní ležící vrstvy
+drobné opukové ssuti). 15.8., 19.8.""
+
+""Sonda 2b, spodní horizont hnědé slavníkovské vrstvy
+mezi pásem kamenů lemujícím jižní okraj prohlubně
+
+s destrukcí a jz. stěnou sondy, a to v metrovém pruhu
+při jv. stěně sondy. 20.,8.""“
+
+""Sonda 2b, dtto mezi sz. okrajem metrového pruhu
+Posč ar 1870 03 ARO PRA M že l ne l o m
+
+ 
+"	15	TextRegion	0.966463565826416
+155.86367797851562	1095.2520751953125	194.6878204345703	1113.545166015625	rectangle	"54)
+"	16	TextRegion	0.9605165719985962
+154.77748107910156	1011.0284423828124	196.79519653320312	1029.830322265625	rectangle	"53)
+"	17	TextRegion	0.9438615441322328
+157.59536743164062	842.2606811523438	196.7837829589844	861.6941528320312	rectangle	"51)
+"	18	TextRegion	0.936255931854248
+153.96678161621094	1504.6746826171875	194.3420867919922	1523.39794921875	rectangle	"58)
+"	19	TextRegion	0.918968379497528
+157.4321746826172	926.7715454101562	199.174072265625	946.5870971679688	rectangle	"52)
+"	20	TextRegion	0.908190906047821
+300.625732421875	343.83154296875	1115.09326171875	429.700927734375	rectangle	"t ""Sonda 2c, slavníkovská hnědá vrstva, spodní horizont
+
+vrstvy prvních 20 cm, 9,8."" Obr. 4:1; 5:2.
+(Fe ocilka, kostěné šidélko)
+"	22	TextRegion	0.8748545050621033
+163.40911865234375	223.96006774902344	352.0202941894531	385.409912109375	rectangle	"47) 141/74: "":
+7
+48) 142/74: "":
+
+49) 143/74:
+
+ 
+"	23	TextRegion	0.8660233616828918

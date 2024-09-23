@@ -1,0 +1,71 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.4029541015625	1590.8541259765625	623.264404296875	1606.332275390625	rectangle		0	TextRegion	0.9999743700027466
+201.96974182128903	1308.0595703125	1013.2754516601562	1414.4100341796875	rectangle	"Nesoudržné a výrazně homogenizované navážky ve spodní partii překrývaly cc
+m mocnou polohu šedohnědé ulehlé písčité hlíny s příměsí převážně drobnýc
+
+renitých příměsí a uhlíků (sj. S07-11). Do této uloženiny se zahluboval rozměrný výko
+"	1	TextRegion	0.9999651908874512
+159.88392639160156	362.8811645507813	280.2491455078125	388.10748291015625	rectangle	"Sonda S07
+"	2	TextRegion	0.9998290538787842
+142.0855255126953	110.53020477294922	1037.371826171875	224.05731201171875	rectangle	"uloženiny S06-09 se zahluboval nevelký oválný objekt (sj. VO5, dno 196,98) vyplněný
+soudržnou písčitou hlínou.
+
+Objekt se zahluboval do soudržného zahliněného písku (sj. S06-11, povrch
+"	3	TextRegion	0.9993485808372498
+153.2637939453125	432.7327270507813	1046.9068603515625	753.8220825195312	rectangle	"Archeologická sonda měla ve své horní partii z důvodu nálezu zděných konstrukcí
+nepravidelný lalokovitý tvar o velikosti 6,4 x 5 m, který se však ve své zahloubené části
+zformoval do přibližně obdélného tvaru o rozměru 2,4 x 1 m. Sonda se nalézala na
+západní straně pozemku č. 1556/3, v místech interiéru před výzkumem asanovaného
+domu (obr. příl. 1, 2, 3, 4). Úroveň povrchu sondy se nalézala na niveletě 199,36 m n. m.,
+byly v této sondě dokumentovány 2 řezy a 1 půdorys (S07-RJ, RZ; S07-P01).
+
+Svrchní partii historického nadloží zde tvořil zahradní substrát (si. S07-01),
+"	4	TextRegion	0.9990231990814208
+159.90733337402344	198.95428466796875	1019.256591796875	260.6034851074219	rectangle	"Objekt se zahluboval do soudržného zahliněného písku (sj. S06-11, povrcl
+
+107 NAV ktarý ja ma]iné n
+
+ 
+
+adit ma7i nánlavaová cadimantv
+"	5	TextRegion	0.9989223480224608
+157.01187133789062	116.77003479003906	1045.5667724609375	173.28395080566406	rectangle	"uloženiny S06-09 se zahluboval nevelký oválný objekt (sj. VO5, dno 196,98) vyplněný
+
+enudržnau nícčitau hlínau
+"	6	TextRegion	0.9960905909538268
+149.42942810058594	588.7507934570312	1034.605224609375	1193.6463623046875	rectangle	"domu (obr. příl. 1, 2, 3, 4). Úroveň povrchu sondy se nalézala na niveletě 199,36 m n. m.,
+byly v této sondě dokumentovány 2 řezy a 1 půdorys (S07-RJ, RZ; S07-P01).
+
+Svrchní partii historického nadloží zde tvořil zahradní substrát (sj. S07-01),
+překrývající polohu písčité hlíny s příměsí zlomků cihel a malty (sj. S07-02).
+
+Recentní souvrství překrývalo situaci tvořenou zděnou konstrukcí v podobě
+pravoúhlého nároží (204, V21), porušeného výkopem sondy, ke které byla od jihu na
+spáru přisazena zeď (Z05, V18) a vnevelké vzdálenosti od uvedených konstrukcí
+probíhala souběžně zeď (206, V19). Koruny těchto zdí se nalézaly přibližně ve stejné
+nadmořské výšce kolem 198,80 až 199,00. Ve všech případech se jednalo o základové
+partie konstrukcí ze smíšeného materiálu s převahou lomové opuky, v menšině křemenců
+nebo cihel spojovaných vápennou maltou. Obdobnou výškovou úroveň si držela i
+základová spára u konstrukcí ZO5 a Z06 pohybující se na niveletě 198,20 a o něco hlouběji
+
+u základu Z04 na 197,50. Zdiva se zahlubovala do souvrství písčitých hlín, které
+"	7	TextRegion	0.9868370294570924
+162.1527862548828	881.2451171875	1018.8406982421876	1272.6153564453125	rectangle	"pravounleno narozi (404, VZ), poruseneho vykopem sondy, ke ktere Dyla od jihu n
+spáru přisazena zeď (Z05, V18) a vnevelké vzdálenosti od uvedených konstrukc
+probíhala souběžně zeď (206, V19). Koruny těchto zdí se nalézaly přibližně ve stejní
+nadmořské výšce kolem 198,80 až 199,00. Ve všech případech se jednalo o základov“
+partie konstrukcí ze smíšeného materiálu s převahou lomové opuky, v menšině křemenci
+nebo cihel spojovaných vápennou maltou. Obdobnou výškovou úroveň si držela
+základová spára u konstrukcí Z05 a Z06 pohybující se na niveletě 198,20 a o něco hloubě;
+u základu Z04 na 197,50. Zdiva se zahlubovala do souvrství písčitých hlín, kter:
+
+obsahovaly opět velké množství stavebního odpadu (sj. S07-03 až S07-09, báze 196,92
+
+A9 AM
+
+ 
+"	8	TextRegion	0.9625120162963868
+177.22457885742188	117.38314819335938	1017.47021484375	142.34164428710938	rectangle	"loženiny S06-09 se zahluboval nevelký oválný objekt (sj. VO5, dno 196,98) vyplněn
+"	9	TextRegion	0.9229735732078552
+158.94224548339844	239.9094390869141	920.023193359375	278.25982666015625	rectangle	"197,08), který je možné přiřadit mezi náplavové sedimenty.
+"	10	TextRegion	0.900600016117096

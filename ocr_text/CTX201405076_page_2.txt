@@ -1,0 +1,38 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+199.6530303955078	222.3169860839844	253.25961303710935	236.68450927734372	rectangle	"Obsah
+"	0	TextRegion	0.9999717473983764
+200.1108856201172	1080.0814208984375	449.7140808105469	1095.7962646484375	rectangle	"V Kutné Hoře dne 12. 11. 2014
+"	1	TextRegion	0.9998650550842284
+201.76348876953125	794.398193359375	944.1533813476562	815.6309814453125	rectangle	"Tato NZ obsahuje 13 stran textu, 54 stran tabulek, 30 stran plánů, 32 stran fotodokumentace
+"	2	TextRegion	0.9995993971824646
+217.61862182617188	341.29510498046875	952.7593994140624	619.3668823242188	rectangle	"KU
+„ Lokalizace a okolnosti výzkumu
+„ Geografický a sídelní kontext naleziště.
+„ Historie naleziště
+„ Cíle a metoda výzkumu .
+Popis terénní situace.
+„ Popis objektů.......
+„ Zhodnocení výsledků výzkumu
+Literatura..
+0. Seznam objektů
+1 Gaznam cáčků
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+"	3	TextRegion	0.998729407787323
+590.646240234375	1614.9017333984375	599.095703125	1625.9168701171875	rectangle		4	TextRegion	0.9969083666801452
+197.8864898681641	270.452392578125	447.7654113769531	289.5100402832031	rectangle	"Text a dokumentace NZ
+"	5	TextRegion	0.9899837970733644
+310.8878479003906	335.5704040527344	955.2633666992188	347.2364807128906	rectangle		6	TextRegion	0.9409708976745604

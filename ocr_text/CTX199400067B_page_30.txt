@@ -1,0 +1,56 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+186.89596557617188	1123.5523681640625	1090.6910400390625	1289.721923828125	rectangle	"Tab. 13:25, č. nege 51 125a, be Sonda 2a-2c (1974).
+Část základu jižní podezdívky budovy, orientované V-Z. V pozac
+(sonda 2c) dosažena úroveň povrchu vrstvy 3 z 10.stol. Pohled
+od VSV. Vpravo od podezdívky část zbytku západní příčky
+E hidavěš
+"	0	TextRegion	0.9999462366104126
+168.9273223876953	1315.96630859375	1078.4598388671875	1519.3419189453125	rectangle	"Tab. 13:26, č. nege 51 126. Sonda 2a-2b (1974). V po-
+předí základ jižní podezdívky budovy orientované V-Z, za ní
+část jejích destrukčních sutí, V pozadí vnitřní příkop opev=
+nění a sutě vnitřní hradební zdi. Pohled od S.
+
+Tab. 14:27, č. neg. 51 127. Sonda 2b (1974). Vpředu
+"	1	TextRegion	0.998428463935852
+582.595703125	32.726959228515625	612.8231201171875	53.642208099365234	rectangle		2	TextRegion	0.9982286095619202
+360.077392578125	692.8250732421875	1095.1151123046875	815.8422241210938	rectangle	"11:22, č. nege 51 122, Sonda 2a-2c (1974). Jižní
+budovy orientované V-Z a zbytky jejích destrukčních
+vnitřní příkop a kontrolní blok se sutí vnitřní
+
+BKS A A 990
+"	3	TextRegion	0.997605562210083
+748.7316284179688	18.88849639892578	1071.0595703125	78.83480072021484	rectangle	"A KOménTar
+Textýyk fototabulkám
+Sonda 2a - 2d (1974) -=
+"	4	TextRegion	0.99539977312088
+213.7655487060547	941.0851440429688	1046.970703125	1086.8995361328125	rectangle	"JVIDEH VIDSVUVY Je £ONDLeEU OG VJVo
+
+Tab. 12:24, č. neg. 51 124. Sonda 2a=2c (1974). Část
+ákladu jižní podezdívky budovy orientované Z-V. V pozadí
+sonda 2c) dosažena úroveň povrchu vrstvy 3 z lO.století,
+"	5	TextRegion	0.9926464557647704
+227.7017364501953	527.0181884765625	1101.1534423828125	649.1248779296875	rectangle	"Tab, 11:21, č. neg. 51 121, Sonda 2b (1974). Část jižní
+dezdívky budovy orientované V-Z a část vyzděného kanálku
+interiéru budovy. Stav po sejmutí vrstvy lO.století, Pohled
+"	6	TextRegion	0.9906536936759948
+242.5797882080078	839.9486694335938	1113.383056640625	965.3314208984376	rectangle	"Tab, 12:23, č. neg. 51 123, Sonda 2a-2c (1974). Jižní
+szdívka budovy, orientované V=Z. Vzadu (v sondě 2c) dosažen
+řch vrstvy 3. Pohled od VJV.
+"	7	TextRegion	0.9691305756568908
+188.80743408203125	654.3720092773438	277.1576232910156	673.5663452148438	rectangle	"od SV.
+"	9	TextRegion	0.891632616519928
+165.37289428710938	146.3227996826172	1088.3133544921875	558.1870727539062	rectangle	"Tab. 9:18, čeneg. 51 118, Sonda 2b (1974). Vnější líc
+jižní podezdívky budovy orientované V-Z, v popředí zbytky de-
+strukčních sutí budovy. Pohled od JZ.
+
+Tab. 10:19, č. neg. 51 119. Sonda 2a-2d (1974). Vnější
+líc jižní podezdívky budovy orientované V-Z, v popředí zbytky
+destrukčních sutí budovy. Pohled od J.
+
+Tab, 10:20, č. nege 51 120, Sonda 2b (1974). Zával nad
+základem jižní podezdívky budovy orientované V-Z, vpravo část
+vyzděného kanálku v interiéru budovy. Pohled od V. Za kanálke;
+zbytek východní příčky v budově.
+
+fab. 11:21. AŽ. nee. 51 121. Sanda 24h (1074). Msat jišní
+"	10	TextRegion	0.8729692101478577

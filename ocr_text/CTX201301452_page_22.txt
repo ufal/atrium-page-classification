@@ -1,0 +1,60 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+176.56675720214844	475.3529357910156	939.2796630859376	610.0213623046875	rectangle	"001 — ulehlá, šedavě středně hnědá uloženina tvořená 60 % hlíny a 40 % spraše
+002 — ulehlá, šedavě středně hnědá uloženina tvořená 60 % hlíny a 40 % spraše
+
+003 — ulehlá, šedavě středně hnědá uloženina tvořená 60 % hlíny a 40 % spraše
+
+NA  vůkan fvrýnlěň R2NORK)
+"	0	TextRegion	0.9998676776885986
+150.9949951171875	1065.0625	946.89404296875	1195.4027099609375	rectangle	"U ÁUUL — VYKOp sondy zjišťovacího vyzkumu (Vvyplň UZU02)
+C2002 — ulehlá, šedavě středně hnědá uloženina tvořená 60 % hlíny a 40 % spraše
+C2003 — ulehlá, šedavě středně hnědá uloženina tvořená 60 % hlíny a 40 % spraše
+
+2004 — výkon (výplň C2005)
+"	1	TextRegion	0.9995063543319702
+165.2034912109375	172.4703826904297	934.4801025390624	318.0330810546875	rectangle	"1004— výkop (výplň B1005)
+1005 — ulehlá, šedavě středně hnědá uloženina tvořená 60 % hlíny a 40 % spraše
+1006 — výkop (výplň B1007)
+
+107 213114 Yao% otřadun“ beXA4 sslaSamima dark CO O0/ klássy 5 ANO0/ omraša
+"	2	TextRegion	0.999273121356964
+173.25286865234375	1206.697021484375	936.8008422851562	1306.6124267578125	rectangle	"005 — ulehlá, šedavě středně hnědá uloženina tvořená 60 % hlíny a 40 % spraše
+
+006 — ulehlá, šedavě středně hnědá uloženina tvořená 50 % hlíny a 50 % spraše
+
+ 
+"	3	TextRegion	0.9992483258247375
+221.2069091796875	762.1109619140625	1071.2972412109375	821.1102294921875	rectangle	"- středně ulehlá, šedavě tmavě hnědá uloženina tvořená 80 % hlíny a 20 % spraše
+
+wmi nronlástkv snraše
+"	4	TextRegion	0.9991689920425416
+425.2764587402344	1591.4801025390625	773.651123046875	1613.733642578125	rectangle	"3.3. Přehled stratigrafických jednotek
+"	5	TextRegion	0.9982300400733948
+138.89022827148438	293.2253112792969	930.0027465820312	367.0618286132813	rectangle	"B1007 — ulchlá, šedavě středně hnědá uloženina tvořená 60 % hlíny a 40 % spraše
+
+B1008 — podloží tvořené okrovou spraší
+"	6	TextRegion	0.9975365400314332
+161.51319885253906	622.8344116210938	880.68994140625	748.3916625976562	rectangle	" 
+
+3005 — výkop sondy zjišťovacího výzkumu (výplň B3006)
+3006 — ulehlá, šedavě středně hnědá uloženina tvořená 60 % hlíny a 40 % sj
+
+3007 — mazanicová struktura
+"	7	TextRegion	0.9785562753677368
+192.8487548828125	217.9530792236328	937.1865844726562	284.199462890625	rectangle	"JS — ulehlá, šedavě středně hnědá uloženina tvořená 60 % hlíny a 40 % spraše
+
+)é — výkon (výplň B1007)
+"	8	TextRegion	0.9689728021621704
+141.76898193359375	1011.3350219726562	294.6373596191406	1032.3099365234375	rectangle	"ČTVEREC C2
+"	9	TextRegion	0.8907824754714966
+153.2557373046875	146.43492126464844	965.4920043945312	211.0283660888672	rectangle	"31003 — ulehlá, šedavě středně hnědá uloženina tvořená 60 % hlíny a 40 % spraše
+
+31004 — výkop (výplň B1005)
+"	10	TextRegion	0.8732742667198181
+136.7919921875	742.073486328125	1026.6795654296875	882.2659301757812	rectangle	"B3008 — středně ulehlá, šedavě tmavě hnědá uloženina tvořená 80 % hlíny a 20 % spra
+s okrovými proplástky spraše
+
+B3009 — ulchlá, šedavě tmavě hnědá uloženina tvořená 80 % hlíny a 20 % spraše
+"	11	TextRegion	0.828784704208374
+141.3030548095703	432.76849365234375	290.1460876464844	453.2697143554688	rectangle	"ČTVEREC B3
+"	12	TextRegion	0.823889434337616

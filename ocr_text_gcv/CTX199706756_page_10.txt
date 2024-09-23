@@ -1,0 +1,4 @@
+IMAGE_NAME	DESCRIPTION	LANGUAGE	BBOX_1	BBOX_2	BBOX_3	BBOX_4
+image	Soupis objektů	cs	(390, 842)	(778, 842)	(778, 864)	(390, 864)
+image	Soupis		(390, 842)	(558, 842)	(558, 864)	(390, 864)
+image	objektů		(578, 842)	(778, 842)	(778, 864)	(578, 864)

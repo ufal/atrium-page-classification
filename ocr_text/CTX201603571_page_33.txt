@@ -1,0 +1,60 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.3905029296875	1590.92431640625	623.1336669921875	1607.2291259765625	rectangle		0	TextRegion	0.9999933242797852
+141.9293212890625	789.3418579101562	1029.4228515625	844.7135009765625	rectangle	"KE: 1x silně omletý zlomek těla hrncovité nádoby, provedení režné, barvy šedohnědě. M:
+střednězrnný, větší křemenná zrna, oxidačně vypálený.
+"	1	TextRegion	0.9999618530273438
+143.09715270996094	116.15067291259766	1017.3560791015624	243.9159393310547	rectangle	"KE: menší časově heterogenní soubor zlomků těl z hrncovitých nádob, provedení režné,
+barvy světle béžové, hnědé, stopově glazované. M: jemný u mladšího materiálu, u
+staršího střednězrnný, příměs křemenných zrn, oxidačně vypálený. V: glazura medově
+hnědá, bílá transparentní (bělnina).
+
+CT: Tv omarfní mmrásní bnricab SalaJná Inieřšimný elita eřerchr wáh= 77s
+
+ 
+"	2	TextRegion	0.9999560117721558
+161.89666748046875	372.62213134765625	965.6798095703124	466.08392333984375	rectangle	" 
+
+KE: 3x zlomek těla a dna hrncovité nádoby, provedení režné, barvy šedohnědě. M:
+střednězrnný, s vyšším podílem křemenných zrn, oxidačně vypálený. V: rytá rýha.
+ST: 1x amorfní porézní kousek železné (silikátová pěna) strusky, váha 8g
+"	3	TextRegion	0.9998291730880736
+151.07598876953125	557.1761474609375	894.7581176757812	672.623779296875	rectangle	"Sáček č. S05-16 (sj. S05-16, obr. příl. 61)
+
+KE: 2x zlomek těla hrncovité nádoby, provedení režné, barvy šedohnědě. M:
+střednězrnný, oxidačně vypálený.
+
+ST: 5x amorfní porézní kousky železné (kovářské/nístějové) strusky, váha 95;
+"	4	TextRegion	0.9998199343681335
+150.78585815429688	1118.3643798828125	1009.3849487304688	1321.32373046875	rectangle	"Sáček č. S06-08 (sj. S06-08, obr. příl. 61)
+
+KE: menší časově heterogenní soubor zlomků těl z hrncovitých nádob, provedení režné,
+barvy světle šedé, béžové, hnědé, tmavě šedé — leštěné, stopově glazované. M: jemný u
+mladšího materiálu, u staršího střednězrnný, příměs křemenných zrn, oxidačně vypálen:
+V: rytá rýha, u mladší vývalková šroubovice, glazura medově hnědá.
+
+KK: 1x zvířecí kosti se stopou kuchyňského opracování (druhově neurčeno)
+
+ST: 2x amorfní porézní kousky železné (nístějové) strusky, váha 31g
+
+ 
+"	5	TextRegion	0.9996654987335204
+162.84390258789062	498.62115478515625	351.2454528808594	519.3549194335938	rectangle	"Datování: RS4/VS1?
+"	6	TextRegion	0.9984936714172364
+139.5163116455078	942.438720703125	910.0520629882812	1030.5272216796875	rectangle	"Sáček č. S05-18 (sj. S05-18, obr. příl. 61)
+KE: 3x omleté a drobné zlomky těla hrncovité nádoby, provedení režné, barvy
+Šedohnědě. M: střednězrnný, oxidačně vypálený.
+"	7	TextRegion	0.9980827569961548
+164.1932373046875	879.4762573242188	349.36773681640625	900.4360961914062	rectangle	"Datování: RS4/VS1?
+"	8	TextRegion	0.9972566962242126
+159.0091552734375	1054.83447265625	350.9588317871094	1077.342529296875	rectangle	"Datování: RS4/VS1?
+"	9	TextRegion	0.9870643615722656
+159.3336639404297	703.2437133789062	351.953125	727.093994140625	rectangle	"Datování: RS4/VS1?
+"	10	TextRegion	0.9829384684562684
+160.8756561279297	1405.674560546875	561.6290283203125	1430.30078125	rectangle	"Sáček č. S06-09 (sj. S06-09, obr. příl. 62)
+"	11	TextRegion	0.9823006391525269
+160.9200897216797	761.3536376953125	418.5697326660156	788.0015258789062	rectangle	" 
+"	12	TextRegion	0.9552820920944214
+164.92236328125	293.47222900390625	539.9322509765625	323.2852478027344	rectangle	"Datování: časově heterogenní RS4/NO2
+"	13	TextRegion	0.947087287902832
+160.11846923828125	1349.411865234375	553.718017578125	1375.95751953125	rectangle	"Datování: časově heterogenní RS4 a NO1
+"	14	TextRegion	0.8490579724311829

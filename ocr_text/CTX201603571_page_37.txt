@@ -1,0 +1,51 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+601.3884887695312	1591.159912109375	623.4675903320312	1606.7335205078125	rectangle		0	TextRegion	0.9999879598617554
+162.03549194335938	1205.074951171875	1023.6959228515624	1454.8046875	rectangle	"Nejstarší antropogenní komponentu na zkoumané ploše reprezentovaly
+zahloubené objekty. Největší seskupení bylo dokumentováno v jižní části zkoumané
+plochy v sondě S011 (S11-P01-P03, obr. příl. 32-34). Ve většině se jednalo o superpozic
+několika středních a menších jámových výkopů, které můžeme teoreticky spojit
+s konstrukčními prvky dřevěných staveb, nebo konstrukcí (sloupy, kůly, ploty?)
+
+Podstatně přesnější interpretaci je možné formulovat u jámového výkopu V24
+"	1	TextRegion	0.9999160766601562
+157.82833862304688	871.9419555664062	1028.3104248046875	1163.7086181640625	rectangle	"platřormy, ktera se pohybovala přibližné mezi kotami 196,5 — 198 Mm n. m., doslo
+k zapouštění nejstarších zahloubených antropogenních objektů.
+
+Půdu i čisté fluviální náplavy pohřbily na několika místech mladší svahové
+sedimenty. Zastiženy byly ve čtyřech ze sedmi geologicky vyhodnocených sond (S01, S02,
+S05, S06). Jedná se o holocenní uloženiny deluvio-fluviální povahy. Erozní pochody, při
+kterých došlo k mobilizaci zemin uložených ve výše položených partiích blízkého okolí, lze
+
+patrně spojit se zvyšující se intenzitou lidské činnosti v průběhu středověku (zemědělství,
+"	2	TextRegion	0.9978298544883728
+163.48757934570312	120.41596221923828	747.3201293945312	144.6254425048828	rectangle	"8. Vyhodnocení akce a perspektiva dalšího výzkum!
+"	3	TextRegion	0.9933399558067322
+159.91709899902344	206.41636657714844	1041.8448486328125	551.3135986328125	rectangle	"Realizace zjišťovacího výzkumu na pozemcích č. 1556 a 1557 přinesla řadu
+důležitých informací o historickém a přírodním vývoj místa, na jejichž základě je
+v současné době možné definovat objem a strukturu archeologických nálezů a situací na
+sledovaném místě a dále nastínit podobu záchranného archeologického výzkumu, který
+zde bude muset proběhnout před zahájením, nebo v rámci vlastní stavby objektu UK.
+
+Z geologického hlediska byla ve většině sond zastižena svrchní poloha přírodního
+podloží, která svou skladbou koresponduje s dosavadními znalostmi o její podobě
+
+v'těchto místech (Král a kol. 2010). Úroveň podloží se nalézá v hloubce cca kolem 3 až 3,5
+"	4	TextRegion	0.984412968158722
+170.33657836914062	275.39727783203125	1023.3098754882812	945.5521850585938	rectangle	"| současné době možné definovat objem a strukturu archeologických nálezů a situací na
+ledovaném místě a dále nastínit podobu záchranného archeologického výzkumu, který
+'de bude muset proběhnout před zahájením, nebo v rámci vlastní stavby objektu UK.
+
+Z geologického hlediska byla ve většině sond zastižena svrchní poloha přírodníhc
+nodloží, která svou skladbou koresponduje s dosavadními znalostmi o její podobě
+| těchto místech (Král a kol. 2010). Úroveň podloží se nalézá v hloubce cca kolem 3 až 3,""
+n pod současným povrchem. Základní komponentou sterilního podkladu tvoří fluviáln
+jloženiny terasových stupňů Botiče pleistocénního stáří, na kterých se během holocénu
+ryvinula slabě humózní půda. Ze sedmi posuzovaných sond se půdní horizonty dochovaly
+/pěti znich (S01, S02, S04, S05, S11). Svrchní hranice půdy představovala úroveř
+novrchu terénu před osídlením daného místa v mladším pravěku či raném středověku
+ejich záměrné ovlivnění člověkem dokumentuje v případě sondy S01 malá kolekce raně
+tředověké keramiky nalezená ve svrchní partii této půdy (číslo sáčku S01-18). Z tétc
+latformy, která se pohybovala přibližně mezi kótami 196,5 — 198 m n. m., došlc
+
+ zapouštění nejstarších zahloubených antropogenních objektů.
+"	5	TextRegion	0.9788955450057985

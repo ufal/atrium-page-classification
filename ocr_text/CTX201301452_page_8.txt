@@ -1,0 +1,57 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+153.95382690429688	1300.7757568359375	1043.86083984375	1456.27001953125	rectangle	"| — Ve Struhách čp. 1057 — na ppč. 1538 při stavbě knihovny Úřadu pro patenty a vynálezy
+I letech 1969—1970 zachyceny sídlištní objekty kultur s lineární keramikou, s vypíchanou
+ceramikou, řivnáčské (chata a jáma s pecí), únětické (sídlištní jáma s pohřbem dospělého
+
+edince se dvěma dětmi a zásobní jáma), věteřovské, knovízské, štítarské (mj. chata),
+"	0	TextRegion	0.9997981190681458
+126.43475341796876	1120.622314453125	1057.0689697265625	1264.99755859375	rectangle	" 
+
+6 — ul. Antonína Čermáka — kostrový hrob jordanovské kultury s schussenriedským
+džbánkem a zvířecími kostmi objeven počátkem 30. let 20. století poblíž hřbitova; v ulici
+vykopány roku 1932 knovízské sídlištní objekty
+"	1	TextRegion	0.9996477365493774
+131.8535919189453	223.3402557373047	1049.0609130859375	622.4912719726562	rectangle	" 
+
+Čísla lokalit uvedených v této kapitole korelují s čísly v Příloze č. 6. Zachycují okolí
+předmětné parcely do vzdálenosti 300 metrů (tento okruh je pro lepší patrnost vyznačen
+žlutou kružnicí). Červené body značí nálezy lokalizované, žluté pak z blíže či přesně
+neznámého prostoru. Modrým rámečkem je pod číslem 1 zvýrazněna parcela č. 1254, na níž
+proběhl záchranný archeologický výzkum referovaný touto nálezovou zprávou. Před
+referovaným předstihovým archeologickým výzkumem byl na předmětné parcele realizován
+zjišťovací archeologický výzkum, jehož terénní část proběhla ve dnech 23. 1. až 2. 2. 2012 a
+zpracování v návaznosti ve dnech 3. 2. až I. 3. 2012. Zjišťovací výzkum identifikoval dva
+stratigraficky odlišné půdní horizonty ovlivněné antropogenními faktory a zahloubené objekty
+
+sídlištního charakteru a pravěkého stáří
+"	2	TextRegion	0.9995799660682678
+143.42320251464844	1513.88525390625	184.9477996826172	1531.8424072265625	rectangle	"758).
+"	3	TextRegion	0.9992682337760924
+119.05529022216795	1011.5697021484376	1049.2000732421875	1121.8753662109375	rectangle	"5 — bývalá pískovna jižně od bubenečského hřbitova („za blázincem“) — zřejmě u
+křižovatky ulic Maďarské a Chittusiho mezi sanatoriem čp. 144 a domem čp. 45, střepy a
+
+nádobky knovízské kultury
+"	4	TextRegion	0.9991821646690368
+138.45553588867188	144.72613525390625	741.011474609375	170.60580444335938	rectangle	"2.4. Předchozí archeologické poznání lokality a jejího okolí
+
+ 
+"	5	TextRegion	0.9990910291671752
+139.3937530517578	688.1723022460938	1063.79638671875	806.9136962890625	rectangle	"2- Juárezova ul., v úseku od domu čp. 425 k čp. 427 a před domem čp. 591 — v roce 1995
+ve výkopu pro kabel kulturní souvrství či větší objekty (?) se sídlištními pozůstatky kultury
+
+s lineární keramikou a kultury štítarské
+"	6	TextRegion	0.9977039694786072
+317.74176025390625	1590.3406982421875	873.166015625	1615.3209228515625	rectangle	"2.4. Předchozí archeologické poznání lokality a jejího okol
+"	7	TextRegion	0.9959256649017334
+134.9417266845703	761.1123657226562	1024.4705810546875	947.2828369140624	rectangle	"s lineární keramikou a kultury štítarské
+3 — Juárezova ul. čp. 1084 — v roce 1995 ve výkopu pro dům jáma a chata s keramik«
+
+štítarské kultury a zvířecími kostmi ( ).
+4 — Heineho ul. — při kopání kanalizace počátkem 20. století zjištěny zahloubené objek
+
+s keramikou časně slovanského a starohradištního období
+"	8	TextRegion	0.9738554954528807
+149.15908813476562	973.1054077148438	285.1214599609375	995.4747314453124	rectangle	"539, 895, 904).
+"	9	TextRegion	0.9145371913909912
+206.60272216796875	1470.524169921875	1043.60888671875	1507.1268310546875	rectangle	"ské a laténské
+"	10	TextRegion	0.8518435955047607

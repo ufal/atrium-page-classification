@@ -1,0 +1,45 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+176.70816040039062	443.9501037597656	1159.7071533203125	681.2731323242188	rectangle	"Tab. 29:57, č. neg. 81 263. Sonda 2a-2d (1974). V popředí
+sonda 2c ve 3,fázi výzkumu, vzadu uprostřed a vpravo sonda 2a+2b
+ve 4.fázi, vzadu vlevo sonda 2d ve 3.fázi. Od Z k V běží sondami
+2a, 2b a 2c základ jižní podezdívky pravděpodobného kněžského do-
+mu z 1O.století. Vpravo okraj vnitřního příkopu a sokl s destruk=
+cí vnitřní hradební zdi (z 28.9.995). Pohled od Z. Foto: M.Šimana-
+
+=o.
+
+ 
+"	0	TextRegion	0.9999161958694458
+134.37896728515625	710.1552124023438	1155.1400146484375	939.6196899414062	rectangle	"Tab. 30:58, č. neg. 81 264. Sonda 2a-2c (1974). V popředí
+sonda 2a+2b ve 4.fázi výzkumu, vzadu VJV okraj sondy 2c ve 3.fázi.
+Od V k Z probíhá základ jižní podezdívky pravděpodobného kněžské-
+ho domu z 1O.století. Vpravo část vyzděného odvodního kanálku,
+vlevo okraj vnitřního příkopu a sokl s destrukcí vnitřní hradební
+zdi (z 28.9.995). Pohled od V. Foto: M.Šimana - J.Tájek.
+"	1	TextRegion	0.9999014139175416
+394.3306274414063	30.444839477539062	426.3934020996094	49.39623260498047	rectangle		2	TextRegion	0.9993759989738464
+524.3648681640625	18.345378875732425	982.7037353515624	87.9925308227539	rectangle	"Texty a komentář k fototabulkám
+Sonda 2a = 2d (1974) - str. 7
+"	3	TextRegion	0.9983123540878296
+140.8779754638672	183.95545959472656	1131.11865234375	427.7810974121094	rectangle	"3.fázi výzkumu. Pohled na okraj vnitřního příkopu s pásem de-
+strukční suti z pravděpodobného kněžského domu z 10.století,
+Pohled od V. Foto: M.Šimana = J.Morávek,
+
+Tab. 29:56, č. neg. 81 262. Sonda 2b (1974) ve 3.fázi vý=
+zkumu: pás destrukční suti z pravděpodobného kněžského domu
+z lO.století na okraji vnitřního příkopu. Pohled od Z. Foto:
+M.Šimana = J. Morávek.
+"	4	TextRegion	0.992281973361969
+200.3390045166016	679.994384765625	320.6878967285156	698.3583374023438	rectangle	"J.Tájek,
+"	5	TextRegion	0.9860405921936036
+153.0919189453125	144.22865295410156	1123.5289306640625	300.2698059082031	rectangle	"Tab, 28:55, č. neg. 81 261. Sonda 2b (+ 2a) (1974) ve
+3.fázi výzkumu. Pohled na okraj vnitřního příkopu s pásem de-
+strukční suti z pravděpodobného kněžského domu z 10.století,
+Pohled od V. Foto: M.Šimana = J.Morávek,
+"	6	TextRegion	0.9092612862586976
+335.35357666015625	292.693115234375	1096.54052734375	408.9990234375	rectangle	"29:56, č. neg. 81 262. Sonda 2b (1974) ve 3.fázi vý.
+destrukční suti z pravděpodobného kněžského domu
+tí na okraji vnitřního příkopu. Pohled od Z. Foto:
+"	8	TextRegion	0.8814394474029541
+374.7329711914063	33.18397903442383	443.80999755859375	46.93008804321289	rectangle	"- 99 .
+"	9	TextRegion	0.8087568283081055

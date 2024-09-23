@@ -1,0 +1,114 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+544.730712890625	54.485469818115234	577.6534423828125	71.04558563232422	rectangle	"29
+"	0	TextRegion	0.9997954964637756
+149.35035705566406	770.075439453125	293.71307373046875	791.8320922851562	rectangle	"12) 71/74:
+"	1	TextRegion	0.999580442905426
+150.06427001953125	578.9993896484375	297.24029541015625	599.8998413085938	rectangle	"10) 69/74:
+"	2	TextRegion	0.9993270635604858
+166.43658447265625	663.1563110351562	292.016845703125	681.864990234375	rectangle	"L) 70/74:
+"	3	TextRegion	0.999241590499878
+148.5476531982422	877.10546875	293.9236145019531	897.9010620117188	rectangle	"13) 72/74:
+"	4	TextRegion	0.9992396831512452
+149.2366943359375	961.361572265625	296.560302734375	982.7630615234376	rectangle	"14) 73/74:
+"	5	TextRegion	0.9989903569221495
+285.01483154296875	948.0236206054688	1056.3255615234375	1507.4117431640625	rectangle	"""Sonda 2b, začišťování svahu příkopu mezi soklem
+s destrukcí a plochou kaménků pod vrstvou žlutého p
+(ve slavníkovské hnědé vrstvě). 24,-25,6,,26.6.""
+
+""Sonda 2b, hrubé začišťování pásu kamennéssuti nad
+zbytky zdi Z-V a její destrukcí. 24.6.""
+
+""Sonda 2a, konečné čištění povrchu destrukce kam.zd
+Z-V (v jižním sousedství této zdi). 25.6,""
+
+""Sonda 2a, čištění úrovně 1. fáze ve slavníkovském
+/perníkovém/ horizontu mezi jižním okrajem destruko
+kam. zdi V-Z a sev, okrajem vnitř. příkopu. 25.6.""
+
+""Sonda 2a, kam, destrukce v sev, partii vnitř, přík
+(mezi sev, okrajem příkopu a jz. stěnou sondy), úro
+l. fáze ve slavníkovském horizontu - povrch vnitř,
+svahu příkopu. 25.6., 26.6., 27.6,""
+
+""Sonda 2b, konečné čištění pásu kam, ssuti nad zbyt
+zdi Z-V a jeji destrukcí, 27.6."" Obr. 16.
+
+""Sonda 2a, západní roh sondy, v hnědé slavníkovské
+vrstvě pod kam, destrukcí v příkopě, v nejhlubší pa
+zachycené části příkopu. 27.6,""
+"	6	TextRegion	0.9989563226699828
+157.80133056640625	1251.0523681640625	296.2261962890625	1275.9710693359375	rectangle	"8) 79/74:
+"	7	TextRegion	0.9988780617713928
+160.24871826171875	387.6397705078125	182.9927978515625	407.2962951660156	rectangle		8	TextRegion	0.9987805485725404
+190.57318115234372	157.08396911621094	1108.962646484375	204.28738403320312	rectangle	"| 63/74: ""Sonda 2b , úroveň cca 80-90 cm (""slavníkovská vrstva""
+17565""
+"	9	TextRegion	0.9977495074272156
+159.70458984375	494.5880432128906	182.4687347412109	513.4393920898438	rectangle		10	TextRegion	0.9905400276184082
+173.00177001953125	495.3167724609375	298.7507019042969	517.0908203125	rectangle	")) 68/74:
+"	11	TextRegion	0.9875487089157104
+162.65199279785156	159.9104766845703	185.9122467041016	178.98892211914062	rectangle	"7)
+"	12	TextRegion	0.9860884547233582
+527.9066162109375	56.60776519775391	592.1337890625	70.0865249633789	rectangle	"- 29..
+"	13	TextRegion	0.97065532207489
+307.3612365722656	399.55865478515625	1149.9351806640625	891.3274536132812	rectangle	"DOndJa ca + 2D, Zzacistena uroven ve slavnikovské hlini=
+topisčité vrstvě, severně od zdi a její destrukce, 60-70
+(při sv. hraně sondy 2b)/až/ 80-90 cm (při sz. stěně
+sondy 2a). 19.6.""
+
+""Sonda 2a + 2b, při začišťování povrchu kam, zdi a kam,
+destrukce v jejím jižním sousedství, a to v severním
+sousedství soklu s kam, destrukcí hradby. 19.6,""
+
+""Sonda 2b, pás cca 2 m široký v jižním sousedství destruk
+zdi V-Z, vrstva cca 10 cm po úroveň 1. fáze (slavníkovská
+vrstva hnědá perniková).24.6,""
+
+""Sonda 2b, plocha mezi jižní hranicí nálezů ze sáčku
+
+69 a okrajem/počátkem svahu vnitř, příkopu, vrstva cca
+
+10 cm po úroveň 1. fáze (slavníkovská vrstva hnědá
+perníková), 24.-25.6,""
+
+""Sonda 2b, začišťování svahu příkopu při jz. hraně
+
+sondy (cca l m široký pás při jz. stěně sondy, od jejiho
+jižního rohu po plochu kaménků pod vrstvou žlutého písku,
+ve slavníkovské hnědé vrstvě), 25,6,""
+
+""Sonda 2bh. nři >. atFě8ně oandy  navureh nlaschuy bamánbá
+"	14	TextRegion	0.9667743444442748
+139.67674255371094	1358.5087890625	300.8233642578125	1396.4576416015625	rectangle	"19) 81/74:
+"	15	TextRegion	0.9588165283203124
+142.90130615234375	1250.28076171875	180.769775390625	1269.7127685546875	rectangle	"18)
+"	16	TextRegion	0.957822859287262
+299.2346496582031	159.6785125732422	1128.6600341796875	185.19309997558597	rectangle	"""Sonda 2b , úroveň cca 80-90 cm (""slavníkovská vrstva""),
+"	17	TextRegion	0.955936849117279
+144.0778350830078	769.2000122070312	186.5331573486328	788.66943359375	rectangle	"12)
+"	18	TextRegion	0.9547454118728638
+332.8938293457031	391.7203063964844	1158.7396240234375	497.2367248535156	rectangle	"3onda 2a + 2b, začištěná úroveň ve slavníkovské hlini=
+opísčité vrstvě, severně od zdi a její destrukce, 60-70
+oři sv. hraně sondy 2b)/až/ 80-90 cm (při sz. stěně
+
+ondy 2a), 19.6.""
+"	19	TextRegion	0.9411826729774476
+156.98800659179688	1354.04541015625	290.279541015625	1436.5262451171875	rectangle	"9) 81/74:
+
+O) 82/74:
+"	21	TextRegion	0.93019300699234
+177.46115112304688	386.71392822265625	302.377197265625	407.7600708007813	rectangle	") 67/74:
+"	22	TextRegion	0.9126805067062378
+150.0988311767578	1045.3558349609375	295.2851257324219	1072.198974609375	rectangle	"15) 76/74:
+"	23	TextRegion	0.9057791233062744
+307.0013122558594	475.7086486816406	1148.4473876953125	688.2113647460938	rectangle	"m.. 076 A
+
+""Sonda 2a + 2b, při začišťování povrchu kam, zdi a kam,
+destrukce v jejím jižním sousedství, a to v severním
+sousedství soklu s kam, destrukcí hradby. 19.6,""
+
+""Sonda 2b, pás cca 2 m široký v jižním sousedství destruk
+zdi V-Z, vrstva cca 10 cm po úroveň 1. fáze (slavníkovská
+vrstva hnědá perníková).24.6,""
+
+""Sonda 2b, plocha mezi jižní hranicí nálezů ze sáčku
+"	24	TextRegion	0.8715206980705261

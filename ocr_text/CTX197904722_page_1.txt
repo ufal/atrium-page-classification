@@ -1,0 +1,63 @@
+x_1	y_1	x_2	y_2	block_type	text	id	type	score
+197.043212890625	403.5599365234375	1088.560546875	1286.61083984375	rectangle	"konstrukci rotundy svatováclavské na Pražském hradě, i když
+koli křížového typu«
+
+Důležité jsou poznatky stratigrafické, sloužící k meznému
+tování jednotlivých podlaží. Kazatelna autenticky datována
+
+| 1585 leží na kamenném dláždění stejně starým nebo spíše star
+m pozdně středověkým. Dláždění kamenné přechází místy v pískc
+u navážku stejného stáří, Tento podlažní pozdně středověky
+rizont kryje starší zřejmě předroménskou prosbou podlažní úrc
+ň, popušenou staršími hroby i v místech základů pilířů.
+
+Uvnitř rotundy se pochovávalo již od 1. poloviny 19. stoleti
+""k o tom svědčí nález gombíku s pletencovým vzorem v drunotné
+»„loze zásypu mladšího pohřbu. Náležel nepochybně jednomý ze
+tarších pohřbů nalezených při triumfálním oblouku, nejpravdě-
+odobněji ženě s řetízkem na klíční kosti nebo jiným dvěma
+>z nálezů, které stratigraficky náležejí starší skupině pohřbi
+Jsou tedy současné s pohřby vně rotundy z minulých let, dobře
+odle inventáře i stratigraficky datovaných.
+
+Z mladších hrobů je nejvýznamnější pohřeb kněze s cínovým
+2lichem,kasulí, patrně Štolou ze sametu ostatkovou schránkou
+motivem ukřižování na sklíčku a patriarším křížkem na hrudi.
+a lebkou ležela kniha bohoslužebného rázu s přezkou. Předběžn
+ze proti původnímu odhadu datovat pohřeb do 17. století. Nále
+yl dokumentov'án filmem.
+
+/ Loni získané terénní poznatky-trojice mohutných kůlových
+
+ 
+"	0	TextRegion	0.9999834299087524
+104.33283233642578	117.58280181884766	1135.583740234375	496.4395751953125	rectangle	"mnohými poznatky prokazováno již v letech minulých. Pozoru-
+hodným objevem letošní sezony je nález základů zdiva na dvou
+
+až třech místech při vnitřním líci obvodového zdiva rotundy,
+svědčícím o základech pilířů, snad rytmicky obměňovaných. Jeli-
+kož základy při risalitu triumfáhního oblouku jsou až 2 m dlou-
+hé a směřují radiálně k centru rotundy, lze se domnívat, že šlo
+u předrománské stavby o vnitřní členění pomocí arkád, přípsdně
+Že máme co činit s ochozovou botundou, snad blízkou Cibulkově
+rekonstrukci rotundy svatováclavské na Pražském hradě, i když
+
+nikoli křížového typu«
+
+T331 aš84 +44 jams nazna*-bk.. at
+
+ 
+
+3jorafické. sloužící k meznému
+"	1	TextRegion	0.9998815059661864
+181.37754821777344	1181.885009765625	1111.01806640625	1452.8182373046875	rectangle	"Kite ju | 7 EAP ML MYM VW S50 9 O
+
+byl dokumentov“án filmem.
+
+2/ Loni získané terénní poznatky-trojice mohutných kůlových
+jem u věže kostela a zbytky kamenné plenty dávaly tušit existen-
+ci brány uvnitř vnitřního valu. Předpoklad se letos potvrdil
+rozséhlejším průkopem v těchto místech. Brána je čelní, dovnitř
+se vějířovitě rozevírá a při jižní strsně se opírá o obloukovitě
+sevřené hradební rameno mladší slovanské hradby k jehož časovému
+"	2	TextRegion	0.9998685121536256
