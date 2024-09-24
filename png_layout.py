@@ -3,10 +3,11 @@ import layoutparser as lp
 import cv2
 from common_utils import *
 
+
 # PNG files layout extraction
 class PNG_Layout:
-    def __init__(self, output_folder=os.environ['FOLDER_LAYOUTS']):
-        self.layout_output_folder = output_folder
+    def __init__(self, output_folder: Path = None):
+        self.layout_output_folder = Path(os.environ['FOLDER_LAYOUTS']) if output_folder is None else output_folder
 
         self.png_file_list = []
 
@@ -17,37 +18,28 @@ class PNG_Layout:
         self.model = lp.Detectron2LayoutModel(config_path=pl_model_path, label_map=pl_labelmap,
                                             extra_config=["MODEL.ROI_HEADS.SCORE_THRESH_TEST", 0.8])
 
-        if not os.path.exists(self.layout_output_folder):
-            os.makedirs(self.layout_output_folder)
+        if not self.layout_output_folder.is_dir():
+            self.layout_output_folder.mkdir()
 
     # PNG layout detection
-    def _png_detect(self, png_file: str):
-        image = cv2.imread(png_file)
-        # print(image)
-        # cv2.imshow("img", image)
+    def _png_detect(self, png_file: Path):
+        image = cv2.imread(str(png_file))
         image = image[..., ::-1]
 
         layout_pl = self.model.detect(image)
-        # img = lp.draw_box(img, layout_pl, box_width=3,
-        #                   show_element_type=True, color_map=pl_palette)
-        # img.show()
-
         df = layout_pl.to_dataframe()
-        # print(df)
-        # layout = lp.io.load_dataframe(df)
-        # print(layout)
 
-        layout_file_name = f"{self.layout_output_folder}/{png_file.split('/')[-1].split('.')[0]}.txt"
+        layout_file_name = self.layout_output_folder / f"{png_file.stem}.txt"
         df.to_csv(layout_file_name, sep="\t", index=False)
-        print(f"Layout of {png_file.split('/')[-1]} containing {len(df.index)} blocks saved to {layout_file_name}")
+        print(f"Layout of {png_file.stem} containing {len(df.index)} blocks saved to {layout_file_name}")
         return df
 
     # called to process directory path
-    def folder_to_layouts(self, path: str) -> None:
-        pdf_list = directory_scraper(path, self.png_file_list)
+    def folder_to_layouts(self, path: Path) -> None:
+        self.png_file_list = directory_scraper(path, "png")
 
-        for file in pdf_list:
-            self._png_detect(file)
+        for file in self.png_file_list:
+            self._png_detect(Path(file))
 
 # possible configs for found layout parser (worse than chosen according to manual tests)
 

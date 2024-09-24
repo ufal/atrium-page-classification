@@ -27,10 +27,10 @@ image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 ret, thresh_image = cv2.threshold(image_gray, 150, 255, cv2.THRESH_BINARY)
 # cv2.imshow("img_tresh", thresh_image)
 
-thresh_gauss_big = cv2.adaptiveThreshold(image_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
-            cv2.THRESH_BINARY, 49, 15)
-thresh_gauss_small = cv2.adaptiveThreshold(image_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
-            cv2.THRESH_BINARY, 9, 5)
+thresh_gauss_big = cv2.adaptiveThreshold(
+    image_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 49, 15)
+thresh_gauss_small = cv2.adaptiveThreshold(
+    image_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 9, 5)
 # cv2.imshow("img_tresh_gauss", thresh_gauss)
 
 ret2, th2 = cv2.threshold(image_gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)

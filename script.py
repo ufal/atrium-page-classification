@@ -3,18 +3,19 @@ from png_layout import *
 from ocr_parser import *
 import argparse
 
-file_small = "CTX200903109.pdf"
-file_big = "CTX200502635.pdf"
-
-pages_output_folder = os.environ['FOLDER_PAGES']
-layout_output_folder = os.environ['FOLDER_LAYOUTS']
-ocr_output_folder = os.environ['FOLDER_TEXTS']
-ocr_output_folder_gcv = ocr_output_folder + "_gcv"
-
-folder_brno = "/lnet/work/people/lutsai/atrium/Brno-20240119T165503Z-001/Brno"
-folder_arup = "/lnet/work/people/lutsai/atrium/ATRIUM_ARUP_vzorek/CTX"
-
 if __name__ == "__main__":
+    file_small = "CTX200903109.pdf"
+    file_big = "CTX200502635.pdf"
+
+    folder_brno = "/lnet/work/people/lutsai/atrium/Brno-20240119T165503Z-001/Brno"
+    folder_arup = "/lnet/work/people/lutsai/atrium/ATRIUM_ARUP_vzorek/CTX"
+
+    cur = Path.cwd()
+    pages_output_folder = Path(os.environ.get('FOLDER_PAGES', cur / "pages"))
+    layout_output_folder = Path(os.environ.get('FOLDER_LAYOUTS', cur / "layouts"))
+    ocr_output_folder = Path(os.environ.get('FOLDER_TEXTS', cur / "ocr_text"))
+    ocr_output_folder_gcv = Path(str(ocr_output_folder) + "_gcv")
+
     parser = argparse.ArgumentParser(description='OCR PDF/PNG parser')
     parser.add_argument('-f', "--file", type=str, default=file_small, help="Single PDF file path")
     parser.add_argument('-d', "--directory", type=str, default=folder_arup, help="Path to folder with PDF files")
@@ -38,9 +39,9 @@ if __name__ == "__main__":
 
     if args.pdf:
         if args.dir:
-            pdf_parser.folder_to_pages(args.directory)  # called on folder with pdf files and folders with pdf files
+            pdf_parser.folder_to_pages(Path(args.directory))  # called on folder with pdf files and folders with pdf files
         else:
-            pdf_parser.pdf_to_png(args.file)
+            pdf_parser.pdf_to_png(Path(args.file))
 
         if args.img:
             if not args.nogcv:
@@ -50,9 +51,9 @@ if __name__ == "__main__":
                 ocr_parser.ocr_output_folder(pages_output_folder, layout_output_folder)
     elif not args.pdf and args.img:
         if args.dir:
-            ocr_parser.folder_ocr_gcv(args.pagedir)  # called on pages only
+            ocr_parser.folder_ocr_gcv(Path(args.pagedir))  # called on pages only
         else:
-            ocr_parser._ocr_image_gcv(args.pagefile)
+            ocr_parser._ocr_image_gcv(Path(args.pagefile))
 
 
     # png_list = directory_scraper(pdf_parser.page_output_folder)  # called on pages_output_folder
