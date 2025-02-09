@@ -53,11 +53,14 @@ Use pip to install dependencies:
 
 Run the program from its starting point [run.py](run.py) with optional flags:
 
-    python3 run.py -tn 3 -f '/full/path/to/file.png'
+    python3 run.py -tn 3 -f '/full/path/to/file.png' -m '/full/path/to/model/folder'
 
 to run single PNG file classification with top 3 predictions
 
-    python3 run.py -tn 3 --dir -d '/full/path/to/directory' 
+    python3 run.py -tn 3 --dir -d '/full/path/to/directory' -m '/full/path/to/model/folder'
+
+
+    python3 run.py -tn 3 -d '/full/path/to/directory' -m '/full/path/to/model/folder'
 
 to parse all PNG files in the directory (+ its subdirectories) and classify all pages (RECOMMENDED)
 
@@ -69,7 +72,7 @@ Code of the main function in the starting point [run.py](run.py) file can be edi
 If [.env](.env) variables are not loaded - change filenames in the main function of [run.py](run.py)
 
 
-**TIP**     You can set up default values of _topn_, _file_ and _directory_ values in the main function of
+**TIP**     You can set up default values of _model_path_, _topn_, _file_ and _directory_ values in the main function of
 [run.py](run.py) and then run the script via:
 
     python3 run.py --dir 

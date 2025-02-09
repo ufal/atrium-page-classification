@@ -4,20 +4,20 @@ from classifier import *
 import time
 
 if __name__ == "__main__":
-    data_dir = f'/lnet/work/people/lutsai/pythonProject/pages/train_final'
-    test_dir = f'/lnet/work/people/lutsai/pythonProject/pages/test_data'
+    data_dir = f'/lnet/work/people/lutsai/pythonProject/pages/train_final'  # data for training
+    test_dir = f'/lnet/work/people/lutsai/pythonProject/pages/test_data'  # considered as default input folder
 
     seed = 420
-    max_categ = 1400
+    max_categ = 1400  # max number of category samples
     test_size = 0.1
-    log_step = 10
+    log_step = 10  # for training only
 
-    epochs = 2
-    batch = 12
+    epochs = 5  # training only
+    batch = 12  # depends on GPU/CPU capabilities
     top_N = 3
 
-    Training = False
-    Testing = True
+    Training = False  # training control
+    Testing = False  # evaluation control
 
     base_model = "google/vit-base-patch16-224"
     model_folder = "model_1119_3"
@@ -28,6 +28,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Page sorter based on RFC')
     parser.add_argument('-f', "--file", type=str, default=None, help="Single PNG page path")
     parser.add_argument('-d', "--directory", type=str, default=None, help="Path to folder with PNG pages")
+    parser.add_argument('-m', "--model", type=str, default=model_path, help="Path to folder with model")
     parser.add_argument('-tn', "--topn", type=int, default=top_N, help="Number of top result categories to consider")
     parser.add_argument("--dir", help="Process whole directory", action="store_true")
     parser.add_argument("--train", help="Training model", default=Training, action="store_true")
@@ -57,8 +58,7 @@ if __name__ == "__main__":
                                                      np.array(total_labels),
                                                      test_size=test_size,
                                                      random_state=seed,
-                                                     stratify=np.array(
-                                                         total_labels))
+                                                     stratify=np.array(total_labels))
 
         # Initialize the classifier
         classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories))
@@ -71,27 +71,45 @@ if __name__ == "__main__":
         classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories))
 
     if args.train:
-        train_loader = classifier.process_images(trainfiles, trainLabels, batch, True)
-        eval_loader = classifier.process_images(testfiles, testLabels, batch, False)
+        train_loader = classifier.process_images(trainfiles,
+                                                 trainLabels,
+                                                 batch,
+                                                 True)
+        eval_loader = classifier.process_images(testfiles,
+                                                testLabels,
+                                                batch,
+                                                False)
 
-        classifier.train_model(train_loader, eval_loader, output_dir="./model_output", num_epochs=epochs,
+        classifier.train_model(train_loader,
+                               eval_loader,
+                               output_dir="./model_output",
+                               num_epochs=epochs,
                                logging_steps=log_step)
 
     classifier.load_model(model_path)
 
     if args.eval:
-        eval_loader = classifier.process_images(testfiles, testLabels, batch, False)
+        eval_loader = classifier.process_images(testfiles,
+                                                testLabels,
+                                                batch,
+                                                False)
         eval_predictions = classifier.infer_dataloader(eval_loader, top_N)
 
         test_labels = np.argmax(testLabels, axis=-1).tolist()
 
-        rdf = dataframe_results(testfiles, eval_predictions, categories, top_N)
+        rdf = dataframe_results(testfiles,
+                                eval_predictions,
+                                categories,
+                                top_N)
 
         rdf["TRUE"] = [categories[i] for i in test_labels]
 
         rdf.to_csv(f"result/tables/{time_stamp}_{model_folder}_EVAL.csv", sep=",", index=False)
 
-        confusion_plot(eval_predictions, test_labels, categories, top_N)
+        confusion_plot(eval_predictions,
+                       test_labels,
+                       categories,
+                       top_N)
 
     if args.file is not None:
         pred_scores = classifier.top_n_predictions(args.file, top_N)
@@ -103,14 +121,17 @@ if __name__ == "__main__":
         for lab, sc in zip(labels, scores):
             print(f"\t{lab}:  {sc}")
 
-    if args.dir:
+    if args.dir or input_dir is not None:
         test_images = sorted(os.listdir(test_dir))
         test_images = [os.path.join(test_dir, img) for img in test_images]
         test_loader = classifier.create_dataloader(test_images, batch)
 
         test_predictions = classifier.infer_dataloader(test_loader, top_N)
 
-        rdf = dataframe_results(test_images, test_predictions, categories, top_N)
+        rdf = dataframe_results(test_images,
+                                test_predictions,
+                                categories,
+                                top_N)
 
         rdf.to_csv(f"result/tables/{time_stamp}_{model_folder}.csv", sep=",", index=False)
 

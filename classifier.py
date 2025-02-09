@@ -170,6 +170,7 @@ class ImageClassifier:
                 else:
                     predicted_class_idx = logits.argmax(-1).tolist()
                     predictions.extend(predicted_class_idx)
+                print(f"Processed {len(predictions)} images")
         return predictions
 
     def save_model(self, save_directory: str):
