@@ -5,6 +5,7 @@ import numpy as np
 import random
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, ConfusionMatrixDisplay
 from matplotlib import pyplot as plt
+import time
 
 
 # get list of all files in the folder and nested folders by file format
@@ -66,7 +67,7 @@ def collect_images(directory: str, max_categ: int) -> (list, list, list):
     return total_files, total_labels, categories
 
 
-def confusion_plot(predictions: list, trues: list, categories: list, top_N: int = 1):
+def confusion_plot(predictions: list, trues: list, categories: list, top_N: int = 1, output_dir: str = None):
 
     single_pred = []
 
@@ -94,7 +95,7 @@ def confusion_plot(predictions: list, trues: list, categories: list, top_N: int 
     print('Percentage correct: ',round(100 * correct / len(trues), 2))
     # Confusion matrix display and normalized output
     disp = ConfusionMatrixDisplay.from_predictions(
-        trues, predictions,
+        trues, single_pred,
         normalize="true", display_labels=np.array(categories)
     )
 
@@ -103,7 +104,8 @@ def confusion_plot(predictions: list, trues: list, categories: list, top_N: int 
         print(
             f"{disp.display_labels[ir]}\t{'   '.join([str(val) if val > 0 else ' -- ' for val in np.round(row, 2)])}")
 
+    time_stamp = time.strftime("%Y%m%d-%H%M")
     disp.ax_.set_title(
         f"TOP {top_N} Full Confusion matrix")
-    plt.savefig(f"{output_dir}/plots/{plot_image}", bbox_inches='tight')
+    plt.savefig(f"{output_dir if output_dir else 'result'}/plots/{time_stamp}_conf_mat.png", bbox_inches='tight')
     plt.close()
