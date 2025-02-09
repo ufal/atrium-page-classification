@@ -1,19 +1,8 @@
 import torch
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
-from datasets import Dataset as HFDataset
-import os
 
-import time
-import pickle
-from collections import Counter
-import random
 from utils import *
-
-import numpy as np
-
-from pathos.multiprocessing import ProcessingPool as Pool
-import multiprocessing as mp
 
 from sklearn.model_selection import train_test_split, cross_val_score
 
@@ -36,7 +25,7 @@ def custom_collate(batch):
 
 
 class ImageClassifier:
-    def __init__(self, checkpoint: str, num_labels: int):
+    def __init__(self, checkpoint: str, num_labels: int, store_dir: str = "/lnet/work/people/lutsai/pythonProject/OCR/ltp-ocr/trans/chekcpoint"):
         """
         Initialize the image classifier with the specified checkpoint.
         """
@@ -47,7 +36,7 @@ class ImageClassifier:
             num_labels=num_labels,
             # id2label=id2label,
             # label2id=label2id,
-            cache_dir="/lnet/work/people/lutsai/pythonProject/OCR/ltp-ocr/trans/chekcpoint",
+            cache_dir=store_dir,
             ignore_mismatched_sizes=True
         ).to(self.device)
 
@@ -148,7 +137,8 @@ class ImageClassifier:
             probabilities = torch.nn.functional.softmax(logits, dim=-1)
             top_n_probs, top_n_indices = torch.topk(probabilities, top_n, dim=-1)
             top_n_probs = top_n_probs / top_n_probs.sum()
-            return list(zip(top_n_indices.squeeze().tolist(), top_n_probs.squeeze().tolist()))
+        print(top_n_indices, top_n_probs)
+        return list(zip(top_n_indices.squeeze().tolist(), top_n_probs.squeeze().tolist()))
 
     def create_dataloader(self, image_paths: list, batch_size: int):
         """

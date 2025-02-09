@@ -20,6 +20,7 @@ if __name__ == "__main__":
 
     checkpoint_anem = "google/vit-base-patch16-224"
     model_folder = "model_1119_3"
+    model_path = f"../trans/model/{model_folder}"
 
     # test_dir = 'testing'
     test_file = "T_MTX195602489-12.png"
@@ -69,17 +70,17 @@ if __name__ == "__main__":
         # Initialize the classifier
         classifier = ImageClassifier(checkpoint=checkpoint_anem, num_labels=len(categories))
 
-        classifier.load_model(f"model/{model_folder}")
+        classifier.load_model(model_path)
 
     if args.file is not None:
-        pred_scores = classifier.top_n_predictions(args.file)
+        pred_scores = classifier.top_n_predictions(args.file, top_N)
 
         labels = [categories[i[0]] for i in pred_scores]
         scores = [round(i[1], 3) for i in pred_scores]
 
-        print(f"File {args.file} predicted:\n")
+        print(f"File {args.file} predicted:")
         for lab, sc in zip(labels, scores):
-            print(f"{lab} - {sc}")
+            print(f"\t{lab}:  {sc}")
 
     if args.dir:
         test_images = sorted(os.listdir(test_dir))

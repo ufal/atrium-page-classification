@@ -24,7 +24,7 @@ def dataframe_results(test_images: list, test_predictions: list, categories: lis
         scores = [round(i[1], 3) for i in predict_scores]
 
         res = [document, page_num] + labels + scores
-        print(res)
+        # print(res)
 
         results.append(res)
 
