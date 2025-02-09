@@ -1,10 +1,10 @@
-fitz==0.0.1.dev2
-google_vision_wrapper==0.0.2
-layoutparser==0.3.4
-numpy==1.23.4
-opencv_python==4.9.0.80
-opencv_python_headless==4.9.0.80
-pandas==2.2.2
-pytesseract==0.3.10
--i  'git+https://github.com/facebookresearch/detectron2.git@ff53992b1985b63bd3262b5a36167098e3dada02'
-
+datasets=
+evaluate
+numpy
+pandas
+pathos
+Pillow
+scikit_learn
+torch
+torchvision
+transformers
