@@ -4,7 +4,6 @@
 input file/directory processing, class (category) results of top N predictions output 
 and summarizing into a tabular format 
 
-
 **Categories:**
 
 **DRAW**:	1182	(11.89%)  - drawings, maps, paintings 
@@ -33,6 +32,13 @@ Dataloader of train dataset is ready:	**8950** images split into 746 batches of 
 
 Dataloader of eval dataset is ready:	**995** images split into 83 batches of size 12
 
+Percentage correct (Top-3):  99.6
+
+Example of the checked results: [model_1119_3.csv](result%2Ftables%2Fmodel_1119_3.csv)
+
+Example of eval dataset results: [20250209-1522_model_1119_3_EVAL.csv](result%2Ftables%2F20250209-1522_model_1119_3_EVAL.csv)
+
+Example of the unchecked results: [20250209-1204_model_1119_3.csv](result%2Ftables%2F20250209-1204_model_1119_3.csv)
 
 **How to run:**
 
@@ -74,6 +80,3 @@ which is for directory (and subdirectories) level processing
 
 which is for PDF file level processing
 
-Example of the checked results: [model_1119_3.csv](result%)2Ftables%)2Fmodel_1119_3.csv)
-
-Example of the unchecked results: [20250209-1204_model_1119_3.csv](result%)2Ftables%)2F20250209-1204_model_1119_3.csv)
