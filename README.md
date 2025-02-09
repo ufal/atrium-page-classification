@@ -7,27 +7,32 @@ and summarizing into a tabular format
 
 **Categories:**
 
-DRAW:	**782** - drawings, maps, paintings 
+**DRAW**:	1182	(11.89%)  - drawings, maps, paintings 
 
-DRAW_L:	**731**	- drawings, maps, paintings inside tabular layout
+**DRAW_L**:	813	(8.17%)   - drawings, maps, paintings inside tabular layout
 
-LINE_HW:	**813** - handwritten text lines inside tabular layout
+**LINE_HW**:	596	(5.99%)   - handwritten text lines inside tabular layout
 
-LINE_P:	**691** - printed text lines inside tabular layout
+**LINE_P**:	603	(6.06%)   - printed text lines inside tabular layout
 
-LINE_T:	**1182** - typed text lines inside tabular layout
+**LINE_T**:	1332	(13.39%)  - typed text lines inside tabular layout
 
-PHOTO:	**853**	- photos with text
+**PHOTO**:	1015	(10.21%)  - photos with text
 
-PHOTO_L:	**603**	- photos inside tabular layout
+**PHOTO_L**:	782	(7.86%)   - photos inside tabular layout
 
-TEXT:	**1015** - mixed types, printed, and handwritten texts
+**TEXT**:	853	(8.58%)   - mixed types, printed, and handwritten texts
 
-TEXT_HW:	**1332** - handwritten text
+**TEXT_HW**:	732	(7.36%)   - handwritten text
 
-TEXT_P:	**596**	- printed text
+**TEXT_P**:	691	(6.95%)   - printed text
 
-TEXT_T:	**1346** - typed text
+**TEXT_T**:	1346	(13.53%)  - typed text
+
+Dataloader of train dataset is ready:	**8950** images split into 746 batches of size 12
+
+Dataloader of eval dataset is ready:	**995** images split into 83 batches of size 12
+
 
 **How to run:**
 
@@ -43,9 +48,11 @@ Use pip to install dependencies:
 Run the program from its starting point [run.py](run.py) with optional flags:
 
     python3 run.py -tn 3 -f '/full/path/to/file.png'
+
 to run single PNG file classification with top 3 predictions
 
     python3 run.py -tn 3 --dir -d '/full/path/to/directory' 
+
 to parse all PNG files in the directory (+ its subdirectories) and classify all pages (RECOMMENDED)
 
 The results of PNG pages classification will be saved to related folders 
@@ -67,6 +74,6 @@ which is for directory (and subdirectories) level processing
 
 which is for PDF file level processing
 
-Example of the checked results: [model_1119_3.csv](result%2Ftables%2Fmodel_1119_3.csv)
+Example of the checked results: [model_1119_3.csv](result%)2Ftables%)2Fmodel_1119_3.csv)
 
-Example of the unchecked results: [20250209-1204_model_1119_3.csv](result%2Ftables%2F20250209-1204_model_1119_3.csv)
+Example of the unchecked results: [20250209-1204_model_1119_3.csv](result%)2Ftables%)2F20250209-1204_model_1119_3.csv)

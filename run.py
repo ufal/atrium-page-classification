@@ -5,13 +5,12 @@ import time
 
 if __name__ == "__main__":
     data_dir = f'/lnet/work/people/lutsai/pythonProject/pages/train_final'
-
     test_dir = f'/lnet/work/people/lutsai/pythonProject/pages/test_data'
 
-    top_N = 5
+    top_N = 3
     seed = 420
     max_categ = 1400
-    batch = 16
+    batch = 12
     test_size = 0.1
     epochs = 2
     log_step = 10
@@ -21,9 +20,6 @@ if __name__ == "__main__":
     checkpoint_anem = "google/vit-base-patch16-224"
     model_folder = "model_1119_3"
     model_path = f"../trans/model/{model_folder}"
-
-    # test_dir = 'testing'
-    test_file = "T_MTX195602489-12.png"
 
     time_stamp = time.strftime("%Y%m%d-%H%M")
 
@@ -40,9 +36,15 @@ if __name__ == "__main__":
 
     cur = Path.cwd() #  directory with this script
     # locally creating new directory pathes instead of .env variables loaded with mistakes
-    output_dir = Path(os.environ.get('FOLDER_RESULTS', cur / "results"))
-    page_images_folder = Path(os.environ.get('FOLDER_PAGES', Path(data_dir) / "pages"))
+    output_dir = Path(os.environ.get('FOLDER_RESULTS', cur / "result"))
+    page_images_folder = Path(os.environ.get('FOLDER_PAGES', Path(data_dir)))
     input_dir = Path(os.environ.get('FOLDER_INPUT', Path(test_dir))) if args.directory is None else Path(args.directory)
+
+    if not output_dir.is_dir():
+        os.makedirs(output_dir)
+
+        os.makedirs(f"{output_dir}/tables")
+        os.makedirs(f"{output_dir}/plots")
 
     if args.train:
         total_files, total_labels, categories = collect_images(data_dir, max_categ)
@@ -63,6 +65,11 @@ if __name__ == "__main__":
 
         classifier.train_model(train_loader, eval_loader, output_dir="./model_output", num_epochs=epochs,
                                logging_steps=log_step)
+
+        eval_predictions = classifier.infer_dataloader(eval_loader, top_N)
+
+        confusion_plot(eval_predictions, testLabels, categories, top_N)
+
     else:
         categories = sorted(os.listdir(data_dir))
         print(f"Category input directories found: {categories}")
