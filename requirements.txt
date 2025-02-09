@@ -6,3 +6,4 @@ scikit_learn
 torch
 torchvision
 transformers
+python-dotenv
