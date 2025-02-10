@@ -38,9 +38,9 @@ Evaluation:	**995** images - percentage correct (Top-3):  **99.6%**
 
 Example of the **checked** results: [model_1119_3.csv](result%2Ftables%2Fmodel_1119_3.csv)
 
-Example of the **checked** evaluation dataset results: [20250209-1522_model_1119_3_EVAL.csv](result%2Ftables%2F20250209-1522_model_1119_3_EVAL.csv)
+Example of the **checked** evaluation dataset results: [20250209-1534_model_1119_3_EVAL.csv](result/tables/20250209-1534_model_1119_3_EVAL.csv)
 
-Example of the **unchecked** with **TRUE** values results: [20250209-1204_model_1119_3.csv](result%2Ftables%2F20250209-1204_model_1119_3.csv)
+Example of the **unchecked** with **TRUE** values results: [20250210-2034_model_1119_3_TOP-3.csv](result/tables/20250210-2034_model_1119_3_TOP-3.csv)
 
 Table columns:
 
