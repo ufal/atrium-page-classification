@@ -42,6 +42,17 @@ Example of eval dataset results: [20250209-1522_model_1119_3_EVAL.csv](result%2F
 
 Example of the unchecked results: [20250209-1204_model_1119_3.csv](result%2Ftables%2F20250209-1204_model_1119_3.csv)
 
+Table columns:
+
+- FILE - name of the file
+- PAGE - number of the page
+- CLASS-N - label of the category, guess TOP-N 
+- SCORE-N - score of the category, guess TOP-N
+
+optionally:
+ 
+- TRUE - actual label of the category
+
 ## How to run:
 
 Open [config.txt](config.txt) and change folder path in the \[INPUT\] section, then optionally change **top_N** and **batch** in the \[SETUP\] section.
