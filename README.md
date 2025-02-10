@@ -4,9 +4,9 @@
 input file/directory processing, class (category) results of top N predictions output 
 and summarizing into a tabular format 
 
-# Model description:
+## Model description:
 
-**Categories:**
+### Categories:
 
 - **DRAW**:	1182	(11.89%)  - drawings, maps, paintings 
 
@@ -30,30 +30,32 @@ and summarizing into a tabular format
 
 - **TEXT_T**:	1346	(13.53%)  - typed text
 
-Training: **8950** images 
+### Data:
 
-Evaluation:	**995** images - percentage correct (Top-3):  **99.6%**
+Training set of the model: **8950** images 
 
-### Data
+Evaluation set [20250209-1534_model_1119_3_EVAL.csv](result/tables/20250209-1534_model_1119_3_EVAL.csv):	**995** images - percentage correct (Top-3):  **99.6%**
 
-Example of the **checked** results: [model_1119_3.csv](result%2Ftables%2Fmodel_1119_3.csv)
+### Result tables:
 
-Example of the **checked** evaluation dataset results: [20250209-1534_model_1119_3_EVAL.csv](result/tables/20250209-1534_model_1119_3_EVAL.csv)
+Example of the manually **checked** results: [model_1119_3.csv](result%2Ftables%2Fmodel_1119_3.csv)
+
+Example of the manually **checked** evaluation dataset results: [20250209-1534_model_1119_3_EVAL.csv](result/tables/20250209-1534_model_1119_3_EVAL.csv)
 
 Example of the **unchecked** with **TRUE** values results: [20250210-2034_model_1119_3_TOP-3.csv](result/tables/20250210-2034_model_1119_3_TOP-3.csv)
 
-Table columns:
+#### Table columns:
 
 - FILE - name of the file
 - PAGE - number of the page
 - CLASS-N - label of the category, guess TOP-N 
 - SCORE-N - score of the category, guess TOP-N
 
-optionally:
+and optionally:
  
 - TRUE - actual label of the category
 
-## How to run:
+## How to install and run:
 
 Open [config.txt](config.txt) and change folder path in the \[INPUT\] section, then optionally change **top_N** and **batch** in the \[SETUP\] section.
 
@@ -69,6 +71,12 @@ and then inside your virtual environment:
 
     pip install -r requirements.txt
 
+To test that everything works okay and see the flag descriptions run:
+
+    python3 run.py -h
+
+### Common command examples
+
 Run the program from its starting point [run.py](run.py) with optional flags:
 
     python3 run.py -tn 3 -f '/full/path/to/file.png' -m '/full/path/to/model/folder'
@@ -82,13 +90,13 @@ for exactly TOP-3 guesses.
 
 to run single PNG file classification - the output will be in the console. 
 
-**ANOTHER OPTION**
+#### Directory processing
 
     python3 run.py -tn 3 --dir -d '/full/path/to/directory' -m '/full/path/to/model/folder'
 
 for exactly TOP-3 guesses
 
-**OR** if you are sure about default variables set in the [config.txt](config.txt):
+**OR** if you are really sure about default variables set in the [config.txt](config.txt):
 
     python3 run.py --dir 
 
@@ -97,7 +105,7 @@ The results of those PNG pages classification will be saved to related folders d
 
 ## For devs
 
-Code of the algorithms can be found in the [classifier.py](classifier.py) file:
+Code of the algorithms can be found in the [classifier.py](classifier.py) and [utils.py](utils.py) files:
 
 Code of the main function in the starting point [run.py](run.py) - file can be edited 
 If [config.txt](config.txt) variables are not loaded - change them in the main function of [run.py](run.py) manually.
