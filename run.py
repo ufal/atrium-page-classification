@@ -1,4 +1,6 @@
 import argparse
+import os
+
 from dotenv import load_dotenv
 from classifier import *
 import time
@@ -45,6 +47,7 @@ if __name__ == "__main__":
 
     cur = Path.cwd()  # directory with this script
     output_dir = Path(os.environ.get('FOLDER_RESULTS', cur / "result"))
+    cp_dir = Path(os.environ.get('FOLDER_CP', cur / "ckeckpoint"))
 
     # locally creating new directory paths instead of .env variables loaded with mistakes
     if not output_dir.is_dir():
@@ -52,6 +55,9 @@ if __name__ == "__main__":
 
         os.makedirs(f"{output_dir}/tables")
         os.makedirs(f"{output_dir}/plots")
+
+    if not cp_dir.is_dir():
+        os.makedirs(cp_dir)
 
     if args.train or args.eval:
         total_files, total_labels, categories = collect_images(data_dir, max_categ)
@@ -71,7 +77,7 @@ if __name__ == "__main__":
         print(f"Category input directories found: {categories}")
 
         # Initialize the classifier
-        classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories))
+        classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories), store_dir=cp_dir)
 
     if args.train:
         train_loader = classifier.process_images(trainfiles,
@@ -124,7 +130,7 @@ if __name__ == "__main__":
         for lab, sc in zip(labels, scores):
             print(f"\t{lab}:  {sc}")
 
-    if args.dir or input_dir is not None:
+    if args.dir or args.directory is not None:
         test_images = sorted(os.listdir(test_dir))
         test_images = [os.path.join(test_dir, img) for img in test_images]
         test_loader = classifier.create_dataloader(test_images, batch)

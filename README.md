@@ -47,7 +47,7 @@ Open [.env](.env) environment file where all output folder paths are defined - p
 Change paths to folders by replacing the beginnings of directory paths with your own **FULL** directory paths (to 
 existing or not directories)
 
-Use pip to install dependencies:
+Use pip to install dependencies into Python 3.10 venv:
 
     pip install -r requirements.txt
 

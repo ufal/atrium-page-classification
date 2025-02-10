@@ -1,9 +1,10 @@
 evaluate
+matplotlib
 numpy
 pandas
 Pillow
+python-dotenv
 scikit_learn
 torch
 torchvision
 transformers
-python-dotenv
