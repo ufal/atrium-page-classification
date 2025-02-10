@@ -1,0 +1,25 @@
+[OUTPUT]
+FOLDER_RESULTS=./result
+FOLDER_CPOINTS=./checkpoint
+FOLDER_MODELS=./model
+
+[TRAIN]
+FOLDER_PAGES=/lnet/work/people/lutsai/pythonProject/pages/train_final
+test_size = 0.1
+log_step = 10
+epochs = 5
+max_categ = 1400
+Training = False
+Testing = False
+
+[SETUP]
+seed = 420
+batch = 12
+top_N = 3
+base_model = google/vit-base-patch16-224
+
+[INPUT]
+FOLDER_INPUT=/lnet/work/people/lutsai/pythonProject/pages/test_data
+
+
+

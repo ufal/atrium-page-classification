@@ -1,31 +1,38 @@
 import argparse
 import os
 
-from dotenv import load_dotenv
+import configparser
 from classifier import *
 import time
 
 if __name__ == "__main__":
-    data_dir = f'/lnet/work/people/lutsai/pythonProject/pages/train_final'  # data for training
-    test_dir = f'/lnet/work/people/lutsai/pythonProject/pages/test_data'  # considered as default input folder
+    # Initialize the parser
+    config = configparser.ConfigParser()
+    # Read the configuration file
+    config.read('config.txt')
 
     def_categ = ["DRAW", "DRAW_L", "LINE_HW", "LINE_P", "LINE_T", "PHOTO", "PHOTO_L", "TEXT", "TEXT_HW", "TEXT_P", "TEXT_T"]
 
-    seed = 420
-    max_categ = 1400  # max number of category samples
-    test_size = 0.1
-    log_step = 10  # for training only
+    seed = config.getint('SETUP', 'seed')
+    batch = config.getint('SETUP', 'batch')  # depends on GPU/CPU capabilities
+    top_N = config.getint('SETUP', 'top_N')  # top N predictions, 3 is enough, 11 for "raw" scores (most scores are 0)
 
-    epochs = 5  # training only
-    batch = 12  # depends on GPU/CPU capabilities
-    top_N = 3  # top N predictions, 3 is enough, 11 for "raw" scores (most scores are 0)
+    base_model = config.get('SETUP', 'base_model')  # do not change
 
-    Training = False  # training control
-    Testing = False  # evaluation control
+    Training = config.getboolean('TRAIN', 'Training')
+    Testing = config.getboolean('TRAIN', 'Testing')
 
-    base_model = "google/vit-base-patch16-224"  # do not change
     model_folder = "model_1119_3"  # change if needed
-    model_path = f"model/{model_folder}"  # change if needed
+    model_dir = config.get('OUTPUT', 'FOLDER_MODELS')
+     # change if needed
+    model_path = f"{model_dir}/{model_folder}"
+
+    test_dir = config.get('INPUT', 'FOLDER_INPUT')
+
+    # cur = Path.cwd()  # directory with this script
+    cur = Path(__file__).resolve().parent  # directory with this script
+    output_dir = Path(config.get('OUTPUT', 'FOLDER_RESULTS'))
+    cp_dir = Path(config.get('OUTPUT', 'FOLDER_CPOINTS'))
 
     time_stamp = time.strftime("%Y%m%d-%H%M")  # for results files
 
@@ -40,14 +47,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    load_dotenv()
-
-    page_images_folder = Path(os.environ.get('FOLDER_PAGES', Path(data_dir)))
-    input_dir = Path(os.environ.get('FOLDER_INPUT', Path(test_dir))) if args.directory is None else Path(args.directory)
-
-    cur = Path.cwd()  # directory with this script
-    output_dir = Path(os.environ.get('FOLDER_RESULTS', cur / "result"))
-    cp_dir = Path(os.environ.get('FOLDER_CP', cur / "ckeckpoint"))
+    input_dir = Path(test_dir) if args.directory is None else Path(args.directory)
+    Training = args.train
+    model_path = args.model
+    top_N = args.topn
 
     # locally creating new directory paths instead of .env variables loaded with mistakes
     if not output_dir.is_dir():
@@ -60,6 +63,13 @@ if __name__ == "__main__":
         os.makedirs(cp_dir)
 
     if args.train or args.eval:
+        epochs = config.getint("TRAIN", "epochs")
+        max_categ = config.getint("TRAIN", "max_categ")  # max number of category samples
+        log_step = config.getint("TRAIN", "log_step")
+        test_size = config.getfloat("TRAIN", "test_size")
+
+        data_dir = config.get("TRAIN", "FOLDER_PAGES")
+
         total_files, total_labels, categories = collect_images(data_dir, max_categ)
 
         (trainfiles, testfiles,

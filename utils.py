@@ -73,8 +73,8 @@ def confusion_plot(predictions: list, trues: list, categories: list, top_N: int 
 
     correct = 0
     for j, pred_scores in enumerate(predictions):
-        labels = [categories[i[0]] for i in pred_scores]
-        scores = [round(i[1], 3) for i in pred_scores]
+        # labels = [categories[i[0]] for i in pred_scores]
+        # scores = [round(i[1], 3) for i in pred_scores]
         classes = [i[0] for i in pred_scores]
 
         true_class = trues[j]

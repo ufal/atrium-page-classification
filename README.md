@@ -34,7 +34,7 @@ Dataloader of eval dataset is ready:	**995** images split into 83 batches of siz
 
 Percentage correct (Top-3):  99.6
 
-Example of the checked results: [model_1119_3.csv](result%2Ftables%2Fmodel_1119_3.csv)
+Example of the **checked** results: [model_1119_3.csv](result%2Ftables%2Fmodel_1119_3.csv)
 
 Example of eval dataset results: [20250209-1522_model_1119_3_EVAL.csv](result%2Ftables%2F20250209-1522_model_1119_3_EVAL.csv)
 
@@ -42,10 +42,9 @@ Example of the unchecked results: [20250209-1204_model_1119_3.csv](result%2Ftabl
 
 **How to run:**
 
-Open [.env](.env) environment file where all output folder paths are defined - please change all of them
+Open [config.txt](config.txt) and change folder path in the \[INPUT\] section, then optionally change **top_N** and **batch** in the \[SETUP\] section.
 
-Change paths to folders by replacing the beginnings of directory paths with your own **FULL** directory paths (to 
-existing or not directories)
+Create a folder "model" next to this file, then place model folder inside it.  
 
 Use pip to install dependencies into Python 3.10+ venv:
 
@@ -55,31 +54,25 @@ Run the program from its starting point [run.py](run.py) with optional flags:
 
     python3 run.py -tn 3 -f '/full/path/to/file.png' -m '/full/path/to/model/folder'
 
+or, if you are sure about default variables:
+
+    python3 run.py -f '/full/path/to/file.png'
+
+
 to run single PNG file classification with top 3 predictions
 
     python3 run.py -tn 3 --dir -d '/full/path/to/directory' -m '/full/path/to/model/folder'
 
+or, if you are sure about default variables:
 
-    python3 run.py -tn 3 -d '/full/path/to/directory' -m '/full/path/to/model/folder'
+    python3 run.py --dir 
 
 to parse all PNG files in the directory (+ its subdirectories) and classify all pages (RECOMMENDED)
 
-The results of PNG pages classification will be saved to related folders 
+The results of PNG pages classification will be saved to related folders defined in [config.txt](config.txt)'s \[OUTPUT\] section.
 
 Code of the algorithms can be found in the [classifier.py](classifier.py) file:
 
 Code of the main function in the starting point [run.py](run.py) file can be edited. 
-If [.env](.env) variables are not loaded - change filenames in the main function of [run.py](run.py)
-
-
-**TIP**     You can set up default values of _model_path_, _topn_, _file_ and _directory_ values in the main function of
-[run.py](run.py) and then run the script via:
-
-    python3 run.py --dir 
-
-which is for directory (and subdirectories) level processing
-
-    python3 run.py 
-
-which is for PDF file level processing
+If [config.txt](config.txt) variables are not loaded - change filenames in the main function of [run.py](run.py)
 

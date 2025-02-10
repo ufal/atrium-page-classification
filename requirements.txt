@@ -1,9 +1,9 @@
 evaluate
+configparser
 matplotlib
 numpy
 pandas
 Pillow
-python-dotenv
 scikit_learn
 torch
 torchvision

@@ -137,7 +137,7 @@ class ImageClassifier:
             probabilities = torch.nn.functional.softmax(logits, dim=-1)
             top_n_probs, top_n_indices = torch.topk(probabilities, top_n, dim=-1)
             top_n_probs = top_n_probs / top_n_probs.sum()
-        print(top_n_indices, top_n_probs)
+        # print(top_n_indices, top_n_probs)
         return list(zip(top_n_indices.squeeze().tolist(), top_n_probs.squeeze().tolist()))
 
     def create_dataloader(self, image_paths: list, batch_size: int):
