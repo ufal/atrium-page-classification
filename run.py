@@ -108,6 +108,10 @@ if __name__ == "__main__":
 
     classifier.load_model(model_path)
 
+    # classifier.push_to_hub(model_path, "vit-historical-page", False, config.get("TRAIN", "token"))
+
+
+
     if args.eval:
         eval_loader = classifier.process_images(testfiles,
                                                 testLabels,

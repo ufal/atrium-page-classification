@@ -11,6 +11,7 @@ epochs = 5
 max_categ = 1400
 Training = False
 Testing = False
+token = hf_lkfjfC
 
 [SETUP]
 seed = 420

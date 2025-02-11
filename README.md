@@ -1,4 +1,4 @@
-# Image processing using ViT for historical documents
+# Image processing using ViT - for historical documents
 
 **Goal:** This project solves a task of page images classification
 
@@ -63,7 +63,7 @@ Open [config.txt](config.txt) and change folder path in the \[INPUT\] section, t
 
 **WARNING**: do not try to change **base_model** and other section contents unless you know what you are doing
 
-Create a folder "**model**" next to this file, then place model folder inside it.  
+Create a folder "**model**" next to this file, then place model folder from [HF repo](https://huggingface.co/k4tel/vit-historical-page) inside it.  
 
 Use pip to install dependencies into Python 3.10+ [venv](https://docs.python.org/3/library/venv.html) (check for linux/win instructions to install):
 
@@ -94,9 +94,9 @@ to run single PNG file classification - the output will be in the console.
 
 #### Directory processing
 
-    python3 run.py -tn 3 --dir -d '/full/path/to/directory' -m '/full/path/to/model/folder'
+    python3 run.py -tn 3 --inner -d '/full/path/to/directory' -m '/full/path/to/model/folder'
 
-for exactly TOP-3 guesses
+for exactly TOP-3 guesses from all images found subdirectories of the directory
 
 **OR** if you are really sure about default variables set in the [config.txt](config.txt):
 

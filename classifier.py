@@ -191,6 +191,34 @@ class ImageClassifier:
         self.model = AutoModelForImageClassification.from_pretrained(load_directory).to(self.device)
         print(f"Model and processor loaded from {load_directory}")
 
+    def push_to_hub(self, load_directory: str, repo_name: str, private: bool = False,
+                    token: str = None):
+        """
+        Upload the fine-tuned model and processor to the Hugging Face Model Hub.
+
+        Args:
+            load_directory (str): The directory where the model and processor are stored.
+            repo_name (str): The name of the repository to create or update on the Hugging Face Hub.
+            organization (str, optional): The organization under which to create the repository. Defaults to None.
+            private (bool, optional): Whether the repository should be private. Defaults to False.
+            token (str, optional): The authentication token for Hugging Face Hub. Defaults to None.
+        """
+        from huggingface_hub import whoami
+
+        # Determine the repository ID
+        username = whoami(token=token)['name']
+        repo_id = f"{username}/{repo_name}"
+
+        # Save the model and processor locally
+        self.model.save_pretrained(load_directory)
+        self.processor.save_pretrained(load_directory)
+
+        # Upload to the Hub
+        self.model.push_to_hub(repo_id, private=private, token=token)
+        self.processor.push_to_hub(repo_id, private=private, token=token)
+
+        print(f"Model and processor pushed to the Hugging Face Hub: {repo_id}")
+
     @staticmethod
     def compute_metrics(eval_pred):
         """
