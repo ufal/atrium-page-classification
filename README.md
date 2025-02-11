@@ -1,12 +1,18 @@
+# Image processing using ViT for historical documents
+
 **Goal:** This project solves a task of page images classification
 
 **Scope:** Processing of images, training and evaluation of ViT model,
-input file/directory processing, class (category) results of top N predictions output 
-and summarizing into a tabular format 
+input file/directory processing, class (category) results of top
+N predictions output, predictions summarizing into a tabular format 
 
 ## Model description:
 
-### Categories:
+### Data:
+
+Training set of the model: **8950** images 
+
+#### Categories:
 
 - **DRAW**:	1182	(11.89%)  - drawings, maps, paintings 
 
@@ -30,11 +36,7 @@ and summarizing into a tabular format
 
 - **TEXT_T**:	1346	(13.53%)  - typed text
 
-### Data:
-
-Training set of the model: **8950** images 
-
-Evaluation set [20250209-1534_model_1119_3_EVAL.csv](result/tables/20250209-1534_model_1119_3_EVAL.csv):	**995** images - percentage correct (Top-3):  **99.6%**
+Evaluation set (10% of the above stats) [20250209-1534_model_1119_3_EVAL.csv](result/tables/20250209-1534_model_1119_3_EVAL.csv):	**995** images - percentage correct (Top-3):  **99.6%**
 
 ### Result tables:
 
@@ -42,18 +44,18 @@ Example of the manually **checked** results: [model_1119_3.csv](result%2Ftables%
 
 Example of the manually **checked** evaluation dataset results: [20250209-1534_model_1119_3_EVAL.csv](result/tables/20250209-1534_model_1119_3_EVAL.csv)
 
-Example of the **unchecked** with **TRUE** values results: [20250210-2034_model_1119_3_TOP-3.csv](result/tables/20250210-2034_model_1119_3_TOP-3.csv)
+Example of the **unchecked with TRUE** values results: [20250210-2034_model_1119_3_TOP-3.csv](result/tables/20250210-2034_model_1119_3_TOP-3.csv)
 
 #### Table columns:
 
-- FILE - name of the file
-- PAGE - number of the page
-- CLASS-N - label of the category, guess TOP-N 
-- SCORE-N - score of the category, guess TOP-N
+- **FILE** - name of the file
+- **PAGE** - number of the page
+- **CLASS-N** - label of the category, guess TOP-N 
+- **SCORE-N** - score of the category, guess TOP-N
 
 and optionally:
  
-- TRUE - actual label of the category
+- **TRUE** - actual label of the category
 
 ## How to install and run:
 
@@ -63,7 +65,7 @@ Open [config.txt](config.txt) and change folder path in the \[INPUT\] section, t
 
 Create a folder "**model**" next to this file, then place model folder inside it.  
 
-Use pip to install dependencies into Python 3.10+ [venv](https://docs.python.org/3/library/venv.html):
+Use pip to install dependencies into Python 3.10+ [venv](https://docs.python.org/3/library/venv.html) (check for linux/win instructions to install):
 
     source <your_venv_dir>/bin/activate
 

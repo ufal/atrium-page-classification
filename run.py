@@ -41,7 +41,8 @@ if __name__ == "__main__":
     parser.add_argument('-d', "--directory", type=str, default=None, help="Path to folder with PNG pages")
     parser.add_argument('-m', "--model", type=str, default=model_path, help="Path to folder with model")
     parser.add_argument('-tn', "--topn", type=int, default=top_N, help="Number of top result categories to consider")
-    parser.add_argument("--dir", help="Process whole directory", action="store_true")
+    parser.add_argument("--dir", help="Process whole directory (if -d not used)", action="store_true")
+    parser.add_argument("--inner", help="Process subdirectories of the given directory as well (FALSE by default)", default=False, action="store_true")
     parser.add_argument("--train", help="Training model", default=Training, action="store_true")
     parser.add_argument("--eval", help="Evaluating model", default=Testing, action="store_true")
 
@@ -141,7 +142,13 @@ if __name__ == "__main__":
             print(f"\t{lab}:  {sc}")
 
     if args.dir or args.directory is not None:
-        test_images = sorted(os.listdir(test_dir))
+
+        if args.inner:
+            test_images = directory_scraper(Path(test_dir), "png")
+        else:
+            test_images = sorted(os.listdir(test_dir))
+
+
         test_images = [os.path.join(test_dir, img) for img in test_images]
         test_loader = classifier.create_dataloader(test_images, batch)
 
