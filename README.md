@@ -4,9 +4,12 @@
 
 **Scope:** Processing of images, training and evaluation of ViT model,
 input file/directory processing, class (category) results of top
-N predictions output, predictions summarizing into a tabular format 
+N predictions output, predictions summarizing into a tabular format, 
+HF hub support for the model
 
 ## Model description:
+
+Model files can be found here:  [huggingface.co/k4tel/vit-historical-page](https://huggingface.co/k4tel/vit-historical-page)
 
 ### Data:
 
@@ -36,15 +39,23 @@ Training set of the model: **8950** images
 
 - **TEXT_T**:	1346	(13.53%)  - only machine typed text
 
-Evaluation set (10% of the above stats) [20250209-1534_model_1119_3_EVAL.csv](result/tables/20250209-1534_model_1119_3_EVAL.csv):	**995** images - percentage correct (Top-3):  **99.6%**
+Evaluation set (10% of the above stats) [20250209-1534_model_1119_3_EVAL.csv](result/tables/20250209-1534_model_1119_3_EVAL.csv):	**995** images 
 
-### Result tables:
+### Results:
 
-Example of the manually **checked** results: [model_1119_3.csv](result%2Ftables%2Fmodel_1119_3.csv)
+Evaluation set's accuracy (Top-3):  **99.6%**
 
-Example of the manually **checked** evaluation dataset results: [20250209-1534_model_1119_3_EVAL.csv](result/tables/20250209-1534_model_1119_3_EVAL.csv)
+Regarding the model output, **Top-3** is enough to cover most of the images, 
+setting **Top-5** will help with a small number of difficult to classify samples.
+Finally, using **Top-11** option will give you a **raw version** of class scores returned by the model
 
-Example of the **unchecked with TRUE** values results: [20250210-2034_model_1119_3_TOP-3.csv](result/tables/20250210-2034_model_1119_3_TOP-3.csv)
+#### Result tables:
+
+- Example of the manually **checked** results (small): [model_1119_3.csv](result%2Ftables%2Fmodel_1119_3.csv)
+
+- Example of the manually **checked** evaluation dataset results: [20250209-1534_model_1119_3_EVAL.csv](result/tables/20250209-1534_model_1119_3_EVAL.csv)
+
+- Example of the **unchecked with TRUE** values results: [20250210-2034_model_1119_3_TOP-3.csv](result/tables/20250210-2034_model_1119_3_TOP-3.csv)
 
 #### Table columns:
 
@@ -87,12 +98,16 @@ To test that everything works okay and see the flag descriptions run:
     python3 run.py -h
 
 There is an option to **load the model from the HF hub directly**, rather than use the local model folder.
-To run any inference without locally saved model files, firstly use a specific flag: 
+To run any inference without locally saved model files, firstly login to your **HF account** and find 
+**Access tokens** section in the **account settings**, where you should **generate a new token**. 
+
+After that change token variable in the \[HF\] section of the [config.txt](config.txt) to your generated token string.
+Only now you can load the model via:
 
     python3 run.py --hf
 
 You should see a message about loading the model from hub and then saving it locally. 
-After that you can play with any commands listed below
+Only after you obtain the trained model files, you can play with any commands listed below
 
 ### Common command examples
 
