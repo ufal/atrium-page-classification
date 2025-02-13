@@ -81,14 +81,14 @@ if __name__ == "__main__":
                                                      stratify=np.array(total_labels))
 
         # Initialize the classifier
-        classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories))
+        classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories), store_dir=str(cp_dir))
 
     else:
         categories = def_categ
         print(f"Category input directories found: {categories}")
 
         # Initialize the classifier
-        classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories), store_dir=cp_dir)
+        classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories), store_dir=str(cp_dir))
 
     if args.train:
         train_loader = classifier.process_images(trainfiles,
@@ -109,8 +109,6 @@ if __name__ == "__main__":
     classifier.load_model(str(model_path))
 
     # classifier.push_to_hub(model_path, "vit-historical-page", False, config.get("TRAIN", "token"))
-
-
 
     if args.eval:
         eval_loader = classifier.process_images(testfiles,
@@ -143,17 +141,16 @@ if __name__ == "__main__":
 
         print(f"File {args.file} predicted:")
         for lab, sc in zip(labels, scores):
-            print(f"\t{lab}:  {sc}")
+            print(f"\t{lab}:  {round(sc * 100, 2)}%")
 
     if args.dir or args.directory is not None:
 
         if args.inner:
-            test_images = directory_scraper(Path(test_dir), "png")
+            test_images = sorted(directory_scraper(Path(test_dir), "png"))
         else:
             test_images = sorted(os.listdir(test_dir))
+            test_images = [os.path.join(test_dir, img) for img in test_images]
 
-
-        test_images = [os.path.join(test_dir, img) for img in test_images]
         test_loader = classifier.create_dataloader(test_images, batch)
 
         test_predictions = classifier.infer_dataloader(test_loader, top_N)

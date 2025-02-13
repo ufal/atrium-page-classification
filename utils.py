@@ -27,8 +27,6 @@ def dataframe_results(test_images: list, test_predictions: list, categories: lis
         scores = [round(i[1], 3) for i in predict_scores]
 
         res = [document, page_num] + labels + scores
-        # print(res)
-
         results.append(res)
 
     col = ["FILE", "PAGE"] + [f"CLASS-{j + 1}" for j in range(top_N)] + [f"SCORE-{j + 1}" for j in range(top_N)]
@@ -41,9 +39,7 @@ def collect_images(directory: str, max_categ: int) -> (list, list, list):
     categories = sorted(os.listdir(directory))
     print(f"Category input directories found: {categories}")
 
-    total_files = []
-    total_labels = []
-    total_classes = []
+    total_files, total_labels, total_classes = [], [], []
     for category_idx, category in enumerate(categories):
         all_category_files = os.listdir(os.path.join(directory, category))
         if len(all_category_files) > max_categ:
@@ -68,13 +64,9 @@ def collect_images(directory: str, max_categ: int) -> (list, list, list):
 
 
 def confusion_plot(predictions: list, trues: list, categories: list, top_N: int = 1, output_dir: str = None):
-
     single_pred = []
-
     correct = 0
     for j, pred_scores in enumerate(predictions):
-        # labels = [categories[i[0]] for i in pred_scores]
-        # scores = [round(i[1], 3) for i in pred_scores]
         classes = [i[0] for i in pred_scores]
 
         true_class = trues[j]
@@ -93,6 +85,7 @@ def confusion_plot(predictions: list, trues: list, categories: list, top_N: int 
                 correct += 1
 
     print('Percentage correct: ',round(100 * correct / len(trues), 2))
+
     # Confusion matrix display and normalized output
     disp = ConfusionMatrixDisplay.from_predictions(
         trues, single_pred,

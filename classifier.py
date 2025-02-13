@@ -17,7 +17,6 @@ def custom_collate(batch):
     Custom collate function to filter out None entries from the batch.
     """
     # Filter out None entries
-    # print(batch)
     batch = [item for item in batch if item is not None]
     if len(batch) == 0:
         return None, None
@@ -34,8 +33,6 @@ class ImageClassifier:
         self.model = AutoModelForImageClassification.from_pretrained(
             checkpoint,
             num_labels=num_labels,
-            # id2label=id2label,
-            # label2id=label2id,
             cache_dir=store_dir,
             ignore_mismatched_sizes=True
         ).to(self.device)
