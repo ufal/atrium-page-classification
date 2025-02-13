@@ -63,19 +63,36 @@ Open [config.txt](config.txt) and change folder path in the \[INPUT\] section, t
 
 **WARNING**: do not try to change **base_model** and other section contents unless you know what you are doing
 
-Create a folder "**model**" next to this file, then place model folder from [HF repo](https://huggingface.co/k4tel/vit-historical-page) inside it.  
+There are few option to obtain the trained model files:
 
-Use pip to install dependencies into Python 3.10+ [venv](https://docs.python.org/3/library/venv.html) (check for linux/win instructions to install):
+- get a complete archive of the model folder from its developers ( Create a folder "**model**" next to this file, then place the model folder inside it)
+- get a model and processor from the [HF repo](https://huggingface.co/k4tel/vit-historical-page) using a specific flag described below
+
+Make sure you have Python version 3.10+ installed on your machine.
+Then create a virtual environment for this project following the Linux/Windows-specific instruction at the [venv docs](https://docs.python.org/3/library/venv.html)
+
+Note that you will need up to **1 GB of space for model** files and checkpoints, 
+and up to **3 GB of space for the python libraries** (pytorch and its dependencies, etc)
+
+After creating the venv folder, activate it via:
 
     source <your_venv_dir>/bin/activate
 
-and then inside your virtual environment:
+and then inside your virtual environment run to install the python libraries:
 
     pip install -r requirements.txt
 
 To test that everything works okay and see the flag descriptions run:
 
     python3 run.py -h
+
+There is an option to **load the model from the HF hub directly**, rather than use the local model folder.
+To run any inference without locally saved model files use a specific flag: 
+
+    python3 run.py --hf
+
+You should see a message about loading the model from hub and then saving it locally. 
+After that you can play with any commands listed below
 
 ### Common command examples
 
@@ -107,8 +124,15 @@ The results of those PNG pages classification will be saved to related folders d
 
 ## For devs
 
+To train the model run: 
+
+    python3 run.py --train  
+
+To evaluate the model and create a confusion matrix plot run: 
+
+    python3 run.py --eval  
+
 Code of the algorithms can be found in the [classifier.py](classifier.py) and [utils.py](utils.py) files:
 
-Code of the main function in the starting point [run.py](run.py) - file can be edited 
-If [config.txt](config.txt) variables are not loaded - change them in the main function of [run.py](run.py) manually.
+Code of the main function in the starting point [run.py](run.py) - file can be edited
 

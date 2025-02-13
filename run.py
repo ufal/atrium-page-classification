@@ -21,6 +21,7 @@ if __name__ == "__main__":
 
     Training = config.getboolean('TRAIN', 'Training')
     Testing = config.getboolean('TRAIN', 'Testing')
+    HF = config.getboolean('HF', 'use_hf')
 
     model_folder = "model_1119_3"  # change if needed
     model_dir = config.get('OUTPUT', 'FOLDER_MODELS')
@@ -45,6 +46,7 @@ if __name__ == "__main__":
     parser.add_argument("--inner", help="Process subdirectories of the given directory as well (FALSE by default)", default=False, action="store_true")
     parser.add_argument("--train", help="Training model", default=Training, action="store_true")
     parser.add_argument("--eval", help="Evaluating model", default=Testing, action="store_true")
+    parser.add_argument("--hf", help="Use model and processor from the HuggingFace repository", default=HF, action="store_true")
 
     args = parser.parse_args()
 
@@ -106,9 +108,17 @@ if __name__ == "__main__":
                                num_epochs=epochs,
                                logging_steps=log_step)
 
-    classifier.load_model(str(model_path))
+    if args.hf:
+        # pushing to repo
+        # classifier.push_to_hub(str(model_path), config.get("HF", "repo_name"), False, config.get("HF", "token"))
 
-    # classifier.push_to_hub(model_path, "vit-historical-page", False, config.get("TRAIN", "token"))
+        # loading from repo
+        classifier.load_from_hub(config.get("HF", "repo_name"), config.get("HF", "token"))
+
+        classifier.save_model(str(model_path))
+
+    else:
+        classifier.load_model(str(model_path))
 
     if args.eval:
         eval_loader = classifier.process_images(testfiles,

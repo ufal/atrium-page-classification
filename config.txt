@@ -11,7 +11,6 @@ epochs = 5
 max_categ = 1400
 Training = False
 Testing = False
-token = hf_lkfjfC
 
 [SETUP]
 seed = 420
@@ -22,5 +21,7 @@ base_model = google/vit-base-patch16-224
 [INPUT]
 FOLDER_INPUT=/lnet/work/people/lutsai/pythonProject/pages/test_CTX
 
-
-
+[HF]
+repo_name = k4tel/vit-historical-page
+token = hf_fAkS...OOnBajU
+use_hf = False

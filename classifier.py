@@ -10,6 +10,7 @@ import PIL
 PIL.Image.MAX_IMAGE_PIXELS = 886402639
 from PIL import Image, ImageEnhance, ImageFilter
 from transformers import AutoImageProcessor, AutoModelForImageClassification, TrainingArguments, Trainer, default_data_collator
+from huggingface_hub import whoami
 
 
 def custom_collate(batch):
@@ -188,7 +189,7 @@ class ImageClassifier:
         self.model = AutoModelForImageClassification.from_pretrained(load_directory).to(self.device)
         print(f"Model and processor loaded from {load_directory}")
 
-    def push_to_hub(self, load_directory: str, repo_name: str, private: bool = False,
+    def push_to_hub(self, load_directory: str, repo_id: str, private: bool = False,
                     token: str = None):
         """
         Upload the fine-tuned model and processor to the Hugging Face Model Hub.
@@ -200,11 +201,10 @@ class ImageClassifier:
             private (bool, optional): Whether the repository should be private. Defaults to False.
             token (str, optional): The authentication token for Hugging Face Hub. Defaults to None.
         """
-        from huggingface_hub import whoami
 
         # Determine the repository ID
-        username = whoami(token=token)['name']
-        repo_id = f"{username}/{repo_name}"
+        # username = whoami(token=token)['name']
+        # repo_id = f"{username}/{repo_name}"
 
         # Save the model and processor locally
         self.model.save_pretrained(load_directory)
@@ -215,6 +215,32 @@ class ImageClassifier:
         self.processor.push_to_hub(repo_id, private=private, token=token)
 
         print(f"Model and processor pushed to the Hugging Face Hub: {repo_id}")
+
+    def load_from_hub(self, repo_id: str, token: str = None):
+        """
+        Load a model and its processor from the Hugging Face Hub.
+
+        Args:
+            repo_id (str): The name of the repository on the Hugging Face Hub.
+            token (str, optional): The authentication token for accessing private repositories. Defaults to None.
+
+        Returns:
+            model: The loaded model.
+            processor: The loaded processor.
+        """
+
+        # Load the model from the repository
+        model = AutoModelForImageClassification.from_pretrained(repo_id, token=token)
+
+        # Load the processor from the repository
+        processor = AutoImageProcessor.from_pretrained(repo_id, token=token)
+
+        self.model, self.processor = model, processor
+
+        print(f"Model and processor loaded from the Hugging Face Hub: {repo_id}")
+
+        # return model, processor
+
 
     @staticmethod
     def compute_metrics(eval_pred):
