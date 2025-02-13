@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
     input_dir = Path(test_dir) if args.directory is None else Path(args.directory)
     Training = args.train
-    model_path = args.model
+    model_path = Path(args.model)
     top_N = args.topn
 
     # locally creating new directory paths instead of .env variables loaded with mistakes
@@ -106,7 +106,7 @@ if __name__ == "__main__":
                                num_epochs=epochs,
                                logging_steps=log_step)
 
-    classifier.load_model(model_path)
+    classifier.load_model(str(model_path))
 
     # classifier.push_to_hub(model_path, "vit-historical-page", False, config.get("TRAIN", "token"))
 
