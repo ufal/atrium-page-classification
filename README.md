@@ -72,13 +72,13 @@ Make sure you have Python version 3.10+ installed on your machine.
 Then create a virtual environment for this project following the Linux/Windows-specific instruction at the [venv docs](https://docs.python.org/3/library/venv.html)
 
 Note that you will need up to **1 GB of space for model** files and checkpoints, 
-and up to **3 GB of space for the python libraries** (pytorch and its dependencies, etc)
+and up to **7 GB of space for the python libraries** (pytorch and its dependencies, etc)
 
-After creating the venv folder, activate it via:
+After creating the venv folder, activate the environment via:
 
     source <your_venv_dir>/bin/activate
 
-and then inside your virtual environment run to install the python libraries:
+and then inside your virtual environment to install the python libraries run:
 
     pip install -r requirements.txt
 
@@ -87,7 +87,7 @@ To test that everything works okay and see the flag descriptions run:
     python3 run.py -h
 
 There is an option to **load the model from the HF hub directly**, rather than use the local model folder.
-To run any inference without locally saved model files use a specific flag: 
+To run any inference without locally saved model files, firstly use a specific flag: 
 
     python3 run.py --hf
 
@@ -113,13 +113,13 @@ to run single PNG file classification - the output will be in the console.
 
     python3 run.py -tn 3 --inner -d '/full/path/to/directory' -m '/full/path/to/model/folder'
 
-for exactly TOP-3 guesses from all images found subdirectories of the directory
+for exactly TOP-3 guesses from all images found in the subdirectories of the given directory.
 
 **OR** if you are really sure about default variables set in the [config.txt](config.txt):
 
     python3 run.py --dir 
 
-to parse all PNG files in the directory (+ its subdirectories) and classify all pages (**RECOMMENDED**)
+to parse all PNG files in the directory (+ its subdirectories if use _--inner_) and classify all pages (**RECOMMENDED**)
 The results of those PNG pages classification will be saved to related folders defined in [config.txt](config.txt)'s \[OUTPUT\] section.
 
 ## For devs
@@ -134,5 +134,5 @@ To evaluate the model and create a confusion matrix plot run:
 
 Code of the algorithms can be found in the [classifier.py](classifier.py) and [utils.py](utils.py) files:
 
-Code of the main function in the starting point [run.py](run.py) - file can be edited
+Code of the main function in the starting point [run.py](run.py) file can be edited
 
