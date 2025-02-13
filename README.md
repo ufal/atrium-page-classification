@@ -115,7 +115,7 @@ Run the program from its starting point [run.py](run.py) with optional flags:
 
     python3 run.py -tn 3 -f '/full/path/to/file.png' -m '/full/path/to/model/folder'
 
-for exactly TOP-3 guesses. 
+for exactly TOP-3 guesses - normalized scores for the highest 3 class scores
 
 **OR** if you are sure about default variables set in the [config.txt](config.txt):
 
