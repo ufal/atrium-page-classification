@@ -151,3 +151,6 @@ Code of the algorithms can be found in the [classifier.py](classifier.py) and [u
 
 Code of the main function in the starting point [run.py](run.py) file can be edited
 
+#### Contacts
+
+For support write to lutsai.k@gmail.com
