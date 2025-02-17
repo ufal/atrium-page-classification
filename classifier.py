@@ -216,13 +216,12 @@ class ImageClassifier:
 
         print(f"Model and processor pushed to the Hugging Face Hub: {repo_id}")
 
-    def load_from_hub(self, repo_id: str, token: str = None):
+    def load_from_hub(self, repo_id: str):
         """
         Load a model and its processor from the Hugging Face Hub.
 
         Args:
             repo_id (str): The name of the repository on the Hugging Face Hub.
-            token (str, optional): The authentication token for accessing private repositories. Defaults to None.
 
         Returns:
             model: The loaded model.
@@ -230,10 +229,10 @@ class ImageClassifier:
         """
 
         # Load the model from the repository
-        model = AutoModelForImageClassification.from_pretrained(repo_id, token=token)
+        model = AutoModelForImageClassification.from_pretrained(repo_id)
 
         # Load the processor from the repository
-        processor = AutoImageProcessor.from_pretrained(repo_id, token=token)
+        processor = AutoImageProcessor.from_pretrained(repo_id)
 
         self.model, self.processor = model, processor
 

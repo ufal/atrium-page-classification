@@ -113,7 +113,7 @@ if __name__ == "__main__":
         # classifier.push_to_hub(str(model_path), config.get("HF", "repo_name"), False, config.get("HF", "token"))
 
         # loading from repo
-        classifier.load_from_hub(config.get("HF", "repo_name"), config.get("HF", "token"))
+        classifier.load_from_hub(config.get("HF", "repo_name"))
 
         classifier.save_model(str(model_path))
 
