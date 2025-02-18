@@ -19,33 +19,39 @@ Training set of the model: **8950** images
 
 #### Categories
 
-- **DRAW 📈**:	1182	(11.89%)  - drawings, maps, paintings with text
+- **DRAW 📈**:	1182	(11.89%)  - **drawings, maps, paintings with text**
 
-- **DRAW_L 📈📏**:	813	(8.17%)   - drawings, maps, paintings with a table legend or inside tabular layout / forms
+- **DRAW_L 📈📏**:	813	(8.17%)   - **drawings, maps, paintings with a table legend or inside tabular layout / forms**
 
-- **LINE_HW ✏️📏**:	596	(5.99%)   - handwritten text lines inside tabular layout / forms
+- **LINE_HW ✏️📏**:	596	(5.99%)   - **handwritten text lines inside tabular layout / forms**
 
-- **LINE_P 📏**:	603	(6.06%)   - printed text lines inside tabular layout / forms
+- **LINE_P 📏**:	603	(6.06%)   - **printed text lines inside tabular layout / forms**
 
-- **LINE_T 📏**:	1332	(13.39%)  - machine typed text lines inside tabular layout / forms
+- **LINE_T 📏**:	1332	(13.39%)  - **machine typed text lines inside tabular layout / forms**
 
-- **PHOTO 🌄**:	1015	(10.21%)  - photos with text
+- **PHOTO 🌄**:	1015	(10.21%)  - **photos with text**
 
-- **PHOTO_L 🌄📏**:	782	(7.86%)   - photos inside tabular layout / forms
+- **PHOTO_L 🌄📏**:	782	(7.86%)   - **photos inside tabular layout / forms or with a tabular annotation**
 
-- **TEXT 📰**:	853	(8.58%)   - mixed types, printed, and handwritten texts 
+- **TEXT 📰**:	853	(8.58%)   - **mixed types of printed and handwritten texts** 
 
-- **TEXT_HW ✏️📄**:	732	(7.36%)   - only handwritten text
+- **TEXT_HW ✏️📄**:	732	(7.36%)   - **only handwritten text**
 
-- **TEXT_P 📄**:	691	(6.95%)   - only printed text
+- **TEXT_P 📄**:	691	(6.95%)   - **only printed text**
 
-- **TEXT_T 📄**:	1346	(13.53%)  - only machine typed text
+- **TEXT_T 📄**:	1346	(13.53%)  - **only machine typed text**
 
 Evaluation set (10% of the above stats) [20250209-1534_model_1119_3_EVAL.csv](result/tables/20250209-1534_model_1119_3_EVAL.csv) 🔗:	**995** images 
 
 ### Results 📊
 
-Evaluation set's accuracy (Top-3):  **99.6%** 
+Evaluation set's accuracy (**Top-3**):  **99.6%** 
+
+![TOP-3 confusion matrix](result%2Fplots%2F20250209-1526_conf_mat.png)
+
+Evaluation set's accuracy (**Top-1**):  **97.3%** 
+
+![TOP-1 confusion matrix](result%2Fplots%2F20250218-1523_conf_mat.png)
 
 ⚠️ Regarding the model output, **Top-3** is enough to cover most of the images, 
 setting **Top-5** will help with a small number of difficult to classify samples.

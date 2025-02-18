@@ -65,6 +65,9 @@ if __name__ == "__main__":
     if not cp_dir.is_dir():
         os.makedirs(cp_dir)
 
+    if not Path(model_dir).is_dir():
+        os.makedirs(model_dir)
+
     if args.train or args.eval:
         epochs = config.getint("TRAIN", "epochs")
         max_categ = config.getint("TRAIN", "max_categ")  # max number of category samples

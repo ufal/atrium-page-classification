@@ -23,8 +23,8 @@ def dataframe_results(test_images: list, test_predictions: list, categories: lis
         image_name = Path(image_file).stem
         document, page_num = image_name.split("-")
 
-        labels = [categories[i[0]] for i in predict_scores]
-        scores = [round(i[1], 3) for i in predict_scores]
+        labels = [categories[i[0]] for i in predict_scores] if top_N > 1 else [categories[predict_scores]]
+        scores = [round(i[1], 3) for i in predict_scores] if top_N > 1 else [round(predict_scores, 3)]
 
         res = [document, page_num] + labels + scores
         results.append(res)
@@ -67,11 +67,10 @@ def confusion_plot(predictions: list, trues: list, categories: list, top_N: int 
     single_pred = []
     correct = 0
     for j, pred_scores in enumerate(predictions):
-        classes = [i[0] for i in pred_scores]
-
         true_class = trues[j]
 
         if top_N > 1:
+            classes = [i[0] for i in pred_scores]
 
             if true_class in classes:
                 correct += 1
@@ -80,8 +79,8 @@ def confusion_plot(predictions: list, trues: list, categories: list, top_N: int 
                 single_pred.append(classes[0])
 
         else:
-            single_pred.append(classes[0])
-            if classes[0] == true_class:
+            single_pred.append(pred_scores)
+            if pred_scores == true_class:
                 correct += 1
 
     print('Percentage correct: ',round(100 * correct / len(trues), 2))
