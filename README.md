@@ -1,6 +1,6 @@
 # Image processing using ViT - for historical documents
 
-**Goal:** This project solves a task of page images classification
+### Goal: This project solves a task of page images classification
 
 **Scope:** Processing of images, training and evaluation of ViT model,
 input file/directory processing, class (category) results of top
@@ -62,7 +62,7 @@ Finally, using **Top-11** option will give you a **raw version** of class scores
 - Example of the manually ✍ **checked** results (small): [model_1119_3_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 🔗
 
 - Example of the manually ✍ **checked** evaluation dataset results (TOP-3): [20250209-1534_model_1119_3_TOP-3_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_TOP-3_EVAL.csv) 🔗
-- 
+
 - Example of the manually ✍ **checked** evaluation dataset results (TOP-1): [20250218-1519_model_1119_3_TOP-1_EVAL.csv](result%2Ftables%2F20250218-1519_model_1119_3_TOP-1_EVAL.csv) 🔗
 
 - Example of the **unchecked with TRUE** values results: [20250210-2034_model_1119_3_TOP-3.csv](result%2Ftables%2F20250210-2034_model_1119_3_TOP-3.csv) 🔗
@@ -89,7 +89,7 @@ There are few option to obtain the trained model files:
 - get a complete archive of the model folder from its developers ( Create a folder "**model**" next to this file, then place the model folder inside it)
 - get a model and processor from the [HF 😊 repo](https://huggingface.co/k4tel/vit-historical-page) 🔗 using a specific flag described below
 
-Make sure you have Python version 3.10+ installed on your machine 💻.
+Make sure you have **Python version 3.10+** installed on your machine 💻.
 Then create a virtual environment for this project following the Linux/Windows-specific instruction at the [venv docs](https://docs.python.org/3/library/venv.html) 👀🔗
 
 **⚠️ NOTE ⚠️** up to **1 GB of space for model** files and checkpoints is needed, 
@@ -113,7 +113,7 @@ To run any inference without locally saved model files, firstly load the model v
     python3 run.py --hf
 
 You should see a message about loading the model from hub and then saving it locally. 
-Only after you obtain the trained model files, you can play with any commands listed below
+Only after you obtain the trained model files, you can play with any commands provided below
 
 ### Common command examples 
 
