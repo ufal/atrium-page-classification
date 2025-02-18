@@ -59,11 +59,13 @@ Finally, using **Top-11** option will give you a **raw version** of class scores
 
 #### Result tables
 
-- Example of the manually ✍ **checked** results (small): [model_1119_3.csv](result%2Ftables%2Fmodel_1119_3.csv) 🔗
+- Example of the manually ✍ **checked** results (small): [model_1119_3_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 🔗
 
-- Example of the manually ✍ **checked** evaluation dataset results: [20250209-1534_model_1119_3_EVAL.csv](result/tables/20250209-1534_model_1119_3_EVAL.csv) 🔗
+- Example of the manually ✍ **checked** evaluation dataset results (TOP-3): [20250209-1534_model_1119_3_TOP-3_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_TOP-3_EVAL.csv) 🔗
+- 
+- Example of the manually ✍ **checked** evaluation dataset results (TOP-1): [20250218-1519_model_1119_3_TOP-1_EVAL.csv](result%2Ftables%2F20250218-1519_model_1119_3_TOP-1_EVAL.csv) 🔗
 
-- Example of the **unchecked with TRUE** values results: [20250210-2034_model_1119_3_TOP-3.csv](result/tables/20250210-2034_model_1119_3_TOP-3.csv) 🔗
+- Example of the **unchecked with TRUE** values results: [20250210-2034_model_1119_3_TOP-3.csv](result%2Ftables%2F20250210-2034_model_1119_3_TOP-3.csv) 🔗
 
 #### Table columns
 
