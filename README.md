@@ -82,24 +82,29 @@ and optionally:
 
 Open [config.txt](config.txt) 🔗 and change folder path in the \[INPUT\] section, then optionally change **top_N** and **batch** in the \[SETUP\] section.
 
-**😈 WARNING 😈**: do not try to change **base_model** and other section contents unless you know what you are doing
+
+> [!CAUTION]
+> Do not try to change **base_model** and other section contents unless you know what you are doing
 
 There are few option to obtain the trained model files:
 
 - get a complete archive of the model folder from its developers ( Create a folder "**model**" next to this file, then place the model folder inside it)
 - get a model and processor from the [HF 😊 repo](https://huggingface.co/k4tel/vit-historical-page) 🔗 using a specific flag described below
 
-Make sure you have **Python version 3.10+** installed on your machine 💻.
-Then create a virtual environment for this project following the Linux/Windows-specific instruction at the [venv docs](https://docs.python.org/3/library/venv.html) 👀🔗
+> [!IMPORTANT]
+> Make sure you have **Python version 3.10+** installed on your machine 💻. Then create a virtual environment for this project 
 
-**⚠️ NOTE ⚠️** up to **1 GB of space for model** files and checkpoints is needed, 
-and up to **7 GB of space for the python libraries** (pytorch and its dependencies, etc)
-
+Follow the **Linux** / **Windows**-specific instruction at the [venv docs](https://docs.python.org/3/library/venv.html) 👀🔗 if you don't know how to.
 After creating the venv folder, activate the environment via:
 
     source <your_venv_dir>/bin/activate
 
-and then inside your virtual environment to install (takes time ⌛) the python libraries run:
+and then inside your virtual environment to install python libraries (takes time ⌛) 
+
+> [!NOTE]
+> Up to **1 GB of space for model** files and checkpoints is needed, and up to **7 GB of space for the python libraries** (pytorch and its dependencies, etc)
+
+Can be done via:
 
     pip install -r requirements.txt
 
@@ -140,8 +145,10 @@ for exactly TOP-3 guesses from all images found in the subdirectories of the giv
 
     python3 run.py --dir 
 
-to parse all PNG files in the directory (+ its subdirectories if use _--inner_) and classify all pages (**RECOMMENDED**)
-The results of those PNG pages classification will be saved 💾 to related folders defined in [config.txt](config.txt)'s \[OUTPUT\] section.
+The classification results of PNG pages collected from the directory will be saved 💾 to related folders defined in [config.txt](config.txt)'s \[OUTPUT\] section.
+
+> [!TIP]
+> To parse all PNG files in the directory AND its subdirectories use _--inner
 
 ## For devs
 
