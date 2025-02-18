@@ -9,9 +9,9 @@ HF 😊 hub support for the model
 
 ## Model description
 
-Fine-tuned model files can be found here:  [huggingface.co/k4tel/vit-historical-page](https://huggingface.co/k4tel/vit-historical-page) 🔗
+Fine-tuned model files can be found here:  [vit-historical-page](https://huggingface.co/k4tel/vit-historical-page) 🔗
 
-Base model repository: [huggingface.co/google/vit-base-patch16-224](https://huggingface.co/google/vit-base-patch16-224) 🔗
+Base model repository: [google's vit-base-patch16-224](https://huggingface.co/google/vit-base-patch16-224) 🔗
 
 ### Data
 
@@ -19,21 +19,21 @@ Training set of the model: **8950** images
 
 #### Categories
 
-| Label | Size (ratio)   | Description                                                                        |
-| --- |----------------|------------------------------------------------------------------------------------|
-| **DRAW 📈** | 	1182	(11.89%) | **drawings, maps, paintings with text**                                            |
-|**DRAW_L 📈📏**| 	813	(8.17%)   | **drawings, maps, paintings with a table legend or inside tabular layout / forms** |
-| **LINE_HW ✏️📏**| 	596	(5.99%)   | **handwritten text lines inside tabular layout / forms**                           |
-| **LINE_P 📏**| 	603	(6.06%)   | **printed text lines inside tabular layout / forms**                               |
-|**LINE_T 📏**| 	1332	(13.39%) | **machine typed text lines inside tabular layout / forms**                         |
-| **PHOTO 🌄**| 	1015	(10.21%) | **photos with text**                                                               |
-| **PHOTO_L 🌄📏**| 	782	(7.86%)   | **photos inside tabular layout / forms or with a tabular annotation**              |
-| **TEXT 📰**| 	853	(8.58%)   | **mixed types of printed and handwritten texts**                                   |
-| **TEXT_HW ✏️📄**| 	732	(7.36%)   | **only handwritten text**                                                          |
-| **TEXT_P 📄**| 	691	(6.95%)   | **only printed text**                                                              |
-| **TEXT_T 📄**| 	1346	(13.53%) | **only machine typed text**                                                        |
+| Label | Size (ratio)   | Description                                                                             |
+| --- |----------------|-----------------------------------------------------------------------------------------|
+| **DRAW** | 	1182	(11.89%) | **📈 - drawings, maps, paintings with text**                                            |
+|**DRAW_L**| 	813	(8.17%)   | **📈📏 - drawings, maps, paintings with a table legend or inside tabular layout / forms** |
+| **LINE_HW**| 	596	(5.99%)   | **✏️📏 - handwritten text lines inside tabular layout / forms**                           |
+| **LINE_P**| 	603	(6.06%)   | **📏 - printed text lines inside tabular layout / forms**                                 |
+|**LINE_T**| 	1332	(13.39%) | **📏 - machine typed text lines inside tabular layout / forms**                           |
+| **PHOTO**| 	1015	(10.21%) | **🌄 - photos with text**                                                                 |
+| **PHOTO_L**| 	782	(7.86%)   | **🌄📏 - photos inside tabular layout / forms or with a tabular annotation**              |
+| **TEXT**| 	853	(8.58%)   | **📰 - mixed types of printed and handwritten texts**                                     |
+| **TEXT_HW**| 	732	(7.36%)   | **✏️📄 - only handwritten text**                                                          |
+| **TEXT_P**| 	691	(6.95%)   | **📄 - only printed text**                                                                |
+| **TEXT_T**| 	1346	(13.53%) | **📄 - only machine typed text**                                                          |
 
-Evaluation set (10% of the above stats) [20250209-1534_model_1119_3_EVAL.csv](result/tables/20250209-1534_model_1119_3_EVAL.csv) 🔗:	**995** images 
+Evaluation set (10% of the above stats) [model_EVAL.csv](result/tables/20250209-1534_model_1119_3_EVAL.csv) 🔗:	**995** images 
 
 ## How to install 🔧 and run ▶️
 
@@ -73,7 +73,7 @@ To test that everything works okay and see the flag descriptions ❓ run:
     python3 run.py -h
 
 There is an option to **load the model from the HF 😊 hub directly**, rather than use the local model folder.
-To run any inference without locally saved model files, firstly load the model via:
+To run any predictions without locally saved model files, firstly load the model via:
 
     python3 run.py --hf
 
@@ -124,13 +124,13 @@ Evaluation set's accuracy (**Top-1**):  **97.3%**
 
 #### Result tables
 
-- Example of the manually ✍ **checked** results (small): [model_1119_3_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 🔗
+- Example of the manually ✍ **checked** results (small): [model_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 🔗
 
-- Example of the manually ✍ **checked** evaluation dataset results (TOP-3): [20250209-1534_model_1119_3_TOP-3_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_TOP-3_EVAL.csv) 🔗
+- Example of the manually ✍ **checked** evaluation dataset results (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_TOP-3_EVAL.csv) 🔗
 
-- Example of the manually ✍ **checked** evaluation dataset results (TOP-1): [20250218-1519_model_1119_3_TOP-1_EVAL.csv](result%2Ftables%2F20250218-1519_model_1119_3_TOP-1_EVAL.csv) 🔗
+- Example of the manually ✍ **checked** evaluation dataset results (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250218-1519_model_1119_3_TOP-1_EVAL.csv) 🔗
 
-- Example of the **unchecked with TRUE** values results: [20250210-2034_model_1119_3_TOP-3.csv](result%2Ftables%2F20250210-2034_model_1119_3_TOP-3.csv) 🔗
+- Example of the **unchecked with TRUE** values results: [model_TOP-3.csv](result%2Ftables%2F20250210-2034_model_1119_3_TOP-3.csv) 🔗
 
 #### Table columns
 
