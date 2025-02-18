@@ -47,6 +47,10 @@ Evaluation set (10% of the above stats) [20250209-1534_model_1119_3_EVAL.csv](re
 
 Open [config.txt](config.txt) 🔗 and change folder path in the \[INPUT\] section, then optionally change **top_N** and **batch** in the \[SETUP\] section.
 
+> [!NOTE]
+>️ **Top-3** is enough to cover most of the images, setting **Top-5** will help with a small number of difficult to classify samples.
+Finally, using **Top-11** option will give you a **raw version** of class scores returned by the model
+
 > [!CAUTION]
 > Do not try to change **base_model** and other section contents unless you know what you are doing
 
@@ -126,10 +130,6 @@ Evaluation set's accuracy (**Top-1**):  **97.3%**
 
 ![TOP-1 confusion matrix](result%2Fplots%2F20250218-1523_conf_mat.png)
 
-⚠️ Regarding the model output, **Top-3** is enough to cover most of the images, 
-setting **Top-5** will help with a small number of difficult to classify samples.
-Finally, using **Top-11** option will give you a **raw version** of class scores returned by the model
-
 #### Result tables
 
 - Example of the manually ✍ **checked** results (small): [model_1119_3_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 🔗
@@ -150,8 +150,6 @@ Finally, using **Top-11** option will give you a **raw version** of class scores
 and optionally:
  
 - **TRUE** - actual label of the category
-
-
 
 ## For devs
 
