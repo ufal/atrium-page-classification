@@ -112,7 +112,8 @@ for exactly TOP-3 guesses from all images found in the given directory.
 
     python3 run.py --dir 
 
-The classification results of PNG pages collected from the directory will be saved 💾 to related folders defined in [config.txt](config.txt)'s \[OUTPUT\] section.
+The classification results of PNG pages collected from the directory will be saved 💾 to related 
+folders defined in **\[OUTPUT\]** section of [config.txt](config.txt)🔗 file.
 
 > [!TIP]
 > To additionally get raw class probabilities from the model along with the TOP-N results, use
