@@ -17,8 +17,9 @@ def directory_scraper(folder_path: Path, file_format: str = "png", file_list: li
     return file_list
 
 
-def dataframe_results(test_images: list, test_predictions: list, categories: list, top_N: int):
+def dataframe_results(test_images: list, test_predictions: list, categories: list, top_N: int, raw_scores: list = None):
     results = []
+    raws = []
     for image_file, predict_scores in zip(test_images, test_predictions):
         image_name = Path(image_file).stem
         document, page_num = image_name.split("-")
@@ -28,11 +29,21 @@ def dataframe_results(test_images: list, test_predictions: list, categories: lis
 
         res = [document, page_num] + labels + scores
         results.append(res)
+        if raw_scores is not None:
+            raws.append([document, page_num])
 
     col = ["FILE", "PAGE"] + [f"CLASS-{j + 1}" for j in range(top_N)] + [f"SCORE-{j + 1}" for j in range(top_N)]
     rdf = pd.DataFrame(results, columns=col)
 
-    return rdf
+    rawdf = None
+    if raw_scores is not None:
+        col = ["FILE", "PAGE"]
+        rawdf = pd.DataFrame(raws, columns=col)
+        rawdf[categories] = raw_scores
+
+        rawdf.round({c:3 for c in categories})
+
+    return rdf, rawdf
 
 
 def collect_images(directory: str, max_categ: int) -> (list, list, list):

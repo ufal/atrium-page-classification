@@ -14,9 +14,10 @@ Testing = False
 
 [SETUP]
 seed = 420
+base_model = google/vit-base-patch16-224
 batch = 12
 top_N = 3
-base_model = google/vit-base-patch16-224
+raw = False
 
 [INPUT]
 FOLDER_INPUT=/lnet/work/people/lutsai/pythonProject/pages/test_CTX

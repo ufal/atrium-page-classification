@@ -19,6 +19,8 @@ if __name__ == "__main__":
 
     base_model = config.get('SETUP', 'base_model')  # do not change
 
+    raw = config.getboolean('SETUP', 'raw')
+
     Training = config.getboolean('TRAIN', 'Training')
     Testing = config.getboolean('TRAIN', 'Testing')
     HF = config.getboolean('HF', 'use_hf')
@@ -47,6 +49,7 @@ if __name__ == "__main__":
     parser.add_argument("--train", help="Training model", default=Training, action="store_true")
     parser.add_argument("--eval", help="Evaluating model", default=Testing, action="store_true")
     parser.add_argument("--hf", help="Use model and processor from the HuggingFace repository", default=HF, action="store_true")
+    parser.add_argument("--raw", help="Output raw scores for all categories", default=raw, action="store_true")
 
     args = parser.parse_args()
 
@@ -54,6 +57,7 @@ if __name__ == "__main__":
     Training = args.train
     model_path = Path(args.model)
     top_N = args.topn
+    raw = args.raw
 
     # locally creating new directory paths instead of .env variables loaded with mistakes
     if not output_dir.is_dir():
@@ -128,18 +132,22 @@ if __name__ == "__main__":
                                                 testLabels,
                                                 batch,
                                                 False)
-        eval_predictions = classifier.infer_dataloader(eval_loader, top_N)
+        eval_predictions, raw_prediction = classifier.infer_dataloader(eval_loader, top_N, raw)
 
         test_labels = np.argmax(testLabels, axis=-1).tolist()
 
-        rdf = dataframe_results(testfiles,
-                                eval_predictions,
-                                categories,
-                                top_N)
+        rdf, raw_df = dataframe_results(testfiles,
+                                        eval_predictions,
+                                        categories,
+                                        top_N,
+                                        raw_prediction)
 
         rdf["TRUE"] = [categories[i] for i in test_labels]
-
         rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{model_folder}_TOP-{top_N}_EVAL.csv", sep=",", index=False)
+
+        if raw:
+            raw_df["TRUE"] = [categories[i] for i in test_labels]
+            raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{model_folder}_EVAL_RAW.csv", sep=",", index=False)
 
         confusion_plot(eval_predictions,
                        test_labels,
@@ -166,13 +174,16 @@ if __name__ == "__main__":
 
         test_loader = classifier.create_dataloader(test_images, batch)
 
-        test_predictions = classifier.infer_dataloader(test_loader, top_N)
+        test_predictions, raw_prediction = classifier.infer_dataloader(test_loader, top_N, raw)
 
-        rdf = dataframe_results(test_images,
-                                test_predictions,
-                                categories,
-                                top_N)
+        rdf, raw_df = dataframe_results(test_images,
+                                        test_predictions,
+                                        categories,
+                                        top_N,
+                                        raw_prediction)
 
         rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{model_folder}_TOP-{top_N}.csv", sep=",", index=False)
+        if raw:
+            raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{model_folder}_RAW.csv", sep=",", index=False)
 
 

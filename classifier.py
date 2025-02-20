@@ -147,19 +147,23 @@ class ImageClassifier:
         print(f"Dataloader of directory dataset is ready:\t{len(image_paths)} images split into {len(dataloader)} batches of size {batch_size}")
         return dataloader
 
-    def infer_dataloader(self, dataloader, top_n: int = 1):
+    def infer_dataloader(self, dataloader, top_n: int, raw: bool = False):
         """
         Perform inference on a DataLoader, optionally with top-N predictions.
         """
         self.model.eval()
         predictions = []
+        raw_scores = []
+
         with torch.no_grad():
             for batch in dataloader:
                 inputs = batch['pixel_values']
                 # print(inputs)
                 outputs = self.model(pixel_values=inputs.to(self.device))
                 logits = outputs.logits
+
                 probabilities = torch.nn.functional.softmax(logits, dim=-1)
+                raw_scores.extend(probabilities.tolist())
                 if top_n > 1:
                     top_n_probs, top_n_indices = torch.topk(probabilities, top_n, dim=-1)
                     for indices, probs in zip(top_n_indices, top_n_probs):
@@ -169,7 +173,9 @@ class ImageClassifier:
                     predicted_class_idx = logits.argmax(-1).tolist()
                     predictions.extend(predicted_class_idx)
                 print(f"Processed {len(predictions)} images")
-        return predictions
+
+        raw_scores = None if not raw else raw_scores
+        return predictions, raw_scores
 
     def save_model(self, save_directory: str):
         """
