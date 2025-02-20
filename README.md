@@ -1,6 +1,6 @@
-# Image processing using ViT - for historical documents
+# Image processing using fine-tuned ViT - for historical documents sorting
 
-### Goal: This project solves a task of page images classification
+### Goal: solve a task of archive page images classification (for their further content-based processing)
 
 **Scope:** Processing of images, training and evaluation of ViT model,
 input file/directory processing, class (category) results of top
@@ -37,11 +37,12 @@ Evaluation set (10% of the above stats) [model_EVAL.csv](result/tables/20250209-
 
 ## How to install 🔧 and run ▶️
 
-Open [config.txt](config.txt) 🔗 and change folder path in the \[INPUT\] section, then optionally change **top_N** and **batch** in the \[SETUP\] section.
+Open [config.txt](config.txt) 🔗 and change folder path in the **\[INPUT\]** section, then 
+optionally change **top_N** and **batch** in the **\[SETUP\]** section.
 
 > [!NOTE]
->️ **Top-3** is enough to cover most of the images, setting **Top-5** will help with a small number of difficult to classify samples.
-Finally, using **Top-11** or **--raw** flag option will give you a **raw version** of class scores returned by the model
+>️ **Top-3** is enough to cover most of the images, setting **Top-5** will help with a small number 
+> of difficult to classify samples.
 
 > [!CAUTION]
 > Do not try to change **base_model** and other section contents unless you know what you are doing
@@ -52,7 +53,8 @@ There are few option to obtain the trained model files:
 - get a model and processor from the [HF 😊 repo](https://huggingface.co/k4tel/vit-historical-page) 🔗 using a specific flag described below
 
 > [!IMPORTANT]
-> Make sure you have **Python version 3.10+** installed on your machine 💻. Then create a separate virtual environment for this project 
+> Make sure you have **Python version 3.10+** installed on your machine 💻. 
+> Then create a separate virtual environment for this project 
 
 Follow the **Linux** / **Windows**-specific instruction at the [venv docs](https://docs.python.org/3/library/venv.html) 👀🔗 if you don't know how to.
 After creating the venv folder, activate the environment via:
@@ -62,7 +64,8 @@ After creating the venv folder, activate the environment via:
 and then inside your virtual environment to install python libraries (takes time ⌛) 
 
 > [!NOTE]
-> Up to **1 GB of space for model** files and checkpoints is needed, and up to **7 GB of space for the python libraries** (pytorch and its dependencies, etc)
+> Up to **1 GB of space for model** files and checkpoints is needed, and up to **7 GB 
+> of space for the python libraries** (pytorch and its dependencies, etc)
 
 Can be done via:
 
@@ -72,13 +75,15 @@ To test that everything works okay and see the flag descriptions ❓ run:
 
     python3 run.py -h
 
-There is an option to **load the model from the HF 😊 hub directly**, rather than use the local model folder.
-To run any predictions without locally saved model files, firstly load the model via:
+There is an option to **load the model from the HF 😊 hub directly**, rather than use the 
+local model folder. To run any predictions without locally saved model files, firstly 
+load the model via:
 
     python3 run.py --hf
 
 You should see a message about loading the model from hub and then saving it locally. 
-Only after you obtain the trained model files, you can play with any commands provided below
+Only after you have obtained the trained model files (takes less time ⌛), you can play with 
+any commands provided below
 
 ### Common command examples 
 
@@ -99,9 +104,9 @@ to run single PNG file classification - the output will be in the console.
 
 #### Directory processing 📁
 
-    python3 run.py -tn 3 --inner -d '/full/path/to/directory' -m '/full/path/to/model/folder'
+    python3 run.py -tn 3 -d '/full/path/to/directory' -m '/full/path/to/model/folder'
 
-for exactly TOP-3 guesses from all images found in the subdirectories of the given directory.
+for exactly TOP-3 guesses from all images found in the given directory.
 
 **OR** if you are really sure about default variables set in the [config.txt](config.txt) 🔗:
 
@@ -110,7 +115,12 @@ for exactly TOP-3 guesses from all images found in the subdirectories of the giv
 The classification results of PNG pages collected from the directory will be saved 💾 to related folders defined in [config.txt](config.txt)'s \[OUTPUT\] section.
 
 > [!TIP]
-> To parse all PNG files in the directory AND its subdirectories use the --inner flag
+> To additionally get raw class probabilities from the model along with the TOP-N results, use
+> **--raw** flag when processing the directory
+ 
+> [!TIP]
+> To process all PNG files in the directory **AND its subdirectories** use the **--inner** flag
+> when processing the directory
 
 ### Results 📊
 
@@ -128,13 +138,13 @@ Evaluation set's accuracy (**Top-1**):  **97.3%**
 
 - Example of the manually ✍ **checked** evaluation dataset results (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_TOP-3_EVAL.csv) 🔗
 
-- Example of the manually ✍ **checked** evaluation dataset RAW results [model_RAW_EVAL.csv](result%2Ftables%2F20250220-1342_model_1119_3_EVAL_RAW.csv) 🔗
+- Example of the manually ✍ **checked** evaluation dataset **RAW** results [model_RAW_EVAL.csv](result%2Ftables%2F20250220-1342_model_1119_3_EVAL_RAW.csv) 🔗
 
 - Example of the manually ✍ **checked** evaluation dataset results (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250218-1519_model_1119_3_TOP-1_EVAL.csv) 🔗
 
 - Example of the **unchecked with TRUE** values results: [model_TOP-3.csv](result%2Ftables%2F20250210-2034_model_1119_3_TOP-3.csv) 🔗
 
-- Example of the RAW **unchecked with TRUE** values results: [model_RAW.csv](result%2Ftables%2F20250220-1331_model_1119_3_RAW.csv) 🔗
+- Example of the **unchecked with TRUE** values **RAW** results: [model_RAW.csv](result%2Ftables%2F20250220-1331_model_1119_3_RAW.csv) 🔗
 
 #### Table columns
 
@@ -149,6 +159,12 @@ and optionally:
 
 ## For devs
 
+Most of the changeable variables are in the [config.txt](config.txt) 🔗 file, specifically,
+in the **\[TRAIN\]**, **\[HF\]**, and **\[SETUP\]** sections.
+
+For more detailed training process adjustments refer to the related functions in [classifier.py](classifier.py) 🔗 
+file, where you will find some predefined values not used in the [run.py](run.py) 🔗 file.
+
 To train the model run: 
 
     python3 run.py --train  
@@ -157,10 +173,13 @@ To evaluate the model and create a confusion matrix plot 📊 run:
 
     python3 run.py --eval  
 
-Code of the algorithms can be found in the [classifier.py](classifier.py) 🔗 and [utils.py](utils.py) 🔗 files:
+Code of the model-specific classes can be found in the [classifier.py](classifier.py) 🔗 file.
 
-Code of the main function in the starting point [run.py](run.py) 🔗 file can be edited
+Code of the task-related algorithms can be found in the [utils.py](utils.py) 🔗 file.
+
+Code of the main function in the starting point [run.py](run.py) 🔗 file can be edited for 
+flags and function argument extension.
 
 #### Contacts
 
-For support write to 📧 lutsai.k@gmail.com 📧
+For support write to: 📧 lutsai.k@gmail.com 📧
