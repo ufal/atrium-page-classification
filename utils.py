@@ -39,9 +39,10 @@ def dataframe_results(test_images: list, test_predictions: list, categories: lis
     if raw_scores is not None:
         col = ["FILE", "PAGE"]
         rawdf = pd.DataFrame(raws, columns=col)
-        rawdf[categories] = raw_scores
+        raw_weights = np.array(raw_scores).round(3)
+        rawdf[categories] = raw_weights
 
-        rawdf.round({c:3 for c in categories})
+        # rawdf.round({c:3 for c in categories})
 
     return rdf, rawdf
 
