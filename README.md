@@ -174,6 +174,11 @@ To evaluate the model and create a confusion matrix plot 📊 run:
 
     python3 run.py --eval  
 
+> [!IMPORTANT]
+> In both cases, you must make sure that training data directory is set right in the 
+> [config.txt](config.txt) 🔗 and it contains category subdirectories with images inside. 
+> Names of the category subdirectories become actual label names, and replaces the default categories list.
+
 Code of the model-specific classes can be found in the [classifier.py](classifier.py) 🔗 file.
 
 Code of the task-related algorithms can be found in the [utils.py](utils.py) 🔗 file.
