@@ -33,7 +33,7 @@ Training set of the model: **8950** images
 |  **TEXT_P** | 	6.95%  | **📄 - only printed text**                                                   |
 |  **TEXT_T** | 	13.53% | **📄 - only machine typed text**                                             |
 
-Evaluation set (10% of the above stats) [model_EVAL.csv](result/tables/20250209-1534_model_1119_3_EVAL.csv) 🔗:	**995** images 
+Evaluation set (10% of the all, with the same proportions as above) [model_EVAL.csv](result/tables/20250209-1534_model_1119_3_EVAL.csv) 🔗:	**995** images 
 
 ## How to install 🔧 and run ▶️
 
@@ -61,7 +61,7 @@ After creating the venv folder, activate the environment via:
 
     source <your_venv_dir>/bin/activate
 
-and then inside your virtual environment to install python libraries (takes time ⌛) 
+and then inside your virtual environment, you should install python libraries (takes time ⌛) 
 
 > [!NOTE]
 > Up to **1 GB of space for model** files and checkpoints is needed, and up to **7 GB 
@@ -71,7 +71,7 @@ Can be done via:
 
     pip install -r requirements.txt
 
-To test that everything works okay and see the flag descriptions ❓ run:
+To test that everything works okay and see the flag descriptions ❓ call for **--help**:
 
     python3 run.py -h
 
@@ -82,8 +82,8 @@ load the model via:
     python3 run.py --hf
 
 You should see a message about loading the model from hub and then saving it locally. 
-Only after you have obtained the trained model files (takes less time ⌛), you can play with 
-any commands provided below
+Only after you have obtained the trained model files (takes less time ⌛ than installing dependencies), 
+you can play with any commands provided below.
 
 ### Common command examples 
 
@@ -189,3 +189,10 @@ flags and function argument extension.
 #### Contacts
 
 For support write to: 📧 lutsai.k@gmail.com 📧
+
+#### Acknowledgements
+
+- **Developed by** [UFAL](https://ufal.mff.cuni.cz/home-page)
+- **Funded by** [ATRIUM](https://atrium-research.eu/) 
+- **Shared by** [ATRIUM](https://atrium-research.eu/) & [UFAL](https://ufal.mff.cuni.cz/home-page)
+- **Model type:** fine-tuned [ViT]((https://huggingface.co/google/vit-base-patch16-224))
