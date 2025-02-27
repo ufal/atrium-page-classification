@@ -33,7 +33,7 @@ Training set of the model: **8950** images
 |  **TEXT_P** | 	6.95%  | **📄 - only printed text**                                                   |
 |  **TEXT_T** | 	13.53% | **📄 - only machine typed text**                                             |
 
-Evaluation set (10% of the all, with the same proportions as above) [model_EVAL.csv](result/tables/20250209-1534_model_1119_3_EVAL.csv) 🔗:	**995** images 
+Evaluation set (10% of the all, with the same proportions as above) [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 🔗:	**995** images 
 
 ## How to install 🔧 and run ▶️
 
@@ -54,7 +54,7 @@ optionally change **top_N** and **batch** in the **\[SETUP\]** section.
 > Do not try to change **base_model** and other section contents unless you know what you are doing
 
 There is a preferable way of obtaining the trained model files through the HF 😊 hub, which is implemented
-using a specific flag **--hf** described below. Unless you already have the model files in the 'model/model_version'
+using a specific flag **--hf** described below. Unless you already have the model files in the **'model/model_version'**
 directory next to this file, you must use the **--hf** flag to download the model files from the [HF 😊 repo](https://huggingface.co/k4tel/vit-historical-page) 🔗 
 
 > [!IMPORTANT]
