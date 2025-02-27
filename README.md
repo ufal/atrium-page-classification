@@ -37,6 +37,12 @@ Evaluation set (10% of the above stats) [model_EVAL.csv](result/tables/20250209-
 
 ## How to install 🔧 and run ▶️
 
+Clone this project to your local machine 🖥️ via:
+
+    cd /local/folder/for/this/project
+    git init
+    git clone https://github.com/K4TEL/atrium-ufal.git
+
 Open [config.txt](config.txt) 🔗 and change folder path in the **\[INPUT\]** section, then 
 optionally change **top_N** and **batch** in the **\[SETUP\]** section.
 
@@ -47,10 +53,9 @@ optionally change **top_N** and **batch** in the **\[SETUP\]** section.
 > [!CAUTION]
 > Do not try to change **base_model** and other section contents unless you know what you are doing
 
-There are few option to obtain the trained model files:
-
-- get a complete archive of the model folder from its developers ( Create a folder "**model**" next to this file, then place the model folder inside it)
-- get a model and processor from the [HF 😊 repo](https://huggingface.co/k4tel/vit-historical-page) 🔗 using a specific flag described below
+There is a preferable way of obtaining the trained model files through the HF 😊 hub, which is implemented
+using a specific flag **--hf** described below. Unless you already have the model files in the 'model/model_version'
+directory next to this file, you must use the **--hf** flag to download the model files from the [HF 😊 repo](https://huggingface.co/k4tel/vit-historical-page) 🔗 
 
 > [!IMPORTANT]
 > Make sure you have **Python version 3.10+** installed on your machine 💻. 
@@ -75,9 +80,7 @@ To test that everything works okay and see the flag descriptions ❓ run:
 
     python3 run.py -h
 
-There is an option to **load the model from the HF 😊 hub directly**, rather than use the 
-local model folder. To run any predictions without locally saved model files, firstly 
-load the model via:
+To **pull the model from the HF 😊 hub repository directly**, load the model via:
 
     python3 run.py --hf
 
@@ -180,6 +183,59 @@ Code of the task-related algorithms can be found in the [utils.py](utils.py) �
 
 Code of the main function in the starting point [run.py](run.py) 🔗 file can be edited for 
 flags and function argument extension.
+
+### Data preparation
+
+In case you have a set pf PDF files that you would like to turn to PNG pages, there are useful scripts in the
+[data_scripts](data_scripts) 🔗 folder. 
+
+Firstly: 
+
+    cd /local/folder/for/this/project/data_scripts
+    cp pdf2png.sh /full/path/to/your/folder/with/pdf/files
+    cd /full/path/to/your/folder/with/pdf/files
+
+Now check the script and comments in [pdf2png.sh](data_scripts%2Fpdf2png.sh) 🔗 file, and run it:
+
+    bash pdf2png.sh
+
+> [!NOTE]
+> The scripts are adapted for **Linux** systems
+
+After the script is done, you will have as many subdirectories with PNG pages as you had PDF files in that directory.
+
+Optionally you can use the [move_single.sh](data_scripts%2Fmove_single.sh) 🔗 script to move 
+all PNG files from directories with a single PNG file inside to the common directory onepagers.
+    
+    cp /full/path/to/project/data_scripts/move_single.sh .
+    bash move_single.sh
+
+After that you should prepare a CSV file with the following columns:
+
+- **FILE** - name of the PDF file which was the source of this page
+- **PAGE** - number of the page
+- **CLASS** - label of the category
+
+And then you should use script in the [sort.sh](data_scripts%2Fsort.sh) 🔗 file to prepare data for training:
+
+    cp /full/path/to/project/data_scripts/sort.sh .
+    bash sort.sh
+
+> [!IMPORTANT]
+> Check the top of the script for the path to the CSV file, path to the directory PNG pages subdirectories, and
+> path to the directory where you want to store the training data.
+
+After the script is done, you will have a directory with a similar structure:
+
+    /full/path/to/your/folder/with/train/pages
+    ├── DRAW
+    ├── DRAW_L
+    ├── LINE_HW
+    ├── LINE_P
+
+Make sure to check the [config.txt](config.txt) 🔗 file for the **\[TRAIN\]** section variables, where you should
+set a path to the data folder. Then change Training and Testing to True, and optionally tweak the parameters
+for maximum number of samples per category, epochs, etc.
 
 #### Contacts
 
