@@ -221,9 +221,17 @@ After the script is done, you will have a directory full of subdirectories with 
         ├── PDFFile1Name-002.png
         ...
     ├── PdfFile2Name
+        ├── PdfFile2Name-01.png
+        ├── PDFFile2Name-02.png
+        ...
     ├── PdfFile3Name
+        ├── PdfFile3Name-1.png 
     ├── PdfFile4Name
     ...
+
+> [!NOTE]
+> The page numbers are padded with zeros (on the left) to match the length of the last page number in each PDF file,
+> this is done automatically by the pdftoppm command
 
 Optionally you can use the [move_single.sh](data_scripts%2Fmove_single.sh) 🔗 script to move 
 all PNG files from directories with a single PNG file inside to the common directory of one-pagers.
