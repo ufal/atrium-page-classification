@@ -54,8 +54,7 @@ optionally change **top_N** and **batch** in the **\[SETUP\]** section.
 > Do not try to change **base_model** and other section contents unless you know what you are doing
 
 There is a preferable way of obtaining the trained model files through the HF 😊 hub, which is implemented
-using a specific flag **--hf** described below. Unless you already have the model files in the **'model/model_version'**
-directory next to this file, you must use the **--hf** flag to download the model files from the [HF 😊 repo](https://huggingface.co/k4tel/vit-historical-page) 🔗 
+using a specific flag **--hf** described below. 
 
 > [!IMPORTANT]
 > Make sure you have **Python version 3.10+** installed on your machine 💻. 
@@ -87,6 +86,11 @@ To **pull the model from the HF 😊 hub repository directly**, load the model v
 You should see a message about loading the model from hub and then saving it locally. 
 Only after you have obtained the trained model files (takes less time ⌛ than installing dependencies), 
 you can play with any commands provided below.
+
+> [!IMPORTANT]
+> Unless you already have the model files in the **'model/model_version'**
+directory next to this file, you must use the **--hf** flag to download the
+> model files from the [HF 😊 repo](https://huggingface.co/k4tel/vit-historical-page) 🔗
 
 ### Common command examples 
 
@@ -191,6 +195,8 @@ flags and function argument extension.
 
 ### Data preparation
 
+#### PDF to PNG
+
 In case you have a set pf PDF files that you would like to turn to PNG pages, there are useful scripts in the
 [data_scripts](data_scripts) 🔗 folder. 
 
@@ -207,13 +213,28 @@ Now check the script and comments in [pdf2png.sh](data_scripts%2Fpdf2png.sh) �
 > [!NOTE]
 > The scripts are adapted for **Linux** systems
 
-After the script is done, you will have as many subdirectories with PNG pages as you had PDF files in that directory.
+After the script is done, you will have a directory full of subdirectories with a similar structure:
+
+    /full/path/to/your/folder/with/pdf/files
+    ├── PdfFile1Name
+        ├── PdfFile1Name-001.png
+        ├── PDFFile1Name-002.png
+        ...
+    ├── PdfFile2Name
+    ├── PdfFile3Name
+    ├── PdfFile4Name
+    ...
 
 Optionally you can use the [move_single.sh](data_scripts%2Fmove_single.sh) 🔗 script to move 
-all PNG files from directories with a single PNG file inside to the common directory onepagers.
+all PNG files from directories with a single PNG file inside to the common directory of one-pagers.
     
     cp /full/path/to/project/data_scripts/move_single.sh .
     bash move_single.sh
+
+The reason for such movement is simply convenience in the annotation process. 
+These changes are cared for in the following [sort.sh](data_scripts%2Fsort.sh) 🔗 script as well.
+
+#### PNG pages annotation
 
 After that you should prepare a CSV file with the following columns:
 
@@ -221,26 +242,32 @@ After that you should prepare a CSV file with the following columns:
 - **PAGE** - number of the page
 - **CLASS** - label of the category
 
+#### PNG pages sorting for training
+
 And then you should use script in the [sort.sh](data_scripts%2Fsort.sh) 🔗 file to prepare data for training:
 
     cp /full/path/to/project/data_scripts/sort.sh .
     bash sort.sh
 
 > [!IMPORTANT]
-> Check the top of the script for the path to the CSV file, path to the directory PNG pages subdirectories, and
+> Check the top of the script for the path to the CSV file, path to the directory containing subdirectories of PNG pages, and
 > path to the directory where you want to store the training data.
 
-After the script is done, you will have a directory with a similar structure:
+After the script is done, you will have a directory full of subdirectories with a similar structure:
 
     /full/path/to/your/folder/with/train/pages
-    ├── DRAW
-    ├── DRAW_L
-    ├── LINE_HW
-    ├── LINE_P
+    ├── Label1
+        ├── PdfFileAName-00N.png
+        ├── PdfFileBName-0M.png
+        ...
+    ├── Label2
+    ├── Label3
+    ├── Label4
+    ...
 
 Make sure to check the [config.txt](config.txt) 🔗 file for the **\[TRAIN\]** section variables, where you should
-set a path to the data folder. Then change Training and Testing to True, and optionally tweak the parameters
-for maximum number of samples per category, epochs, etc.
+set a path to the data folder. Then optionally tweak the parameter of **max_categ**
+for maximum number of samples per category in case you have over-represented labels significantly dominating in size.
 
 #### Contacts
 

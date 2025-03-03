@@ -18,13 +18,14 @@ tail -n +2 "$input_csv" | while IFS=',' read -r filename page_number category; d
   # Check if subdirectory exists in input directory
   input_subdir="$input_dir/$filename"
   if [ -d "$input_subdir" ]; then
-    # Copy the file ending with the page number to the category subdirectory
-
+    # Get the number of files in the input subdirectory
     file_count=$(ls -1q "$input_subdir"/*.png 2>/dev/null | wc -l)
+    # Pad the page number with zeros to match the file name format
     pn=$(printf "%0${#file_count}d" "$page_number")
 
-
+    # Find the file ending with the padded page number
     file_to_copy=$(find "$input_subdir" -type f -name "*-$pn.png" -print -quit)
+    # Copy the file to the category subdirectory
     if [ -n "$file_to_copy" ]; then
       cp "$file_to_copy" "$category_dir/"
     else
@@ -33,6 +34,7 @@ tail -n +2 "$input_csv" | while IFS=',' read -r filename page_number category; d
   else
     # Use 'onepagers' as the default subdirectory
     default_subdir="$input_dir/onepagers"
+    # Find the file starting with the filename and ending with the page number
     file_to_copy=$(find "$default_subdir" -type f -name "$filename-$page_number.png" -print -quit)
     if [ -n "$file_to_copy" ]; then
       cp "$file_to_copy" "$category_dir/"
