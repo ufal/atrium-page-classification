@@ -201,13 +201,13 @@ There are useful scripts in the [data_scripts](data_scripts) 🔗 folder for the
 
 The source set of PDF documents must be converted to page-specific PNG images.
 
-Firstly, copy the converter script **pdf2png.sh or pdf2png.bat** to the directory with PDF documents.
+Firstly, copy the PDF-to-PNG converter script to the directory with PDF documents.
 
-For Windows:
+For **Windows**:
 
     move \local\folder\for\this\project\data_scripts\pdf2png.bat \full\path\to\your\folder\with\pdf\files
 
-For Unix:
+For **Unix**:
 
     cp /local/folder/for/this/project/data_scripts/pdf2png.sh /full/path/to/your/folder/with/pdf/files
 
@@ -215,12 +215,14 @@ For Unix:
 Now check the content and comments in [pdf2png.sh](data_scripts%2Fpdf2png.sh) 🔗 or [pdf2png.bat](data_scripts%2Fpdf2png.bat) 🔗 
 script, and run it.
 
-For Windows:
+For **Windows**:
 
+    cd \full\path\to\your\folder\with\pdf\files
     pdf2png.bat
 
-For Unix:
+For **Unix**:
 
+    cd /full/path/to/your/folder/with/pdf/files
     pdf2png.sh
 
 After the program is done, you will have a directory full of document-specific subdirectories
@@ -229,7 +231,7 @@ containing page-specific images with a similar structure:
     /full/path/to/your/folder/with/pdf/files
     ├── PdfFile1Name
         ├── PdfFile1Name-001.png
-        ├── PDFFile1Name-002.png
+        ├── PdfFile1Name-002.png
         ...
     ├── PdfFile2Name
         ├── PdfFile2Name-01.png
@@ -242,15 +244,15 @@ containing page-specific images with a similar structure:
 
 > [!NOTE]
 > The page numbers are padded with zeros (on the left) to match the length of the last page number in each PDF file,
-> this is done automatically by the pdftoppm command used on Unix. While ImageMagick's convert command used 
-> on Windows does not pad the page numbers.
+> this is done automatically by the pdftoppm command used on **Unix**. While ImageMagick's convert command used 
+> on **Windows** does not pad the page numbers.
 
-On Windows it will look like this:
+On **Windows** it will look like this:
 
     \full\path\to\your\folder\with\pdf\files
     ├── PdfFile1Name
         ├── PdfFile1Name-1.png
-        ├── PDFFile1Name-2.png
+        ├── PdfFile1Name-2.png
         ...
     ├── PdfFile2Name
         ├── PdfFile2Name-1.png
@@ -265,14 +267,16 @@ On Windows it will look like this:
 Optionally you can use the [move_single.sh](data_scripts%2Fmove_single.sh) 🔗 or [move_single.bat](data_scripts%2Fmove_single.bat) 🔗 script to move 
 all PNG files from directories with a single PNG file inside to the common directory of one-pagers.
 
-For Windows:
+For **Windows**:
 
     move \local\folder\for\this\project\data_scripts\move_single.bat \full\path\to\your\folder\with\pdf\files
+    cd \full\path\to\your\folder\with\pdf\files
     move_single.bat
 
-For Unix:
+For **Unix**:
     
     cp /local/folder/for/this//project/data_scripts/move_single.sh /full/path/to/your/folder/with/pdf/files
+    cd /full/path/to/your/folder/with/pdf/files 
     move_single.sh 
 
 The reason for such movement is simply convenience in the following annotation process. 
@@ -294,17 +298,19 @@ Prepare a CSV table with such columns:
 Cluster the annotated data into separate folders using the [sort.sh](data_scripts%2Fsort.sh) 🔗 or [sort.bat](data_scripts%2Fsort.bat) 🔗 
 script to copy data from the source folder to the training folder where each category has its own subdirectory:
 
-For Windows:
+For **Windows**:
 
     sort.bat
 
-For Unix:
+For **Unix**:
     
     sort.sh
 
 > [!IMPORTANT]
-> Check the top of the script for the path to the CSV table, path to the directory containing document-specific
-> subdirectories of PNG pages, and path to the directory where you want to store the training data.
+> It does not matter from which directory you launch the sorting script, but you must check the top of the script for 
+> the path to the CSV table with annotations, path to the directory containing document-specific
+> subdirectories of page-specific PNG pages, and path to the directory where you want to store the training data of
+> label-specific directories with annotated page images.
 
 After the program is done, you will have a directory full of label-specific subdirectories 
 containing document-specific pages with a similar structure:
@@ -319,12 +325,12 @@ containing document-specific pages with a similar structure:
     ├── Label4
     ...
 
-And on Windows:
+Similarly, on **Windows**:
     
     \full\path\to\your\folder\with\train\pages
     ├── Label1
-        ├── PdfFileAName-1.png
-        ├── PdfFileBName-2.png
+        ├── PdfFileAName-N.png
+        ├── PdfFileBName-M.png
         ...
     ├── Label2
     ├── Label3
