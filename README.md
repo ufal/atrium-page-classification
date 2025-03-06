@@ -193,27 +193,29 @@ Code of the task-related algorithms can be found in the [utils.py](utils.py) �
 Code of the main function in the starting point [run.py](run.py) 🔗 file can be edited for 
 flags and function argument extension.
 
-### Data preparation
+## Data preparation
 
-#### PDF to PNG
+There are useful scripts in the [data_scripts](data_scripts) 🔗 folder for the whole process. 
 
-In case you have a set pf PDF files that you would like to turn to PNG pages, there are useful scripts in the
-[data_scripts](data_scripts) 🔗 folder. 
+> [!NOTE]
+> The scripts are adapted for **Linux** systems
 
-Firstly: 
+### PDF to PNG
+
+The source set of PDF documents must be converted to page-specific PNG images.
+
+Firstly, copy the converter script to the directory with PDF documents: 
 
     cd /local/folder/for/this/project/data_scripts
     cp pdf2png.sh /full/path/to/your/folder/with/pdf/files
     cd /full/path/to/your/folder/with/pdf/files
 
-Now check the script and comments in [pdf2png.sh](data_scripts%2Fpdf2png.sh) 🔗 file, and run it:
+Now check the content and comments in [pdf2png.sh](data_scripts%2Fpdf2png.sh) 🔗 script, and run it:
 
     bash pdf2png.sh
 
-> [!NOTE]
-> The scripts are adapted for **Linux** systems
-
-After the script is done, you will have a directory full of subdirectories with a similar structure:
+After the program is done, you will have a directory full of document-specific subdirectories
+containing page-specific images with a similar structure:
 
     /full/path/to/your/folder/with/pdf/files
     ├── PdfFile1Name
@@ -237,31 +239,36 @@ Optionally you can use the [move_single.sh](data_scripts%2Fmove_single.sh) 🔗 
 all PNG files from directories with a single PNG file inside to the common directory of one-pagers.
     
     cp /full/path/to/project/data_scripts/move_single.sh .
-    bash move_single.sh
+    bash move_single.sh 
 
-The reason for such movement is simply convenience in the annotation process. 
-These changes are cared for in the following [sort.sh](data_scripts%2Fsort.sh) 🔗 script as well.
+The reason for such movement is simply convenience in the following annotation process. 
+These changes are cared for in the next [sort.sh](data_scripts%2Fsort.sh) 🔗 script as well.
 
-#### PNG pages annotation
+### PNG pages annotation
 
-After that you should prepare a CSV file with the following columns:
+Prepare a CSV table with such columns:
 
-- **FILE** - name of the PDF file which was the source of this page
-- **PAGE** - number of the page
+- **FILE** - name of the PDF document which was the source of this page
+- **PAGE** - number of the page (**NOT** padded with 0s)
 - **CLASS** - label of the category
 
-#### PNG pages sorting for training
+> [!TIP]
+> Prepare equal in size categories if possible, so that the model will not be biased towards the over-represented labels
 
-And then you should use script in the [sort.sh](data_scripts%2Fsort.sh) 🔗 file to prepare data for training:
+### PNG pages sorting for training
+
+Cluster the annotated data into separate folders using the [sort.sh](data_scripts%2Fsort.sh) 🔗 script to copy data from the source
+folder to the training folder where each category has its own subdirectory:
 
     cp /full/path/to/project/data_scripts/sort.sh .
     bash sort.sh
 
 > [!IMPORTANT]
-> Check the top of the script for the path to the CSV file, path to the directory containing subdirectories of PNG pages, and
-> path to the directory where you want to store the training data.
+> Check the top of the script for the path to the CSV table, path to the directory containing document-specific
+> subdirectories of PNG pages, and path to the directory where you want to store the training data.
 
-After the script is done, you will have a directory full of subdirectories with a similar structure:
+After the program is done, you will have a directory full of label-specific subdirectories 
+containing document-specific pages with a similar structure:
 
     /full/path/to/your/folder/with/train/pages
     ├── Label1
@@ -273,11 +280,14 @@ After the script is done, you will have a directory full of subdirectories with 
     ├── Label4
     ...
 
-Make sure to check the [config.txt](config.txt) 🔗 file for the **\[TRAIN\]** section variables, where you should
-set a path to the data folder. Then optionally tweak the parameter of **max_categ**
-for maximum number of samples per category in case you have over-represented labels significantly dominating in size.
+Before running the training, make sure to check the [config.txt](config.txt) 🔗 file for the **\[TRAIN\]** section variables, where you should
+set a path to the data folder. 
 
-#### Contacts
+Optionally tweak the parameter of **max_categ**
+for maximum number of samples per category, in case you have over-represented labels significantly dominating in size.
+Set **max_categ** higher than the number of samples in the largest category to use **all** data samples.
+
+### Contacts
 
 For support write to: 📧 lutsai.k@gmail.com 📧
 
@@ -286,4 +296,4 @@ For support write to: 📧 lutsai.k@gmail.com 📧
 - **Developed by** [UFAL](https://ufal.mff.cuni.cz/home-page)
 - **Funded by** [ATRIUM](https://atrium-research.eu/) 
 - **Shared by** [ATRIUM](https://atrium-research.eu/) & [UFAL](https://ufal.mff.cuni.cz/home-page)
-- **Model type:** fine-tuned [ViT]((https://huggingface.co/google/vit-base-patch16-224))
+- **Model type:** fine-tuned [ViT]((https://huggingface.co/google/vit-base-patch16-224)) with a 224x224 resolution size
