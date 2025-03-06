@@ -192,24 +192,36 @@ flags and function argument extension.
 
 ## Data preparation
 
-There are useful scripts in the [data_scripts](data_scripts) 🔗 folder for the whole process. 
+There are useful scripts in the [data_scripts](data_scripts) 🔗 folder for the whole process of data preparation. 
 
 > [!NOTE]
-> The scripts are adapted for **Linux** systems
+> The .sh scripts are adapted for **Unix** OS and .bat scripts are adapted for **Windows** OS
 
 ### PDF to PNG
 
 The source set of PDF documents must be converted to page-specific PNG images.
 
-Firstly, copy the converter script to the directory with PDF documents: 
+Firstly, copy the converter script **pdf2png.sh or pdf2png.bat** to the directory with PDF documents.
 
-    cd /local/folder/for/this/project/data_scripts
-    cp pdf2png.sh /full/path/to/your/folder/with/pdf/files
-    cd /full/path/to/your/folder/with/pdf/files
+For Windows:
 
-Now check the content and comments in [pdf2png.sh](data_scripts%2Fpdf2png.sh) 🔗 script, and run it:
+    move \local\folder\for\this\project\data_scripts\pdf2png.bat \full\path\to\your\folder\with\pdf\files
 
-    bash pdf2png.sh
+For Unix:
+
+    cp /local/folder/for/this/project/data_scripts/pdf2png.sh /full/path/to/your/folder/with/pdf/files
+
+
+Now check the content and comments in [pdf2png.sh](data_scripts%2Fpdf2png.sh) 🔗 or [pdf2png.bat](data_scripts%2Fpdf2png.bat) 🔗 
+script, and run it.
+
+For Windows:
+
+    pdf2png.bat
+
+For Unix:
+
+    pdf2png.sh
 
 After the program is done, you will have a directory full of document-specific subdirectories
 containing page-specific images with a similar structure:
@@ -230,16 +242,41 @@ containing page-specific images with a similar structure:
 
 > [!NOTE]
 > The page numbers are padded with zeros (on the left) to match the length of the last page number in each PDF file,
-> this is done automatically by the pdftoppm command
+> this is done automatically by the pdftoppm command used on Unix. While ImageMagick's convert command used 
+> on Windows does not pad the page numbers.
 
-Optionally you can use the [move_single.sh](data_scripts%2Fmove_single.sh) 🔗 script to move 
+On Windows it will look like this:
+
+    \full\path\to\your\folder\with\pdf\files
+    ├── PdfFile1Name
+        ├── PdfFile1Name-1.png
+        ├── PDFFile1Name-2.png
+        ...
+    ├── PdfFile2Name
+        ├── PdfFile2Name-1.png
+        ├── PDFFile2Name-2.png
+        ...
+    ├── PdfFile3Name
+        ├── PdfFile3Name-1.png 
+    ├── PdfFile4Name
+    ...
+
+
+Optionally you can use the [move_single.sh](data_scripts%2Fmove_single.sh) 🔗 or [move_single.bat](data_scripts%2Fmove_single.bat) 🔗 script to move 
 all PNG files from directories with a single PNG file inside to the common directory of one-pagers.
+
+For Windows:
+
+    move \local\folder\for\this\project\data_scripts\move_single.bat \full\path\to\your\folder\with\pdf\files
+    move_single.bat
+
+For Unix:
     
-    cp /full/path/to/project/data_scripts/move_single.sh .
-    bash move_single.sh 
+    cp /local/folder/for/this//project/data_scripts/move_single.sh /full/path/to/your/folder/with/pdf/files
+    move_single.sh 
 
 The reason for such movement is simply convenience in the following annotation process. 
-These changes are cared for in the next [sort.sh](data_scripts%2Fsort.sh) 🔗 script as well.
+These changes are cared for in the next [sort.sh](data_scripts%2Fsort.sh) 🔗 and [sort.bat](data_scripts%2Fsort.bat) 🔗 scripts as well.
 
 ### PNG pages annotation
 
@@ -254,11 +291,16 @@ Prepare a CSV table with such columns:
 
 ### PNG pages sorting for training
 
-Cluster the annotated data into separate folders using the [sort.sh](data_scripts%2Fsort.sh) 🔗 script to copy data from the source
-folder to the training folder where each category has its own subdirectory:
+Cluster the annotated data into separate folders using the [sort.sh](data_scripts%2Fsort.sh) 🔗 or [sort.bat](data_scripts%2Fsort.bat) 🔗 
+script to copy data from the source folder to the training folder where each category has its own subdirectory:
 
-    cp /full/path/to/project/data_scripts/sort.sh .
-    bash sort.sh
+For Windows:
+
+    sort.bat
+
+For Unix:
+    
+    sort.sh
 
 > [!IMPORTANT]
 > Check the top of the script for the path to the CSV table, path to the directory containing document-specific
@@ -271,6 +313,18 @@ containing document-specific pages with a similar structure:
     ├── Label1
         ├── PdfFileAName-00N.png
         ├── PdfFileBName-0M.png
+        ...
+    ├── Label2
+    ├── Label3
+    ├── Label4
+    ...
+
+And on Windows:
+    
+    \full\path\to\your\folder\with\train\pages
+    ├── Label1
+        ├── PdfFileAName-1.png
+        ├── PdfFileBName-2.png
         ...
     ├── Label2
     ├── Label3
