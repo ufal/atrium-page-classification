@@ -197,6 +197,10 @@ There are useful scripts in the [data_scripts](data_scripts) 🔗 folder for the
 > [!NOTE]
 > The .sh scripts are adapted for **Unix** OS and .bat scripts are adapted for **Windows** OS
 
+On **Windows** you must also install the following software before converting PDF documents to PNG images:
+- [ImageMagick](https://imagemagick.org/script/download.php#windows) 🔗 - download and install latest version
+- [Ghostscript](https://www.ghostscript.com/releases/gsdnld.html) 🔗 - download and install latest version (32 or 64 bit) by AGPL
+
 ### PDF to PNG
 
 The source set of PDF documents must be converted to page-specific PNG images.
