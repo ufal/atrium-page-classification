@@ -35,30 +35,17 @@ Training set of the model: **8950** images
 
 Evaluation set (10% of the all, with the same proportions as above) [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 🔗:	**995** images 
 
-## How to install 🔧 and run ▶️
+## How to install 🔧
+
+> [!IMPORTANT]
+> Make sure you have **Python version 3.10+** installed on your machine 💻. 
+> Then create a separate virtual environment for this project 
 
 Clone this project to your local machine 🖥️ via:
 
     cd /local/folder/for/this/project
     git init
     git clone https://github.com/K4TEL/atrium-ufal.git
-
-Open [config.txt](config.txt) 🔗 and change folder path in the **\[INPUT\]** section, then 
-optionally change **top_N** and **batch** in the **\[SETUP\]** section.
-
-> [!NOTE]
->️ **Top-3** is enough to cover most of the images, setting **Top-5** will help with a small number 
-> of difficult to classify samples.
-
-> [!CAUTION]
-> Do not try to change **base_model** and other section contents unless you know what you are doing
-
-There is a preferable way of obtaining the trained model files through the HF 😊 hub, which is implemented
-using a specific flag **--hf** described below. 
-
-> [!IMPORTANT]
-> Make sure you have **Python version 3.10+** installed on your machine 💻. 
-> Then create a separate virtual environment for this project 
 
 Follow the **Linux** / **Windows**-specific instruction at the [venv docs](https://docs.python.org/3/library/venv.html) 👀🔗 if you don't know how to.
 After creating the venv folder, activate the environment via:
@@ -92,7 +79,17 @@ you can play with any commands provided below.
 directory next to this file, you must use the **--hf** flag to download the
 > model files from the [HF 😊 repo](https://huggingface.co/k4tel/vit-historical-page) 🔗
 
-### Common command examples 
+## How to run ▶️
+
+Open [config.txt](config.txt) 🔗 and change folder path in the **\[INPUT\]** section, then 
+optionally change **top_N** and **batch** in the **\[SETUP\]** section.
+
+> [!NOTE]
+>️ **Top-3** is enough to cover most of the images, setting **Top-5** will help with a small number 
+> of difficult to classify samples.
+
+> [!CAUTION]
+> Do not try to change **base_model** and other section contents unless you know what you are doing
 
 Run the program from its starting point [run.py](run.py) 🔗 with optional flags:
 
@@ -109,7 +106,7 @@ for exactly TOP-3 guesses
 
 to run single PNG file classification - the output will be in the console. 
 
-#### Directory processing 📁
+### Directory processing 📁
 
     python3 run.py -tn 3 -d '/full/path/to/directory' -m '/full/path/to/model/folder'
 
@@ -130,7 +127,7 @@ folders defined in **\[OUTPUT\]** section of [config.txt](config.txt)🔗 file.
 > To process all PNG files in the directory **AND its subdirectories** use the **--inner** flag
 > when processing the directory
 
-### Results 📊
+## Results 📊
 
 Evaluation set's accuracy (**Top-3**):  **99.6%** 
 
