@@ -65,7 +65,7 @@ Clone this project to your local machine 🖥️ via:
 
     cd /local/folder/for/this/project
     git init
-    git clone https://github.com/K4TEL/atrium-ufal.git
+    git clone https://github.com/ufal/atrium-page-classification.git
 
 Follow the **Linux** / **Windows**-specific instruction at the [venv docs][3] 👀🔗 if you don't know how to.
 After creating the venv folder, activate the environment via:
