@@ -5,7 +5,7 @@
 **Scope:** Processing of images, training and evaluation of ViT model,
 input file/directory processing, class 🏷️ (category) results of top
 N predictions output, predictions summarizing into a tabular format, 
-HF 😊 hub support for the model
+HF 😊 hub support for the model, data preparation scripts for PDF to PNG conversion
 
 ### Table of contents 📑
 
@@ -31,9 +31,9 @@ HF 😊 hub support for the model
 
 ## Model description 📇
 
-🔲 Fine-tuned model repository:  vit-historical-page [^1] 🔗
+🔲 Fine-tuned model repository: **ufal's vit-historical-page** [^1] 🔗
 
-🔳 Base model repository: google's vit-base-patch16-224 [^2] 🔗
+🔳 Base model repository: **google's vit-base-patch16-224** [^2] 🔗
 
 ### Data 📜
 
@@ -199,8 +199,6 @@ Evaluation set's accuracy (**Top-1**):  **97.3%** 🏆
 
 <summary>General result columns 👀</summary>
 
-**For general results: 🔹**
-
 - **FILE** - name of the file
 - **PAGE** - number of the page
 - **CLASS-N** - label of the category 🏷️, guess TOP-N 
@@ -215,8 +213,6 @@ and optionally
 <details>
 
 <summary>Raw result columns 👀</summary>
-
-**For raw results: 🔹**
 
 - **FILE** - name of the file
 - **PAGE** - number of the page
@@ -456,7 +452,7 @@ set a path to the data folder.
 - **Developed by** UFAL [^7] 👥
 - **Funded by** ATRIUM [^4]  💰
 - **Shared by** ATRIUM [^4] & UFAL [^7]
-- **Model type:** fine-tuned ViT [^2] with a 224x224 resolution size
+- **Model type:** fine-tuned ViT with a 224x224 resolution size [^2]
 
 **©️ 2022 UFAL & ATRIUM**
 
