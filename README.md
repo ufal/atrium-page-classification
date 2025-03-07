@@ -10,34 +10,35 @@ HF 😊 hub support for the model
 ### Table of contents 📑
 
   * [Model description 📇](#model-description-)
-    + [Data 🔶](#data-)
-      - [Categories 🏷️](#categories-)
+    + [Data 📜](#data-)
+    + [Categories 🏷️](#categories-)
   * [How to install 🔧](#how-to-install-)
   * [How to run ▶️](#how-to-run-)
+    + [Page processing 📄](#page-processing-)
     + [Directory processing 📁](#directory-processing-)
   * [Results 📊](#results-)
-      - [Result tables 🔷](#result-tables-)
-      - [Table columns 🔷](#table-columns-)
+      - [Result tables 📏](#result-tables-)
+      - [Table columns 📋](#table-columns-)
   * [For developers 🛠️](#for-developers-)
   * [Data preparation 📦](#data-preparation-)
-    + [PDF to PNG 🔷](#pdf-to-png-)
-    + [PNG pages annotation 🔷](#png-pages-annotation-)
-    + [PNG pages sorting for training 🔷](#png-pages-sorting-for-training-)
-  * [Contacts 🔶](#contacts-)
+    + [PDF to PNG 📚](#pdf-to-png-)
+    + [PNG pages annotation 🔎](#png-pages-annotation-)
+    + [PNG pages sorting for training 📬](#png-pages-sorting-for-training-)
+  * [Contacts 📧](#contacts-)
   * [Acknowledgements 🙏](#acknowledgements-)
 
 
 ## Model description 📇
 
-Fine-tuned model files can be found here:  [vit-historical-page][1] 🔗
+🔲 Fine-tuned model repository:  [vit-historical-page][^1] 🔗
 
-Base model repository: [google's vit-base-patch16-224][2] 🔗
+🔳 Base model repository: [google's vit-base-patch16-224][^2] 🔗
 
-### Data 🔶
+### Data 📜
 
 Training set of the model: **8950** images 
 
-#### Categories 🏷️
+### Categories 🏷️
 
 |      Label️ |  Ratio  | Description                                                                  |
 |------------:|:-------:|:-----------------------------------------------------------------------------|
@@ -55,9 +56,11 @@ Training set of the model: **8950** images
 
 Evaluation set (10% of the all, with the same proportions as above) [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎:	**995** images 
 
+----
+
 ## How to install 🔧
 
-> [!IMPORTANT]
+> [!WARNING]
 > Make sure you have **Python version 3.10+** installed on your machine 💻. 
 > Then create a separate virtual environment for this project 
 
@@ -67,7 +70,7 @@ Clone this project to your local machine 🖥️ via:
     git init
     git clone https://github.com/ufal/atrium-page-classification.git
 
-Follow the **Linux** / **Windows**-specific instruction at the [venv docs][3] 👀🔗 if you don't know how to.
+Follow the **Linux** / **Windows**-specific instruction at the [venv docs][^3] 👀🔗 if you don't know how to.
 After creating the venv folder, activate the environment via:
 
     source <your_venv_dir>/bin/activate
@@ -97,7 +100,9 @@ you can play with any commands provided below.
 > [!IMPORTANT]
 > Unless you already have the model files in the **'model/model_version'**
 directory next to this file, you must use the **--hf** flag to download the
-> model files from the [HF 😊 repo][1] 🔗
+> model files from the [HF 😊 repo][^1] 🔗
+
+----
 
 ## How to run ▶️
 
@@ -110,6 +115,8 @@ optionally change **top_N** and **batch** in the **\[SETUP\]** section.
 
 > [!CAUTION]
 > Do not try to change **base_model** and other section contents unless you know what you are doing
+
+### Page processing 📄
 
 Run the program from its starting point [run.py](run.py) 📎 with optional flags:
 
@@ -147,6 +154,8 @@ folders defined in **\[OUTPUT\]** section of [config.txt](config.txt) ⚙ file.
 > To process all PNG files in the directory **AND its subdirectories** use the **--inner** flag
 > when processing the directory
 
+----
+
 ## Results 📊
 
 Evaluation set's accuracy (**Top-3**):  **99.6%** 
@@ -157,7 +166,7 @@ Evaluation set's accuracy (**Top-1**):  **97.3%**
 
 ![TOP-1 confusion matrix](result%2Fplots%2F20250218-1523_conf_mat.png)
 
-#### Result tables 🔷
+#### Result tables 📏
 
 - Example of the manually ✍ **checked** results (small): [model_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 📎
 
@@ -171,7 +180,11 @@ Evaluation set's accuracy (**Top-1**):  **97.3%**
 
 - Example of the **unchecked with TRUE** values **RAW** results: [model_RAW.csv](result%2Ftables%2F20250220-1331_model_1119_3_RAW.csv) 📎
 
-#### Table columns 🔷
+#### Table columns 📋
+
+<details>
+
+<summary>General result columns 👀</summary>
 
 **For general results: 🔹**
 
@@ -184,6 +197,12 @@ and optionally
  
 - **TRUE** - actual label of the category 🏷️
 
+</details>
+
+<details>
+
+<summary>Raw result columns 👀</summary>
+
 **For raw results: 🔹**
 
 - **FILE** - name of the file
@@ -191,10 +210,14 @@ and optionally
 - **<CATEGORY_LABEL>** - separate columns for each of the defined classes 🏷️
 - **TRUE** - actual label of the category 🏷️
 
-The reason to use **--raw** flag is possible convenience of results review, 
-since the most ambiguous cases are expected to be at the bottom of the table sorted in
-descending order by all **<CATEGORY_LABEL>** columns, while the most obvious (for the model)
-cases are expected to be at the top.
+</details>
+
+> The reason to use **--raw** flag is possible convenience of results review, 
+> since the most ambiguous cases are expected to be at the bottom of the table sorted in
+> descending order by all **<CATEGORY_LABEL>** columns, while the most obvious (for the model)
+> cases are expected to be at the top.
+
+----
 
 ## For developers 🛠️
 
@@ -224,6 +247,8 @@ Code of the task-related algorithms can be found in the [utils.py](utils.py) �
 Code of the main function in the starting point [run.py](run.py) 📎 file can be edited for 
 flags and function argument extension.
 
+----
+
 ## Data preparation 📦
 
 There are useful multiplatform :accessibility: scripts in the [data_scripts](data_scripts) 📁 folder for the whole process of data preparation. 
@@ -232,10 +257,10 @@ There are useful multiplatform :accessibility: scripts in the [data_scripts](dat
 > The .sh scripts are adapted for **Unix** OS and .bat scripts are adapted for **Windows** OS
 
 On **Windows** you must also install the following software before converting PDF documents to PNG images:
-- [ImageMagick][5] 🔗 - download and install latest version
-- [Ghostscript][6] 🔗 - download and install latest version (32 or 64 bit) by AGPL
+- [ImageMagick][^5] 🔗 - download and install latest version
+- [Ghostscript][^6] 🔗 - download and install latest version (32 or 64 bit) by AGPL
 
-### PDF to PNG 🔷
+### PDF to PNG 📚
 
 The source set of PDF documents must be converted to page-specific PNG images.
 
@@ -266,6 +291,10 @@ For **Unix**:
 After the program is done, you will have a directory full of document-specific subdirectories
 containing page-specific images with a similar structure:
 
+<details>
+
+<summary>Unix folder structure 👀</summary>
+
     /full/path/to/your/folder/with/pdf/files
     ├── PdfFile1Name
         ├── PdfFile1Name-001.png
@@ -280,12 +309,16 @@ containing page-specific images with a similar structure:
     ├── PdfFile4Name
     ...
 
+</details>
+
 > [!NOTE]
 > The page numbers are padded with zeros (on the left) to match the length of the last page number in each PDF file,
 > this is done automatically by the pdftoppm command used on **Unix**. While ImageMagick's convert command used 
 > on **Windows** does not pad the page numbers.
 
-On **Windows** it will look like this:
+<details>
+
+<summary>Windows folder structure 👀</summary>
 
     \full\path\to\your\folder\with\pdf\files
     ├── PdfFile1Name
@@ -301,6 +334,7 @@ On **Windows** it will look like this:
     ├── PdfFile4Name
     ...
 
+</details>
 
 Optionally you can use the [move_single.sh](data_scripts%2Funix%2Fmove_single.sh) 📎 or [move_single.bat](data_scripts%2Fwindows%2Fmove_single.bat) 📎 script to move 
 all PNG files from directories with a single PNG file inside to the common directory of one-pagers.
@@ -320,7 +354,7 @@ For **Unix**:
 The reason for such movement is simply convenience in the following annotation process. 
 These changes are cared for in the next [sort.sh](data_scripts%2Funix%2Fsort.sh) 📎 and [sort.bat](data_scripts%2Fwindows%2Fsort.bat) 📎 scripts as well.
 
-### PNG pages annotation 🔷
+### PNG pages annotation 🔎
 
 Prepare a CSV table with such columns:
 
@@ -331,7 +365,7 @@ Prepare a CSV table with such columns:
 > [!TIP]
 > Prepare equal in size categories 🏷️ if possible, so that the model will not be biased towards the over-represented labels 🏷️
 
-### PNG pages sorting for training 🔷
+### PNG pages sorting for training 📬
 
 Cluster the annotated data into separate folders using the [sort.sh](data_scripts%2Funix%2Fsort.sh) 📎 or [sort.bat](data_scripts%2Fwindows%2Fsort.bat) 📎 
 script to copy data from the source folder to the training folder where each category 🏷️ has its own subdirectory:
@@ -353,6 +387,10 @@ For **Unix**:
 After the program is done, you will have a directory full of label-specific subdirectories 
 containing document-specific pages with a similar structure:
 
+<details>
+
+<summary>Unix folder structure 👀</summary>
+
     /full/path/to/your/folder/with/train/pages
     ├── Label1
         ├── PdfFileAName-00N.png
@@ -363,7 +401,11 @@ containing document-specific pages with a similar structure:
     ├── Label4
     ...
 
-Similarly, on **Windows**:
+</details>
+
+<details>
+
+<summary>Windows folder structure 👀</summary>
     
     \full\path\to\your\folder\with\train\pages
     ├── Label1
@@ -375,31 +417,34 @@ Similarly, on **Windows**:
     ├── Label4
     ...
 
+</details>
+
 Before running the training, make sure to check the [config.txt](config.txt) ⚙️ file for the **\[TRAIN\]** section variables, where you should
 set a path to the data folder. 
 
-Optionally, in the [config.txt](config.txt) ⚙️ file tweak the parameter of **max_categ**
-for maximum number of samples per category 🏷️, in case you have over-represented labels️ significantly dominating in size.
-Set **max_categ** higher than the number of samples in the largest category 🏷️ to use **all** data samples.
+> Optionally, in the [config.txt](config.txt) ⚙️ file tweak the parameter of **max_categ**
+> for maximum number of samples per category 🏷️, in case you have over-represented labels️ significantly dominating in size.
+> Set **max_categ** higher than the number of samples in the largest category 🏷️ to use **all** data samples.
 
-## Contacts 🔶
+----
 
-For support write to: 📧 lutsai.k@gmail.com 📧
+## Contacts 📧
+
+**For support write to:** lutsai.k@gmail.com
 
 ## Acknowledgements 🙏
 
-- **Developed by** [UFAL][7] 👥
-- **Funded by** [ATRIUM][4]  💰
-- **Shared by** [ATRIUM][4] & [UFAL][7]
-- **Model type:** fine-tuned [ViT][2] with a 224x224 resolution size
+- **Developed by** [UFAL][^7] 👥
+- **Funded by** [ATRIUM][^4]  💰
+- **Shared by** [ATRIUM][^4] & [UFAL][^7]
+- **Model type:** fine-tuned [ViT][^2] with a 224x224 resolution size
 
-©️ 2022 UFAL & ATRIUM
+**©️ 2022 UFAL & ATRIUM**
 
-
-[1]: https://huggingface.co/k4tel/vit-historical-page
-[2]: https://huggingface.co/google/vit-base-patch16-224
-[3]: https://docs.python.org/3/library/venv.html
-[4]: https://atrium-research.eu/
-[5]: https://imagemagick.org/script/download.php#windows
-[6]: https://www.ghostscript.com/releases/gsdnld.html
-[7]: https://ufal.mff.cuni.cz/home-page
+[^1]: https://huggingface.co/k4tel/vit-historical-page
+[^2]: https://huggingface.co/google/vit-base-patch16-224
+[^3]: https://docs.python.org/3/library/venv.html
+[^4]: https://atrium-research.eu/
+[^5]: https://imagemagick.org/script/download.php#windows
+[^6]: https://www.ghostscript.com/releases/gsdnld.html
+[^7]: https://ufal.mff.cuni.cz/home-page
