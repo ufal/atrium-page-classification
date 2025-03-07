@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "atrium-page-classification: Classification of historical page images using fine-tuned ViT"
+version: "1.0.0"
+date-released: "2025-03-07"
+authors:
+  - family-names: "Lutsai"
+    given-names: "Kateryna"
+  - family-names: "Stranak"
+    given-names: "Pavel"
+  - family-names: "Novak"
+    given-names: "David"
+  - family-names: "Krivankova"
+    given-names: "Dana"
+repository-code: "https://github.com/ufal/atrium-page-classification"
+license: "MIT"
