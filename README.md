@@ -9,22 +9,22 @@ HF 😊 hub support for the model
 
 ### Table of contents 📑
 
-  * [Model description 📇](#model-description---)
-    + [Data 🔶](#data---)
-      - [Categories 🏷️](#categories----)
-  * [How to install 🔧](#how-to-install---)
-  * [How to run ▶️](#how-to-run---)
-    + [Directory processing 📁](#directory-processing---)
-  * [Results 📊](#results---)
-      - [Result tables 🔷](#result-tables---)
-      - [Table columns 🔷](#table-columns---)
-  * [For developers 🛠️](#for-developers----)
-  * [Data preparation 📦](#data-preparation---)
-    + [PDF to PNG 🔷](#pdf-to-png---)
-    + [PNG pages annotation 🔷](#png-pages-annotation---)
-    + [PNG pages sorting for training 🔷](#png-pages-sorting-for-training---)
-  * [Contacts 🔶](#contacts---)
-  * [Acknowledgements 🙏](#acknowledgements---)
+  * [Model description 📇](#model-description-)
+    + [Data 🔶](#data-)
+      - [Categories 🏷️](#categories-)
+  * [How to install 🔧](#how-to-install-)
+  * [How to run ▶️](#how-to-run-)
+    + [Directory processing 📁](#directory-processing-)
+  * [Results 📊](#results-)
+      - [Result tables 🔷](#result-tables-)
+      - [Table columns 🔷](#table-columns-)
+  * [For developers 🛠️](#for-developers-)
+  * [Data preparation 📦](#data-preparation-)
+    + [PDF to PNG 🔷](#pdf-to-png-)
+    + [PNG pages annotation 🔷](#png-pages-annotation-)
+    + [PNG pages sorting for training 🔷](#png-pages-sorting-for-training-)
+  * [Contacts 🔶](#contacts-)
+  * [Acknowledgements 🙏](#acknowledgements-)
 
 
 ## Model description 📇
