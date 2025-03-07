@@ -27,6 +27,7 @@ HF 😊 hub support for the model
   * [Contacts 📧](#contacts-)
   * [Acknowledgements 🙏](#acknowledgements-)
 
+----
 
 ## Model description 📇
 
@@ -85,7 +86,7 @@ Can be done via:
 
     pip install -r requirements.txt
 
-To test that everything works okay and see the flag descriptions ❓ call for **--help**:
+To test that everything works okay and see the flag descriptions call for **--help** ❓:
 
     python3 run.py -h
 
@@ -158,15 +159,25 @@ folders defined in **\[OUTPUT\]** section of [config.txt](config.txt) ⚙ file.
 
 ## Results 📊
 
-Evaluation set's accuracy (**Top-3**):  **99.6%** 
+<details>
+
+<summary>Confusion matrix plots 📊</summary>
+
+Evaluation set's accuracy (**Top-3**):  **99.6%** 🏆
 
 ![TOP-3 confusion matrix](result%2Fplots%2F20250209-1526_conf_mat.png)
 
-Evaluation set's accuracy (**Top-1**):  **97.3%** 
+Evaluation set's accuracy (**Top-1**):  **97.3%** 🏆
 
 ![TOP-1 confusion matrix](result%2Fplots%2F20250218-1523_conf_mat.png)
 
+</details>
+
 #### Result tables 📏
+
+<details>
+
+<summary>Examples of the result tables 👀</summary>
 
 - Example of the manually ✍ **checked** results (small): [model_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 📎
 
@@ -179,6 +190,8 @@ Evaluation set's accuracy (**Top-1**):  **97.3%**
 - Example of the **unchecked with TRUE** values results: [model_TOP-3.csv](result%2Ftables%2F20250210-2034_model_1119_3_TOP-3.csv) 📎
 
 - Example of the **unchecked with TRUE** values **RAW** results: [model_RAW.csv](result%2Ftables%2F20250220-1331_model_1119_3_RAW.csv) 📎
+
+</details>
 
 #### Table columns 📋
 
@@ -221,11 +234,24 @@ and optionally
 
 ## For developers 🛠️
 
+<details>
+
+<summary>File details 👀</summary>
+
 Most of the changeable variables are in the [config.txt](config.txt) ⚙ file, specifically,
 in the **\[TRAIN\]**, **\[HF\]**, and **\[SETUP\]** sections.
 
 For more detailed training process adjustments refer to the related functions in [classifier.py](classifier.py) 📎 
 file, where you will find some predefined values not used in the [run.py](run.py) 📎 file.
+
+| File Name        | Description                                                                                                     |
+|------------------|-----------------------------------------------------------------------------------------------------------------|
+| `classifier.py`  | Contains model-specific classes and related functions. Also includes predefined values for training adjustments |
+| `utils.py`       | Contains task-related algorithms                                                                                |
+| `run.py`         | Starting point of the program with its main function. Can be edited for flags and function argument extensions  |
+| `config.txt`     | Contains all the changeable variables for the program. Should be edited                                         |
+
+</details>
 
 To train the model run: 
 
@@ -239,13 +265,6 @@ To evaluate the model and create a confusion matrix plot 📊 run:
 > In both cases, you must make sure that training data directory is set right in the 
 > [config.txt](config.txt) ⚙ and it contains category 🏷️ subdirectories with images inside. 
 > Names of the category 🏷️ subdirectories become actual label names, and replaces the default categories 🏷️ list.
-
-Code of the model-specific classes can be found in the [classifier.py](classifier.py) 📎 file.
-
-Code of the task-related algorithms can be found in the [utils.py](utils.py) 📎 file.
-
-Code of the main function in the starting point [run.py](run.py) 📎 file can be edited for 
-flags and function argument extension.
 
 ----
 
@@ -378,7 +397,7 @@ For **Unix**:
     
     sort.sh
 
-> [!IMPORTANT]
+> [!WARNING]
 > It does not matter from which directory you launch the sorting script, but you must check the top of the script for 
 > the path to the CSV table with annotations, path to the directory containing document-specific
 > subdirectories of page-specific PNG pages, and path to the directory where you want to store the training data of
@@ -430,7 +449,7 @@ set a path to the data folder.
 
 ## Contacts 📧
 
-**For support write to:** lutsai.k@gmail.com
+**For support write to:** lutsai.k@gmail.com responsible for this repository [^8]
 
 ## Acknowledgements 🙏
 
@@ -448,3 +467,4 @@ set a path to the data folder.
 [^5]: https://imagemagick.org/script/download.php#windows
 [^6]: https://www.ghostscript.com/releases/gsdnld.html
 [^7]: https://ufal.mff.cuni.cz/home-page
+[^8]: https://github.com/ufal/atrium-page-classification
