@@ -6,11 +6,15 @@ date-released: "2025-03-07"
 authors:
   - family-names: "Lutsai"
     given-names: "Kateryna"
+    orcid: https://orcid.org/0009-0002-4773-2797
   - family-names: "Stranak"
     given-names: "Pavel"
+    orcid: https://orcid.org/0000-0002-6895-8536
   - family-names: "Novak"
     given-names: "David"
+    orcid: https://orcid.org/0009-0005-8722-0245
   - family-names: "Krivankova"
     given-names: "Dana"
+    orcid: https://orcid.org/0000-0001-5718-9447
 repository-code: "https://github.com/ufal/atrium-page-classification"
 license: "MIT"
