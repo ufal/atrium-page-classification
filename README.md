@@ -7,6 +7,26 @@ input file/directory processing, class 🏷️ (category) results of top
 N predictions output, predictions summarizing into a tabular format, 
 HF 😊 hub support for the model
 
+### Table of contents 📑
+
+  * [Model description 📇](#model-description---)
+    + [Data 🔶](#data---)
+      - [Categories 🏷️](#categories----)
+  * [How to install 🔧](#how-to-install---)
+  * [How to run ▶️](#how-to-run---)
+    + [Directory processing 📁](#directory-processing---)
+  * [Results 📊](#results---)
+      - [Result tables 🔷](#result-tables---)
+      - [Table columns 🔷](#table-columns---)
+  * [For developers 🛠️](#for-developers----)
+  * [Data preparation 📦](#data-preparation---)
+    + [PDF to PNG 🔷](#pdf-to-png---)
+    + [PNG pages annotation 🔷](#png-pages-annotation---)
+    + [PNG pages sorting for training 🔷](#png-pages-sorting-for-training---)
+  * [Contacts 🔶](#contacts---)
+  * [Acknowledgements 🙏](#acknowledgements---)
+
+
 ## Model description 📇
 
 Fine-tuned model files can be found here:  [vit-historical-page](https://huggingface.co/k4tel/vit-historical-page) 🔗
@@ -359,14 +379,14 @@ Before running the training, make sure to check the [config.txt](config.txt) ⚙
 set a path to the data folder. 
 
 Optionally, in the [config.txt](config.txt) ⚙️ file tweak the parameter of **max_categ**
-for maximum number of samples per category 🏷️, in case you have over-represented labels 🏷️ significantly dominating in size.
+for maximum number of samples per category 🏷️, in case you have over-represented labels️ significantly dominating in size.
 Set **max_categ** higher than the number of samples in the largest category 🏷️ to use **all** data samples.
 
-### Contacts 🔶
+## Contacts 🔶
 
 For support write to: 📧 lutsai.k@gmail.com 📧
 
-#### Acknowledgements 🙏
+## Acknowledgements 🙏
 
 - **Developed by** [UFAL](https://ufal.mff.cuni.cz/home-page) 👥
 - **Funded by** [ATRIUM](https://atrium-research.eu/)  💰
