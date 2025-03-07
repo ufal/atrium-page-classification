@@ -29,9 +29,9 @@ HF 😊 hub support for the model
 
 ## Model description 📇
 
-Fine-tuned model files can be found here:  [vit-historical-page](https://huggingface.co/k4tel/vit-historical-page) 🔗
+Fine-tuned model files can be found here:  [vit-historical-page][1] 🔗
 
-Base model repository: [google's vit-base-patch16-224](https://huggingface.co/google/vit-base-patch16-224) 🔗
+Base model repository: [google's vit-base-patch16-224][2] 🔗
 
 ### Data 🔶
 
@@ -67,7 +67,7 @@ Clone this project to your local machine 🖥️ via:
     git init
     git clone https://github.com/K4TEL/atrium-ufal.git
 
-Follow the **Linux** / **Windows**-specific instruction at the [venv docs](https://docs.python.org/3/library/venv.html) 👀🔗 if you don't know how to.
+Follow the **Linux** / **Windows**-specific instruction at the [venv docs][3] 👀🔗 if you don't know how to.
 After creating the venv folder, activate the environment via:
 
     source <your_venv_dir>/bin/activate
@@ -97,7 +97,7 @@ you can play with any commands provided below.
 > [!IMPORTANT]
 > Unless you already have the model files in the **'model/model_version'**
 directory next to this file, you must use the **--hf** flag to download the
-> model files from the [HF 😊 repo](https://huggingface.co/k4tel/vit-historical-page) 🔗
+> model files from the [HF 😊 repo][1] 🔗
 
 ## How to run ▶️
 
@@ -232,8 +232,8 @@ There are useful multiplatform :accessibility: scripts in the [data_scripts](dat
 > The .sh scripts are adapted for **Unix** OS and .bat scripts are adapted for **Windows** OS
 
 On **Windows** you must also install the following software before converting PDF documents to PNG images:
-- [ImageMagick](https://imagemagick.org/script/download.php#windows) 🔗 - download and install latest version
-- [Ghostscript](https://www.ghostscript.com/releases/gsdnld.html) 🔗 - download and install latest version (32 or 64 bit) by AGPL
+- [ImageMagick][5] 🔗 - download and install latest version
+- [Ghostscript][6] 🔗 - download and install latest version (32 or 64 bit) by AGPL
 
 ### PDF to PNG 🔷
 
@@ -250,7 +250,7 @@ For **Unix**:
     cp /local/folder/for/this/project/data_scripts/pdf2png.sh /full/path/to/your/folder/with/pdf/files
 
 
-Now check the content and comments in [pdf2png.sh](data_scripts%2Fpdf2png.sh) 📎 or [pdf2png.bat](data_scripts%2Fpdf2png.bat) 📎 
+Now check the content and comments in [pdf2png.sh](data_scripts%2Funix%2Fpdf2png.sh) 📎 or [pdf2png.bat](data_scripts%2Fwindows%2Fpdf2png.bat) 📎 
 script, and run it.
 
 For **Windows**:
@@ -302,7 +302,7 @@ On **Windows** it will look like this:
     ...
 
 
-Optionally you can use the [move_single.sh](data_scripts%2Fmove_single.sh) 📎 or [move_single.bat](data_scripts%2Fmove_single.bat) 📎 script to move 
+Optionally you can use the [move_single.sh](data_scripts%2Funix%2Fmove_single.sh) 📎 or [move_single.bat](data_scripts%2Fwindows%2Fmove_single.bat) 📎 script to move 
 all PNG files from directories with a single PNG file inside to the common directory of one-pagers.
 
 For **Windows**:
@@ -318,7 +318,7 @@ For **Unix**:
     move_single.sh 
 
 The reason for such movement is simply convenience in the following annotation process. 
-These changes are cared for in the next [sort.sh](data_scripts%2Fsort.sh) 📎 and [sort.bat](data_scripts%2Fsort.bat) 📎 scripts as well.
+These changes are cared for in the next [sort.sh](data_scripts%2Funix%2Fsort.sh) 📎 and [sort.bat](data_scripts%2Fwindows%2Fsort.bat) 📎 scripts as well.
 
 ### PNG pages annotation 🔷
 
@@ -333,7 +333,7 @@ Prepare a CSV table with such columns:
 
 ### PNG pages sorting for training 🔷
 
-Cluster the annotated data into separate folders using the [sort.sh](data_scripts%2Fsort.sh) 📎 or [sort.bat](data_scripts%2Fsort.bat) 📎 
+Cluster the annotated data into separate folders using the [sort.sh](data_scripts%2Funix%2Fsort.sh) 📎 or [sort.bat](data_scripts%2Fwindows%2Fsort.bat) 📎 
 script to copy data from the source folder to the training folder where each category 🏷️ has its own subdirectory:
 
 For **Windows**:
@@ -388,9 +388,18 @@ For support write to: 📧 lutsai.k@gmail.com 📧
 
 ## Acknowledgements 🙏
 
-- **Developed by** [UFAL](https://ufal.mff.cuni.cz/home-page) 👥
-- **Funded by** [ATRIUM](https://atrium-research.eu/)  💰
-- **Shared by** [ATRIUM](https://atrium-research.eu/) & [UFAL](https://ufal.mff.cuni.cz/home-page)
-- **Model type:** fine-tuned [ViT]((https://huggingface.co/google/vit-base-patch16-224)) with a 224x224 resolution size
+- **Developed by** [UFAL][7] 👥
+- **Funded by** [ATRIUM][4]  💰
+- **Shared by** [ATRIUM][4] & [UFAL][7]
+- **Model type:** fine-tuned [ViT][2] with a 224x224 resolution size
 
 ©️ 2022 UFAL & ATRIUM
+
+
+[1]: https://huggingface.co/k4tel/vit-historical-page
+[2]: https://huggingface.co/google/vit-base-patch16-224
+[3]: https://docs.python.org/3/library/venv.html
+[4]: https://atrium-research.eu/
+[5]: https://imagemagick.org/script/download.php#windows
+[6]: https://www.ghostscript.com/releases/gsdnld.html
+[7]: https://ufal.mff.cuni.cz/home-page
