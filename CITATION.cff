@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
-title: "atrium-page-classification: Classification of historical page images using fine-tuned ViT"
+title: "ATRIUM's page classifier: Classification of historical page images using fine-tuned ViT"
 version: "1.0.0"
 date-released: "2025-03-07"
 authors:
