@@ -30,9 +30,9 @@ HF 😊 hub support for the model
 
 ## Model description 📇
 
-🔲 Fine-tuned model repository:  [vit-historical-page][^1] 🔗
+🔲 Fine-tuned model repository:  vit-historical-page [^1] 🔗
 
-🔳 Base model repository: [google's vit-base-patch16-224][^2] 🔗
+🔳 Base model repository: google's vit-base-patch16-224 [^2] 🔗
 
 ### Data 📜
 
@@ -70,7 +70,7 @@ Clone this project to your local machine 🖥️ via:
     git init
     git clone https://github.com/ufal/atrium-page-classification.git
 
-Follow the **Linux** / **Windows**-specific instruction at the [venv docs][^3] 👀🔗 if you don't know how to.
+Follow the **Linux** / **Windows**-specific instruction at the venv docs [^3] 👀🔗 if you don't know how to.
 After creating the venv folder, activate the environment via:
 
     source <your_venv_dir>/bin/activate
@@ -100,7 +100,7 @@ you can play with any commands provided below.
 > [!IMPORTANT]
 > Unless you already have the model files in the **'model/model_version'**
 directory next to this file, you must use the **--hf** flag to download the
-> model files from the [HF 😊 repo][^1] 🔗
+> model files from the HF 😊 repo [^1] 🔗
 
 ----
 
@@ -257,8 +257,8 @@ There are useful multiplatform :accessibility: scripts in the [data_scripts](dat
 > The .sh scripts are adapted for **Unix** OS and .bat scripts are adapted for **Windows** OS
 
 On **Windows** you must also install the following software before converting PDF documents to PNG images:
-- [ImageMagick][^5] 🔗 - download and install latest version
-- [Ghostscript][^6] 🔗 - download and install latest version (32 or 64 bit) by AGPL
+- ImageMagick [^5] 🔗 - download and install latest version
+- Ghostscript [^6] 🔗 - download and install latest version (32 or 64 bit) by AGPL
 
 ### PDF to PNG 📚
 
@@ -434,10 +434,10 @@ set a path to the data folder.
 
 ## Acknowledgements 🙏
 
-- **Developed by** [UFAL][^7] 👥
-- **Funded by** [ATRIUM][^4]  💰
-- **Shared by** [ATRIUM][^4] & [UFAL][^7]
-- **Model type:** fine-tuned [ViT][^2] with a 224x224 resolution size
+- **Developed by** UFAL [^7] 👥
+- **Funded by** ATRIUM [^4]  💰
+- **Shared by** ATRIUM [^4] & UFAL [^7]
+- **Model type:** fine-tuned ViT [^2] with a 224x224 resolution size
 
 **©️ 2022 UFAL & ATRIUM**
 
