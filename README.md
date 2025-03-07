@@ -441,7 +441,7 @@ set a path to the data folder.
 
 **©️ 2022 UFAL & ATRIUM**
 
-[^1]: https://huggingface.co/k4tel/vit-historical-page
+[^1]: https://huggingface.co/ufal/vit-historical-page
 [^2]: https://huggingface.co/google/vit-base-patch16-224
 [^3]: https://docs.python.org/3/library/venv.html
 [^4]: https://atrium-research.eu/
