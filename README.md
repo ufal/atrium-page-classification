@@ -1,4 +1,4 @@
-# Image classification using fine-tuned ViT - for historical :bowtie: documents sorting
+# Image classification using fine-tuned ViT - for historical documents sorting
 
 ### Goal: solve a task of archive page images sorting (for their further content-based processing)
 
@@ -35,6 +35,11 @@ HF 😊 hub support for the model, data preparation scripts for PDF to PNG conve
 
 🔳 Base model repository: **google's vit-base-patch16-224** [^2] 🔗
 
+The model was trained on the manually annotated dataset of historical documents, in particular,  images of pages 
+from the archival documents with paper sources that were scanned into digital form. The images contain various
+combinations of texts, tables, drawings, and photos - categories 🏷️ tabulated below were formed based on those 
+archival documents. 
+
 ### Data 📜
 
 Training set of the model: **8950** images 
@@ -57,9 +62,21 @@ Training set of the model: **8950** images
 
 Evaluation set (10% of the all, with the same proportions as above) [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎:	**995** images 
 
+The categories were chosen to sort the pages by the following criterion: 
+
+- presence of graphical elements (drawings 📈 OR photos 🌄)
+- type of text 📄 (handwritten ✏️️ OR printed OR typed)
+- presence of tabular layout / forms 📏
+
+The reasons for such distinction are different processing pipelines for different types of pages, that would be
+applied after the classification.
+
 ----
 
 ## How to install 🔧
+
+The easiest way to obtain the model would be to use the HF 😊 hub repository [^1] 🔗 that can be easily accessed 
+vie this project. Step-by-step instructions on this program installation are provided below.
 
 > [!WARNING]
 > Make sure you have **Python version 3.10+** installed on your machine 💻. 
@@ -100,14 +117,58 @@ you can play with any commands provided below.
 
 > [!IMPORTANT]
 > Unless you already have the model files in the **'model/model_version'**
-directory next to this file, you must use the **--hf** flag to download the
+> directory next to this file, you must use the **--hf** flag to download the
 > model files from the HF 😊 repo [^1] 🔗
+
+After the model is downloaded, you should see a similar file structure: 
+
+<details>
+
+<summary>Project file structure 👀</summary>
+    
+    /local/folder/for/this/project
+    ├── model
+        ├── model_version
+            ├── config.json
+            ├── model.safetensors
+            ├── preprocessor_config.json
+    ├── data_scripts
+        ├── windows
+            ├── move_single.bat
+            ├── pdf2png.bat
+            ├── sort.bat
+        ├── unix
+            ├── move_single.sh
+            ├── pdf2png.sh
+            ├── sort.sh
+    ├── result
+        ├── plots
+            ├── date-time_conf_mat.png
+            ...
+        ├── tables
+            ├── date-time_TOP-N.csv
+            ├── date-time_TOP-N_EVAL.csv
+            ├── date-time_TOP-N_EVAL_RAW.csv
+            ...
+    ├── run.py
+    ├── classifier.py
+    ├── utils.py
+    ├── requirements.
+    ├── config.txt
+    ...
+
+</details>
 
 ----
 
 ## How to run ▶️
 
-Open [config.txt](config.txt) ⚙ and change folder path in the **\[INPUT\]** section, then 
+There are two main ways to run the program:
+
+- **Single PNG file classification** 📄
+- **Directory with PNG files classification** 📁
+
+To begin with, open [config.txt](config.txt) ⚙ and change folder path in the **\[INPUT\]** section, then 
 optionally change **top_N** and **batch** in the **\[SETUP\]** section.
 
 > [!NOTE]
@@ -118,6 +179,10 @@ optionally change **top_N** and **batch** in the **\[SETUP\]** section.
 > Do not try to change **base_model** and other section contents unless you know what you are doing
 
 ### Page processing 📄
+
+The following prediction should be run using **-f** or **--file** flag with the path argument. Optionally, you can use
+**-tn** or **--topn** flag with the number of guesses you want to get, and also **-m** or **--model** flag with the path to the model 
+folder argument. 
 
 Run the program from its starting point [run.py](run.py) 📎 with optional flags:
 
@@ -135,6 +200,12 @@ for exactly TOP-3 guesses
 to run single PNG file classification - the output will be in the console. 
 
 ### Directory processing 📁
+
+The following prediction type does nor require explicit directory path setting with the **-d** or **--director**y, 
+since its default value is set in the [config.txt](config.txt) ⚙ file and awaken when the **--dir** flag is used. The same flags for the number of 
+guesses, and the model folder path as for the single page processing can be used. In addition, 2 
+directory-specific flags  **--inner** and -**-raw** are available. 
+
 
     python3 run.py -tn 3 -d '/full/path/to/directory' -m '/full/path/to/model/folder'
 
@@ -158,6 +229,8 @@ folders defined in **\[OUTPUT\]** section of [config.txt](config.txt) ⚙ file.
 ----
 
 ## Results 📊
+
+There are plots of confusion matrices for the evaluation dataset and tables with results in the [results](result) 📁 folder. 
 
 <details>
 
@@ -230,6 +303,9 @@ and optionally
 
 ## For developers 🛠️
 
+Use this project code as a base for your own image classification tasks. Instructions on the key phases of 
+the process are provided below.
+
 <details>
 
 <summary>File details 👀</summary>
@@ -266,7 +342,7 @@ To evaluate the model and create a confusion matrix plot 📊 run:
 
 ## Data preparation 📦
 
-There are useful multiplatform :accessibility: scripts in the [data_scripts](data_scripts) 📁 folder for the whole process of data preparation. 
+There are useful multiplatform scripts in the [data_scripts](data_scripts) 📁 folder for the whole process of data preparation. 
 
 > [!NOTE]
 > The .sh scripts are adapted for **Unix** OS and .bat scripts are adapted for **Windows** OS
