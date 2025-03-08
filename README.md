@@ -82,6 +82,10 @@ vie this project. Step-by-step instructions on this program installation are pro
 > Make sure you have **Python version 3.10+** installed on your machine 💻. 
 > Then create a separate virtual environment for this project 
 
+<details>
+
+<summary>How to 👀</summary>
+
 Clone this project to your local machine 🖥️ via:
 
     cd /local/folder/for/this/project
@@ -94,6 +98,8 @@ After creating the venv folder, activate the environment via:
     source <your_venv_dir>/bin/activate
 
 and then inside your virtual environment, you should install python libraries (takes time ⌛) 
+
+</details>
 
 > [!NOTE]
 > Up to **1 GB of space for model** files and checkpoints is needed, and up to **7 GB 
@@ -184,6 +190,10 @@ The following prediction should be run using **-f** or **--file** flag with the 
 **-tn** or **--topn** flag with the number of guesses you want to get, and also **-m** or **--model** flag with the path to the model 
 folder argument. 
 
+<details>
+
+<summary>How to 👀</summary>
+
 Run the program from its starting point [run.py](run.py) 📎 with optional flags:
 
     python3 run.py -tn 3 -f '/full/path/to/file.png' -m '/full/path/to/model/folder'
@@ -199,6 +209,8 @@ for exactly TOP-3 guesses
 
 to run single PNG file classification - the output will be in the console. 
 
+</details>
+
 ### Directory processing 📁
 
 The following prediction type does nor require explicit directory path setting with the **-d** or **--director**y, 
@@ -206,6 +218,9 @@ since its default value is set in the [config.txt](config.txt) ⚙ file and awak
 guesses, and the model folder path as for the single page processing can be used. In addition, 2 
 directory-specific flags  **--inner** and -**-raw** are available. 
 
+<details>
+
+<summary>How to 👀</summary>
 
     python3 run.py -tn 3 -d '/full/path/to/directory' -m '/full/path/to/model/folder'
 
@@ -214,6 +229,8 @@ for exactly TOP-3 guesses from all images found in the given directory.
 **OR** if you are really sure about default variables set in the [config.txt](config.txt) ⚙:
 
     python3 run.py --dir 
+
+</details>
 
 The classification results of PNG pages collected from the directory will be saved 💾 to related [results](result) 📁
 folders defined in **\[OUTPUT\]** section of [config.txt](config.txt) ⚙ file.
@@ -357,6 +374,10 @@ The source set of PDF documents must be converted to page-specific PNG images.
 
 Firstly, copy the PDF-to-PNG converter script to the directory with PDF documents.
 
+<details>
+
+<summary>How to 👀</summary>
+
 For **Windows**:
 
     move \local\folder\for\this\project\data_scripts\pdf2png.bat \full\path\to\your\folder\with\pdf\files
@@ -365,9 +386,14 @@ For **Unix**:
 
     cp /local/folder/for/this/project/data_scripts/pdf2png.sh /full/path/to/your/folder/with/pdf/files
 
+</details>
 
 Now check the content and comments in [pdf2png.sh](data_scripts%2Funix%2Fpdf2png.sh) 📎 or [pdf2png.bat](data_scripts%2Fwindows%2Fpdf2png.bat) 📎 
 script, and run it.
+
+<details>
+
+<summary>How to 👀</summary>
 
 For **Windows**:
 
@@ -378,6 +404,8 @@ For **Unix**:
 
     cd /full/path/to/your/folder/with/pdf/files
     pdf2png.sh
+
+</details>
 
 After the program is done, you will have a directory full of document-specific subdirectories
 containing page-specific images with a similar structure:
@@ -430,6 +458,10 @@ containing page-specific images with a similar structure:
 Optionally you can use the [move_single.sh](data_scripts%2Funix%2Fmove_single.sh) 📎 or [move_single.bat](data_scripts%2Fwindows%2Fmove_single.bat) 📎 script to move 
 all PNG files from directories with a single PNG file inside to the common directory of one-pagers.
 
+<details>
+
+<summary>How to 👀</summary>
+
 For **Windows**:
 
     move \local\folder\for\this\project\data_scripts\move_single.bat \full\path\to\your\folder\with\pdf\files
@@ -441,6 +473,8 @@ For **Unix**:
     cp /local/folder/for/this//project/data_scripts/move_single.sh /full/path/to/your/folder/with/pdf/files
     cd /full/path/to/your/folder/with/pdf/files 
     move_single.sh 
+
+</details>
 
 The reason for such movement is simply convenience in the following annotation process. 
 These changes are cared for in the next [sort.sh](data_scripts%2Funix%2Fsort.sh) 📎 and [sort.bat](data_scripts%2Fwindows%2Fsort.bat) 📎 scripts as well.
@@ -459,7 +493,11 @@ Prepare a CSV table with such columns:
 ### PNG pages sorting for training 📬
 
 Cluster the annotated data into separate folders using the [sort.sh](data_scripts%2Funix%2Fsort.sh) 📎 or [sort.bat](data_scripts%2Fwindows%2Fsort.bat) 📎 
-script to copy data from the source folder to the training folder where each category 🏷️ has its own subdirectory:
+script to copy data from the source folder to the training folder where each category 🏷️ has its own subdirectory.
+
+<details>
+
+<summary>How to 👀</summary>
 
 For **Windows**:
 
@@ -468,6 +506,8 @@ For **Windows**:
 For **Unix**:
     
     sort.sh
+
+</details>
 
 > [!WARNING]
 > It does not matter from which directory you launch the sorting script, but you must check the top of the script for 
