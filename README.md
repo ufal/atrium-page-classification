@@ -130,7 +130,7 @@ After the model is downloaded, you should see a similar file structure:
 
 <details>
 
-<summary>Project files tree 🌳 structure 👀</summary>
+<summary>Project tree 🌳 files structure 👀</summary>
     
     /local/folder/for/this/project
     ├── model
@@ -332,22 +332,22 @@ the process are provided below.
 
 <details>
 
-<summary>Project tree 🌳 file structure 👀</summary>
+<summary>Project files description 👀</summary>
+
+| File Name        | Description                                                                                                     |
+|------------------|-----------------------------------------------------------------------------------------------------------------|
+| `classifier.py`  | Model-specific classes and related functions including predefined values for training arguments                 |
+| `utils.py`       | Task-related algorithms                                                                                         |
+| `run.py`         | Starting point of the program with its main function - can be edited for flags and function argument extensions |
+| `config.txt`     | Changeable variables for the program - should be edited                                                         |
+
+</details>
 
 Most of the changeable variables are in the [config.txt](config.txt) ⚙ file, specifically,
 in the **\[TRAIN\]**, **\[HF\]**, and **\[SETUP\]** sections.
 
 For more detailed training process adjustments refer to the related functions in [classifier.py](classifier.py) 📎 
 file, where you will find some predefined values not used in the [run.py](run.py) 📎 file.
-
-| File Name        | Description                                                                                                     |
-|------------------|-----------------------------------------------------------------------------------------------------------------|
-| `classifier.py`  | Contains model-specific classes and related functions. Also includes predefined values for training adjustments |
-| `utils.py`       | Contains task-related algorithms                                                                                |
-| `run.py`         | Starting point of the program with its main function. Can be edited for flags and function argument extensions  |
-| `config.txt`     | Contains all the changeable variables for the program. Should be edited                                         |
-
-</details>
 
 To train the model run: 
 
@@ -362,11 +362,11 @@ To evaluate the model and create a confusion matrix plot 📊 run:
 > [config.txt](config.txt) ⚙ and it contains category 🏷️ subdirectories with images inside. 
 > Names of the category 🏷️ subdirectories become actual label names, and replaces the default categories 🏷️ list.
 
+During training image transformations were applied sequentially with a 50% chance.
+
 <details>
 
-<summary>Images training preprocessing details 👀</summary>
-
-During training the following transformations were applied sequentially with a 50% chance:
+<summary>Images preprocessing details 👀</summary>
 
 * transforms.ColorJitter(**brightness** 0.5)
 * transforms.ColorJitter(**contrast** 0.5)
@@ -375,11 +375,11 @@ During training the following transformations were applied sequentially with a 5
 * transforms.Lambda(lambda img: ImageEnhance.**Sharpness**(img).enhance(random.uniform(0.5, 1.5)))
 * transforms.Lambda(lambda img: img.filter(ImageFilter.**GaussianBlur**(radius=random.uniform(0, 2))))
 
+</details>
+
 No rotation, reshaping, or flipping was applied to the images, manly colors manipulations were used. The 
 reason behind this are pages containing specific form types, general text orientation on the pages, and the default
 reshape of the model input to the square 224x224 resolution images. 
-
-</details>
 
 <details>
 
@@ -398,8 +398,7 @@ reshape of the model input to the square 224x224 resolution images.
 
 </details>
 
-Above are the default hyperparameters used in the training process and default image transformation applied 
-to the training data. You can change them in the [classifier.py](classifier.py) 📎 file, where the model is
+Above are the default hyperparameters used in the training process that can be changed in the [classifier.py](classifier.py) 📎 file, where the model is
 defined and trained.
 
 ----
