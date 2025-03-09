@@ -13,7 +13,7 @@ from transformers import AutoImageProcessor, AutoModelForImageClassification, Tr
 from huggingface_hub import whoami
 
 
-def custom_collate(batch):
+def custom_collate(batch: list) -> (torch.Tensor, torch.Tensor):
     """
     Custom collate function to filter out None entries from the batch.
     """
@@ -59,7 +59,7 @@ class ImageClassifier:
             transforms.Normalize(mean=self.processor.image_mean, std=self.processor.image_std)
         ])
 
-    def process_images(self, image_paths: list, image_labels: list, batch_size: int, train: bool = True):
+    def process_images(self, image_paths: list, image_labels: list, batch_size: int, train: bool = True) -> DataLoader:
         """
         Process a list of image file paths into batches.
         """
@@ -68,7 +68,7 @@ class ImageClassifier:
         print(f"Dataloader of {'train' if train else 'eval'} dataset is ready:\t{len(image_paths)} images split into {len(dataloader)} batches of size {batch_size}")
         return dataloader
 
-    def preprocess_image(self, image_path: str, train: bool = True):
+    def preprocess_image(self, image_path: str, train: bool = True) -> torch.Tensor:
         """
         Preprocess a single image for training or evaluation.
         """
@@ -92,7 +92,7 @@ class ImageClassifier:
             per_device_eval_batch_size=eval_dataloader.batch_size,
             num_train_epochs=num_epochs,
             warmup_ratio=0.1,
-            logging_steps=10,
+            logging_steps=logging_steps,
             load_best_model_at_end=True,
             metric_for_best_model="accuracy",
             push_to_hub=False,
@@ -111,7 +111,7 @@ class ImageClassifier:
 
         self.save_model(f"model/model_{len(train_dataloader)}_{num_epochs}")
 
-    def infer(self, image_path: str):
+    def infer(self, image_path: str) -> int:
         """
         Perform inference on a single image.
         """
@@ -123,7 +123,7 @@ class ImageClassifier:
             predicted_class_idx = logits.argmax(-1).item()
             return predicted_class_idx
 
-    def top_n_predictions(self, image_path: str, top_n: int = 1):
+    def top_n_predictions(self, image_path: str, top_n: int = 1) -> list:
         """
         Perform inference and return top-N predictions with normalized probabilities.
         """
@@ -138,7 +138,7 @@ class ImageClassifier:
         # print(top_n_indices, top_n_probs)
         return list(zip(top_n_indices.squeeze().tolist(), top_n_probs.squeeze().tolist()))
 
-    def create_dataloader(self, image_paths: list, batch_size: int):
+    def create_dataloader(self, image_paths: list, batch_size: int) -> DataLoader:
         """
         Turn an input list of image paths into a DataLoader without labels.
         """
@@ -147,7 +147,7 @@ class ImageClassifier:
         print(f"Dataloader of directory dataset is ready:\t{len(image_paths)} images split into {len(dataloader)} batches of size {batch_size}")
         return dataloader
 
-    def infer_dataloader(self, dataloader, top_n: int, raw: bool = False):
+    def infer_dataloader(self, dataloader, top_n: int, raw: bool = False) -> (list, list):
         """
         Perform inference on a DataLoader, optionally with top-N predictions.
         """
@@ -158,7 +158,6 @@ class ImageClassifier:
         with torch.no_grad():
             for batch in dataloader:
                 inputs = batch['pixel_values']
-                # print(inputs)
                 outputs = self.model(pixel_values=inputs.to(self.device))
                 logits = outputs.logits
 
@@ -241,14 +240,11 @@ class ImageClassifier:
         processor = AutoImageProcessor.from_pretrained(repo_id)
 
         self.model, self.processor = model, processor
-
         print(f"Model and processor loaded from the Hugging Face Hub: {repo_id}")
-
-        # return model, processor
 
 
     @staticmethod
-    def compute_metrics(eval_pred):
+    def compute_metrics(eval_pred: list) -> dict:
         """
         Compute accuracy metrics for evaluation.
         """
@@ -272,7 +268,7 @@ class ImageDataset(Dataset):
         if image_labels is None:
             self.known = False
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.image_paths)
 
     def __getitem__(self, idx):

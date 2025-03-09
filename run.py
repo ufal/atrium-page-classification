@@ -59,7 +59,7 @@ if __name__ == "__main__":
     top_N = args.topn
     raw = args.raw
 
-    # locally creating new directory paths instead of .env variables loaded with mistakes
+    # locally creating new directory paths instead of context.txt variables loaded with mistakes
     if not output_dir.is_dir():
         os.makedirs(output_dir)
 

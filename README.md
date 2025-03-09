@@ -296,7 +296,7 @@ Evaluation set's accuracy (**Top-1**):  **97.3%** 🏆
 By running tests on the evaluation dataset after training you can generate the following output files:
 
 - **data-time_model_TOP-N_EVAL.csv** - results of the evaluation dataset with TOP-N guesses
-- **data-time_conf_mat.png** - confusion matrix plot for the evaluation dataset also with TOP-N guesses
+- **data-time_conf_mat_TOP-N.png** - confusion matrix plot for the evaluation dataset also with TOP-N guesses
 - **data-time_model_EVAL_RAW.csv** - raw probabilities for all classes of the evaluation dataset 
 
 > [!NOTE]
@@ -652,6 +652,8 @@ set a path to the data folder.
 - **Model type:** fine-tuned ViT with a 224x224 resolution size [^2]
 
 **©️ 2022 UFAL & ATRIUM**
+
+----
 
 ## Appendix 🤓
 

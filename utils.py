@@ -17,7 +17,8 @@ def directory_scraper(folder_path: Path, file_format: str = "png", file_list: li
     return file_list
 
 
-def dataframe_results(test_images: list, test_predictions: list, categories: list, top_N: int, raw_scores: list = None):
+def dataframe_results(test_images: list, test_predictions: list, categories: list, top_N: int,
+                      raw_scores: list = None) -> (pd.DataFrame, pd.DataFrame):
     results = []
     raws = []
     for image_file, predict_scores in zip(test_images, test_predictions):
@@ -41,8 +42,6 @@ def dataframe_results(test_images: list, test_predictions: list, categories: lis
         rawdf = pd.DataFrame(raws, columns=col)
         raw_weights = np.array(raw_scores).round(3)
         rawdf[categories] = raw_weights
-
-        # rawdf.round({c:3 for c in categories})
 
     rawdf.sort(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
     rdf.sort(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
@@ -114,5 +113,5 @@ def confusion_plot(predictions: list, trues: list, categories: list, top_N: int 
     time_stamp = time.strftime("%Y%m%d-%H%M")
     disp.ax_.set_title(
         f"TOP {top_N} Full Confusion matrix")
-    plt.savefig(f"{output_dir if output_dir else 'result'}/plots/{time_stamp}_conf_mat.png", bbox_inches='tight')
+    plt.savefig(f"{output_dir if output_dir else 'result'}/plots/{time_stamp}_conf_mat_TOP-{top_N}.png", bbox_inches='tight')
     plt.close()
