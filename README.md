@@ -44,6 +44,12 @@ archival documents.
 
 Training set of the model: **8950** images 
 
+Evaluation set (10% of the all, with the same proportions as below) [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎:	**995** images
+
+Manually ✍ annotation were performed beforehand and took some time ⌛, the categories 🏷️ were formed from
+different sources of the archival documents from year 1920 to year 2020. Disproportion of the categories 🏷️ is
+**NOT** intentional, but rather a result of the source data nature.
+
 ### Categories 🏷️
 
 |      Label️ |  Ratio  | Description                                                                  |
@@ -59,8 +65,6 @@ Training set of the model: **8950** images
 | **TEXT_HW** |  7.36%  | **✏️📄 - only handwritten text**                                             |
 |  **TEXT_P** | 	6.95%  | **📄 - only printed text**                                                   |
 |  **TEXT_T** | 	13.53% | **📄 - only machine typed text**                                             |
-
-Evaluation set (10% of the all, with the same proportions as above) [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎:	**995** images 
 
 The categories were chosen to sort the pages by the following criterion: 
 
