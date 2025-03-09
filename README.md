@@ -5,7 +5,7 @@
 **Scope:** Processing of images, training and evaluation of ViT model,
 input file/directory processing, class 🏷️ (category) results of top
 N predictions output, predictions summarizing into a tabular format, 
-HF 😊 hub support for the model, data preparation scripts for PDF to PNG conversion
+HF 😊 hub support for the model, multiplatform (Win/Lin) data preparation scripts for PDF to PNG conversion
 
 ### Table of contents 📑
 
@@ -31,14 +31,20 @@ HF 😊 hub support for the model, data preparation scripts for PDF to PNG conve
 
 ## Model description 📇
 
-🔲 Fine-tuned model repository: **ufal's vit-historical-page** [^1] 🔗
+🔲 Fine-tuned model repository: **UFAL's vit-historical-page** [^1] 🔗
 
-🔳 Base model repository: **google's vit-base-patch16-224** [^2] 🔗
+🔳 Base model repository: **Google's vit-base-patch16-224** [^2] 🔗
 
-The model was trained on the manually annotated dataset of historical documents, in particular,  images of pages 
+The model was trained on the manually annotated dataset of historical documents, in particular, images of pages 
 from the archival documents with paper sources that were scanned into digital form. The images contain various
-combinations of texts, tables, drawings, and photos - categories 🏷️ tabulated below were formed based on those 
-archival documents. 
+combinations of texts ️📄, tables 📏, drawings 📈, and photos 🌄 - categories 🏷️ described below were formed based on those 
+archival documents.
+
+The key use case of the provided model and data processing pipeline is to classify an input PNG image from PDF scanned 
+paper source into one of the categories - each responsible for the following content-specific data processing pipeline.
+In other words, when several APIs for different OCR subtasks are at your disposal - run this classifier first to 
+mark the input data as machine typed (old-fonts) / hand-written ✏ / just printed plain ️📄 text or structured in tabular 📏
+format text, as well as to mark presence of the printed 🌄 or drawn 📈 graphic materials yet to be extracted from the page images.
 
 ### Data 📜
 
@@ -46,31 +52,37 @@ Training set of the model: **8950** images
 
 Evaluation set (10% of the all, with the same proportions as below) [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎:	**995** images
 
-Manually ✍ annotation were performed beforehand and took some time ⌛, the categories 🏷️ were formed from
+Manual ✍ annotation were performed beforehand and took some time ⌛, the categories 🏷️ were formed from
 different sources of the archival documents from year 1920 to year 2020. Disproportion of the categories 🏷️ is
-**NOT** intentional, but rather a result of the source data nature.
+**NOT** intentional, but rather a result of the source data nature. 
+
+In total, several hundred of separate PDF files were selected and split into PNG pages, some scanned documents 
+were one-page long and some were much longer (dozens and hundreds of pages). The specific content and language of the
+source data is irrelevant considering the model resolution, however all of the data samples were from **archaeological 
+reports** which may be somehow affect the drawings detection due to common form objects being ceramic pieces, 
+arrowheads, and rocks firstly drawn by hand and later illustrated with digital tools. 
 
 ### Categories 🏷️
 
-|      Label️ |  Ratio  | Description                                                                  |
-|------------:|:-------:|:-----------------------------------------------------------------------------|
-|    **DRAW** | 	11.89% | **📈 - drawings, maps, paintings with text**                                 |
-|  **DRAW_L** | 	8.17%  | **📈📏 - drawings ... with a table legend or inside tabular layout / forms** |
-| **LINE_HW** |  5.99%  | **✏️📏 - handwritten text lines inside tabular layout / forms**              |
-|  **LINE_P** | 	6.06%  | **📏 - printed text lines inside tabular layout / forms**                    |
-|  **LINE_T** | 	13.39% | **📏 - machine typed text lines inside tabular layout / forms**              |
-|   **PHOTO** | 	10.21% | **🌄 - photos with text**                                                    |
-| **PHOTO_L** |  7.86%  | **🌄📏 - photos inside tabular layout / forms or with a tabular annotation** |
-|    **TEXT** | 	8.58%  | **📰 - mixed types of printed and handwritten texts**                        |
-| **TEXT_HW** |  7.36%  | **✏️📄 - only handwritten text**                                             |
-|  **TEXT_P** | 	6.95%  | **📄 - only printed text**                                                   |
-|  **TEXT_T** | 	13.53% | **📄 - only machine typed text**                                             |
+|      Label️ |  Ratio  | Description                                                                   |
+|------------:|:-------:|:------------------------------------------------------------------------------|
+|    **DRAW** | 	11.89% | **📈 - drawings, maps, paintings with text**                                  |
+|  **DRAW_L** | 	8.17%  | **📈📏 - drawings, etc with a table legend or inside tabular layout / forms** |
+| **LINE_HW** |  5.99%  | **✏️📏 - handwritten text lines inside tabular layout / forms**               |
+|  **LINE_P** | 	6.06%  | **📏 - printed text lines inside tabular layout / forms**                     |
+|  **LINE_T** | 	13.39% | **📏 - machine typed text lines inside tabular layout / forms**               |
+|   **PHOTO** | 	10.21% | **🌄 - photos with text**                                                     |
+| **PHOTO_L** |  7.86%  | **🌄📏 - photos inside tabular layout / forms or with a tabular annotation**  |
+|    **TEXT** | 	8.58%  | **📰 - mixed types of printed and handwritten texts**                         |
+| **TEXT_HW** |  7.36%  | **✏️📄 - only handwritten text**                                              |
+|  **TEXT_P** | 	6.95%  | **📄 - only printed text**                                                    |
+|  **TEXT_T** | 	13.53% | **📄 - only machine typed text**                                              |
 
 The categories were chosen to sort the pages by the following criterion: 
 
-- presence of graphical elements (drawings 📈 OR photos 🌄)
-- type of text 📄 (handwritten ✏️️ OR printed OR typed)
-- presence of tabular layout / forms 📏
+- **presence of graphical elements** (drawings 📈 OR photos 🌄)
+- **type of text** 📄 (handwritten ✏️️ OR printed OR typed OR mixed 📰)
+- **presence of tabular layout / forms** 📏
 
 The reasons for such distinction are different processing pipelines for different types of pages, that would be
 applied after the classification.
@@ -96,7 +108,7 @@ Clone this project to your local machine 🖥️ via:
     git init
     git clone https://github.com/ufal/atrium-page-classification.git
 
-Follow the **Linux** / **Windows**-specific instruction at the venv docs [^3] 👀🔗 if you don't know how to.
+Follow the *Unix** / **Windows**-specific instruction at the venv docs [^3] 👀🔗 if you don't know how to.
 After creating the venv folder, activate the environment via:
 
     source <your_venv_dir>/bin/activate
@@ -180,8 +192,9 @@ After the model is downloaded, you should see a similar file structure:
     ├── run.py
     ├── classifier.py
     ├── utils.py
-    ├── requirements.
+    ├── requirements.txt
     ├── config.txt
+    ├── README.md
     └── ...
 
 </details>
@@ -281,7 +294,7 @@ Evaluation set's accuracy (**Top-3**):  **99.6%** 🏆
 
 <details>
 
-<summary>Confusion matrix TOP-3 📊</summary>
+<summary>Confusion matrix 📊 TOP-3 👀</summary>
 
 ![TOP-3 confusion matrix](result%2Fplots%2F20250209-1526_conf_mat.png)
 
@@ -291,7 +304,7 @@ Evaluation set's accuracy (**Top-1**):  **97.3%** 🏆
 
 <details>
 
-<summary>Confusion matrix TOP-1 📊</summary>
+<summary>Confusion matrix 📊 TOP-1 👀</summary>
 
 ![TOP-1 confusion matrix](result%2Fplots%2F20250218-1523_conf_mat.png)
 
@@ -322,7 +335,7 @@ Demo files:
 
 - **Unchecked with TRUE** values: [model_TOP-3.csv](result%2Ftables%2F20250210-2034_model_1119_3_TOP-3.csv) 📎
 
-With the following **columns**:
+With the following **columns** 📋:
 
 - **FILE** - name of the file
 - **PAGE** - number of the page
@@ -345,7 +358,7 @@ Demo files:
 
 - **Unchecked with TRUE** values **RAW**: [model_RAW.csv](result%2Ftables%2F20250220-1331_model_1119_3_RAW.csv) 📎
 
-With the following **columns**:
+With the following **columns** 📋:
 
 - **FILE** - name of the file
 - **PAGE** - number of the page
@@ -368,7 +381,7 @@ the process are provided below.
 
 <details>
 
-<summary>Project files description 👀</summary>
+<summary>Project files description 📋👀</summary>
 
 | File Name        | Description                                                                                                     |
 |------------------|-----------------------------------------------------------------------------------------------------------------|
@@ -420,7 +433,7 @@ During training image transformations were applied sequentially with a 50% chanc
 
 <details>
 
-<summary>Training hyperparameters details 👀</summary>
+<summary>Training hyperparameters 👀</summary>
  
 * eval_strategy "epoch"
 * save_strategy "epoch"
@@ -473,7 +486,8 @@ Firstly, copy the PDF-to-PNG converter script to the directory with PDF document
 </details>
 
 Now check the content and comments in [pdf2png.sh](data_scripts%2Funix%2Fpdf2png.sh) 📎 or [pdf2png.bat](data_scripts%2Fwindows%2Fpdf2png.bat) 📎 
-script, and run it.
+script, and run it. You can optionally comment out the **removal of processed PDF files** from the script, yet it's not 
+recommended in case you are going to launch the program several times from the same location. 
 
 <details>
 
@@ -574,6 +588,8 @@ Prepare a CSV table with such columns:
 > [!TIP]
 > Prepare equal in size categories 🏷️ if possible, so that the model will not be biased towards the over-represented labels 🏷️
 
+It takes time ⌛ to collect at least several hundred of examples per category.
+
 ### PNG pages sorting for training 📬
 
 Cluster the annotated data into separate folders using the [sort.sh](data_scripts%2Funix%2Fsort.sh) 📎 or [sort.bat](data_scripts%2Fwindows%2Fsort.bat) 📎 
@@ -595,8 +611,8 @@ script to copy data from the source folder to the training folder where each cat
 
 > [!WARNING]
 > It does **NOT** matter from which directory you launch the sorting script, but you must check the top of the script for 
-> the path to the CSV table with annotations, path to the directory containing document-specific
-> subdirectories of page-specific PNG pages, and path to the directory where you want to store the training data of
+> (**1**) the path to the CSV table with annotations, (**2**) path to the directory containing document-specific
+> subdirectories of page-specific PNG pages, and (**3**) path to the directory where you want to store the training data of
 > label-specific directories with annotated page images.
 
 After the program is done, you will have a directory full of label-specific subdirectories 
@@ -692,6 +708,7 @@ set a path to the data folder.
 - 🌄 - photos
 - ✏️ - hand-written content
 - 📄 - text content
+- 📰 - mixed types of text content, maybe with graphics
 
 </details>
 
