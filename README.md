@@ -355,6 +355,40 @@ To evaluate the model and create a confusion matrix plot 📊 run:
 > [config.txt](config.txt) ⚙ and it contains category 🏷️ subdirectories with images inside. 
 > Names of the category 🏷️ subdirectories become actual label names, and replaces the default categories 🏷️ list.
 
+<details>
+
+<summary>Training images preprocessing details 👀</summary>
+
+During training the following transformations were applied randomly with a 50% chance:
+
+* transforms.ColorJitter(brightness 0.5)
+* transforms.ColorJitter(contrast 0.5)
+* transforms.ColorJitter(saturation 0.5)
+* transforms.ColorJitter(hue 0.5)
+* transforms.Lambda(lambda img: ImageEnhance.Sharpness(img).enhance(random.uniform(0.5, 1.5)))
+* transforms.Lambda(lambda img: img.filter(ImageFilter.GaussianBlur(radius=random.uniform(0, 2))))
+
+No rotation, reshaping, or flipping was applied to the images, manly colors manipulations were used.
+
+</details>
+
+<details>
+
+<summary>Training hyperparameters details 👀</summary>
+ 
+* eval_strategy "epoch"
+* save_strategy "epoch"
+* learning_rate 5e-5
+* per_device_train_batch_size 8
+* per_device_eval_batch_size 8
+* num_train_epochs 3
+* warmup_ratio 0.1
+* logging_steps 10
+* load_best_model_at_end True
+* metric_for_best_model "accuracy" 
+
+</details>
+
 ----
 
 ## Data preparation 📦
