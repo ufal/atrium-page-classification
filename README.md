@@ -25,6 +25,7 @@ HF 😊 hub support for the model, data preparation scripts for PDF to PNG conve
     + [PNG pages sorting for training 📬](#png-pages-sorting-for-training-)
   * [Contacts 📧](#contacts-)
   * [Acknowledgements 🙏](#acknowledgements-)
+  * [Appendix 🤓](#appendix-)
 
 ----
 
@@ -654,7 +655,10 @@ set a path to the data folder.
 
 ## Appendix 🤓
 
-Emoji codes used in the document:
+<details>
+
+<summary>README emoji codes 👀</summary>
+
 - 🖥 - your computer
 - 🏷️ - label/category/class
 - 📄 - page/file
@@ -671,15 +675,27 @@ Emoji codes used in the document:
 - 📎 - link to the internal file
 - 🔗 - link to the external website
 
-also page content specific:
+</details>
+
+<details>
+
+<summary>Content specific emoji codes 👀</summary>
+
 - 📏 - table content
 - 📈 - drawings/paintings/diagrams
 - 🌄 - photos
 - ✏️ - hand-written content
 - 📄 - text content
 
-finally:
+</details>
+
+<details>
+
+<summary>Decorative emojis 👀</summary>
+
 - 📇📜🔧▶🛠️📦🔎📚🙏👥📬🤓 - decorative purpose only
+
+</details>
 
 [^1]: https://huggingface.co/ufal/vit-historical-page
 [^2]: https://huggingface.co/google/vit-base-patch16-224
