@@ -5,7 +5,7 @@
 **Scope:** Processing of images, training and evaluation of ViT model,
 input file/directory processing, class 🏷️ (category) results of top
 N predictions output, predictions summarizing into a tabular format, 
-HF 😊 hub support for the model, multiplatform (Win/Lin) data preparation scripts for PDF to PNG conversion
+HF 😊 hub [^1] support for the model, multiplatform (Win/Lin) data preparation scripts for PDF to PNG conversion
 
 ### Table of contents 📑
 
@@ -36,12 +36,14 @@ HF 😊 hub support for the model, multiplatform (Win/Lin) data preparation scri
 🔳 Base model repository: **Google's vit-base-patch16-224** [^2] 🔗
 
 The model was trained on the manually annotated dataset of historical documents, in particular, images of pages 
-from the archival documents with paper sources that were scanned into digital form. The images contain various
-combinations of texts ️📄, tables 📏, drawings 📈, and photos 🌄 - categories 🏷️ described below were formed based on those 
-archival documents.
+from the archival documents with paper sources that were scanned into digital form. 
+
+The images contain various combinations of texts ️📄, tables 📏, drawings 📈, and photos 🌄 - 
+categories 🏷️ described below were formed based on those archival documents.
 
 The key use case of the provided model and data processing pipeline is to classify an input PNG image from PDF scanned 
 paper source into one of the categories - each responsible for the following content-specific data processing pipeline.
+
 In other words, when several APIs for different OCR subtasks are at your disposal - run this classifier first to 
 mark the input data as machine typed (old style fonts) / hand-written ✏️ / just printed plain ️📄 text or structured in tabular 📏
 format text, as well as to mark presence of the printed 🌄 or drawn 📈 graphic materials yet to be extracted from the page images.
@@ -53,11 +55,15 @@ Training set of the model: **8950** images
 Evaluation set (10% of the all, with the same proportions as below) [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎:	**995** images
 
 Manual ✍ annotation were performed beforehand and took some time ⌛, the categories 🏷️ were formed from
-different sources of the archival documents from year 1920 to year 2020. Disproportion of the categories 🏷️ is
+different sources of the archival documents from year 1920 to year 2020. 
+
+Disproportion of the categories 🏷️ is
 **NOT** intentional, but rather a result of the source data nature. 
 
 In total, several hundred of separate PDF files were selected and split into PNG pages, some scanned documents 
-were one-page long and some were much longer (dozens and hundreds of pages). The specific content and language of the
+were one-page long and some were much longer (dozens and hundreds of pages). 
+
+The specific content and language of the
 source data is irrelevant considering the model's vision resolution, however all of the data samples were from **archaeological 
 reports** which may somehow affect the drawings detection due to common form objects being ceramic pieces, 
 arrowheads, and rocks firstly drawn by hand and later illustrated with digital tools. 
@@ -125,21 +131,22 @@ Can be done via:
 
     pip install -r requirements.txt
 
-To test that everything works okay and see the flag descriptions call for **--help** ❓:
+To test that everything works okay and see the flag descriptions call for `--help` ❓:
 
     python3 run.py -h
 
-To **pull the model from the HF 😊 hub repository directly**, load the model via:
+To **pull the model from the HF 😊 hub repository [^1] directly**, load the model via:
 
     python3 run.py --hf
 
 You should see a message about loading the model from hub and then saving it locally. 
+
 Only after you have obtained the trained model files (takes less time ⌛ than installing dependencies), 
 you can play with any commands provided below.
 
 > [!IMPORTANT]
-> Unless you already have the model files in the **'model/model_version'**
-> directory next to this file, you must use the **--hf** flag to download the
+> Unless you already have the model files in the `model/model_version`
+> directory next to this file, you must use the `--hf` flag to download the
 > model files from the HF 😊 repo [^1] 🔗
 
 After the model is downloaded, you should see a similar file structure: 
@@ -199,7 +206,7 @@ After the model is downloaded, you should see a similar file structure:
 
 </details>
 
-Some of the listed above folders may be missing, like **model_output** which is created after training the model.
+Some of the listed above folders may be missing, like `model_output` which is created after training the model.
 
 ----
 
@@ -210,8 +217,8 @@ There are two main ways to run the program:
 - **Single PNG file classification** 📄
 - **Directory with PNG files classification** 📁
 
-To begin with, open [config.txt](config.txt) ⚙ and change folder path in the **\[INPUT\]** section, then 
-optionally change **top_N** and **batch** in the **\[SETUP\]** section.
+To begin with, open [config.txt](config.txt) ⚙ and change folder path in the `[INPUT]` section, then 
+optionally change `top_N` and `batch` in the `[SETUP]` section.
 
 > [!NOTE]
 >️ **Top-3** is enough to cover most of the images, setting **Top-5** will help with a small number 
@@ -222,9 +229,9 @@ optionally change **top_N** and **batch** in the **\[SETUP\]** section.
 
 ### Page processing 📄
 
-The following prediction should be run using **-f** or **--file** flag with the path argument. Optionally, you can use
-**-tn** or **--topn** flag with the number of guesses you want to get, and also **-m** or **--model** flag with the path to the model 
-folder argument. 
+The following prediction should be run using `-f` or `--file` flag with the path argument. Optionally, 
+you can use `-tn` or `--topn` flag with the number of guesses you want to get, and also `-m` or 
+`--model` flag with the path to the model folder argument. 
 
 <details>
 
@@ -249,13 +256,13 @@ to run single PNG file classification - the output will be in the console.
 
 ### Directory processing 📁
 
-The following prediction type does nor require explicit directory path setting with the **-d** or **--director**y, 
-since its default value is set in the [config.txt](config.txt) ⚙ file and awaken when the **--dir** flag is used. The same flags for the number of 
+The following prediction type does nor require explicit directory path setting with the `-d` or `--directory`, 
+since its default value is set in the [config.txt](config.txt) ⚙ file and awaken when the `--dir` flag is used. The same flags for the number of 
 guesses, and the model folder path as for the single page processing can be used. In addition, 2 
-directory-specific flags  **--inner** and -**-raw** are available. 
+directory-specific flags  `--inner` and `--raw` are available. 
 
 > [!CAUTION]
-> You must either explicitly set **-d** flag's argument or use **--dir** flag (calling for the preset default 
+> You must either explicitly set `-d` flag's argument or use `--dir` flag (calling for the preset default 
 > value of the input directory) to process PNG files on the directory level, otherwise nothing will happen
 
 <details>
@@ -273,22 +280,30 @@ for exactly TOP-3 guesses from all images found in the given directory.
 </details>
 
 The classification results of PNG pages collected from the directory will be saved 💾 to related [results](result) 📁
-folders defined in **\[OUTPUT\]** section of [config.txt](config.txt) ⚙ file.
+folders defined in `[OUTPUT]` section of [config.txt](config.txt) ⚙ file.
 
 > [!TIP]
 > To additionally get raw class 🏷️ probabilities from the model along with the TOP-N results, use
-> **--raw** flag when processing the directory
+> `--raw` flag when processing the directory (**NOT** available for single file processing)
  
 > [!TIP]
-> To process all PNG files in the directory **AND its subdirectories** use the **--inner** flag
+> To process all PNG files in the directory **AND its subdirectories** use the `--inner` flag
 > when processing the directory
+ 
+Naturally, processing of the big amount of PNG pages takes time ⌛ and this process
+is recorded in the command line via messages like `Processed <B×N> images` where `B`
+is batch size set in the [config.txt](config.txt) ⚙ file, and `N` is an 
+iteration of the current dataloader processing loop. 
+
+Only after all images from the input directory are processed, the output table is
+saved 💾 in the `results/tables` folder. 
 
 ----
 
 ## Results 📊
 
 There are accuracy performance measurements and plots of confusion matrices for the evaluation 
-dataset and tables with results in the [results](result) 📁 folder. 
+dataset. Both graphic plots and tables with results can be found in the [results](result) 📁 folder. 
 
 Evaluation set's accuracy (**Top-3**):  **99.6%** 🏆
 
@@ -367,7 +382,7 @@ With the following **columns** 📋:
 
 </details>
 
-The reason to use **--raw** flag is possible convenience of results review, 
+The reason to use `--raw` flag is possible convenience of results review, 
 since the most ambiguous cases are expected to be at the bottom of the table sorted in
 descending order by all **<CATEGORY_LABEL>** columns, while the most obvious (for the model)
 cases are expected to be at the top.
@@ -393,7 +408,7 @@ the process are provided below.
 </details>
 
 Most of the changeable variables are in the [config.txt](config.txt) ⚙ file, specifically,
-in the **\[TRAIN\]**, **\[HF\]**, and **\[SETUP\]** sections.
+in the `[TRAIN]`, `[HF]`, and `[SETUP]` sections.
 
 For more detailed training process adjustments refer to the related functions in [classifier.py](classifier.py) 📎 
 file, where you will find some predefined values not used in the [run.py](run.py) 📎 file.
@@ -458,7 +473,8 @@ defined and trained.
 There are useful multiplatform scripts in the [data_scripts](data_scripts) 📁 folder for the whole process of data preparation. 
 
 > [!NOTE]
-> The .sh scripts are adapted for **Unix** OS and .bat scripts are adapted for **Windows** OS
+> The `.sh` scripts are adapted for **Unix** OS and `.bat` scripts are adapted for **Windows** OS, yet 
+> their functionality remains the same
 
 On **Windows** you must also install the following software before converting PDF documents to PNG images:
 - ImageMagick [^5] 🔗 - download and install latest version
@@ -486,8 +502,11 @@ Firstly, copy the PDF-to-PNG converter script to the directory with PDF document
 </details>
 
 Now check the content and comments in [pdf2png.sh](data_scripts%2Funix%2Fpdf2png.sh) 📎 or [pdf2png.bat](data_scripts%2Fwindows%2Fpdf2png.bat) 📎 
-script, and run it. You can optionally comment out the **removal of processed PDF files** from the script, yet it's not 
-recommended in case you are going to launch the program several times from the same location. 
+script, and run it. 
+
+> [!IMPORTANT]
+> You can optionally comment out the **removal of processed PDF files** from the script, yet it's not 
+> recommended in case you are going to launch the program several times from the same location. 
 
 <details>
 
@@ -530,7 +549,7 @@ containing page-specific images with a similar structure:
 
 > [!NOTE]
 > The page numbers are padded with zeros (on the left) to match the length of the last page number in each PDF file,
-> this is done automatically by the pdftoppm command used on **Unix**. While ImageMagick's convert command used 
+> this is done automatically by the pdftoppm command used on **Unix**. While ImageMagick's [^5] convert command used 
 > on **Windows** does not pad the page numbers.
 
 <details>
@@ -650,13 +669,13 @@ containing document-specific pages with a similar structure:
 
 </details>
 
-Before running the training, make sure to check the [config.txt](config.txt) ⚙️ file for the **\[TRAIN\]** section variables, where you should
+Before running the training, make sure to check the [config.txt](config.txt) ⚙️ file for the `[TRAIN]` section variables, where you should
 set a path to the data folder. 
 
 > [!TIP]
-> In the [config.txt](config.txt) ⚙️ file tweak the parameter of **max_categ**
-> for maximum number of samples per category 🏷️, in case you have over-represented labels significantly dominating in size.
-> Set **max_categ** higher than the number of samples in the largest category 🏷️ to use **all** data samples.
+> In the [config.txt](config.txt) ⚙️ file tweak the parameter of `max_categ`
+> for maximum number of samples per category 🏷️, in case you have **over-represented labels** significantly dominating in size.
+> Set `max_categ` higher than the number of samples in the largest category 🏷️ to use **all** data samples.
 
 ----
 
