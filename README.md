@@ -17,8 +17,7 @@ HF 😊 hub support for the model, data preparation scripts for PDF to PNG conve
     + [Page processing 📄](#page-processing-)
     + [Directory processing 📁](#directory-processing-)
   * [Results 📊](#results-)
-      - [Result tables 📏](#result-tables-)
-      - [Table columns 📋](#table-columns-)
+      - [Result tables and their columns 📏📋](#result-tables-and-their-columns-)
   * [For developers 🛠️](#for-developers-)
   * [Data preparation 📦](#data-preparation-)
     + [PDF to PNG 📚](#pdf-to-png-)
@@ -273,15 +272,21 @@ folders defined in **\[OUTPUT\]** section of [config.txt](config.txt) ⚙ file.
 There are accuracy performance measurements and plots of confusion matrices for the evaluation 
 dataset and tables with results in the [results](result) 📁 folder. 
 
+Evaluation set's accuracy (**Top-3**):  **99.6%** 🏆
+
 <details>
 
-<summary>Confusion matrix plots 📊</summary>
-
-Evaluation set's accuracy (**Top-3**):  **99.6%** 🏆
+<summary>Confusion matrix TOP-3 📊</summary>
 
 ![TOP-3 confusion matrix](result%2Fplots%2F20250209-1526_conf_mat.png)
 
+</details>
+
 Evaluation set's accuracy (**Top-1**):  **97.3%** 🏆
+
+<details>
+
+<summary>Confusion matrix TOP-1 📊</summary>
 
 ![TOP-1 confusion matrix](result%2Fplots%2F20250218-1523_conf_mat.png)
 
@@ -296,7 +301,7 @@ By running tests on the evaluation dataset after training you can generate the f
 > [!NOTE]
 > Generated tables will be sorted by **FILE** and **PAGE** number columns in ascending order. 
 
-#### Result tables and their columns 📏📋
+### Result tables and their columns 📏📋
 
 <details>
 
@@ -646,6 +651,35 @@ set a path to the data folder.
 - **Model type:** fine-tuned ViT with a 224x224 resolution size [^2]
 
 **©️ 2022 UFAL & ATRIUM**
+
+## Appendix 🤓
+
+Emoji codes used in the document:
+- 🖥 - your computer
+- 🏷️ - label/category/class
+- 📄 - page/file
+- 📁 - folder/directory
+- 📊 - generated diagrams or plots
+- 🌳 - tree of file structure
+- ⌛ - time-consuming process
+- ✍ - manual action
+- 🏆 - performance measurement
+- 😊 - Hugging Face (HF)
+- 📧 - contacts 
+- 👀 - click to see
+- ⚙️ - configuration/settings
+- 📎 - link to the internal file
+- 🔗 - link to the external website
+
+also page content specific:
+- 📏 - table content
+- 📈 - drawings/paintings/diagrams
+- 🌄 - photos
+- ✏️ - hand-written content
+- 📄 - text content
+
+finally:
+- 📇📜🔧▶🛠️📦🔎📚🙏👥📬🤓 - decorative purpose only
 
 [^1]: https://huggingface.co/ufal/vit-historical-page
 [^2]: https://huggingface.co/google/vit-base-patch16-224
