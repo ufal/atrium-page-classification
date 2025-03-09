@@ -130,40 +130,59 @@ After the model is downloaded, you should see a similar file structure:
 
 <details>
 
-<summary>Project tree 🌳 files structure 👀</summary>
+<summary>Full project tree 🌳 files structure 👀</summary>
     
     /local/folder/for/this/project
     ├── model
-        ├── model_version
+        └── model_version 
             ├── config.json
             ├── model.safetensors
-            ├── preprocessor_config.json
+            └── preprocessor_config.json
+    ├── checkpoint
+            ├── models--google--vit-base-patch16-224
+                ├── blobs
+                ├── snapshots
+                └── refs
+            └── .locs
+                └── models--google--vit-base-patch16-224
+    ├── model_output
+        ├── checkpoint-version
+            ├── config.json
+            ├── model.safetensors
+            ├── trainer_state.json
+            ├── optimizer.pt
+            ├── scheduler.pt
+            ├── rng_state.pth
+            └── training_args.bin
+        └── ...
     ├── data_scripts
         ├── windows
             ├── move_single.bat
             ├── pdf2png.bat
-            ├── sort.bat
-        ├── unix
+            └── sort.bat
+        └── unix
             ├── move_single.sh
             ├── pdf2png.sh
-            ├── sort.sh
+            └── sort.sh
     ├── result
         ├── plots
             ├── date-time_conf_mat.png
-            ...
-        ├── tables
+            └── ...
+        └── tables
             ├── date-time_TOP-N.csv
             ├── date-time_TOP-N_EVAL.csv
             ├── date-time_EVAL_RAW.csv
-            ...
+            └── ...
     ├── run.py
     ├── classifier.py
     ├── utils.py
     ├── requirements.
     ├── config.txt
-    ...
+    └── ...
 
 </details>
+
+Some of the listed above folders may be missing, like **model_output** which is created after training the model.
 
 ----
 
@@ -218,6 +237,10 @@ since its default value is set in the [config.txt](config.txt) ⚙ file and awak
 guesses, and the model folder path as for the single page processing can be used. In addition, 2 
 directory-specific flags  **--inner** and -**-raw** are available. 
 
+> [!CAUTION]
+> You must either explicitly set **-d** flag's argument or use **--dir** flag (calling for the preset default 
+> value of the input directory) to process PNG files on the directory level, otherwise nothing will happen
+
 <details>
 
 <summary>How to 👀</summary>
@@ -270,31 +293,26 @@ By running tests on the evaluation dataset after training you can generate the f
 - **data-time_conf_mat.png** - confusion matrix plot for the evaluation dataset also with TOP-N guesses
 - **data-time_model_EVAL_RAW.csv** - raw probabilities for all classes of the evaluation dataset 
 
-#### Result tables 📏
+> [!NOTE]
+> Generated tables will be sorted by **FILE** and **PAGE** number columns in ascending order. 
+
+#### Result tables and their columns 📏📋
 
 <details>
 
-<summary>Examples of the result tables 👀</summary>
+<summary>General result tables 👀</summary>
 
-- Example of the manually ✍ **checked** results (small): [model_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 📎
+Demo files:
 
-- Example of the manually ✍ **checked** evaluation dataset results (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_TOP-3_EVAL.csv) 📎
+- Manually ✍ **checked** (small): [model_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 📎
 
-- Example of the manually ✍ **checked** evaluation dataset **RAW** results [model_RAW_EVAL.csv](result%2Ftables%2F20250220-1342_model_1119_3_EVAL_RAW.csv) 📎
+- Manually ✍ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_TOP-3_EVAL.csv) 📎
 
-- Example of the manually ✍ **checked** evaluation dataset results (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250218-1519_model_1119_3_TOP-1_EVAL.csv) 📎
+- Manually ✍ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250218-1519_model_1119_3_TOP-1_EVAL.csv) 📎
 
-- Example of the **unchecked with TRUE** values results: [model_TOP-3.csv](result%2Ftables%2F20250210-2034_model_1119_3_TOP-3.csv) 📎
+- **Unchecked with TRUE** values: [model_TOP-3.csv](result%2Ftables%2F20250210-2034_model_1119_3_TOP-3.csv) 📎
 
-- Example of the **unchecked with TRUE** values **RAW** results: [model_RAW.csv](result%2Ftables%2F20250220-1331_model_1119_3_RAW.csv) 📎
-
-</details>
-
-#### Table columns 📋
-
-<details>
-
-<summary>General result columns 👀</summary>
+With the following **columns**:
 
 - **FILE** - name of the file
 - **PAGE** - number of the page
@@ -309,7 +327,15 @@ and optionally
 
 <details>
 
-<summary>Raw result columns 👀</summary>
+<summary>Raw result tables 👀</summary>
+
+Demo files:
+
+- Manually ✍ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250220-1342_model_1119_3_EVAL_RAW.csv) 📎
+
+- **Unchecked with TRUE** values **RAW**: [model_RAW.csv](result%2Ftables%2F20250220-1331_model_1119_3_RAW.csv) 📎
+
+With the following **columns**:
 
 - **FILE** - name of the file
 - **PAGE** - number of the page
@@ -366,7 +392,7 @@ During training image transformations were applied sequentially with a 50% chanc
 
 <details>
 
-<summary>Images preprocessing details 👀</summary>
+<summary>Image preprocessing steps 👀</summary>
 
 * transforms.ColorJitter(**brightness** 0.5)
 * transforms.ColorJitter(**contrast** 0.5)
@@ -377,9 +403,10 @@ During training image transformations were applied sequentially with a 50% chanc
 
 </details>
 
-No rotation, reshaping, or flipping was applied to the images, manly colors manipulations were used. The 
-reason behind this are pages containing specific form types, general text orientation on the pages, and the default
-reshape of the model input to the square 224x224 resolution images. 
+> [!NOTE]
+> No rotation, reshaping, or flipping was applied to the images, manly colors manipulations were used. The 
+> reason behind this are pages containing specific form types, general text orientation on the pages, and the default
+> reshape of the model input to the square 224x224 resolution images. 
 
 <details>
 
@@ -387,12 +414,12 @@ reshape of the model input to the square 224x224 resolution images.
  
 * eval_strategy "epoch"
 * save_strategy "epoch"
-* learning_rate 5e-5
+* learning_rate **5e-5**
 * per_device_train_batch_size 8
 * per_device_eval_batch_size 8
-* num_train_epochs 3
-* warmup_ratio 0.1
-* logging_steps 10
+* num_train_epochs **3**
+* warmup_ratio **0.1**
+* logging_steps **10**
 * load_best_model_at_end True
 * metric_for_best_model "accuracy" 
 
@@ -416,7 +443,8 @@ On **Windows** you must also install the following software before converting PD
 
 ### PDF to PNG 📚
 
-The source set of PDF documents must be converted to page-specific PNG images.
+The source set of PDF documents must be converted to page-specific PNG images before processing. The following steps
+describe procedure of converting PDF documents to PNG images suitable for both training, evaluation, and prediction.
 
 Firstly, copy the PDF-to-PNG converter script to the directory with PDF documents.
 
@@ -464,15 +492,15 @@ containing page-specific images with a similar structure:
     ├── PdfFile1Name
         ├── PdfFile1Name-001.png
         ├── PdfFile1Name-002.png
-        ...
+        └── ...
     ├── PdfFile2Name
         ├── PdfFile2Name-01.png
         ├── PDFFile2Name-02.png
-        ...
+        └── ...
     ├── PdfFile3Name
-        ├── PdfFile3Name-1.png 
+        └── PdfFile3Name-1.png 
     ├── PdfFile4Name
-    ...
+    └── ...
 
 </details>
 
@@ -489,15 +517,15 @@ containing page-specific images with a similar structure:
     ├── PdfFile1Name
         ├── PdfFile1Name-1.png
         ├── PdfFile1Name-2.png
-        ...
+        └── ...
     ├── PdfFile2Name
         ├── PdfFile2Name-1.png
         ├── PDFFile2Name-2.png
-        ...
+        └── ...
     ├── PdfFile3Name
-        ├── PdfFile3Name-1.png 
+        └── PdfFile3Name-1.png 
     ├── PdfFile4Name
-    ...
+    └── ...
 
 </details>
 
@@ -556,7 +584,7 @@ script to copy data from the source folder to the training folder where each cat
 </details>
 
 > [!WARNING]
-> It does not matter from which directory you launch the sorting script, but you must check the top of the script for 
+> It does **NOT** matter from which directory you launch the sorting script, but you must check the top of the script for 
 > the path to the CSV table with annotations, path to the directory containing document-specific
 > subdirectories of page-specific PNG pages, and path to the directory where you want to store the training data of
 > label-specific directories with annotated page images.
@@ -572,11 +600,11 @@ containing document-specific pages with a similar structure:
     ├── Label1
         ├── PdfFileAName-00N.png
         ├── PdfFileBName-0M.png
-        ...
+        └── ...
     ├── Label2
     ├── Label3
     ├── Label4
-    ...
+    └── ...
 
 </details>
 
@@ -588,20 +616,21 @@ containing document-specific pages with a similar structure:
     ├── Label1
         ├── PdfFileAName-N.png
         ├── PdfFileBName-M.png
-        ...
+        └── ...
     ├── Label2
     ├── Label3
     ├── Label4
-    ...
+    └── ...
 
 </details>
-S
+
 Before running the training, make sure to check the [config.txt](config.txt) ⚙️ file for the **\[TRAIN\]** section variables, where you should
 set a path to the data folder. 
 
-Optionally, in the [config.txt](config.txt) ⚙️ file tweak the parameter of **max_categ**
-for maximum number of samples per category 🏷️, in case you have over-represented labels️ significantly dominating in size.
-Set **max_categ** higher than the number of samples in the largest category 🏷️ to use **all** data samples.
+> [!TIP]
+> In the [config.txt](config.txt) ⚙️ file tweak the parameter of **max_categ**
+> for maximum number of samples per category 🏷️, in case you have over-represented labels significantly dominating in size.
+> Set **max_categ** higher than the number of samples in the largest category 🏷️ to use **all** data samples.
 
 ----
 

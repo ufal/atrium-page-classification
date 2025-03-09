@@ -44,6 +44,9 @@ def dataframe_results(test_images: list, test_predictions: list, categories: lis
 
         # rawdf.round({c:3 for c in categories})
 
+    rawdf.sort(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
+    rdf.sort(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
+
     return rdf, rawdf
 
 
