@@ -130,7 +130,7 @@ After the model is downloaded, you should see a similar file structure:
 
 <details>
 
-<summary>Project file structure 👀</summary>
+<summary>Project files tree 🌳 structure 👀</summary>
     
     /local/folder/for/this/project
     ├── model
@@ -154,7 +154,7 @@ After the model is downloaded, you should see a similar file structure:
         ├── tables
             ├── date-time_TOP-N.csv
             ├── date-time_TOP-N_EVAL.csv
-            ├── date-time_TOP-N_EVAL_RAW.csv
+            ├── date-time_EVAL_RAW.csv
             ...
     ├── run.py
     ├── classifier.py
@@ -200,9 +200,6 @@ Run the program from its starting point [run.py](run.py) 📎 with optional flag
 
 for exactly TOP-3 guesses 
 
-> [!NOTE]
-> Console output and all result tables contain **normalized** scores for the highest N class 🏷️ scores
-
 **OR** if you are sure about default variables set in the [config.txt](config.txt) ⚙:
 
     python3 run.py -f '/full/path/to/file.png'
@@ -210,6 +207,9 @@ for exactly TOP-3 guesses
 to run single PNG file classification - the output will be in the console. 
 
 </details>
+
+> [!NOTE]
+> Console output and all result tables contain **normalized** scores for the highest N class 🏷️ scores
 
 ### Directory processing 📁
 
@@ -247,7 +247,8 @@ folders defined in **\[OUTPUT\]** section of [config.txt](config.txt) ⚙ file.
 
 ## Results 📊
 
-There are plots of confusion matrices for the evaluation dataset and tables with results in the [results](result) 📁 folder. 
+There are accuracy performance measurements and plots of confusion matrices for the evaluation 
+dataset and tables with results in the [results](result) 📁 folder. 
 
 <details>
 
@@ -262,6 +263,12 @@ Evaluation set's accuracy (**Top-1**):  **97.3%** 🏆
 ![TOP-1 confusion matrix](result%2Fplots%2F20250218-1523_conf_mat.png)
 
 </details>
+
+By running tests on the evaluation dataset after training you can generate the following output files:
+
+- **data-time_model_TOP-N_EVAL.csv** - results of the evaluation dataset with TOP-N guesses
+- **data-time_conf_mat.png** - confusion matrix plot for the evaluation dataset also with TOP-N guesses
+- **data-time_model_EVAL_RAW.csv** - raw probabilities for all classes of the evaluation dataset 
 
 #### Result tables 📏
 
@@ -311,10 +318,10 @@ and optionally
 
 </details>
 
-> The reason to use **--raw** flag is possible convenience of results review, 
-> since the most ambiguous cases are expected to be at the bottom of the table sorted in
-> descending order by all **<CATEGORY_LABEL>** columns, while the most obvious (for the model)
-> cases are expected to be at the top.
+The reason to use **--raw** flag is possible convenience of results review, 
+since the most ambiguous cases are expected to be at the bottom of the table sorted in
+descending order by all **<CATEGORY_LABEL>** columns, while the most obvious (for the model)
+cases are expected to be at the top.
 
 ----
 
@@ -325,7 +332,7 @@ the process are provided below.
 
 <details>
 
-<summary>File details 👀</summary>
+<summary>Project tree 🌳 file structure 👀</summary>
 
 Most of the changeable variables are in the [config.txt](config.txt) ⚙ file, specifically,
 in the **\[TRAIN\]**, **\[HF\]**, and **\[SETUP\]** sections.
@@ -357,18 +364,20 @@ To evaluate the model and create a confusion matrix plot 📊 run:
 
 <details>
 
-<summary>Training images preprocessing details 👀</summary>
+<summary>Images training preprocessing details 👀</summary>
 
-During training the following transformations were applied randomly with a 50% chance:
+During training the following transformations were applied sequentially with a 50% chance:
 
-* transforms.ColorJitter(brightness 0.5)
-* transforms.ColorJitter(contrast 0.5)
-* transforms.ColorJitter(saturation 0.5)
-* transforms.ColorJitter(hue 0.5)
-* transforms.Lambda(lambda img: ImageEnhance.Sharpness(img).enhance(random.uniform(0.5, 1.5)))
-* transforms.Lambda(lambda img: img.filter(ImageFilter.GaussianBlur(radius=random.uniform(0, 2))))
+* transforms.ColorJitter(**brightness** 0.5)
+* transforms.ColorJitter(**contrast** 0.5)
+* transforms.ColorJitter(**saturation** 0.5)
+* transforms.ColorJitter(**hue** 0.5)
+* transforms.Lambda(lambda img: ImageEnhance.**Sharpness**(img).enhance(random.uniform(0.5, 1.5)))
+* transforms.Lambda(lambda img: img.filter(ImageFilter.**GaussianBlur**(radius=random.uniform(0, 2))))
 
-No rotation, reshaping, or flipping was applied to the images, manly colors manipulations were used.
+No rotation, reshaping, or flipping was applied to the images, manly colors manipulations were used. The 
+reason behind this are pages containing specific form types, general text orientation on the pages, and the default
+reshape of the model input to the square 224x224 resolution images. 
 
 </details>
 
@@ -388,6 +397,10 @@ No rotation, reshaping, or flipping was applied to the images, manly colors mani
 * metric_for_best_model "accuracy" 
 
 </details>
+
+Above are the default hyperparameters used in the training process and default image transformation applied 
+to the training data. You can change them in the [classifier.py](classifier.py) 📎 file, where the model is
+defined and trained.
 
 ----
 
@@ -412,11 +425,11 @@ Firstly, copy the PDF-to-PNG converter script to the directory with PDF document
 
 <summary>How to 👀</summary>
 
-For **Windows**:
+ **Windows**:
 
     move \local\folder\for\this\project\data_scripts\pdf2png.bat \full\path\to\your\folder\with\pdf\files
 
-For **Unix**:
+**Unix**:
 
     cp /local/folder/for/this/project/data_scripts/pdf2png.sh /full/path/to/your/folder/with/pdf/files
 
@@ -429,12 +442,12 @@ script, and run it.
 
 <summary>How to 👀</summary>
 
-For **Windows**:
+**Windows**:
 
     cd \full\path\to\your\folder\with\pdf\files
     pdf2png.bat
 
-For **Unix**:
+**Unix**:
 
     cd /full/path/to/your/folder/with/pdf/files
     pdf2png.sh
@@ -446,7 +459,7 @@ containing page-specific images with a similar structure:
 
 <details>
 
-<summary>Unix folder structure 👀</summary>
+<summary>Unix folder tree 🌳 structure 👀</summary>
 
     /full/path/to/your/folder/with/pdf/files
     ├── PdfFile1Name
@@ -471,7 +484,7 @@ containing page-specific images with a similar structure:
 
 <details>
 
-<summary>Windows folder structure 👀</summary>
+<summary>Windows folder tree 🌳 structure 👀</summary>
 
     \full\path\to\your\folder\with\pdf\files
     ├── PdfFile1Name
@@ -496,13 +509,13 @@ all PNG files from directories with a single PNG file inside to the common direc
 
 <summary>How to 👀</summary>
 
-For **Windows**:
+**Windows**:
 
     move \local\folder\for\this\project\data_scripts\move_single.bat \full\path\to\your\folder\with\pdf\files
     cd \full\path\to\your\folder\with\pdf\files
     move_single.bat
 
-For **Unix**:
+**Unix**:
     
     cp /local/folder/for/this//project/data_scripts/move_single.sh /full/path/to/your/folder/with/pdf/files
     cd /full/path/to/your/folder/with/pdf/files 
@@ -533,11 +546,11 @@ script to copy data from the source folder to the training folder where each cat
 
 <summary>How to 👀</summary>
 
-For **Windows**:
+**Windows**:
 
     sort.bat
 
-For **Unix**:
+**Unix**:
     
     sort.sh
 
@@ -554,7 +567,7 @@ containing document-specific pages with a similar structure:
 
 <details>
 
-<summary>Unix folder structure 👀</summary>
+<summary>Unix folder tree 🌳 structure 👀</summary>
 
     /full/path/to/your/folder/with/train/pages
     ├── Label1
@@ -570,7 +583,7 @@ containing document-specific pages with a similar structure:
 
 <details>
 
-<summary>Windows folder structure 👀</summary>
+<summary>Windows folder tree 🌳 structure 👀</summary>
     
     \full\path\to\your\folder\with\train\pages
     ├── Label1
@@ -583,13 +596,13 @@ containing document-specific pages with a similar structure:
     ...
 
 </details>
-
+S
 Before running the training, make sure to check the [config.txt](config.txt) ⚙️ file for the **\[TRAIN\]** section variables, where you should
 set a path to the data folder. 
 
-> Optionally, in the [config.txt](config.txt) ⚙️ file tweak the parameter of **max_categ**
-> for maximum number of samples per category 🏷️, in case you have over-represented labels️ significantly dominating in size.
-> Set **max_categ** higher than the number of samples in the largest category 🏷️ to use **all** data samples.
+Optionally, in the [config.txt](config.txt) ⚙️ file tweak the parameter of **max_categ**
+for maximum number of samples per category 🏷️, in case you have over-represented labels️ significantly dominating in size.
+Set **max_categ** higher than the number of samples in the largest category 🏷️ to use **all** data samples.
 
 ----
 
