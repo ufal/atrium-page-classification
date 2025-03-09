@@ -43,7 +43,7 @@ archival documents.
 The key use case of the provided model and data processing pipeline is to classify an input PNG image from PDF scanned 
 paper source into one of the categories - each responsible for the following content-specific data processing pipeline.
 In other words, when several APIs for different OCR subtasks are at your disposal - run this classifier first to 
-mark the input data as machine typed (old-fonts) / hand-written ✏ / just printed plain ️📄 text or structured in tabular 📏
+mark the input data as machine typed (old style fonts) / hand-written ✏️ / just printed plain ️📄 text or structured in tabular 📏
 format text, as well as to mark presence of the printed 🌄 or drawn 📈 graphic materials yet to be extracted from the page images.
 
 ### Data 📜
@@ -58,8 +58,8 @@ different sources of the archival documents from year 1920 to year 2020. Disprop
 
 In total, several hundred of separate PDF files were selected and split into PNG pages, some scanned documents 
 were one-page long and some were much longer (dozens and hundreds of pages). The specific content and language of the
-source data is irrelevant considering the model resolution, however all of the data samples were from **archaeological 
-reports** which may be somehow affect the drawings detection due to common form objects being ceramic pieces, 
+source data is irrelevant considering the model's vision resolution, however all of the data samples were from **archaeological 
+reports** which may somehow affect the drawings detection due to common form objects being ceramic pieces, 
 arrowheads, and rocks firstly drawn by hand and later illustrated with digital tools. 
 
 ### Categories 🏷️
