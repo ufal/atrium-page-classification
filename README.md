@@ -5,7 +5,8 @@
 **Scope:** Processing of images, training / evaluation of ViT model,
 input file/directory processing, class 🏷️ (category) results of top
 N predictions output, predictions summarizing into a tabular format, 
-HF 😊 hub [^1] support for the model, multiplatform (Win/Lin) data preparation scripts for PDF to PNG conversion
+HF 😊 hub [^1] support for the model, multiplatform (Win/Lin) data 
+preparation scripts for PDF to PNG conversion
 
 ### Table of contents 📑
 
@@ -45,8 +46,9 @@ The key use case of the provided model and data processing pipeline is to classi
 paper source into one of the categories - each responsible for the following content-specific data processing pipeline.
 
 In other words, when several APIs for different OCR subtasks are at your disposal - run this classifier first to 
-mark the input data as machine typed (old style fonts) / hand-written ✏️ / just printed plain ️📄 text or structured in tabular 📏
-format text, as well as to mark the presence of the printed 🌄 or drawn 📈 graphic materials yet to be extracted from the page images.
+mark the input data as machine typed (old style fonts) / hand-written ✏️ / just printed plain ️📄 text 
+or structured in tabular 📏 format text, as well as to mark the presence of the printed 🌄 or drawn 📈 graphic 
+materials yet to be extracted from the page images.
 
 ### Data 📜
 
@@ -226,7 +228,7 @@ optionally change `top_N` and `batch` in the `[SETUP]` section.
 > of difficult to classify samples.
 
 > [!CAUTION]
-> Do not try to change **base_model** and other section contents unless you know what you are doing
+> Do **NOT** try to change **base_model** and other section contents unless you know what you are doing
 
 ### Page processing 📄
 
@@ -257,10 +259,10 @@ to run a single PNG file classification - the output will be in the console.
 
 ### Directory processing 📁
 
-The following prediction type does not require explicit directory path setting with the `-d` or `--directory`, 
-since its default value is set in the [config.txt](config.txt) ⚙ file and awakens when the `--dir` flag is used. The same flags for the number of 
-guesses and the model folder path as for the single-page processing can be used. In addition, 2 
-directory-specific flags  `--inner` and `--raw` are available. 
+The following prediction type does **NOT** require explicit directory path setting with the `-d` or `--directory`, 
+since its default value is set in the [config.txt](config.txt) ⚙ file and awakens when the `--dir` flag 
+is used. The same flags for the number of guesses and the model folder path as for the single-page 
+processing can be used. In addition, 2 directory-specific flags  `--inner` and `--raw` are available. 
 
 > [!CAUTION]
 > You must either explicitly set `-d` flag's argument or use `--dir` flag (calling for the preset in 
@@ -519,7 +521,7 @@ Now check the content and comments in [pdf2png.sh](data_scripts%2Funix%2Fpdf2png
 script, and run it. 
 
 > [!IMPORTANT]
-> You can optionally comment out the **removal of processed PDF files** from the script, yet it's not 
+> You can optionally comment out the **removal of processed PDF files** from the script, yet it's **NOT** 
 > recommended in case you are going to launch the program several times from the same location. 
 
 <details>
@@ -564,7 +566,7 @@ containing page-specific images with a similar structure:
 > [!NOTE]
 > The page numbers are padded with zeros (on the left) to match the length of the last page number in each PDF file,
 > this is done automatically by the pdftoppm command used on **Unix**. While ImageMagick's [^5] convert command used 
-> on **Windows** does not pad the page numbers.
+> on **Windows** does **NOT** pad the page numbers.
 
 <details>
 
@@ -630,11 +632,33 @@ Prepare a CSV table with exactly 3 columns:
 > [!TIP]
 > Prepare equal-in-size categories 🏷️ if possible, so that the model will not be biased towards the over-represented labels 🏷️
 
+For **Windows** users, it's **NOT** recommended to use MS Excel for writing CSV tables, the free 
+alternative may be Apache's OpenOffice [^9]. As for **Unix** users, the default LibreCalc should be enough to 
+correctly write comma-separated CSV table.
+
+<details>
+
+<summary>Table in .csv format example 👀</summary>
+
+    FILE,PAGE,CLASS
+    PdfFile1Name,1,Label1
+    PdfFile2Name,9,Label1
+    PdfFile1Name,11,Label3
+    ...
+
+</details>
+
 ### PNG pages sorting for training 📬
 
 Cluster the annotated data into separate folders using the [sort.sh](data_scripts%2Funix%2Fsort.sh) 📎 or [sort.bat](data_scripts%2Fwindows%2Fsort.bat) 📎 
 script to copy data from the source folder to the training folder where each category 🏷️ has its own subdirectory.
 This division of PNG images will be used as gold data in training and evaluation.
+
+> [!WARNING]
+> It does **NOT** matter from which directory you launch the sorting script, but you must check the top of the script for 
+> (**1**) the path to the previously described **CSV table with annotations**, (**2**) the path to the previously described 
+> directory containing **document-specific subdirectories of page-specific PNG pages**, and (**3**) the path to the directory
+> where you want to store the **training data of label-specific directories with annotated page images**.
 
 <details>
 
@@ -649,12 +673,6 @@ This division of PNG images will be used as gold data in training and evaluation
     sort.sh
 
 </details>
-
-> [!WARNING]
-> It does **NOT** matter from which directory you launch the sorting script, but you must check the top of the script for 
-> (**1**) the path to the CSV table with annotations, (**2**) the path to the directory containing document-specific
-> subdirectories of page-specific PNG pages, and (**3**) the path to the directory where you want to store the training data of
-> label-specific directories with annotated page images.
 
 After the program is done, you will have a directory full of label-specific subdirectories 
 containing document-specific pages with a similar structure:
@@ -769,3 +787,4 @@ set a path to the data folder.
 [^6]: https://www.ghostscript.com/releases/gsdnld.html
 [^7]: https://ufal.mff.cuni.cz/home-page
 [^8]: https://github.com/ufal/atrium-page-classification
+[^9]: https://www.openoffice.org/download/
