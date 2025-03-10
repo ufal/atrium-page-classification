@@ -95,6 +95,9 @@ The categories were chosen to sort the pages by the following criterion:
 The reasons for such distinction are different processing pipelines for different types of pages, which would be
 applied after the classification.
 
+Examples of pages sorted by category 🏷️ can be found in the [category_samples](category_samples) 📁 directory
+which is also available as a testing subset of the training data (can be used to run evaluation and prediction).
+
 ----
 
 ## How to install 🔧
@@ -199,6 +202,12 @@ After the model is downloaded, you should see a similar file structure:
             ├── date-time_TOP-N_EVAL.csv
             ├── date-time_EVAL_RAW.csv
             └── ...
+    ├── category_samples
+        ├── DRAW
+            ├── CTX193200994-24.png
+            └── ...
+        ├── DRAW_L
+        └── ...
     ├── run.py
     ├── classifier.py
     ├── utils.py
