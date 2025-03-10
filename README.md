@@ -1,8 +1,8 @@
-# Image classification using fine-tuned ViT - for historical documents sorting
+# Image classification using fine-tuned ViT - for historical document sorting
 
 ### Goal: solve a task of archive page images sorting (for their further content-based processing)
 
-**Scope:** Processing of images, training and evaluation of ViT model,
+**Scope:** Processing of images, training / evaluation of ViT model,
 input file/directory processing, class 🏷️ (category) results of top
 N predictions output, predictions summarizing into a tabular format, 
 HF 😊 hub [^1] support for the model, multiplatform (Win/Lin) data preparation scripts for PDF to PNG conversion
@@ -46,43 +46,43 @@ paper source into one of the categories - each responsible for the following con
 
 In other words, when several APIs for different OCR subtasks are at your disposal - run this classifier first to 
 mark the input data as machine typed (old style fonts) / hand-written ✏️ / just printed plain ️📄 text or structured in tabular 📏
-format text, as well as to mark presence of the printed 🌄 or drawn 📈 graphic materials yet to be extracted from the page images.
+format text, as well as to mark the presence of the printed 🌄 or drawn 📈 graphic materials yet to be extracted from the page images.
 
 ### Data 📜
 
 Training set of the model: **8950** images 
 
-Evaluation set (10% of all - same proportions categories 🏷️ as below) [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎:	**995** images
+Evaluation set (10% of all - same proportions categories 🏷️ as below) [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎:  **995** images
 
-Manual ✍ annotation were performed beforehand and took some time ⌛, the categories 🏷️ were formed from
-different sources of the archival documents dated year 1920-2020. 
+Manual ✍ annotation was performed beforehand and took some time ⌛, the categories 🏷️ were formed from
+different sources of the archival documents originated in the 1920-2020 years span of time. 
 
 Disproportion of the categories 🏷️ is
 **NOT** intentional, but rather a result of the source data nature. 
 
-In total, several hundred of separate PDF files were selected and split into PNG pages, some scanned documents 
+In total, several hundreds of separate PDF files were selected and split into PNG pages, some scanned documents 
 were one-page long and some were much longer (dozens and hundreds of pages). 
 
 The specific content and language of the
-source data is irrelevant considering the model's vision resolution, however all of the data samples were from **archaeological 
-reports** which may somehow affect the drawings detection due to common form objects being ceramic pieces, 
-arrowheads, and rocks firstly drawn by hand and later illustrated with digital tools. 
+source data is irrelevant considering the model's vision resolution, however, all of the data samples were from **archaeological 
+reports** which may somehow affect the drawing detection preferences due to the common form of objects being ceramic pieces, 
+arrowheads, and rocks formerly drawn by hand and later illustrated with digital tools. 
 
 ### Categories 🏷️
 
 |      Label️ |  Ratio  | Description                                                                   |
 |------------:|:-------:|:------------------------------------------------------------------------------|
-|    **DRAW** | 	11.89% | **📈 - drawings, maps, paintings with text**                                  |
-|  **DRAW_L** | 	8.17%  | **📈📏 - drawings, etc with a table legend or inside tabular layout / forms** |
+|    **DRAW** |     11.89% | **📈 - drawings, maps, paintings with text**                                  |
+|  **DRAW_L** |     8.17%  | **📈📏 - drawings, etc with a table legend or inside tabular layout / forms** |
 | **LINE_HW** |  5.99%  | **✏️📏 - handwritten text lines inside tabular layout / forms**               |
-|  **LINE_P** | 	6.06%  | **📏 - printed text lines inside tabular layout / forms**                     |
-|  **LINE_T** | 	13.39% | **📏 - machine typed text lines inside tabular layout / forms**               |
-|   **PHOTO** | 	10.21% | **🌄 - photos with text**                                                     |
+|  **LINE_P** |     6.06%  | **📏 - printed text lines inside tabular layout / forms**                     |
+|  **LINE_T** |     13.39% | **📏 - machine typed text lines inside tabular layout / forms**               |
+|   **PHOTO** |     10.21% | **🌄 - photos with text**                                                     |
 | **PHOTO_L** |  7.86%  | **🌄📏 - photos inside tabular layout / forms or with a tabular annotation**  |
-|    **TEXT** | 	8.58%  | **📰 - mixed types of printed and handwritten texts**                         |
+|    **TEXT** |     8.58%  | **📰 - mixed types of printed and handwritten texts**                         |
 | **TEXT_HW** |  7.36%  | **✏️📄 - only handwritten text**                                              |
-|  **TEXT_P** | 	6.95%  | **📄 - only printed text**                                                    |
-|  **TEXT_T** | 	13.53% | **📄 - only machine typed text**                                              |
+|  **TEXT_P** |     6.95%  | **📄 - only printed text**                                                    |
+|  **TEXT_T** |     13.53% | **📄 - only machine typed text**                                              |
 
 The categories were chosen to sort the pages by the following criterion: 
 
@@ -90,7 +90,7 @@ The categories were chosen to sort the pages by the following criterion:
 - **type of text** 📄 (handwritten ✏️️ OR printed OR typed OR mixed 📰)
 - **presence of tabular layout / forms** 📏
 
-The reasons for such distinction are different processing pipelines for different types of pages, that would be
+The reasons for such distinction are different processing pipelines for different types of pages, which would be
 applied after the classification.
 
 ----
@@ -119,15 +119,15 @@ After creating the venv folder, activate the environment via:
 
     source <your_venv_dir>/bin/activate
 
-and then inside your virtual environment, you should install python libraries (takes time ⌛) 
+and then inside your virtual environment, you should install Python libraries (takes time ⌛) 
 
 </details>
 
 > [!NOTE]
 > Up to **1 GB of space for model** files and checkpoints is needed, and up to **7 GB 
-> of space for the python libraries** (pytorch and its dependencies, etc)
+> of space for the Python libraries** (Pytorch and its dependencies, etc)
 
-Can be done via:
+Installation of Python dependencies can be done via:
 
     pip install -r requirements.txt
 
@@ -207,7 +207,7 @@ After the model is downloaded, you should see a similar file structure:
 
 </details>
 
-Some of the listed above folders may be missing, like `model_output` which is created after training the model.
+Some of the listed above folders may be missing, like `model_output` which is automatically created after launching the model.
 
 ----
 
@@ -248,7 +248,7 @@ for exactly TOP-3 guesses
 
     python3 run.py -f '/full/path/to/file.png'
 
-to run single PNG file classification - the output will be in the console. 
+to run a single PNG file classification - the output will be in the console. 
 
 </details>
 
@@ -258,14 +258,14 @@ to run single PNG file classification - the output will be in the console.
 ### Directory processing 📁
 
 The following prediction type does not require explicit directory path setting with the `-d` or `--directory`, 
-since its default value is set in the [config.txt](config.txt) ⚙ file and awaken when the `--dir` flag is used. The same flags for the number of 
-guesses, and the model folder path as for the single page processing can be used. In addition, 2 
+since its default value is set in the [config.txt](config.txt) ⚙ file and awakens when the `--dir` flag is used. The same flags for the number of 
+guesses and the model folder path as for the single-page processing can be used. In addition, 2 
 directory-specific flags  `--inner` and `--raw` are available. 
 
 > [!CAUTION]
 > You must either explicitly set `-d` flag's argument or use `--dir` flag (calling for the preset in 
 > `[INPUT]` section default value of the input directory) to process PNG files on the directory
-> level, otherwise nothing will happen
+> level, otherwise, nothing will happen
 
 <details>
 
@@ -292,7 +292,7 @@ folders defined in `[OUTPUT]` section of [config.txt](config.txt) ⚙ file.
 > To process all PNG files in the directory **AND its subdirectories** use the `--inner` flag
 > when processing the directory
  
-Naturally, processing of the big amount of PNG pages takes time ⌛ and this process
+Naturally, processing of the large amount of PNG pages takes time ⌛ and this process
 is recorded in the command line via messages like `Processed <B×N> images` where `B`
 is batch size set in the `[SETUP]` section of the [config.txt](config.txt) ⚙ file, 
 and `N` is an iteration of the current dataloader processing loop. 
@@ -386,7 +386,7 @@ With the following **columns** 📋:
 
 </details>
 
-The reason to use `--raw` flag is possible convenience of results review, 
+The reason to use the `--raw` flag is the possible convenience of results review, 
 since the most ambiguous cases are expected to be at the bottom of the table sorted in
 descending order by all **<CATEGORY_LABEL>** columns, while the most obvious (for the model)
 cases are expected to be at the top.
@@ -395,8 +395,8 @@ cases are expected to be at the top.
 
 ## For developers 🛠️
 
-Use this project code as a base for your own image classification tasks. Instructions on the key phases of 
-the process are provided below.
+Use this project code as a base for your own image classification tasks. Guide on the key phases of 
+the process is provided below.
 
 <details>
 
@@ -426,14 +426,14 @@ To evaluate the model, create a confusion matrix plot 📊 and additionally get 
     python3 run.py --eval --raw
 
 > [!IMPORTANT]
-> In both cases, you must make sure that training data directory is set right in the 
+> In both cases, you must make sure that the training data directory is set right in the 
 > [config.txt](config.txt) ⚙ and it contains category 🏷️ subdirectories with images inside. 
-> Names of the category 🏷️ subdirectories become actual label names, and replaces the default categories 🏷️ list.
+> Names of the category 🏷️ subdirectories become actual label names and replace the default categories 🏷️ list.
 
 After training is complete the model will be saved to its separate subdirectory in the `model` directory, by default, 
-the naming of the model folder corresponds to the length of its training batch dataloader and number of epochs. 
+the naming of the model folder corresponds to the length of its training batch dataloader and the number of epochs. 
 
-Since length of the dataloader depends not only on the size of the dataset, but also on the preset batch size, you can change 
+Since the length of the dataloader depends not only on the size of the dataset but also on the preset batch size, you can change 
 the `batch` variable value in the [config.txt](config.txt) ⚙ file to train a differently named model on the same dataset.
 Alternatively, adjust the **model naming generation** in the [classifier.py](classifier.py)'s 📎 training function.
 
@@ -453,7 +453,7 @@ During training image transformations were applied sequentially with a 50% chanc
 </details>
 
 > [!NOTE]
-> No rotation, reshaping, or flipping was applied to the images, mainly colors manipulations were used. The 
+> No rotation, reshaping, or flipping was applied to the images, mainly color manipulations were used. The 
 > reason behind this are pages containing specific form types, general text orientation on the pages, and the default
 > reshape of the model input to the square 224x224 resolution images. 
 
@@ -477,7 +477,7 @@ During training image transformations were applied sequentially with a 50% chanc
 Above are the default hyperparameters used in the training process that can be partially (only `epoch` and `log_step`) 
 changed in the `[TRAIN]` section, plus `batch` in the `[SETUP]`section, of the [config.txt](config.txt) ⚙ file. 
 
-You are free to play with learning rate right in the training function arguments called in the [run.py](run.py) 📎 file, 
+You are free to play with the learning rate right in the training function arguments called in the [run.py](run.py) 📎 file, 
 yet warmup ratio and other hyperparameters are accessible only through the [classifier.py](classifier.py) 📎 file.
 
 ----
@@ -491,13 +491,13 @@ There are useful multiplatform scripts in the [data_scripts](data_scripts) 📁 
 > their functionality remains the same
 
 On **Windows** you must also install the following software before converting PDF documents to PNG images:
-- ImageMagick [^5] 🔗 - download and install latest version
-- Ghostscript [^6] 🔗 - download and install latest version (32 or 64 bit) by AGPL
+- ImageMagick [^5] 🔗 - download and install the latest version
+- Ghostscript [^6] 🔗 - download and install the latest version (32 or 64-bit) by AGPL
 
 ### PDF to PNG 📚
 
 The source set of PDF documents must be converted to page-specific PNG images before processing. The following steps
-describe procedure of converting PDF documents to PNG images suitable for both training, evaluation, and prediction.
+describe the procedure of converting PDF documents to PNG images suitable for training, evaluation, or prediction inference.
 
 Firstly, copy the PDF-to-PNG converter script to the directory with PDF documents.
 
@@ -619,7 +619,7 @@ These changes are cared for in the next [sort.sh](data_scripts%2Funix%2Fsort.sh)
 The generated PNG images of document pages are used to form the annotated gold data. 
 
 > [!NOTE]
-> It takes a lot of time ⌛ to collect at least several hundred of examples per category.
+> It takes a lot of time ⌛ to collect at least several hundred examples per category.
 
 Prepare a CSV table with exactly 3 columns:
 
@@ -628,13 +628,13 @@ Prepare a CSV table with exactly 3 columns:
 - **CLASS** - label of the category 🏷️
 
 > [!TIP]
-> Prepare equal in size categories 🏷️ if possible, so that the model will not be biased towards the over-represented labels 🏷️
+> Prepare equal-in-size categories 🏷️ if possible, so that the model will not be biased towards the over-represented labels 🏷️
 
 ### PNG pages sorting for training 📬
 
 Cluster the annotated data into separate folders using the [sort.sh](data_scripts%2Funix%2Fsort.sh) 📎 or [sort.bat](data_scripts%2Fwindows%2Fsort.bat) 📎 
 script to copy data from the source folder to the training folder where each category 🏷️ has its own subdirectory.
-This division of PNG images will be used as a gold data in training and evaluation.
+This division of PNG images will be used as gold data in training and evaluation.
 
 <details>
 
@@ -652,8 +652,8 @@ This division of PNG images will be used as a gold data in training and evaluati
 
 > [!WARNING]
 > It does **NOT** matter from which directory you launch the sorting script, but you must check the top of the script for 
-> (**1**) the path to the CSV table with annotations, (**2**) path to the directory containing document-specific
-> subdirectories of page-specific PNG pages, and (**3**) path to the directory where you want to store the training data of
+> (**1**) the path to the CSV table with annotations, (**2**) the path to the directory containing document-specific
+> subdirectories of page-specific PNG pages, and (**3**) the path to the directory where you want to store the training data of
 > label-specific directories with annotated page images.
 
 After the program is done, you will have a directory full of label-specific subdirectories 
@@ -696,7 +696,7 @@ set a path to the data folder.
 
 > [!TIP]
 > In the [config.txt](config.txt) ⚙️ file tweak the parameter of `max_categ`
-> for maximum number of samples per category 🏷️, in case you have **over-represented labels** significantly dominating in size.
+> for a maximum number of samples per category 🏷️, in case you have **over-represented labels** significantly dominating in size.
 > Set `max_categ` higher than the number of samples in the largest category 🏷️ to use **all** data samples.
 
 ----
