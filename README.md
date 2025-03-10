@@ -444,7 +444,7 @@ During training image transformations were applied sequentially with a 50% chanc
 </details>
 
 > [!NOTE]
-> No rotation, reshaping, or flipping was applied to the images, manly colors manipulations were used. The 
+> No rotation, reshaping, or flipping was applied to the images, mainly colors manipulations were used. The 
 > reason behind this are pages containing specific form types, general text orientation on the pages, and the default
 > reshape of the model input to the square 224x224 resolution images. 
 
