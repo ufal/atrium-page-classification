@@ -257,7 +257,7 @@ to run single PNG file classification - the output will be in the console.
 
 ### Directory processing 📁
 
-The following prediction type does nor require explicit directory path setting with the `-d` or `--directory`, 
+The following prediction type does not require explicit directory path setting with the `-d` or `--directory`, 
 since its default value is set in the [config.txt](config.txt) ⚙ file and awaken when the `--dir` flag is used. The same flags for the number of 
 guesses, and the model folder path as for the single page processing can be used. In addition, 2 
 directory-specific flags  `--inner` and `--raw` are available. 
@@ -431,10 +431,11 @@ To evaluate the model, create a confusion matrix plot 📊 and additionally get 
 > Names of the category 🏷️ subdirectories become actual label names, and replaces the default categories 🏷️ list.
 
 After training is complete the model will be saved to its separate subdirectory in the `model` directory, by default, 
-the naming of the model folder corresponds to the length of its training batch dataloader and number of epochs. Since 
-length of the dataloader depends not only on the size of the dataset, but also on the preset batch size, you can change 
+the naming of the model folder corresponds to the length of its training batch dataloader and number of epochs. 
+
+Since length of the dataloader depends not only on the size of the dataset, but also on the preset batch size, you can change 
 the `batch` variable value in the [config.txt](config.txt) ⚙ file to train a differently named model on the same dataset.
-Alternatively, adjust the model naming generation in the [classifier.py](classifier.py)'s 📎 training function.
+Alternatively, adjust the **model naming generation** in the [classifier.py](classifier.py)'s 📎 training function.
 
 During training image transformations were applied sequentially with a 50% chance.
 
@@ -473,8 +474,11 @@ During training image transformations were applied sequentially with a 50% chanc
 
 </details>
 
-Above are the default hyperparameters used in the training process that can be changed in the [classifier.py](classifier.py) 📎 file, where the model is
-defined and trained.
+Above are the default hyperparameters used in the training process that can be partially (only `epoch` and `log_step`) 
+changed in the `[TRAIN]` section, plus `batch` in the `[SETUP]`section, of the [config.txt](config.txt) ⚙ file. 
+
+You are free to play with learning rate right in the training function arguments called in the [run.py](run.py) 📎 file, 
+yet warmup ratio and other hyperparameters are accessible only through the [classifier.py](classifier.py) 📎 file.
 
 ----
 
@@ -583,9 +587,11 @@ containing page-specific images with a similar structure:
 </details>
 
 Optionally you can use the [move_single.sh](data_scripts%2Funix%2Fmove_single.sh) 📎 or [move_single.bat](data_scripts%2Fwindows%2Fmove_single.bat) 📎 script to move 
-all PNG files from directories with a single PNG file inside to the common directory of one-pagers. By default, 
-the scripts assume `onepagers` is the back-off directory for PDF document names without a corresponding separate directory
-of PNG pages found in the PDF files directory (already converted to subdirectories of pages).
+all PNG files from directories with a single PNG file inside to the common directory of one-pagers. 
+
+By default, the scripts assume `onepagers` is the back-off directory for PDF document names without a 
+corresponding separate directory of PNG pages found in the PDF files directory (already converted to 
+subdirectories of pages).
 
 <details>
 
