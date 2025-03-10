@@ -52,10 +52,10 @@ format text, as well as to mark presence of the printed 🌄 or drawn 📈 graph
 
 Training set of the model: **8950** images 
 
-Evaluation set (10% of the all, with the same proportions as below) [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎:	**995** images
+Evaluation set (10% of all - same proportions categories 🏷️ as below) [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎:	**995** images
 
 Manual ✍ annotation were performed beforehand and took some time ⌛, the categories 🏷️ were formed from
-different sources of the archival documents from year 1920 to year 2020. 
+different sources of the archival documents dated year 1920-2020. 
 
 Disproportion of the categories 🏷️ is
 **NOT** intentional, but rather a result of the source data nature. 
@@ -98,7 +98,7 @@ applied after the classification.
 ## How to install 🔧
 
 The easiest way to obtain the model would be to use the HF 😊 hub repository [^1] 🔗 that can be easily accessed 
-vie this project. Step-by-step instructions on this program installation are provided below.
+via this project. Step-by-step instructions on this program installation are provided below.
 
 > [!WARNING]
 > Make sure you have **Python version 3.10+** installed on your machine 💻. 
@@ -114,7 +114,7 @@ Clone this project to your local machine 🖥️ via:
     git init
     git clone https://github.com/ufal/atrium-page-classification.git
 
-Follow the *Unix** / **Windows**-specific instruction at the venv docs [^3] 👀🔗 if you don't know how to.
+Follow the **Unix** / **Windows**-specific instruction at the venv docs [^3] 👀🔗 if you don't know how to.
 After creating the venv folder, activate the environment via:
 
     source <your_venv_dir>/bin/activate
@@ -139,7 +139,8 @@ To **pull the model from the HF 😊 hub repository [^1] directly**, load the mo
 
     python3 run.py --hf
 
-You should see a message about loading the model from hub and then saving it locally. 
+You should see a message about loading the model from the hub and then saving it locally on
+your machine 🖥. 
 
 Only after you have obtained the trained model files (takes less time ⌛ than installing dependencies), 
 you can play with any commands provided below.
@@ -262,8 +263,9 @@ guesses, and the model folder path as for the single page processing can be used
 directory-specific flags  `--inner` and `--raw` are available. 
 
 > [!CAUTION]
-> You must either explicitly set `-d` flag's argument or use `--dir` flag (calling for the preset default 
-> value of the input directory) to process PNG files on the directory level, otherwise nothing will happen
+> You must either explicitly set `-d` flag's argument or use `--dir` flag (calling for the preset in 
+> `[INPUT]` section default value of the input directory) to process PNG files on the directory
+> level, otherwise nothing will happen
 
 <details>
 
@@ -292,8 +294,8 @@ folders defined in `[OUTPUT]` section of [config.txt](config.txt) ⚙ file.
  
 Naturally, processing of the big amount of PNG pages takes time ⌛ and this process
 is recorded in the command line via messages like `Processed <B×N> images` where `B`
-is batch size set in the [config.txt](config.txt) ⚙ file, and `N` is an 
-iteration of the current dataloader processing loop. 
+is batch size set in the `[SETUP]` section of the [config.txt](config.txt) ⚙ file, 
+and `N` is an iteration of the current dataloader processing loop. 
 
 Only after all images from the input directory are processed, the output table is
 saved 💾 in the `results/tables` folder. 
