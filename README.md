@@ -305,7 +305,7 @@ saved 💾 in the `results/tables` folder.
 ## Results 📊
 
 There are accuracy performance measurements and plots of confusion matrices for the evaluation 
-dataset. Both graphic plots and tables with results can be found in the [results](result) 📁 folder. 
+dataset. Both graphic plots and tables with results can be found in the [results](result) 📁 folder.
 
 Evaluation set's accuracy (**Top-3**):  **99.6%** 🏆
 
@@ -335,6 +335,8 @@ By running tests on the evaluation dataset after training you can generate the f
 
 > [!NOTE]
 > Generated tables will be sorted by **FILE** and **PAGE** number columns in ascending order. 
+
+Additionally, results of prediction inference run on the directory level without checked results are included.
 
 ### Result tables and their columns 📏📋
 
@@ -419,14 +421,20 @@ To train the model run:
 
     python3 run.py --train  
 
-To evaluate the model and create a confusion matrix plot 📊 run: 
+To evaluate the model, create a confusion matrix plot 📊 and additionally get raw class probabilities table run: 
 
-    python3 run.py --eval  
+    python3 run.py --eval --raw
 
 > [!IMPORTANT]
 > In both cases, you must make sure that training data directory is set right in the 
 > [config.txt](config.txt) ⚙ and it contains category 🏷️ subdirectories with images inside. 
 > Names of the category 🏷️ subdirectories become actual label names, and replaces the default categories 🏷️ list.
+
+After training is complete the model will be saved to its separate subdirectory in the `model` directory, by default, 
+the naming of the model folder corresponds to the length of its training batch dataloader and number of epochs. Since 
+length of the dataloader depends not only on the size of the dataset, but also on the preset batch size, you can change 
+the `batch` variable value in the [config.txt](config.txt) ⚙ file to train a differently named model on the same dataset.
+Alternatively, adjust the model naming generation in the [classifier.py](classifier.py)'s 📎 training function.
 
 During training image transformations were applied sequentially with a 50% chance.
 
@@ -575,7 +583,9 @@ containing page-specific images with a similar structure:
 </details>
 
 Optionally you can use the [move_single.sh](data_scripts%2Funix%2Fmove_single.sh) 📎 or [move_single.bat](data_scripts%2Fwindows%2Fmove_single.bat) 📎 script to move 
-all PNG files from directories with a single PNG file inside to the common directory of one-pagers.
+all PNG files from directories with a single PNG file inside to the common directory of one-pagers. By default, 
+the scripts assume `onepagers` is the back-off directory for PDF document names without a corresponding separate directory
+of PNG pages found in the PDF files directory (already converted to subdirectories of pages).
 
 <details>
 
@@ -600,7 +610,12 @@ These changes are cared for in the next [sort.sh](data_scripts%2Funix%2Fsort.sh)
 
 ### PNG pages annotation 🔎
 
-Prepare a CSV table with such columns:
+The generated PNG images of document pages are used to form the annotated gold data. 
+
+> [!NOTE]
+> It takes a lot of time ⌛ to collect at least several hundred of examples per category.
+
+Prepare a CSV table with exactly 3 columns:
 
 - **FILE** - name of the PDF document which was the source of this page
 - **PAGE** - number of the page (**NOT** padded with 0s)
@@ -609,12 +624,11 @@ Prepare a CSV table with such columns:
 > [!TIP]
 > Prepare equal in size categories 🏷️ if possible, so that the model will not be biased towards the over-represented labels 🏷️
 
-It takes time ⌛ to collect at least several hundred of examples per category.
-
 ### PNG pages sorting for training 📬
 
 Cluster the annotated data into separate folders using the [sort.sh](data_scripts%2Funix%2Fsort.sh) 📎 or [sort.bat](data_scripts%2Fwindows%2Fsort.bat) 📎 
 script to copy data from the source folder to the training folder where each category 🏷️ has its own subdirectory.
+This division of PNG images will be used as a gold data in training and evaluation.
 
 <details>
 
