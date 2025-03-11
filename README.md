@@ -64,8 +64,8 @@ different sources of the archival documents originated in the 1920-2020 years sp
 > Disproportion of the categories 🏷️ in both training data and provided [category_samples](category_samples) 📁 is
 > **NOT** intentional, but rather a result of the source data nature. 
 
-In total, several hundreds of separate PDF files were selected and split into PNG pages, some scanned documents 
-were one-page long and some were much longer (dozens and hundreds of pages). 
+In total, several thousands of separate PDF files were selected and split into PNG pages, ~3720 of scanned documents 
+were one-page long and ~120 of them were much longer (dozens and hundreds of pages). 
 
 The specific content and language of the
 source data is irrelevant considering the model's vision resolution, however, all of the data samples were from **archaeological 
@@ -75,19 +75,19 @@ arrowheads, and rocks formerly drawn by hand and later illustrated with digital 
 
 ### Categories 🏷️
 
-|      Label️ |  Ratio  | Description                                                                   |
-|------------:|:-------:|:------------------------------------------------------------------------------|
-|    **DRAW** |     11.89% | **📈 - drawings, maps, paintings with text**                                  |
-|  **DRAW_L** |     8.17%  | **📈📏 - drawings, etc with a table legend or inside tabular layout / forms** |
-| **LINE_HW** |  5.99%  | **✏️📏 - handwritten text lines inside tabular layout / forms**               |
-|  **LINE_P** |     6.06%  | **📏 - printed text lines inside tabular layout / forms**                     |
-|  **LINE_T** |     13.39% | **📏 - machine typed text lines inside tabular layout / forms**               |
-|   **PHOTO** |     10.21% | **🌄 - photos with text**                                                     |
-| **PHOTO_L** |  7.86%  | **🌄📏 - photos inside tabular layout / forms or with a tabular annotation**  |
-|    **TEXT** |     8.58%  | **📰 - mixed types of printed and handwritten texts**                         |
-| **TEXT_HW** |  7.36%  | **✏️📄 - only handwritten text**                                              |
-|  **TEXT_P** |     6.95%  | **📄 - only printed text**                                                    |
-|  **TEXT_T** |     13.53% | **📄 - only machine typed text**                                              |
+|      Label️ |   Ratio    | Description                                                                   |
+|------------:|:----------:|:------------------------------------------------------------------------------|
+|    **DRAW** |   11.89%   | **📈 - drawings, maps, paintings with text**                                  |
+|  **DRAW_L** |   8.17%    | **📈📏 - drawings, etc with a table legend or inside tabular layout / forms** |
+| **LINE_HW** |   5.99%    | **✏️📏 - handwritten text lines inside tabular layout / forms**               |
+|  **LINE_P** |   6.06%    | **📏 - printed text lines inside tabular layout / forms**                     |
+|  **LINE_T** |   13.39%   | **📏 - machine typed text lines inside tabular layout / forms**               |
+|   **PHOTO** |   10.21%   | **🌄 - photos with text**                                                     |
+| **PHOTO_L** |   7.86%    | **🌄📏 - photos inside tabular layout / forms or with a tabular annotation**  |
+|    **TEXT** |   8.58%    | **📰 - mixed types of printed and handwritten texts**                         |
+| **TEXT_HW** |   7.36%    | **✏️📄 - only handwritten text**                                              |
+|  **TEXT_P** |   6.95%    | **📄 - only printed text**                                                    |
+|  **TEXT_T** |   13.53%   | **📄 - only machine typed text**                                              |
 
 The categories were chosen to sort the pages by the following criterion: 
 
@@ -244,8 +244,8 @@ optionally change `top_N` and `batch` in the `[SETUP]` section.
 
 ### Page processing 📄
 
-The following prediction should be run using `-f` or `--file` flag with the path argument. Optionally, 
-you can use `-tn` or `--topn` flag with the number of guesses you want to get, and also `-m` or 
+The following prediction should be run using the `-f` or `--file` flag with the path argument. Optionally, 
+you can use the `-tn` or `--topn` flag with the number of guesses you want to get, and also the `-m` or 
 `--model` flag with the path to the model folder argument. 
 
 <details>
@@ -277,7 +277,7 @@ is used. The same flags for the number of guesses and the model folder path as f
 processing can be used. In addition, 2 directory-specific flags  `--inner` and `--raw` are available. 
 
 > [!CAUTION]
-> You must either explicitly set `-d` flag's argument or use `--dir` flag (calling for the preset in 
+> You must either explicitly set the `-d` flag's argument or use the `--dir` flag (calling for the preset in 
 > `[INPUT]` section default value of the input directory) to process PNG files on the directory
 > level, otherwise, nothing will happen
 
@@ -428,9 +428,9 @@ the process is provided below.
 Most of the changeable variables are in the [config.txt](config.txt) ⚙ file, specifically,
 in the `[TRAIN]`, `[HF]`, and `[SETUP]` sections. 
 
-In these sections you will find many boolean variables that can be changed from the default `False` 
+In the dev sections of the configuration ⚙ file, you will find many boolean variables that can be changed from the default `False` 
 state to `True`, yet it's recommended to awaken those variables solely through the specific 
-**commend line flags implemented for each of these boolean variables**.
+**command line flags implemented for each of these boolean variables**.
 
 For more detailed training process adjustments refer to the related functions in [classifier.py](classifier.py) 📎 
 file, where you will find some predefined values not used in the [run.py](run.py) 📎 file.
@@ -499,13 +499,13 @@ You are free to play with the learning rate right in the training function argum
 yet warmup ratio and other hyperparameters are accessible only through the [classifier.py](classifier.py) 📎 file.
 
 Finally, when your model is trained and you are happy with its performance tests, you can uncomment a code line
-in the [run.py](run.py) 📎 file for HF 😊 hub model push. This functionality is already implemented and can be
-accessed through the **--hf** flag using set in the `[HF]` section values of `token` and `repo_name` variables.
+in the [run.py](run.py) 📎 file for HF 😊 hub model push. This functionality has already been implemented and can be
+accessed through the **--hf** flag using the values set in the `[HF]` section for the `token` and `repo_name` variables.
 
 > [!CAUTION]
 > Set your own `repo_name` to the empty one of yours on HF 😊 hub, then in the **Settings** of your HF 😊 account
-> find **Access Tokens** section and generate a new token - copy paste its value to the `token` variable. Before commiting 
-> those [config.txt](config.txt) ⚙ file changes via git replace full `token` value with its shortened version for security reasons.
+> find the **Access Tokens** section and generate a new token - copy and paste its value to the `token` variable. Before committing 
+> those [config.txt](config.txt) ⚙ file changes via git replace the full `token` value with its shortened version for security reasons.
 
 ----
 
@@ -659,7 +659,7 @@ Prepare a CSV table with exactly 3 columns:
 
 For **Windows** users, it's **NOT** recommended to use MS Excel for writing CSV tables, the free 
 alternative may be Apache's OpenOffice [^9]. As for **Unix** users, the default LibreCalc should be enough to 
-correctly write comma-separated CSV table.
+correctly write a comma-separated CSV table.
 
 <details>
 
