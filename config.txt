@@ -23,6 +23,6 @@ raw = False
 FOLDER_INPUT=./category_samples
 
 [HF]
-repo_name = k4tel/vit-historical-page
+repo_name = ufal/vit-historical-page
 token = hf_fAkS...OOnBajU
 use_hf = False

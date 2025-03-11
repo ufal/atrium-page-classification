@@ -40,9 +40,10 @@ The model was trained on the manually annotated dataset of historical documents,
 from the archival documents with paper sources that were scanned into digital form. 
 
 The images contain various combinations of texts ️📄, tables 📏, drawings 📈, and photos 🌄 - 
-categories 🏷️ described below were formed based on those archival documents.
+categories 🏷️ described below were formed based on those archival documents. Page examples can be found in
+the [category_samples](category_samples) 📁 directory.
 
-The key use case of the provided model and data processing pipeline is to classify an input PNG image from PDF scanned 
+The key **use case** of the provided model and data processing pipeline is to classify an input PNG image from PDF scanned 
 paper source into one of the categories - each responsible for the following content-specific data processing pipeline.
 
 In other words, when several APIs for different OCR subtasks are at your disposal - run this classifier first to 
@@ -59,8 +60,9 @@ Evaluation set (10% of all - same proportions categories 🏷️ as below) [mode
 Manual ✍ annotation was performed beforehand and took some time ⌛, the categories 🏷️ were formed from
 different sources of the archival documents originated in the 1920-2020 years span of time. 
 
-Disproportion of the categories 🏷️ is
-**NOT** intentional, but rather a result of the source data nature. 
+> [!NOTE]
+> Disproportion of the categories 🏷️ in both training data and provided [category_samples](category_samples) 📁 is
+> **NOT** intentional, but rather a result of the source data nature. 
 
 In total, several hundreds of separate PDF files were selected and split into PNG pages, some scanned documents 
 were one-page long and some were much longer (dozens and hundreds of pages). 
@@ -68,7 +70,8 @@ were one-page long and some were much longer (dozens and hundreds of pages).
 The specific content and language of the
 source data is irrelevant considering the model's vision resolution, however, all of the data samples were from **archaeological 
 reports** which may somehow affect the drawing detection preferences due to the common form of objects being ceramic pieces, 
-arrowheads, and rocks formerly drawn by hand and later illustrated with digital tools. 
+arrowheads, and rocks formerly drawn by hand and later illustrated with digital tools (examples can be found in
+[DRAW](category_samples%2FDRAW) 📁)
 
 ### Categories 🏷️
 
@@ -423,7 +426,11 @@ the process is provided below.
 </details>
 
 Most of the changeable variables are in the [config.txt](config.txt) ⚙ file, specifically,
-in the `[TRAIN]`, `[HF]`, and `[SETUP]` sections.
+in the `[TRAIN]`, `[HF]`, and `[SETUP]` sections. 
+
+In these sections you will find many boolean variables that can be changed from the default `False` 
+state to `True`, yet it's recommended to awaken those variables solely through the specific 
+**commend line flags implemented for each of these boolean variables**.
 
 For more detailed training process adjustments refer to the related functions in [classifier.py](classifier.py) 📎 
 file, where you will find some predefined values not used in the [run.py](run.py) 📎 file.
@@ -490,6 +497,15 @@ changed in the `[TRAIN]` section, plus `batch` in the `[SETUP]`section, of the [
 
 You are free to play with the learning rate right in the training function arguments called in the [run.py](run.py) 📎 file, 
 yet warmup ratio and other hyperparameters are accessible only through the [classifier.py](classifier.py) 📎 file.
+
+Finally, when your model is trained and you are happy with its performance tests, you can uncomment a code line
+in the [run.py](run.py) 📎 file for HF 😊 hub model push. This functionality is already implemented and can be
+accessed through the **--hf** flag using set in the `[HF]` section values of `token` and `repo_name` variables.
+
+> [!CAUTION]
+> Set your own `repo_name` to the empty one of yours on HF 😊 hub, then in the **Settings** of your HF 😊 account
+> find **Access Tokens** section and generate a new token - copy paste its value to the `token` variable. Before commiting 
+> those [config.txt](config.txt) ⚙ file changes via git replace full `token` value with its shortened version for security reasons.
 
 ----
 
