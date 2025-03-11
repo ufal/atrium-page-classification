@@ -24,6 +24,7 @@ preparation scripts for PDF to PNG conversion
     + [PNG pages annotation 🔎](#png-pages-annotation-)
     + [PNG pages sorting for training 📬](#png-pages-sorting-for-training-)
   * [For developers 🛠️](#for-developers-)
+    * [Training 💪 & Evaluation 🏆](#training---evaluation-)
   * [Contacts 📧](#contacts-)
   * [Acknowledgements 🙏](#acknowledgements-)
   * [Appendix 🤓](#appendix-)
@@ -683,7 +684,7 @@ state to `True`, yet it's recommended to awaken those variables solely through t
 For more detailed training process adjustments refer to the related functions in [classifier.py](classifier.py) 📎 
 file, where you will find some predefined values not used in the [run.py](run.py) 📎 file.
 
-### Training & Evaluation 
+### Training 💪 & Evaluation 🏆
 
 Minimal machine 🖥 requirements for slow prediction run and very slow train / evaluation:
 - **CPU** with a decent (above average) operational memory
@@ -692,7 +693,7 @@ Ideal machine 🖥 requirements for fast prediction and relatively fast train / 
 - **CPU** of some kind and memory size
 - **GPU** (for real CUDA [^10] support - better one of Nvidia's cards)
 
-Worth mentioning that efficient training is possible only with a CUDA-compatible GPU card.
+Worth mentioning that the efficient training is possible only with a CUDA-compatible GPU card.
 
 > [!NOTE]
 > The so-called CUDA support for Python's Pytorch library is supposed to be automatically installed
