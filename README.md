@@ -686,10 +686,15 @@ file, where you will find some predefined values not used in the [run.py](run.py
 
 ### Training 💪 & Evaluation 🏆
 
-Minimal machine 🖥 requirements for slow prediction run and very slow train / evaluation:
-- **CPU** with a decent (above average) operational memory
+> [!IMPORTANT]
+> For both training and evaluation, you must make sure that the training data directory is set right in the 
+> [config.txt](config.txt) ⚙ and it contains category 🏷️ subdirectories with images inside. 
+> Names of the category 🏷️ subdirectories become actual label names and replace the default categories 🏷️ list
 
-Ideal machine 🖥 requirements for fast prediction and relatively fast train / evaluation:
+Minimal machine 🖥 requirements for slow prediction run and very slow training / evaluation:
+- **CPU** with a decent (above average) operational memory size
+
+Ideal machine 🖥 requirements for fast prediction and relatively fast training / evaluation:
 - **CPU** of some kind and memory size
 - **GPU** (for real CUDA [^10] support - better one of Nvidia's cards)
 
@@ -703,43 +708,10 @@ Worth mentioning that the efficient training is possible only with a CUDA-compat
 
 To train the model run: 
 
-    python3 run.py --train  
+    python3 run.py --train
 
-To evaluate the model, create a confusion matrix plot 📊 and additionally get raw class probabilities table run: 
-
-    python3 run.py --eval --raw
-
-> [!IMPORTANT]
-> In both cases, you must make sure that the training data directory is set right in the 
-> [config.txt](config.txt) ⚙ and it contains category 🏷️ subdirectories with images inside. 
-> Names of the category 🏷️ subdirectories become actual label names and replace the default categories 🏷️ list.
-
-After training is complete the model will be saved to its separate subdirectory in the `model` directory, by default, 
-the naming of the model folder corresponds to the length of its training batch dataloader and the number of epochs. 
-
-Since the length of the dataloader depends not only on the size of the dataset but also on the preset batch size, you can change 
-the `batch` variable value in the [config.txt](config.txt) ⚙ file to train a differently named model on the same dataset.
-Alternatively, adjust the **model naming generation** in the [classifier.py](classifier.py)'s 📎 training function.
-
-During training image transformations were applied sequentially with a 50% chance.
-
-<details>
-
-<summary>Image preprocessing steps 👀</summary>
-
-* transforms.ColorJitter(**brightness** 0.5)
-* transforms.ColorJitter(**contrast** 0.5)
-* transforms.ColorJitter(**saturation** 0.5)
-* transforms.ColorJitter(**hue** 0.5)
-* transforms.Lambda(lambda img: ImageEnhance.**Sharpness**(img).enhance(random.uniform(0.5, 1.5)))
-* transforms.Lambda(lambda img: img.filter(ImageFilter.**GaussianBlur**(radius=random.uniform(0, 2))))
-
-</details>
-
-> [!NOTE]
-> No rotation, reshaping, or flipping was applied to the images, mainly color manipulations were used. The 
-> reason behind this are pages containing specific form types, general text orientation on the pages, and the default
-> reshape of the model input to the square 224x224 resolution images. 
+The training process has automatic progress logging into console, and should take approximately 5-12h 
+depending on your machine's 🖥 GPU memory size and prepared dataset size. 
 
 <details>
 
@@ -764,9 +736,55 @@ changed in the `[TRAIN]` section, plus `batch` in the `[SETUP]`section, of the [
 You are free to play with the learning rate right in the training function arguments called in the [run.py](run.py) 📎 file, 
 yet warmup ratio and other hyperparameters are accessible only through the [classifier.py](classifier.py) 📎 file.
 
+**Playing with training hyperparameters** is
+recommended only if training loss (error rate) descends too slow to reach 0.001-0.001
+values by the end of the 3rd (last by default) epoch.
+
+During training image transformations were applied sequentially with a 50% chance.
+
+> [!NOTE]
+> No rotation, reshaping, or flipping was applied to the images, mainly color manipulations were used. The 
+> reason behind this are pages containing specific form types, general text orientation on the pages, and the default
+> reshape of the model input to the square 224x224 resolution images. 
+
+<details>
+
+<summary>Image preprocessing steps 👀</summary>
+
+* transforms.ColorJitter(**brightness** 0.5)
+* transforms.ColorJitter(**contrast** 0.5)
+* transforms.ColorJitter(**saturation** 0.5)
+* transforms.ColorJitter(**hue** 0.5)
+* transforms.Lambda(lambda img: ImageEnhance.**Sharpness**(img).enhance(random.uniform(0.5, 1.5)))
+* transforms.Lambda(lambda img: img.filter(ImageFilter.**GaussianBlur**(radius=random.uniform(0, 2))))
+
+</details>
+
+After training is complete the model will be saved to its separate subdirectory in the `model` directory, by default, 
+the naming of the model folder corresponds to the length of its training batch dataloader and the number of epochs - 
+for example `model_<S/B>_E` where `E` is the number of epochs, `B` is the batch size, and `S` is the size of your 
+**training** dataset.
+
+> [!IMPORTANT] 
+> Since the length of the dataloader depends not only on the size of the dataset but also on the preset batch size, you can change 
+> the `batch` variable value in the [config.txt](config.txt) ⚙ file to train a differently named model on the same dataset.
+> Alternatively, adjust the **model naming generation** in the [classifier.py](classifier.py)'s 📎 training function.
+
+After the fine-tuned model is saved, you can explicitly call for evaluation of the model to get a table of TOP-N classes for
+the randomly composed subset (10% in size) of the training page folder. 
+
+To do this in the unchanged configuration ⚙, create a 
+confusion matrix plot 📊 and additionally get raw class probabilities table run: 
+
+    python3 run.py --eval --raw
+
+**OR** when you don't remember the specific `[SETUP]` and `[TRAIN]` variables' values for the trained model, you can use:
+
+    python3 run.py --eval -m './model/model_<your_model_number_code>'
+
 Finally, when your model is trained and you are happy with its performance tests, you can uncomment a code line
 in the [run.py](run.py) 📎 file for HF 😊 hub model push. This functionality has already been implemented and can be
-accessed through the **--hf** flag using the values set in the `[HF]` section for the `token` and `repo_name` variables.
+accessed through the `--hf` flag using the values set in the `[HF]` section for the `token` and `repo_name` variables.
 
 > [!CAUTION]
 > Set your own `repo_name` to the empty one of yours on HF 😊 hub, then in the **Settings** of your HF 😊 account
