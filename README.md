@@ -5,7 +5,7 @@
 **Scope:** Processing of images, training / evaluation of ViT model,
 input file/directory processing, class 🏷️ (category) results of top
 N predictions output, predictions summarizing into a tabular format, 
-HF 😊 hub [^1] support for the model, multiplatform (Win/Lin) data 
+HF 😊 hub [^1] 🔗 support for the model, multiplatform (Win/Lin) data 
 preparation scripts for PDF to PNG conversion
 
 ### Table of contents 📑
@@ -40,7 +40,7 @@ The model was trained on the manually annotated dataset of historical documents,
 from the archival documents with paper sources that were scanned into digital form. 
 
 The images contain various combinations of texts ️📄, tables 📏, drawings 📈, and photos 🌄 - 
-categories 🏷️ described below were formed based on those archival documents. Page examples can be found in
+categories 🏷️ described [below](#categories-) were formed based on those archival documents. Page examples can be found in
 the [category_samples](category_samples) 📁 directory.
 
 The key **use case** of the provided model and data processing pipeline is to classify an input PNG image from PDF scanned 
@@ -55,7 +55,7 @@ materials yet to be extracted from the page images.
 
 Training set of the model: **8950** images 
 
-Evaluation set (10% of all - same proportions categories 🏷️ as below) [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎:  **995** images
+Evaluation set (10% of all - same proportion in categories 🏷️ as [below](#categories-)) [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎:  **995** images
 
 Manual ✍ annotation was performed beforehand and took some time ⌛, the categories 🏷️ were formed from
 different sources of the archival documents originated in the 1920-2020 years span of time. 
@@ -71,7 +71,7 @@ The specific content and language of the
 source data is irrelevant considering the model's vision resolution, however, all of the data samples were from **archaeological 
 reports** which may somehow affect the drawing detection preferences due to the common form of objects being ceramic pieces, 
 arrowheads, and rocks formerly drawn by hand and later illustrated with digital tools (examples can be found in
-[DRAW](category_samples%2FDRAW) 📁)
+[category_samples/DRAW](category_samples%2FDRAW) 📁)
 
 ### Categories 🏷️
 
@@ -106,7 +106,7 @@ which is also available as a testing subset of the training data (can be used to
 ## How to install 🔧
 
 The easiest way to obtain the model would be to use the HF 😊 hub repository [^1] 🔗 that can be easily accessed 
-via this project. Step-by-step instructions on this program installation are provided below.
+via this project. Step-by-step instructions on this program installation are provided here.
 
 > [!WARNING]
 > Make sure you have **Python version 3.10+** installed on your machine 💻. 
@@ -143,7 +143,7 @@ To test that everything works okay and see the flag descriptions call for `--hel
 
     python3 run.py -h
 
-To **pull the model from the HF 😊 hub repository [^1] directly**, load the model via:
+To **pull the model from the HF 😊 hub repository [^1] 🔗**, load the model via:
 
     python3 run.py --hf
 
@@ -151,7 +151,7 @@ You should see a message about loading the model from the hub and then saving it
 your machine 🖥. 
 
 Only after you have obtained the trained model files (takes less time ⌛ than installing dependencies), 
-you can play with any commands provided below.
+you can play with any commands provided [below](#how-to-run-).
 
 > [!IMPORTANT]
 > Unless you already have the model files in the `model/model_version`
@@ -410,7 +410,7 @@ cases are expected to be at the top.
 ## For developers 🛠️
 
 Use this project code as a base for your own image classification tasks. Guide on the key phases of 
-the process is provided below.
+the process is provided here.
 
 <details>
 
@@ -590,7 +590,7 @@ containing page-specific images with a similar structure:
 
 > [!NOTE]
 > The page numbers are padded with zeros (on the left) to match the length of the last page number in each PDF file,
-> this is done automatically by the pdftoppm command used on **Unix**. While ImageMagick's [^5] convert command used 
+> this is done automatically by the pdftoppm command used on **Unix**. While ImageMagick's [^5] 🔗 convert command used 
 > on **Windows** does **NOT** pad the page numbers.
 
 <details>
@@ -638,7 +638,7 @@ subdirectories of pages).
 
 </details>
 
-The reason for such movement is simply convenience in the following annotation process. 
+The reason for such movement is simply convenience in the following annotation process [below](#png-pages-annotation-). 
 These changes are cared for in the next [sort.sh](data_scripts%2Funix%2Fsort.sh) 📎 and [sort.bat](data_scripts%2Fwindows%2Fsort.bat) 📎 scripts as well.
 
 ### PNG pages annotation 🔎
@@ -658,7 +658,7 @@ Prepare a CSV table with exactly 3 columns:
 > Prepare equal-in-size categories 🏷️ if possible, so that the model will not be biased towards the over-represented labels 🏷️
 
 For **Windows** users, it's **NOT** recommended to use MS Excel for writing CSV tables, the free 
-alternative may be Apache's OpenOffice [^9]. As for **Unix** users, the default LibreCalc should be enough to 
+alternative may be Apache's OpenOffice [^9] 🔗. As for **Unix** users, the default LibreCalc should be enough to 
 correctly write a comma-separated CSV table.
 
 <details>
@@ -746,14 +746,14 @@ set a path to the data folder.
 
 ## Contacts 📧
 
-**For support write to:** lutsai.k@gmail.com responsible for this repository [^8]
+**For support write to:** lutsai.k@gmail.com responsible for this GitHub repository [^8] 🔗
 
 ## Acknowledgements 🙏
 
 - **Developed by** UFAL [^7] 👥
 - **Funded by** ATRIUM [^4]  💰
-- **Shared by** ATRIUM [^4] & UFAL [^7]
-- **Model type:** fine-tuned ViT with a 224x224 resolution size [^2]
+- **Shared by** ATRIUM [^4] & UFAL [^7] 🔗
+- **Model type:** fine-tuned ViT with a 224x224 resolution size [^2] 🔗
 
 **©️ 2022 UFAL & ATRIUM**
 
