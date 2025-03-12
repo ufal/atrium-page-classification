@@ -139,7 +139,14 @@ and then inside your virtual environment, you should install Python libraries (t
 
 </details>
 
-> [!NOTE]
+Minimal machine 🖥 requirements for slow prediction run and very slow training / evaluation:
+- **CPU** with a decent (above average) operational memory size
+
+Ideal machine 🖥 requirements for fast prediction and relatively fast training / evaluation:
+- **CPU** of some kind and memory size
+- **GPU** (for real CUDA [^10] support - better one of Nvidia's cards)
+
+> [!CAUTION]
 > Up to **1 GB of space for model** files and checkpoints is needed, and up to **7 GB 
 > of space for the Python libraries** (Pytorch and its dependencies, etc)
 
@@ -148,7 +155,15 @@ Installation of Python dependencies can be done via:
     pip install -r requirements.txt
 
 After the dependencies installation is finished successfully, in the same virtual environment, you can
-run the Python program. To test that everything works okay and see the flag 
+run the Python program. 
+
+> [!NOTE]
+> The so-called CUDA support for Python's Pytorch library is supposed to be automatically installed
+> at the `pip install -r requirements.txt` stage when the presence of the GPU on your machine 🖥
+> is checked for the first time, later it's also checked every time before the model initialization
+> (for training, evaluation or prediction run).
+
+To test that everything works okay and see the flag 
 descriptions call for `--help` ❓:
 
     python3 run.py -h
@@ -173,7 +188,7 @@ After the model is downloaded, you should see a similar file structure:
 
 <details>
 
-<summary>Full project tree 🌳 files structure 👀</summary>
+<summary>Initial project tree 🌳 files structure 👀</summary>
     
     /local/folder/for/this/project
     ├── model
@@ -182,22 +197,12 @@ After the model is downloaded, you should see a similar file structure:
             ├── model.safetensors
             └── preprocessor_config.json
     ├── checkpoint
-            ├── models--google--vit-base-patch16-224
-                ├── blobs
-                ├── snapshots
-                └── refs
-            └── .locs
-                └── models--google--vit-base-patch16-224
-    ├── model_output
-        ├── checkpoint-version
-            ├── config.json
-            ├── model.safetensors
-            ├── trainer_state.json
-            ├── optimizer.pt
-            ├── scheduler.pt
-            ├── rng_state.pth
-            └── training_args.bin
-        └── ...
+        ├── models--google--vit-base-patch16-224
+            ├── blobs
+            ├── snapshots
+            └── refs
+        └── .locs
+            └── models--google--vit-base-patch16-224
     ├── data_scripts
         ├── windows
             ├── move_single.bat
@@ -421,6 +426,9 @@ cases are expected to be at the top.
 ----
 
 ## Data preparation 📦
+
+You can use this section a guide for creating your own dataset of pages, which will be suitable for
+further model processing.
 
 There are useful multiplatform scripts in the [data_scripts](data_scripts) 📁 folder for the whole process of data preparation. 
 
@@ -692,20 +700,11 @@ file, where you will find some predefined values not used in the [run.py](run.py
 > [config.txt](config.txt) ⚙ and it contains category 🏷️ subdirectories with images inside. 
 > Names of the category 🏷️ subdirectories become actual label names and replace the default categories 🏷️ list
 
-Minimal machine 🖥 requirements for slow prediction run and very slow training / evaluation:
-- **CPU** with a decent (above average) operational memory size
-
-Ideal machine 🖥 requirements for fast prediction and relatively fast training / evaluation:
+Machine 🖥 requirements for training / evaluation:
 - **CPU** of some kind and memory size
 - **GPU** (for real CUDA [^10] support - better one of Nvidia's cards)
 
 Worth mentioning that the efficient training is possible only with a CUDA-compatible GPU card.
-
-> [!NOTE]
-> The so-called CUDA support for Python's Pytorch library is supposed to be automatically installed
-> at the `pip install -r requirements.txt` stage when the presence of the GPU on your machine 🖥
-> is checked for the first time, later it's also checked every time before the model initialization
-> (for training, evaluation or prediction).
 
 To train the model run: 
 
@@ -766,6 +765,53 @@ the naming of the model folder corresponds to the length of its training batch d
 for example `model_<S/B>_E` where `E` is the number of epochs, `B` is the batch size, and `S` is the size of your 
 **training** dataset.
 
+<details>
+
+<summary>Full project tree 🌳 files structure 👀</summary>
+    
+    /local/folder/for/this/project
+    ├── model
+        ├── model_version1 
+            ├── config.json
+            ├── model.safetensors
+            └── preprocessor_config.json
+        ├── model_version2
+        └── ...
+    ├── checkpoint
+        ├── models--google--vit-base-patch16-224
+            ├── blobs
+            ├── snapshots
+            └── refs
+        └── .locs
+            └── models--google--vit-base-patch16-224
+    ├── model_output
+        ├── checkpoint-version1
+            ├── config.json
+            ├── model.safetensors
+            ├── trainer_state.json
+            ├── optimizer.pt
+            ├── scheduler.pt
+            ├── rng_state.pth
+            └── training_args.bin
+        ├── checkpoint-version2
+        └── ...
+    ├── data_scripts
+        ├── windows
+        └── unix
+    ├── result
+        ├── plots
+        └── tables
+    ├── category_samples
+        ├── DRAW
+        ├── DRAW_L
+        └── ...
+    ├── run.py
+    ├── classifier.py
+    ├── utils.py
+    └── ...
+
+</details>
+
 > [!IMPORTANT] 
 > Since the length of the dataloader depends not only on the size of the dataset but also on the preset batch size, you can change 
 > the `batch` variable value in the [config.txt](config.txt) ⚙ file to train a differently named model on the same dataset.
@@ -797,6 +843,9 @@ accessed through the `--hf` flag using the values set in the `[HF]` section for 
 ## Contacts 📧
 
 **For support write to:** lutsai.k@gmail.com responsible for this GitHub repository [^8] 🔗
+
+Information about the authors of this project, including their ORCIDs, can be found in the
+[CITATION.cff](CITATION.cff) 📎 file.
 
 ## Acknowledgements 🙏
 
