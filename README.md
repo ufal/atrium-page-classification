@@ -3,7 +3,7 @@
 ### Goal: solve a task of archive page images sorting (for their further content-based processing)
 
 **Scope:** Processing of images, training / evaluation of ViT model,
-input file/directory processing, class 🏷️ (category) results of top
+input file/directory processing, class 🪧  (category) results of top
 N predictions output, predictions summarizing into a tabular format, 
 HF 😊 hub [^1] 🔗 support for the model, multiplatform (Win/Lin) data 
 preparation scripts for PDF to PNG conversion
@@ -12,9 +12,9 @@ preparation scripts for PDF to PNG conversion
 
   * [Model description 📇](#model-description-)
     + [Data 📜](#data-)
-    + [Categories 🏷️](#categories-)
+    + [Categories 🪧️](#categories--)
   * [How to install 🔧](#how-to-install-)
-  * [How to run ▶️️ prediction](#how-to-run--prediction)
+  * [How to run prediction modes 🪄](#how-to-run-prediction--modes)
     + [Page processing 📄](#page-processing-)
     + [Directory processing 📁](#directory-processing-)
   * [Results 📊](#results-)
@@ -23,7 +23,7 @@ preparation scripts for PDF to PNG conversion
     + [PDF to PNG 📚](#pdf-to-png-)
     + [PNG pages annotation 🔎](#png-pages-annotation-)
     + [PNG pages sorting for training 📬](#png-pages-sorting-for-training-)
-  * [Developer 🛠 notes](#developer--notes)
+  * [For developers 🪛](#for-developers-)
     * [Training 💪 & Evaluation 🏆](#training---evaluation-)
   * [Contacts 📧](#contacts-)
   * [Acknowledgements 🙏](#acknowledgements-)
@@ -41,7 +41,7 @@ The model was trained on the manually ✍️ annotated dataset of historical doc
 from the archival documents with paper sources that were scanned into digital form. 
 
 The images contain various combinations of texts ️📄, tables 📏, drawings 📈, and photos 🌄 - 
-categories 🏷️ described [below](#categories-) were formed based on those archival documents. Page examples can be found in
+categories 🪧  described [below](#categories-) were formed based on those archival documents. Page examples can be found in
 the [category_samples](category_samples) 📁 directory.
 
 The key **use case** of the provided model and data processing pipeline is to classify an input PNG image from PDF scanned 
@@ -56,17 +56,17 @@ materials yet to be extracted from the page images.
 
 > **Training** 💪 set of the model: **8950** images 
 > 
-> (90% of all - proportion in categories 🏷️ tabulated [below](#categories-))
+> (90% of all - proportion in categories 🪧  tabulated [below](#categories-))
 
 > **Evaluation** 🏆 set:  **995** images
 > 
-> (10% of all - same proportion in categories 🏷️ as [below](#categories-)) demonstrated in [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎
+> (10% of all - same proportion in categories 🪧  as [below](#categories-)) demonstrated in [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎
 
-Manual ✍️ annotation was performed beforehand and took some time ⌛, the categories 🏷️ were formed from
+Manual ✍️ annotation was performed beforehand and took some time ⌛, the categories 🪧  were formed from
 different sources of the archival documents originated in the 1920-2020 years span. 
 
 > [!NOTE]
-> Disproportion of the categories 🏷️ in both training data and provided [category_samples](category_samples) 📁 is
+> Disproportion of the categories 🪧  in both training data and provided [category_samples](category_samples) 📁 is
 > **NOT** intentional, but rather a result of the source data nature. 
 
 In total, several thousands of separate PDF files were selected and split into PNG pages, ~3720 of scanned documents 
@@ -79,7 +79,7 @@ reports** which may somehow affect the drawing detection preferences due to the 
 arrowheads, and rocks formerly drawn by hand and later illustrated with digital tools (examples can be found in
 [category_samples/DRAW](category_samples%2FDRAW) 📁)
 
-### Categories 🏷️
+### Categories 🪧 
 
 |    Label️ | Ratio  | Description                                                                   |
 |----------:|:------:|:------------------------------------------------------------------------------|
@@ -104,7 +104,7 @@ The categories were chosen to sort the pages by the following criteria:
 The reasons for such distinction are different processing pipelines for different types of pages, which would be
 applied after the classification.
 
-Examples of pages sorted by category 🏷️ can be found in the [category_samples](category_samples) 📁 directory
+Examples of pages sorted by category 🪧  can be found in the [category_samples](category_samples) 📁 directory
 which is also available as a testing subset of the training data (can be used to run evaluation and prediction with a
 necessary `--inner` flag).
 
@@ -247,7 +247,7 @@ only after launching the model.
 
 ----
 
-## How to run ▶️ prediction
+## How to run prediction 🪄 modes
 
 There are two main ways to run the program:
 
@@ -291,7 +291,7 @@ to run a single PNG file classification - the output will be in the console.
 </details>
 
 > [!NOTE]
-> Console output and all result tables contain **normalized** scores for the highest N class 🏷️ scores
+> Console output and all result tables contain **normalized** scores for the highest N class 🪧  scores
 
 ### Directory processing 📁
 
@@ -323,7 +323,7 @@ The classification results of PNG pages collected from the directory will be sav
 folders defined in `[OUTPUT]` section of [config.txt](config.txt) ⚙ file.
 
 > [!TIP]
-> To additionally get raw class 🏷️ probabilities from the model along with the TOP-N results, use
+> To additionally get raw class 🪧  probabilities from the model along with the TOP-N results, use
 > `--raw` flag when processing the directory (**NOT** available for single file processing)
  
 > [!TIP]
@@ -366,7 +366,7 @@ Evaluation set's accuracy (**Top-1**):  **97.3%** 🏆
 
 </details>
 
-Confusion matrices provided above show the diagonal of matching gold and predicted categories 🏷️ 
+Confusion matrices provided above show the diagonal of matching gold and predicted categories 🪧  
 while their off-diagonal elements show inter-class errors. By those graphs you can judge what type
 of mistakes you should expect from your model. 
 
@@ -401,12 +401,12 @@ With the following **columns** 📋:
 
 - **FILE** - name of the file
 - **PAGE** - number of the page
-- **CLASS-N** - label of the category 🏷️, guess TOP-N 
-- **SCORE-N** - score of the category 🏷️, guess TOP-N
+- **CLASS-N** - label of the category 🪧 , guess TOP-N 
+- **SCORE-N** - score of the category 🪧 , guess TOP-N
 
 and optionally
  
-- **TRUE** - actual label of the category 🏷️
+- **TRUE** - actual label of the category 🪧 
 
 </details>
 
@@ -424,8 +424,8 @@ With the following **columns** 📋:
 
 - **FILE** - name of the file
 - **PAGE** - number of the page
-- **<CATEGORY_LABEL>** - separate columns for each of the defined classes 🏷️
-- **TRUE** - actual label of the category 🏷️
+- **<CATEGORY_LABEL>** - separate columns for each of the defined classes 🪧 
+- **TRUE** - actual label of the category 🪧 
 
 </details>
 
@@ -582,10 +582,10 @@ Prepare a CSV table with exactly 3 columns:
 
 - **FILE** - name of the PDF document which was the source of this page
 - **PAGE** - number of the page (**NOT** padded with 0s)
-- **CLASS** - label of the category 🏷️
+- **CLASS** - label of the category 🪧 
 
 > [!TIP]
-> Prepare equal-in-size categories 🏷️ if possible, so that the model will not be biased towards the over-represented labels 🏷️
+> Prepare equal-in-size categories 🪧  if possible, so that the model will not be biased towards the over-represented labels 🪧 
 
 For **Windows** users, it's **NOT** recommended to use MS Excel for writing CSV tables, the free 
 alternative may be Apache's OpenOffice [^9] 🔗. As for **Unix** users, the default LibreCalc should be enough to 
@@ -606,7 +606,7 @@ correctly write a comma-separated CSV table.
 ### PNG pages sorting for training 📬
 
 Cluster the annotated data into separate folders using the [sort.sh](data_scripts%2Funix%2Fsort.sh) 📎 or [sort.bat](data_scripts%2Fwindows%2Fsort.bat) 📎 
-script to copy data from the source folder to the training folder where each category 🏷️ has its own subdirectory.
+script to copy data from the source folder to the training folder where each category 🪧  has its own subdirectory.
 This division of PNG images will be used as gold data in training and evaluation.
 
 > [!WARNING]
@@ -669,14 +669,14 @@ set a path to the data folder.
 
 > [!TIP]
 > In the [config.txt](config.txt) ⚙️ file tweak the parameter of `max_categ`
-> for a maximum number of samples per category 🏷️, in case you have **over-represented labels** significantly dominating in size.
-> Set `max_categ` higher than the number of samples in the largest category 🏷️ to use **all** data samples.
+> for a maximum number of samples per category 🪧 , in case you have **over-represented labels** significantly dominating in size.
+> Set `max_categ` higher than the number of samples in the largest category 🪧  to use **all** data samples.
 
 From this point, you can start model training or evaluation process.
 
 ----
 
-## Developer 🛠️ notes
+## For developers 🪛
 
 You can use this project code as a base for your own image classification tasks. Guide on the key phases of 
 the process is provided here.
@@ -708,8 +708,8 @@ file, where you will find some predefined values not used in the [run.py](run.py
 
 > [!IMPORTANT]
 > For both training and evaluation, you must make sure that the training pages directory is set right in the 
-> [config.txt](config.txt) ⚙ and it contains category 🏷️ subdirectories with images inside. 
-> Names of the category 🏷️ subdirectories become actual label names and replace the default categories 🏷️ list
+> [config.txt](config.txt) ⚙ and it contains category 🪧  subdirectories with images inside. 
+> Names of the category 🪧  subdirectories become actual label names and replace the default categories 🪧  list
 
 Device 🖥️ requirements for training / evaluation:
 - **CPU** of some kind and memory size
@@ -900,7 +900,7 @@ Information about the authors of this project, including their ORCIDs, can be fo
 <summary>README emoji codes 👀</summary>
 
 - 🖥 - your computer
-- 🏷️ - label/category/class
+- 🪧  - label/category/class
 - 📄 - page/file
 - 📁 - folder/directory
 - 📊 - generated diagrams or plots
@@ -934,7 +934,7 @@ Information about the authors of this project, including their ORCIDs, can be fo
 
 <summary>Decorative emojis 👀</summary>
 
-- 📇📜🔧▶️🛠️📦🔎📚🙏👥📬🤓 - decorative purpose only
+- 📇📜🔧▶🪄🪛️📦🔎📚🙏👥📬🤓 - decorative purpose only
 
 </details>
 
