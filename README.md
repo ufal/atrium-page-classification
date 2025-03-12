@@ -12,7 +12,7 @@ preparation scripts for PDF to PNG conversion
 
   * [Model description 📇](#model-description-)
     + [Data 📜](#data-)
-    + [Categories 🪧️](#categories--)
+    + [Categories 🪧️](#categories-)
   * [How to install 🔧](#how-to-install-)
   * [How to run prediction modes 🪄](#how-to-run-prediction--modes)
     + [Page processing 📄](#page-processing-)
@@ -33,45 +33,45 @@ preparation scripts for PDF to PNG conversion
 
 ## Model description 📇
 
-🔲 Fine-tuned model repository: **UFAL's vit-historical-page** [^1] 🔗
+🔲 **Fine-tuned** model repository: UFAL's **vit-historical-page** [^1] 🔗
 
-🔳 Base model repository: **Google's vit-base-patch16-224** [^2] 🔗
+🔳 **Base** model repository: Google's **vit-base-patch16-224** [^2] 🔗
 
 The model was trained on the manually ✍️ annotated dataset of historical documents, in particular, images of pages 
 from the archival documents with paper sources that were scanned into digital form. 
 
 The images contain various combinations of texts ️📄, tables 📏, drawings 📈, and photos 🌄 - 
-categories 🪧  described [below](#categories-) were formed based on those archival documents. Page examples can be found in
+categories 🪧 described [below](#categories-) were formed based on those archival documents. Page examples can be found in
 the [category_samples](category_samples) 📁 directory.
 
 The key **use case** of the provided model and data processing pipeline is to classify an input PNG image from PDF scanned 
 paper source into one of the categories - each responsible for the following content-specific data processing pipeline.
 
-In other words, when several APIs for different OCR subtasks are at your disposal - run this classifier first to 
-mark the input data as machine typed (old style fonts) / hand-written ✏️ / just printed plain ️📄 text 
-or structured in tabular 📏 format text, as well as to mark the presence of the printed 🌄 or drawn 📈 graphic 
-materials yet to be extracted from the page images.
+> In other words, when several APIs for different OCR subtasks are at your disposal - run this classifier first to 
+> mark the input data as machine typed (old style fonts) / hand-written ✏️ / just printed plain ️📄 text 
+> or structured in tabular 📏 format text, as well as to mark the presence of the printed 🌄 or drawn 📈 graphic 
+> materials yet to be extracted from the page images.
 
 ### Data 📜
 
-> **Training** 💪 set of the model: **8950** images 
-> 
-> (90% of all - proportion in categories 🪧  tabulated [below](#categories-))
+**Training** 💪 set of the model: **8950** images 
 
-> **Evaluation** 🏆 set:  **995** images
-> 
-> (10% of all - same proportion in categories 🪧  as [below](#categories-)) demonstrated in [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎
+> **90% of all** - proportion in categories 🪧 tabulated [below](#categories-)
+
+**Evaluation** 🏆 set:  **995** images
+
+> **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎
 
 Manual ✍️ annotation was performed beforehand and took some time ⌛, the categories 🪧  were formed from
 different sources of the archival documents originated in the 1920-2020 years span. 
 
 > [!NOTE]
-> Disproportion of the categories 🪧  in both training data and provided [category_samples](category_samples) 📁 is
+> Disproportion of the categories 🪧 in both training data and provided evaluation [category_samples](category_samples) 📁 is
 > **NOT** intentional, but rather a result of the source data nature. 
 
 In total, several thousands of separate PDF files were selected and split into PNG pages, ~3720 of scanned documents 
 were one-page long which covered around a third of all data, and ~120 of them were much longer (dozens and hundreds 
-of pages) covering more than 60% of data. 
+of pages) covering the rest (more than 60% of all annotated data). 
 
 The specific content and language of the
 source data is irrelevant considering the model's vision resolution, however, all of the data samples were from **archaeological 
@@ -79,7 +79,7 @@ reports** which may somehow affect the drawing detection preferences due to the 
 arrowheads, and rocks formerly drawn by hand and later illustrated with digital tools (examples can be found in
 [category_samples/DRAW](category_samples%2FDRAW) 📁)
 
-### Categories 🪧 
+### Categories 🪧
 
 |    Label️ | Ratio  | Description                                                                   |
 |----------:|:------:|:------------------------------------------------------------------------------|
@@ -101,10 +101,10 @@ The categories were chosen to sort the pages by the following criteria:
 - **type of text** 📄 (handwritten ✏️️ OR printed OR typed OR mixed 📰)
 - **presence of tabular layout / forms** 📏
 
-The reasons for such distinction are different processing pipelines for different types of pages, which would be
-applied after the classification.
+> The reasons for such distinction are different processing pipelines for different types of pages, which would be
+> applied after the classification as mentioned [above](#model-description-).
 
-Examples of pages sorted by category 🪧  can be found in the [category_samples](category_samples) 📁 directory
+Examples of pages sorted by category 🪧 can be found in the [category_samples](category_samples) 📁 directory
 which is also available as a testing subset of the training data (can be used to run evaluation and prediction with a
 necessary `--inner` flag).
 
@@ -187,7 +187,7 @@ You should see a message about loading the model from the hub and then saving it
 your machine 🖥️. 
 
 Only after you have obtained the trained model files (takes less time ⌛ than installing dependencies), 
-you can play with any commands provided [below](#how-to-run--prediction).
+you can play with any commands provided [below](#how-to-run-prediction--modes).
 
 After the model is downloaded, you should see a similar file structure: 
 
@@ -242,7 +242,7 @@ After the model is downloaded, you should see a similar file structure:
 
 </details>
 
-Some of the folders may be missing, like mentioned [later](#developer--notes) `model_output` which is automatically created
+Some of the folders may be missing, like mentioned [later](#for-developers-) `model_output` which is automatically created
 only after launching the model.
 
 ----
@@ -323,7 +323,7 @@ The classification results of PNG pages collected from the directory will be sav
 folders defined in `[OUTPUT]` section of [config.txt](config.txt) ⚙ file.
 
 > [!TIP]
-> To additionally get raw class 🪧  probabilities from the model along with the TOP-N results, use
+> To additionally get raw class 🪧 probabilities from the model along with the TOP-N results, use
 > `--raw` flag when processing the directory (**NOT** available for single file processing)
  
 > [!TIP]
@@ -366,9 +366,9 @@ Evaluation set's accuracy (**Top-1**):  **97.3%** 🏆
 
 </details>
 
-Confusion matrices provided above show the diagonal of matching gold and predicted categories 🪧  
-while their off-diagonal elements show inter-class errors. By those graphs you can judge what type
-of mistakes you should expect from your model. 
+> Confusion matrices provided above show the diagonal of matching gold and predicted categories 🪧 
+> while their off-diagonal elements show inter-class errors. By those graphs you can judge what type
+> of mistakes you should expect from your model. 
 
 By running tests on the evaluation dataset after training you can generate the following output files:
 
@@ -401,8 +401,8 @@ With the following **columns** 📋:
 
 - **FILE** - name of the file
 - **PAGE** - number of the page
-- **CLASS-N** - label of the category 🪧 , guess TOP-N 
-- **SCORE-N** - score of the category 🪧 , guess TOP-N
+- **CLASS-N** - label of the category 🪧, guess TOP-N 
+- **SCORE-N** - score of the category 🪧, guess TOP-N
 
 and optionally
  
@@ -546,7 +546,7 @@ containing page-specific images with a similar structure:
 Optionally you can use the [move_single.sh](data_scripts%2Funix%2Fmove_single.sh) 📎 or [move_single.bat](data_scripts%2Fwindows%2Fmove_single.bat) 📎 script to move 
 all PNG files from directories with a single PNG file inside to the common directory of one-pagers. 
 
-By default, the scripts assume `onepagers` is the back-off directory for PDF document names without a 
+By default, the scripts assume that the `onepagers` is the back-off directory for PDF document names without a 
 corresponding separate directory of PNG pages found in the PDF files directory (already converted to 
 subdirectories of pages).
 
@@ -585,7 +585,7 @@ Prepare a CSV table with exactly 3 columns:
 - **CLASS** - label of the category 🪧 
 
 > [!TIP]
-> Prepare equal-in-size categories 🪧  if possible, so that the model will not be biased towards the over-represented labels 🪧 
+> Prepare equal-in-size categories 🪧 if possible, so that the model will not be biased towards the over-represented labels 🪧 
 
 For **Windows** users, it's **NOT** recommended to use MS Excel for writing CSV tables, the free 
 alternative may be Apache's OpenOffice [^9] 🔗. As for **Unix** users, the default LibreCalc should be enough to 
@@ -606,7 +606,7 @@ correctly write a comma-separated CSV table.
 ### PNG pages sorting for training 📬
 
 Cluster the annotated data into separate folders using the [sort.sh](data_scripts%2Funix%2Fsort.sh) 📎 or [sort.bat](data_scripts%2Fwindows%2Fsort.bat) 📎 
-script to copy data from the source folder to the training folder where each category 🪧  has its own subdirectory.
+script to copy data from the source folder to the training folder where each category 🪧 has its own subdirectory.
 This division of PNG images will be used as gold data in training and evaluation.
 
 > [!WARNING]
@@ -669,8 +669,8 @@ set a path to the data folder.
 
 > [!TIP]
 > In the [config.txt](config.txt) ⚙️ file tweak the parameter of `max_categ`
-> for a maximum number of samples per category 🪧 , in case you have **over-represented labels** significantly dominating in size.
-> Set `max_categ` higher than the number of samples in the largest category 🪧  to use **all** data samples.
+> for a maximum number of samples per category 🪧, in case you have **over-represented labels** significantly dominating in size.
+> Set `max_categ` higher than the number of samples in the largest category 🪧 to use **all** data samples.
 
 From this point, you can start model training or evaluation process.
 
@@ -708,8 +708,8 @@ file, where you will find some predefined values not used in the [run.py](run.py
 
 > [!IMPORTANT]
 > For both training and evaluation, you must make sure that the training pages directory is set right in the 
-> [config.txt](config.txt) ⚙ and it contains category 🪧  subdirectories with images inside. 
-> Names of the category 🪧  subdirectories become actual label names and replace the default categories 🪧  list
+> [config.txt](config.txt) ⚙ and it contains category 🪧 subdirectories with images inside. 
+> Names of the category 🪧 subdirectories become actual label names and replace the default categories 🪧 list
 
 Device 🖥️ requirements for training / evaluation:
 - **CPU** of some kind and memory size
@@ -762,8 +762,8 @@ Above are the default hyperparameters or TrainingArguments [^11] used in the tra
 (only `epoch` and `log_step`) changed in the `[TRAIN]` section, plus `batch` in the `[SETUP]`section, 
 of the [config.txt](config.txt) ⚙ file. 
 
-You are free to play with the **learning rate** right in the training function arguments called in the [run.py](run.py) 📎 file, 
-yet **warmup ratio and other hyperparameters** are accessible only through the [classifier.py](classifier.py) 📎 file.
+> You are free to play with the **learning rate** right in the training function arguments called in the [run.py](run.py) 📎 file, 
+> yet **warmup ratio and other hyperparameters** are accessible only through the [classifier.py](classifier.py) 📎 file.
 
 Playing with training hyperparameters is
 recommended only if **training 💪 loss** (error rate) descends too slow to reach 0.001-0.001
@@ -795,7 +795,7 @@ During training image transformations [^12] are applied sequentially with a 50% 
 
 More about selecting the image transformation and the available ones you can read in the PyTorch torchvision docs [^12].
 
-After training is complete the model will be saved to its separate subdirectory in the `model` directory, by default, 
+After training is complete the model will be saved 💾 to its separate subdirectory in the `model` directory, by default, 
 the **naming of the model folder** corresponds to the length of its training batch dataloader and the number of epochs - 
 for example `model_<S/B>_E` where `E` is the number of epochs, `B` is the batch size, and `S` is the size of your 
 **training** dataset (by defaults, 90% of the provided in `[TRAIN]`'s folder data).
@@ -852,7 +852,7 @@ for example `model_<S/B>_E` where `E` is the number of epochs, `B` is the batch 
 > the `batch` variable value in the [config.txt](config.txt) ⚙ file to train a differently named model on the same dataset.
 > Alternatively, adjust the **model naming generation** in the [classifier.py](classifier.py)'s 📎 training function.
 
-After the fine-tuned model is saved, you can explicitly call for evaluation of the model to get a table of TOP-N classes for
+After the fine-tuned model is saved 💾, you can explicitly call for evaluation of the model to get a table of TOP-N classes for
 the randomly composed subset (10% in size) of the training page folder. 
 
 To do this in the unchanged configuration ⚙, automatically create a 
@@ -879,8 +879,8 @@ accessed through the `--hf` flag using the values set in the `[HF]` section for 
 
 **For support write to:** lutsai.k@gmail.com responsible for this GitHub repository [^8] 🔗
 
-Information about the authors of this project, including their ORCIDs, can be found in the
-[CITATION.cff](CITATION.cff) 📎 file.
+> Information about the authors of this project, including their ORCIDs, can be found in the
+> [CITATION.cff](CITATION.cff) 📎 file.
 
 ## Acknowledgements 🙏
 
@@ -900,7 +900,7 @@ Information about the authors of this project, including their ORCIDs, can be fo
 <summary>README emoji codes 👀</summary>
 
 - 🖥 - your computer
-- 🪧  - label/category/class
+- 🪧 - label/category/class
 - 📄 - page/file
 - 📁 - folder/directory
 - 📊 - generated diagrams or plots
