@@ -18,6 +18,7 @@ base_model = google/vit-base-patch16-224
 batch = 12
 top_N = 3
 raw = False
+inner = False
 
 [INPUT]
 FOLDER_INPUT=./category_samples

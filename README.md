@@ -37,7 +37,7 @@ preparation scripts for PDF to PNG conversion
 
 🔳 Base model repository: **Google's vit-base-patch16-224** [^2] 🔗
 
-The model was trained on the manually annotated dataset of historical documents, in particular, images of pages 
+The model was trained on the manually ✍️ annotated dataset of historical documents, in particular, images of pages 
 from the archival documents with paper sources that were scanned into digital form. 
 
 The images contain various combinations of texts ️📄, tables 📏, drawings 📈, and photos 🌄 - 
@@ -58,7 +58,7 @@ Training set of the model: **8950** images
 
 Evaluation set (10% of all - same proportion in categories 🏷️ as [below](#categories-)) [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎:  **995** images
 
-Manual ✍ annotation was performed beforehand and took some time ⌛, the categories 🏷️ were formed from
+Manual ✍️ annotation was performed beforehand and took some time ⌛, the categories 🏷️ were formed from
 different sources of the archival documents originated in the 1920-2020 years span of time. 
 
 > [!NOTE]
@@ -362,9 +362,9 @@ Evaluation set's accuracy (**Top-1**):  **97.3%** 🏆
 
 By running tests on the evaluation dataset after training you can generate the following output files:
 
-- **data-time_model_TOP-N_EVAL.csv** - results of the evaluation dataset with TOP-N guesses
-- **data-time_conf_mat_TOP-N.png** - confusion matrix plot for the evaluation dataset also with TOP-N guesses
-- **data-time_model_EVAL_RAW.csv** - raw probabilities for all classes of the evaluation dataset 
+- **date-time_model_TOP-N_EVAL.csv** - results of the evaluation dataset with TOP-N guesses
+- **date-time_conf_mat_TOP-N.png** - confusion matrix plot for the evaluation dataset also with TOP-N guesses
+- **date-time_model_EVAL_RAW.csv** - raw probabilities for all classes of the evaluation dataset 
 
 > [!NOTE]
 > Generated tables will be sorted by **FILE** and **PAGE** number columns in ascending order. 
@@ -379,11 +379,11 @@ Additionally, results of prediction inference run on the directory level without
 
 Demo files:
 
-- Manually ✍ **checked** (small): [model_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 📎
+- Manually ✍️ **checked** (small): [model_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 📎
 
-- Manually ✍ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_TOP-3_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_TOP-3_EVAL.csv) 📎
 
-- Manually ✍ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250218-1519_model_1119_3_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250218-1519_model_1119_3_TOP-1_EVAL.csv) 📎
 
 - **Unchecked with TRUE** values: [model_TOP-3.csv](result%2Ftables%2F20250210-2034_model_1119_3_TOP-3.csv) 📎
 
@@ -406,7 +406,7 @@ and optionally
 
 Demo files:
 
-- Manually ✍ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250220-1342_model_1119_3_EVAL_RAW.csv) 📎
+- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250220-1342_model_1119_3_EVAL_RAW.csv) 📎
 
 - **Unchecked with TRUE** values **RAW**: [model_RAW.csv](result%2Ftables%2F20250220-1331_model_1119_3_RAW.csv) 📎
 
@@ -872,7 +872,7 @@ Information about the authors of this project, including their ORCIDs, can be fo
 - 📊 - generated diagrams or plots
 - 🌳 - tree of file structure
 - ⌛ - time-consuming process
-- ✍ - manual action
+- ✍️ - manual action
 - 🏆 - performance measurement
 - 😊 - Hugging Face (HF)
 - 📧 - contacts 
@@ -900,7 +900,7 @@ Information about the authors of this project, including their ORCIDs, can be fo
 
 <summary>Decorative emojis 👀</summary>
 
-- 📇📜🔧▶🛠️📦🔎📚🙏👥📬🤓 - decorative purpose only
+- 📇📜🔧▶️🛠️📦🔎📚🙏👥📬🤓 - decorative purpose only
 
 </details>
 

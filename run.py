@@ -20,6 +20,7 @@ if __name__ == "__main__":
     base_model = config.get('SETUP', 'base_model')  # do not change
 
     raw = config.getboolean('SETUP', 'raw')
+    inner = config.getboolean('SETUP', 'inner')
 
     Training = config.getboolean('TRAIN', 'Training')
     Testing = config.getboolean('TRAIN', 'Testing')
@@ -45,7 +46,7 @@ if __name__ == "__main__":
     parser.add_argument('-m', "--model", type=str, default=model_path, help="Path to folder with model")
     parser.add_argument('-tn', "--topn", type=int, default=top_N, help="Number of top result categories to consider")
     parser.add_argument("--dir", help="Process whole directory (if -d not used)", action="store_true")
-    parser.add_argument("--inner", help="Process subdirectories of the given directory as well (FALSE by default)", default=False, action="store_true")
+    parser.add_argument("--inner", help="Process subdirectories of the given directory as well (FALSE by default)", default=inner, action="store_true")
     parser.add_argument("--train", help="Training model", default=Training, action="store_true")
     parser.add_argument("--eval", help="Evaluating model", default=Testing, action="store_true")
     parser.add_argument("--hf", help="Use model and processor from the HuggingFace repository", default=HF, action="store_true")
