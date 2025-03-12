@@ -274,7 +274,16 @@ class ImageDataset(Dataset):
     def __getitem__(self, idx):
         image_path = self.image_paths[idx]
         try:
-            image = Image.open(image_path).convert('RGB')
+            image = Image.open(image_path)
+
+            # Check the image mode
+            if image.mode != 'RGB':
+                # Convert RGBA to RGB
+                image_alpha = image.convert('RGBA')
+                new_image = Image.new("RGBA", image_alpha.size, "WHITE")  # Create a white rgba background
+                new_image.paste(image_alpha, (0, 0),
+                                image_alpha)  # Paste the image on the background. Go to the links given below for details.
+                image = new_image.convert('RGB')
             if self.transform:
                 image = self.transform(image)
             return {'pixel_values': image, 'label': self.image_labels[idx] if self.known else None}

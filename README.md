@@ -100,7 +100,8 @@ The reasons for such distinction are different processing pipelines for differen
 applied after the classification.
 
 Examples of pages sorted by category 🏷️ can be found in the [category_samples](category_samples) 📁 directory
-which is also available as a testing subset of the training data (can be used to run evaluation and prediction).
+which is also available as a testing subset of the training data (can be used to run evaluation and prediction with a
+necessary `--inner` flag).
 
 ----
 
@@ -123,7 +124,7 @@ Clone this project to your local machine 🖥️ via:
     git init
     git clone https://github.com/ufal/atrium-page-classification.git
 
-**OR** for updating the project, got to the folder containing `.git` subfolder and run:
+**OR** for updating the already cloned project, go to the folder containing `.git` subfolder and run:
 
     cd /local/folder/for/this/project/atrium-page-classification
     git pull

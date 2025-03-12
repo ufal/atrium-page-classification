@@ -144,10 +144,13 @@ if __name__ == "__main__":
 
         rdf["TRUE"] = [categories[i] for i in test_labels]
         rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{model_folder}_TOP-{top_N}_EVAL.csv", sep=",", index=False)
+        print(f"Evaluation results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
 
         if raw:
             raw_df["TRUE"] = [categories[i] for i in test_labels]
             raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{model_folder}_EVAL_RAW.csv", sep=",", index=False)
+            print(f"RAW Evaluation results are recorded into {output_dir}/tables/ directory")
+
 
         confusion_plot(eval_predictions,
                        test_labels,
@@ -183,7 +186,11 @@ if __name__ == "__main__":
                                         raw_prediction)
 
         rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{model_folder}_TOP-{top_N}.csv", sep=",", index=False)
+        print(f"Results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
+
         if raw:
             raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{model_folder}_RAW.csv", sep=",", index=False)
+            print(f"RAW Results are recorded into {output_dir}/tables/ directory")
+
 
 
