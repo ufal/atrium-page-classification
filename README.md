@@ -63,14 +63,15 @@ materials yet to be extracted from the page images.
 > (10% of all - same proportion in categories 🏷️ as [below](#categories-)) demonstrated in [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎
 
 Manual ✍️ annotation was performed beforehand and took some time ⌛, the categories 🏷️ were formed from
-different sources of the archival documents originated in the 1920-2020 years span of time. 
+different sources of the archival documents originated in the 1920-2020 years span. 
 
 > [!NOTE]
 > Disproportion of the categories 🏷️ in both training data and provided [category_samples](category_samples) 📁 is
 > **NOT** intentional, but rather a result of the source data nature. 
 
 In total, several thousands of separate PDF files were selected and split into PNG pages, ~3720 of scanned documents 
-were one-page long and ~120 of them were much longer (dozens and hundreds of pages). 
+were one-page long which covered around a third of all data, and ~120 of them were much longer (dozens and hundreds 
+of pages) covering more than 60% of data. 
 
 The specific content and language of the
 source data is irrelevant considering the model's vision resolution, however, all of the data samples were from **archaeological 
@@ -80,21 +81,21 @@ arrowheads, and rocks formerly drawn by hand and later illustrated with digital 
 
 ### Categories 🏷️
 
-|      Label️ |   Ratio    | Description                                                                   |
-|------------:|:----------:|:------------------------------------------------------------------------------|
-|    `DRAW` |   11.89%   | **📈 - drawings, maps, paintings with text**                                  |
-|  `DRAW_L` |   8.17%    | **📈📏 - drawings, etc with a table legend or inside tabular layout / forms** |
-| `LINE_HW` |   5.99%    | **✏️📏 - handwritten text lines inside tabular layout / forms**               |
-|  `LINE_P` |   6.06%    | **📏 - printed text lines inside tabular layout / forms**                     |
-|  `LINE_T` |   13.39%   | **📏 - machine typed text lines inside tabular layout / forms**               |
-|   `PHOTO` |   10.21%   | **🌄 - photos with text**                                                     |
-| `PHOTO_L` |   7.86%    | **🌄📏 - photos inside tabular layout / forms or with a tabular annotation**  |
-|    `TEXT` |   8.58%    | **📰 - mixed types of printed and handwritten texts**                         |
-| `TEXT_HW` |   7.36%    | **✏️📄 - only handwritten text**                                              |
-|  `TEXT_P` |   6.95%    | **📄 - only printed text**                                                    |
-|  `TEXT_T` |   13.53%   | **📄 - only machine typed text**                                              |
+|    Label️ | Ratio  | Description                                                                   |
+|----------:|:------:|:------------------------------------------------------------------------------|
+|    `DRAW` | 11.89% | **📈 - drawings, maps, paintings with text**                                  |
+|  `DRAW_L` | 8.17%  | **📈📏 - drawings, etc with a table legend or inside tabular layout / forms** |
+| `LINE_HW` | 5.99%  | **✏️📏 - handwritten text lines inside tabular layout / forms**               |
+|  `LINE_P` | 6.06%  | **📏 - printed text lines inside tabular layout / forms**                     |
+|  `LINE_T` | 13.39% | **📏 - machine typed text lines inside tabular layout / forms**               |
+|   `PHOTO` | 10.21% | **🌄 - photos with text**                                                     |
+| `PHOTO_L` | 7.86%  | **🌄📏 - photos inside tabular layout / forms or with a tabular annotation**  |
+|    `TEXT` | 8.58%  | **📰 - mixed types of printed and handwritten texts**                         |
+| `TEXT_HW` | 7.36%  | **✏️📄 - only handwritten text**                                              |
+|  `TEXT_P` | 6.95%  | **📄 - only printed text**                                                    |
+|  `TEXT_T` | 13.53% | **📄 - only machine typed text**                                              |
 
-The categories were chosen to sort the pages by the following criterion: 
+The categories were chosen to sort the pages by the following criteria: 
 
 - **presence of graphical elements** (drawings 📈 OR photos 🌄)
 - **type of text** 📄 (handwritten ✏️️ OR printed OR typed OR mixed 📰)
@@ -327,7 +328,7 @@ folders defined in `[OUTPUT]` section of [config.txt](config.txt) ⚙ file.
  
 > [!TIP]
 > To process all PNG files in the directory **AND its subdirectories** use the `--inner` flag
-> when processing the directory
+> when processing the directory, or switch its default value to `True` in the `[SETUP]` section 
  
 Naturally, processing of the large amount of PNG pages takes time ⌛ and progress of this process
 is recorded in the console via messages like `Processed <B×N> images` where `B`
@@ -335,7 +336,7 @@ is batch size set in the `[SETUP]` section of the [config.txt](config.txt) ⚙ f
 and `N` is an iteration of the current dataloader processing loop. 
 
 Only after all images from the input directory are processed, the output table is
-saved 💾 in the `results/tables` folder. 
+saved 💾 in the `result/tables` folder. 
 
 ----
 
@@ -343,7 +344,7 @@ saved 💾 in the `results/tables` folder.
 
 There are accuracy performance measurements and plots of confusion matrices for the evaluation 
 dataset (10% of the provided in `[TRAIN]`'s folder data). Both graphic plots and tables with 
-results can be found in the [results](result) 📁 folder.
+results can be found in the [result](result) 📁 folder.
 
 Evaluation set's accuracy (**Top-3**):  **99.6%** 🏆
 
@@ -710,7 +711,7 @@ file, where you will find some predefined values not used in the [run.py](run.py
 > [config.txt](config.txt) ⚙ and it contains category 🏷️ subdirectories with images inside. 
 > Names of the category 🏷️ subdirectories become actual label names and replace the default categories 🏷️ list
 
-Machine 🖥️ requirements for training / evaluation:
+Device 🖥️ requirements for training / evaluation:
 - **CPU** of some kind and memory size
 - **GPU** (for real CUDA [^10] support - better one of Nvidia's cards)
 
@@ -724,12 +725,12 @@ case, **above-average CPU memory capacity** is a must-have to avoid a total syst
 <summary>Rough estimations of memory usage 👀</summary>
 
 | **Batch size** | **CPU / GPU memory usage** |
-|------------|------------------------|
-| 4          | 2 Gb                   |
-| 8          | 3 Gb                   |
-| 16         | 5 Gb                   |
-| 32         | 9 Gb                   |
-| 64         | 17 Gb                  |
+|----------------|----------------------------|
+| 4              | 2 Gb                       |
+| 8              | 3 Gb                       |
+| 16             | 5 Gb                       |
+| 32             | 9 Gb                       |
+| 64             | 17 Gb                      |
 
 </details>
 
@@ -854,7 +855,7 @@ for example `model_<S/B>_E` where `E` is the number of epochs, `B` is the batch 
 After the fine-tuned model is saved, you can explicitly call for evaluation of the model to get a table of TOP-N classes for
 the randomly composed subset (10% in size) of the training page folder. 
 
-To do this in the unchanged configuration ⚙, create a 
+To do this in the unchanged configuration ⚙, automatically create a 
 confusion matrix plot 📊 and additionally get raw class probabilities table run: 
 
     python3 run.py --eval --raw
