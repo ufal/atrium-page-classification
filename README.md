@@ -338,7 +338,8 @@ saved 💾 in the `results/tables` folder.
 ## Results 📊
 
 There are accuracy performance measurements and plots of confusion matrices for the evaluation 
-dataset. Both graphic plots and tables with results can be found in the [results](result) 📁 folder.
+dataset (10% of the provided in `[TRAIN]`'s folder data). Both graphic plots and tables with 
+results can be found in the [results](result) 📁 folder.
 
 Evaluation set's accuracy (**Top-3**):  **99.6%** 🏆
 
@@ -359,6 +360,10 @@ Evaluation set's accuracy (**Top-1**):  **97.3%** 🏆
 ![TOP-1 confusion matrix](result%2Fplots%2F20250218-1523_conf_mat.png)
 
 </details>
+
+Confusion matrices provided above show the diagonal of matching gold and predicted categories 🏷️ 
+while their off-diagonal elements show inter-class errors. By those graphs you can judge what type
+of mistakes you should expect from your model. 
 
 By running tests on the evaluation dataset after training you can generate the following output files:
 
@@ -707,6 +712,9 @@ Machine 🖥 requirements for training / evaluation:
 
 Worth mentioning that the efficient training is possible only with a CUDA-compatible GPU card.
 
+For test training launch on the CPU-only device you should set batch size to lower than 4, and even in this
+case, machine 🖥 with above-average CPU memory capacity is a must-have to avoid a total system crush.
+
 To train the model run: 
 
     python3 run.py --train
@@ -741,7 +749,11 @@ yet warmup ratio and other hyperparameters are accessible only through the [clas
 recommended only if training loss (error rate) descends too slow to reach 0.001-0.001
 values by the end of the 3rd (last by default) epoch.
 
-During training image transformations were applied sequentially with a 50% chance.
+In case evaluation loss starts to steadily going up after the previous descend, this means
+you have reached the limit of worthy epochs, and next time you should set `epochs` to the
+number of epoch that has successfully ended before you noticed the evaluation loss growth.
+
+During training image transformations are applied sequentially with a 50% chance.
 
 > [!NOTE]
 > No rotation, reshaping, or flipping was applied to the images, mainly color manipulations were used. The 
@@ -764,7 +776,7 @@ During training image transformations were applied sequentially with a 50% chanc
 After training is complete the model will be saved to its separate subdirectory in the `model` directory, by default, 
 the naming of the model folder corresponds to the length of its training batch dataloader and the number of epochs - 
 for example `model_<S/B>_E` where `E` is the number of epochs, `B` is the batch size, and `S` is the size of your 
-**training** dataset.
+**training** dataset (by defaults, 90% of the provided in `[TRAIN]`'s folder data).
 
 <details>
 

@@ -72,7 +72,15 @@ class ImageClassifier:
         """
         Preprocess a single image for training or evaluation.
         """
-        image = Image.open(image_path).convert('RGB')
+        image = Image.open(image_path)
+        # Check the image mode
+        if image.mode != 'RGB':
+            # Convert RGBA to RGB
+            image_alpha = image.convert('RGBA')
+            new_image = Image.new("RGBA", image_alpha.size, "WHITE")  # Create a white rgba background
+            new_image.paste(image_alpha, (0, 0),
+                            image_alpha)  # Paste the image on the background. Go to the links given below for details.
+            image = new_image.convert('RGB')
         transform = self.train_transforms if train else self.eval_transforms
         tensor = transform(image).unsqueeze(0).to(self.device)
         return tensor
@@ -275,7 +283,6 @@ class ImageDataset(Dataset):
         image_path = self.image_paths[idx]
         try:
             image = Image.open(image_path)
-
             # Check the image mode
             if image.mode != 'RGB':
                 # Convert RGBA to RGB

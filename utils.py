@@ -23,7 +23,9 @@ def dataframe_results(test_images: list, test_predictions: list, categories: lis
     raws = []
     for image_file, predict_scores in zip(test_images, test_predictions):
         image_name = Path(image_file).stem
-        document, page_num = image_name.split("-")
+        name_parts = image_name.split("-")
+        page_num = int(name_parts[-1])
+        document = name_parts[0] if len(name_parts) == 2 else "-".join(name_parts[:-1])
 
         labels = [categories[i[0]] for i in predict_scores] if top_N > 1 else [categories[predict_scores]]
         scores = [round(i[1], 3) for i in predict_scores] if top_N > 1 else [round(predict_scores, 3)]
