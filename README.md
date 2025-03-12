@@ -54,9 +54,9 @@ materials yet to be extracted from the page images.
 
 ### Data 📜
 
-Training set of the model: **8950** images 
+**Training** set of the model (90% of all - proportion in categories 🏷️ tabulated [below](#categories-)): **8950** images 
 
-Evaluation set (10% of all - same proportion in categories 🏷️ as [below](#categories-)) [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎:  **995** images
+**Evaluation** set (10% of all - same proportion in categories 🏷️ as [below](#categories-)) [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎:  **995** images
 
 Manual ✍️ annotation was performed beforehand and took some time ⌛, the categories 🏷️ were formed from
 different sources of the archival documents originated in the 1920-2020 years span of time. 
@@ -78,17 +78,17 @@ arrowheads, and rocks formerly drawn by hand and later illustrated with digital 
 
 |      Label️ |   Ratio    | Description                                                                   |
 |------------:|:----------:|:------------------------------------------------------------------------------|
-|    **DRAW** |   11.89%   | **📈 - drawings, maps, paintings with text**                                  |
-|  **DRAW_L** |   8.17%    | **📈📏 - drawings, etc with a table legend or inside tabular layout / forms** |
-| **LINE_HW** |   5.99%    | **✏️📏 - handwritten text lines inside tabular layout / forms**               |
-|  **LINE_P** |   6.06%    | **📏 - printed text lines inside tabular layout / forms**                     |
-|  **LINE_T** |   13.39%   | **📏 - machine typed text lines inside tabular layout / forms**               |
-|   **PHOTO** |   10.21%   | **🌄 - photos with text**                                                     |
-| **PHOTO_L** |   7.86%    | **🌄📏 - photos inside tabular layout / forms or with a tabular annotation**  |
-|    **TEXT** |   8.58%    | **📰 - mixed types of printed and handwritten texts**                         |
-| **TEXT_HW** |   7.36%    | **✏️📄 - only handwritten text**                                              |
-|  **TEXT_P** |   6.95%    | **📄 - only printed text**                                                    |
-|  **TEXT_T** |   13.53%   | **📄 - only machine typed text**                                              |
+|    `DRAW` |   11.89%   | **📈 - drawings, maps, paintings with text**                                  |
+|  `DRAW_L` |   8.17%    | **📈📏 - drawings, etc with a table legend or inside tabular layout / forms** |
+| `LINE_HW` |   5.99%    | **✏️📏 - handwritten text lines inside tabular layout / forms**               |
+|  `LINE_P` |   6.06%    | **📏 - printed text lines inside tabular layout / forms**                     |
+|  `LINE_T` |   13.39%   | **📏 - machine typed text lines inside tabular layout / forms**               |
+|   `PHOTO` |   10.21%   | **🌄 - photos with text**                                                     |
+| `PHOTO_L` |   7.86%    | **🌄📏 - photos inside tabular layout / forms or with a tabular annotation**  |
+|    `TEXT` |   8.58%    | **📰 - mixed types of printed and handwritten texts**                         |
+| `TEXT_HW` |   7.36%    | **✏️📄 - only handwritten text**                                              |
+|  `TEXT_P` |   6.95%    | **📄 - only printed text**                                                    |
+|  `TEXT_T` |   13.53%   | **📄 - only machine typed text**                                              |
 
 The categories were chosen to sort the pages by the following criterion: 
 
@@ -702,7 +702,7 @@ file, where you will find some predefined values not used in the [run.py](run.py
 ### Training 💪 & Evaluation 🏆
 
 > [!IMPORTANT]
-> For both training and evaluation, you must make sure that the training data directory is set right in the 
+> For both training and evaluation, you must make sure that the training pages directory is set right in the 
 > [config.txt](config.txt) ⚙ and it contains category 🏷️ subdirectories with images inside. 
 > Names of the category 🏷️ subdirectories become actual label names and replace the default categories 🏷️ list
 
@@ -712,8 +712,8 @@ Machine 🖥 requirements for training / evaluation:
 
 Worth mentioning that the efficient training is possible only with a CUDA-compatible GPU card.
 
-For test training launch on the CPU-only device you should set batch size to lower than 4, and even in this
-case, machine 🖥 with above-average CPU memory capacity is a must-have to avoid a total system crush.
+For test training launch on the **CPU-only device 🖥** you should set **batch size to lower than 4**, and even in this
+case, **above-average CPU memory capacity** is a must-have to avoid a total system crush.
 
 To train the model run: 
 
@@ -742,14 +742,14 @@ depending on your machine's 🖥 GPU memory size and prepared dataset size.
 Above are the default hyperparameters used in the training process that can be partially (only `epoch` and `log_step`) 
 changed in the `[TRAIN]` section, plus `batch` in the `[SETUP]`section, of the [config.txt](config.txt) ⚙ file. 
 
-You are free to play with the learning rate right in the training function arguments called in the [run.py](run.py) 📎 file, 
-yet warmup ratio and other hyperparameters are accessible only through the [classifier.py](classifier.py) 📎 file.
+You are free to play with the **learning rate** right in the training function arguments called in the [run.py](run.py) 📎 file, 
+yet **warmup ratio and other hyperparameters** are accessible only through the [classifier.py](classifier.py) 📎 file.
 
-**Playing with training hyperparameters** is
-recommended only if training loss (error rate) descends too slow to reach 0.001-0.001
+Playing with training hyperparameters is
+recommended only if **training loss** (error rate) descends too slow to reach 0.001-0.001
 values by the end of the 3rd (last by default) epoch.
 
-In case evaluation loss starts to steadily going up after the previous descend, this means
+In the case **evaluation loss** starts to steadily going up after the previous descend, this means
 you have reached the limit of worthy epochs, and next time you should set `epochs` to the
 number of epoch that has successfully ended before you noticed the evaluation loss growth.
 
@@ -774,7 +774,7 @@ During training image transformations are applied sequentially with a 50% chance
 </details>
 
 After training is complete the model will be saved to its separate subdirectory in the `model` directory, by default, 
-the naming of the model folder corresponds to the length of its training batch dataloader and the number of epochs - 
+the **naming of the model folder** corresponds to the length of its training batch dataloader and the number of epochs - 
 for example `model_<S/B>_E` where `E` is the number of epochs, `B` is the batch size, and `S` is the size of your 
 **training** dataset (by defaults, 90% of the provided in `[TRAIN]`'s folder data).
 
@@ -843,7 +843,7 @@ confusion matrix plot 📊 and additionally get raw class probabilities table ru
     python3 run.py --eval -m './model/model_<your_model_number_code>'
 
 Finally, when your model is trained and you are happy with its performance tests, you can uncomment a code line
-in the [run.py](run.py) 📎 file for HF 😊 hub model push. This functionality has already been implemented and can be
+in the [run.py](run.py) 📎 file for **HF 😊 hub model push**. This functionality has already been implemented and can be
 accessed through the `--hf` flag using the values set in the `[HF]` section for the `token` and `repo_name` variables.
 
 > [!CAUTION]
