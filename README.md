@@ -14,7 +14,7 @@ preparation scripts for PDF to PNG conversion
     + [Data 📜](#data-)
     + [Categories 🏷️](#categories-)
   * [How to install 🔧](#how-to-install-)
-  * [How to run ▶️](#how-to-run-)
+  * [How to run ▶️️ prediction](#how-to-run--prediction)
     + [Page processing 📄](#page-processing-)
     + [Directory processing 📁](#directory-processing-)
   * [Results 📊](#results-)
@@ -23,7 +23,7 @@ preparation scripts for PDF to PNG conversion
     + [PDF to PNG 📚](#pdf-to-png-)
     + [PNG pages annotation 🔎](#png-pages-annotation-)
     + [PNG pages sorting for training 📬](#png-pages-sorting-for-training-)
-  * [For developers 🛠️](#for-developers-)
+  * [Developer 🛠 notes](#developer--notes)
     * [Training 💪 & Evaluation 🏆](#training---evaluation-)
   * [Contacts 📧](#contacts-)
   * [Acknowledgements 🙏](#acknowledgements-)
@@ -54,9 +54,13 @@ materials yet to be extracted from the page images.
 
 ### Data 📜
 
-**Training** set of the model (90% of all - proportion in categories 🏷️ tabulated [below](#categories-)): **8950** images 
+> **Training** 💪 set of the model: **8950** images 
+> 
+> (90% of all - proportion in categories 🏷️ tabulated [below](#categories-))
 
-**Evaluation** set (10% of all - same proportion in categories 🏷️ as [below](#categories-)) [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎:  **995** images
+> **Evaluation** 🏆 set:  **995** images
+> 
+> (10% of all - same proportion in categories 🏷️ as [below](#categories-)) demonstrated in [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎
 
 Manual ✍️ annotation was performed beforehand and took some time ⌛, the categories 🏷️ were formed from
 different sources of the archival documents originated in the 1920-2020 years span of time. 
@@ -107,8 +111,8 @@ necessary `--inner` flag).
 
 ## How to install 🔧
 
-The easiest way to obtain the model would be to use the HF 😊 hub repository [^1] 🔗 that can be easily accessed 
-via this project. Step-by-step instructions on this program installation are provided here.
+Step-by-step instructions on this program installation are provided here. The easiest way to obtain the model would 
+be to use the HF 😊 hub repository [^1] 🔗 that can be easily accessed via this project. 
 
 > [!WARNING]
 > Make sure you have **Python version 3.10+** installed on your machine 💻. 
@@ -118,7 +122,7 @@ via this project. Step-by-step instructions on this program installation are pro
 
 <summary>How to 👀</summary>
 
-Clone this project to your local machine 🖥️ via:
+Clone this project to your local machine 🖥️️ via:
 
     cd /local/folder/for/this/project
     git init
@@ -139,12 +143,12 @@ and then inside your virtual environment, you should install Python libraries (t
 
 </details>
 
-Minimal machine 🖥 requirements for slow prediction run and very slow training / evaluation:
+**Minimal** machine 🖥️ requirements for slow prediction run (and very slow training / evaluation):
 - **CPU** with a decent (above average) operational memory size
 
-Ideal machine 🖥 requirements for fast prediction and relatively fast training / evaluation:
+**Ideal** machine 🖥️ requirements for fast prediction (and relatively fast training / evaluation):
 - **CPU** of some kind and memory size
-- **GPU** (for real CUDA [^10] support - better one of Nvidia's cards)
+- **GPU** (for real CUDA [^10] support - only one of Nvidia's cards)
 
 > [!CAUTION]
 > Up to **1 GB of space for model** files and checkpoints is needed, and up to **7 GB 
@@ -154,35 +158,35 @@ Installation of Python dependencies can be done via:
 
     pip install -r requirements.txt
 
-After the dependencies installation is finished successfully, in the same virtual environment, you can
-run the Python program. 
-
 > [!NOTE]
-> The so-called CUDA [^10] support for Python's Pytorch library is supposed to be automatically installed
-> at the `pip install -r requirements.txt` stage when the presence of the GPU on your machine 🖥
+> The so-called **CUDA [^10] support** for Python's PyTorch library is supposed to be automatically installed
+> at this point - when the presence of the GPU on your machine 🖥️
 > is checked for the first time, later it's also checked every time before the model initialization
 > (for training, evaluation or prediction run).
+
+After the dependencies installation is finished successfully, in the same virtual environment, you can
+run the Python program. 
 
 To test that everything works okay and see the flag 
 descriptions call for `--help` ❓:
 
     python3 run.py -h
 
-You should see a (hopefully) helpful message about all available command line flags. Your next step is
+You should see a (hopefully) helpful message about all available command line flags. Your next step would be
 to **pull the model from the HF 😊 hub repository [^1] 🔗** via:
 
     python3 run.py --hf
-
-You should see a message about loading the model from the hub and then saving it locally on
-your machine 🖥. 
 
 > [!IMPORTANT]
 > Unless you already have the model files in the `model/model_version`
 > directory next to this file, you must use the `--hf` flag to download the
 > model files from the HF 😊 repo [^1] 🔗
 
+You should see a message about loading the model from the hub and then saving it locally on
+your machine 🖥️. 
+
 Only after you have obtained the trained model files (takes less time ⌛ than installing dependencies), 
-you can play with any commands provided [below](#how-to-run-).
+you can play with any commands provided [below](#how-to-run--prediction).
 
 After the model is downloaded, you should see a similar file structure: 
 
@@ -237,12 +241,12 @@ After the model is downloaded, you should see a similar file structure:
 
 </details>
 
-Some of the folders may be missing, like mentioned later `model_output` which is automatically created
+Some of the folders may be missing, like mentioned [later](#developer--notes) `model_output` which is automatically created
 only after launching the model.
 
 ----
 
-## How to run ▶️
+## How to run ▶️ prediction
 
 There are two main ways to run the program:
 
@@ -367,9 +371,9 @@ of mistakes you should expect from your model.
 
 By running tests on the evaluation dataset after training you can generate the following output files:
 
-- **date-time_model_TOP-N_EVAL.csv** - results of the evaluation dataset with TOP-N guesses
-- **date-time_conf_mat_TOP-N.png** - confusion matrix plot for the evaluation dataset also with TOP-N guesses
-- **date-time_model_EVAL_RAW.csv** - raw probabilities for all classes of the evaluation dataset 
+- **date-time_model_TOP-N_EVAL.csv** - (by default) results of the evaluation dataset with TOP-N guesses
+- **date-time_conf_mat_TOP-N.png** - (by default) confusion matrix plot for the evaluation dataset also with TOP-N guesses
+- **date-time_model_EVAL_RAW.csv** - (by flag `--raw`) raw probabilities for all classes of the evaluation dataset 
 
 > [!NOTE]
 > Generated tables will be sorted by **FILE** and **PAGE** number columns in ascending order. 
@@ -671,7 +675,7 @@ From this point, you can start model training or evaluation process.
 
 ----
 
-## For developers 🛠️
+## Developer 🛠️ notes
 
 You can use this project code as a base for your own image classification tasks. Guide on the key phases of 
 the process is provided here.
@@ -706,21 +710,35 @@ file, where you will find some predefined values not used in the [run.py](run.py
 > [config.txt](config.txt) ⚙ and it contains category 🏷️ subdirectories with images inside. 
 > Names of the category 🏷️ subdirectories become actual label names and replace the default categories 🏷️ list
 
-Machine 🖥 requirements for training / evaluation:
+Machine 🖥️ requirements for training / evaluation:
 - **CPU** of some kind and memory size
 - **GPU** (for real CUDA [^10] support - better one of Nvidia's cards)
 
 Worth mentioning that the efficient training is possible only with a CUDA-compatible GPU card.
 
-For test training launch on the **CPU-only device 🖥** you should set **batch size to lower than 4**, and even in this
+For test training launch on the **CPU-only device 🖥️** you should set **batch size to lower than 4**, and even in this
 case, **above-average CPU memory capacity** is a must-have to avoid a total system crush.
+
+<details>
+
+<summary>Rough estimations of memory usage 👀</summary>
+
+| **Batch size** | **CPU / GPU memory usage** |
+|------------|------------------------|
+| 4          | 2 Gb                   |
+| 8          | 3 Gb                   |
+| 16         | 5 Gb                   |
+| 32         | 9 Gb                   |
+| 64         | 17 Gb                  |
+
+</details>
 
 To train the model run: 
 
     python3 run.py --train
 
-The training process has automatic progress logging into console, and should take approximately 5-12h 
-depending on your machine's 🖥 GPU memory size and prepared dataset size. 
+The training process has an automatic progress logging into console, and should take approximately 5-12h 
+depending on your machine's 🖥️ CPU / GPU memory size and prepared dataset size. 
 
 <details>
 
@@ -739,21 +757,22 @@ depending on your machine's 🖥 GPU memory size and prepared dataset size.
 
 </details>
 
-Above are the default hyperparameters used in the training process that can be partially (only `epoch` and `log_step`) 
-changed in the `[TRAIN]` section, plus `batch` in the `[SETUP]`section, of the [config.txt](config.txt) ⚙ file. 
+Above are the default hyperparameters or TrainingArguments [^11] used in the training process that can be partially
+(only `epoch` and `log_step`) changed in the `[TRAIN]` section, plus `batch` in the `[SETUP]`section, 
+of the [config.txt](config.txt) ⚙ file. 
 
 You are free to play with the **learning rate** right in the training function arguments called in the [run.py](run.py) 📎 file, 
 yet **warmup ratio and other hyperparameters** are accessible only through the [classifier.py](classifier.py) 📎 file.
 
 Playing with training hyperparameters is
-recommended only if **training loss** (error rate) descends too slow to reach 0.001-0.001
+recommended only if **training 💪 loss** (error rate) descends too slow to reach 0.001-0.001
 values by the end of the 3rd (last by default) epoch.
 
-In the case **evaluation loss** starts to steadily going up after the previous descend, this means
+In the case **evaluation 🏆 loss** starts to steadily going up after the previous descend, this means
 you have reached the limit of worthy epochs, and next time you should set `epochs` to the
 number of epoch that has successfully ended before you noticed the evaluation loss growth.
 
-During training image transformations are applied sequentially with a 50% chance.
+During training image transformations [^12] are applied sequentially with a 50% chance.
 
 > [!NOTE]
 > No rotation, reshaping, or flipping was applied to the images, mainly color manipulations were used. The 
@@ -772,6 +791,8 @@ During training image transformations are applied sequentially with a 50% chance
 * transforms.Lambda(lambda img: img.filter(ImageFilter.**GaussianBlur**(radius=random.uniform(0, 2))))
 
 </details>
+
+More about selecting the image transformation and the available ones you can read in the PyTorch torchvision docs [^12].
 
 After training is complete the model will be saved to its separate subdirectory in the `model` directory, by default, 
 the **naming of the model folder** corresponds to the length of its training batch dataloader and the number of epochs - 
@@ -926,3 +947,5 @@ Information about the authors of this project, including their ORCIDs, can be fo
 [^8]: https://github.com/ufal/atrium-page-classification
 [^9]: https://www.openoffice.org/download/
 [^10]: https://developer.nvidia.com/cuda-python
+[^11]: https://huggingface.co/docs/transformers/en/main_classes/trainer#transformers.TrainingArguments
+[^12]: https://pytorch.org/vision/0.20/transforms.html
