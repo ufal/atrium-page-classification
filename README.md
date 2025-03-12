@@ -366,9 +366,9 @@ Evaluation set's accuracy (**Top-1**):  **97.3%** 🏆
 
 </details>
 
-> Confusion matrices provided above show the diagonal of matching gold and predicted categories 🪧 
-> while their off-diagonal elements show inter-class errors. By those graphs you can judge what type
-> of mistakes you should expect from your model. 
+> **Confusion matrices** provided above show the diagonal of matching gold and predicted categories 🪧
+> while their off-diagonal elements show inter-class errors. By those graphs you can judge 
+> **what type of mistakes to expect** from your model. 
 
 By running tests on the evaluation dataset after training you can generate the following output files:
 
@@ -879,8 +879,8 @@ accessed through the `--hf` flag using the values set in the `[HF]` section for 
 
 **For support write to:** lutsai.k@gmail.com responsible for this GitHub repository [^8] 🔗
 
-> Information about the authors of this project, including their ORCIDs, can be found in the
-> [CITATION.cff](CITATION.cff) 📎 file.
+> Information about the authors of this project, including their names and ORCIDs, can 
+> be found in the [CITATION.cff](CITATION.cff) 📎 file.
 
 ## Acknowledgements 🙏
 
