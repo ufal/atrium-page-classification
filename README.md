@@ -158,7 +158,7 @@ After the dependencies installation is finished successfully, in the same virtua
 run the Python program. 
 
 > [!NOTE]
-> The so-called CUDA support for Python's Pytorch library is supposed to be automatically installed
+> The so-called CUDA [^10] support for Python's Pytorch library is supposed to be automatically installed
 > at the `pip install -r requirements.txt` stage when the presence of the GPU on your machine 🖥
 > is checked for the first time, later it's also checked every time before the model initialization
 > (for training, evaluation or prediction run).
@@ -237,7 +237,8 @@ After the model is downloaded, you should see a similar file structure:
 
 </details>
 
-Some of the listed above folders may be missing, like `model_output` which is automatically created only after launching the model.
+Some of the folders may be missing, like mentioned later `model_output` which is automatically created
+only after launching the model.
 
 ----
 
