@@ -487,7 +487,7 @@ categories 🪧.
 
 ## Data preparation 📦
 
-You can use this section a guide for creating your own dataset of pages, which will be suitable for
+You can use this section as a guide for creating your own dataset of pages, which will be suitable for
 further model processing.
 
 There are useful multiplatform scripts in the [data_scripts](data_scripts) 📁 folder for the whole process of data preparation. 
@@ -727,8 +727,8 @@ From this point, you can start model training or evaluation process.
 
 ## For developers 🪛
 
-You can use this project code as a base for your own image classification tasks. Guide on the key phases of 
-the process is provided here.
+You can use this project code as a base for your own image classification tasks. The detailed guide on 
+the key phases of the whole process (settings, training, evaluation) is provided here.
 
 <details>
 
@@ -1002,6 +1002,9 @@ accessed through the `--hf` flag using the values set in the `[HF]` section for 
 - 📇📜🔧▶🪄🪛️📦🔎📚🙏👥📬🤓 - decorative purpose only
 
 </details>
+
+> [!TIP]
+> Alternative version of this README file is available in [README.html](README.html) 📎 webpage
 
 [^1]: https://huggingface.co/ufal/vit-historical-page
 [^2]: https://huggingface.co/google/vit-base-patch16-224
