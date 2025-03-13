@@ -15,7 +15,7 @@ Testing = False
 [SETUP]
 seed = 420
 base_model = google/vit-base-patch16-224
-batch = 12
+batch = 11
 top_N = 3
 raw = False
 inner = False
