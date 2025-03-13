@@ -61,7 +61,7 @@ paper source into one of the categories - each responsible for the following con
 
 **Evaluation** 🏆 set:  **995** images
 
-> **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_EVAL.csv) 📎
+> **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250313-1515_model_1119_3_TOP-5_EVAL.csv) 📎
 
 Manual ✍️ annotation was performed beforehand and took some time ⌛, the categories 🪧  were formed from
 different sources of the archival documents originated in the 1920-2020 years span. 
@@ -152,8 +152,15 @@ subdirectory and run pulling which will merge upcoming files with your local cha
     git commit -m 'local changes'
     git pull -X theirs
 
+Alternatively, if you do **NOT** care about local changes, just remove those files:
+
+    cd /local/folder/for/this/project/atrium-page-classification
+    rm <changed_file>
+    git pull
+
 Next step would be a creation of the virtual environment. Follow the **Unix** / **Windows**-specific 
 instruction at the venv docs [^3] 👀🔗 if you don't know how to.
+
 After creating the venv folder, activate the environment via:
 
     source <your_venv_dir>/bin/activate
@@ -440,11 +447,13 @@ Demo files:
 
 - Manually ✍️ **checked** (small): [model_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250209-1534_model_1119_3_TOP-3_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-5): [model_TOP-5_EVAL.csv](result%2Ftables%2F20250313-1515_model_1119_3_TOP-5_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250218-1519_model_1119_3_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250313-1526_model_1119_3_TOP-1_EVAL.csv) 📎
 
-- **Unchecked with TRUE** values: [model_TOP-3.csv](result%2Ftables%2F20250210-2034_model_1119_3_TOP-3.csv) 📎
+- **Unchecked with TRUE** values: [model_TOP-3.csv](result%2Ftables%2F20250313-1530_model_1119_3_TOP-3.csv) 📎
+
+- **Unchecked with TRUE** values (small): [model_TOP-3.csv](result%2Ftables%2F20250313-1554_model_1119_3_TOP-3.csv)📎
 
 With the following **columns** 📋:
 
@@ -465,9 +474,11 @@ and optionally
 
 Demo files:
 
-- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250220-1342_model_1119_3_EVAL_RAW.csv) 📎
+- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250313-1515_model_1119_3_EVAL_RAW.csv) 📎
 
-- **Unchecked with TRUE** values **RAW**: [model_RAW.csv](result%2Ftables%2F20250220-1331_model_1119_3_RAW.csv) 📎
+- **Unchecked with TRUE** values **RAW**: [model_RAW.csv](result%2Ftables%2F20250313-1530_model_1119_3_RAW.csv) 📎
+
+- **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250313-1554_model_1119_3_RAW.csv) 📎
 
 With the following **columns** 📋:
 
