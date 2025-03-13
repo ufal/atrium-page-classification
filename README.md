@@ -145,10 +145,10 @@ Clone this project to your local machine 🖥️️ via:
     git clone https://github.com/ufal/atrium-page-classification.git
 
 **OR** for updating the already cloned project with some changes, go to the folder containing (hidden) `.git` 
-subdirectory and run pulling which will merge with your local changes (overwrite them):
+subdirectory and run pulling which will merge upcoming files with your local changes:
 
     cd /local/folder/for/this/project/atrium-page-classification
-    git add .
+    git add <changed_file>
     git commit -m 'local changes'
     git pull -X theirs
 
