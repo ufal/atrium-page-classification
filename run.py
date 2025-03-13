@@ -26,9 +26,8 @@ if __name__ == "__main__":
     Testing = config.getboolean('TRAIN', 'Testing')
     HF = config.getboolean('HF', 'use_hf')
 
-    model_folder = config.get('INPUT', 'model_version')
+    model_folder = config.get('SETUP', 'model_version')
     model_dir = config.get('OUTPUT', 'FOLDER_MODELS')
-     # change if needed
     model_path = f"{model_dir}/{model_folder}"
 
     test_dir = config.get('INPUT', 'FOLDER_INPUT')

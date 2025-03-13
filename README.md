@@ -24,7 +24,8 @@ preparation scripts for PDF to PNG conversion
     + [PNG pages annotation 🔎](#png-pages-annotation-)
     + [PNG pages sorting for training 📬](#png-pages-sorting-for-training-)
   * [For developers 🪛](#for-developers-)
-    * [Training 💪 & Evaluation 🏆](#training---evaluation-)
+    * [Training 💪](#training-)
+    * [Evaluation 🏆](#evaluation-)
   * [Contacts 📧](#contacts-)
   * [Acknowledgements 🙏](#acknowledgements-)
   * [Appendix 🤓](#appendix-)
@@ -115,8 +116,22 @@ necessary `--inner` flag).
 Step-by-step instructions on this program installation are provided here. The easiest way to obtain the model would 
 be to use the HF 😊 hub repository [^1] 🔗 that can be easily accessed via this project. 
 
+<details>
+
+<summary>Hardware requirements 👀</summary>
+
+**Minimal** machine 🖥️ requirements for slow prediction run (and very slow training / evaluation):
+- **CPU** with a decent (above average) operational memory size
+
+**Ideal** machine 🖥️ requirements for fast prediction (and relatively fast training / evaluation):
+- **CPU** of some kind and memory size
+- **GPU** (for real CUDA [^10] support - only one of Nvidia's cards)
+
+</details>
+
 > [!WARNING]
-> Make sure you have **Python version 3.10+** installed on your machine 💻. 
+> Make sure you have **Python version 3.10+** installed on your machine 💻 and check its hardware 
+> requirements for correct program running provided above. 
 > Then create a separate virtual environment for this project 
 
 <details>
@@ -129,13 +144,16 @@ Clone this project to your local machine 🖥️️ via:
     git init
     git clone https://github.com/ufal/atrium-page-classification.git
 
-**OR** for updating the already cloned project, go to the folder containing `.git` subfolder and run:
+**OR** for updating the already cloned project with some changes, go to the folder containing (hidden) `.git` 
+subdirectory and run pulling which will merge with your local changes (overwrite them):
 
     cd /local/folder/for/this/project/atrium-page-classification
-    git pull
+    git add .
+    git commit -m 'local changes'
+    git pull -X theirs
 
-
-Follow the **Unix** / **Windows**-specific instruction at the venv docs [^3] 👀🔗 if you don't know how to.
+Next step would be a creation of the virtual environment. Follow the **Unix** / **Windows**-specific 
+instruction at the venv docs [^3] 👀🔗 if you don't know how to.
 After creating the venv folder, activate the environment via:
 
     source <your_venv_dir>/bin/activate
@@ -144,12 +162,6 @@ and then inside your virtual environment, you should install Python libraries (t
 
 </details>
 
-**Minimal** machine 🖥️ requirements for slow prediction run (and very slow training / evaluation):
-- **CPU** with a decent (above average) operational memory size
-
-**Ideal** machine 🖥️ requirements for fast prediction (and relatively fast training / evaluation):
-- **CPU** of some kind and memory size
-- **GPU** (for real CUDA [^10] support - only one of Nvidia's cards)
 
 > [!CAUTION]
 > Up to **1 GB of space for model** files and checkpoints is needed, and up to **7 GB 
@@ -166,7 +178,7 @@ Installation of Python dependencies can be done via:
 > (for training, evaluation or prediction run).
 
 After the dependencies installation is finished successfully, in the same virtual environment, you can
-run the Python program. 
+run the Python program.  
 
 To test that everything works okay and see the flag 
 descriptions call for `--help` ❓:
@@ -179,9 +191,9 @@ to **pull the model from the HF 😊 hub repository [^1] 🔗** via:
     python3 run.py --hf
 
 > [!IMPORTANT]
-> Unless you already have the model files in the `model/model_version`
-> directory next to this file, you must use the `--hf` flag to download the
-> model files from the HF 😊 repo [^1] 🔗
+> If you already have the model files in the `model/model_version`
+> directory next to this file, you do **NOT** have to use the `--hf` flag to download the
+> model files from the HF 😊 repo [^1] 🔗 (only for th model update)
 
 You should see a message about loading the model from the hub and then saving it locally on
 your machine 🖥️. 
@@ -195,7 +207,7 @@ After the model is downloaded, you should see a similar file structure:
 
 <summary>Initial project tree 🌳 files structure 👀</summary>
     
-    /local/folder/for/this/project
+    /local/folder/for/this/project/atrium-page-classification
     ├── model
         └── model_version 
             ├── config.json
@@ -261,10 +273,45 @@ optionally change `top_N` and `batch` in the `[SETUP]` section.
 >️ **Top-3** is enough to cover most of the images, setting **Top-5** will help with a small number 
 > of difficult to classify samples.
 
+The `batch` variable value depends on your machine 🖥️ memory size
+
+<details>
+
+<summary>Rough estimations of memory usage per batch size 👀</summary>
+
+| **Batch size** | **CPU / GPU memory usage** |
+|----------------|----------------------------|
+| 4              | 2 Gb                       |
+| 8              | 3 Gb                       |
+| 16             | 5 Gb                       |
+| 32             | 9 Gb                       |
+| 64             | 17 Gb                      |
+
+</details>
+
+It is safe to use batch size below **12** for a regular office desktop computer, and lower it to **4** if it's an old device.
+For training on a High Performance Computing cluster, you may use values above **20** for
+the `batch` variable in the `[SETUP]` section.
+
 > [!CAUTION]
 > Do **NOT** try to change **base_model** and other section contents unless you know what you are doing
 
-Make sure the virtual environment with all the installed libraries is activated, and only then proceed. 
+Make sure the virtual environment with all the installed libraries is activated, you are in the project 
+directory with Python files and only then proceed. 
+
+<details>
+
+<summary>How to 👀</summary>
+
+    cd /local/folder/for/this/project/
+    source <your_venv_dir>/bin/activate
+    cd atrium-page-classification
+
+</details>
+
+> [!IMPORTANT]
+> All the listed below commands for Python scripts running are adapted for **Unix** consoles, while
+> **Windows** users must use `python` instead of `python3` syntax
 
 ### Page processing 📄
 
@@ -556,13 +603,13 @@ subdirectories of pages).
 
 **Windows**:
 
-    move \local\folder\for\this\project\data_scripts\move_single.bat \full\path\to\your\folder\with\pdf\files
+    move \local\folder\for\this\project\atrium-page-classification\data_scripts\move_single.bat \full\path\to\your\folder\with\pdf\files
     cd \full\path\to\your\folder\with\pdf\files
     move_single.bat
 
 **Unix**:
     
-    cp /local/folder/for/this//project/data_scripts/move_single.sh /full/path/to/your/folder/with/pdf/files
+    cp /local/folder/for/this//project/atrium-page-classification/data_scripts/move_single.sh /full/path/to/your/folder/with/pdf/files
     cd /full/path/to/your/folder/with/pdf/files 
     move_single.sh 
 
@@ -704,8 +751,6 @@ state to `True`, yet it's recommended to awaken those variables solely through t
 For more detailed training process adjustments refer to the related functions in [classifier.py](classifier.py) 📎 
 file, where you will find some predefined values not used in the [run.py](run.py) 📎 file.
 
-### Training 💪 & Evaluation 🏆
-
 > [!IMPORTANT]
 > For both training and evaluation, you must make sure that the training pages directory is set right in the 
 > [config.txt](config.txt) ⚙ and it contains category 🪧 subdirectories with images inside. 
@@ -716,9 +761,6 @@ Device 🖥️ requirements for training / evaluation:
 - **GPU** (for real CUDA [^10] support - better one of Nvidia's cards)
 
 Worth mentioning that the efficient training is possible only with a CUDA-compatible GPU card.
-
-For test training launch on the **CPU-only device 🖥️** you should set **batch size to lower than 4**, and even in this
-case, **above-average CPU memory capacity** is a must-have to avoid a total system crush.
 
 <details>
 
@@ -733,6 +775,11 @@ case, **above-average CPU memory capacity** is a must-have to avoid a total syst
 | 64             | 17 Gb                      |
 
 </details>
+
+For test launches on the **CPU-only device 🖥️** you should set **batch size to lower than 4**, and even in this
+case, **above-average CPU memory capacity** is a must-have to avoid a total system crush.
+
+### Training 💪
 
 To train the model run: 
 
@@ -760,7 +807,7 @@ depending on your machine's 🖥️ CPU / GPU memory size and prepared dataset s
 
 Above are the default hyperparameters or TrainingArguments [^11] used in the training process that can be partially
 (only `epoch` and `log_step`) changed in the `[TRAIN]` section, plus `batch` in the `[SETUP]`section, 
-of the [config.txt](config.txt) ⚙ file. 
+of the [config.txt](config.txt) ⚙ file.
 
 > You are free to play with the **learning rate** right in the training function arguments called in the [run.py](run.py) 📎 file, 
 > yet **warmup ratio and other hyperparameters** are accessible only through the [classifier.py](classifier.py) 📎 file.
@@ -804,7 +851,7 @@ for example `model_<S/B>_E` where `E` is the number of epochs, `B` is the batch 
 
 <summary>Full project tree 🌳 files structure 👀</summary>
     
-    /local/folder/for/this/project
+    /local/folder/for/this/project/atrium-page-classification
     ├── model
         ├── model_version1 
             ├── config.json
@@ -848,12 +895,19 @@ for example `model_<S/B>_E` where `E` is the number of epochs, `B` is the batch 
 </details>
 
 > [!IMPORTANT] 
-> Since the length of the dataloader depends not only on the size of the dataset but also on the preset batch size, you can change 
-> the `batch` variable value in the [config.txt](config.txt) ⚙ file to train a differently named model on the same dataset.
-> Alternatively, adjust the **model naming generation** in the [classifier.py](classifier.py)'s 📎 training function.
+> The `model_version` value does **NOT** affect the trained model naming, other training parameters do. 
+> Since the length of the dataloader depends not only on the size of the dataset but also on the preset batch size, 
+> and test subset ratio. 
+
+You can slightly change the `test_size` and / or
+the `batch` variable value in the [config.txt](config.txt) ⚙ file to train a differently named model on the same dataset.
+Alternatively, adjust the **model naming generation** in the [classifier.py](classifier.py)'s 📎 training function.
+
+### Evaluation 🏆
 
 After the fine-tuned model is saved 💾, you can explicitly call for evaluation of the model to get a table of TOP-N classes for
-the randomly composed subset (10% in size) of the training page folder. 
+the randomly composed subset (10% in size by default) of the training page folder. There is an option of setting 
+`test_size` to 1.0 and use all the sorted by category pages provided in `[TRAIN]`'s folder for evaluation. 
 
 To do this in the unchanged configuration ⚙, automatically create a 
 confusion matrix plot 📊 and additionally get raw class probabilities table run: 
