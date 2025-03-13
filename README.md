@@ -479,9 +479,9 @@ With the following **columns** 📋:
 </details>
 
 The reason to use the `--raw` flag is the possible convenience of results review, 
-since the most ambiguous cases are expected to be at the bottom of the table sorted in
-descending order by all **<CATEGORY_LABEL>** columns, while the most obvious (for the model)
-cases are expected to be at the top.
+since the rows will be basically sorted by categories, and most ambiguous ones will
+have more small probabilities instead of zeros than the most obvious (for the model) 
+categories 🪧.
 
 ----
 
@@ -916,7 +916,7 @@ Alternatively, adjust the **model naming generation** in the [classifier.py](cla
 After the fine-tuned model is saved 💾, you can explicitly call for evaluation of the model to get a table of TOP-N classes for
 the randomly composed subset (10% in size by default) of the training page folder. 
 
-There is an option of setting `test_size` to 1.0 and use all the sorted by category pages provided 
+There is an option of setting `test_size` to 0.8 and use all the sorted by category pages provided 
 in `[TRAIN]`'s folder for evaluation, but do **NOT** launch it on the whole training data you have actually used up
 for the evaluated model training.
 
