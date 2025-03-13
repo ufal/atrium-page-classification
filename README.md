@@ -14,7 +14,7 @@ preparation scripts for PDF to PNG conversion
     + [Data 📜](#data-)
     + [Categories 🪧️](#categories-)
   * [How to install 🔧](#how-to-install-)
-  * [How to run prediction modes 🪄](#how-to-run-prediction--modes)
+  * [How to run prediction 🪄 modes](#how-to-run-prediction--modes)
     + [Page processing 📄](#page-processing-)
     + [Directory processing 📁](#directory-processing-)
   * [Results 📊](#results-)
@@ -130,8 +130,8 @@ be to use the HF 😊 hub repository [^1] 🔗 that can be easily accessed via t
 </details>
 
 > [!WARNING]
-> Make sure you have **Python version 3.10+** installed on your machine 💻 and check its hardware 
-> requirements for correct program running provided above. 
+> Make sure you have **Python version 3.10+** installed on your machine 💻 and check its
+> **hardware requirements** for correct program running provided above. 
 > Then create a separate virtual environment for this project 
 
 <details>
@@ -161,7 +161,6 @@ After creating the venv folder, activate the environment via:
 and then inside your virtual environment, you should install Python libraries (takes time ⌛) 
 
 </details>
-
 
 > [!CAUTION]
 > Up to **1 GB of space for model** files and checkpoints is needed, and up to **7 GB 
@@ -351,6 +350,9 @@ processing can be used. In addition, 2 directory-specific flags  `--inner` and `
 > You must either explicitly set the `-d` flag's argument or use the `--dir` flag (calling for the preset in 
 > `[INPUT]` section default value of the input directory) to process PNG files on the directory
 > level, otherwise, nothing will happen
+
+Worth mentioning that the **directory 📁 level processing is performed in batches**, therefore you should refer to
+the hardware's memory capacity requirements for different batch sizes tabulated [above](#how-to-run-prediction--modes).
 
 <details>
 
@@ -788,6 +790,12 @@ To train the model run:
 The training process has an automatic progress logging into console, and should take approximately 5-12h 
 depending on your machine's 🖥️ CPU / GPU memory size and prepared dataset size. 
 
+> [!TIP]
+> Run the training with **default hyperparameters** if you have at least ~10,000 and **less than 50,000 page samples** 
+> of the very similar to the initial source data - meaning, no further changes are required for fine-tuning model 
+> for the same task on an expanded (or new) dataset of document pages, even number of categories 🪧 does 
+> **NOT** matter while it stays under **20**
+
 <details>
 
 <summary>Training hyperparameters 👀</summary>
@@ -906,8 +914,11 @@ Alternatively, adjust the **model naming generation** in the [classifier.py](cla
 ### Evaluation 🏆
 
 After the fine-tuned model is saved 💾, you can explicitly call for evaluation of the model to get a table of TOP-N classes for
-the randomly composed subset (10% in size by default) of the training page folder. There is an option of setting 
-`test_size` to 1.0 and use all the sorted by category pages provided in `[TRAIN]`'s folder for evaluation. 
+the randomly composed subset (10% in size by default) of the training page folder. 
+
+There is an option of setting `test_size` to 1.0 and use all the sorted by category pages provided 
+in `[TRAIN]`'s folder for evaluation, but do **NOT** launch it on the whole training data you have actually used up
+for the evaluated model training.
 
 To do this in the unchanged configuration ⚙, automatically create a 
 confusion matrix plot 📊 and additionally get raw class probabilities table run: 
