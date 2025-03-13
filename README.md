@@ -152,8 +152,15 @@ subdirectory and run pulling which will merge upcoming files with your local cha
     git commit -m 'local changes'
     git pull -X theirs
 
+Alternatively, if you do **NOT** care about local changes, just remove those files:
+
+    cd /local/folder/for/this/project/atrium-page-classification
+    rm <changed_file>
+    git pull
+
 Next step would be a creation of the virtual environment. Follow the **Unix** / **Windows**-specific 
 instruction at the venv docs [^3] 👀🔗 if you don't know how to.
+
 After creating the venv folder, activate the environment via:
 
     source <your_venv_dir>/bin/activate
