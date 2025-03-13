@@ -45,6 +45,7 @@ def dataframe_results(test_images: list, test_predictions: list, categories: lis
         raw_weights = np.array(raw_scores).round(3)
         rawdf[categories] = raw_weights
         rawdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
+        # rawdf.sort_values(categories, ascending=[False] * len(categories), inplace=True)
 
     rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
 
