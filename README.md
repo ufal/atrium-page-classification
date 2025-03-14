@@ -61,7 +61,7 @@ paper source into one of the categories - each responsible for the following con
 
 **Evaluation** 🏆 set:  **995** images
 
-> **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250313-1515_model_1119_3_TOP-5_EVAL.csv) 📎
+> **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250314-1602_model_1119_3_TOP-5_EVAL.csv) 📎
 
 Manual ✍️ annotation was performed beforehand and took some time ⌛, the categories 🪧  were formed from
 different sources of the archival documents originated in the 1920-2020 years span. 
@@ -447,13 +447,13 @@ Demo files:
 
 - Manually ✍️ **checked** (small): [model_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-5): [model_TOP-5_EVAL.csv](result%2Ftables%2F20250313-1515_model_1119_3_TOP-5_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-5): [model_TOP-5_EVAL.csv](result%2Ftables%2F20250314-1602_model_1119_3_TOP-5_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250313-1526_model_1119_3_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250314-1606_model_1119_3_TOP-1_EVAL.csv) 📎
 
-- **Unchecked with TRUE** values: [model_TOP-3.csv](result%2Ftables%2F20250313-1530_model_1119_3_TOP-3.csv) 📎
+- **Unchecked with TRUE** values: [model_TOP-5.csv](result%2Ftables%2F20250314-1600_model_1119_3_TOP-5.csv) 📎
 
-- **Unchecked with TRUE** values (small): [model_TOP-3.csv](result%2Ftables%2F20250313-1554_model_1119_3_TOP-3.csv)📎
+- **Unchecked with TRUE** values (small): [model_TOP-3.csv](result%2Ftables%2F20250314-1615_model_1119_3_TOP-3.csv)📎
 
 With the following **columns** 📋:
 
@@ -474,11 +474,11 @@ and optionally
 
 Demo files:
 
-- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250313-1515_model_1119_3_EVAL_RAW.csv) 📎
+- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250314-1602_model_1119_3_EVAL_RAW.csv) 📎
 
-- **Unchecked with TRUE** values **RAW**: [model_RAW.csv](result%2Ftables%2F20250313-1530_model_1119_3_RAW.csv) 📎
+- **Unchecked with TRUE** values **RAW**: [model_RAW.csv](result%2Ftables%2F20250314-1600_model_1119_3_RAW.csv) 📎
 
-- **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250313-1554_model_1119_3_RAW.csv) 📎
+- **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250314-1615_model_1119_3_RAW.csv) 📎
 
 With the following **columns** 📋:
 
@@ -767,7 +767,8 @@ file, where you will find some predefined values not used in the [run.py](run.py
 > [!IMPORTANT]
 > For both training and evaluation, you must make sure that the training pages directory is set right in the 
 > [config.txt](config.txt) ⚙ and it contains category 🪧 subdirectories with images inside. 
-> Names of the category 🪧 subdirectories become actual label names and replace the default categories 🪧 list
+> Names of the category 🪧 subdirectories are sorted in the alphabetic order and become actual
+> label names and replace the default categories 🪧 list
 
 Device 🖥️ requirements for training / evaluation:
 - **CPU** of some kind and memory size

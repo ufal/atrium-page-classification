@@ -143,11 +143,13 @@ if __name__ == "__main__":
                                         raw_prediction)
 
         rdf["TRUE"] = [categories[i] for i in test_labels]
+        rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
         rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{model_folder}_TOP-{top_N}_EVAL.csv", sep=",", index=False)
         print(f"Evaluation results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
 
         if raw:
             raw_df["TRUE"] = [categories[i] for i in test_labels]
+            raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
             raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{model_folder}_EVAL_RAW.csv", sep=",", index=False)
             print(f"RAW Evaluation results are recorded into {output_dir}/tables/ directory")
 
@@ -185,10 +187,12 @@ if __name__ == "__main__":
                                         top_N,
                                         raw_prediction)
 
+        rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
         rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{model_folder}_TOP-{top_N}.csv", sep=",", index=False)
         print(f"Results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
 
         if raw:
+            raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
             raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{model_folder}_RAW.csv", sep=",", index=False)
             print(f"RAW Results are recorded into {output_dir}/tables/ directory")
 
