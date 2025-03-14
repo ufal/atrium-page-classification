@@ -724,6 +724,9 @@ containing document-specific pages with a similar structure:
 
 </details>
 
+The sorting script can help you in moderating mislabeled samples before the training. Accurate data annotation
+directly affects the model performance. 
+
 Before running the training, make sure to check the [config.txt](config.txt) ⚙️ file for the `[TRAIN]` section variables, where you should
 set a path to the data folder. 
 
