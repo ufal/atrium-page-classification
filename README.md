@@ -10,6 +10,7 @@ preparation scripts for PDF to PNG conversion
 
 ### Table of contents 📑
 
+  * [Versions 🏁](#versions-)
   * [Model description 📇](#model-description-)
     + [Data 📜](#data-)
     + [Categories 🪧️](#categories-)
@@ -31,6 +32,16 @@ preparation scripts for PDF to PNG conversion
   * [Appendix 🤓](#appendix-)
 
 ----
+
+## Versions 🏁
+
+There are currently 2 version of the model available for download, both of them have the same set of categories, 
+but different data annotations. The latest `v2.0` is considered to be default.
+
+| Version | Pages | N-page files |   PDFs   | Description                                                   |
+|--------:|:-----:|:------------:|:--------:|:--------------------------------------------------------------|
+|  `v1.0` | 10073 |   **~104**   | **3896** | annotations with mistakes, more heterogenous data             |
+|  `v1.0` | 11940 |   **~509**   | **5002** | more diverse pages in each category, less annotation mistakes |
 
 ## Model description 📇
 
@@ -61,7 +72,7 @@ paper source into one of the categories - each responsible for the following con
 
 > **90% of all** - proportion in categories 🪧 tabulated [below](#categories-)
 
-**Evaluation** 🏆 set:  **1194** images for v1.0 and v2.0
+**Evaluation** 🏆 set:  **1194** images for v1.0 and v2.0 (taken from v2.0 annotations)
 
 > **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250416-1431_model_1119_3_TOP-1_EVAL.csv) 📎
 
