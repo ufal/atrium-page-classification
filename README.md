@@ -55,11 +55,15 @@ paper source into one of the categories - each responsible for the following con
 
 ### Data 📜
 
-**Training** 💪 set of the model: **8950** images 
+**Training** 💪 set of the model: **8950** images for v.1.0
+
+**Training** 💪 set of the model: **10745** images for v2.0
 
 > **90% of all** - proportion in categories 🪧 tabulated [below](#categories-)
 
-**Evaluation** 🏆 set:  **995** images
+**Evaluation** 🏆 set:  **995** images for v1.0
+
+**Evaluation** 🏆 set:  **1194** images for v2.0
 
 > **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250314-1602_model_1119_3_TOP-5_EVAL.csv) 📎
 
@@ -82,6 +86,10 @@ arrowheads, and rocks formerly drawn by hand and later illustrated with digital 
 
 ### Categories 🪧
 
+<details>
+
+<summary>v1.0 Categories 🪧</summary>
+
 |    Label️ | Ratio  | Description                                                                   |
 |----------:|:------:|:------------------------------------------------------------------------------|
 |    `DRAW` | 11.89% | **📈 - drawings, maps, paintings with text**                                  |
@@ -95,6 +103,25 @@ arrowheads, and rocks formerly drawn by hand and later illustrated with digital 
 | `TEXT_HW` | 7.36%  | **✏️📄 - only handwritten text**                                              |
 |  `TEXT_P` | 6.95%  | **📄 - only printed text**                                                    |
 |  `TEXT_T` | 13.53% | **📄 - only machine typed text**                                              |
+
+</details>
+
+**v2.0 version Categories 🪧**:
+
+|    Label️ | Ratio | Description                                                                   |
+|----------:|:-----:|:------------------------------------------------------------------------------|
+|    `DRAW` | 9.12% | **📈 - drawings, maps, paintings with text**                                  |
+|  `DRAW_L` | 9.14% | **📈📏 - drawings, etc with a table legend or inside tabular layout / forms** |
+| `LINE_HW` | 8.84% | **✏️📏 - handwritten text lines inside tabular layout / forms**               |
+|  `LINE_P` | 9.15% | **📏 - printed text lines inside tabular layout / forms**                     |
+|  `LINE_T` | 9.2%  | **📏 - machine typed text lines inside tabular layout / forms**               |
+|   `PHOTO` | 9.05% | **🌄 - photos with text**                                                     |
+| `PHOTO_L` | 9.1%  | **🌄📏 - photos inside tabular layout / forms or with a tabular annotation**  |
+|    `TEXT` | 9.14% | **📰 - mixed types of printed and handwritten texts**                         |
+| `TEXT_HW` | 9.14% | **✏️📄 - only handwritten text**                                              |
+|  `TEXT_P` | 9.07% | **📄 - only printed text**                                                    |
+|  `TEXT_T` | 9.05% | **📄 - only machine typed text**                                              |
+
 
 The categories were chosen to sort the pages by the following criteria: 
 
@@ -199,7 +226,8 @@ to **pull the model from the HF 😊 hub repository [^1] 🔗** via:
 > [!IMPORTANT]
 > If you already have the model files in the `model/model_version`
 > directory next to this file, you do **NOT** have to use the `--hf` flag to download the
-> model files from the HF 😊 repo [^1] 🔗 (only for th model update)
+> model files from the HF 😊 repo [^1] 🔗 (only for the model update). The `revision` variable stands
+> for the model version, and you can change it to the one you want to use (`main`, `v1.0`, and `v2.0` are currently available).
 
 You should see a message about loading the model from the hub and then saving it locally on
 your machine 🖥️. 
@@ -402,13 +430,23 @@ There are accuracy performance measurements and plots of confusion matrices for 
 dataset (10% of the provided in `[TRAIN]`'s folder data). Both graphic plots and tables with 
 results can be found in the [result](result) 📁 folder.
 
-Evaluation set's accuracy (**Top-3**):  **99.6%** 🏆
+**v1.0** Evaluation set's accuracy (**Top-3**):  **99.6%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-3 👀</summary>
 
 ![TOP-3 confusion matrix](result%2Fplots%2F20250209-1526_conf_mat.png)
+
+</details>
+
+**v2.0** Evaluation set's accuracy (**Top-3**):  **99.92%** 🏆
+
+<details>
+
+<summary>Confusion matrix 📊 TOP-3 👀</summary>
+
+![TOP-3 confusion matrix](result%2Fplots%2F20250416-1158_conf_mat_TOP-3.png)
 
 </details>
 
@@ -419,6 +457,16 @@ Evaluation set's accuracy (**Top-1**):  **97.3%** 🏆
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
 ![TOP-1 confusion matrix](result%2Fplots%2F20250218-1523_conf_mat.png)
+
+</details>
+
+**v2.0** Evaluation set's accuracy (**Top-1**):  **96.9%** 🏆
+
+<details>
+
+<summary>Confusion matrix 📊 TOP-1 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2F20250416-1153_conf_mat_TOP-1.png)
 
 </details>
 
@@ -443,7 +491,7 @@ Additionally, results of prediction inference run on the directory level without
 
 <summary>General result tables 👀</summary>
 
-Demo files:
+Demo files  **v1.0**:
 
 - Manually ✍️ **checked** (small): [model_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 📎
 
@@ -454,6 +502,16 @@ Demo files:
 - **Unchecked with TRUE** values: [model_TOP-5.csv](result%2Ftables%2F20250314-1600_model_1119_3_TOP-5.csv) 📎
 
 - **Unchecked with TRUE** values (small): [model_TOP-3.csv](result%2Ftables%2F20250314-1615_model_1119_3_TOP-3.csv)📎
+
+Demo files  **v2.0**:
+
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250416-1148_model_672_5_TOP-1_EVAL.csv) 📎
+
+- Manually ✍️ **checked** evaluation dataset (TOP-5): [model_TOP-5_EVAL.csv](result%2Ftables%2F20250416-1218_model_672_5_TOP-5_EVAL.csv) 📎
+
+- **Unchecked with TRUE** values: [model_TOP-5.csv](result%2Ftables%2F20250416-1224_model_672_5_TOP-5.csv) 📎
+
+- **Unchecked with TRUE** values (small): [model_TOP-3.csv](result%2Ftables%2F20250416-1226_model_672_5_TOP-3.csv)📎
 
 With the following **columns** 📋:
 
@@ -472,13 +530,21 @@ and optionally
 
 <summary>Raw result tables 👀</summary>
 
-Demo files:
+Demo files **v1.0**:
 
 - Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250314-1602_model_1119_3_EVAL_RAW.csv) 📎
 
 - **Unchecked with TRUE** values **RAW**: [model_RAW.csv](result%2Ftables%2F20250314-1600_model_1119_3_RAW.csv) 📎
 
 - **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250314-1615_model_1119_3_RAW.csv) 📎
+
+Demo files **v2.0**:
+ 
+- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250416-1047_model_672_5_EVAL_RAW.csv) 📎
+
+- **Unchecked with TRUE** values **RAW**: [model_RAW.csv](result%2Ftables%2F20250416-1224_model_672_5_RAW.csv) 📎
+
+- **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250416-1226_model_672_5_RAW.csv) 📎
 
 With the following **columns** 📋:
 

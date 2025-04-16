@@ -100,7 +100,7 @@ def confusion_plot(predictions: list, trues: list, categories: list, top_N: int 
 
     # Confusion matrix display and normalized output
     disp = ConfusionMatrixDisplay.from_predictions(
-        trues, single_pred,
+        trues, single_pred, cmap='inferno',
         normalize="true", display_labels=np.array(categories)
     )
 
@@ -109,8 +109,12 @@ def confusion_plot(predictions: list, trues: list, categories: list, top_N: int 
         print(
             f"{disp.display_labels[ir]}\t{'   '.join([str(val) if val > 0 else ' -- ' for val in np.round(row, 2)])}")
 
+    # 1. Remove column labels (x-axis tick labels)
+    disp.ax_.set_xticklabels([])
+
     time_stamp = time.strftime("%Y%m%d-%H%M")
     disp.ax_.set_title(
         f"TOP {top_N} Full Confusion matrix")
-    plt.savefig(f"{output_dir if output_dir else 'result'}/plots/{time_stamp}_conf_mat_TOP-{top_N}.png", bbox_inches='tight')
+    out = f"{output_dir if output_dir else 'result'}/plots/{time_stamp}_conf_mat_TOP-{top_N}.png"
+    plt.savefig(out, bbox_inches='tight', dpi=300 )
     plt.close()

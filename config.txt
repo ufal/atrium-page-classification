@@ -4,27 +4,28 @@ FOLDER_CPOINTS=./checkpoint
 FOLDER_MODELS=./model
 
 [TRAIN]
-FOLDER_PAGES=./category_samples
+FOLDER_PAGES=/lnet/work/people/lutsai/pythonProject/pages/train_2
 test_size = 0.1
 log_step = 10
-epochs = 5
-max_categ = 1400
+epochs = 3
+max_categ = 1200
 Training = False
 Testing = False
 
 [SETUP]
 seed = 420
 base_model = google/vit-base-patch16-224
-batch = 11
+batch = 16
 top_N = 3
 raw = False
 inner = False
-model_version = model_1119_3
+model_version = model_672_5
 
 [INPUT]
-FOLDER_INPUT=./category_samples
+FOLDER_INPUT=/lnet/work/people/lutsai/pythonProject/pages/test_CTX
 
 [HF]
 repo_name = ufal/vit-historical-page
-token = hf_fAkS...OOnBajU
+token = hf_GUUZw...BrkdulG
 use_hf = False
+revision = v2.0

@@ -143,7 +143,6 @@ class ImageClassifier:
             probabilities = torch.nn.functional.softmax(logits, dim=-1)
             top_n_probs, top_n_indices = torch.topk(probabilities, top_n, dim=-1)
             top_n_probs = top_n_probs / top_n_probs.sum()
-        # print(top_n_indices, top_n_probs)
         return list(zip(top_n_indices.squeeze().tolist(), top_n_probs.squeeze().tolist()))
 
     def create_dataloader(self, image_paths: list, batch_size: int) -> DataLoader:
@@ -203,7 +202,7 @@ class ImageClassifier:
         print(f"Model and processor loaded from {load_directory}")
 
     def push_to_hub(self, load_directory: str, repo_id: str, private: bool = False,
-                    token: str = None):
+                    token: str = None, revision: str = "main"):
         """
         Upload the fine-tuned model and processor to the Hugging Face Model Hub.
 
@@ -224,12 +223,12 @@ class ImageClassifier:
         self.processor.save_pretrained(load_directory)
 
         # Upload to the Hub
-        self.model.push_to_hub(repo_id, private=private, token=token)
-        self.processor.push_to_hub(repo_id, private=private, token=token)
+        self.model.push_to_hub(repo_id, private=private, token=token, revision=revision)
+        self.processor.push_to_hub(repo_id, private=private, token=token, revision=revision)
 
         print(f"Model and processor pushed to the Hugging Face Hub: {repo_id}")
 
-    def load_from_hub(self, repo_id: str):
+    def load_from_hub(self, repo_id: str,  revision: str = "main"):
         """
         Load a model and its processor from the Hugging Face Hub.
 
@@ -242,10 +241,10 @@ class ImageClassifier:
         """
 
         # Load the model from the repository
-        model = AutoModelForImageClassification.from_pretrained(repo_id)
+        model = AutoModelForImageClassification.from_pretrained(repo_id, revision=revision)
 
         # Load the processor from the repository
-        processor = AutoImageProcessor.from_pretrained(repo_id)
+        processor = AutoImageProcessor.from_pretrained(repo_id, revision=revision)
 
         self.model, self.processor = model, processor
         print(f"Model and processor loaded from the Hugging Face Hub: {repo_id}")
