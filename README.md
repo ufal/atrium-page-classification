@@ -63,7 +63,7 @@ paper source into one of the categories - each responsible for the following con
 
 **Evaluation** 🏆 set:  **1194** images for v1.0 and v2.0
 
-> **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250314-1602_model_1119_3_TOP-5_EVAL.csv) 📎
+> **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250416-1431_model_1119_3_TOP-1_EVAL.csv) 📎
 
 Manual ✍️ annotation was performed beforehand and took some time ⌛, the categories 🪧  were formed from
 different sources of the archival documents originated in the 1920-2020 years span. 
