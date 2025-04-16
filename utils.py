@@ -109,12 +109,15 @@ def confusion_plot(predictions: list, trues: list, categories: list, top_N: int 
         print(
             f"{disp.display_labels[ir]}\t{'   '.join([str(val) if val > 0 else ' -- ' for val in np.round(row, 2)])}")
 
-    # 1. Remove column labels (x-axis tick labels)
-    disp.ax_.set_xticklabels([])
+    # Customize x-axis tick labels to show only the first character of each label
+    tick_positions = disp.ax_.get_xticks()
+    short_labels = [f"{label[0]}{label.split('_')[-1][0] if '_' in label else ''}" for label in disp.display_labels]
+    disp.ax_.set_xticks(tick_positions)
+    disp.ax_.set_xticklabels(short_labels)
 
     time_stamp = time.strftime("%Y%m%d-%H%M")
     disp.ax_.set_title(
         f"TOP {top_N} Full Confusion matrix")
     out = f"{output_dir if output_dir else 'result'}/plots/{time_stamp}_conf_mat_TOP-{top_N}.png"
-    plt.savefig(out, bbox_inches='tight', dpi=300 )
+    plt.savefig(out, bbox_inches='tight', dpi=300)
     plt.close()

@@ -61,9 +61,7 @@ paper source into one of the categories - each responsible for the following con
 
 > **90% of all** - proportion in categories 🪧 tabulated [below](#categories-)
 
-**Evaluation** 🏆 set:  **995** images for v1.0
-
-**Evaluation** 🏆 set:  **1194** images for v2.0
+**Evaluation** 🏆 set:  **1194** images for v1.0 and v2.0
 
 > **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250314-1602_model_1119_3_TOP-5_EVAL.csv) 📎
 
@@ -430,13 +428,13 @@ There are accuracy performance measurements and plots of confusion matrices for 
 dataset (10% of the provided in `[TRAIN]`'s folder data). Both graphic plots and tables with 
 results can be found in the [result](result) 📁 folder.
 
-**v1.0** Evaluation set's accuracy (**Top-3**):  **99.6%** 🏆
+**v1.0** Evaluation set's accuracy (**Top-3**):  **95.06%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-3 👀</summary>
 
-![TOP-3 confusion matrix](result%2Fplots%2F20250209-1526_conf_mat.png)
+![TOP-3 confusion matrix](result%2Fplots%2F20250416-1430_conf_mat_TOP-3.png)
 
 </details>
 
@@ -446,17 +444,17 @@ results can be found in the [result](result) 📁 folder.
 
 <summary>Confusion matrix 📊 TOP-3 👀</summary>
 
-![TOP-3 confusion matrix](result%2Fplots%2F20250416-1158_conf_mat_TOP-3.png)
+![TOP-3 confusion matrix](result%2Fplots%2F20250416-1447_conf_mat_TOP-3.png)
 
 </details>
 
-Evaluation set's accuracy (**Top-1**):  **97.3%** 🏆
+**v1.0** Evaluation set's accuracy (**Top-1**):  **78.98%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20250218-1523_conf_mat.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20250416-1436_conf_mat_TOP-1.png)
 
 </details>
 
@@ -466,7 +464,7 @@ Evaluation set's accuracy (**Top-1**):  **97.3%** 🏆
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20250416-1153_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20250416-1441_conf_mat_TOP-1.png)
 
 </details>
 
@@ -495,9 +493,9 @@ Demo files  **v1.0**:
 
 - Manually ✍️ **checked** (small): [model_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-5): [model_TOP-5_EVAL.csv](result%2Ftables%2F20250314-1602_model_1119_3_TOP-5_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250416-1426_model_1119_3_TOP-3_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250314-1606_model_1119_3_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250416-1431_model_1119_3_TOP-1_EVAL.csv) 📎
 
 - **Unchecked with TRUE** values: [model_TOP-5.csv](result%2Ftables%2F20250314-1600_model_1119_3_TOP-5.csv) 📎
 
@@ -505,9 +503,9 @@ Demo files  **v1.0**:
 
 Demo files  **v2.0**:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250416-1148_model_672_5_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250416-1154_model_672_5_TOP-3_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-5): [model_TOP-5_EVAL.csv](result%2Ftables%2F20250416-1218_model_672_5_TOP-5_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250416-1148_model_672_5_TOP-1_EVAL.csv) 📎
 
 - **Unchecked with TRUE** values: [model_TOP-5.csv](result%2Ftables%2F20250416-1224_model_672_5_TOP-5.csv) 📎
 
@@ -532,7 +530,7 @@ and optionally
 
 Demo files **v1.0**:
 
-- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250314-1602_model_1119_3_EVAL_RAW.csv) 📎
+- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250416-1448_model_1119_3_EVAL_RAW.csv) 📎
 
 - **Unchecked with TRUE** values **RAW**: [model_RAW.csv](result%2Ftables%2F20250314-1600_model_1119_3_RAW.csv) 📎
 
@@ -794,7 +792,7 @@ The sorting script can help you in moderating mislabeled samples before the trai
 directly affects the model performance. 
 
 Before running the training, make sure to check the [config.txt](config.txt) ⚙️ file for the `[TRAIN]` section variables, where you should
-set a path to the data folder. 
+set a path to the data folder. Make sure label directory names do **NOT** contain special characters like spaces, tabs or paragraph splits.
 
 > [!TIP]
 > In the [config.txt](config.txt) ⚙️ file tweak the parameter of `max_categ`
