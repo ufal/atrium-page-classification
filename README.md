@@ -67,13 +67,13 @@ paper source into one of the categories - each responsible for the following con
 
 ### Data 📜
 
-**Training** 💪 set of the model: **8950** images for v.1.0
+**Training** 💪 set of the model: **8950** images for `v1.0`
 
-**Training** 💪 set of the model: **10745** images for v2.0
+**Training** 💪 set of the model: **10745** images for `v2.0`
 
 > **90% of all** - proportion in categories 🪧 tabulated [below](#categories-)
 
-**Evaluation** 🏆 set:  **1194** images for v1.0 and v2.0 (taken from v2.0 annotations)
+**Evaluation** 🏆 set:  **1194** images for `v1.0` and `v2.0` (taken from `v2.0` annotations)
 
 > **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250416-1431_model_1119_3_TOP-1_EVAL.csv) 📎
 
@@ -440,7 +440,7 @@ There are accuracy performance measurements and plots of confusion matrices for 
 dataset (10% of the provided in `[TRAIN]`'s folder data). Both graphic plots and tables with 
 results can be found in the [result](result) 📁 folder.
 
-**v1.0** Evaluation set's accuracy (**Top-3**):  **95.06%** 🏆
+`v1.0` Evaluation set's accuracy (**Top-3**):  **95.06%** 🏆
 
 <details>
 
@@ -450,7 +450,7 @@ results can be found in the [result](result) 📁 folder.
 
 </details>
 
-**v2.0** Evaluation set's accuracy (**Top-3**):  **99.92%** 🏆
+`v2.0` Evaluation set's accuracy (**Top-3**):  **99.92%** 🏆
 
 <details>
 
@@ -460,7 +460,7 @@ results can be found in the [result](result) 📁 folder.
 
 </details>
 
-**v1.0** Evaluation set's accuracy (**Top-1**):  **78.98%** 🏆
+`v1.0` Evaluation set's accuracy (**Top-1**):  **78.98%** 🏆
 
 <details>
 
@@ -470,7 +470,7 @@ results can be found in the [result](result) 📁 folder.
 
 </details>
 
-**v2.0** Evaluation set's accuracy (**Top-1**):  **96.9%** 🏆
+`v2.0` Evaluation set's accuracy (**Top-1**):  **96.9%** 🏆
 
 <details>
 
@@ -501,7 +501,7 @@ Additionally, results of prediction inference run on the directory level without
 
 <summary>General result tables 👀</summary>
 
-Demo files  **v1.0**:
+Demo files  `v1.0`:
 
 - Manually ✍️ **checked** (small): [model_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 📎
 
@@ -513,7 +513,7 @@ Demo files  **v1.0**:
 
 - **Unchecked with TRUE** values (small): [model_TOP-3.csv](result%2Ftables%2F20250314-1615_model_1119_3_TOP-3.csv)📎
 
-Demo files  **v2.0**:
+Demo files  `v2.0`:
 
 - Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250416-1154_model_672_5_TOP-3_EVAL.csv) 📎
 
@@ -540,7 +540,7 @@ and optionally
 
 <summary>Raw result tables 👀</summary>
 
-Demo files **v1.0**:
+Demo files `v1.0`:
 
 - Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250416-1448_model_1119_3_EVAL_RAW.csv) 📎
 
@@ -548,7 +548,7 @@ Demo files **v1.0**:
 
 - **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250314-1615_model_1119_3_RAW.csv) 📎
 
-Demo files **v2.0**:
+Demo files `v2.0`:
  
 - Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250416-1047_model_672_5_EVAL_RAW.csv) 📎
 
