@@ -36,7 +36,8 @@ preparation scripts for PDF to PNG conversion
 ## Versions 🏁
 
 There are currently 2 version of the model available for download, both of them have the same set of categories, 
-but different data annotations. The latest `v2.0` is considered to be default.
+but different data annotations. The latest `v2.0` is considered to be default and can be found in the `main` branch
+of HF 😊 hub [^1] 🔗 
 
 | Version | Pages | N-page files |   PDFs   | Description                                                   |
 |--------:|:-----:|:------------:|:--------:|:--------------------------------------------------------------|
