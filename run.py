@@ -116,9 +116,10 @@ if __name__ == "__main__":
                                logging_steps=log_step)
 
     if args.hf:
-        # pushing to repo
-        classifier.load_model(str(model_path))
-        classifier.push_to_hub(str(model_path), config.get("HF", "repo_name"), False, config.get("HF", "token"), config.get("HF", "revision"))
+        # UNCOMMENT for pushing to HF repo
+        # ----------------------------------------------
+        # classifier.load_model(str(model_path))
+        # classifier.push_to_hub(str(model_path), config.get("HF", "repo_name"), False, config.get("HF", "token"), config.get("HF", "revision"))
 
         # loading from repo
         classifier.load_from_hub(config.get("HF", "repo_name"), config.get("HF", "revision"))
