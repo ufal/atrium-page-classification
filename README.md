@@ -451,7 +451,7 @@ results can be found in the [result](result) 📁 folder.
 
 </details>
 
-`v2.0` Evaluation set's accuracy (**Top-3**):  **99.92%** 🏆
+`v2.0` Evaluation set's accuracy (**Top-3**):  **99.75%** 🏆
 
 <details>
 
@@ -471,7 +471,7 @@ results can be found in the [result](result) 📁 folder.
 
 </details>
 
-`v2.0` Evaluation set's accuracy (**Top-1**):  **96.9%** 🏆
+`v2.0` Evaluation set's accuracy (**Top-1**):  **96.82%** 🏆
 
 <details>
 
