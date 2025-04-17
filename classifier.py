@@ -35,7 +35,7 @@ class ImageClassifier:
             checkpoint,
             num_labels=num_labels,
             cache_dir=store_dir,
-            ignore_mismatched_sizes=True
+            ignore_mismatched_sizes=True,
         ).to(self.device)
 
         # Define transformations
@@ -234,6 +234,7 @@ class ImageClassifier:
 
         Args:
             repo_id (str): The name of the repository on the Hugging Face Hub.
+            revision (str, optional): The revision of the repository to load. Defaults to "main".
 
         Returns:
             model: The loaded model.

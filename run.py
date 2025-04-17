@@ -25,10 +25,14 @@ if __name__ == "__main__":
     Training = config.getboolean('TRAIN', 'Training')
     Testing = config.getboolean('TRAIN', 'Testing')
     HF = config.getboolean('HF', 'use_hf')
+    hf_version = config.get("HF", "revision")
 
-    model_folder = config.get('SETUP', 'model_version')
+    # setting main to latest version by default
+    # hf_version = hf_version if hf_version != 'main' else config.get('HF', 'latest')
+
+    model_name_local = f"model_{hf_version.replace('.', '')}"
     model_dir = config.get('OUTPUT', 'FOLDER_MODELS')
-    model_path = f"{model_dir}/{model_folder}"
+    model_path = f"{model_dir}/{model_name_local}"
 
     test_dir = config.get('INPUT', 'FOLDER_INPUT')
 
@@ -116,10 +120,12 @@ if __name__ == "__main__":
                                logging_steps=log_step)
 
     if args.hf:
-        # UNCOMMENT for pushing to HF repo
+        # ----------------------------------------------
+        # ----- UNCOMMENT for pushing to HF repo -------
         # ----------------------------------------------
         # classifier.load_model(str(model_path))
         # classifier.push_to_hub(str(model_path), config.get("HF", "repo_name"), False, config.get("HF", "token"), config.get("HF", "revision"))
+        # ----------------------------------------------
 
         # loading from repo
         classifier.load_from_hub(config.get("HF", "repo_name"), config.get("HF", "revision"))
@@ -148,13 +154,13 @@ if __name__ == "__main__":
 
         rdf["TRUE"] = [categories[i] for i in test_labels]
         rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
-        rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{model_folder}_TOP-{top_N}_EVAL.csv", sep=",", index=False)
+        rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{model_name_local}_TOP-{top_N}_EVAL.csv", sep=",", index=False)
         print(f"Evaluation results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
 
         if raw:
             raw_df["TRUE"] = [categories[i] for i in test_labels]
             raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
-            raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{model_folder}_EVAL_RAW.csv", sep=",", index=False)
+            raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{model_name_local}_EVAL_RAW.csv", sep=",", index=False)
             print(f"RAW Evaluation results are recorded into {output_dir}/tables/ directory")
 
 
@@ -192,12 +198,12 @@ if __name__ == "__main__":
                                         raw_prediction)
 
         rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
-        rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{model_folder}_TOP-{top_N}.csv", sep=",", index=False)
+        rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{model_name_local}_TOP-{top_N}.csv", sep=",", index=False)
         print(f"Results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
 
         if raw:
             raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
-            raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{model_folder}_RAW.csv", sep=",", index=False)
+            raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{model_name_local}_RAW.csv", sep=",", index=False)
             print(f"RAW Results are recorded into {output_dir}/tables/ directory")
 
 

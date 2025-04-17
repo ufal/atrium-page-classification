@@ -19,13 +19,13 @@ batch = 16
 top_N = 3
 raw = False
 inner = False
-model_version = model_672_5
 
 [INPUT]
 FOLDER_INPUT=./category_samples
 
 [HF]
 repo_name = ufal/vit-historical-page
-token = hf_ALr...zdBL
+token = hf_AOLs....yGcHguvM
 use_hf = False
 revision = main
+latest = v2.0

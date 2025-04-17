@@ -189,7 +189,8 @@ subdirectory and run pulling which will merge upcoming files with your local cha
     git commit -m 'local changes'
     git pull -X theirs
 
-Alternatively, if you do **NOT** care about local changes, just remove those files:
+Alternatively, if you do **NOT** care about local changes **OR** you want to get the latest project files, 
+just remove those files:
 
     cd /local/folder/for/this/project/atrium-page-classification
     rm <changed_file>
@@ -234,7 +235,7 @@ to **pull the model from the HF 😊 hub repository [^1] 🔗** via:
     python3 run.py --hf
 
 > [!IMPORTANT]
-> If you already have the model files in the `model/model_version`
+> If you already have the model files in the `model/movel_v<HFrevision>`
 > directory next to this file, you do **NOT** have to use the `--hf` flag to download the
 > model files from the HF 😊 repo [^1] 🔗 (only for the model update). The `revision` variable stands
 > for the model version, and you can change it to the one you want to use (`main`, `v1.0`, and `v2.0` are currently available).
@@ -253,7 +254,7 @@ After the model is downloaded, you should see a similar file structure:
     
     /local/folder/for/this/project/atrium-page-classification
     ├── model
-        └── model_version 
+        └── movel_v<HFrevision> 
             ├── config.json
             ├── model.safetensors
             └── preprocessor_config.json
@@ -456,7 +457,7 @@ results can be found in the [result](result) 📁 folder.
 
 <summary>Confusion matrix 📊 TOP-3 👀</summary>
 
-![TOP-3 confusion matrix](result%2Fplots%2F20250416-1447_conf_mat_TOP-3.png)
+![TOP-3 confusion matrix](result%2Fplots%2F20250417-1049_conf_mat_TOP-3.png)
 
 </details>
 
@@ -476,7 +477,7 @@ results can be found in the [result](result) 📁 folder.
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20250416-1441_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20250417-1055_conf_mat_TOP-1.png)
 
 </details>
 
@@ -515,13 +516,13 @@ Demo files  `v1.0`:
 
 Demo files  `v2.0`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250416-1154_model_672_5_TOP-3_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250417-1044_model_672_3_TOP-3_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250416-1148_model_672_5_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250417-1050_model_672_3_TOP-1_EVAL.csv) 📎
 
-- **Unchecked with TRUE** values: [model_TOP-5.csv](result%2Ftables%2F20250416-1224_model_672_5_TOP-5.csv) 📎
+- **Unchecked with TRUE** values: [model_TOP-3.csv](result%2Ftables%2F20250417-1138_model_672_3_TOP-3.csv) 📎
 
-- **Unchecked with TRUE** values (small): [model_TOP-3.csv](result%2Ftables%2F20250416-1226_model_672_5_TOP-3.csv)📎
+- **Unchecked with TRUE** values (small): [model_TOP-3.csv](result%2Ftables%2F20250417-1244_model_672_3_TOP-3.csv)📎
 
 With the following **columns** 📋:
 
@@ -550,11 +551,11 @@ Demo files `v1.0`:
 
 Demo files `v2.0`:
  
-- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250416-1047_model_672_5_EVAL_RAW.csv) 📎
+- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250417-1129_model_672_3_EVAL_RAW.csv) 📎
 
-- **Unchecked with TRUE** values **RAW**: [model_RAW.csv](result%2Ftables%2F20250416-1224_model_672_5_RAW.csv) 📎
+- **Unchecked with TRUE** values **RAW**: [model_RAW.csv](result%2Ftables%2F20250417-1242_model_672_3_RAW.csv) 📎
 
-- **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250416-1226_model_672_5_RAW.csv) 📎
+- **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250417-1244_model_672_3_RAW.csv) 📎
 
 With the following **columns** 📋:
 
@@ -952,11 +953,11 @@ for example `model_<S/B>_E` where `E` is the number of epochs, `B` is the batch 
     
     /local/folder/for/this/project/atrium-page-classification
     ├── model
-        ├── model_version1 
+        ├── movel_v<HFrevision1> 
             ├── config.json
             ├── model.safetensors
             └── preprocessor_config.json
-        ├── model_version2
+        ├── movel_v<HFrevision2>
         └── ...
     ├── checkpoint
         ├── models--google--vit-base-patch16-224
@@ -994,7 +995,8 @@ for example `model_<S/B>_E` where `E` is the number of epochs, `B` is the batch 
 </details>
 
 > [!IMPORTANT] 
-> The `model_version` value does **NOT** affect the trained model naming, other training parameters do. 
+> The `movel_v<HFrevision>` folder naming is generated from the HF 😊 repo [^1] 🔗 `revision` value and does **NOT** 
+> affect the trained model naming, other training parameters do. 
 > Since the length of the dataloader depends not only on the size of the dataset but also on the preset batch size, 
 > and test subset ratio. 
 
@@ -1023,6 +1025,9 @@ confusion matrix plot 📊 and additionally get raw class probabilities table ru
 Finally, when your model is trained and you are happy with its performance tests, you can uncomment a code line
 in the [run.py](run.py) 📎 file for **HF 😊 hub model push**. This functionality has already been implemented and can be
 accessed through the `--hf` flag using the values set in the `[HF]` section for the `token` and `repo_name` variables.
+
+In this case, you must **rename the trained model folder** in respect to the `revision` value (dots in the naming are skipped, e.g. 
+revision `v1.9.22` turns to `model_v1922` model folder), and only then run repo push.
 
 > [!CAUTION]
 > Set your own `repo_name` to the empty one of yours on HF 😊 hub, then in the **Settings** of your HF 😊 account
