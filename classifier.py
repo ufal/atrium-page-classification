@@ -85,7 +85,7 @@ class ImageClassifier:
         tensor = transform(image).unsqueeze(0).to(self.device)
         return tensor
 
-    def train_model(self, train_dataloader, eval_dataloader, output_dir: str, num_epochs: int = 3, learning_rate: float = 5e-5, logging_steps: int = 10):
+    def train_model(self, train_dataloader, eval_dataloader, output_dir: str, out_model: str, num_epochs: int = 3, learning_rate: float = 5e-5, logging_steps: int = 10):
         """
         Train the model using the provided training and evaluation data loaders.
         """
@@ -117,7 +117,7 @@ class ImageClassifier:
 
         trainer.train()
 
-        self.save_model(f"model/model_{len(train_dataloader)}_{num_epochs}")
+        self.save_model(f"model/{out_model}")
 
     def infer(self, image_path: str) -> int:
         """
@@ -178,7 +178,7 @@ class ImageClassifier:
                 else:
                     predicted_class_idx = logits.argmax(-1).tolist()
                     predictions.extend(predicted_class_idx)
-                print(f"Processed {len(predictions)} images")
+                print(f"Processed {len(predictions)} images at {time.strftime('%Y-%m-%d %H:%M:%S')}")
 
         raw_scores = None if not raw else raw_scores
         return predictions, raw_scores

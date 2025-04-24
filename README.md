@@ -42,7 +42,7 @@ of HF 😊 hub [^1] 🔗
 | Version | Pages | N-page files |   PDFs   | Description                                                   |
 |--------:|:-----:|:------------:|:--------:|:--------------------------------------------------------------|
 |  `v1.0` | 10073 |   **~104**   | **3896** | annotations with mistakes, more heterogenous data             |
-|  `v1.0` | 11940 |   **~509**   | **5002** | more diverse pages in each category, less annotation mistakes |
+|  `v2.0` | 11940 |   **~509**   | **5002** | more diverse pages in each category, less annotation mistakes |
 
 ## Model description 📇
 
@@ -190,10 +190,12 @@ subdirectory and run pulling which will merge upcoming files with your local cha
     git pull -X theirs
 
 Alternatively, if you do **NOT** care about local changes **OR** you want to get the latest project files, 
-just remove those files:
+just remove those files (all `.py`, `.txt` and `README` files) and pull the latest version from the repository:
 
     cd /local/folder/for/this/project/atrium-page-classification
-    rm <changed_file>
+    rm *.py
+    rm *.txt
+    rm README*
     git pull
 
 Next step would be a creation of the virtual environment. Follow the **Unix** / **Windows**-specific 
@@ -234,11 +236,14 @@ to **pull the model from the HF 😊 hub repository [^1] 🔗** via:
 
     python3 run.py --hf
 
+**OR** for specific model version (e.g. `main`, `v1.0` or `v2.0`) use the `--revision` flag:
+ 
+    python3 run.py --hf -rev v1.0
+
 > [!IMPORTANT]
-> If you already have the model files in the `model/movel_v<HFrevision>`
+> If you already have the model files in the `model/movel_<revision>`
 > directory next to this file, you do **NOT** have to use the `--hf` flag to download the
-> model files from the HF 😊 repo [^1] 🔗 (only for the model update). The `revision` variable stands
-> for the model version, and you can change it to the one you want to use (`main`, `v1.0`, and `v2.0` are currently available).
+> model files from the HF 😊 repo [^1] 🔗 (only for the **model version update**).
 
 You should see a message about loading the model from the hub and then saving it locally on
 your machine 🖥️. 
@@ -254,7 +259,7 @@ After the model is downloaded, you should see a similar file structure:
     
     /local/folder/for/this/project/atrium-page-classification
     ├── model
-        └── movel_v<HFrevision> 
+        └── movel_<revision> 
             ├── config.json
             ├── model.safetensors
             └── preprocessor_config.json
@@ -995,7 +1000,7 @@ for example `model_<S/B>_E` where `E` is the number of epochs, `B` is the batch 
 </details>
 
 > [!IMPORTANT] 
-> The `movel_v<HFrevision>` folder naming is generated from the HF 😊 repo [^1] 🔗 `revision` value and does **NOT** 
+> The `movel_<revision>` folder naming is generated from the HF 😊 repo [^1] 🔗 `revision` value and does **NOT** 
 > affect the trained model naming, other training parameters do. 
 > Since the length of the dataloader depends not only on the size of the dataset but also on the preset batch size, 
 > and test subset ratio. 

@@ -38,6 +38,10 @@ def dataframe_results(test_images: list, test_predictions: list, categories: lis
     col = ["FILE", "PAGE"] + [f"CLASS-{j + 1}" for j in range(top_N)] + [f"SCORE-{j + 1}" for j in range(top_N)]
     rdf = pd.DataFrame(results, columns=col)
 
+    if top_N == 1:
+        rdf.drop(columns=["SCORE-1"], inplace=True)
+        rdf.rename(columns={"CLASS-1": "CATEGORY"}, inplace=True)
+
     rawdf = None
     if raw_scores is not None:
         col = ["FILE", "PAGE"]
@@ -76,7 +80,7 @@ def collect_images(directory: str, max_categ: int) -> (list, list, list):
     return total_files, total_labels, categories
 
 
-def confusion_plot(predictions: list, trues: list, categories: list, top_N: int = 1, output_dir: str = None):
+def confusion_plot(predictions: list, trues: list, categories: list, out_model: str, top_N: int = 1, output_dir: str = None):
     single_pred = []
     correct = 0
     for j, pred_scores in enumerate(predictions):
@@ -118,6 +122,6 @@ def confusion_plot(predictions: list, trues: list, categories: list, top_N: int 
     time_stamp = time.strftime("%Y%m%d-%H%M")
     disp.ax_.set_title(
         f"TOP {top_N} Full Confusion matrix")
-    out = f"{output_dir if output_dir else 'result'}/plots/{time_stamp}_conf_mat_TOP-{top_N}.png"
+    out = f"{output_dir if output_dir else 'result'}/plots/{time_stamp}_{out_model}_conf_mat_TOP-{top_N}.png"
     plt.savefig(out, bbox_inches='tight', dpi=300)
     plt.close()

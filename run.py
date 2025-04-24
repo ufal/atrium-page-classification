@@ -47,6 +47,7 @@ if __name__ == "__main__":
     parser.add_argument('-f', "--file", type=str, default=None, help="Single PNG page path")
     parser.add_argument('-d', "--directory", type=str, default=None, help="Path to folder with PNG pages")
     parser.add_argument('-m', "--model", type=str, default=model_path, help="Path to folder with model")
+    parser.add_argument('-rev', "--revision", type=str, default=hf_version, help="HuggingFace revision (e.g. `main`, `vN.0` or `vN.M`)")
     parser.add_argument('-tn', "--topn", type=int, default=top_N, help="Number of top result categories to consider")
     parser.add_argument("--dir", help="Process whole directory (if -d not used)", action="store_true")
     parser.add_argument("--inner", help="Process subdirectories of the given directory as well (FALSE by default)", default=inner, action="store_true")
@@ -116,6 +117,7 @@ if __name__ == "__main__":
         classifier.train_model(train_loader,
                                eval_loader,
                                output_dir="./model_output",
+                               out_model=model_name_local,
                                num_epochs=epochs,
                                logging_steps=log_step)
 
@@ -128,7 +130,7 @@ if __name__ == "__main__":
         # ----------------------------------------------
 
         # loading from repo
-        classifier.load_from_hub(config.get("HF", "repo_name"), config.get("HF", "revision"))
+        classifier.load_from_hub(config.get("HF", "repo_name"), args.revision)
 
         classifier.save_model(str(model_path))
 
@@ -163,10 +165,10 @@ if __name__ == "__main__":
             raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{model_name_local}_EVAL_RAW.csv", sep=",", index=False)
             print(f"RAW Evaluation results are recorded into {output_dir}/tables/ directory")
 
-
         confusion_plot(eval_predictions,
                        test_labels,
                        categories,
+                       model_name_local,
                        top_N)
 
     if args.file is not None:
@@ -180,6 +182,7 @@ if __name__ == "__main__":
             print(f"\t{lab}:  {round(sc * 100, 2)}%")
 
     if args.dir or args.directory is not None:
+        print(f"Start of the directory processing at {time.strftime('%Y-%m-%d %H:%M:%S')}")
 
         if args.inner:
             test_images = sorted(directory_scraper(Path(test_dir), "png"))
