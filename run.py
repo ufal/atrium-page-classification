@@ -47,6 +47,7 @@ if __name__ == "__main__":
     parser.add_argument('-f', "--file", type=str, default=None, help="Single PNG page path")
     parser.add_argument('-d', "--directory", type=str, default=None, help="Path to folder with PNG pages")
     parser.add_argument('-m', "--model", type=str, default=model_path, help="Path to folder with model")
+    parser.add_argument('-b', "--base", type=str, default=base_model, help="Repository of the base model")
     parser.add_argument('-rev', "--revision", type=str, default=hf_version, help="HuggingFace revision (e.g. `main`, `vN.0` or `vN.M`)")
     parser.add_argument('-tn', "--topn", type=int, default=top_N, help="Number of top result categories to consider")
     parser.add_argument("--dir", help="Process whole directory (if -d not used)", action="store_true")
@@ -95,14 +96,14 @@ if __name__ == "__main__":
                                                      stratify=np.array(total_labels))
 
         # Initialize the classifier
-        classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories), store_dir=str(cp_dir))
+        classifier = ImageClassifier(checkpoint=args.base, num_labels=len(categories), store_dir=str(cp_dir))
 
     else:
         categories = def_categ
         print(f"Category input directories found: {categories}")
 
         # Initialize the classifier
-        classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories), store_dir=str(cp_dir))
+        classifier = ImageClassifier(checkpoint=args.base, num_labels=len(categories), store_dir=str(cp_dir))
 
     if args.train:
         train_loader = classifier.process_images(trainfiles,
@@ -114,6 +115,8 @@ if __name__ == "__main__":
                                                 batch,
                                                 False)
 
+        print(f"Training on {len(trainfiles)} images, evaluating on {len(testfiles)} images")
+        print(f"Base model: {args.base}, local model name: {model_name_local}")
         classifier.train_model(train_loader,
                                eval_loader,
                                output_dir="./model_output",

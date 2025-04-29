@@ -36,19 +36,22 @@ preparation scripts for PDF to PNG conversion
 ## Versions 🏁
 
 There are currently 2 version of the model available for download, both of them have the same set of categories, 
-but different data annotations. The latest `v2.0` is considered to be default and can be found in the `main` branch
+but different data annotations. The latest approved `v2.1` is considered to be default and can be found in the `main` branch
 of HF 😊 hub [^1] 🔗 
 
-| Version | Pages | N-page files |   PDFs   | Description                                                   |
-|--------:|:-----:|:------------:|:--------:|:--------------------------------------------------------------|
-|  `v1.0` | 10073 |   **~104**   | **3896** | annotations with mistakes, more heterogenous data             |
-|  `v2.0` | 11940 |   **~509**   | **5002** | more diverse pages in each category, less annotation mistakes |
+| Version | Base                   | Pages |   PDFs   | Description                                                               |
+|--------:|------------------------|:-----:|:--------:|:--------------------------------------------------------------------------|
+|  `v2.0` | `vit-base-path16-224`  | 10073 | **3896** | annotations with mistakes, more heterogenous data                         |
+|  `v2.1` | `vit-base-path16-224`  | 11940 | **5002** | `main`: more diverse pages in each category, less annotation mistakes     |
+|  `v2.2` | `vit-base-path16-224`  | 15855 | **5730** | same data as `v2.1` + some restored pages from `v2.0`                     |
+|  `v3.2` | `vit-base-path16-384`  | 15855 | **5730** | same data as `v2.0.2`, but a bit larger model base with higher resolution |
+|  `v5.2` | `vit-large-path16-384` | 15855 | **5730** | same data as `v2.0.2`, but the largest model base with higher resolution  |
 
 ## Model description 📇
 
 🔲 **Fine-tuned** model repository: UFAL's **vit-historical-page** [^1] 🔗
 
-🔳 **Base** model repository: Google's **vit-base-patch16-224** [^2] 🔗
+🔳 **Base** model repository: Google's **vit-base-patch16-224**,  **vit-base-patch16-384**,  **vit-large-patch16-284** [^2] [^13] [^14] 🔗
 
 The model was trained on the manually ✍️ annotated dataset of historical documents, in particular, images of pages 
 from the archival documents with paper sources that were scanned into digital form. 
@@ -67,13 +70,13 @@ paper source into one of the categories - each responsible for the following con
 
 ### Data 📜
 
-**Training** 💪 set of the model: **8950** images for `v1.0`
+**Training** 💪 set of the model: **8950** images for `v2.0`
 
-**Training** 💪 set of the model: **10745** images for `v2.0`
+**Training** 💪 set of the model: **10745** images for `v2.1`
 
 > **90% of all** - proportion in categories 🪧 tabulated [below](#categories-)
 
-**Evaluation** 🏆 set:  **1194** images for `v1.0` and `v2.0` (taken from `v2.0` annotations)
+**Evaluation** 🏆 set:  **1194** images for `v2.0` and `v2.1` (taken from `v2.1` annotations)
 
 > **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250416-1431_model_1119_3_TOP-1_EVAL.csv) 📎
 
@@ -98,7 +101,7 @@ arrowheads, and rocks formerly drawn by hand and later illustrated with digital 
 
 <details>
 
-<summary>v1.0 Categories 🪧</summary>
+<summary>v2.0 Categories 🪧</summary>
 
 |    Label️ | Ratio  | Description                                                                   |
 |----------:|:------:|:------------------------------------------------------------------------------|
@@ -116,7 +119,7 @@ arrowheads, and rocks formerly drawn by hand and later illustrated with digital 
 
 </details>
 
-**v2.0 version Categories 🪧**:
+**v2.1 version Categories 🪧**:
 
 |    Label️ | Ratio | Description                                                                   |
 |----------:|:-----:|:------------------------------------------------------------------------------|
@@ -236,9 +239,14 @@ to **pull the model from the HF 😊 hub repository [^1] 🔗** via:
 
     python3 run.py --hf
 
-**OR** for specific model version (e.g. `main`, `v1.0` or `v2.0`) use the `--revision` flag:
+**OR** for specific model version (e.g. `main`, `v2.0` or `vX.2`) use the `--revision` flag:
  
-    python3 run.py --hf -rev v1.0
+    python3 run.py --hf -rev v2.0
+
+**OR** for specific base model version (e.g. `google/vit-large-patch16-384`) use the `--base` flag (only when the 
+trained model version demands such base model as described [above](#versions-)):
+ 
+    python3 run.py --hf -rev v5.2 -b google/vit-large-patch16-384
 
 > [!IMPORTANT]
 > If you already have the model files in the `model/movel_<revision>`
@@ -346,6 +354,18 @@ the `batch` variable in the `[SETUP]` section.
 > [!CAUTION]
 > Do **NOT** try to change **base_model** and other section contents unless you know what you are doing
 
+<details>
+
+<summary>Rough estimations of disk space needed for trained model in relation to the base model 👀</summary>
+
+| **Version**             | **Disk space** |
+|-------------------------|----------------|
+| `vit-base-patch16-224`  | 344 Mb         |
+| `vit-base-patch16-384`  | 345 Mb         |
+| `vit-large-patch16-384` | 1.2 Gb         |
+
+</details>
+
 Make sure the virtual environment with all the installed libraries is activated, you are in the project 
 directory with Python files and only then proceed. 
 
@@ -446,7 +466,7 @@ There are accuracy performance measurements and plots of confusion matrices for 
 dataset (10% of the provided in `[TRAIN]`'s folder data). Both graphic plots and tables with 
 results can be found in the [result](result) 📁 folder.
 
-`v1.0` Evaluation set's accuracy (**Top-3**):  **95.06%** 🏆
+`v2.0` Evaluation set's accuracy (**Top-3**):  **95.06%** 🏆
 
 <details>
 
@@ -456,7 +476,7 @@ results can be found in the [result](result) 📁 folder.
 
 </details>
 
-`v2.0` Evaluation set's accuracy (**Top-3**):  **99.75%** 🏆
+`v2.1` Evaluation set's accuracy (**Top-3**):  **99.75%** 🏆
 
 <details>
 
@@ -466,7 +486,7 @@ results can be found in the [result](result) 📁 folder.
 
 </details>
 
-`v1.0` Evaluation set's accuracy (**Top-1**):  **78.98%** 🏆
+`v2.0` Evaluation set's accuracy (**Top-1**):  **78.98%** 🏆
 
 <details>
 
@@ -476,7 +496,7 @@ results can be found in the [result](result) 📁 folder.
 
 </details>
 
-`v2.0` Evaluation set's accuracy (**Top-1**):  **96.82%** 🏆
+`v2.1` Evaluation set's accuracy (**Top-1**):  **96.82%** 🏆
 
 <details>
 
@@ -507,7 +527,7 @@ Additionally, results of prediction inference run on the directory level without
 
 <summary>General result tables 👀</summary>
 
-Demo files  `v1.0`:
+Demo files  `v2.0`:
 
 - Manually ✍️ **checked** (small): [model_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 📎
 
@@ -519,7 +539,7 @@ Demo files  `v1.0`:
 
 - **Unchecked with TRUE** values (small): [model_TOP-3.csv](result%2Ftables%2F20250314-1615_model_1119_3_TOP-3.csv)📎
 
-Demo files  `v2.0`:
+Demo files  `v2.1`:
 
 - Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250417-1044_model_672_3_TOP-3_EVAL.csv) 📎
 
@@ -546,7 +566,7 @@ and optionally
 
 <summary>Raw result tables 👀</summary>
 
-Demo files `v1.0`:
+Demo files `v2.0`:
 
 - Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250416-1448_model_1119_3_EVAL_RAW.csv) 📎
 
@@ -554,7 +574,7 @@ Demo files `v1.0`:
 
 - **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250314-1615_model_1119_3_RAW.csv) 📎
 
-Demo files `v2.0`:
+Demo files `v2.1`:
  
 - Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250417-1129_model_672_3_EVAL_RAW.csv) 📎
 
@@ -1053,7 +1073,7 @@ revision `v1.9.22` turns to `model_v1922` model folder), and only then run repo 
 - **Developed by** UFAL [^7] 👥
 - **Funded by** ATRIUM [^4]  💰
 - **Shared by** ATRIUM [^4] & UFAL [^7] 🔗
-- **Model type:** fine-tuned ViT with a 224x224 resolution size [^2] 🔗
+- **Model type:** fine-tuned ViT with a 224x224 [^2] 🔗 or 384x384 [^13] [^14] 🔗 resolution size 
 
 **©️ 2022 UFAL & ATRIUM**
 
@@ -1119,3 +1139,5 @@ revision `v1.9.22` turns to `model_v1922` model folder), and only then run repo 
 [^10]: https://developer.nvidia.com/cuda-python
 [^11]: https://huggingface.co/docs/transformers/en/main_classes/trainer#transformers.TrainingArguments
 [^12]: https://pytorch.org/vision/0.20/transforms.html
+[^13]: https://huggingface.co/google/vit-base-patch16-384
+[^14]: https://huggingface.co/google/vit-large-patch16-384
