@@ -4,7 +4,7 @@ FOLDER_CPOINTS=./checkpoint
 FOLDER_MODELS=./model
 
 [TRAIN]
-FOLDER_PAGES=/lnet/work/people/lutsai/pythonProject/pages/train_2
+FOLDER_PAGES=/lnet/work/people/lutsai/pythonProject/pages/train_4
 test_size = 0.1
 log_step = 10
 epochs = 3
@@ -27,5 +27,5 @@ FOLDER_INPUT=./category_samples
 repo_name = ufal/vit-historical-page
 token = hf_AOLs....yGcHguvM
 use_hf = False
-revision = main
-latest = v2.0
+revision = v2.2
+latest = v2.2
