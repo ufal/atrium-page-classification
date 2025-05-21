@@ -60,10 +60,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     input_dir = Path(test_dir) if args.directory is None else Path(args.directory)
-    Training = args.train
-    model_path = Path(args.model)
-    top_N = args.topn
-    raw = args.raw
+    Training, top_N, raw = args.train, args.topn, args.raw
+
+    if args.revision == hf_version and args.base == base_model:
+        model_path = Path(args.model)
+    else:
+        new_model_name_local = f"model_{args.revision.replace('.', '')}"
+        model_path = f"{model_dir}/{new_model_name_local}"
+        model_path = Path(model_path)
 
     # locally creating new directory paths instead of context.txt variables loaded with mistakes
     if not output_dir.is_dir():
@@ -135,12 +139,12 @@ if __name__ == "__main__":
         # loading from repo
         classifier.load_from_hub(config.get("HF", "repo_name"), args.revision)
 
-        hf_model_name_local = f"model_{args.revision.replace('.', '')}"
-        hf_model_path = f"{model_dir}/{hf_model_name_local}"
+        # hf_model_name_local = f"model_{args.revision.replace('.', '')}"
+        # hf_model_path = f"{model_dir}/{hf_model_name_local}"
 
-        classifier.save_model(str(hf_model_path))
+        classifier.save_model(str(model_path))
 
-        classifier.load_model(str(hf_model_path))
+        classifier.load_model(str(model_path))
 
     else:
         classifier.load_model(str(model_path))

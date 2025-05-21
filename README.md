@@ -436,6 +436,9 @@ for exactly TOP-3 guesses in tabular format from all images found in the given d
 **OR** if you are really sure about default variables set in the [config.txt](config.txt) ⚙:
 
     python3 run.py --dir 
+    
+    python3 run.py -rev v3.2 -b google/vit-base-patch16-384 --inner --dir
+
 
 </details>
 
