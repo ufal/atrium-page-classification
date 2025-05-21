@@ -135,9 +135,12 @@ if __name__ == "__main__":
         # loading from repo
         classifier.load_from_hub(config.get("HF", "repo_name"), args.revision)
 
-        classifier.save_model(str(model_path))
+        hf_model_name_local = f"model_{args.revision.replace('.', '')}"
+        hf_model_path = f"{model_dir}/{hf_model_name_local}"
 
-        classifier.load_model(str(model_path))
+        classifier.save_model(str(hf_model_path))
+
+        classifier.load_model(str(hf_model_path))
 
     else:
         classifier.load_model(str(model_path))
@@ -167,6 +170,7 @@ if __name__ == "__main__":
             raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
             raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{model_name_local}_EVAL_RAW.csv", sep=",", index=False)
             print(f"RAW Evaluation results are recorded into {output_dir}/tables/ directory")
+
 
         confusion_plot(eval_predictions,
                        test_labels,
