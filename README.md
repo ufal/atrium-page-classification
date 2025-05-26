@@ -39,13 +39,13 @@ There are currently 2 version of the model available for download, both of them 
 but different data annotations. The latest approved `v2.1` is considered to be default and can be found in the `main` branch
 of HF 😊 hub [^1] 🔗 
 
-| Version | Base                   | Pages |   PDFs   | Description                                                               |
-|--------:|------------------------|:-----:|:--------:|:--------------------------------------------------------------------------|
-|  `v2.0` | `vit-base-path16-224`  | 10073 | **3896** | annotations with mistakes, more heterogenous data                         |
-|  `v2.1` | `vit-base-path16-224`  | 11940 | **5002** | `main`: more diverse pages in each category, less annotation mistakes     |
-|  `v2.2` | `vit-base-path16-224`  | 15855 | **5730** | same data as `v2.1` + some restored pages from `v2.0`                     |
-|  `v3.2` | `vit-base-path16-384`  | 15855 | **5730** | same data as `v2.0.2`, but a bit larger model base with higher resolution |
-|  `v5.2` | `vit-large-path16-384` | 15855 | **5730** | same data as `v2.0.2`, but the largest model base with higher resolution  |
+| Version | Base                   | Pages |   PDFs   | Description                                                             |
+|--------:|------------------------|:-----:|:--------:|:------------------------------------------------------------------------|
+|  `v2.0` | `vit-base-path16-224`  | 10073 | **3896** | annotations with mistakes, more heterogenous data                       |
+|  `v2.1` | `vit-base-path16-224`  | 11940 | **5002** | `main`: more diverse pages in each category, less annotation mistakes   |
+|  `v2.2` | `vit-base-path16-224`  | 15855 | **5730** | same data as `v2.1` + some restored pages from `v2.0`                   |
+|  `v3.2` | `vit-base-path16-384`  | 15855 | **5730** | same data as `v2.2`, but a bit larger model base with higher resolution |
+|  `v5.2` | `vit-large-path16-384` | 15855 | **5730** | same data as `v2.2`, but the largest model base with higher resolution  |
 
 ## Model description 📇
 
@@ -74,11 +74,13 @@ paper source into one of the categories - each responsible for the following con
 
 **Training** 💪 set of the model: **10745** images for `v2.1`
 
+**Training** 💪 set of the model: **15855** images for `v2.2`, `v3.2` and `v5.2` 
+
 > **90% of all** - proportion in categories 🪧 tabulated [below](#categories-)
 
-**Evaluation** 🏆 set:  **1194** images for `v2.0` and `v2.1` (taken from `v2.1` annotations)
+**Evaluation** 🏆 set:  **1290** images (taken from `v2.2` annotations)
 
-> **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250416-1431_model_1119_3_TOP-1_EVAL.csv) 📎
+> **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250526-1158_model_v22_TOP-1_EVAL.csv) 📎
 
 Manual ✍️ annotation was performed beforehand and took some time ⌛, the categories 🪧  were formed from
 different sources of the archival documents originated in the 1920-2020 years span. 
@@ -99,42 +101,19 @@ arrowheads, and rocks formerly drawn by hand and later illustrated with digital 
 
 ### Categories 🪧
 
-<details>
-
-<summary>v2.0 Categories 🪧</summary>
-
-|    Label️ | Ratio  | Description                                                                   |
-|----------:|:------:|:------------------------------------------------------------------------------|
-|    `DRAW` | 11.89% | **📈 - drawings, maps, paintings with text**                                  |
-|  `DRAW_L` | 8.17%  | **📈📏 - drawings, etc with a table legend or inside tabular layout / forms** |
-| `LINE_HW` | 5.99%  | **✏️📏 - handwritten text lines inside tabular layout / forms**               |
-|  `LINE_P` | 6.06%  | **📏 - printed text lines inside tabular layout / forms**                     |
-|  `LINE_T` | 13.39% | **📏 - machine typed text lines inside tabular layout / forms**               |
-|   `PHOTO` | 10.21% | **🌄 - photos with text**                                                     |
-| `PHOTO_L` | 7.86%  | **🌄📏 - photos inside tabular layout / forms or with a tabular annotation**  |
-|    `TEXT` | 8.58%  | **📰 - mixed types of printed and handwritten texts**                         |
-| `TEXT_HW` | 7.36%  | **✏️📄 - only handwritten text**                                              |
-|  `TEXT_P` | 6.95%  | **📄 - only printed text**                                                    |
-|  `TEXT_T` | 13.53% | **📄 - only machine typed text**                                              |
-
-</details>
-
-**v2.1 version Categories 🪧**:
-
-|    Label️ | Ratio | Description                                                                   |
-|----------:|:-----:|:------------------------------------------------------------------------------|
-|    `DRAW` | 9.12% | **📈 - drawings, maps, paintings with text**                                  |
-|  `DRAW_L` | 9.14% | **📈📏 - drawings, etc with a table legend or inside tabular layout / forms** |
-| `LINE_HW` | 8.84% | **✏️📏 - handwritten text lines inside tabular layout / forms**               |
-|  `LINE_P` | 9.15% | **📏 - printed text lines inside tabular layout / forms**                     |
-|  `LINE_T` | 9.2%  | **📏 - machine typed text lines inside tabular layout / forms**               |
-|   `PHOTO` | 9.05% | **🌄 - photos with text**                                                     |
-| `PHOTO_L` | 9.1%  | **🌄📏 - photos inside tabular layout / forms or with a tabular annotation**  |
-|    `TEXT` | 9.14% | **📰 - mixed types of printed and handwritten texts**                         |
-| `TEXT_HW` | 9.14% | **✏️📄 - only handwritten text**                                              |
-|  `TEXT_P` | 9.07% | **📄 - only printed text**                                                    |
-|  `TEXT_T` | 9.05% | **📄 - only machine typed text**                                              |
-
+|    Label️ | Description                                                                   |
+|----------:|:------------------------------------------------------------------------------|
+|    `DRAW` | **📈 - drawings, maps, paintings with text**                                  |
+|  `DRAW_L` | **📈📏 - drawings, etc with a table legend or inside tabular layout / forms** |
+| `LINE_HW` | **✏️📏 - handwritten text lines inside tabular layout / forms**               |
+|  `LINE_P` | **📏 - printed text lines inside tabular layout / forms**                     |
+|  `LINE_T` | **📏 - machine typed text lines inside tabular layout / forms**               |
+|   `PHOTO` | **🌄 - photos with text**                                                     |
+| `PHOTO_L` | **🌄📏 - photos inside tabular layout / forms or with a tabular annotation**  |
+|    `TEXT` | **📰 - mixed types of printed and handwritten texts**                         |
+| `TEXT_HW` | **✏️📄 - only handwritten text**                                              |
+|  `TEXT_P` | **📄 - only printed text**                                                    |
+|  `TEXT_T` | **📄 - only machine typed text**                                              |
 
 The categories were chosen to sort the pages by the following criteria: 
 
@@ -469,43 +448,63 @@ There are accuracy performance measurements and plots of confusion matrices for 
 dataset (10% of the provided in `[TRAIN]`'s folder data). Both graphic plots and tables with 
 results can be found in the [result](result) 📁 folder.
 
-`v2.0` Evaluation set's accuracy (**Top-3**):  **95.06%** 🏆
+`v2.0` Evaluation set's accuracy (**Top-3**):  **95.58%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-3 👀</summary>
 
-![TOP-3 confusion matrix](result%2Fplots%2F20250416-1430_conf_mat_TOP-3.png)
+![TOP-3 confusion matrix](result%2Fplots%2F20250526-1147_model_v20_conf_mat_TOP-3.png)
 
 </details>
 
-`v2.1` Evaluation set's accuracy (**Top-3**):  **99.75%** 🏆
+`v2.1` Evaluation set's accuracy (**Top-3**):  **99.84%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-3 👀</summary>
 
-![TOP-3 confusion matrix](result%2Fplots%2F20250417-1049_conf_mat_TOP-3.png)
+![TOP-3 confusion matrix](result%2Fplots%2F20250526-1157_model_v21_conf_mat_TOP-3.png)
 
 </details>
 
-`v2.0` Evaluation set's accuracy (**Top-1**):  **78.98%** 🏆
+`v2.2` Evaluation set's accuracy (**Top-3**):  **100.00%** 🏆
+
+<details>
+
+<summary>Confusion matrix 📊 TOP-3 👀</summary>
+
+![TOP-3 confusion matrix](result%2Fplots%2F20250526-1201_model_v22_conf_mat_TOP-3.png)
+
+</details>
+
+`v2.0` Evaluation set's accuracy (**Top-1**):  **84.96%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20250416-1436_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20250526-1152_model_v20_conf_mat_TOP-1.png)
 
 </details>
 
-`v2.1` Evaluation set's accuracy (**Top-1**):  **96.82%** 🏆
+`v2.1` Evaluation set's accuracy (**Top-1**):  **96.36%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20250417-1055_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20250526-1156_model_v21_conf_mat_TOP-1.png)
+
+</details>
+
+`v2.2` Evaluation set's accuracy (**Top-1**):  **99.61%** 🏆
+
+<details>
+
+<summary>Confusion matrix 📊 TOP-1 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2F20250526-1202_model_v22_conf_mat_TOP-1.png)
 
 </details>
 
@@ -516,7 +515,7 @@ results can be found in the [result](result) 📁 folder.
 By running tests on the evaluation dataset after training you can generate the following output files:
 
 - **date-time_model_TOP-N_EVAL.csv** - (by default) results of the evaluation dataset with TOP-N guesses
-- **date-time_conf_mat_TOP-N.png** - (by default) confusion matrix plot for the evaluation dataset also with TOP-N guesses
+- **date-time_model_conf_mat_TOP-N.png** - (by default) confusion matrix plot for the evaluation dataset also with TOP-N guesses
 - **date-time_model_EVAL_RAW.csv** - (by flag `--raw`) raw probabilities for all classes of the evaluation dataset 
 
 > [!NOTE]
@@ -534,9 +533,9 @@ Demo files  `v2.0`:
 
 - Manually ✍️ **checked** (small): [model_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250416-1426_model_1119_3_TOP-3_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250526-1142_model_v20_TOP-3_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250416-1431_model_1119_3_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250526-1148_model_v20_TOP-1_EVAL.csv) 📎
 
 - **Unchecked with TRUE** values: [model_TOP-5.csv](result%2Ftables%2F20250314-1600_model_1119_3_TOP-5.csv) 📎
 
@@ -544,13 +543,20 @@ Demo files  `v2.0`:
 
 Demo files  `v2.1`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250417-1044_model_672_3_TOP-3_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250526-1153_model_v21_TOP-3_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250417-1050_model_672_3_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250526-1151_model_v21_TOP-1_EVAL.csv) 📎
 
 - **Unchecked with TRUE** values: [model_TOP-3.csv](result%2Ftables%2F20250417-1138_model_672_3_TOP-3.csv) 📎
 
 - **Unchecked with TRUE** values (small): [model_TOP-3.csv](result%2Ftables%2F20250417-1244_model_672_3_TOP-3.csv)📎
+
+Demo files  `v2.2`:
+
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250526-1156_model_v22_TOP-3_EVAL.csv) 📎
+
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250526-1158_model_v22_TOP-1_EVAL.csv) 📎
+
 
 With the following **columns** 📋:
 
@@ -571,7 +577,7 @@ and optionally
 
 Demo files `v2.0`:
 
-- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250416-1448_model_1119_3_EVAL_RAW.csv) 📎
+- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250526-1148_model_v20_EVAL_RAW.csv) 📎
 
 - **Unchecked with TRUE** values **RAW**: [model_RAW.csv](result%2Ftables%2F20250314-1600_model_1119_3_RAW.csv) 📎
 
@@ -579,11 +585,15 @@ Demo files `v2.0`:
 
 Demo files `v2.1`:
  
-- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250417-1129_model_672_3_EVAL_RAW.csv) 📎
+- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250526-1151_model_v21_EVAL_RAW.csv) 📎
 
 - **Unchecked with TRUE** values **RAW**: [model_RAW.csv](result%2Ftables%2F20250417-1242_model_672_3_RAW.csv) 📎
 
 - **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250417-1244_model_672_3_RAW.csv) 📎
+
+- Demo files `v2.2`:
+ 
+- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250526-1156_model_v22_EVAL_RAW.csv) 📎
 
 With the following **columns** 📋:
 
