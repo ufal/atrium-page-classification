@@ -47,6 +47,18 @@ of HF 😊 hub [^1] 🔗
 |  `v3.2` | `vit-base-path16-384`  | 15855 | **5730** | same data as `v2.2`, but a bit larger model base with higher resolution |
 |  `v5.2` | `vit-large-path16-384` | 15855 | **5730** | same data as `v2.2`, but the largest model base with higher resolution  |
 
+<details>
+
+<summary>Base model - size 👀</summary>
+
+| **Version**             | **Disk space** |
+|-------------------------|----------------|
+| `vit-base-patch16-224`  | 344 Mb         |
+| `vit-base-patch16-384`  | 345 Mb         |
+| `vit-large-patch16-384` | 1.2 Gb         |
+
+</details>
+
 ## Model description 📇
 
 🔲 **Fine-tuned** model repository: UFAL's **vit-historical-page** [^1] 🔗
@@ -64,7 +76,7 @@ The key **use case** of the provided model and data processing pipeline is to cl
 paper source into one of the categories - each responsible for the following content-specific data processing pipeline.
 
 > In other words, when several APIs for different OCR subtasks are at your disposal - run this classifier first to 
-> mark the input data as machine typed (old style fonts) / hand-written ✏️ / just printed plain ️📄 text 
+> mark the input data as machine-typed (old style fonts) / handwritten ✏️ / just printed plain ️📄 text 
 > or structured in tabular 📏 format text, as well as to mark the presence of the printed 🌄 or drawn 📈 graphic 
 > materials yet to be extracted from the page images.
 
@@ -74,7 +86,7 @@ paper source into one of the categories - each responsible for the following con
 
 **Training** 💪 set of the model: **10745** images for `v2.1`
 
-**Training** 💪 set of the model: **15855** images for `v2.2`, `v3.2` and `v5.2` 
+**Training** 💪 set of the model: **14565** images for `v2.2`, `v3.2` and `v5.2` 
 
 > **90% of all** - proportion in categories 🪧 tabulated [below](#categories-)
 
@@ -89,8 +101,8 @@ different sources of the archival documents originated in the 1920-2020 years sp
 > Disproportion of the categories 🪧 in both training data and provided evaluation [category_samples](category_samples) 📁 is
 > **NOT** intentional, but rather a result of the source data nature. 
 
-In total, several thousands of separate PDF files were selected and split into PNG pages, ~3720 of scanned documents 
-were one-page long which covered around a third of all data, and ~120 of them were much longer (dozens and hundreds 
+In total, several thousands of separate PDF files were selected and split into PNG pages, ~4k of scanned documents 
+were one-page long which covered around a third of all data, and ~2k of them were much longer (dozens and hundreds 
 of pages) covering the rest (more than 60% of all annotated data). 
 
 The specific content and language of the
@@ -101,19 +113,19 @@ arrowheads, and rocks formerly drawn by hand and later illustrated with digital 
 
 ### Categories 🪧
 
-|    Label️ | Description                                                                   |
-|----------:|:------------------------------------------------------------------------------|
-|    `DRAW` | **📈 - drawings, maps, paintings with text**                                  |
-|  `DRAW_L` | **📈📏 - drawings, etc with a table legend or inside tabular layout / forms** |
-| `LINE_HW` | **✏️📏 - handwritten text lines inside tabular layout / forms**               |
-|  `LINE_P` | **📏 - printed text lines inside tabular layout / forms**                     |
-|  `LINE_T` | **📏 - machine typed text lines inside tabular layout / forms**               |
-|   `PHOTO` | **🌄 - photos with text**                                                     |
-| `PHOTO_L` | **🌄📏 - photos inside tabular layout / forms or with a tabular annotation**  |
-|    `TEXT` | **📰 - mixed types of printed and handwritten texts**                         |
-| `TEXT_HW` | **✏️📄 - only handwritten text**                                              |
-|  `TEXT_P` | **📄 - only printed text**                                                    |
-|  `TEXT_T` | **📄 - only machine typed text**                                              |
+|    Label️ | Description                                                                                                      |
+|----------:|:-----------------------------------------------------------------------------------------------------------------|
+|    `DRAW` | **📈 - drawings, maps, paintings, schematics, or graphics, potentially containing some text labels or captions** |
+|  `DRAW_L` | **📈📏 - drawings, etc but presented within a table-like layout or includes a legend formatted as a table**      |
+| `LINE_HW` | **✏️📏 - handwritten text organized in a tabular or form-like structure**                                        |
+|  `LINE_P` | **📏 - printed text organized in a tabular or form-like structure**                                              |
+|  `LINE_T` | **📏 - machine-typed text organized in a tabular or form-like structure**                                        |
+|   `PHOTO` | **🌄 - photographs or photographic cutouts, potentially with text captions**                                     |
+| `PHOTO_L` | **🌄📏 - photos presented within a table-like layout or accompanied by tabular annotations**                     |
+|    `TEXT` | **📰 - mixtures of printed, handwritten, and/or typed text, potentially with minor graphical elements**          |
+| `TEXT_HW` | **✏️📄 - only handwritten text in paragraph or block form (non-tabular)**                                        |
+|  `TEXT_P` | **📄 - only printed text in paragraph or block form (non-tabular)**                                              |
+|  `TEXT_T` | **📄 - only machine-typed text in paragraph or block form (non-tabular)**                                        |
 
 The categories were chosen to sort the pages by the following criteria: 
 
@@ -1123,7 +1135,7 @@ revision `v1.9.22` turns to `model_v1922` model folder), and only then run repo 
 - 📏 - table content
 - 📈 - drawings/paintings/diagrams
 - 🌄 - photos
-- ✏️ - hand-written content
+- ✏️ - handwritten content
 - 📄 - text content
 - 📰 - mixed types of text content, maybe with graphics
 
