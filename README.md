@@ -41,11 +41,11 @@ of HF 😊 hub [^1] 🔗
 
 | Version | Base                   | Pages |   PDFs   | Description                                                             |
 |--------:|------------------------|:-----:|:--------:|:------------------------------------------------------------------------|
-|  `v2.0` | `vit-base-path16-224`  | 10073 | **3896** | annotations with mistakes, more heterogenous data                       |
-|  `v2.1` | `vit-base-path16-224`  | 11940 | **5002** | `main`: more diverse pages in each category, less annotation mistakes   |
-|  `v2.2` | `vit-base-path16-224`  | 15855 | **5730** | same data as `v2.1` + some restored pages from `v2.0`                   |
-|  `v3.2` | `vit-base-path16-384`  | 15855 | **5730** | same data as `v2.2`, but a bit larger model base with higher resolution |
-|  `v5.2` | `vit-large-path16-384` | 15855 | **5730** | same data as `v2.2`, but the largest model base with higher resolution  |
+|  `v2.0` | `vit-base-patch16-224`  | 10073 | **3896** | annotations with mistakes, more heterogenous data                       |
+|  `v2.1` | `vit-base-patch16-224`  | 11940 | **5002** | `main`: more diverse pages in each category, less annotation mistakes   |
+|  `v2.2` | `vit-base-patch16-224`  | 15855 | **5730** | same data as `v2.1` + some restored pages from `v2.0`                   |
+|  `v3.2` | `vit-base-patch16-384`  | 15855 | **5730** | same data as `v2.2`, but a bit larger model base with higher resolution |
+|  `v5.2` | `vit-large-patch16-384` | 15855 | **5730** | same data as `v2.2`, but the largest model base with higher resolution  |
 
 <details>
 
