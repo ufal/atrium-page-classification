@@ -1,31 +1,43 @@
 [OUTPUT]
-FOLDER_RESULTS=./result
-FOLDER_CPOINTS=./checkpoint
-FOLDER_MODELS=./model
+FOLDER_RESULTS=./results
+FOLDER_CPOINTS=./model_checkpoints
+FOLDER_MODELS=./model_checkpoints
+
+[EVAL]
+FOLDER_PAGES=/lnet/work/people/lutsai/pythonProject/pages/eval_4
 
 [TRAIN]
 FOLDER_PAGES=/lnet/work/people/lutsai/pythonProject/pages/train_4
+
 test_size = 0.1
 log_step = 10
-epochs = 3
-max_categ = 1200
+epochs = 10
+lr = 1e-5
+max_categ = 2000
+max_categ_e = 1000
+
 Training = False
 Testing = False
 
 [SETUP]
 seed = 420
-base_model = google/vit-base-patch16-224
-batch = 16
-top_N = 3
+base_model = ViT-B/16
+batch = 10
+top_N = 1
 raw = False
-inner = False
+
+categories_file = page_categories_total.tsv
+
+zero_shot = False
+avg = False
+categories_prefix = page_categories
 
 [INPUT]
 FOLDER_INPUT=./category_samples
 
 [HF]
-repo_name = ufal/vit-historical-page
-token = hf_AOLs....yGcHguvM
+repo_name = ufal/clip-historical-page
+token = hf_ALr...zdBL
 use_hf = False
-revision = v2.2
+revision = v1.1
 latest = v2.2

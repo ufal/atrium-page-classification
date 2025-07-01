@@ -2,14 +2,22 @@ import argparse
 import os
 
 import configparser
-from classifier import *
+from clip_full import *
 import time
 
 if __name__ == "__main__":
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    elif torch.backends.mps.is_available() and torch.backends.mps.is_built():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+    print(f"Using device: {device}")
+
     # Initialize the parser
     config = configparser.ConfigParser()
     # Read the configuration file
-    config.read('config.txt')
+    config.read('config_clip.txt')
 
     def_categ = ["DRAW", "DRAW_L", "LINE_HW", "LINE_P", "LINE_T", "PHOTO", "PHOTO_L", "TEXT", "TEXT_HW", "TEXT_P", "TEXT_T"]
 
@@ -20,7 +28,10 @@ if __name__ == "__main__":
     base_model = config.get('SETUP', 'base_model')  # do not change
 
     raw = config.getboolean('SETUP', 'raw')
-    inner = config.getboolean('SETUP', 'inner')
+    avg = config.getboolean('SETUP', 'avg')  # average scores from multiple category description files
+
+    categ_prefix = config.get('SETUP', 'categories_prefix')  # prefix for category description files
+    categ_file = config.get('SETUP', 'categories_file')  # file with category descriptions
 
     Training = config.getboolean('TRAIN', 'Training')
     Testing = config.getboolean('TRAIN', 'Testing')
@@ -36,6 +47,17 @@ if __name__ == "__main__":
 
     test_dir = config.get('INPUT', 'FOLDER_INPUT')
 
+    epochs = config.getint("TRAIN", "epochs")
+    max_categ = config.getint("TRAIN", "max_categ")  # max number of category samples
+    max_categ_e = config.getint("TRAIN", "max_categ_e")  # max number of category samples for evaluation
+    log_step = config.getint("TRAIN", "log_step")
+    test_size = config.getfloat("TRAIN", "test_size")
+    learning_rate = config.getfloat("TRAIN", "lr")
+
+    raw = config.getboolean('SETUP', 'raw')
+    zero_shot = config.getboolean('SETUP', 'zero_shot')  # zero-shot prediction without training
+
+
     # cur = Path.cwd()  # directory with this script
     cur = Path(__file__).resolve().parent  # directory with this script
     output_dir = Path(config.get('OUTPUT', 'FOLDER_RESULTS'))
@@ -44,27 +66,57 @@ if __name__ == "__main__":
     time_stamp = time.strftime("%Y%m%d-%H%M")  # for results files
 
     parser = argparse.ArgumentParser(description='Page sorter based on ViT')
-    parser.add_argument('-f', "--file", type=str, default=None, help="Single PNG page path")
-    parser.add_argument('-d', "--directory", type=str, default=None, help="Path to folder with PNG pages")
-    parser.add_argument('-m', "--model", type=str, default=model_path, help="Path to folder with model")
-    parser.add_argument('-b', "--base", type=str, default=base_model, help="Repository of the base model")
+
+    # Prediction arguments
+    parser.add_argument('-f', "--file", type=str, default=None, help="Single PNG page path for prediction.")
+    parser.add_argument('-d', "--directory", type=str, default=None,
+                        help="Path to folder with PNG pages for prediction.")
+    parser.add_argument("--dir", help="Predict a whole directory of images.", action="store_true")
+    parser.add_argument('-m', "--model", type=str, default=base_model,
+                        help="CLIP model name to use. Default is ViT-B/32.")
+
+    # Training arguments
+    parser.add_argument("--train", action="store_true", help="Run model fine-tuning.")
+    parser.add_argument('--epochs', type=int, default=epochs, help='Number of training epochs.')
+    parser.add_argument('--lr', type=float, default=learning_rate, help='Learning rate for the optimizer.')
+    parser.add_argument('--batch_size', type=int, default=batch, help='Batch size for training and evaluation.')
+    parser.add_argument('-mc', "--max_categ", type=int, default=max_categ,
+                        help="Maximum number of samples per category for training.")
+    parser.add_argument('-mce', "--max_categ_eval", type=int, default=max_categ_e,
+                        help="Maximum number of samples per category for evaluation.")
+
+    # Category file arguments
+    parser.add_argument('--cat_prefix', type=str, default=categ_prefix,
+                        help='Prefix for category description TSV files.')
+    parser.add_argument('--avg', action='store_true', default=avg, help='Average scores from multiple category description files.')
+    parser.add_argument('--zero_shot', action='store_true', default=zero_shot, help='Perform zero-shot prediction (no training).')
+    parser.add_argument('--vis', action='store_true', help='Visualize model accuracy statsistics.')
+
+    # Common arguments
+    parser.add_argument('-tn', "--topn", type=int, default=top_N, help="Number of top result categories to consider.")
+
+    # Evaluation arguments
+    parser.add_argument("--eval", action="store_true", help="Evaluate a saved model.")
+    parser.add_argument("--eval_dir", action="store_true", help="Evaluate a directory of saved models.")
+    parser.add_argument("--model_path", type=str, default=None,
+                        help="Path to the saved model checkpoint (.pt file) for evaluation.")
+    parser.add_argument("--model_dir", type=str, default=model_dir,
+                        help="Path to the directory of saved model checkpoints (.pt files) for evaluation.")
+
+
     parser.add_argument('-rev', "--revision", type=str, default=hf_version, help="HuggingFace revision (e.g. `main`, `vN.0` or `vN.M`)")
-    parser.add_argument('-tn', "--topn", type=int, default=top_N, help="Number of top result categories to consider")
-    parser.add_argument("--dir", help="Process whole directory (if -d not used)", action="store_true")
-    parser.add_argument("--inner", help="Process subdirectories of the given directory as well (FALSE by default)", default=inner, action="store_true")
-    parser.add_argument("--train", help="Training model", default=Training, action="store_true")
-    parser.add_argument("--eval", help="Evaluating model", default=Testing, action="store_true")
     parser.add_argument("--hf", help="Use model and processor from the HuggingFace repository", default=HF, action="store_true")
-    parser.add_argument("--raw", help="Output raw scores for all categories", default=raw, action="store_true")
+    parser.add_argument("--raw", help="Output raw scores for each category", default=raw, action="store_true")
+
 
     args = parser.parse_args()
 
     input_dir = Path(test_dir) if args.directory is None else Path(args.directory)
     Training, top_N, raw = args.train, args.topn, args.raw
 
-    if args.revision == hf_version and args.base == base_model:
+    if args.revision == hf_version and args.model == base_model:
         model_path = Path(args.model)
-    else:
+    elif not Path(args.model).is_file():
         new_model_name_local = f"model_{args.revision.replace('.', '')}"
         model_path = f"{model_dir}/{new_model_name_local}"
         model_path = Path(model_path)
@@ -82,51 +134,124 @@ if __name__ == "__main__":
     if not Path(model_dir).is_dir():
         os.makedirs(model_dir)
 
-    if args.train or args.eval:
-        epochs = config.getint("TRAIN", "epochs")
-        max_categ = config.getint("TRAIN", "max_categ")  # max number of category samples
-        log_step = config.getint("TRAIN", "log_step")
-        test_size = config.getfloat("TRAIN", "test_size")
+    args.logdir = os.path.join("logs", "{}-{}-{}".format(
+        os.path.basename(globals().get("__file__", "notebook")),
+        datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S"),
+        ",".join(("{}={}".format(re.sub("(.)[^_]*_?", r"\1", k), v) for k, v in sorted(vars(args).items()) if v
+                  is not None and k not in (
+                      "file", "directory", "dir", "eval", "train", "model_path", "model", "cat_prefix", "model_dir",
+                      "eval_dir", "vis")))
+    ))
 
-        data_dir = config.get("TRAIN", "FOLDER_PAGES")
+    args.logdir += f"-{args.model.replace('/', '_')}" if args.model else ""
 
-        total_files, total_labels, categories = collect_images(data_dir, max_categ)
+    cur = Path(__file__).parent if '__file__' in globals() else Path.cwd()
+    output_dir = cur / "results"
+    output_dir.mkdir(exist_ok=True)
 
-        (trainfiles, testfiles,
-         trainLabels, testLabels) = train_test_split(total_files,
-                                                     np.array(total_labels),
-                                                     test_size=test_size,
-                                                     random_state=seed,
-                                                     stratify=np.array(total_labels))
+    clip_instance = CLIP(args.max_categ, args.max_categ_eval, args.topn, args.model, device,
+                         categ_file,
+                         str(output_dir), args.cat_prefix, args.avg, args.zero_shot)
 
-        # Initialize the classifier
-        classifier = ImageClassifier(checkpoint=args.base, num_labels=len(categories), store_dir=str(cp_dir))
+    data_dir = config.get("TRAIN", "FOLDER_PAGES")
+    data_dir_eval = config.get("EVAL", "FOLDER_PAGES")
 
-    else:
-        categories = def_categ
-        print(f"Category input directories found: {categories}")
-
-        # Initialize the classifier
-        classifier = ImageClassifier(checkpoint=args.base, num_labels=len(categories), store_dir=str(cp_dir))
+    categories = def_categ
+    print(f"Category input directories found: {categories}")
 
     if args.train:
-        train_loader = classifier.process_images(trainfiles,
-                                                 trainLabels,
-                                                 batch,
-                                                 True)
-        eval_loader = classifier.process_images(testfiles,
-                                                testLabels,
-                                                batch,
-                                                False)
+        if not os.path.isdir(data_dir):
+            raise ValueError(f"Train directory not found at: {data_dir}")
+        if not os.path.isdir(data_dir_eval):
+            raise ValueError(f"Evaluation directory not found at: {data_dir_eval}")
 
-        print(f"Training on {len(trainfiles)} images, evaluating on {len(testfiles)} images")
-        print(f"Base model: {args.base}, local model name: {model_name_local}")
-        classifier.train_model(train_loader,
-                               eval_loader,
-                               output_dir="./model_output",
-                               out_model=model_name_local,
-                               num_epochs=epochs,
-                               logging_steps=log_step)
+        clip_instance.train(
+            train_dir=data_dir,
+            eval_dir=data_dir_eval,
+            log_dir=args.logdir,
+            num_epochs=args.epochs,
+            learning_rate=args.lr,
+            batch_size=args.batch_size
+        )
+    elif args.vis:
+        csv = output_dir / 'stats' / f"model_accuracies{'_zero' if args.zero_shot else ''}.csv"
+        if not csv.exists():
+            print(f"CSV file for visualization not found at {csv}. Please run model evaluation first.")
+        else:
+            visualize_results(str(csv), str(output_dir / 'stats'), args.zero_shot)
+    elif args.eval:
+        weights_path = Path("model_checkpoints")
+        if args.zero_shot:
+            model_path_str = None
+        else:
+            model_path_str = args.model_path
+            print(f"Model path provided: {model_path_str}")
+            if model_path_str is None:
+                remove_punctuation = str.maketrans(string.punctuation, ' ' * len(string.punctuation))
+                model_name_sanitized = args.model.translate(remove_punctuation).replace(" ", "")
+                model_path = weights_path / f"model_{model_name_sanitized}_{args.max_categ}c_{str(args.lr)}.pt"
+                if not model_path.exists():
+                    model_path = weights_path / f"model_{model_name_sanitized}_{args.max_categ}c_{str(args.lr)}_cp.pt"
+
+                if not model_path.exists():
+                    raise ValueError(
+                        "Model file or checkpoint not found at default paths. Please provide a path using --model_path.")
+
+            model_path_str = str(weights_path / model_path_str)
+
+        if not os.path.isdir(data_dir_eval):
+            raise ValueError(f"Evaluation directory not found at: {data_dir_eval}")
+
+        clip_instance.evaluate_saved_model(
+            model_path=model_path_str,
+            eval_dir=data_dir_eval,
+            batch_size=args.batch_size
+        )
+    elif args.eval_dir:
+        if not os.path.isdir(data_dir_eval):
+            raise ValueError(f"Evaluation directory not found at: {data_dir_eval}")
+        if not os.path.isdir(args.model_dir):
+            raise ValueError(f"Model directory not found at: {args.model_dir}. Please provide a valid path.")
+
+        evaluate_multiple_models(
+            model_dir=args.model_dir,
+            eval_dir=data_dir_eval,
+            batch_size=args.batch_size,
+            device=device,
+            cat_prefix=args.cat_prefix,
+            vis=True,
+            zero_shot=args.zero_shot,
+        )
+    elif args.zero_shot:  # New branch for zero-shot prediction
+        if args.file:
+            prediction = clip_instance.predict_single(args.file)
+            print(f"Zero-shot prediction for {args.file}: {prediction}")
+        elif args.dir:
+            input_dir_pred = Path(args.directory) if args.directory is not None else cur / 'test-images' / 'pages'
+            table_out_path = output_dir / 'tables'
+            table_out_path.mkdir(exist_ok=True, parents=True)
+            directory_result_output = str(table_out_path / f'zero_shot_raw_result_{args.model.replace("/", "")}_{args.topn}n_{max_categ}c.csv')
+            clip_instance.predict_directory(str(input_dir_pred), raw=True, out_table=directory_result_output)
+        else:
+            print("Please specify a file (-f) or a directory (-d) for zero-shot prediction.")
+    else:
+        if args.file:
+            if args.topn > 1:
+                scores, labels = clip_instance.predict_top(args.file)
+                print(f"File {args.file} predicted:")
+                for lab, sc in zip(labels, scores):
+                    print(f"\t{lab}:  {round(sc * 100, 2)}%")
+            else:
+                prediction = clip_instance.predict_single(args.file)
+                print(f"Prediction for {args.file}:\n{prediction}")
+
+        if args.dir or args.directory is not None:
+            input_dir_pred = Path(args.directory) if args.directory is not None else cur / 'test-images' / 'pages'
+            table_out_path = output_dir / 'tables'
+            table_out_path.mkdir(exist_ok=True, parents=True)
+            directory_result_output = str(table_out_path / f'result_{time_stamp}_{args.model.replace("/", "")}_{args.topn}n_{max_categ}c.csv')
+            clip_instance.predict_directory(str(input_dir_pred), raw=True, out_table=directory_result_output)
+
 
     if args.hf:
         # ----------------------------------------------
@@ -137,88 +262,13 @@ if __name__ == "__main__":
         # ----------------------------------------------
 
         # loading from repo
-        classifier.load_from_hub(config.get("HF", "repo_name"), args.revision)
+        clip_instance.load_from_hub(config.get("HF", "repo_name"), args.revision)
 
         # hf_model_name_local = f"model_{args.revision.replace('.', '')}"
         # hf_model_path = f"{model_dir}/{hf_model_name_local}"
 
-        classifier.save_model(str(model_path))
+        clip_instance.save_model(str(model_path))
 
-        classifier.load_model(str(model_path))
-
-    else:
-        classifier.load_model(str(model_path))
-
-    if args.eval:
-        eval_loader = classifier.process_images(testfiles,
-                                                testLabels,
-                                                batch,
-                                                False)
-        eval_predictions, raw_prediction = classifier.infer_dataloader(eval_loader, top_N, raw)
-
-        test_labels = np.argmax(testLabels, axis=-1).tolist()
-
-        rdf, raw_df = dataframe_results(testfiles,
-                                        eval_predictions,
-                                        categories,
-                                        top_N,
-                                        raw_prediction)
-
-        rdf["TRUE"] = [categories[i] for i in test_labels]
-        rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
-        rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{model_name_local}_TOP-{top_N}_EVAL.csv", sep=",", index=False)
-        print(f"Evaluation results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
-
-        if raw:
-            raw_df["TRUE"] = [categories[i] for i in test_labels]
-            raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
-            raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{model_name_local}_EVAL_RAW.csv", sep=",", index=False)
-            print(f"RAW Evaluation results are recorded into {output_dir}/tables/ directory")
-
-
-        confusion_plot(eval_predictions,
-                       test_labels,
-                       categories,
-                       model_name_local,
-                       top_N)
-
-    if args.file is not None:
-        pred_scores = classifier.top_n_predictions(args.file, top_N)
-
-        labels = [categories[i[0]] for i in pred_scores]
-        scores = [round(i[1], 3) for i in pred_scores]
-
-        print(f"File {args.file} predicted:")
-        for lab, sc in zip(labels, scores):
-            print(f"\t{lab}:  {round(sc * 100, 2)}%")
-
-    if args.dir or args.directory is not None:
-        print(f"Start of the directory processing at {time.strftime('%Y-%m-%d %H:%M:%S')}")
-
-        if args.inner:
-            test_images = sorted(directory_scraper(Path(test_dir), "png"))
-        else:
-            test_images = sorted(os.listdir(test_dir))
-            test_images = [os.path.join(test_dir, img) for img in test_images]
-
-        test_loader = classifier.create_dataloader(test_images, batch)
-
-        test_predictions, raw_prediction = classifier.infer_dataloader(test_loader, top_N, raw)
-
-        rdf, raw_df = dataframe_results(test_images,
-                                        test_predictions,
-                                        categories,
-                                        top_N,
-                                        raw_prediction)
-
-        rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
-        rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{model_name_local}_TOP-{top_N}.csv", sep=",", index=False)
-        print(f"Results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
-
-        if raw:
-            raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
-            raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{model_name_local}_RAW.csv", sep=",", index=False)
-            print(f"RAW Results are recorded into {output_dir}/tables/ directory")
-
+        clip_instance.load_model(str(model_path))
 
 

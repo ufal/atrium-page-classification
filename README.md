@@ -1,8 +1,8 @@
-# Image classification using fine-tuned ViT - for historical document sorting
+# Image classification using fine-tuned CLIP - for historical document sorting
 
 ### Goal: solve a task of archive page images sorting (for their further content-based processing)
 
-**Scope:** Processing of images, training / evaluation of ViT model,
+**Scope:** Processing of images, training / evaluation of CLIP model,
 input file/directory processing, class 🪧  (category) results of top
 N predictions output, predictions summarizing into a tabular format, 
 HF 😊 hub [^1] 🔗 support for the model, multiplatform (Win/Lin) data 
@@ -35,35 +35,36 @@ preparation scripts for PDF to PNG conversion
 
 ## Versions 🏁
 
-There are currently 2 version of the model available for download, both of them have the same set of categories, 
-but different data annotations. The latest approved `v2.1` is considered to be default and can be found in the `main` branch
+There are currently 4 version of the model available for download, both of them have the same set of categories, 
+but different data annotations. The latest approved `v1.1` is considered to be default and can be found in the `main` branch
 of HF 😊 hub [^1] 🔗 
 
-| Version | Base                   | Pages |   PDFs   | Description                                                             |
-|--------:|------------------------|:-----:|:--------:|:------------------------------------------------------------------------|
-|  `v2.0` | `vit-base-patch16-224`  | 10073 | **3896** | annotations with mistakes, more heterogenous data                       |
-|  `v2.1` | `vit-base-patch16-224`  | 11940 | **5002** | `main`: more diverse pages in each category, less annotation mistakes   |
-|  `v2.2` | `vit-base-patch16-224`  | 15855 | **5730** | same data as `v2.1` + some restored pages from `v2.0`                   |
-|  `v3.2` | `vit-base-patch16-384`  | 15855 | **5730** | same data as `v2.2`, but a bit larger model base with higher resolution |
-|  `v5.2` | `vit-large-patch16-384` | 15855 | **5730** | same data as `v2.2`, but the largest model base with higher resolution  |
+| Version | Base           | Pages |   PDFs   | Description                   |
+|--------:|----------------|:-----:|:--------:|:------------------------------|
+|  `v1.1` | `ViT-B/16`     | 15855 | **5730** | smallest                      |
+|  `v1.2` | `ViT-B/32`     | 15855 | **5730** | small with higher granularity |
+|  `v2.1` | `ViT-L/14`     | 15855 | **5730** | large                         |
+|  `v2.2` | `ViT-L/14@336` | 15855 | **5730** | large with highest resolution |
+
 
 <details>
 
 <summary>Base model - size 👀</summary>
 
-| **Version**             | **Disk space** |
-|-------------------------|----------------|
-| `vit-base-patch16-224`  | 344 Mb         |
-| `vit-base-patch16-384`  | 345 Mb         |
-| `vit-large-patch16-384` | 1.2 Gb         |
+| **Version**                         | **Disk space** |
+|-------------------------------------|----------------|
+| `openai/clip-vit-base-patch16`      | 992 Mb         |
+| `openai/clip-vit-base-patch32`      | 1008 Mb        |
+| `openai/clip-vit-large-patch14`     | 1.5 Gb         |
+| `openai/clip-vit-large-patch14-336` | 1.5 Gb         |
 
 </details>
 
 ## Model description 📇
 
-🔲 **Fine-tuned** model repository: UFAL's **vit-historical-page** [^1] 🔗
+🔲 **Fine-tuned** model repository: UFAL's **clip-historical-page** [^1] 🔗
 
-🔳 **Base** model repository: Google's **vit-base-patch16-224**,  **vit-base-patch16-384**,  **vit-large-patch16-284** [^2] [^13] [^14] 🔗
+🔳 **Base** model repository: OpenAI's **clip-vit-base-patch16**,  **clip-vit-base-patch32**,  **clip-vit-large-patch14**, **clip-vit-large-patch14-336** [^2] [^13] [^14] 🔗
 
 The model was trained on the manually ✍️ annotated dataset of historical documents, in particular, images of pages 
 from the archival documents with paper sources that were scanned into digital form. 
@@ -82,15 +83,11 @@ paper source into one of the categories - each responsible for the following con
 
 ### Data 📜
 
-**Training** 💪 set of the model: **8950** images for `v2.0`
-
-**Training** 💪 set of the model: **10745** images for `v2.1`
-
-**Training** 💪 set of the model: **14565** images for `v2.2`, `v3.2` and `v5.2` 
+**Training** 💪 set of the model: **14267** images 
 
 > **90% of all** - proportion in categories 🪧 tabulated [below](#categories-)
 
-**Evaluation** 🏆 set:  **1290** images (taken from `v2.2` annotations)
+**Evaluation** 🏆 set:  **1583** images 
 
 > **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250526-1158_model_v22_TOP-1_EVAL.csv) 📎
 
@@ -137,8 +134,7 @@ The categories were chosen to sort the pages by the following criteria:
 > applied after the classification as mentioned [above](#model-description-).
 
 Examples of pages sorted by category 🪧 can be found in the [category_samples](category_samples) 📁 directory
-which is also available as a testing subset of the training data (can be used to run evaluation and prediction with a
-necessary `--inner` flag).
+which is also available as a testing subset of the training data.
 
 ----
 
@@ -230,14 +226,14 @@ to **pull the model from the HF 😊 hub repository [^1] 🔗** via:
 
     python3 run.py --hf
 
-**OR** for specific model version (e.g. `main`, `v2.0` or `vX.2`) use the `--revision` flag:
+**OR** for specific model version (e.g. `main`, `vX.1` or `vX.2`) use the `--revision` flag:
  
-    python3 run.py --hf -rev v2.0
+    python3 run.py --hf -rev v1.1
 
-**OR** for specific base model version (e.g. `google/vit-large-patch16-384`) use the `--base` flag (only when the 
+**OR** for specific base model version (e.g. `openai/clip-vit-base-patch16`) use the `--base` flag (only when the 
 trained model version demands such base model as described [above](#versions-)):
  
-    python3 run.py --hf -rev v5.2 -b google/vit-large-patch16-384
+    python3 run.py --hf -rev v2.2 -m ViT-L/14@336
 
 > [!IMPORTANT]
 > If you already have the model files in the `model/movel_<revision>`
@@ -349,11 +345,12 @@ the `batch` variable in the `[SETUP]` section.
 
 <summary>Rough estimations of disk space needed for trained model in relation to the base model 👀</summary>
 
-| **Version**             | **Disk space** |
-|-------------------------|----------------|
-| `vit-base-patch16-224`  | 344 Mb         |
-| `vit-base-patch16-384`  | 345 Mb         |
-| `vit-large-patch16-384` | 1.2 Gb         |
+| **Version**                         | **Disk space** |
+|-------------------------------------|----------------|
+| `openai/clip-vit-base-patch16`      | 992 Mb         |
+| `openai/clip-vit-base-patch32`      | 1008 Mb        |
+| `openai/clip-vit-large-patch14`     | 1.5 Gb         |
+| `openai/clip-vit-large-patch14-336` | 1.5 Gb         |
 
 </details>
 
@@ -386,7 +383,7 @@ you can use the `-tn` or `--topn` flag with the number of guesses you want to ge
 
 Run the program from its starting point [run.py](run.py) 📎 with optional flags:
 
-    python3 run.py -tn 3 -f '/full/path/to/file.png' -m '/full/path/to/model/folder'
+    python3 run.py -tn 3 -f '/full/path/to/file.png' --model_path '/full/path/to/model/folder' -m '<base_code>'
 
 for exactly TOP-3 guesses with a console output.
 
@@ -406,7 +403,7 @@ to run a single PNG file classification - the output will be in the console.
 The following prediction type does **NOT** require explicit directory path setting with the `-d` or `--directory`, 
 since its default value is set in the [config.txt](config.txt) ⚙ file and awakens when the `--dir` flag 
 is used. The same flags for the number of guesses and the model folder path as for the single-page 
-processing can be used. In addition, 2 directory-specific flags  `--inner` and `--raw` are available. 
+processing can be used. In addition, a directory-specific flag `--raw` is available. 
 
 > [!CAUTION]
 > You must either explicitly set the `-d` flag's argument or use the `--dir` flag (calling for the preset in 
@@ -420,7 +417,7 @@ the hardware's memory capacity requirements for different batch sizes tabulated 
 
 <summary>How to 👀</summary>
 
-    python3 run.py -tn 3 -d '/full/path/to/directory' -m '/full/path/to/model/folder'
+    python3 run.py -tn 3 -d '/full/path/to/directory' --model_path '/full/path/to/model/folder' -m '<base_code>'
 
 for exactly TOP-3 guesses in tabular format from all images found in the given directory.
 
@@ -428,7 +425,7 @@ for exactly TOP-3 guesses in tabular format from all images found in the given d
 
     python3 run.py --dir 
     
-    python3 run.py -rev v3.2 -b google/vit-base-patch16-384 --inner --dir
+    python3 run.py -rev v2.2 -m ViT-B/15 --dir
 
 
 </details>
@@ -460,37 +457,28 @@ There are accuracy performance measurements and plots of confusion matrices for 
 dataset (10% of the provided in `[TRAIN]`'s folder data). Both graphic plots and tables with 
 results can be found in the [result](result) 📁 folder.
 
-`v2.0` Evaluation set's accuracy (**Top-3**):  **95.58%** 🏆
+
+`v1.1` Evaluation set's accuracy (**Top-1**):  **100.00%** 🏆
 
 <details>
 
-<summary>Confusion matrix 📊 TOP-3 👀</summary>
+<summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-3 confusion matrix](result%2Fplots%2F20250526-1147_model_v20_conf_mat_TOP-3.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20250526-1157_model_v21_conf_mat_TOP-3.png)
 
 </details>
 
-`v2.1` Evaluation set's accuracy (**Top-3**):  **99.84%** 🏆
+`v1.2` Evaluation set's accuracy (**Top-1**):  **100.00%** 🏆
 
 <details>
 
-<summary>Confusion matrix 📊 TOP-3 👀</summary>
+<summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-3 confusion matrix](result%2Fplots%2F20250526-1157_model_v21_conf_mat_TOP-3.png)
-
-</details>
-
-`v2.2` Evaluation set's accuracy (**Top-3**):  **100.00%** 🏆
-
-<details>
-
-<summary>Confusion matrix 📊 TOP-3 👀</summary>
-
-![TOP-3 confusion matrix](result%2Fplots%2F20250526-1201_model_v22_conf_mat_TOP-3.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20250526-1201_model_v22_conf_mat_TOP-3.png)
 
 </details>
 
-`v2.0` Evaluation set's accuracy (**Top-1**):  **84.96%** 🏆
+`v2.1` Evaluation set's accuracy (**Top-1**):  **99.94%** 🏆
 
 <details>
 
@@ -500,23 +488,13 @@ results can be found in the [result](result) 📁 folder.
 
 </details>
 
-`v2.1` Evaluation set's accuracy (**Top-1**):  **96.36%** 🏆
+`v2.2` Evaluation set's accuracy (**Top-1**):  **99.87%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
 ![TOP-1 confusion matrix](result%2Fplots%2F20250526-1156_model_v21_conf_mat_TOP-1.png)
-
-</details>
-
-`v2.2` Evaluation set's accuracy (**Top-1**):  **99.61%** 🏆
-
-<details>
-
-<summary>Confusion matrix 📊 TOP-1 👀</summary>
-
-![TOP-1 confusion matrix](result%2Fplots%2F20250526-1202_model_v22_conf_mat_TOP-1.png)
 
 </details>
 
