@@ -57,6 +57,7 @@ if __name__ == "__main__":
 
     raw = config.getboolean('SETUP', 'raw')
     zero_shot = config.getboolean('SETUP', 'zero_shot')  # zero-shot prediction without training
+    visualize = config.getboolean('SETUP', 'visualize')  # visualize model accuracy statistics
 
 
     # cur = Path.cwd()  # directory with this script
@@ -92,7 +93,7 @@ if __name__ == "__main__":
     parser.add_argument('--cat_dir', type=str, default=categ_directory, help='Directory with category description files.'),
     parser.add_argument('--avg', action='store_true', default=avg, help='Average scores from multiple category description files.')
     parser.add_argument('--zero_shot', action='store_true', default=zero_shot, help='Perform zero-shot prediction (no training).')
-    parser.add_argument('--vis', action='store_true', help='Visualize model accuracy statsistics.')
+    parser.add_argument('--vis', action='store_true',default=visualize, help='Visualize model accuracy statsistics.')
 
     # Common arguments
     parser.add_argument('-tn', "--topn", type=int, default=top_N, help="Number of top result categories to consider.")

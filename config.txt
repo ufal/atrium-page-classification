@@ -30,6 +30,7 @@ categories_file = category_description_total.tsv
 
 zero_shot = False
 avg = False
+visualize = False
 description_folder = ./category_descriptions
 categories_prefix = page_categories
 

@@ -62,6 +62,8 @@ of HF 😊 hub [^1] 🔗
 
 ## Model description 📇
 
+![architecture_diagram](architecture_clip.png)
+
 🔲 **Fine-tuned** model repository: UFAL's **clip-historical-page** [^1] 🔗
 
 🔳 **Base** model repository: OpenAI's **clip-vit-base-patch16**,  **clip-vit-base-patch32**,  **clip-vit-large-patch14**, **clip-vit-large-patch14-336** [^2] [^13] [^14] 🔗
@@ -233,7 +235,7 @@ to **pull the model from the HF 😊 hub repository [^1] 🔗** via:
 **OR** for specific base model version (e.g. `openai/clip-vit-base-patch16`) use the `--base` flag (only when the 
 trained model version demands such base model as described [above](#versions-)):
  
-    python3 run.py --hf -rev v2.2 -m ViT-L/14@336
+    python3 run.py --hf -rev v2.2 -m `ViT-L/14@336`
 
 > [!IMPORTANT]
 > If you already have the model files in the `model/movel_<revision>`
@@ -464,8 +466,7 @@ results can be found in the [result](result) 📁 folder.
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20250526-1157_model_v21_conf_mat_TOP-3.png)
-
+![TOP-1 confusion matrix](result%2Fplots%2Fconf_1n_2000c_ViTB16_20250701-1423.png)
 </details>
 
 `v1.2` Evaluation set's accuracy (**Top-1**):  **100.00%** 🏆
@@ -474,7 +475,7 @@ results can be found in the [result](result) 📁 folder.
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20250526-1201_model_v22_conf_mat_TOP-3.png)
+![TOP-1 confusion matrix](result%2Fplots%2Fconf_1n_2000c_ViTB32_20250701-1426.png)
 
 </details>
 
@@ -484,7 +485,7 @@ results can be found in the [result](result) 📁 folder.
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20250526-1152_model_v20_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2Fconf_1n_2000c_ViTL14_20250701-1422.png)
 
 </details>
 
@@ -494,8 +495,7 @@ results can be found in the [result](result) 📁 folder.
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20250526-1156_model_v21_conf_mat_TOP-1.png)
-
+![TOP-1 confusion matrix](result%2Fplots%2Fconf_1n_2000c_ViTL14336px_20250701-1417.png)
 </details>
 
 > **Confusion matrices** provided above show the diagonal of matching gold and predicted categories 🪧
@@ -944,10 +944,11 @@ which summarizes the category 🪧 descriptions in the [category_samples](catego
 with only a single table of category 🪧 descriptions (via `categories_file` variable), or use `--avg` flag to average all of the 
 category 🪧 descriptions in the `description_folder` starting with the `categories_prefix` value.
 
-[descriptions_comparison_graph.png](descriptions_comparison.pdf) 📎 is a graph containing separate and averaged results 
-of all category 🪧 descriptions.
+[descriptions_comparison_graph.png](descriptions_comparison.png) 📎 is a graph containing separate and averaged results 
+of all category 🪧 descriptions. Using averaged text embeddings of all label description seems to be the most powerful way to
+classify our images.
 
-![description comparison graph](descriptions_comparison.pdf)
+![description comparison graph](descriptions_comparison.png)
 
 > You are free to play with the **learning rate** right in the training function arguments called in the [run.py](run.py) 📎 file, 
 > yet **warmup ratio and other hyperparameters** are accessible only through the [classifier.py](classifier.py) 📎 file.

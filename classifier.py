@@ -539,6 +539,7 @@ class CLIP:
         """
         remove_punctuation = str.maketrans(string.punctuation, ' ' * len(string.punctuation))
         model_name_sanitized = self.model_name.translate(remove_punctuation).replace(" ", "") if model_name_sanitized is None else model_name_sanitized
+        print(self.output_dir)
 
         plot_path = Path(f'{self.output_dir}/plots')
         table_path = Path(f'{self.output_dir}/tables')
@@ -603,10 +604,12 @@ class CLIP:
         if tab:
             out_df, _ = dataframe_results(image_files, all_predictions, self.categories, raw_scores= None,
                                   top_N=self.top_N)
-
+            all_true_labels = np.asarray(all_true_labels, dtype=int)
             print(out_df)
             print(out_df.size)
             print(len(all_true_labels))
+            print(all_true_labels)
+            print(all_true_labels.min(), all_true_labels.max())
             out_df["TRUE"] = [self.categories[i] for i in all_true_labels]
             out_df.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
             out_df.to_csv(table_file, sep=",", index=False)
@@ -693,7 +696,7 @@ def load_categories(tsv_file, directory = None, prefix=None):
     categories_data = defaultdict(list)
 
     dir = directory if directory else "category_descriptions"
-    base_dir = Path(__file__).parent / dir  # directory of tables
+    base_dir = Path(__file__).parent  # directory of tables
     if not base_dir.is_dir():
         print(f"Error: {base_dir} not a directory")
         return {}
