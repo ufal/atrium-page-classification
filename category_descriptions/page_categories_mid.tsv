@@ -1,0 +1,12 @@
+label	description
+DRAW	a drawings or a map or a diagram
+DRAW_L	a table and drawings or a map or a diagram
+LINE_HW	a table or a filled form of handwritten texts
+LINE_P	a table or a filled form of printed texts
+LINE_T	a table or a filled form of typed texts
+PHOTO	photos or photo cutouts
+PHOTO_L	a table and photos or photo cutouts
+TEXT	printed and handwritten text styles on a page
+TEXT_HW	a handwritten plain text page or handwritten text paragraphs
+TEXT_P	a printed plain text page or printed text paragraphs
+TEXT_T	a typed plain text document page or typed text paragraphs

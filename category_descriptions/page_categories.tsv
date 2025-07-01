@@ -1,0 +1,12 @@
+label	description
+DRAW	drawings, maps, paintings, schematics, graphics with labels
+DRAW+AF8-L	drawings, maps, paintings, schematics, graphics with a table legend, inside a table or form
+LINE+AF8-HW	handwritten text lines inside a table or form
+LINE+AF8-P	printed text lines inside a table or form
+LINE+AF8-T	typed text lines inside a table or form 
+PHOTO	photos or cutouts from photos with labels
+PHOTO+AF8-L	photos with a table caption, inside a table or form
+TEXT	mixed printed and handwritten texts
+TEXT+AF8-HW	handwritten text page
+TEXT+AF8-P	printed text page
+TEXT+AF8-T	typed document page

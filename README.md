@@ -838,7 +838,9 @@ set a path to the data folder. Make sure label directory names do **NOT** contai
 > [!TIP]
 > In the [config.txt](config.txt) ⚙️ file tweak the parameter of `max_categ`
 > for a maximum number of samples per category 🪧, in case you have **over-represented labels** significantly dominating in size.
-> Set `max_categ` higher than the number of samples in the largest category 🪧 to use **all** data samples.
+> Set `max_categ` higher than the number of samples in the largest category 🪧 to use **all** data samples. Similarly, 
+> `max_categ_e` parameter sets the maximum number of samples per category 🪧 for the evaluation dataset, and should be 
+> increased to very large numbers if you want to cover all samples from al categories 🪧.
 
 From this point, you can start model training or evaluation process.
 
@@ -935,7 +937,17 @@ depending on your machine's 🖥️ CPU / GPU memory size and prepared dataset s
 
 Above are the default hyperparameters or TrainingArguments [^11] used in the training process that can be partially
 (only `epoch` and `log_step`) changed in the `[TRAIN]` section, plus `batch` in the `[SETUP]`section, 
-of the [config.txt](config.txt) ⚙ file.
+of the [config.txt](config.txt) ⚙ file. Importantly, `avg` - average configuration of all texts can be used.
+
+CLIP models accept not only images but also text inputs, in our case its [descriptions.tsv](category_description_total.tsv) 📎 file 
+which summarizes the category 🪧 descriptions in the [category_samples](category_samples) 📁 folder. Optionally you can run the modesl
+with only a single table of category 🪧 descriptions (via `categories_file` variable), or use `--avg` flag to average all of the 
+category 🪧 descriptions in the `description_folder` starting with the `categories_prefix` value.
+
+[descriptions_comparison_graph.png](descriptions_comparison.pdf) 📎 is a graph containing separate and averaged results 
+of all category 🪧 descriptions.
+
+![description comparison graph](descriptions_comparison.pdf)
 
 > You are free to play with the **learning rate** right in the training function arguments called in the [run.py](run.py) 📎 file, 
 > yet **warmup ratio and other hyperparameters** are accessible only through the [classifier.py](classifier.py) 📎 file.
@@ -1044,11 +1056,15 @@ for the evaluated model training.
 To do this in the unchanged configuration ⚙, automatically create a 
 confusion matrix plot 📊 and additionally get raw class probabilities table run: 
 
-    python3 run.py --eval --raw
+    python3 run.py --eval
 
 **OR** when you don't remember the specific `[SETUP]` and `[TRAIN]` variables' values for the trained model, you can use:
 
-    python3 run.py --eval -m './model/model_<your_model_number_code>'
+    python3 run.py --eval -m '<base_code>'
+
+To prove that initial models without finetuning show awful results you can run `--zero_shot` flag during the evalution.
+
+    python3 run.py --eval --zero_shot -m '<base_code>'
 
 Finally, when your model is trained and you are happy with its performance tests, you can uncomment a code line
 in the [run.py](run.py) 📎 file for **HF 😊 hub model push**. This functionality has already been implemented and can be

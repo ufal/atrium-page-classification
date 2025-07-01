@@ -1,0 +1,12 @@
+label	description
+DRAW	A drawing, a map, a painting, a sketch, a diagram, a schematic, or a graphic with labels on a document page.
+DRAW+AF8-L	A drawing, a map, a painting, a sketch, a diagram, a schematic, or a graphic with an accompanying table or tabular legend on a document page.
+LINE+AF8-HW	A table or a filled form with handwritten text lines on a document page. Such as a filled report
+LINE+AF8-P	A table or a filled form with printed text lines on a document page.
+LINE+AF8-T	A table or a filled form with typed text lines on a document page. Such as a filled report
+PHOTO	A photo or a photo cutout with labels attached to a document page. 
+PHOTO+AF8-L	A photo or a photo cutout labeled with an accompanying table or tabular legend on a document page.
+TEXT	A document page with mixed printed and handwritten text styles, such as a newspaper or book cutout with handwritten comments.
+TEXT+AF8-HW	A handwritten plain text, handwritten text paragraphs, or handwritten list items on a document page. Such as a field diary scans and notebook notes.
+TEXT+AF8-P	A printed plain text, printed text paragraphs, or printed list items on a document page. Such as a clean book page scan or an article page scan.
+TEXT+AF8-T	A typed plain text, typed text paragraphs, or typed list items on a document page. Such as an old style field report scans

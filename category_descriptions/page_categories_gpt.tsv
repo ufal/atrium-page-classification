@@ -1,0 +1,12 @@
+label	description
+DRAW	A page with a drawing, map, painting, or schematic
+DRAW_L	A page with a drawing or map presented in a table layout
+LINE_HW	A page with handwritten text in a table layout
+LINE_P	A page with printed text in a table layout
+LINE_T	A page with typed text in a table layout
+PHOTO	A page with a photograph or photographic image
+PHOTO_L	A page with a photograph presented in a table layout
+TEXT	A page with mixed handwritten, printed, or typed text
+TEXT_HW	A page with only handwritten text in paragraphs
+TEXT_P	A page with only printed text in paragraphs
+TEXT_T	A page with only typed text in paragraphs

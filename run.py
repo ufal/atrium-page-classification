@@ -2,7 +2,7 @@ import argparse
 import os
 
 import configparser
-from clip_full import *
+from classifier import *
 import time
 
 if __name__ == "__main__":
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     # Initialize the parser
     config = configparser.ConfigParser()
     # Read the configuration file
-    config.read('config_clip.txt')
+    config.read('config.txt')
 
     def_categ = ["DRAW", "DRAW_L", "LINE_HW", "LINE_P", "LINE_T", "PHOTO", "PHOTO_L", "TEXT", "TEXT_HW", "TEXT_P", "TEXT_T"]
 
@@ -32,6 +32,7 @@ if __name__ == "__main__":
 
     categ_prefix = config.get('SETUP', 'categories_prefix')  # prefix for category description files
     categ_file = config.get('SETUP', 'categories_file')  # file with category descriptions
+    categ_directory = config.get('SETUP', 'description_folder')  # directory with category description files
 
     Training = config.getboolean('TRAIN', 'Training')
     Testing = config.getboolean('TRAIN', 'Testing')
@@ -88,6 +89,7 @@ if __name__ == "__main__":
     # Category file arguments
     parser.add_argument('--cat_prefix', type=str, default=categ_prefix,
                         help='Prefix for category description TSV files.')
+    parser.add_argument('--cat_dir', type=str, default=categ_directory, help='Directory with category description files.'),
     parser.add_argument('--avg', action='store_true', default=avg, help='Average scores from multiple category description files.')
     parser.add_argument('--zero_shot', action='store_true', default=zero_shot, help='Perform zero-shot prediction (no training).')
     parser.add_argument('--vis', action='store_true', help='Visualize model accuracy statsistics.')
@@ -149,9 +151,10 @@ if __name__ == "__main__":
     output_dir = cur / "results"
     output_dir.mkdir(exist_ok=True)
 
+    cat_directory = str(cur / args.cat_dir)
     clip_instance = CLIP(args.max_categ, args.max_categ_eval, args.topn, args.model, device,
                          categ_file,
-                         str(output_dir), args.cat_prefix, args.avg, args.zero_shot)
+                         str(output_dir), args.cat_prefix, cat_directory, args.avg, args.zero_shot)
 
     data_dir = config.get("TRAIN", "FOLDER_PAGES")
     data_dir_eval = config.get("EVAL", "FOLDER_PAGES")

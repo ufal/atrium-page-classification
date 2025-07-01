@@ -192,7 +192,7 @@ class CLIP:
     """
 
     def __init__(self, max_category_samples: int | None, eval_max_category_samples: int | None,
-                 top_N: int, model_name: str, device, categories_tsv: str, out: str = None,
+                 top_N: int, model_name: str, device, categories_tsv: str, categories_dir: str, out: str = None,
                  cat_prefix: str = None, avg: bool = True, zero_shot: bool = False):
         self.upper_category_limit = max_category_samples
         self.upper_category_limit_eval = eval_max_category_samples
@@ -235,7 +235,7 @@ class CLIP:
         ])
 
         if self.avg:
-            loaded_cats = load_categories(categories_tsv, cat_prefix)
+            loaded_cats = load_categories(categories_tsv, prefix=cat_prefix, directory=categories_dir)
             self.categories = sorted(loaded_cats.keys())
             self.class_to_idx = {cat: i for i, cat in enumerate(self.categories)}
             self.texts = loaded_cats  # dict of lists
@@ -246,7 +246,7 @@ class CLIP:
                 for desc in descs:
                     print(f"  - {desc}")
         else:
-            loaded_cats = load_categories(categories_tsv)
+            loaded_cats = load_categories(categories_tsv, directory=categories_dir)
             if type(loaded_cats) is dict:
                 self.categories = sorted(loaded_cats.keys())
                 self.class_to_idx = {cat: i for i, cat in enumerate(self.categories)}
@@ -544,8 +544,8 @@ class CLIP:
         table_path = Path(f'{self.output_dir}/tables')
         plot_path.mkdir(parents=True, exist_ok=True)
         time_stamp = time.strftime("%Y%m%d-%H%M")
-        plot_image = plot_path / f'conf_{self.top_N}n_{self.upper_category_limit}c_{model_name_sanitized}_{time_stamp}.png'
-        table_file = table_path / f'EVAL_{self.top_N}n_{self.upper_category_limit}c_{model_name_sanitized}_{time_stamp}.csv'
+        plot_image = plot_path / f'EVAL_conf_{self.top_N}n_{self.upper_category_limit}c_{model_name_sanitized}_{time_stamp}.png'
+        table_file = table_path / f'EVAL_table_{self.top_N}n_{self.upper_category_limit}c_{model_name_sanitized}_{time_stamp}.csv'
 
         all_predictions = []
         all_true_labels = []
@@ -604,6 +604,9 @@ class CLIP:
             out_df, _ = dataframe_results(image_files, all_predictions, self.categories, raw_scores= None,
                                   top_N=self.top_N)
 
+            print(out_df)
+            print(out_df.size)
+            print(len(all_true_labels))
             out_df["TRUE"] = [self.categories[i] for i in all_true_labels]
             out_df.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
             out_df.to_csv(table_file, sep=",", index=False)
@@ -682,19 +685,20 @@ class CLIP:
             print(f"RAW Results are recorded into {self.output_dir}/tables/ directory")
 
 
-def load_categories(tsv_file_or_dir, prefix=None):
+def load_categories(tsv_file, directory = None, prefix=None):
     """
     Loads categories and descriptions from TSV files for the CLIP model.
     If prefix is provided, it loads all files starting with that prefix from the directory.
     """
     categories_data = defaultdict(list)
 
-    if prefix:
-        base_dir = Path(__file__).parent / "category_descriptions" # directory of tables
-        if not base_dir.is_dir():
-            print(f"Error: {base_dir} not a directory")
-            return {}
+    dir = directory if directory else "category_descriptions"
+    base_dir = Path(__file__).parent / dir  # directory of tables
+    if not base_dir.is_dir():
+        print(f"Error: {base_dir} not a directory")
+        return {}
 
+    if prefix:
         files_to_load = list(base_dir.glob(f"{prefix}*.tsv")) + list(base_dir.glob(f"{prefix}*.csv"))
         if not files_to_load:
             print(f"Warning: No TSV files with prefix '{prefix}' found in {base_dir}. Using default categories.")
@@ -716,8 +720,7 @@ def load_categories(tsv_file_or_dir, prefix=None):
 
     else:  # Original behavior
         categories = []
-        base_dir = Path(__file__).parent / "category_descriptions" # directory of tables
-        tsv_file_or_dir = base_dir / tsv_file_or_dir
+        tsv_file_or_dir = base_dir / tsv_file
 
         if not os.path.exists(tsv_file_or_dir):
             print(f"Warning: Categories file not found at {tsv_file_or_dir}. Using default categories.")

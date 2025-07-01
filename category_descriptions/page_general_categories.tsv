@@ -1,0 +1,5 @@
+label	description
+DRAW	all sorts of drawings, line art, pen or pencil sketches, paintings, maps, diagrams or schematics, potentially annotated with textual object identifiers
+TEXT	plain printed, machine typed, or hand-written text as the only content of the page
+LINE	table or form, cells with clear border or edgeless cells forming clear rows and columns
+PHOTO	full photos or cutouts from photos, any size and form, potentially annotated with text

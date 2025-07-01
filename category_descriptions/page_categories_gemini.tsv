@@ -1,0 +1,12 @@
+label	description
+DRAW	A drawing, a map, a painting, a schematic, or a graphic with labels on a document page.
+DRAW_L	A drawing, a map, a painting, a schematic, or a graphic with an accompanying table or tabular legend on a document page.
+LINE_HW	A table or a filled form containing handwritten text lines on a document page.
+LINE_P	A table or a filled form containing printed text lines on a document page.
+LINE_T	A table or a filled form containing typed text lines on a document page.
+PHOTO	A photo or a photo cutout attached to a document page.
+PHOTO_L	A photo or a photo cutout with an accompanying table or tabular legend on a document page.
+TEXT	A document page with mixed printed and handwritten text styles, such as a newspaper or book cutout with handwritten comments.
+TEXT_HW	A handwritten plain text, handwritten text paragraphs, or handwritten list items on a document page.
+TEXT_P	A printed plain text, printed text paragraphs, or printed list items on a document page.
+TEXT_T	A typed plain text, typed text paragraphs, or typed list items on a document page.

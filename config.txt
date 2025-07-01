@@ -26,10 +26,11 @@ batch = 10
 top_N = 1
 raw = False
 
-categories_file = page_categories_total.tsv
+categories_file = category_description_total.tsv
 
 zero_shot = False
 avg = False
+description_folder = ./category_descriptions
 categories_prefix = page_categories
 
 [INPUT]

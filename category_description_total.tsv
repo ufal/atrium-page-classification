@@ -1,0 +1,100 @@
+label	description
+DRAW	A page with a drawing, map, painting, or schematic with text annotation
+DRAW_L	A page with a drawing or map presented in a table layout or with a legend table
+LINE_HW	A page with handwritten text in a table layout or a manually filled form
+LINE_P	A page with printed text in a table layout or a large printed tabled that takes a whole page
+LINE_T	A page with typed text in a table layout or a filled with typed text form
+PHOTO	A page with a photograph or photographic image with text annotation
+PHOTO_L	A page with a photograph presented in a table layout or with a legend table
+TEXT	A page with mixed handwritten, printed, or typed text such as a previously printed and then manually commented page from a book, a newspaper, or an article
+TEXT_HW	A page with only handwritten text in paragraphs such as a page from field journals
+TEXT_P	A page with only printed text in paragraphs, lists, and plain text layouts such as a page from an article or a thesis
+TEXT_T	A page with only typed text in paragraphs, lists, and plain text layouts such as a page from an article or a thesis
+DRAW	A drawing, a map, a painting, a sketch, a diagram, a schematic, or a graphic with labels on a document page.
+DRAW_L	A drawing, a map, a painting, a sketch, a diagram, a schematic, or a graphic with an accompanying table or tabular legend on a document page.
+LINE_HW	A table or a filled form with handwritten text lines on a document page. Such as a filled report
+LINE_P	A table or a filled form with printed text lines on a document page.
+LINE_T	A table or a filled form with typed text lines on a document page. Such as a filled report
+PHOTO	A photo or a photo cutout with labels attached to a document page. 
+PHOTO_L	A photo or a photo cutout labeled with an accompanying table or tabular legend on a document page.
+TEXT	A document page with mixed printed and handwritten text styles, such as a newspaper or book cutout with handwritten comments.
+TEXT_HW	A handwritten plain text, handwritten text paragraphs, or handwritten list items on a document page. Such as a field diary scans and notebook notes.
+TEXT_P	A printed plain text, printed text paragraphs, or printed list items on a document page. Such as a clean book page scan or an article page scan.
+TEXT_T	A typed plain text, typed text paragraphs, or typed list items on a document page. Such as an old style field report scans
+DRAW	A drawing, a map, a painting, a schematic, or a graphic with labels on a document page.
+DRAW_L	A drawing, a map, a painting, a schematic, or a graphic with an accompanying table or tabular legend on a document page.
+LINE_HW	A table or a filled form containing handwritten text lines on a document page.
+LINE_P	A table or a filled form containing printed text lines on a document page.
+LINE_T	A table or a filled form containing typed text lines on a document page.
+PHOTO	A photo or a photo cutout attached to a document page.
+PHOTO_L	A photo or a photo cutout with an accompanying table or tabular legend on a document page.
+TEXT	A document page with mixed printed and handwritten text styles, such as a newspaper or book cutout with handwritten comments.
+TEXT_HW	A handwritten plain text, handwritten text paragraphs, or handwritten list items on a document page.
+TEXT_P	A printed plain text, printed text paragraphs, or printed list items on a document page.
+TEXT_T	A typed plain text, typed text paragraphs, or typed list items on a document page.
+DRAW	A page with a drawing, map, painting, or schematic
+DRAW_L	A page with a drawing or map presented in a table layout
+LINE_HW	A page with handwritten text in a table layout
+LINE_P	A page with printed text in a table layout
+LINE_T	A page with typed text in a table layout
+PHOTO	A page with a photograph or photographic image
+PHOTO_L	A page with a photograph presented in a table layout
+TEXT	A page with mixed handwritten, printed, or typed text
+TEXT_HW	A page with only handwritten text in paragraphs
+TEXT_P	A page with only printed text in paragraphs
+TEXT_T	A page with only typed text in paragraphs
+DRAW	a drawings or a map or a diagram
+DRAW_L	a table or a tabular legend and drawings or a map or a diagram
+LINE_HW	a table or a filled form of handwritten texts on a page
+LINE_P	a table or a filled form of printed texts on a document page
+LINE_T	a table or a filled form of typed texts on a document page
+PHOTO	photos or photo cutouts attached to the document page
+PHOTO_L	a table or a tabular legend and photos or photo cutouts on a document page
+TEXT	printed and handwritten text styles on a page like a newspaper cutout or a book cutout commented in another way 
+TEXT_HW	a handwritten plain text or handwritten text paragraphs on a page
+TEXT_P	a printed plain text or printed text paragraphs or printed list items on a document page
+TEXT_T	a typed plain text or typed text paragraphs or typed list items on a document page
+DRAW	a drawings or a map or a diagram
+DRAW_L	a table and drawings or a map or a diagram
+LINE_HW	a table or a filled form of handwritten texts
+LINE_P	a table or a filled form of printed texts
+LINE_T	a table or a filled form of typed texts
+PHOTO	photos or photo cutouts
+PHOTO_L	a table and photos or photo cutouts
+TEXT	printed and handwritten text styles on a page
+TEXT_HW	a handwritten plain text page or handwritten text paragraphs
+TEXT_P	a printed plain text page or printed text paragraphs
+TEXT_T	a typed plain text document page or typed text paragraphs
+DRAW	a drawings or a map or a diagram
+DRAW_L	a table and a drawings or a map
+LINE_HW	a handwritten table or a filled form 
+LINE_P	a printed table or a filled form 
+LINE_T	a typed table or a filled form 
+PHOTO	photos on a page
+PHOTO_L	a table and photos
+TEXT	printed text and handwritten comment
+TEXT_HW	a handwritten text
+TEXT_P	a printed text
+TEXT_T	a typed text
+DRAW	a drawings or a map or a diagram
+DRAW_L	a drawings or a map or a diagram and a table
+LINE_HW	a table or a filled form of handwritten cells
+LINE_P	a table or a filled form of printed cells
+LINE_T	a table or a filled form of typed cells
+PHOTO	photos or photo cutouts
+PHOTO_L	photos or photo cutouts and a table
+TEXT	mixed text styles
+TEXT_HW	a handwritten text page
+TEXT_P	a printed text page
+TEXT_T	a typed document page
+DRAW	drawings, maps, paintings, schematics, graphics with labels
+DRAW_L	drawings, maps, paintings, schematics, graphics with a table legend, inside a table or form
+LINE_HW	handwritten text lines inside a table or form
+LINE_P	printed text lines inside a table or form
+LINE_T	typed text lines inside a table or form 
+PHOTO	photos or cutouts from photos with labels
+PHOTO_L	photos with a table caption, inside a table or form
+TEXT	mixed printed and handwritten texts
+TEXT_HW	handwritten text page
+TEXT_P	printed text page
+TEXT_T	typed document page

@@ -1,0 +1,12 @@
+label	description
+DRAW	A page with a drawing, map, painting, or schematic with text annotation
+DRAW+AF8-L	A page with a drawing or map presented in a table layout or with a legend table
+LINE+AF8-HW	A page with handwritten text in a table layout or a manually filled form
+LINE+AF8-P	A page with printed text in a table layout or a large printed tabled that takes a whole page
+LINE+AF8-T	A page with typed text in a table layout or a filled with typed text form
+PHOTO	A page with a photograph or photographic image with text annotation
+PHOTO+AF8-L	A page with a photograph presented in a table layout or with a legend table
+TEXT	A page with mixed handwritten, printed, or typed text such as a previously printed and then manually commented page from a book, a newspaper, or an article
+TEXT+AF8-HW	A page with only handwritten text in paragraphs such as a page from field journals
+TEXT+AF8-P	A page with only printed text in paragraphs, lists, and plain text layouts such as a page from an article or a thesis
+TEXT+AF8-T	A page with only typed text in paragraphs, lists, and plain text layouts such as a page from an article or a thesis

@@ -1,0 +1,12 @@
+label	description
+DRAW	a drawings or a map or a diagram
+DRAW+AF8-L	a table or a tabular legend and drawings or a map or a diagram
+LINE+AF8-HW	a table or a filled form of handwritten texts on a page
+LINE+AF8-P	a table or a filled form of printed texts on a document page
+LINE+AF8-T	a table or a filled form of typed texts on a document page
+PHOTO	photos or photo cutouts attached to the document page
+PHOTO+AF8-L	a table or a tabular legend and photos or photo cutouts on a document page
+TEXT	printed and handwritten text styles on a page like a newspaper cutout or a book cutout commented in another way 
+TEXT+AF8-HW	a handwritten plain text or handwritten text paragraphs on a page
+TEXT+AF8-P	a printed plain text or printed text paragraphs or printed list items on a document page
+TEXT+AF8-T	a typed plain text or typed text paragraphs or typed list items on a document page
