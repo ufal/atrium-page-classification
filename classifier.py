@@ -1,6 +1,9 @@
+import datetime
+
 import torch
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
+import transformers
 
 from utils import *
 
@@ -24,6 +27,48 @@ def custom_collate(batch: list) -> (torch.Tensor, torch.Tensor):
     return default_data_collator(batch)
 
 
+# Added from few_shot_finetuning.py for balanced sampling during training
+class BalancedBatchSampler(torch.utils.data.sampler.BatchSampler):
+    """
+    BatchSampler - from a MNIST-like dataset, samples n_classes and within these classes samples n_samples.
+    Returns batches of size n_classes * n_samples
+    """
+
+    def __init__(self, labels_one_hot: np.array , n_classes_per_batch, n_samples_of_class):
+        self.labels = labels_one_hot
+        self.labels_set = list(np.unique(self.labels.argmax(axis=-1))) # Modified for one-hot
+        self.label_to_indices = {label: np.where(self.labels.argmax(axis=-1) == label)[0]  # Modified for one-hot
+                                 for label in self.labels_set}
+        for l in self.labels_set:
+            np.random.shuffle(self.label_to_indices[l])
+        self.used_label_indices_count = {label: 0 for label in self.labels_set}
+        self.count = 0
+        self.n_classes = n_classes_per_batch
+        self.n_samples = n_samples_of_class
+        self.n_dataset = len(self.labels)
+        self.batch_size = self.n_samples * self.n_classes
+
+    def __iter__(self):
+        self.count = 0
+        while self.count + self.batch_size < self.n_dataset:
+            classes = np.random.choice(self.labels_set, self.n_classes, replace=False)
+            indices = []
+            for class_ in classes:
+                indices.extend(self.label_to_indices[class_][
+                               self.used_label_indices_count[class_]:self.used_label_indices_count[
+                                                                         class_] + self.n_samples])
+                self.used_label_indices_count[class_] += self.n_samples
+                if self.used_label_indices_count[class_] + self.n_samples > len(self.label_to_indices[class_]):
+                    np.random.shuffle(self.label_to_indices[class_])
+                    self.used_label_indices_count[class_] = 0
+            yield indices
+            self.count += self.n_classes * self.n_samples
+
+    def __len__(self):
+        return self.n_dataset // self.batch_size
+
+
+
 class ImageClassifier:
     def __init__(self, checkpoint: str, num_labels: int, store_dir: str = "/lnet/work/people/lutsai/pythonProject/OCR/ltp-ocr/trans/chekcpoint"):
         """
@@ -37,6 +82,16 @@ class ImageClassifier:
             cache_dir=store_dir,
             ignore_mismatched_sizes=True,
         ).to(self.device)
+        self.model_name = checkpoint
+
+        if checkpoint.startswith("timm"):
+            image_size = self.model.config.pretrained_cfg["input_size"][-1]  # For timm models, input_size is [batch_size, channels, height, width]
+            image_mean = self.model.config.pretrained_cfg["mean"]
+            image_std = self.model.config.pretrained_cfg["std"]
+        else:
+            image_size = self.processor.size['height']
+            image_mean = self.processor.image_mean
+            image_std = self.processor.image_std
 
         # Define transformations
         self.train_transforms = transforms.Compose([
@@ -48,23 +103,27 @@ class ImageClassifier:
                 transforms.Lambda(lambda img: ImageEnhance.Sharpness(img).enhance(random.uniform(0.5, 1.5))),
                 transforms.Lambda(lambda img: img.filter(ImageFilter.GaussianBlur(radius=random.uniform(0, 2))))
             ], p=0.5),
-            transforms.Resize((self.processor.size['height'], self.processor.size['width'])),
+            transforms.Resize((image_size, image_size)),
             transforms.ToTensor(),
-            transforms.Normalize(mean=self.processor.image_mean, std=self.processor.image_std)
+            transforms.Normalize(mean=image_mean, std=image_std)
         ])
 
         self.eval_transforms = transforms.Compose([
-            transforms.Resize((self.processor.size['height'], self.processor.size['width'])),
+            transforms.Resize((image_size, image_size)),
             transforms.ToTensor(),
-            transforms.Normalize(mean=self.processor.image_mean, std=self.processor.image_std)
+            transforms.Normalize(mean=image_mean, std=image_std)
         ])
 
-    def process_images(self, image_paths: list, image_labels: list, batch_size: int, train: bool = True) -> DataLoader:
+
+
+
+    def process_images(self, image_paths: list, image_labels: list, batch_size: int, train: bool = True, ignored_paths: list = None) -> DataLoader:
         """
         Process a list of image file paths into batches.
         """
-        dataset = ImageDataset(image_paths, image_labels, self.train_transforms if train else self.eval_transforms)
-        dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=train, collate_fn=custom_collate)
+        dataset = ImageDataset(image_paths, image_labels, self.train_transforms if train else self.eval_transforms, ignored_paths=ignored_paths)
+        dataloader = DataLoader(dataset, collate_fn=custom_collate,
+                                batch_sampler=BalancedBatchSampler(image_labels, batch_size, 1) if train else None)
         print(f"Dataloader of {'train' if train else 'eval'} dataset is ready:\t{len(image_paths)} images split into {len(dataloader)} batches of size {batch_size}")
         return dataloader
 
@@ -85,18 +144,69 @@ class ImageClassifier:
         tensor = transform(image).unsqueeze(0).to(self.device)
         return tensor
 
-    def train_model(self, train_dataloader, eval_dataloader, output_dir: str, out_model: str, num_epochs: int = 3, learning_rate: float = 5e-5, logging_steps: int = 10):
+    def train_model(self, train_dataloader, eval_dataloader, output_dir: str, out_model: str,
+                    num_epochs: int = 3, learning_rate: float = 1e-5, logging_steps: int = 10):
         """
         Train the model using the provided training and evaluation data loaders.
         """
         print(f"Training for {num_epochs} epochs on {len(train_dataloader)} train samples and evaluation on {len(eval_dataloader)} samples")
+
+        # Define optimizer and scheduler
+        # For the optimizer, we typically pass model.parameters()
+        optimizer = torch.optim.AdamW(self.model.parameters(), lr=learning_rate, weight_decay=0.0001)
+        num_batches_train = len(train_dataloader)
+        scheduler_poly = transformers.get_scheduler(
+            name="polynomial",
+            optimizer=optimizer,
+            num_warmup_steps=250,
+            num_training_steps=num_epochs * num_batches_train,
+            scheduler_specific_kwargs={
+                "power": 1.0,  # Polynomial decay power
+                "lr_end": 1e-10,  # Final learning rate at the end of training
+            },
+        )
+        scheduler_linear = transformers.get_scheduler(
+            name="linear",
+            optimizer=optimizer,
+            num_training_steps=num_epochs * num_batches_train,
+            num_warmup_steps=250,
+        )
+        scheduler_cosine = transformers.get_scheduler(
+            name="cosine",
+            optimizer=optimizer,
+            num_warmup_steps=250,
+            num_training_steps=num_epochs * num_batches_train,
+            scheduler_specific_kwargs={
+                "num_cycles": 0.5,  # Number of cosine cycles
+            }
+        )
+
+        # Generate log_dir dynamically, similar to clip_full.py
+        current_file_name = os.path.basename(__file__)
+        log_dir = "{}-{}-{}".format(
+            os.path.basename(current_file_name),
+            datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S"),
+            "lr={:.1e}".format(learning_rate).replace("-", "_")  # Simplified version
+        )
+        log_dir += f"-e={num_epochs}-m={self.model_name}-{out_model}"  # Example of adding more info
+        log_dir = os.path.join("logs", log_dir.replace(" ", "_").replace("/", "_")).replace(".", "")
+        # make sure logdir exists
+        cur = Path(__file__).parent
+        log_dir = cur / log_dir
+        Path(log_dir).mkdir(exist_ok=True, parents=True)
+
+        # Correct way to get the batch size from the BalancedBatchSampler
+        if isinstance(train_dataloader.batch_sampler, BalancedBatchSampler):
+            effective_train_batch_size = train_dataloader.batch_sampler.batch_size
+        else:
+            effective_train_batch_size = train_dataloader.batch_size  # Fallback if not using balanced sampler
 
         training_args = TrainingArguments(
             output_dir=output_dir,
             eval_strategy="epoch",
             save_strategy="epoch",
             learning_rate=learning_rate,
-            per_device_train_batch_size=train_dataloader.batch_size,
+            per_device_train_batch_size=effective_train_batch_size,
             per_device_eval_batch_size=eval_dataloader.batch_size,
             num_train_epochs=num_epochs,
             warmup_ratio=0.1,
@@ -104,6 +214,9 @@ class ImageClassifier:
             load_best_model_at_end=True,
             metric_for_best_model="accuracy",
             push_to_hub=False,
+            report_to="tensorboard",
+            logging_dir=log_dir,  # Use the dynamically generated log director
+            # fp16=True if torch.cuda.is_available() else False,
         )
 
         trainer = Trainer(
@@ -113,6 +226,8 @@ class ImageClassifier:
             eval_dataset=eval_dataloader.dataset,
             data_collator=lambda data: custom_collate(data),
             compute_metrics=self.compute_metrics,
+            #optimizers=(optimizer, scheduler_cosine)  # Pass the optimizer and scheduler
+            # optimizer_cls_and_kwargs=(torch.optim.AdamW, {'lr': learning_rate, 'weight_decay': 0.0001}),
         )
 
         trainer.train()
@@ -145,11 +260,11 @@ class ImageClassifier:
             top_n_probs = top_n_probs / top_n_probs.sum()
         return list(zip(top_n_indices.squeeze().tolist(), top_n_probs.squeeze().tolist()))
 
-    def create_dataloader(self, image_paths: list, batch_size: int) -> DataLoader:
+    def create_dataloader(self, image_paths: list, batch_size: int, ignored_paths: list = None) -> DataLoader:
         """
         Turn an input list of image paths into a DataLoader without labels.
         """
-        dataset = ImageDataset(image_paths, transform=self.eval_transforms)
+        dataset = ImageDataset(image_paths, transform=self.eval_transforms, ignored_paths=ignored_paths)
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=custom_collate)
         print(f"Dataloader of directory dataset is ready:\t{len(image_paths)} images split into {len(dataloader)} batches of size {batch_size}")
         return dataloader
@@ -266,10 +381,16 @@ class ImageClassifier:
 
 
 class ImageDataset(Dataset):
-    def __init__(self, image_paths: list, image_labels: list = None, transform=None):
+    def __init__(self, image_paths: list, image_labels: list = None, transform=None, ignored_paths: list = None):
         self.image_paths = image_paths
         self.image_labels = image_labels
         self.transform = transform
+
+        if ignored_paths is not None:
+            # Filter out ignored paths
+            self.image_paths = [path for path in image_paths if path not in ignored_paths]
+            if image_labels is not None:
+                self.image_labels = [label for path, label in zip(image_paths, image_labels) if path not in ignored_paths]
 
         self.known = True
 

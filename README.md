@@ -61,6 +61,8 @@ of HF 😊 hub [^1] 🔗
 
 ## Model description 📇
 
+![architecture.png](architecture.png)
+
 🔲 **Fine-tuned** model repository: UFAL's **vit-historical-page** [^1] 🔗
 
 🔳 **Base** model repository: Google's **vit-base-patch16-224**,  **vit-base-patch16-384**,  **vit-large-patch16-284** [^2] [^13] [^14] 🔗
