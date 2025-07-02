@@ -1,7 +1,7 @@
 [OUTPUT]
 FOLDER_RESULTS=./results
 FOLDER_CPOINTS=./model_checkpoints
-FOLDER_MODELS=./model_checkpoints
+FOLDER_MODELS=./models
 
 [EVAL]
 FOLDER_PAGES=/lnet/work/people/lutsai/pythonProject/pages/eval_4

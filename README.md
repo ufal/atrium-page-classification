@@ -39,9 +39,9 @@ There are currently 4 version of the model available for download, both of them 
 but different data annotations. The latest approved `v1.1` is considered to be default and can be found in the `main` branch
 of HF 😊 hub [^1] 🔗 
 
-| Version | Base           | Pages |   PDFs   | Description                   |
+| Version | Base code      | Pages |   PDFs   | Description                   |
 |--------:|----------------|:-----:|:--------:|:------------------------------|
-|  `v1.1` | `ViT-B/16`     | 15855 | **5730** | smallest                      |
+|  `v1.1` | `ViT-B/16`     | 15855 | **5730** | smallest (default)            |
 |  `v1.2` | `ViT-B/32`     | 15855 | **5730** | small with higher granularity |
 |  `v2.1` | `ViT-L/14`     | 15855 | **5730** | large                         |
 |  `v2.2` | `ViT-L/14@336` | 15855 | **5730** | large with highest resolution |
@@ -66,7 +66,7 @@ of HF 😊 hub [^1] 🔗
 
 🔲 **Fine-tuned** model repository: UFAL's **clip-historical-page** [^1] 🔗
 
-🔳 **Base** model repository: OpenAI's **clip-vit-base-patch16**,  **clip-vit-base-patch32**,  **clip-vit-large-patch14**, **clip-vit-large-patch14-336** [^2] [^13] [^14] 🔗
+🔳 **Base** model repository: OpenAI's **clip-vit-base-patch16**,  **clip-vit-base-patch32**,  **clip-vit-large-patch14**, **clip-vit-large-patch14-336** [^2] [^13] [^14] [^15] 🔗
 
 The model was trained on the manually ✍️ annotated dataset of historical documents, in particular, images of pages 
 from the archival documents with paper sources that were scanned into digital form. 
@@ -91,7 +91,7 @@ paper source into one of the categories - each responsible for the following con
 
 **Evaluation** 🏆 set:  **1583** images 
 
-> **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250526-1158_model_v22_TOP-1_EVAL.csv) 📎
+> **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2FEVAL_table_1n_2000c_ViTB16_20250701-2159.csv) 📎
 
 Manual ✍️ annotation was performed beforehand and took some time ⌛, the categories 🪧  were formed from
 different sources of the archival documents originated in the 1920-2020 years span. 
@@ -232,7 +232,7 @@ to **pull the model from the HF 😊 hub repository [^1] 🔗** via:
  
     python3 run.py --hf -rev v1.1
 
-**OR** for specific base model version (e.g. `openai/clip-vit-base-patch16`) use the `--base` flag (only when the 
+**OR** for specific base model version (e.g. `ViT-B/16`, `ViT-B/32`, `ViT-L/14` or `ViT-L/14@336px`) use the `--base` flag (only when the 
 trained model version demands such base model as described [above](#versions-)):
  
     python3 run.py --hf -rev v2.2 -m `ViT-L/14@336`
@@ -255,18 +255,15 @@ After the model is downloaded, you should see a similar file structure:
 <summary>Initial project tree 🌳 files structure 👀</summary>
     
     /local/folder/for/this/project/atrium-page-classification
-    ├── model
-        └── movel_<revision> 
+    ├── models
+        └── <base_code>_rev_<revision> 
             ├── config.json
             ├── model.safetensors
             └── preprocessor_config.json
-    ├── checkpoint
-        ├── models--google--vit-base-patch16-224
-            ├── blobs
-            ├── snapshots
-            └── refs
-        └── .locs
-            └── models--google--vit-base-patch16-224
+    ├── model_checkpoints
+        ├── model_<categ_limit>_<base_code>_<lr>.pt
+        ├── model_<categ_limit>_<base_code>_<lr>_cp.pt
+        └── ...
     ├── data_scripts
         ├── windows
             ├── move_single.bat
@@ -278,12 +275,12 @@ After the model is downloaded, you should see a similar file structure:
             └── sort.sh
     ├── result
         ├── plots
-            ├── date-time_conf_mat.png
+            ├── conf_mat_Nn_Cc_<base>_date-time.png
             └── ...
         └── tables
-            ├── date-time_TOP-N.csv
-            ├── date-time_TOP-N_EVAL.csv
-            ├── date-time_EVAL_RAW.csv
+            ├── result_date-time_<base>_Nn_Cc.csv
+            ├── EVAL_table_Nn_Cc_<base>_date-time.csv
+            ├── date-time_<base>_RAW.csv
             └── ...
     ├── category_samples
         ├── DRAW
@@ -504,9 +501,10 @@ results can be found in the [result](result) 📁 folder.
 
 By running tests on the evaluation dataset after training you can generate the following output files:
 
-- **date-time_model_TOP-N_EVAL.csv** - (by default) results of the evaluation dataset with TOP-N guesses
-- **date-time_model_conf_mat_TOP-N.png** - (by default) confusion matrix plot for the evaluation dataset also with TOP-N guesses
-- **date-time_model_EVAL_RAW.csv** - (by flag `--raw`) raw probabilities for all classes of the evaluation dataset 
+- **EVAL_table_Nn_Cc_<base>_date-time.csv** - (by default) results of the evaluation dataset with TOP-N guesses
+- **conf_mat_Nn_Cc_<base>_date-time.png** - (by default) confusion matrix plot for the evaluation dataset also with TOP-N guesses
+- **date-time_<base>_RAW.csv** - (by flag `--raw`) raw probabilities for all classes of the processed directory 
+- **result_date-time_<base>_Nn_Cc.csv** - (by default) results of the processed directory with TOP-N guesses
 
 > [!NOTE]
 > Generated tables will be sorted by **FILE** and **PAGE** number columns in ascending order. 
@@ -519,34 +517,31 @@ Additionally, results of prediction inference run on the directory level without
 
 <summary>General result tables 👀</summary>
 
-Demo files  `v2.0`:
+Demo files  `v1.1`:
 
-- Manually ✍️ **checked** (small): [model_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2FEVAL_table_1n_2000c_ViTB16_20250701-2159.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250526-1142_model_v20_TOP-3_EVAL.csv) 📎
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2Fresult_20250701-1816_ViT-B16_1n_2000c.csv)📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250526-1148_model_v20_TOP-1_EVAL.csv) 📎
+Demo files  `v1.2`:
 
-- **Unchecked with TRUE** values: [model_TOP-5.csv](result%2Ftables%2F20250314-1600_model_1119_3_TOP-5.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2FEVAL_table_1n_2000c_ViTB32_20250701-2207.csv) 📎
 
-- **Unchecked with TRUE** values (small): [model_TOP-3.csv](result%2Ftables%2F20250314-1615_model_1119_3_TOP-3.csv)📎
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2Fresult_20250701-2216_ViT-B32_1n_2000c.csv)📎
 
 Demo files  `v2.1`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250526-1153_model_v21_TOP-3_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2FEVAL_table_1n_2000c_ViTL14_20250701-2129.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250526-1151_model_v21_TOP-1_EVAL.csv) 📎
-
-- **Unchecked with TRUE** values: [model_TOP-3.csv](result%2Ftables%2F20250417-1138_model_672_3_TOP-3.csv) 📎
-
-- **Unchecked with TRUE** values (small): [model_TOP-3.csv](result%2Ftables%2F20250417-1244_model_672_3_TOP-3.csv)📎
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2Fresult_20250701-1742_ViT-L14_1n_2000c.csv)📎
 
 Demo files  `v2.2`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250526-1156_model_v22_TOP-3_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2FEVAL_table_1n_2000c_ViTL14336px_20250701-2150.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250526-1158_model_v22_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-5): [model_TOP-5_EVAL.csv](result%2Ftables%2FEVAL_table_5n_2000c_ViTL14336px_20250702-0852.csv) 📎
 
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2Fresult_20250701-2218_ViT-L14@336px_1n_2000c.csv)📎
 
 With the following **columns** 📋:
 
@@ -565,32 +560,28 @@ and optionally
 
 <summary>Raw result tables 👀</summary>
 
-Demo files `v2.0`:
+Demo files `v1.1`:
 
-- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250526-1148_model_v20_EVAL_RAW.csv) 📎
+- **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250701-1816_ViT-B16_RAW.csv) 📎
 
-- **Unchecked with TRUE** values **RAW**: [model_RAW.csv](result%2Ftables%2F20250314-1600_model_1119_3_RAW.csv) 📎
+Demo files `v1.2`:
 
-- **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250314-1615_model_1119_3_RAW.csv) 📎
+- **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250701-2216_ViT-B32_RAW.csv) 📎
 
 Demo files `v2.1`:
- 
-- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250526-1151_model_v21_EVAL_RAW.csv) 📎
 
-- **Unchecked with TRUE** values **RAW**: [model_RAW.csv](result%2Ftables%2F20250417-1242_model_672_3_RAW.csv) 📎
-
-- **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250417-1244_model_672_3_RAW.csv) 📎
+- **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250701-1743_ViT-L14_RAW.csv) 📎
 
 - Demo files `v2.2`:
- 
-- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250526-1156_model_v22_EVAL_RAW.csv) 📎
+
+- **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250701-2218_ViT-L14@336px_RAW.csv) 📎
+
 
 With the following **columns** 📋:
 
 - **FILE** - name of the file
 - **PAGE** - number of the page
 - **<CATEGORY_LABEL>** - separate columns for each of the defined classes 🪧 
-- **TRUE** - actual label of the category 🪧 
 
 </details>
 
@@ -939,10 +930,13 @@ Above are the default hyperparameters or TrainingArguments [^11] used in the tra
 (only `epoch` and `log_step`) changed in the `[TRAIN]` section, plus `batch` in the `[SETUP]`section, 
 of the [config.txt](config.txt) ⚙ file. Importantly, `avg` - average configuration of all texts can be used.
 
-CLIP models accept not only images but also text inputs, in our case its [descriptions.tsv](category_description_total.tsv) 📎 file 
-which summarizes the category 🪧 descriptions in the [category_samples](category_samples) 📁 folder. Optionally you can run the modesl
-with only a single table of category 🪧 descriptions (via `categories_file` variable), or use `--avg` flag to average all of the 
-category 🪧 descriptions in the `description_folder` starting with the `categories_prefix` value.
+> [!IMPORTANT]
+> CLIP models accept not only images but also text inputs, in our case its [descriptions.tsv](category_description_total.tsv) 📎 file 
+> which summarizes the category 🪧 descriptions in the [category_samples](category_samples) 📁 folder. Optionally you can run the modesl
+> with only a single table of category 🪧 descriptions (via `categories_file` variable), or use `--avg` flag to average all of the 
+> category 🪧 descriptions in the `description_folder` starting with the `categories_prefix` value.
+
+In case your descriptions table contains **more than 1 text per category 🪧**, the `--avg` flag will be set to `True` automatically.
 
 [descriptions_comparison_graph.png](descriptions_comparison.png) 📎 is a graph containing separate and averaged results 
 of all category 🪧 descriptions. Using averaged text embeddings of all label description seems to be the most powerful way to
@@ -966,7 +960,7 @@ During training image transformations [^12] are applied sequentially with a 50% 
 > [!NOTE]
 > No rotation, reshaping, or flipping was applied to the images, mainly color manipulations were used. The 
 > reason behind this are pages containing specific form types, general text orientation on the pages, and the default
-> reshape of the model input to the square 224x224 resolution images. 
+> reshape of the model input to the square 224x224 (or 336x336) resolution images. 
 
 <details>
 
@@ -993,30 +987,23 @@ for example `model_<S/B>_E` where `E` is the number of epochs, `B` is the batch 
 <summary>Full project tree 🌳 files structure 👀</summary>
     
     /local/folder/for/this/project/atrium-page-classification
-    ├── model
-        ├── movel_v<HFrevision1> 
+    ├── models
+        ├── <base_code>_rev_v<HFrevision1> 
             ├── config.json
             ├── model.safetensors
             └── preprocessor_config.json
-        ├── movel_v<HFrevision2>
+        ├── <base_code>_rev_v<HFrevision2>
         └── ...
-    ├── checkpoint
-        ├── models--google--vit-base-patch16-224
+    ├── hf_hub_checkpoints
+        ├── models--openai--clip-vit-base-patch16
             ├── blobs
             ├── snapshots
             └── refs
         └── .locs
-            └── models--google--vit-base-patch16-224
-    ├── model_output
-        ├── checkpoint-version1
-            ├── config.json
-            ├── model.safetensors
-            ├── trainer_state.json
-            ├── optimizer.pt
-            ├── scheduler.pt
-            ├── rng_state.pth
-            └── training_args.bin
-        ├── checkpoint-version2
+            └── models--openai--clip-vit-large-patch14
+    ├── model_checkpoints
+        ├── model_<categ_limit>_<base_code>_<lr>.pt
+        ├── model_<categ_limit>_<base_code>_<lr>_cp.pt
         └── ...
     ├── data_scripts
         ├── windows
@@ -1061,7 +1048,7 @@ confusion matrix plot 📊 and additionally get raw class probabilities table ru
 
 **OR** when you don't remember the specific `[SETUP]` and `[TRAIN]` variables' values for the trained model, you can use:
 
-    python3 run.py --eval -m '<base_code>'
+    python3 run.py --eval -model_path 'model_<categ_limit>_<base>_<lr>.pt'
 
 To prove that initial models without finetuning show awful results you can run `--zero_shot` flag during the evalution.
 
@@ -1093,7 +1080,7 @@ revision `v1.9.22` turns to `model_v1922` model folder), and only then run repo 
 - **Developed by** UFAL [^7] 👥
 - **Funded by** ATRIUM [^4]  💰
 - **Shared by** ATRIUM [^4] & UFAL [^7] 🔗
-- **Model type:** fine-tuned ViT with a 224x224 [^2] 🔗 or 384x384 [^13] [^14] 🔗 resolution size 
+- **Model type:** fine-tuned ViT with a 224x224 [^2] [^13] [^14] 🔗 or 336x336 [^15] 🔗 resolution size 
 
 **©️ 2022 UFAL & ATRIUM**
 
@@ -1147,8 +1134,8 @@ revision `v1.9.22` turns to `model_v1922` model folder), and only then run repo 
 > [!TIP]
 > Alternative version of this README file is available in [README.html](README.html) 📎 webpage
 
-[^1]: https://huggingface.co/ufal/vit-historical-page
-[^2]: https://huggingface.co/google/vit-base-patch16-224
+[^1]: https://huggingface.co/ufal/clip-historical-page
+[^2]: https://huggingface.co/openai/clip-vit-base-patch16
 [^3]: https://docs.python.org/3/library/venv.html
 [^4]: https://atrium-research.eu/
 [^5]: https://imagemagick.org/script/download.php#windows
@@ -1159,5 +1146,6 @@ revision `v1.9.22` turns to `model_v1922` model folder), and only then run repo 
 [^10]: https://developer.nvidia.com/cuda-python
 [^11]: https://huggingface.co/docs/transformers/en/main_classes/trainer#transformers.TrainingArguments
 [^12]: https://pytorch.org/vision/0.20/transforms.html
-[^13]: https://huggingface.co/google/vit-base-patch16-384
-[^14]: https://huggingface.co/google/vit-large-patch16-384
+[^13]: https://huggingface.co/openai/clip-vit-base-patch32
+[^14]: https://huggingface.co/openai/clip-vit-large-patch14
+[^15]: https://huggingface.co/openai/clip-vit-large-patch14-336
