@@ -1,5 +1,6 @@
 import argparse
 import os
+from huggingface_hub import create_branch
 
 import configparser
 from classifier import *
@@ -42,9 +43,9 @@ if __name__ == "__main__":
     # setting main to latest version by default
     # hf_version = hf_version if hf_version != 'main' else config.get('HF', 'latest')
 
-    model_name_local = f"model_{hf_version.replace('.', '')}"
-    model_dir = config.get('OUTPUT', 'FOLDER_MODELS')
-    model_path = f"{model_dir}/{model_name_local}"
+    model_name_local = f"{base_model.replace('/', '')}_rev_{hf_version.replace('.', '')}"
+    hf_models_directory = config.get('OUTPUT', 'FOLDER_MODELS')
+    model_path = Path(f"{hf_models_directory}/{model_name_local}")
 
     test_dir = config.get('INPUT', 'FOLDER_INPUT')
 
@@ -103,7 +104,7 @@ if __name__ == "__main__":
     parser.add_argument("--eval_dir", action="store_true", help="Evaluate a directory of saved models.")
     parser.add_argument("--model_path", type=str, default=None,
                         help="Path to the saved model checkpoint (.pt file) for evaluation.")
-    parser.add_argument("--model_dir", type=str, default=model_dir,
+    parser.add_argument("--model_dir", type=str, default=hf_models_directory,
                         help="Path to the directory of saved model checkpoints (.pt files) for evaluation.")
 
 
@@ -117,13 +118,6 @@ if __name__ == "__main__":
     input_dir = Path(test_dir) if args.directory is None else Path(args.directory)
     Training, top_N, raw = args.train, args.topn, args.raw
 
-    if args.revision == hf_version and args.model == base_model:
-        model_path = Path(args.model)
-    elif not Path(args.model).is_file():
-        new_model_name_local = f"model_{args.revision.replace('.', '')}"
-        model_path = f"{model_dir}/{new_model_name_local}"
-        model_path = Path(model_path)
-
     # locally creating new directory paths instead of context.txt variables loaded with mistakes
     if not output_dir.is_dir():
         os.makedirs(output_dir)
@@ -134,8 +128,8 @@ if __name__ == "__main__":
     if not cp_dir.is_dir():
         os.makedirs(cp_dir)
 
-    if not Path(model_dir).is_dir():
-        os.makedirs(model_dir)
+    if not Path(hf_models_directory).is_dir():
+        os.makedirs(hf_models_directory)
 
     args.logdir = os.path.join("logs", "{}-{}-{}".format(
         os.path.basename(globals().get("__file__", "notebook")),
@@ -165,6 +159,70 @@ if __name__ == "__main__":
 
     categories = def_categ
     print(f"Category input directories found: {categories}")
+
+    if args.hf:
+        weights_path = Path("model_checkpoints")
+
+        # -------------------------------------------------------------
+        # ----- UNCOMMENT for saving trained model in HF format -------
+        # -------------------------------------------------------------
+        # model_path_str = args.model_path
+        # print(f"Model path provided: {model_path_str}")
+        # if model_path_str is None:
+        #     remove_punctuation = str.maketrans(string.punctuation, ' ' * len(string.punctuation))
+        #     model_name_sanitized = args.model.translate(remove_punctuation).replace(" ", "")
+        #     model_path = weights_path / f"model_{model_name_sanitized}_{args.max_categ}c_{str(args.lr)}.pt"
+        #     if not model_path.exists():
+        #         model_path = weights_path / f"model_{model_name_sanitized}_{args.max_categ}c_{str(args.lr)}_cp.pt"
+        #
+        #     if not model_path.exists():
+        #         raise ValueError(
+        #             "Model file or checkpoint not found at default paths. Please provide a path using --model_path.")
+        #
+        # model_path_str = str(weights_path / model_path_str) if model_path_str else None
+        #
+        # if model_path_str is not None:
+        #     print(f"Loading model from {model_path_str} for evaluation...")
+        #     checkpoint = torch.load(model_path_str, map_location=device)
+        #     clip_instance.model.load_state_dict(checkpoint['model_state_dict'])
+        #     print(f"Model loaded from epoch {checkpoint['epoch']} with loss {checkpoint['loss']:.4f}.")
+        # -------------------------------------------------------------
+
+        # saving model to local path
+        model_name_local = f"{args.model.replace('/', '')}_rev_{args.revision.replace('.', '')}"
+        model_path = Path(weights_path.parent / args.model_dir / model_name_local)
+
+
+        # ----------------------------------------------
+        # ----- UNCOMMENT for saving in HF format -------
+        # ----------------------------------------------
+        # if not model_path.is_dir():
+        #     os.makedirs(model_path, exist_ok=True)
+        # clip_instance.save_model(str(model_path))
+        # ----------------------------------------------
+
+        # clip_instance.load_model(str(model_path))
+        # ----------------------------------------------
+        # ----- UNCOMMENT for pushing to HF repo -------
+        # ----------------------------------------------
+        # create_branch(config.get("HF", "repo_name"), repo_type="model", branch=config.get("HF", "revision"),
+        #               exist_ok=True,
+        #               token=config.get("HF", "token"))
+        # clip_instance.pushing_to_hub(config.get("HF", "repo_name"), False, config.get("HF", "token"),
+        #                              config.get("HF", "revision"))
+        # ----------------------------------------------
+
+        # raise NotImplementedError
+        #
+        # loading from repo
+        clip_instance.load_from_hub(config.get("HF", "repo_name"), args.revision)
+
+        # hf_model_name_local = f"model_{args.revision.replace('.', '')}"
+        # hf_model_path = f"{model_dir}/{hf_model_name_local}"
+
+        clip_instance.save_model(str(model_path))
+
+        clip_instance.load_model(str(model_path))
 
     if args.train:
         if not os.path.isdir(data_dir):
@@ -260,22 +318,6 @@ if __name__ == "__main__":
             clip_instance.predict_directory(str(input_dir_pred), raw=True, out_table=directory_result_output)
 
 
-    if args.hf:
-        # ----------------------------------------------
-        # ----- UNCOMMENT for pushing to HF repo -------
-        # ----------------------------------------------
-        # classifier.load_model(str(model_path))
-        # classifier.pushing_to_hub(str(model_path), config.get("HF", "repo_name"), False, config.get("HF", "token"), config.get("HF", "revision"))
-        # ----------------------------------------------
 
-        # loading from repo
-        clip_instance.load_from_hub(config.get("HF", "repo_name"), args.revision)
-
-        # hf_model_name_local = f"model_{args.revision.replace('.', '')}"
-        # hf_model_path = f"{model_dir}/{hf_model_name_local}"
-
-        clip_instance.save_model(str(model_path))
-
-        clip_instance.load_model(str(model_path))
 
 

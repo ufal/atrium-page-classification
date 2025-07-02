@@ -285,6 +285,9 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
         print(f"Number of prediction classes: {self.num_prediction_classes}")
         print(f"Model name: {self.model_name}")
 
+        self.categories_dir = categories_dir
+        self.categories_tsv = categories_tsv
+
     def _get_averaged_text_features(self):
         """Computes averaged text features for each category."""
         all_features = []
@@ -638,15 +641,25 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
         if not os.path.exists(save_directory):
             os.makedirs(save_directory)
         # The PyTorchModelHubMixin's save_pretrained method handles saving the model and its configuration.
-        self.save_pretrained(save_directory, config={
+        configs = {
             "vision_feat_dim": self.preprocess.transforms[0].size,
             "text_feat_dim": self.model.text_projection.shape[1] if hasattr(self.model, 'text_projection') else 512, # Assuming text feature dim from CLIP
             "model_name": self.model_name,
             "avg": self.avg,
             "categories": self.categories,
             "texts": self.texts, # Save the texts for reconstruction
-            "zero_shot": self.zero_shot
-        })
+            "zero_shot": self.zero_shot,
+            "image_size": self.preprocess.transforms[0].size,
+            "image_mean": self.preprocess.transforms[-1].mean,
+            "image_std": self.preprocess.transforms[-1].std
+        }
+
+        # expand config with base model configs
+        if hasattr(self.model, 'config'):
+            configs.update(self.model.config.to_dict())
+            configs.update(self.preprocess.config.to_dict() if hasattr(self.preprocess, 'config') else {})
+
+        self.save_pretrained(save_directory, config=configs)
         print(f"Model and configuration saved to {save_directory}")
 
     def load_model(self, load_directory: str):
@@ -655,7 +668,15 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
         """
         # The from_pretrained method of PyTorchModelHubMixin loads the model into the current instance.
         # It also handles loading the associated configuration.
-        loaded_model = self.from_pretrained(load_directory)
+        loaded_model = self.from_pretrained(load_directory,
+                                            max_category_samples=self.upper_category_limit,
+                                            eval_max_category_samples=self.upper_category_limit_eval,
+                                            top_N=self.top_N,
+                                            model_name=self.model_name,  # will be set from config if needed
+                                            device=self.device,
+                                            categories_tsv=self.categories_tsv,
+                                            categories_dir=self.categories_dir
+                                            )
         self.model = loaded_model.model
         self.preprocess = loaded_model.preprocess # Assuming preprocess is also part of the loaded state or can be re-initialized
 
@@ -665,6 +686,7 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
         self.categories = loaded_model.categories if hasattr(loaded_model, 'categories') else self.categories
         self.texts = loaded_model.texts if hasattr(loaded_model, 'texts') else self.texts
         self.zero_shot = loaded_model.zero_shot if hasattr(loaded_model, 'zero_shot') else self.zero_shot
+
 
         # Recompute text features if `avg` is true and `texts` were loaded
         if self.avg and hasattr(self, 'texts') and self.texts:
@@ -689,14 +711,17 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
         # The PyTorchModelHubMixin's push_to_hub method handles saving the model locally
         # and then pushing it to the Hugging Face Hub.
         # Ensure the config includes necessary parameters for re-instantiation.
-        self.push_to_hub(repo_id, private=private, token=token, revision=revision, config={
+        self.push_to_hub(repo_id, private=private, token=token, branch=revision, config={
             "vision_feat_dim": self.preprocess.transforms[0].size,
             "text_feat_dim": self.model.text_projection.shape[1] if hasattr(self.model, 'text_projection') else 512,
             "model_name": self.model_name,
             "avg": self.avg,
             "categories": self.categories,
             "texts": self.texts,
-            "zero_shot": self.zero_shot
+            "zero_shot": self.zero_shot,
+            "image_size": self.preprocess.transforms[0].size,
+            "image_mean": self.preprocess.transforms[-1].mean,
+            "image_std": self.preprocess.transforms[-1].std
         })
         print(f"Model and configuration pushed to the Hugging Face Hub: {repo_id}")
 
@@ -710,7 +735,16 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
         """
         # The from_pretrained method of PyTorchModelHubMixin loads the model and its configuration
         # directly into the current instance.
-        loaded_model = self.from_pretrained(repo_id, revision=revision)
+        loaded_model = self.from_pretrained(repo_id, revision=revision,
+                                            max_category_samples=self.upper_category_limit,
+                                            eval_max_category_samples=self.upper_category_limit_eval,
+                                            top_N=self.top_N,
+                                            model_name=self.model_name,  # will be set from config if needed
+                                            device=self.device,
+                                            categories_tsv=self.categories_tsv,
+                                            categories_dir=self.categories_dir
+                                            )
+
         self.model = loaded_model.model
         self.preprocess = loaded_model.preprocess # Assuming preprocess is also part of the loaded state or can be re-initialized
 
