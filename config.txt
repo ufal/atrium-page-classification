@@ -39,7 +39,7 @@ FOLDER_INPUT=./category_samples
 
 [HF]
 repo_name = ufal/clip-historical-page
-token = hf_ALr...zdBL
+token = hf_qViUKX....ixyJpjstNxGO
 use_hf = False
 revision = v1.1
 latest = v2.2
