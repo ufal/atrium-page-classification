@@ -35,6 +35,8 @@ from PIL import Image, ImageEnhance, ImageFilter
 Image.MAX_IMAGE_PIXELS = 700_000_000
 import csv
 import string
+from huggingface_hub import PyTorchModelHubMixin
+import torch.nn as nn
 
 from utils import *
 
@@ -186,23 +188,35 @@ class ImageFolderCustom(torch.utils.data.Dataset):
             return dummy_image, dummy_label
 
 
-class CLIP:
-    """
-    CLIP model wrapper for fine-tuning, predictions, and evaluation with custom datasets.
-    """
+class CLIP(nn.Module, PyTorchModelHubMixin):
+    # --- HF‐Hub Mixin metadata (used in the generated model card) ---
+    library_name = "ufal/clip-historical-page"
+    tags          = ["vision-language", "clip", "custom"]
+    pipeline_tag  = "few-shot-image-classification"
 
-    def __init__(self, max_category_samples: int | None, eval_max_category_samples: int | None,
-                 top_N: int, model_name: str, device, categories_tsv: str, categories_dir: str, out: str = None,
-                 cat_prefix: str = None, avg: bool = True, zero_shot: bool = False):
-        self.upper_category_limit = max_category_samples
+    def __init__(self,
+                 max_category_samples: int | None,
+                 eval_max_category_samples: int | None,
+                 top_N: int,
+                 model_name: str,
+                 device,
+                 categories_tsv: str,
+                 categories_dir: str,
+                 output_dir: str = None,
+                 cat_prefix: str = None,
+                 avg: bool = True,
+                 zero_shot: bool = False):
+        super().__init__()  # initialize nn.Module
+        # all your existing init logic follows unchanged:
+        self.upper_category_limit      = max_category_samples
         self.upper_category_limit_eval = eval_max_category_samples
-        self.top_N = top_N
-        self.seed = 42
-        self.avg = avg
-        self.device = device
-        self.zero_shot = zero_shot
+        self.top_N                     = top_N
+        self.seed                      = 42
+        self.avg                       = avg
+        self.device                    = device
+        self.zero_shot                 = zero_shot
 
-        self.output_dir = "results" if out is None else out
+        self.output_dir = Path(__file__).parent / "results" if output_dir is None else Path(output_dir)
         self.download_root = '/lnet/work/projects/atrium/cache/clip'
 
         # Must set jit=False for training
@@ -539,7 +553,6 @@ class CLIP:
         """
         remove_punctuation = str.maketrans(string.punctuation, ' ' * len(string.punctuation))
         model_name_sanitized = self.model_name.translate(remove_punctuation).replace(" ", "") if model_name_sanitized is None else model_name_sanitized
-        print(self.output_dir)
 
         plot_path = Path(f'{self.output_dir}/plots')
         table_path = Path(f'{self.output_dir}/tables')
@@ -548,6 +561,7 @@ class CLIP:
         plot_image = plot_path / f'EVAL_conf_{self.top_N}n_{self.upper_category_limit}c_{model_name_sanitized}_{time_stamp}.png'
         table_file = table_path / f'EVAL_table_{self.top_N}n_{self.upper_category_limit}c_{model_name_sanitized}_{time_stamp}.csv'
 
+        all_pred_scores = []
         all_predictions = []
         all_true_labels = []
 
@@ -566,6 +580,7 @@ class CLIP:
                 text_features_test = self.model.encode_text(all_texts)
                 text_features_test /= text_features_test.norm(dim=-1, keepdim=True)
 
+        images = []
         with torch.no_grad():
             for images, class_ids in tqdm(test_dataloader, desc="Testing"):
                 images = images.to(self.device)
@@ -574,10 +589,13 @@ class CLIP:
 
                 similarity = (100.0 * image_features @ text_features_test.T)
 
+                all_pred_scores.append(similarity.cpu().numpy())
+
                 _, predicted_labels = similarity.max(dim=1)
 
                 all_predictions.extend(predicted_labels.cpu().numpy())
                 all_true_labels.extend(class_ids.cpu().numpy())
+                # images.append(images.cpu().numpy())
 
         acc = round(100 * np.sum(np.array(all_predictions) == np.array(all_true_labels)) / len(all_true_labels), 2)
         print('Accuracy: ', acc)
@@ -602,20 +620,115 @@ class CLIP:
             print(f"Confusion matrix saved to {plot_image}")
 
         if tab:
-            out_df, _ = dataframe_results(image_files, all_predictions, self.categories, raw_scores= None,
-                                  top_N=self.top_N)
+            out_df, _ = dataframe_results(test_images= image_files, test_predictions=all_pred_scores, raw_scores=None,
+                                          top_N= self.top_N, categories=self.categories)
             all_true_labels = np.asarray(all_true_labels, dtype=int)
-            print(out_df)
-            print(out_df.size)
-            print(len(all_true_labels))
-            print(all_true_labels)
-            print(all_true_labels.min(), all_true_labels.max())
             out_df["TRUE"] = [self.categories[i] for i in all_true_labels]
             out_df.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
             out_df.to_csv(table_file, sep=",", index=False)
             print(f"Results for TOP-{self.top_N} predictions are recorded into {self.output_dir}/tables/ directory")
 
         return acc
+
+
+    def save_model(self, save_directory: str):
+        """
+        Save the fine-tuned model and processor to the specified directory using PyTorchModelHubMixin.
+        """
+        if not os.path.exists(save_directory):
+            os.makedirs(save_directory)
+        # The PyTorchModelHubMixin's save_pretrained method handles saving the model and its configuration.
+        self.save_pretrained(save_directory, config={
+            "vision_feat_dim": self.preprocess.transforms[0].size,
+            "text_feat_dim": self.model.text_projection.shape[1] if hasattr(self.model, 'text_projection') else 512, # Assuming text feature dim from CLIP
+            "model_name": self.model_name,
+            "avg": self.avg,
+            "categories": self.categories,
+            "texts": self.texts, # Save the texts for reconstruction
+            "zero_shot": self.zero_shot
+        })
+        print(f"Model and configuration saved to {save_directory}")
+
+    def load_model(self, load_directory: str):
+        """
+        Load a fine-tuned model and its configuration from the specified directory using PyTorchModelHubMixin.
+        """
+        # The from_pretrained method of PyTorchModelHubMixin loads the model into the current instance.
+        # It also handles loading the associated configuration.
+        loaded_model = self.from_pretrained(load_directory)
+        self.model = loaded_model.model
+        self.preprocess = loaded_model.preprocess # Assuming preprocess is also part of the loaded state or can be re-initialized
+
+        # Re-initialize other necessary attributes from the loaded configuration
+        self.model_name = loaded_model.model_name if hasattr(loaded_model, 'model_name') else self.model_name
+        self.avg = loaded_model.avg if hasattr(loaded_model, 'avg') else self.avg
+        self.categories = loaded_model.categories if hasattr(loaded_model, 'categories') else self.categories
+        self.texts = loaded_model.texts if hasattr(loaded_model, 'texts') else self.texts
+        self.zero_shot = loaded_model.zero_shot if hasattr(loaded_model, 'zero_shot') else self.zero_shot
+
+        # Recompute text features if `avg` is true and `texts` were loaded
+        if self.avg and hasattr(self, 'texts') and self.texts:
+            print("Recomputing averaged text features after loading model.")
+            self.text_features = self._get_averaged_text_features()
+
+        self.num_prediction_classes = len(self.categories)
+        print(f"Model and configuration loaded from {load_directory}")
+
+
+    def pushing_to_hub(self, repo_id: str, private: bool = False,
+                    token: str = None, revision: str = "main"):
+        """
+        Upload the fine-tuned model and its configuration to the Hugging Face Model Hub.
+
+        Args:
+            repo_id (str): The name of the repository to create or update on the Hugging Face Hub (e.g., "username/my-clip-model").
+            private (bool, optional): Whether the repository should be private. Defaults to False.
+            token (str, optional): The authentication token for Hugging Face Hub. Defaults to None.
+            revision (str, optional): The revision (branch) to push to. Defaults to "main".
+        """
+        # The PyTorchModelHubMixin's push_to_hub method handles saving the model locally
+        # and then pushing it to the Hugging Face Hub.
+        # Ensure the config includes necessary parameters for re-instantiation.
+        self.push_to_hub(repo_id, private=private, token=token, revision=revision, config={
+            "vision_feat_dim": self.preprocess.transforms[0].size,
+            "text_feat_dim": self.model.text_projection.shape[1] if hasattr(self.model, 'text_projection') else 512,
+            "model_name": self.model_name,
+            "avg": self.avg,
+            "categories": self.categories,
+            "texts": self.texts,
+            "zero_shot": self.zero_shot
+        })
+        print(f"Model and configuration pushed to the Hugging Face Hub: {repo_id}")
+
+    def load_from_hub(self, repo_id: str, revision: str = "main"):
+        """
+        Load a model and its configuration from the Hugging Face Hub.
+
+        Args:
+            repo_id (str): The name of the repository on the Hugging Face Hub.
+            revision (str, optional): The revision of the repository to load. Defaults to "main".
+        """
+        # The from_pretrained method of PyTorchModelHubMixin loads the model and its configuration
+        # directly into the current instance.
+        loaded_model = self.from_pretrained(repo_id, revision=revision)
+        self.model = loaded_model.model
+        self.preprocess = loaded_model.preprocess # Assuming preprocess is also part of the loaded state or can be re-initialized
+
+        # Re-initialize other necessary attributes from the loaded configuration
+        self.model_name = loaded_model.model_name if hasattr(loaded_model, 'model_name') else self.model_name
+        self.avg = loaded_model.avg if hasattr(loaded_model, 'avg') else self.avg
+        self.categories = loaded_model.categories if hasattr(loaded_model, 'categories') else self.categories
+        self.texts = loaded_model.texts if hasattr(loaded_model, 'texts') else self.texts
+        self.zero_shot = loaded_model.zero_shot if hasattr(loaded_model, 'zero_shot') else self.zero_shot
+
+        # Recompute text features if `avg` is true and `texts` were loaded
+        if self.avg and hasattr(self, 'texts') and self.texts:
+            print("Recomputing averaged text features after loading model from Hub.")
+            self.text_features = self._get_averaged_text_features()
+
+        self.num_prediction_classes = len(self.categories)
+        print(f"Model and configuration loaded from the Hugging Face Hub: {repo_id}")
+
 
     def predict_single(self, image_file: str) -> str:
         """
@@ -684,7 +797,7 @@ class CLIP:
 
         if raw:
             raw_df.sort_values(self.categories, ascending=[False] * len(self.categories), inplace=True)
-            raw_df.to_csv(f"{self.output_dir}/tables/{time_stamp}_{self.model_name.replace('/', '')}_RAW.csv", sep=",", index=False)
+            raw_df.to_csv(f"{self.output_dir}/tables/RAW_{self.model_name.replace('/', '')}_{time_stamp}.csv", sep=",", index=False)
             print(f"RAW Results are recorded into {self.output_dir}/tables/ directory")
 
 

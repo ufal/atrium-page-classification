@@ -148,14 +148,17 @@ if __name__ == "__main__":
 
     args.logdir += f"-{args.model.replace('/', '_')}" if args.model else ""
 
-    cur = Path(__file__).parent if '__file__' in globals() else Path.cwd()
+    cur = Path(__file__).parent
     output_dir = cur / "results"
     output_dir.mkdir(exist_ok=True)
 
     cat_directory = str(cur / args.cat_dir)
-    clip_instance = CLIP(args.max_categ, args.max_categ_eval, args.topn, args.model, device,
-                         categ_file,
-                         str(output_dir), args.cat_prefix, cat_directory, args.avg, args.zero_shot)
+    clip_instance = CLIP(max_category_samples=args.max_categ,
+                         eval_max_category_samples=args.max_categ_eval,
+                         top_N=args.topn, model_name=args.model, device=device,
+                         categories_tsv=categ_file,
+                         output_dir=str(output_dir), categories_dir=cat_directory,
+                         cat_prefix=args.cat_prefix, avg=args.avg, zero_shot=args.zero_shot)
 
     data_dir = config.get("TRAIN", "FOLDER_PAGES")
     data_dir_eval = config.get("EVAL", "FOLDER_PAGES")
@@ -262,7 +265,7 @@ if __name__ == "__main__":
         # ----- UNCOMMENT for pushing to HF repo -------
         # ----------------------------------------------
         # classifier.load_model(str(model_path))
-        # classifier.push_to_hub(str(model_path), config.get("HF", "repo_name"), False, config.get("HF", "token"), config.get("HF", "revision"))
+        # classifier.pushing_to_hub(str(model_path), config.get("HF", "repo_name"), False, config.get("HF", "token"), config.get("HF", "revision"))
         # ----------------------------------------------
 
         # loading from repo
