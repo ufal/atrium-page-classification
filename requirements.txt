@@ -1,10 +1,13 @@
-evaluate
-configparser
+clip
+h5py
+huggingface_hub
 matplotlib
 numpy
 pandas
 Pillow
-scikit-learn
+scikit_learn
+scipy
 torch
+torchmetrics
 torchvision
-transformers
+tqdm
