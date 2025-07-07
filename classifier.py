@@ -70,25 +70,35 @@ class BalancedBatchSampler(torch.utils.data.sampler.BatchSampler):
 
 
 class ImageClassifier:
-    def __init__(self, checkpoint: str, num_labels: int, store_dir: str = "/lnet/work/people/lutsai/pythonProject/OCR/ltp-ocr/trans/chekcpoint"):
+    def __init__(self, checkpoint: str, num_labels: int, store_dir: str = "/lnet/work/projects/atrium/transformers/local/chekcpoint"):
         """
         Initialize the image classifier with the specified checkpoint.
         """
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.processor = AutoImageProcessor.from_pretrained(checkpoint)
-        self.model = AutoModelForImageClassification.from_pretrained(
-            checkpoint,
-            num_labels=num_labels,
-            cache_dir=store_dir,
-            ignore_mismatched_sizes=True,
-        ).to(self.device)
         self.model_name = checkpoint
 
         if checkpoint.startswith("timm"):
+            self.model = AutoModelForImageClassification.from_pretrained(
+                checkpoint,
+                num_labels=num_labels,
+                cache_dir=store_dir,
+                ignore_mismatched_sizes=True,
+            ).to(self.device)
+
+            # print(self.model.config)
+
             image_size = self.model.config.pretrained_cfg["input_size"][-1]  # For timm models, input_size is [batch_size, channels, height, width]
             image_mean = self.model.config.pretrained_cfg["mean"]
             image_std = self.model.config.pretrained_cfg["std"]
+
         else:
+            self.model = AutoModelForImageClassification.from_pretrained(
+                checkpoint,
+                num_labels=num_labels,
+                cache_dir=store_dir,
+                ignore_mismatched_sizes=True,
+            ).to(self.device)
+            self.processor = AutoImageProcessor.from_pretrained(checkpoint)
             image_size = self.processor.size['height']
             image_mean = self.processor.image_mean
             image_std = self.processor.image_std
