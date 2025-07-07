@@ -90,7 +90,8 @@ paper source into one of the categories - each responsible for the following con
 
 **Training** 💪 set of the model: **14565** images for `v2.2`, `v3.2` and `v5.2` 
 
-> **90% of all** - proportion in categories 🪧 tabulated [below](#categories-)
+> **90% of all** - proportion in categor![architecture](https://github.com/user-attachments/assets/d35efe94-b154-441e-a56a-054e54cc4ee9)
+ies 🪧 tabulated [below](#categories-)
 
 **Evaluation** 🏆 set:  **1290** images (taken from `v2.2` annotations)
 
