@@ -13,7 +13,7 @@ for /f "tokens=*" %%F in (pdf_files.txt) do (
     :: Create a directory for the images from this PDF file
     if not exist "%%~nF" mkdir "%%~nF"
     :: Convert each page of the PDF to a PNG image in the specified folder
-    @REM     magick -density %DPI% -background white -scene 1 -quality 100 "%%F" "%%~nF\%%~nF-%%d.png"
+@REM     magick -density %DPI% -background white -scene 1 -quality 100 "%%F" "%%~nF\%%~nF-%%d.png"
     magick -density %DPI% "%%F" -background white -alpha remove -alpha off png24:"%%~nF/%%~nF-%%d.png"
     :: Check if conversion was successful
     if not errorlevel 1 (
