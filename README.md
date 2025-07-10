@@ -85,6 +85,9 @@ paper source into one of the categories - each responsible for the following con
 
 ### Data 📜
 
+The dataset is provided under Public Domain license, and consists of **15855** PNG images of pages from the archival documents.
+The source image files and their annotation can be found in the LINDAT repository [^16] 🔗.
+
 **Training** 💪 set of the model: **14267** images 
 
 > **90% of all** - proportion in categories 🪧 tabulated [below](#categories-)
@@ -1151,3 +1154,4 @@ revision `v1.9.22` turns to `model_v1922` model folder), and only then run repo 
 [^13]: https://huggingface.co/openai/clip-vit-base-patch32
 [^14]: https://huggingface.co/openai/clip-vit-large-patch14
 [^15]: https://huggingface.co/openai/clip-vit-large-patch14-336
+[^16]: http://hdl.handle.net/20.500.12800/1-5959
