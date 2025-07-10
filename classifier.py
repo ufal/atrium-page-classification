@@ -90,7 +90,7 @@ class ImageClassifier:
             image_size = self.model.config.pretrained_cfg["input_size"][-1]  # For timm models, input_size is [batch_size, channels, height, width]
             image_mean = self.model.config.pretrained_cfg["mean"]
             image_std = self.model.config.pretrained_cfg["std"]
-
+            self.processor = None
         else:
             self.model = AutoModelForImageClassification.from_pretrained(
                 checkpoint,
@@ -132,8 +132,13 @@ class ImageClassifier:
         Process a list of image file paths into batches.
         """
         dataset = ImageDataset(image_paths, image_labels, self.train_transforms if train else self.eval_transforms, ignored_paths=ignored_paths)
-        dataloader = DataLoader(dataset, collate_fn=custom_collate,
-                                batch_sampler=BalancedBatchSampler(image_labels, batch_size, 1) if train else None)
+        if train:
+            dataloader = DataLoader(dataset, collate_fn=custom_collate,
+                                batch_sampler=BalancedBatchSampler(image_labels, batch_size, 1))
+        else:
+            dataloader = DataLoader(dataset, collate_fn=custom_collate,
+                                batch_size=batch_size)
+       
         print(f"Dataloader of {'train' if train else 'eval'} dataset is ready:\t{len(image_paths)} images split into {len(dataloader)} batches of size {batch_size}")
         return dataloader
 
@@ -315,7 +320,8 @@ class ImageClassifier:
         if not os.path.exists(save_directory):
             os.makedirs(save_directory)
         self.model.save_pretrained(save_directory)
-        self.processor.save_pretrained(save_directory)
+        if self.processor is not None:
+            self.processor.save_pretrained(save_directory)
         print(f"Model and processor saved to {save_directory}")
 
     def load_model(self, load_directory: str):
@@ -338,10 +344,6 @@ class ImageClassifier:
             private (bool, optional): Whether the repository should be private. Defaults to False.
             token (str, optional): The authentication token for Hugging Face Hub. Defaults to None.
         """
-
-        # Determine the repository ID
-        # username = whoami(token=token)['name']
-        # repo_id = f"{username}/{repo_name}"
 
         # Save the model and processor locally
         self.model.save_pretrained(load_directory)

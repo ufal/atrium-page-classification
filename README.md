@@ -1,8 +1,8 @@
-# Image classification using fine-tuned ViT - for historical document sorting
+# Image classification using fine-tuned ViT or EffNetV2 - for historical document sorting
 
 ### Goal: solve a task of archive page images sorting (for their further content-based processing)
 
-**Scope:** Processing of images, training / evaluation of ViT model,
+**Scope:** Processing of images, training / evaluation of ViT / EffNetV2 model,
 input file/directory processing, class 🪧  (category) results of top
 N predictions output, predictions summarizing into a tabular format, 
 HF 😊 hub [^1] 🔗 support for the model, multiplatform (Win/Lin) data 
@@ -39,23 +39,27 @@ There are currently 2 version of the model available for download, both of them 
 but different data annotations. The latest approved `v2.1` is considered to be default and can be found in the `main` branch
 of HF 😊 hub [^1] 🔗 
 
-| Version | Base                   | Pages |   PDFs   | Description                                                             |
-|--------:|------------------------|:-----:|:--------:|:------------------------------------------------------------------------|
-|  `v2.0` | `vit-base-patch16-224`  | 10073 | **3896** | annotations with mistakes, more heterogenous data                       |
-|  `v2.1` | `vit-base-patch16-224`  | 11940 | **5002** | `main`: more diverse pages in each category, less annotation mistakes   |
-|  `v2.2` | `vit-base-patch16-224`  | 15855 | **5730** | same data as `v2.1` + some restored pages from `v2.0`                   |
-|  `v3.2` | `vit-base-patch16-384`  | 15855 | **5730** | same data as `v2.2`, but a bit larger model base with higher resolution |
-|  `v5.2` | `vit-large-patch16-384` | 15855 | **5730** | same data as `v2.2`, but the largest model base with higher resolution  |
+| Version | Base                             | Pages |   PDFs   | Description                                                                        |
+|--------:|----------------------------------|:-----:|:--------:|:-----------------------------------------------------------------------------------|
+|  `v2.0` | `vit-base-patch16-224`           | 10073 | **3896** | annotations with mistakes, more heterogenous data                                  |
+|  `v2.1` | `vit-base-patch16-224`           | 11940 | **5002** | `main`: more diverse pages in each category, less annotation mistakes              |
+|  `v2.2` | `vit-base-patch16-224`           | 15855 | **5730** | same data as `v2.1` + some restored pages from `v2.0`                              |
+|  `v3.2` | `vit-base-patch16-384`           | 15855 | **5730** | same data as `v2.2`, but a bit larger model base with higher resolution            |
+|  `v5.2` | `vit-large-patch16-384`          | 15855 | **5730** | same data as `v2.2`, but the largest model base with higher resolution             |
+|  `v1.2` | `efficientnetv2_s.in21k`         | 15855 | **5730** | same data as `v2.2`, but the smallest model base (CNN)                             |
+|  `v4.2` | `efficientnetv2_l.in21k_ft_in1k` | 15855 | **5730** | same data as `v2.2`, CNN base model smaller than the largest, may be more accurate |
 
 <details>
 
 <summary>Base model - size 👀</summary>
 
-| **Version**             | **Disk space** |
-|-------------------------|----------------|
-| `vit-base-patch16-224`  | 344 Mb         |
-| `vit-base-patch16-384`  | 345 Mb         |
-| `vit-large-patch16-384` | 1.2 Gb         |
+| **Version**                      | **Parameters (M)** | Resolution (px) |
+|----------------------------------|--------------------|-----------------|
+| `efficientnetv2_s.in21k`         | 48                 | 300             |
+| `vit-base-patch16-224`           | 87                 | 224             |
+| `vit-base-patch16-384`           | 87                 | 384             |
+| `efficientnetv2_l.in21k_ft_in1k` | 119                | 384             |
+| `vit-large-patch16-384`          | 305                | 384             |
 
 </details>
 
@@ -65,7 +69,9 @@ of HF 😊 hub [^1] 🔗
 
 🔲 **Fine-tuned** model repository: UFAL's **vit-historical-page** [^1] 🔗
 
-🔳 **Base** model repository: Google's **vit-base-patch16-224**,  **vit-base-patch16-384**,  **vit-large-patch16-284** [^2] [^13] [^14] 🔗
+🔳 **Base** model repository: 
+- Google's **vit-base-patch16-224**,  **vit-base-patch16-384**, and  **vit-large-patch16-284** [^2] [^13] [^14] 🔗
+- timm's **efficientnetv2_s.in21k** and **efficientnetv2_l.in21k_ft_in1k** [^15] [^16] 🔗
 
 The model was trained on the manually ✍️ annotated dataset of historical documents, in particular, images of pages 
 from the archival documents with paper sources that were scanned into digital form. 
@@ -88,14 +94,13 @@ paper source into one of the categories - each responsible for the following con
 
 **Training** 💪 set of the model: **10745** images for `v2.1`
 
-**Training** 💪 set of the model: **14565** images for `v2.2`, `v3.2` and `v5.2` 
+**Training** 💪 set of the model: **14565** images for `vX.2` 
 
-> **90% of all** - proportion in categor![architecture](https://github.com/user-attachments/assets/d35efe94-b154-441e-a56a-054e54cc4ee9)
-ies 🪧 tabulated [below](#categories-)
+> **90% of all** - proportion in categories 🪧 tabulated [below](#categories-)
 
 **Evaluation** 🏆 set:  **1290** images (taken from `v2.2` annotations)
 
-> **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250526-1158_model_v22_TOP-1_EVAL.csv) 📎
+> **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250701-1057_model_v220105p_TOP-1_EVAL.csv) 📎
 
 Manual ✍️ annotation was performed beforehand and took some time ⌛, the categories 🪧  were formed from
 different sources of the archival documents originated in the 1920-2020 years span. 
@@ -354,8 +359,10 @@ the `batch` variable in the `[SETUP]` section.
 
 | **Version**             | **Disk space** |
 |-------------------------|----------------|
+| `efficientnetv2_s`      | 82 Mb          |
 | `vit-base-patch16-224`  | 344 Mb         |
 | `vit-base-patch16-384`  | 345 Mb         |
+| `efficientnetv2_l`      | 471 Mb         |
 | `vit-large-patch16-384` | 1.2 Gb         |
 
 </details>
@@ -463,63 +470,61 @@ There are accuracy performance measurements and plots of confusion matrices for 
 dataset (10% of the provided in `[TRAIN]`'s folder data). Both graphic plots and tables with 
 results can be found in the [result](result) 📁 folder.
 
-`v2.0` Evaluation set's accuracy (**Top-3**):  **95.58%** 🏆
+| **Revision** | **Top-1** | **Top-3** |
+|--------------|-----------|-----------|
+| `v1.2`       | 97.73     | 99.87     |
+| `v2.2`       | 97.54     | 99.94     |
+| `v3.2`       | 96.49     | 99.94     |
+| `v4.2`       | 97.73     | 99.87     |
+| `v5.2`       | 97.86     | 99.87     |
 
-<details>
-
-<summary>Confusion matrix 📊 TOP-3 👀</summary>
-
-![TOP-3 confusion matrix](result%2Fplots%2F20250526-1147_model_v20_conf_mat_TOP-3.png)
-
-</details>
-
-`v2.1` Evaluation set's accuracy (**Top-3**):  **99.84%** 🏆
-
-<details>
-
-<summary>Confusion matrix 📊 TOP-3 👀</summary>
-
-![TOP-3 confusion matrix](result%2Fplots%2F20250526-1157_model_v21_conf_mat_TOP-3.png)
-
-</details>
-
-`v2.2` Evaluation set's accuracy (**Top-3**):  **100.00%** 🏆
-
-<details>
-
-<summary>Confusion matrix 📊 TOP-3 👀</summary>
-
-![TOP-3 confusion matrix](result%2Fplots%2F20250526-1201_model_v22_conf_mat_TOP-3.png)
-
-</details>
-
-`v2.0` Evaluation set's accuracy (**Top-1**):  **84.96%** 🏆
+`v2.2` Evaluation set's accuracy (**Top-1**):  **97.54%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20250526-1152_model_v20_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20250701-1136_model_v220105p_conf_mat_TOP-1.png)
 
 </details>
 
-`v2.1` Evaluation set's accuracy (**Top-1**):  **96.36%** 🏆
+`v3.2` Evaluation set's accuracy (**Top-1**):  **96.49%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20250526-1156_model_v21_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20250701-1142_model_v320105p_conf_mat_TOP-1.png)
 
 </details>
 
-`v2.2` Evaluation set's accuracy (**Top-1**):  **99.61%** 🏆
+`v5.2` Evaluation set's accuracy (**Top-1**):  **97.73%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20250526-1202_model_v22_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20250701-1203_model_v520105p_conf_mat_TOP-1.png)
+
+</details>
+
+`v1.2` Evaluation set's accuracy (**Top-1**):  **97.73%** 🏆
+
+<details>
+
+<summary>Confusion matrix 📊 TOP-1 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2F20250709-1831_model_v120106s_conf_mat_TOP-1.png)
+
+</details>
+
+`v4.2` Evaluation set's accuracy (**Top-1**):  **97.86%** 🏆
+
+<details>
+
+<summary>Confusion matrix 📊 TOP-1 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2F20250709-1829_model_v120106l_conf_mat_TOP-1.png)
 
 </details>
 
@@ -544,33 +549,45 @@ Additionally, results of prediction inference run on the directory level without
 
 <summary>General result tables 👀</summary>
 
-Demo files  `v2.0`:
-
-- Manually ✍️ **checked** (small): [model_TOP-5.csv](result%2Ftables%2Fmodel_1119_3_TOP-5.csv) 📎
-
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250526-1142_model_v20_TOP-3_EVAL.csv) 📎
-
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250526-1148_model_v20_TOP-1_EVAL.csv) 📎
-
-- **Unchecked with TRUE** values: [model_TOP-5.csv](result%2Ftables%2F20250314-1600_model_1119_3_TOP-5.csv) 📎
-
-- **Unchecked with TRUE** values (small): [model_TOP-3.csv](result%2Ftables%2F20250314-1615_model_1119_3_TOP-3.csv)📎
-
-Demo files  `v2.1`:
-
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250526-1153_model_v21_TOP-3_EVAL.csv) 📎
-
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250526-1151_model_v21_TOP-1_EVAL.csv) 📎
-
-- **Unchecked with TRUE** values: [model_TOP-3.csv](result%2Ftables%2F20250417-1138_model_672_3_TOP-3.csv) 📎
-
-- **Unchecked with TRUE** values (small): [model_TOP-3.csv](result%2Ftables%2F20250417-1244_model_672_3_TOP-3.csv)📎
-
 Demo files  `v2.2`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250526-1156_model_v22_TOP-3_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250701-1057_model_v220105p_TOP-1_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250526-1158_model_v22_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250710-1925_model_v220105p_TOP-3_EVAL.csv) 📎
+
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20250710-1939_model_v220105p_TOP-1.csv)📎
+
+Demo files  `v3.2`:
+
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250701-1057_model_v320105p_TOP-1_EVAL.csv) 📎
+
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250710-1927_model_v320105p_TOP-3_EVAL.csv) 📎
+
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20250710-1936_model_v320105p_TOP-1.csv)📎
+
+Demo files  `v5.2`:
+
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250701-1057_model_v520105p_TOP-1_EVAL.csv) 📎
+
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250710-1928_model_v520105p_TOP-3_EVAL.csv) 📎
+
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20250710-1938_model_v520105p_TOP-1.csv)📎
+
+Demo files  `v1.2`:
+
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250709-1825_model_v120106s_TOP-1_EVAL.csv) 📎
+
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250710-1924_model_v120106s_TOP-3_EVAL.csv) 📎
+
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20250710-1941_model_v120106s_TOP-1.csv)📎
+
+Demo files  `v4.2`:
+
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20250709-1823_model_v120106l_TOP-1_EVAL.csv) 📎
+
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20250710-1921_model_v120106l_TOP-3_EVAL.csv) 📎
+
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20250710-1942_model_v120106l_TOP-1.csv)📎
 
 
 With the following **columns** 📋:
@@ -590,25 +607,35 @@ and optionally
 
 <summary>Raw result tables 👀</summary>
 
-Demo files `v2.0`:
+Demo files `v2.2`:
 
-- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250526-1148_model_v20_EVAL_RAW.csv) 📎
+- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250710-1925_model_v220105p_EVAL_RAW.csv) 📎
 
-- **Unchecked with TRUE** values **RAW**: [model_RAW.csv](result%2Ftables%2F20250314-1600_model_1119_3_RAW.csv) 📎
+- **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250710-1939_model_v220105p_RAW.csv) 📎
 
-- **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250314-1615_model_1119_3_RAW.csv) 📎
+Demo files `v3.2`:
 
-Demo files `v2.1`:
- 
-- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250526-1151_model_v21_EVAL_RAW.csv) 📎
+- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250710-1925_model_v220105p_EVAL_RAW.csv) 📎
 
-- **Unchecked with TRUE** values **RAW**: [model_RAW.csv](result%2Ftables%2F20250417-1242_model_672_3_RAW.csv) 📎
+- **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250710-1936_model_v320105p_RAW.csv) 📎
 
-- **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250417-1244_model_672_3_RAW.csv) 📎
+Demo files `v5.2`:
 
-- Demo files `v2.2`:
- 
-- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250526-1156_model_v22_EVAL_RAW.csv) 📎
+- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250710-1925_model_v220105p_EVAL_RAW.csv) 📎
+
+- **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250710-1938_model_v520105p_RAW.csv) 📎
+
+Demo files `v1.2`:
+
+- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250710-1925_model_v220105p_EVAL_RAW.csv) 📎
+
+- **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250710-1941_model_v120106s_RAW.csv) 📎
+
+Demo files `v4.2`:
+
+- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250710-1925_model_v220105p_EVAL_RAW.csv) 📎
+
+- **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250710-1942_model_v120106l_RAW.csv) 📎
 
 With the following **columns** 📋:
 
@@ -1101,7 +1128,9 @@ revision `v1.9.22` turns to `model_v1922` model folder), and only then run repo 
 - **Developed by** UFAL [^7] 👥
 - **Funded by** ATRIUM [^4]  💰
 - **Shared by** ATRIUM [^4] & UFAL [^7] 🔗
-- **Model type:** fine-tuned ViT with a 224x224 [^2] 🔗 or 384x384 [^13] [^14] 🔗 resolution size 
+- **Model type:** 
+  - fine-tuned ViT with a 224x224 [^2] 🔗 or 384x384 [^13] [^14] 🔗 resolution size 
+  - fine-tuned EffNetV2 with a 300x300 [^15] 🔗 or 384x384 [^16] 🔗 resolution size 
 
 **©️ 2022 UFAL & ATRIUM**
 
@@ -1169,3 +1198,5 @@ revision `v1.9.22` turns to `model_v1922` model folder), and only then run repo 
 [^12]: https://pytorch.org/vision/0.20/transforms.html
 [^13]: https://huggingface.co/google/vit-base-patch16-384
 [^14]: https://huggingface.co/google/vit-large-patch16-384
+[^15]: https://huggingface.co/timm/tf_efficientnetv2_s.in21k
+[^16]: https://huggingface.co/timm/tf_efficientnetv2_l.in21k_ft_in1k
