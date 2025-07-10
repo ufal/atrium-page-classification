@@ -13,15 +13,8 @@ if __name__ == "__main__":
     config.read('config.txt')
 
     revision_to_base_model = {
-        "v1.l": "timm/tf_efficientnetv2_l.in21k_ft_in1k",
-        "v1.m": "timm/tf_efficientnetv2_m.in21k_ft_in1k",
-        "v1.s": "timm/tf_efficientnetv2_s.in21k",
-        "v1.12": "timm/regnety_120.sw_in12k_ft_in1k",
-        "v1.16": "timm/regnety_160.pycls_in1k",
-        "v1.64": "timm/regnety_640.seer_ft_in1k",
-        "v7.2": "microsoft/dit-base-finetuned-rvlcdip",
-        "v8.2": "microsoft/dit-large",
-        "v9.2": "microsoft/dit-large-finetuned-rvlcdip",
+        "v4.2": "timm/tf_efficientnetv2_l.in21k_ft_in1k",
+        "v1.2": "timm/tf_efficientnetv2_s.in21k",
         "v2.2": "google/vit-base-patch16-224",
         "v3.2": "google/vit-base-patch16-384",
         "v5.2": "google/vit-large-patch16-384",

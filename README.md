@@ -119,6 +119,9 @@ reports** which may somehow affect the drawing detection preferences due to the 
 arrowheads, and rocks formerly drawn by hand and later illustrated with digital tools (examples can be found in
 [category_samples/DRAW](category_samples%2FDRAW) 📁)
 
+![data_timeline.png](dataset_timeline.png)
+
+
 ### Categories 🪧
 
 |    Label️ | Description                                                                                                      |
