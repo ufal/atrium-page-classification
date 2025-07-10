@@ -90,6 +90,9 @@ paper source into one of the categories - each responsible for the following con
 
 ### Data 📜
 
+The dataset is provided under Public Domain license, and consists of **15855** PNG images of pages from the archival documents.
+The source image files and their annotation can be found in the LINDAT repository [^17] 🔗.
+
 **Training** 💪 set of the model: **8950** images for `v2.0`
 
 **Training** 💪 set of the model: **10745** images for `v2.1`
@@ -1203,3 +1206,4 @@ revision `v1.9.22` turns to `model_v1922` model folder), and only then run repo 
 [^14]: https://huggingface.co/google/vit-large-patch16-384
 [^15]: https://huggingface.co/timm/tf_efficientnetv2_s.in21k
 [^16]: https://huggingface.co/timm/tf_efficientnetv2_l.in21k_ft_in1k
+[^17]: http://hdl.handle.net/20.500.12800/1-5959
