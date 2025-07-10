@@ -4,8 +4,6 @@ import configparser
 from classifier import *
 import time
 
-
-
 if __name__ == "__main__":
     # Initialize the parser
     config = configparser.ConfigParser()
@@ -15,6 +13,8 @@ if __name__ == "__main__":
     revision_to_base_model = {
         "v4.2": "timm/tf_efficientnetv2_l.in21k_ft_in1k",
         "v1.2": "timm/tf_efficientnetv2_s.in21k",
+        "v2.0": "google/vit-base-patch16-224",
+        "v2.1": "google/vit-base-patch16-224",
         "v2.2": "google/vit-base-patch16-224",
         "v3.2": "google/vit-base-patch16-384",
         "v5.2": "google/vit-large-patch16-384",
