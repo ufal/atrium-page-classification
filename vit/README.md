@@ -189,22 +189,54 @@ Clone this project to your local machine 🖥️️ via:
     git init
     git clone https://github.com/ufal/atrium-page-classification.git
 
+Then change to the Vit and EffNet models or CLIP models branch (`master`, `clip` or `vit`):
+
+    cd atrium-page-classification
+    git checkout vit
+
 **OR** for updating the already cloned project with some changes, go to the folder containing (hidden) `.git` 
 subdirectory and run pulling which will merge upcoming files with your local changes:
 
     cd /local/folder/for/this/project/atrium-page-classification
     git add <changed_file>
     git commit -m 'local changes'
+
+And then for updating the project with the latest changes from the remote repository, run:
+
     git pull -X theirs
+
+Alternatively, if you are interested in a specific branch (`master`, `clip` or `vit`), you can update  it via:
+
+    git fetch origin
+    git checkout vit        
+    git pull --ff-only origin vit
 
 Alternatively, if you do **NOT** care about local changes **OR** you want to get the latest project files, 
 just remove those files (all `.py`, `.txt` and `README` files) and pull the latest version from the repository:
 
     cd /local/folder/for/this/project/atrium-page-classification
+
+And then for a total clean up and update, run:
+
     rm *.py
     rm *.txt
     rm README*
     git pull
+
+Alternatively, for a specific branch (`master`, `clip` or `vit`):
+
+    git reset --hard HEAD
+    git clean -fd
+    git fetch origin
+    git checkout vit
+    git pull origin vit
+
+
+Overall, a force update to the remote repository branch (`master`, `clip` or `vit`) looks like this:
+
+    git fetch origin
+    git checkout vit
+    git reset --hard origin/vit
 
 Next step would be a creation of the virtual environment. Follow the **Unix** / **Windows**-specific 
 instruction at the venv docs [^3] 👀🔗 if you don't know how to.

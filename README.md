@@ -9,6 +9,7 @@ HF 😊 hub support for the model, multiplatform (Win/Lin) data
 preparation scripts for PDF to PNG conversion
 
 **CLIP**: [README.md](clip/README.md)
+
 **ViT** (and EffNetV2): [README.md](vit/README.md)
 
 ## Contacts 📧
