@@ -1,0 +1,37 @@
+[OUTPUT]
+FOLDER_RESULTS=./result
+FOLDER_CPOINTS=./checkpoint
+FOLDER_MODELS=./model
+
+[EVAL]
+FOLDER_PAGES=./category_samples
+
+
+[TRAIN]
+FOLDER_PAGES=./category_samples
+
+test_size = 0.1
+log_step = 10
+epochs = 10
+lr = 5e-5
+max_categ = 2000
+Training = False
+Testing = False
+
+[SETUP]
+seed = 420
+base_model = google/vit-base-patch16-224
+batch = 16
+top_N = 1
+raw = False
+inner = False
+
+[INPUT]
+FOLDER_INPUT=./category_samples
+
+[HF]
+repo_name = ufal/vit-historical-page
+token = hf_ALr...zdBL
+use_hf = False
+revision = v2.20.10.5p
+latest = v2.2

@@ -1,0 +1,12 @@
+evaluate
+configparser
+matplotlib
+numpy
+pandas
+Pillow
+scikit-learn
+torch
+torchvision
+transformers
+timm
+tensorboard
