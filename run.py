@@ -15,6 +15,13 @@ if __name__ == "__main__":
         device = torch.device("cpu")
     print(f"Using device: {device}")
 
+
+    revision_to_base_model = {
+        "v1.1": "ViT-B/16",
+        "v1.2": "ViT-B/32",
+        "v2.1": "ViT-L/14",
+        "v2.2": "ViT-L/14@336",
+    }
     # Initialize the parser
     config = configparser.ConfigParser()
     # Read the configuration file
@@ -108,7 +115,7 @@ if __name__ == "__main__":
                         help="Path to the directory of saved model checkpoints (.pt files) for evaluation.")
 
 
-    parser.add_argument('-rev', "--revision", type=str, default=hf_version, help="HuggingFace revision (e.g. `main`, `vN.0` or `vN.M`)")
+    parser.add_argument('-rev', "--revision", type=str, default=None, help="HuggingFace revision (e.g. `main`, `vN.0` or `vN.M`)")
     parser.add_argument("--hf", help="Use model and processor from the HuggingFace repository", default=HF, action="store_true")
     parser.add_argument("--raw", help="Output raw scores for each category", default=raw, action="store_true")
 
@@ -117,6 +124,18 @@ if __name__ == "__main__":
 
     input_dir = Path(test_dir) if args.directory is None else Path(args.directory)
     Training, top_N, raw = args.train, args.topn, args.raw
+
+
+    if args.revision is None: # using config file revision
+        args.revision = hf_version
+    else:
+        if args.revision not in revision_to_base_model:
+            raise ValueError(f"Revision {args.revision} is not supported. Available revisions: {list(revision_to_base_model.keys())}")
+
+        base_model = revision_to_base_model[args.revision]
+        if args.model != base_model:
+            print(f"Base model {args.base} does not match the revision {args.revision}. Using {base_model} instead.")
+            args.model = base_model
 
     # locally creating new directory paths instead of context.txt variables loaded with mistakes
     if not output_dir.is_dir():
@@ -316,7 +335,6 @@ if __name__ == "__main__":
             table_out_path.mkdir(exist_ok=True, parents=True)
             directory_result_output = str(table_out_path / f'result_{time_stamp}_{args.model.replace("/", "")}_{args.topn}n_{max_categ}c.csv')
             clip_instance.predict_directory(str(input_dir_pred), raw=True, out_table=directory_result_output)
-
 
 
 
