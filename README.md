@@ -48,6 +48,11 @@ of HF 😊 hub [^1] 🔗
 |  `v5.2` | `vit-large-patch16-384`          | 15855 | **5730** | same data as `v2.2`, but the largest model base with higher resolution             |
 |  `v1.2` | `efficientnetv2_s.in21k`         | 15855 | **5730** | same data as `v2.2`, but the smallest model base (CNN)                             |
 |  `v4.2` | `efficientnetv2_l.in21k_ft_in1k` | 15855 | **5730** | same data as `v2.2`, CNN base model smaller than the largest, may be more accurate |
+|  `v2.3` | `vit-base-patch16-224`           | 38625 |  **0**   | new data annotation phase data, more single-page documents used                    |
+|  `v3.3` | `vit-base-patch16-384`           | 38625 |  **0**   | same data as `v2.3`, but a bit larger model base with higher resolution            |
+|  `v5.3` | `vit-large-patch16-384`          | 38625 |  **0**   | same data as `v2.3`, but the largest model base with higher resolution             |
+|  `v1.3` | `efficientnetv2_s.in21k`         | 38625 |  **0**   | same data as `v2.3`, but the smallest model base (CNN)                             |
+|  `v4.3` | `efficientnetv2_l.in21k_ft_in1k` | 38625 |  **0**   | same data as `v2.3`, CNN base model smaller than the largest, may be more accurate |
 
 <details>
 
@@ -90,8 +95,8 @@ paper source into one of the categories - each responsible for the following con
 
 ### Data 📜
 
-The dataset is provided under Public Domain license, and consists of **15855** PNG images of pages from the archival documents.
-The source image files and their annotation can be found in the LINDAT repository [^17] 🔗.
+[//]: # (The dataset is provided under Public Domain license, and consists of **15855** PNG images of pages from the archival documents.)
+[//]: # (The source image files and their annotation can be found in the LINDAT repository [^17] 🔗.)
 
 **Training** 💪 set of the model: **8950** images for `v2.0`
 
@@ -99,9 +104,13 @@ The source image files and their annotation can be found in the LINDAT repositor
 
 **Training** 💪 set of the model: **14565** images for `vX.2` 
 
+**Training** 💪 set of the model: **38625** images for `vX.3` 
+
 > **90% of all** - proportion in categories 🪧 tabulated [below](#categories-)
 
 **Evaluation** 🏆 set:  **1290** images (taken from `v2.2` annotations)
+
+**Evaluation** 🏆 set:  **4823** images (for `vX.3` models)
 
 > **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250701-1057_model_v220105p_TOP-1_EVAL.csv) 📎
 
@@ -276,7 +285,7 @@ to **pull the model from the HF 😊 hub repository [^1] 🔗** via:
 
     python3 run.py --hf
 
-**OR** for specific model version (e.g. `main`, `v2.0` or `vX.2`) use the `--revision` flag:
+**OR** for specific model version (e.g. `main`, `v2.0`, `vX.2` or `vX.3`) use the `--revision` flag:
  
     python3 run.py --hf -rev v2.0
 
@@ -426,7 +435,8 @@ directory with Python files and only then proceed.
 
 The following prediction should be run using the `-f` or `--file` flag with the path argument. Optionally, 
 you can use the `-tn` or `--topn` flag with the number of guesses you want to get, and also the `-m` or 
-`--model` flag with the path to the model folder argument. 
+`--model` flag with the path to the model folder argument. For the specific image file format collection from
+the input fictionary use `-ff` or `--file_format` flag with the format argument (default is `jpeg`).
 
 <details>
 
@@ -464,6 +474,10 @@ processing can be used. In addition, 2 directory-specific flags  `--inner` and `
 Worth mentioning that the **directory 📁 level processing is performed in batches**, therefore you should refer to
 the hardware's memory capacity requirements for different batch sizes tabulated [above](#how-to-run-prediction--modes).
 
+Moreover, in case you have a large amount of files (more than 500,000) that you attempt to process in one run,
+you should keep in mind that even listing all of the files from all of the subdirectories may take a while ⌛,
+not to mention the actual processing time.
+
 <details>
 
 <summary>How to 👀</summary>
@@ -478,6 +492,7 @@ for exactly TOP-3 guesses in tabular format from all images found in the given d
     
     python3 run.py -rev v3.2 -b google/vit-base-patch16-384 --inner --dir
 
+    python3 run.py -m "./models/model_v43" --raw --dir -tn 3
 
 </details>
 
@@ -515,6 +530,11 @@ results can be found in the [result](result) 📁 folder.
 | `v3.2`       | 96.49     | 99.94     |
 | `v4.2`       | 97.73     | 99.87     |
 | `v5.2`       | 97.86     | 99.87     |
+| `v1.3`       | -         | -         |
+| `v2.3`       | -         | -         |
+| `v3.3`       | -         | -         |
+| `v4.3`       | -         | -         |
+| `v5.3`       | -         | -         |
 
 `v2.2` Evaluation set's accuracy (**Top-1**):  **97.54%** 🏆
 
@@ -1122,12 +1142,26 @@ You can slightly change the `test_size` and / or
 the `batch` variable value in the [config.txt](config.txt) ⚙ file to train a differently named model on the same dataset.
 Alternatively, adjust the **model naming generation** in the [classifier.py](classifier.py)'s 📎 training function.
 
+In terms of the input data splitting, this code is adapted to the filenames containing date stamps which are leveraged
+in the filenames sorting, and then randomized step selection, of separate categories 🪧 for the final evaluation and the 
+training-time-evaluation (so-called, dev) subsets - both of the same `test_ratio` size. This behaviour is specifically
+triggered when the `--cross` argument or `cross_runs` variable in the `[TRAIN]` section of the [config.txt](config.txt) ⚙ file 
+is set above 1, as well as when the `--train` flag is used for a single run. 
+
+> [!TIP]
+> The cross-validation takes more time and reselects the data subsets for each run based on a `seed` variable of the
+> `[SETUP]` section in the [config.txt](config.txt) ⚙ file which gets simply incremented by one for each fold (run) of the
+> cross-validation process. The listed data splits are recorded as `.txt` files in the `result/stats` directory 📁 for 
+> each fold of the overall model training run, as well as the fold's final test set predictions are saved in 
+> `result/tables` directory 📁.
+
 ### Evaluation 🏆
 
 After the fine-tuned model is saved 💾, you can explicitly call for evaluation of the model to get a table of TOP-N classes for
-the randomly composed subset (10% in size by default) of the training page folder. 
+the semi-randomly composed subset (10% in size by default) of the training page folder. The class proportions are preserved, 
+and the data is uniformly spread across the time span of the provided dataset.
 
-There is an option of setting `test_size` to 0.8 and use all the sorted by category pages provided 
+There is an option of setting `test_size` to 0.4 and use all the sorted by category pages provided 
 in `[TRAIN]`'s folder for evaluation, but do **NOT** launch it on the whole training data you have actually used up
 for the evaluated model training.
 
