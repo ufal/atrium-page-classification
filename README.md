@@ -1142,7 +1142,7 @@ You can slightly change the `test_size` and / or
 the `batch` variable value in the [config.txt](config.txt) ⚙ file to train a differently named model on the same dataset.
 Alternatively, adjust the **model naming generation** in the [classifier.py](classifier.py)'s 📎 training function.
 
-In terms of the input data splitting, this code is adapted to the filenames containing date stamps which are leveraged
+In terms of the input data splitting, **this code is adapted to the filenames containing date stamps** which are leveraged
 in the filenames sorting, and then randomized step selection, of separate categories 🪧 for the final evaluation and the 
 training-time-evaluation (so-called, dev) subsets - both of the same `test_ratio` size. This behaviour is specifically
 triggered when the `--cross` argument or `cross_runs` variable in the `[TRAIN]` section of the [config.txt](config.txt) ⚙ file 
@@ -1153,7 +1153,7 @@ is set above 1, as well as when the `--train` flag is used for a single run.
 > `[SETUP]` section in the [config.txt](config.txt) ⚙ file which gets simply incremented by one for each fold (run) of the
 > cross-validation process. The listed data splits are recorded as `.txt` files in the `result/stats` directory 📁 for 
 > each fold of the overall model training run, as well as the fold's final test set predictions are saved in 
-> `result/tables` directory 📁.
+> `result/tables` directory 📁. The trained models are saved as model_<revision><fold>.
 
 ### Evaluation 🏆
 

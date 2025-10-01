@@ -129,7 +129,7 @@ if __name__ == "__main__":
         total_files, total_labels, categories = collect_images(data_dir)
 
 
-    elif args.eval:
+    if args.eval:
         data_dir = config.get("EVAL", "FOLDER_PAGES")
         testfiles, testLabels, categories = collect_images(data_dir)
         # Initialize the classifier
@@ -179,7 +179,7 @@ if __name__ == "__main__":
                     train_loader,
                     eval_loader,
                     output_dir=f"./model_output_fold_{i + 1}",
-                    out_model=f"{model_name_local}_fold_{i + 1}",
+                    out_model=f"{model_name_local}{i + 1}",
                     num_epochs=epochs,
                     learning_rate=learning_rate,
                     logging_steps=log_step
@@ -263,20 +263,20 @@ if __name__ == "__main__":
 
         rdf, raw_df = dataframe_results(testfiles, eval_predictions, categories, top_N, raw_prediction)
 
-        rdf["TRUE"] = [categories[i] for i in testLabels]
+        rdf["TRUE"] = [categories[i] for i in test_labels_indices]
         rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
         rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{model_name_local}_TOP-{top_N}_EVAL.csv", sep=",", index=False)
         print(f"Evaluation results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
 
         if raw:
-            raw_df["TRUE"] = [categories[i] for i in testLabels]
+            raw_df["TRUE"] = [categories[i] for i in test_labels_indices]
             raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
             raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{model_name_local}_EVAL_RAW.csv", sep=",", index=False)
             print(f"RAW Evaluation results are recorded into {output_dir}/tables/ directory")
 
 
         confusion_plot(eval_predictions,
-                       testLabels,
+                       test_labels_indices,
                        categories,
                        model_name_local,
                        top_N)
