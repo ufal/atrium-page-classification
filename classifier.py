@@ -773,7 +773,7 @@ def average_model_weights(model_dir: str, model_name_pattern: str, base_model: s
 
     # Save the averaged model
     if output_name is None:
-        output_name = f"{model_name_pattern}a"
+        output_name = f"{model_name_pattern}a{len(fold_dirs)}"
 
     output_path = model_dir / output_name
     output_path.mkdir(exist_ok=True)

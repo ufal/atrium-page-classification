@@ -1202,10 +1202,10 @@ is set above 1, as well as when the `--train` flag is used for a single run.
 Moreover, the models trained in the cross-validation mode that have the same base model can be averaged and saved
 as a separate model for further evaluation or prediction inference. To do this, you should run the following command:
 
-    python3 run.py --average -ap model_v<number>
+    python3 run.py --average -ap model_v<revision>
 
-where `model_<number>` is the common part of the model folders' names, for example, `model_v1`. Which will result
-in a new model saved as `model_<number>a` next to its parent models in the models' directory 📁.
+where `model_<revision>` is the common part of the model folders' names, for example, `model_v1`. Which will result
+in a new model saved as `model_<revision>a<#folds>` next to its parent models in the models' directory 📁.
 
 ### Evaluation 🏆
 
