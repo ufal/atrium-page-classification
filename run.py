@@ -48,6 +48,7 @@ if __name__ == "__main__":
     model_path = f"{model_dir}/{model_name_local}"
 
     test_dir = config.get('INPUT', 'FOLDER_INPUT')
+    dir_format = config.get('INPUT', 'INPUT_FORMAT')
 
     # cur = Path.cwd()  # directory with this script
     cur = Path(__file__).resolve().parent  # directory with this script
@@ -58,22 +59,22 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Page sorter based on ViT')
     parser.add_argument('-f', "--file", type=str, default=None, help="Single page path")
-    parser.add_argument('-ff', "--file_format", type=str, default="jpeg", help="File format to look for in the directory")
+    parser.add_argument('-ff', "--file_format", type=str, default=dir_format, help="File format to look for in the directory")
     parser.add_argument('-d', "--directory", type=str, default=None, help="Path to folder with PNG pages")
     parser.add_argument('-m', "--model", type=str, default=model_path, help="Path to folder with model")
     parser.add_argument('-b', "--base", type=str, default=base_model, help="Repository of the base model")
     parser.add_argument('-rev', "--revision", type=str, default=None, help="HuggingFace revision (e.g. `main`, `vN.0` or `vN.M`)")
     parser.add_argument('-tn', "--topn", type=int, default=top_N, help="Number of top result categories to consider")
     parser.add_argument("--dir", help="Process whole directory (if -d not used)", action="store_true")
+    parser.add_argument("--chunk", help="Process input directory and save predictions in chunks", action="store_true")
     parser.add_argument("--inner", help="Process subdirectories of the given directory as well (FALSE by default)", default=inner, action="store_true")
     parser.add_argument("--train", help="Training model", default=Training, action="store_true")
     parser.add_argument("--eval", help="Evaluating model", default=Testing, action="store_true")
-    # parser.add_argument("--eval_dir", help="Evaluating models", default=False, action="store_true")
     parser.add_argument("--hf", help="Use model and processor from the HuggingFace repository", default=HF, action="store_true")
     parser.add_argument("--raw", help="Output raw scores for all categories", default=raw, action="store_true")
-    parser.add_argument("--cross", type=int, default=cross_runs, help="Number of folds for cross-validation with 80/10/10 split. Default is 0 (no cross-validation).")
+    parser.add_argument("--folds", type=int, default=cross_runs, help="Number of folds for cross-validation with 80/10/10 split. Default is 0 (no cross-validation).")
     parser.add_argument("--average", help="Average existing fold models", action="store_true")
-    parser.add_argument("-ap", "--average_pattern", type=str, default=model_name_local,
+    parser.add_argument("-ap", "--average_pattern", type=str, default=None,
                         help="Pattern for models to average (e.g., 'model_v4')")
 
     args = parser.parse_args()
@@ -126,7 +127,8 @@ if __name__ == "__main__":
 
         data_dir = config.get("TRAIN", "FOLDER_PAGES")
 
-        total_files, total_labels, categories = collect_images(data_dir)
+        if args.train:
+            total_files, total_labels, categories = collect_images(data_dir)
 
 
     if args.eval:
@@ -281,12 +283,6 @@ if __name__ == "__main__":
                        model_name_local,
                        top_N)
 
-
-    # elif args.eval_dir:
-    #     data_dir = config.get("EVAL", "FOLDER_PAGES")
-
-        # evaluate_multiple_models(model_dir, data_dir, True, batch, str(cp_dir))
-
     if args.average:
         print("\n" + "=" * 60)
         print("AVERAGING EXISTING FOLD MODELS")
@@ -305,7 +301,7 @@ if __name__ == "__main__":
                     model_dir=str(model_dir),
                     model_name_pattern=args.average_pattern,
                     base_model=base_model_for_pattern,
-                    num_labels=len(def_categ)  # or len(categories) if available
+                    num_labels=len(categories)
                 )
                 print(f"Averaged model saved to: {averaged_path}")
             except Exception as e:
@@ -352,7 +348,7 @@ if __name__ == "__main__":
             raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{model_name_local}_RAW.csv", sep=",", index=False)
             print(f"RAW Results are recorded into {output_dir}/tables/ directory")
 
-    if args.dir or args.directory is not None:
+    elif (args.dir or args.directory is not None) and args.chunk:
         print(f"Start of the directory processing at {time.strftime('%Y-%m-%d %H:%M:%S')}")
 
         # build list of image paths (unchanged)

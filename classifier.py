@@ -510,6 +510,7 @@ def split_data_80_10_10(files: list, labels: list, random_seed: int, max_categ: 
         labels: List of corresponding labels
         random_seed: Random seed for reproducibility
         max_categ: Maximum number of samples per category to consider
+        safe_check: If True, checks for corrupted images and excludes them
     Returns:
         tuple: (train_files, val_files, test_files, train_labels, val_labels, test_labels)
     """
@@ -645,7 +646,7 @@ def split_data_80_10_10(files: list, labels: list, random_seed: int, max_categ: 
     return train_files, val_files, test_files, train_labels, val_labels, test_labels
 
 
-# Alternative simpler version using numpy's choice with uniform probabilities
+# Alternative simpler version using numpy's choice with uniform probabilities (NOT USED)
 def split_data_80_10_10_simple(files: list, labels: list, random_seed: int) -> (list, list, list, list, list, list):
     """
     Simplified version using numpy's uniform random selection with stratification.
@@ -703,7 +704,7 @@ def average_model_weights(model_dir: str, model_name_pattern: str, base_model: s
         model_name_pattern: Pattern to match model names (e.g., "model_v4")
         base_model: Base model architecture for loading
         num_labels: Number of output classes
-        output_name: Name for the averaged model (defaults to pattern + "_averaged")
+        output_name: Name for the averaged model (defaults to pattern + "a")
 
     Returns:
         Path to the saved averaged model
@@ -711,7 +712,7 @@ def average_model_weights(model_dir: str, model_name_pattern: str, base_model: s
     model_dir = Path(model_dir)
 
     # Find all fold models matching the pattern
-    fold_pattern = f"{model_name_pattern}_fold_*"
+    fold_pattern = f"{model_name_pattern}*"
     fold_dirs = list(model_dir.glob(fold_pattern))
 
     if not fold_dirs:
@@ -772,7 +773,7 @@ def average_model_weights(model_dir: str, model_name_pattern: str, base_model: s
 
     # Save the averaged model
     if output_name is None:
-        output_name = f"{model_name_pattern}_averaged"
+        output_name = f"{model_name_pattern}a"
 
     output_path = model_dir / output_name
     output_path.mkdir(exist_ok=True)

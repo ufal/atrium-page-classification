@@ -98,6 +98,32 @@ paper source into one of the categories - each responsible for the following con
 [//]: # (The dataset is provided under Public Domain license, and consists of **15855** PNG images of pages from the archival documents.)
 [//]: # (The source image files and their annotation can be found in the LINDAT repository [^17] 🔗.)
 
+Our dataset is not split using a simple random shuffle. This is because the data contains structured and clustered 
+distributions of page types within many categories. A random shuffle would likely result in subsets with poor 
+representative variability.
+
+Instead, we use a deterministic, periodic sampling method with a randomized offset. To maximize the size of the 
+training 💪 set, we select the development and test 🏆 subsets first. The training subset then consists of all remaining pages.
+
+Here's the per-category 🪧 procedure for selecting the development and test 🏆 sets:
+
+1. For the category of size `N` compute  the desired subset size, `k`, as a fixed proportion (`test_ratio` which was 10%) of `N`
+2. Compute a selection step, `S`, as `S ≈ N/k` which serves a period base for the selection
+3. Apply a random shift to `S` - an integer index in the range `[S_i - S/4; S_i + S/4]` for every `i`-th of `k` steps of `S`.
+4. Select every `S`-th (`S`-thish in fact) element from the alphabetically ordered sequence after applying the random shift.
+5. Finally, Limit selected indices to be within the range of the category size `N`.
+
+This method produces subsets that:
+
+- Respect the original ordering and local clustering in the data
+- Preserve the proportional representation of each category
+- Introduce controlled randomness, so the selected samples are not strictly periodic
+
+This ensures that our subsets cover the full chronological and structural variability of the 
+collection, leading to a more robust and reliable model evaluation. At the last stages, the whole
+procedure was performed several times in terms of the cross-validation training, when each new fold
+used a incremented by 1 random seed for the random shifts step.
+
 **Training** 💪 set of the model: **8950** images for `v2.0`
 
 **Training** 💪 set of the model: **10745** images for `v2.1`
@@ -106,24 +132,42 @@ paper source into one of the categories - each responsible for the following con
 
 **Training** 💪 set of the model: **38625** images for `vX.3` 
 
-> **90% of all** - proportion in categories 🪧 tabulated [below](#categories-)
+The training subsets above are followed by the test sets below:
 
 **Evaluation** 🏆 set:  **1290** images (taken from `v2.2` annotations)
 
 **Evaluation** 🏆 set:  **4823** images (for `vX.3` models)
 
-> **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2F20250701-1057_model_v220105p_TOP-1_EVAL.csv) 📎
-
-Manual ✍️ annotation was performed beforehand and took some time ⌛, the categories 🪧  were formed from
+Manual ✍️ annotation was performed beforehand and took some time ⌛, the categories 🪧 tabulated  [below](#categories-) were formed from
 different sources of the archival documents originated in the 1920-2020 years span. 
+
+| Category        | Dataset 0   | Dataset 1    | Dataset 2    | Dataset 3     |
+|-----------------|-------------|--------------|--------------|---------------|
+| DRAW            | 1090 (9.1%) | 1368 (8.8%)  | 1472 (9.3%)  | 2709 (5.6%)   |
+| DRAW_L          | 1091 (9.1%) | 1383 (8.9%)  | 1402 (8.8%)  | 2921 (6.0%)   |
+| LINE_HW         | 1055 (8.8%) | 1113 (7.2%)  | 1115 (7.0%)  | 2514 (5.2%)   |
+| LINE_P          | 1092 (9.1%) | 1540 (9.9%)  | 1580 (10.0%) | 2439 (5.0%)   |
+| LINE_T          | 1098 (9.2%) | 1664 (10.7%) | 1668 (10.5%) | 9883 (20.4%)  |
+| PHOTO           | 1081 (9.1%) | 1632 (10.5%) | 1730 (10.9%) | 2691 (5.5%)   |
+| PHOTO_L         | 1087 (9.1%) | 1087 (7.0%)  | 1088 (6.9%)  | 2830 (5.8%)   |
+| TEXT            | 1091 (9.1%) | 1587 (10.3%) | 1592 (10.0%) | 14227 (29.3%) |
+| TEXT_HW         | 1091 (9.1%) | 1092 (7.1%)  | 1092 (6.9%)  | 2008 (4.1%)   |
+| TEXT_P          | 1083 (9.1%) | 1540 (9.9%)  | 1633 (10.3%) | 2312 (4.8%)   |
+| TEXT_T          | 1081 (9.1%) | 1476 (9.5%)  | 1482 (9.3%)  | 3965 (8.2%)   |
+| **Unique PDFs** | 5001        | 5694         | 5729         | 37328         |
+| **Total Pages** | 11,940      | 15,482       | 15,854       | 48,499        |
+
+
+The table above shows category distribution for different model versions, where the last column
+(`Dataset 3`) corresponds to the latest `vX.3` models data, which actually used 14,000 pages of
+`TEXT` category, while other columns cover all the used samples - specifically 80% as training 💪, 
+and 10% each as development and test 🏆 sets. The early model version used 90% of the data as training 💪
+and the remaining 10% as both development and test 🏆 set due to the lack of annotated (manually 
+classified) pages.
 
 > [!NOTE]
 > Disproportion of the categories 🪧 in both training data and provided evaluation [category_samples](category_samples) 📁 is
 > **NOT** intentional, but rather a result of the source data nature. 
-
-In total, several thousands of separate PDF files were selected and split into PNG pages, ~4k of scanned documents 
-were one-page long which covered around a third of all data, and ~2k of them were much longer (dozens and hundreds 
-of pages) covering the rest (more than 60% of all annotated data). 
 
 The specific content and language of the
 source data is irrelevant considering the model's vision resolution, however, all of the data samples were from **archaeological 
@@ -492,7 +536,7 @@ for exactly TOP-3 guesses in tabular format from all images found in the given d
     
     python3 run.py -rev v3.2 -b google/vit-base-patch16-384 --inner --dir
 
-    python3 run.py -m "./models/model_v43" --raw --dir -tn 3
+    python3 run.py -m "./models/model_v43" --dir -ff png
 
 </details>
 
@@ -1145,7 +1189,7 @@ Alternatively, adjust the **model naming generation** in the [classifier.py](cla
 In terms of the input data splitting, **this code is adapted to the filenames containing date stamps** which are leveraged
 in the filenames sorting, and then randomized step selection, of separate categories 🪧 for the final evaluation and the 
 training-time-evaluation (so-called, dev) subsets - both of the same `test_ratio` size. This behaviour is specifically
-triggered when the `--cross` argument or `cross_runs` variable in the `[TRAIN]` section of the [config.txt](config.txt) ⚙ file 
+triggered when the `--folds` argument or `cross_runs` variable in the `[TRAIN]` section of the [config.txt](config.txt) ⚙ file 
 is set above 1, as well as when the `--train` flag is used for a single run. 
 
 > [!TIP]
@@ -1154,6 +1198,14 @@ is set above 1, as well as when the `--train` flag is used for a single run.
 > cross-validation process. The listed data splits are recorded as `.txt` files in the `result/stats` directory 📁 for 
 > each fold of the overall model training run, as well as the fold's final test set predictions are saved in 
 > `result/tables` directory 📁. The trained models are saved as model_<revision><fold>.
+
+Moreover, the models trained in the cross-validation mode that have the same base model can be averaged and saved
+as a separate model for further evaluation or prediction inference. To do this, you should run the following command:
+
+    python3 run.py --average -ap model_v<number>
+
+where `model_<number>` is the common part of the model folders' names, for example, `model_v1`. Which will result
+in a new model saved as `model_<number>a` next to its parent models in the models' directory 📁.
 
 ### Evaluation 🏆
 
@@ -1185,6 +1237,10 @@ revision `v1.9.22` turns to `model_v1922` model folder), and only then run repo 
 > Set your own `repo_name` to the empty one of yours on HF 😊 hub, then in the **Settings** of your HF 😊 account
 > find the **Access Tokens** section and generate a new token - copy and paste its value to the `token` variable. Before committing 
 > those [config.txt](config.txt) ⚙ file changes via git replace the full `token` value with its shortened version for security reasons.
+
+Alternatively, you can evaluate models on a separate dataset of pages, which should be stored in a directory 📁 and 
+provided in the `[EVAL]` section of the [config.txt](config.txt) ⚙ file. The directory structure should be the 
+same as for the training pages directory - the category 🪧 subdirectories are required.
 
 ----
 
