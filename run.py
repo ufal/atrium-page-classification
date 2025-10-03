@@ -216,6 +216,17 @@ if __name__ == "__main__":
             (trainfiles, valfiles, testfiles,
              trainLabels, valLabels, testLabels) = split_data_80_10_10(total_files, total_labels, seed, max_categ)
 
+            with open(f"{output_dir}/stats/{time_stamp}_{model_name_local}_DATASETS.txt", "w") as f:
+                f.write(f"Training set ({len(trainfiles)} images):\n")
+                for file in trainfiles:
+                    f.write(f"{file}\n")
+                f.write(f"\nValidation set ({len(valfiles)} images):\n")
+                for file in valfiles:
+                    f.write(f"{file}\n")
+                f.write(f"\nTest set ({len(testfiles)} images):\n")
+                for file in testfiles:
+                    f.write(f"{file}\n")
+
             # classifier = ImageClassifier(checkpoint=args.base, num_labels=len(categories), store_dir=str(cp_dir))
 
             train_loader = classifier.process_images(trainfiles, trainLabels, batch, True)
