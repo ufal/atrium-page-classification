@@ -714,6 +714,7 @@ def average_model_weights(model_dir: str, model_name_pattern: str, base_model: s
     # Find all fold models matching the pattern
     fold_pattern = f"{model_name_pattern}*"
     fold_dirs = list(model_dir.glob(fold_pattern))
+    fold_dirs = [f for f in fold_dirs if str(f)[-2] != "a"]
 
     if not fold_dirs:
         raise ValueError(f"No fold models found matching pattern: {fold_pattern}")
@@ -773,7 +774,7 @@ def average_model_weights(model_dir: str, model_name_pattern: str, base_model: s
 
     # Save the averaged model
     if output_name is None:
-        output_name = f"{model_name_pattern}a"
+        output_name = f"{model_name_pattern}a{len(fold_dirs)}"
 
     output_path = model_dir / output_name
     output_path.mkdir(exist_ok=True)
