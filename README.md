@@ -574,11 +574,11 @@ results can be found in the [result](result) 📁 folder.
 | `v3.2`       | 96.49     | 99.94     |
 | `v4.2`       | 97.73     | 99.87     |
 | `v5.2`       | 97.86     | 99.87     |
-| `v1.3`       | -         | -         |
-| `v2.3`       | -         | -         |
-| `v3.3`       | -         | -         |
-| `v4.3`       | -         | -         |
-| `v5.3`       | -         | -         |
+| `v1.3`       | 96.83     | 99.71     |
+| `v2.3`       | 98.00     | 99.96     |
+| `v3.3`       | 98.57     | 99.98     |
+| `v4.3`       | 98.15     | 99.61     |
+| `v5.3`       | 99.01     | 99.98     |
 
 `v2.2` Evaluation set's accuracy (**Top-1**):  **97.54%** 🏆
 
@@ -629,6 +629,58 @@ results can be found in the [result](result) 📁 folder.
 ![TOP-1 confusion matrix](result%2Fplots%2F20250709-1829_model_v120106l_conf_mat_TOP-1.png)
 
 </details>
+
+
+`v1.3` Evaluation set's accuracy (**Top-1**):  **96.83%** 🏆
+
+<details>
+
+<summary>Confusion matrix 📊 TOP-1 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2F20251004-1000_model_v13a5_conf_mat_TOP-1.png)
+
+</details>
+
+`v2.3` Evaluation set's accuracy (**Top-1**):  **98.0%** 🏆
+
+<details>
+
+<summary>Confusion matrix 📊 TOP-1 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2F20251004-1022_model_v23a5_conf_mat_TOP-1.png)
+
+</details>
+
+`v3.3` Evaluation set's accuracy (**Top-1**):  **98.0%** 🏆
+
+<details>
+
+<summary>Confusion matrix 📊 TOP-1 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2F20251004-1443_model_v33a5_conf_mat_TOP-1.png)
+
+</details>
+
+`v4.3` Evaluation set's accuracy (**Top-1**):  **98.15%** 🏆
+
+<details>
+
+<summary>Confusion matrix 📊 TOP-1 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2F20251004-1934_model_v43a5_conf_mat_TOP-1.png)
+
+</details>
+
+`v5.3` Evaluation set's accuracy (**Top-1**):  **98.01%** 🏆
+
+<details>
+
+<summary>Confusion matrix 📊 TOP-1 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2F20251004-1014_model_v53a5_conf_mat_TOP-1.png)
+
+</details>
+
 
 > **Confusion matrices** provided above show the diagonal of matching gold and predicted categories 🪧
 > while their off-diagonal elements show inter-class errors. By those graphs you can judge 
