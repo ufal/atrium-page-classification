@@ -15,11 +15,17 @@ if __name__ == "__main__":
     config.read('config.txt')
 
     revision_to_base_model = {
-        "v4.": "timm/tf_efficientnetv2_l.in21k_ft_in1k",
         "v1.": "timm/tf_efficientnetv2_s.in21k",
         "v2.": "google/vit-base-patch16-224",
         "v3.": "google/vit-base-patch16-384",
+        "v4.": "timm/tf_efficientnetv2_l.in21k_ft_in1k",
         "v5.": "google/vit-large-patch16-384",
+        "v6.": "timm/regnety_120.sw_in12k_ft_in1k",
+        "v7.": "timm/regnety_160.swag_ft_in1k",
+        "v8.": "timm/regnety_640.seer",
+        "v9.": "microsoft/dit-base-finetuned-rvlcdip",
+        "v10.": "microsoft/dit-large-finetuned-rvlcdip",
+        "v11.": "microsoft/dit-large"
     }
 
     def_categ = ["DRAW", "DRAW_L", "LINE_HW", "LINE_P", "LINE_T", "PHOTO", "PHOTO_L", "TEXT", "TEXT_HW", "TEXT_P", "TEXT_T"]
@@ -146,9 +152,9 @@ if __name__ == "__main__":
 
     if args.train:
 
-        if args.cross > 0:
-            for i in range(args.cross):
-                print(f"--- Cross-Validation Fold {i + 1}/{args.cross} ---")
+        if args.folds > 0:
+            for i in range(args.folds):
+                print(f"--- Cross-Validation Fold {i + 1}/{args.folds} ---")
                 fold_seed = seed + i  # Use a different seed for each fold
 
                 (trainfiles, valfiles, testfiles,
