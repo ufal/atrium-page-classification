@@ -35,24 +35,24 @@ preparation scripts for PDF to PNG conversion
 
 ## Versions 🏁
 
-There are currently 2 version of the model available for download, both of them have the same set of categories, 
-but different data annotations. The latest approved `v2.1` is considered to be default and can be found in the `main` branch
+There are currently several version of the model available for download, both of them have the same set of categories, 
+but different data annotations. The latest `v5.3` is considered to be default and can be found in the `main` branch
 of HF 😊 hub [^1] 🔗 
 
-| Version | Base                             | Pages |   PDFs   | Description                                                                        |
-|--------:|----------------------------------|:-----:|:--------:|:-----------------------------------------------------------------------------------|
-|  `v2.0` | `vit-base-patch16-224`           | 10073 | **3896** | annotations with mistakes, more heterogenous data                                  |
-|  `v2.1` | `vit-base-patch16-224`           | 11940 | **5002** | `main`: more diverse pages in each category, less annotation mistakes              |
-|  `v2.2` | `vit-base-patch16-224`           | 15855 | **5730** | same data as `v2.1` + some restored pages from `v2.0`                              |
-|  `v3.2` | `vit-base-patch16-384`           | 15855 | **5730** | same data as `v2.2`, but a bit larger model base with higher resolution            |
-|  `v5.2` | `vit-large-patch16-384`          | 15855 | **5730** | same data as `v2.2`, but the largest model base with higher resolution             |
-|  `v1.2` | `efficientnetv2_s.in21k`         | 15855 | **5730** | same data as `v2.2`, but the smallest model base (CNN)                             |
-|  `v4.2` | `efficientnetv2_l.in21k_ft_in1k` | 15855 | **5730** | same data as `v2.2`, CNN base model smaller than the largest, may be more accurate |
-|  `v2.3` | `vit-base-patch16-224`           | 38625 |  **0**   | new data annotation phase data, more single-page documents used                    |
-|  `v3.3` | `vit-base-patch16-384`           | 38625 |  **0**   | same data as `v2.3`, but a bit larger model base with higher resolution            |
-|  `v5.3` | `vit-large-patch16-384`          | 38625 |  **0**   | same data as `v2.3`, but the largest model base with higher resolution             |
-|  `v1.3` | `efficientnetv2_s.in21k`         | 38625 |  **0**   | same data as `v2.3`, but the smallest model base (CNN)                             |
-|  `v4.3` | `efficientnetv2_l.in21k_ft_in1k` | 38625 |  **0**   | same data as `v2.3`, CNN base model smaller than the largest, may be more accurate |
+| Version | Base                             | Pages |   PDFs    | Description                                                                        |
+|--------:|----------------------------------|:-----:|:---------:|:-----------------------------------------------------------------------------------|
+|  `v2.0` | `vit-base-patch16-224`           | 10073 | **3896**  | annotations with mistakes, more heterogenous data                                  |
+|  `v2.1` | `vit-base-patch16-224`           | 11940 | **5002**  | `main`: more diverse pages in each category, less annotation mistakes              |
+|  `v2.2` | `vit-base-patch16-224`           | 15855 | **5730**  | same data as `v2.1` + some restored pages from `v2.0`                              |
+|  `v3.2` | `vit-base-patch16-384`           | 15855 | **5730**  | same data as `v2.2`, but a bit larger model base with higher resolution            |
+|  `v5.2` | `vit-large-patch16-384`          | 15855 | **5730**  | same data as `v2.2`, but the largest model base with higher resolution             |
+|  `v1.2` | `efficientnetv2_s.in21k`         | 15855 | **5730**  | same data as `v2.2`, but the smallest model base (CNN)                             |
+|  `v4.2` | `efficientnetv2_l.in21k_ft_in1k` | 15855 | **5730**  | same data as `v2.2`, CNN base model smaller than the largest, may be more accurate |
+|  `v2.3` | `vit-base-patch16-224`           | 38625 | **37328** | new data annotation phase data, more single-page documents used                    |
+|  `v3.3` | `vit-base-patch16-384`           | 38625 | **37328** | same data as `v2.3`, but a bit larger model base with higher resolution            |
+|  `v5.3` | `vit-large-patch16-384`          | 38625 | **37328** | same data as `v2.3`, but the largest model base with higher resolution             |
+|  `v1.3` | `efficientnetv2_s.in21k`         | 38625 | **37328** | same data as `v2.3`, but the smallest model base (CNN)                             |
+|  `v4.3` | `efficientnetv2_l.in21k_ft_in1k` | 38625 | **37328** | same data as `v2.3`, CNN base model smaller than the largest, may be more accurate |
 
 <details>
 
@@ -95,8 +95,15 @@ paper source into one of the categories - each responsible for the following con
 
 ### Data 📜
 
-[//]: # (The dataset is provided under Public Domain license, and consists of **15855** PNG images of pages from the archival documents.)
-[//]: # (The source image files and their annotation can be found in the LINDAT repository [^17] 🔗.)
+The dataset is provided under Public Domain license, and consists of **48,499** PNG images of pages from **37,328** archival documents.
+The source image files and their annotation can be found in the LINDAT repository [^17] 🔗. 
+
+The annotation provided includes 5 different
+dataset splits of `vX.3` model versions, and it's recommended to average all 5 trained model weights to get a more robust
+model for prediction (in some cases, like `TEXT` and `TEXT_T` categories which samples very often look the same, the accuracy of those 
+problematic categories could drop below 90% with off-diagonal errors rising above 10% after the averaging of trained models). Anyhow, the
+averaged model usually score higher accuracy than any of its individual components... or sometimes causes a drop in accuracy for 
+the most ambiguous categories 🪧️ - depends mostly on the base model choice.
 
 Our dataset is not split using a simple random shuffle. This is because the data contains structured and clustered 
 distributions of page types within many categories. A random shuffle would likely result in subsets with poor 
@@ -578,7 +585,7 @@ results can be found in the [result](result) 📁 folder.
 | `v2.3`       | 98.00     | 99.96     |
 | `v3.3`       | 98.57     | 99.98     |
 | `v4.3`       | 98.15     | 99.61     |
-| `v5.3`       | 99.01     | 99.98     |
+| `v5.3`       | **99.01** | 99.98     |
 
 `v2.2` Evaluation set's accuracy (**Top-1**):  **97.54%** 🏆
 
@@ -1217,9 +1224,8 @@ During training image transformations [^12] are applied sequentially with a 50% 
 More about selecting the image transformation and the available ones you can read in the PyTorch torchvision docs [^12].
 
 After training is complete the model will be saved 💾 to its separate subdirectory in the `model` directory, by default, 
-the **naming of the model folder** corresponds to the length of its training batch dataloader and the number of epochs - 
-for example `model_<S/B>_E` where `E` is the number of epochs, `B` is the batch size, and `S` is the size of your 
-**training** dataset (by defaults, 90% of the provided in `[TRAIN]`'s folder data).
+the **naming of the model folder** corresponds to the `revision` variable in the `[HF]` section of 
+the [config.txt](config.txt) ⚙ file, which is shortened by removing any dots and saved like `model_v<revision>`.
 
 <details>
 
@@ -1270,19 +1276,17 @@ for example `model_<S/B>_E` where `E` is the number of epochs, `B` is the batch 
 
 > [!IMPORTANT] 
 > The `movel_<revision>` folder naming is generated from the HF 😊 repo [^1] 🔗 `revision` value and does **NOT** 
-> affect the trained model naming, other training parameters do. 
-> Since the length of the dataloader depends not only on the size of the dataset but also on the preset batch size, 
-> and test subset ratio. 
+> affect the trained model naming, but the explicit flag `-m` or `--model` can be used to set the model path for a
+> time when the training is done and the model is saved and ready for evaluation or prediction inference. **Keep in mind
+> that the `revision` is shortened, by removing punctuation like dots, to get a sterilized model's version for its 
+> folder naming.**
 
-You can slightly change the `test_size` and / or
-the `batch` variable value in the [config.txt](config.txt) ⚙ file to train a differently named model on the same dataset.
-Alternatively, adjust the **model naming generation** in the [classifier.py](classifier.py)'s 📎 training function.
-
-In terms of the input data splitting, **this code is adapted to the filenames containing date stamps** which are leveraged
+In terms of the input data splitting, **this project is adapted to the filenames containing date stamps** which are leveraged
 in the filenames sorting, and then randomized step selection, of separate categories 🪧 for the final evaluation and the 
 training-time-evaluation (so-called, dev) subsets - both of the same `test_ratio` size. This behaviour is specifically
 triggered when the `--folds` argument or `cross_runs` variable in the `[TRAIN]` section of the [config.txt](config.txt) ⚙ file 
-is set above 1, as well as when the `--train` flag is used for a single run. 
+is set above 0, as well as when the `--train` flag is used for a single run of training, which applies the same 
+splitting strategy of 80-10-10% for training, dev, and evaluation subsets respectively.
 
 > [!TIP]
 > The cross-validation takes more time and reselects the data subsets for each run based on a `seed` variable of the
@@ -1296,7 +1300,7 @@ as a separate model for further evaluation or prediction inference. To do this, 
 
     python3 run.py --average -ap model_v<revision>
 
-where `model_<revision>` is the common part of the model folders' names, for example, `model_v1`. Which will result
+where `model_<revision>` is the common part of the model folders' names, for example, `model_v<revision>`. Which will result
 in a new model saved as `model_<revision>a<#folds>` next to its parent models in the models' directory 📁.
 
 ### Evaluation 🏆
@@ -1304,10 +1308,6 @@ in a new model saved as `model_<revision>a<#folds>` next to its parent models in
 After the fine-tuned model is saved 💾, you can explicitly call for evaluation of the model to get a table of TOP-N classes for
 the semi-randomly composed subset (10% in size by default) of the training page folder. The class proportions are preserved, 
 and the data is uniformly spread across the time span of the provided dataset.
-
-There is an option of setting `test_size` to 0.4 and use all the sorted by category pages provided 
-in `[TRAIN]`'s folder for evaluation, but do **NOT** launch it on the whole training data you have actually used up
-for the evaluated model training.
 
 To do this in the unchanged configuration ⚙, automatically create a 
 confusion matrix plot 📊 and additionally get raw class probabilities table run: 
@@ -1421,3 +1421,4 @@ same as for the training pages directory - the category 🪧 subdirectories are 
 [^15]: https://huggingface.co/timm/tf_efficientnetv2_s.in21k
 [^16]: https://huggingface.co/timm/tf_efficientnetv2_l.in21k_ft_in1k
 [^17]: http://hdl.handle.net/20.500.12800/1-5959
+

@@ -244,10 +244,10 @@ if __name__ == "__main__":
         # ----------------------------------------------
         # ----- UNCOMMENT for pushing to HF repo -------
         # ----------------------------------------------
-        classifier.load_model(str(model_path))
-        create_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision, exist_ok=True, token=config.get("HF", "token"))
+        # classifier.load_model(str(model_path))
+        # create_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision, exist_ok=True, token=config.get("HF", "token"))
 
-        classifier.push_to_hub(str(model_path), config.get("HF", "repo_name"), False, config.get("HF", "token"), config.get("HF", "revision"))
+        # classifier.push_to_hub(str(model_path), config.get("HF", "repo_name"), False, config.get("HF", "token"), config.get("HF", "revision"))
         # ----------------------------------------------
 
         # loading from repo
