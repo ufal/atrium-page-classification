@@ -346,8 +346,10 @@ class ImageClassifier:
         predictions = []
         raw_scores = []
 
+        start_time = datetime.datetime.now()
+        print(f"\tProcessing of {len(dataloader)} batches started at\t{start_time.strftime('%Y-%m-%d %H:%M:%S')}")
         with torch.no_grad():
-            for batch in dataloader:
+            for ib, batch in enumerate(dataloader):
                 inputs = batch['pixel_values']
                 outputs = self.model(pixel_values=inputs.to(self.device))
                 logits = outputs.logits
@@ -362,7 +364,20 @@ class ImageClassifier:
                 else:
                     predicted_class_idx = logits.argmax(-1).tolist()
                     predictions.extend(predicted_class_idx)
-                print(f"Processed {len(predictions)} images at {time.strftime('%Y-%m-%d %H:%M:%S')}")
+
+                if ib % 50 == 0:
+                    elapsed_minutes = (datetime.datetime.now() - start_time).total_seconds() / 60
+                    print(f"{ib}-th batch\t\tProcessed {len(predictions)} images in\t{elapsed_minutes:.2f} min")
+
+
+        end_time = datetime.datetime.now()
+        total_minutes = (end_time - start_time).total_seconds() / 60
+        avg_seconds_per_image = (end_time - start_time).total_seconds() / len(predictions)
+
+        print(
+            f"\tProcessing of {len(dataloader)} batches ({len(predictions)} images) finished at\t{end_time.strftime('%Y-%m-%d %H:%M:%S')}")
+        print(
+            f"\tTotal time: {total_minutes:.2f} min\n\tAverage time: {avg_seconds_per_image:.4f} sec/img")
 
         raw_scores = None if not raw else raw_scores
         return predictions, raw_scores
