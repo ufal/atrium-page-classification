@@ -1,20 +1,20 @@
 [OUTPUT]
-FOLDER_RESULTS=./results
+FOLDER_RESULTS=./result
 FOLDER_CPOINTS=./model_checkpoints
 FOLDER_MODELS=./models
 
 [EVAL]
-FOLDER_PAGES=/lnet/work/people/lutsai/pythonProject/pages/eval_4
+FOLDER_PAGES=/lnet/work/projects/atrium/transformers/pages/test_F12345
 
 [TRAIN]
-FOLDER_PAGES=/lnet/work/people/lutsai/pythonProject/pages/train_4
+FOLDER_PAGES=/lnet/work/projects/atrium/transformers/pages/train_5
 
 test_size = 0.1
 log_step = 10
-epochs = 10
+epochs = 7
 lr = 1e-5
-max_categ = 2000
-max_categ_e = 1000
+max_categ = 14000
+max_categ_e = 3000
 
 Training = False
 Testing = False
@@ -22,7 +22,7 @@ Testing = False
 [SETUP]
 seed = 420
 base_model = ViT-B/16
-batch = 10
+batch = 16
 top_N = 1
 raw = False
 
@@ -34,12 +34,15 @@ visualize = False
 description_folder = ./category_descriptions
 categories_prefix = page_categories
 
+model_storage = /lnet/work/projects/atrium/cache/clip
+
 [INPUT]
 FOLDER_INPUT=./category_samples
+INPUT_FORMAT = png
 
 [HF]
 repo_name = ufal/clip-historical-page
 token = hf_qViUKX....ixyJpjstNxGO
 use_hf = False
-revision = v1.1
-latest = v2.2
+revision = v1.1.3.
+latest = v1.1.3

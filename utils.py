@@ -6,6 +6,8 @@ import random
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, ConfusionMatrixDisplay
 from matplotlib import pyplot as plt
 import time
+import datetime
+import re
 import scipy.special
 
 # get list of all files in the folder and nested folders by file format
@@ -17,155 +19,145 @@ def directory_scraper(folder_path: Path, file_format: str = "png", file_list: li
     return file_list
 
 
-# def dataframe_results(test_images: list, test_predictions: list, categories: list, top_N: int,
-#                       raw_scores: list = None) -> (pd.DataFrame, pd.DataFrame):
-#     results = []
-#     raws = []
-#     # print(test_predictions, "test_predictions")
-#
-#     for image_file, predict_scores in zip(test_images, test_predictions):
-#         image_name = Path(image_file).stem
-#         name_parts = image_name.split("-")
-#         page_num = int(name_parts[-1])
-#         document = name_parts[0] if len(name_parts) == 2 else "-".join(name_parts[:-1])
-#
-#         norm_scores = np.hstack(predict_scores, axis=0) if isinstance(predict_scores, list) else predict_scores
-#
-#         # Apply softmax using LogSumExp for numerical stability
-#         if norm_scores.ndim > 1:
-#             # For a 2D array (e.g., batch_size, num_classes)
-#             log_sum_exp = scipy.special.logsumexp(norm_scores, axis=-1, keepdims=True)
-#             norm_scores = np.exp(norm_scores - log_sum_exp)
-#         else:
-#             # For a 1D array (single prediction)
-#             log_sum_exp = scipy.special.logsumexp(norm_scores)
-#             norm_scores = np.exp(norm_scores - log_sum_exp)
-#
-#         best_indices = np.argsort(norm_scores)[-top_N:][::-1] if top_N > 1 else np.argmax(norm_scores)
-#         best_indices = best_indices[:, :top_N] if top_N > 1 else best_indices
-#
-#         print(best_indices, "best_indices after slicing")
-#
-#         # labels = [categories[i] for i in best_indices] if top_N > 1 else [categories[best_indices]]
-#         # scores = [round(i[1], 3) for i in predict_scores] if top_N > 1 else [round(predict_scores, 3)]
-#
-#         res = [document, page_num] + labels + scores
-#         results.append(res)
-#         if raw_scores is not None:
-#             raws.append([document, page_num])
-#
-#     col = ["FILE", "PAGE"] + [f"CLASS-{j + 1}" for j in range(top_N)] + [f"SCORE-{j + 1}" for j in range(top_N)]
-#     rdf = pd.DataFrame(results, columns=col)
-#
-#     if top_N == 1:
-#         rdf.drop(columns=["SCORE-1"], inplace=True)
-#         rdf.rename(columns={"CLASS-1": "CATEGORY"}, inplace=True)
-#
-#     rawdf = None
-#     if raw_scores is not None:
-#         col = ["FILE", "PAGE"]
-#         rawdf = pd.DataFrame(raws, columns=col)
-#         raw_weights = np.array(raw_scores).round(3)
-#         rawdf[categories] = raw_weights
-#
-#     return rdf, rawdf
-
-
-def dataframe_results(test_images: list, test_predictions: list, categories: list, top_N: int,
-                      raw_scores: list = None) -> (pd.DataFrame, pd.DataFrame):
+def dataframe_results(
+        test_images: list,
+        test_predictions: list,
+        categories: list,
+        top_N: int,
+        raw_scores: list = None
+) -> (pd.DataFrame, pd.DataFrame):
     """
     Processes image prediction results into two pandas DataFrames:
     one for formatted top-N predictions and another for raw scores.
 
-    Args:
-        test_images (list): List of image file paths.
-        test_predictions (list): List of prediction scores (logits or raw scores) for each image.
-                                 Each element is a 1D numpy array corresponding to an image's prediction.
-        categories (list): List of category names, where the index corresponds to the class ID.
-        top_N (int): The number of top predictions to include for each image.
-        raw_scores (list, optional): List of raw scores for each image, if available.
-                                     Defaults to None.
-
-    Returns:
-        tuple: A tuple containing two pandas DataFrames:
-               - rdf (pd.DataFrame): Formatted DataFrame with 'FILE', 'PAGE', and top-N 'CLASS' and 'SCORE' columns.
-                                     If top_N is 1, it will have 'FILE', 'PAGE', and 'CATEGORY'.
-               - rawdf (pd.DataFrame): DataFrame with 'FILE', 'PAGE', and raw scores for all categories.
-                                       Returns None if raw_scores is not provided.
+    FIXED VERSION:
+      - Ensures test_predictions is flattened into an array of per-image scores.
+      - Safely handles cases where the number of prediction values does not match
+        the number of categories.
     """
-    results = []
-    raws = []
+    print(f"Processing {len(test_images)} images with top_N={top_N} predictions "
+          f"of {len(categories)} possible labels...")
 
-    current_labels = []
-    current_scores = []
+    # --- FIX 1: Flatten test_predictions into a single array of per-image scores ---
+    # Convert list of batch arrays into a single list of per-image score arrays
+    flat_predictions = []
+    for batch_preds in test_predictions:
+        # Assuming batch_preds is a numpy array or torch tensor of shape (batch_size, n_classes)
+        # Convert to numpy array and ensure it's 2D
+        batch_preds = np.atleast_2d(np.asarray(batch_preds))
+        for row in batch_preds:
+            flat_predictions.append(row)
 
-    print(f"Processing {len(test_images)} images with top_N={top_N} predictions...")
-    print("Predictions shape:")
-    for pred in test_predictions:
-        print(f"\t{len(pred)} categories")
-    test_predictions = np.vstack(test_predictions) if isinstance(test_predictions, list) else np.array(test_predictions)
-    print(f"Total predictions shape: {test_predictions.shape}")
+    if not flat_predictions:
+        print("[ERROR] Flat predictions list is empty.")
+        return pd.DataFrame(), None
 
-    for image_file, predict_scores in zip(test_images, test_predictions):
+
+    # Vertically stack all per-image score arrays
+    try:
+        preds = np.vstack(flat_predictions)
+    except ValueError as e:
+        print(f"[CRITICAL ERROR] Could not stack flat predictions: {e}")
+        return pd.DataFrame(), None
+
+    # Check if the number of images in predictions matches test_images
+    if preds.shape[0] != len(test_images):
+        print(f"[ERROR] Mismatch: {len(test_images)} images, but {preds.shape[0]} predictions.")
+        # If mismatch, truncate to the minimum count, which is usually the length of the images list
+        min_len = min(preds.shape[0], len(test_images))
+        preds = preds[:min_len]
+        test_images = test_images[:min_len]
+        # raw_scores would also need truncation if it was used, but we'll assume it's aligned or None
+
+    n_images, n_raw_scores = preds.shape
+    n_categories = len(categories)
+    print(f"Final prediction array shape: {preds.shape}")
+
+    # --- FIX 2: Check and align categories and scores ---
+    # If the number of raw scores (columns) is greater than the number of categories, truncate the scores.
+    if n_raw_scores > n_categories:
+        print(
+            f"[WARN] {n_raw_scores} prediction values but only {n_categories} categories. Truncating prediction scores to match categories.")
+        preds = preds[:, :n_categories]
+    # If the number of raw scores is less than the number of categories, truncate the categories list.
+    elif n_raw_scores < n_categories:
+        print(f"[WARN] {n_categories} categories but only {n_raw_scores} prediction scores. Truncating category list.")
+        categories = categories[:n_raw_scores]
+        n_categories = n_raw_scores
+
+    # Re-evaluate n_images, n_categories after potential truncation
+    if preds.ndim == 2:
+        n_images, n_categories = preds.shape
+    else:  # Should not happen after np.vstack
+        print("[ERROR] Predictions are not a 2D array.")
+        return pd.DataFrame(), None
+
+    results, raws = [], []
+    valid_rows = 0
+
+    for image_file, scores in zip(test_images, preds):
+        # Skip fully zero/padded rows
+        if np.all(scores == 0) and not np.any(scores):
+            continue
+
+        # --- Robust filename parsing ---
         image_name = Path(image_file).stem
-        name_parts = image_name.split("-")
-        page_num = int(name_parts[-1])
-        document = name_parts[0] if len(name_parts) == 2 else "-".join(name_parts[:-1])
-
-        # Ensure predict_scores is a numpy array for consistent processing
-        norm_scores = np.array(predict_scores)
-
-        # Apply softmax using LogSumExp for numerical stability
-        # Since predict_scores for a single image is always 1D here,
-        # norm_scores will also be 1D.
-        log_sum_exp = scipy.special.logsumexp(norm_scores)
-        norm_scores = np.exp(norm_scores - log_sum_exp)
-
-        # Determine the best indices based on top_N
-        if top_N > 1:
-            # Get indices of top_N highest scores, sorted in descending order of score
-            best_indices = np.argsort(norm_scores)[-top_N:][::-1]
+        match = re.search(r'(\d+)$', image_name)
+        if match:
+            page_num = int(match.group(1))
+            document = image_name[:match.start()].rstrip("-_")
         else:
-            # Get the index of the single highest score
-            best_indices = [np.argmax(norm_scores)] # Wrap in a list for consistent iteration
+            page_num = None
+            document = image_name
 
-        # Extract labels and scores for the current image
+        # --- Stable softmax normalization ---
+        # scores should already be clipped to n_categories from the checks above
+        valid_scores = scores
+        # Use scipy.special.softmax for robustness if available, otherwise the custom one
+        try:
+            probs = scipy.special.softmax(valid_scores)
+        except AttributeError:
+            exp_scores = np.exp(valid_scores - np.max(valid_scores))
+            probs = exp_scores / np.sum(exp_scores)
+        except FloatingPointError as e:
+            print(f"[WARN] Floating point error during softmax: {e}. Using uniform distribution.")
+            probs = np.full_like(valid_scores, 1.0 / len(valid_scores))
 
-        current_labels = []
-        current_scores = []
-        for idx in best_indices:
-            current_labels.append(categories[idx])
-            current_scores.append(round(norm_scores[idx], 3))
+        # --- Top-N selection ---
+        top_N = max(1, min(top_N, n_categories))
+        top_idx = probs.argsort()[::-1][:top_N]
+        labels = [categories[i] for i in top_idx]
+        score_vals = [round(float(probs[i]), 3) for i in top_idx]
 
-        # Combine document, page_num, labels, and scores for the current result row
-        res = [document, page_num] + current_labels + current_scores
-        results.append(res)
+        results.append([document, page_num] + labels + score_vals)
+        valid_rows += 1
 
-        # Collect raw scores if provided
+        # --- Raw scores ---
         if raw_scores is not None:
-            raws.append([document, page_num])
+            raws.append([document, page_num] + [round(float(s), 3) for s in valid_scores])
 
-    # Create the main results DataFrame
+    # ... (rest of the function for DataFrame construction remains the same) ...
+
+    if valid_rows == 0:
+        print("[ERROR] No valid prediction rows found — check input shapes or category count.")
+        return pd.DataFrame(), None
+
+    # --- Construct formatted results DataFrame ---
     col = ["FILE", "PAGE"] + [f"CLASS-{j + 1}" for j in range(top_N)] + [f"SCORE-{j + 1}" for j in range(top_N)]
     rdf = pd.DataFrame(results, columns=col)
 
-    # Adjust column names if top_N is 1
     if top_N == 1:
-        rdf.drop(columns=["SCORE-1"], inplace=True)
-        rdf.rename(columns={"CLASS-1": "CATEGORY"}, inplace=True)
+        rdf = rdf.rename(columns={"CLASS-1": "CATEGORY"}).drop(columns=["SCORE-1"])
 
-    # Create the raw scores DataFrame if raw_scores were provided
+    # --- Construct raw scores DataFrame ---
     rawdf = None
     if raw_scores is not None:
-        raw_col = ["FILE", "PAGE"]
+        raw_col = ["FILE", "PAGE"] + categories
         rawdf = pd.DataFrame(raws, columns=raw_col)
-        # Ensure raw_scores are processed correctly to match the DataFrame structure
-        # Assuming raw_scores is a list of 1D arrays, similar to test_predictions
-        raw_weights = np.array(raw_scores).round(3)
-        rawdf[categories] = raw_weights
 
-    print(f"DataFrame created with {len(rdf)} entries and columns: {rdf.columns.tolist()}")
-    print(rdf.head())
+    print(f"Created results table with {len(rdf)} rows and columns: {rdf.columns.tolist()}")
+    if rawdf is not None:
+        print(f"Created RAW results table with shape {rawdf.shape}")
 
     return rdf, rawdf
 
@@ -198,48 +190,13 @@ def collect_images(directory: str, max_categ: int) -> (list, list, list):
     return total_files, total_labels, categories
 
 
-def confusion_plot(predictions: list, trues: list, categories: list, out_model: str, top_N: int = 1, output_dir: str = None):
-    single_pred = []
-    correct = 0
-    for j, pred_scores in enumerate(predictions):
-        true_class = trues[j]
 
-        if top_N > 1:
-            classes = [i[0] for i in pred_scores]
 
-            if true_class in classes:
-                correct += 1
-                single_pred.append(true_class)
-            else:
-                single_pred.append(classes[0])
-
-        else:
-            single_pred.append(pred_scores)
-            if pred_scores == true_class:
-                correct += 1
-
-    print('Percentage correct: ',round(100 * correct / len(trues), 2))
-
-    # Confusion matrix display and normalized output
-    disp = ConfusionMatrixDisplay.from_predictions(
-        trues, single_pred, cmap='inferno',
-        normalize="true", display_labels=np.array(categories)
-    )
-
-    print(f"\t{' '.join(disp.display_labels)}")
-    for ir, row in enumerate(disp.confusion_matrix):
-        print(
-            f"{disp.display_labels[ir]}\t{'   '.join([str(val) if val > 0 else ' -- ' for val in np.round(row, 2)])}")
-
-    # Customize x-axis tick labels to show only the first character of each label
-    tick_positions = disp.ax_.get_xticks()
-    short_labels = [f"{label[0]}{label.split('_')[-1][0] if '_' in label else ''}" for label in disp.display_labels]
-    disp.ax_.set_xticks(tick_positions)
-    disp.ax_.set_xticklabels(short_labels)
-
-    time_stamp = time.strftime("%Y%m%d-%H%M")
-    disp.ax_.set_title(
-        f"TOP {top_N} Confusion matrix {out_model}")
-    out = f"{output_dir if output_dir else 'result'}/plots/{time_stamp}_{out_model}_conf_mat_TOP-{top_N}.png"
-    plt.savefig(out, bbox_inches='tight', dpi=300)
-    plt.close()
+def append_to_csv(df, filepath):
+    """
+    Appends a DataFrame to a CSV file, or creates a new file if it doesn't exist.
+    """
+    if not os.path.exists(filepath):
+        df.to_csv(filepath, index=False, sep=",")
+    else:
+        df.to_csv(filepath, mode="a", header=False, index=False, sep=",")

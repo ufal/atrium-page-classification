@@ -178,7 +178,7 @@ Clone this project to your local machine 🖥️️ via:
     git init
     git clone https://github.com/ufal/atrium-page-classification.git
 
-Then change to the Vit and EffNet models or CLIP models branch (`clip` or `vit`):
+Then change to the Vit and EffNet models or CLIP models branch (`master`, `clip` or `vit`):
 
     cd atrium-page-classification
     git checkout vit
@@ -194,7 +194,7 @@ And then for updating the project with the latest changes from the remote reposi
 
     git pull -X theirs
 
-Alternatively, if you are interested in a specific branch (`clip` or `vit`), you can update  it via:
+Alternatively, if you are interested in a specific branch (`master`, `clip` or `vit`), you can update  it via:
 
     git fetch origin
     git checkout vit        
@@ -212,7 +212,7 @@ And then for a total clean up and update, run:
     rm README*
     git pull
 
-Alternatively, for a specific branch (`clip` or `vit`):
+Alternatively, for a specific branch (`master`, `clip` or `vit`):
 
     git reset --hard HEAD
     git clean -fd
@@ -221,7 +221,7 @@ Alternatively, for a specific branch (`clip` or `vit`):
     git pull origin vit
 
 
-Overall, a force update to the remote repository branch (`clip` or `vit`) looks like this:
+Overall, a force update to the remote repository branch (`master`, `clip` or `vit`) looks like this:
 
     git fetch origin
     git checkout vit
