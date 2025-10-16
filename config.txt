@@ -26,7 +26,7 @@ batch = 16
 top_N = 1
 raw = False
 
-categories_file = category_description_total.tsv
+categories_file = ./category_descriptions/TOTAL_page_categories.tsv
 
 zero_shot = False
 avg = False
