@@ -15,8 +15,11 @@ if __name__ == "__main__":
     config.read('config.txt')
 
     revision_to_base_model = {
-        "v1.": "timm/tf_efficientnetv2_s.in21k",
-        "v2.": "google/vit-base-patch16-224",
+        "v10.": "microsoft/dit-large-finetuned-rvlcdip",
+        "v11.": "microsoft/dit-large",
+        "v12.": "timm/tf_efficientnetv2_m.in21k_ft_in1k",
+        "v1.3": "timm/tf_efficientnetv2_s.in21k",
+        "v2.3": "google/vit-base-patch16-224",
         "v3.": "google/vit-base-patch16-384",
         "v4.": "timm/tf_efficientnetv2_l.in21k_ft_in1k",
         "v5.": "google/vit-large-patch16-384",
@@ -24,9 +27,6 @@ if __name__ == "__main__":
         "v7.": "timm/regnety_160.swag_ft_in1k",
         "v8.": "timm/regnety_640.seer",
         "v9.": "microsoft/dit-base-finetuned-rvlcdip",
-        "v10.": "microsoft/dit-large-finetuned-rvlcdip",
-        "v11.": "microsoft/dit-large",
-        "v12.": "timm/tf_efficientnetv2_m.in21k_ft_in1k"
     }
 
     def_categ = ["DRAW", "DRAW_L", "LINE_HW", "LINE_P", "LINE_T", "PHOTO", "PHOTO_L", "TEXT", "TEXT_HW", "TEXT_P", "TEXT_T"]
@@ -97,8 +97,13 @@ if __name__ == "__main__":
     if args.revision is None: # using config file revision
         args.revision = hf_version
         args.base = config_base_model
-        args.model = config_model_path
-        revision_model_name_local = config_model_name_local
+
+        if args.model != config_model_path:
+            revision_model_name_local = Path(args.model).name
+        else:
+            args.model = config_model_path
+            revision_model_name_local = config_model_name_local
+
     else:  # using command line argument revision from flag --revision / -rev
         if not any(args.revision.startswith(key) for key in revision_to_base_model.keys()):
             raise ValueError(f"Revision {args.revision} is not supported. Available revisions: {list(revision_to_base_model.keys())}")
@@ -212,7 +217,12 @@ if __name__ == "__main__":
                 # print(test_predictions[:3])
                 # print(test_predictions[-3:])
 
+                print("=" * 40)
                 print(f"TEST SET's correct percentage:\t{round(100 * sum([1 for true, pred in zip(test_labels_indices, test_predictions) if true == pred]) / len(test_labels_indices), 2)}%")
+                print("=" * 40)
+                print(classification_report(test_labels_indices, test_predictions,
+                                            target_names=categories, labels=list(range(len(categories))),
+                                            zero_division=0))
 
                 rdf, raw_df = dataframe_results(testfiles, test_predictions, categories, top_N, raw_prediction)
                 rdf["TRUE"] = [categories[label] for label in test_labels_indices]
