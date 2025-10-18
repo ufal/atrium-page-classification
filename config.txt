@@ -19,6 +19,7 @@ Training = False
 Testing = False
 
 [SETUP]
+files_format = jpeg
 seed = 420
 base_model = google/vit-large-patch16-384
 batch = 16
@@ -28,7 +29,6 @@ inner = False
 
 [INPUT]
 FOLDER_INPUT=./category_samples
-INPUT_FORMAT = jpeg
 chunk_size = 100
 chunking = False
 
