@@ -95,21 +95,21 @@ paper source into one of the categories - each responsible for the following con
 > or structured in tabular 📏 format text, as well as to mark the presence of the printed 🌄 or drawn 📈 graphic 
 > materials to be extracted from the page images.
 
+| Base Model                                 | Revision | max_cat | Best_Prec (%) | Best_Acc (%) | Fold | Note         |
+|--------------------------------------------|----------|---------|---------------|--------------|------|--------------|
+| **google/vit-base-patch16-224**            | **v2.3** | 14,000  | **98.79**     | **98.79**    | 5    | OK & Small   |
+| **google/vit-base-patch16-384**            | **v3.3** | 14,000  | **98.92**     | **98.92**    | 2    | Good & Small |
+| **google/vit-large-patch16-384**           | **v5.3** | 14,000  | **99.12**     | **99.12**    | 2    | Best & Large |
+| microsoft/dit-base-finetuned-rvlcdip       | v9.3     | 14,000  | 98.71         | 98.72        | 3    |              |
+| microsoft/dit-large-finetuned-rvlcdip      | v10.3    | 14,000  | 98.66         | 98.66        | 3    |              |
+| microsoft/dit-large                        | v11.3    | 14,000  | 98.53         | 98.53        | 2    |              |
+| timm/regnety_120.sw_in12k_ft_in1k          | v12.3    | 14,000  | 98.29         | 98.29        | 3    |              |
+| **timm/regnety_160.swag_ft_in1k**          | **v4.3** | 14,000  | **99.17**     | **99.16**    | 1    | Best & Small |
+| **timm/regnety_640.seer**                  | **v6.3** | 14,000  | **98.79**     | **98.79**    | 5    | OK & Large   |
+| timm/tf_efficientnetv2_l.in21k_ft_in1k     | v8.3     | 14,000  | 98.62         | 98.62        | 5    |              |
+| **timm/tf_efficientnetv2_m.in21k_ft_in1k** | **v1.3** | 14,000  | **98.83**     | **98.83**    | 1    | Good & Small |
+| timm/tf_efficientnetv2_s.in21k             | v7.3     | 14,000  | 97.90         | 97.87        | 1    |              |
 
-| Base Model                                 | Revision | max_cat | Best_Prec         | Best_Acc       | Fold | Note         |
-|--------------------------------------------|----------|---------|-------------------|----------------|------|--------------|
-| google/vit-base-patch16-224                | v12.3    | 14,000  | 98.89       %     | 98.88    %     | 1    |              |
-| **google/vit-base-patch16-384**            | **v3.3** | 14,000  | **99.01       %** | **98.99    %** | 5    | Good & Small |
-| **google/vit-large-patch16-384**           | **v5.3** | 14,000  | **99.25       %** | **99.25    %** | 2    | Best & Large |
-| microsoft/dit-base-finetuned-rvlcdip       | v9.3     | 14,000  | 98.71       %     | 98.72    %     | 3    |              |
-| microsoft/dit-large-finetuned-rvlcdip      | v10.3    | 14,000  | 98.66       %     | 98.66    %     | 3    |              |
-| microsoft/dit-large                        | v11.3    | 14,000  | 98.53       %     | 98.53    %     | 2    |              |
-| timm/regnety_120.sw_in12k_ft_in1k          | v6.3     | 14,000  | 98.29       %     | 98.29    %     | 3    |              |
-| **timm/regnety_160.swag_ft_in1k**          | **v2.3** | 14,000  | **99.21       %** | **99.21    %** | 1    | Best & Small |
-| timm/regnety_640.seer                      | v8.3     | 14,000  | 98.79       %     | 98.79    %     | 5    |              |
-| **timm/tf_efficientnetv2_l.in21k_ft_in1k** | **v4.3** | 14,000  | **98.79       %** | **98.77    %** | 1    | Good & Large |
-| **timm/tf_efficientnetv2_m.in21k_ft_in1k** | **v1.3** | 14,000  | **98.90       %** | **98.90    %** | 1    | Good & Small |
-| timm/tf_efficientnetv2_s.in21k             | v7.3     | 14,000  | 97.90       %     | 97.87    %     | 1    |              |
 
 The rows highlighted in bold correspond to the best models uploaded to the HF 😊 hub [^1] 🔗,
 
@@ -209,6 +209,11 @@ arrowheads, and rocks formerly drawn by hand and later illustrated with digital 
 
 ![data_timeline.png](dataset_timeline.png)
 
+Moreover,  the distribution of categories is shown on the figure below, where train, dev, and test subsets of all 5 cross-validation
+folds are combined together for better visualization. The timeline of the source documents is horizontally represented, 
+while the vertical axis shows the relative proportions of pages per category 🪧️ for each year.
+
+![fold_subset_category_proportions.png](fold_subset_category_proportions.png)
 
 ### Categories 🪧
 
@@ -530,6 +535,10 @@ for exactly TOP-3 guesses with a console output.
 
 to run a single PNG file classification - the output will be in the console. 
 
+    python3 run.py -f '/full/path/to/file.png' --best
+
+to run all the best models on a single PNG file - the output will be in the console. 
+
 </details>
 
 > [!NOTE]
@@ -570,6 +579,10 @@ for exactly TOP-3 guesses in tabular format from all images found in the given d
 
     python3 run.py -m "./models/model_v43" --dir -ff png
 
+Also, to run all the best models (sequentially) on all PNG files in the given directory:
+
+    python3 run.py --dir --inner --best
+
 </details>
 
 The classification results of PNG pages collected from the directory will be saved 💾 to related [results](result) 📁
@@ -606,11 +619,12 @@ results can be found in the [result](result) 📁 folder.
 | `v3.2`       | 96.49     | 99.94     |
 | `v4.2`       | 97.73     | 99.87     |
 | `v5.2`       | 97.86     | 99.87     |
-| `v1.3`       | 96.83     | 99.71     |
-| `v2.3`       | 98.00     | 99.96     |
-| `v3.3`       | 98.57     | 99.98     |
-| `v4.3`       | 98.15     | 99.61     |
-| `v5.3`       | **99.01** | 99.98     |
+| `v1.3`       | 98.83     | 99.96     |
+| `v2.3`       | 98.79     | 99.96     |
+| `v3.3`       | 98.92     | 99.98     |
+| `v4.3`       | **99.16** | 99.96     |
+| `v5.3`       | **99.12** | 99.94     |
+| `v6.3`       | 98.79     | 99.94     |
 
 `v2.2` Evaluation set's accuracy (**Top-1**):  **97.54%** 🏆
 
@@ -663,53 +677,63 @@ results can be found in the [result](result) 📁 folder.
 </details>
 
 
-`v1.3` Evaluation set's accuracy (**Top-1**):  **96.83%** 🏆
+`v1.3` Evaluation set's accuracy (**Top-1**):  **98.83%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20251004-1000_model_v13a5_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2Fmodel_v13_conf_mat_TOP-1.png)
 
 </details>
 
-`v2.3` Evaluation set's accuracy (**Top-1**):  **98.0%** 🏆
+`v2.3` Evaluation set's accuracy (**Top-1**):  **98.79%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20251004-1022_model_v23a5_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2Fmodel_v23_conf_mat_TOP-1.png)
 
 </details>
 
-`v3.3` Evaluation set's accuracy (**Top-1**):  **98.0%** 🏆
+`v3.3` Evaluation set's accuracy (**Top-1**):  **98.92%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20251004-1443_model_v33a5_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2Fmodel_v33_conf_mat_TOP-1.png)
 
 </details>
 
-`v4.3` Evaluation set's accuracy (**Top-1**):  **98.15%** 🏆
+`v4.3` Evaluation set's accuracy (**Top-1**):  **98.62%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20251004-1934_model_v43a5_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2Fmodel_v43_conf_mat_TOP-1.png)
 
 </details>
 
-`v5.3` Evaluation set's accuracy (**Top-1**):  **99.01%** 🏆
+`v5.3` Evaluation set's accuracy (**Top-1**):  **99.12%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20251004-1014_model_v53a5_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2Fmodel_v53_conf_mat_TOP-1.png)
+
+</details>
+
+`v6.3` Evaluation set's accuracy (**Top-1**):  **99.16%** 🏆
+
+<details>
+
+<summary>Confusion matrix 📊 TOP-1 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2Fmodel_v63_conf_mat_TOP-1.png)
 
 </details>
 
@@ -778,43 +802,49 @@ Demo files  `v4.2`:
 
 Demo files  `v2.3`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251004-1015_model_v23a5_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1136_5449_model_v23_TOP-1_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251004-1704_model_v23a5_TOP-3_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1137_5449_model_v23_TOP-3_EVAL.csv) 📎
 
 - **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251004-2013_model_v23a5_TOP-1.csv)📎
 
 Demo files  `v3.3`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251004-1435_model_v33a5_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-0827_5449_model_v33_TOP-1_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251004-1643_model_v33a5_TOP-3_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1145_5449_model_v33_TOP-3_EVAL.csv) 📎
 
 - **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251004-2012_model_v33a5_TOP-1.csv)📎
 
 Demo files  `v5.3`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251004-1004_model_v53a5_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251019-1411_5449_model_v53_TOP-1_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251004-1652_model_v53a5_TOP-3_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251019-1415_5449_model_v53_TOP-3_EVAL.csv) 📎
 
 - **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251004-2011_model_v53a5_TOP-1.csv)📎
 
 Demo files  `v1.3`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251004-0954_model_v13a5_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251019-1328_5449_model_v13_TOP-1_EVAL) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251004-1935_model_v13a5_TOP-3_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251019-1408_5449_model_v13_TOP-3_EVAL) 📎
 
 - **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251004-2011_model_v13a5_TOP-1.csv)📎
 
 Demo files  `v4.3`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251004-1927_model_v43a5_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1135_5449_model_v43_TOP-1_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251004-1928_model_v43a5_TOP-3_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1135_5449_model_v43_TOP-3_EVAL.csv) 📎
 
 - **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251004-2009_model_v43a5_TOP-1.csv)📎
+
+Demo files  `v6.3`:
+
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1123_5449_model_v63_TOP-1_EVAL.csv) 📎
+
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1123_5449_model_v63_TOP-3_EVAL.csv) 📎
 
 With the following **columns** 📋:
 
