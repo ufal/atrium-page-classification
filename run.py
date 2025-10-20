@@ -7,7 +7,6 @@ from classifier import *
 import time
 from huggingface_hub import create_branch, delete_branch
 
-
 if __name__ == "__main__":
     # Initialize the parser
     config = configparser.ConfigParser()
@@ -33,13 +32,13 @@ if __name__ == "__main__":
         "v1.3": "timm/tf_efficientnetv2_m.in21k_ft_in1k",
         "v2.3": "google/vit-base-patch16-224",
         "v3.3": "google/vit-base-patch16-384",
-        "v4.3": "timm/tf_efficientnetv2_l.in21k_ft_in1k",
+        "v4.3": "timm/regnety_160.swag_ft_in1k",
         "v5.3": "google/vit-large-patch16-384",
-        "v6.3": "timm/regnety_160.swag_ft_in1k",
+        "v6.3": "timm/regnety_640.seer",
     }
 
-
-    def_categ = ["DRAW", "DRAW_L", "LINE_HW", "LINE_P", "LINE_T", "PHOTO", "PHOTO_L", "TEXT", "TEXT_HW", "TEXT_P", "TEXT_T"]
+    def_categ = ["DRAW", "DRAW_L", "LINE_HW", "LINE_P", "LINE_T", "PHOTO", "PHOTO_L", "TEXT", "TEXT_HW", "TEXT_P",
+                 "TEXT_T"]
 
     seed = config.getint('SETUP', 'seed')
     batch = config.getint('SETUP', 'batch')  # depends on GPU/CPU capabilities
@@ -47,7 +46,6 @@ if __name__ == "__main__":
 
     config_base_model = config.get('SETUP', 'base_model')  # do not change
     config_format = config.get('SETUP', 'files_format')
-
 
     raw = config.getboolean('SETUP', 'raw')
     inner = config.getboolean('SETUP', 'inner')
@@ -79,21 +77,31 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Page sorter based on ViT')
     parser.add_argument('-f', "--file", type=str, default=None, help="Single page image path")
-    parser.add_argument('-ff', "--file_format", type=str, default=config_format, help="File format to look for in the directory (e.g., png or jpeg)")
+    parser.add_argument('-ff', "--file_format", type=str, default=config_format,
+                        help="File format to look for in the directory (e.g., png or jpeg)")
     parser.add_argument('-d', "--directory", type=str, default=None, help="Path to folder with unprocessed pages")
-    parser.add_argument('-m', "--model", type=str, default=config_model_path, help="Path to the folder with model subfolders")
+    parser.add_argument('-m', "--model", type=str, default=config_model_path,
+                        help="Path to the folder with model subfolders")
     parser.add_argument('-b', "--base", type=str, default=config_base_model, help="Repository of the base model")
-    parser.add_argument('-rev', "--revision", type=str, default=None, help="HuggingFace revision (e.g. `main`, `vN.0` or `vN.M`)")
-    parser.add_argument('-tn', "--topn", type=int, default=top_N, help="Number of the best result categories to consider")
-    parser.add_argument("--dir", help="Process whole directory (if -d not used) but input set in CONFIG", action="store_true")
+    parser.add_argument('-rev', "--revision", type=str, default=None,
+                        help="HuggingFace revision (e.g. `main`, `vN.0` or `vN.M`)")
+    parser.add_argument('-tn', "--topn", type=int, default=top_N,
+                        help="Number of the best result categories to consider")
+    parser.add_argument("--dir", help="Process whole directory (if -d not used) but input set in CONFIG",
+                        action="store_true")
     parser.add_argument("--chunk", help="Process input directory and write predictions in chunks", action="store_true")
-    parser.add_argument("--inner", help="Process nested folders of the given directory (FALSE by default)", default=inner, action="store_true")
+    parser.add_argument("--inner", help="Process nested folders of the given directory (FALSE by default)",
+                        default=inner, action="store_true")
     parser.add_argument("--train", help="Training model", default=Training, action="store_true")
     parser.add_argument("--eval", help="Evaluating model", default=Testing, action="store_true")
-    parser.add_argument("--hf", help="Use model and processor from the HuggingFace repository", default=HF, action="store_true")
+    parser.add_argument("--hf", help="Use model and processor from the HuggingFace repository", default=HF,
+                        action="store_true")
     parser.add_argument("--raw", help="Output raw scores for all categories", default=raw, action="store_true")
-    parser.add_argument("--best", help=f"Output all ({len(revision_best_models.keys())}) best models' scores (more time needed, and NO chunk, raw, or top_N>1 is available)", default=raw, action="store_true")
-    parser.add_argument("--folds", type=int, default=cross_runs, help="Number of folds for cross-validation with 80/10/10 split. Default is 0 (no cross-validation).")
+    parser.add_argument("--best",
+                        help=f"Output all ({len(revision_best_models.keys())}) best models' scores (more time needed, and NO chunk, raw, or top_N>1 is available)",
+                        default=raw, action="store_true")
+    parser.add_argument("--folds", type=int, default=cross_runs,
+                        help="Number of folds for cross-validation with 80/10/10 split. Default is 0 (no cross-validation).")
     parser.add_argument("--average", help="Averaging existing fold models", action="store_true")
     parser.add_argument("-ap", "--average_pattern", type=str, default=None,
                         help="Pattern for models weights to average (e.g., 'model_v4')")
@@ -105,8 +113,7 @@ if __name__ == "__main__":
     args.folds = 0 if not args.train else args.folds
     args.average = False if args.average_pattern is None else args.average
 
-
-    if args.revision is None: # using config file revision
+    if args.revision is None:  # using config file revision
         args.revision = hf_version
         args.base = config_base_model
 
@@ -118,24 +125,24 @@ if __name__ == "__main__":
 
     else:  # using command line argument revision from flag --revision / -rev
         if not any(args.revision.startswith(key) for key in revision_to_base_model.keys()):
-            raise ValueError(f"Revision {args.revision} is not supported. Available revisions: {list(revision_to_base_model.keys())}")
+            raise ValueError(
+                f"Revision {args.revision} is not supported. Available revisions: {list(revision_to_base_model.keys())}")
 
         revision_model_name_local = f"model_{args.revision.replace('.', '')}"
         args.model = f"{model_dir}/{revision_model_name_local}"
         rev_code = key = next(key for key in revision_to_base_model.keys() if args.revision.startswith(key))
 
         if args.base != config_base_model:  # flag argument provided
-            print(f"Base model {config_base_model} does not match the revision {args.revision}. Using {revision_to_base_model[rev_code]} instead.")
+            print(
+                f"Base model {config_base_model} does not match the revision {args.revision}. Using {revision_to_base_model[rev_code]} instead.")
             args.base = revision_to_base_model[rev_code]
         else:
             print(f"Using base model\t{config_base_model} from CONFIG,\trevision\t{args.revision}.")
-
 
     print("Arguments:")
     for arg in vars(args):
         if getattr(args, arg) is not None and getattr(args, arg) != False and getattr(args, arg) != 0:
             print(arg, "\t=\t", getattr(args, arg))
-
 
     # locally creating new directory paths instead of context.txt variables loaded with mistakes
     if not output_dir.is_dir():
@@ -162,7 +169,6 @@ if __name__ == "__main__":
         if args.train:
             total_files, total_labels, categories = collect_images(data_dir)
 
-
     if args.eval:
         data_dir = config.get("EVAL", "FOLDER_PAGES")
         testfiles, testLabels, categories = collect_images(data_dir)
@@ -175,7 +181,6 @@ if __name__ == "__main__":
         # Initialize the classifier
         classifier = ImageClassifier(checkpoint=args.base, num_labels=len(categories), store_dir=str(cp_dir))
 
-
     if args.train:
 
         if args.folds > 0:
@@ -184,10 +189,12 @@ if __name__ == "__main__":
                 fold_seed = seed + i  # Use a different seed for each fold
 
                 (trainfiles, valfiles, testfiles,
-                 trainLabels, valLabels, testLabels) = split_data_80_10_10(total_files, total_labels, fold_seed, max_categ)
+                 trainLabels, valLabels, testLabels) = split_data_80_10_10(total_files, total_labels, fold_seed,
+                                                                           max_categ)
 
                 # record datasets
-                with open(f"{output_dir}/stats/{time_stamp}_{revision_model_name_local}_FOLD_{i + 1}_DATASETS.txt", "w") as f:
+                with open(f"{output_dir}/stats/{time_stamp}_{revision_model_name_local}_FOLD_{i + 1}_DATASETS.txt",
+                          "w") as f:
                     f.write(f"Training set ({len(trainfiles)} images):\n")
                     for file in trainfiles:
                         f.write(f"{file}\n")
@@ -230,7 +237,8 @@ if __name__ == "__main__":
                 # print(test_predictions[-3:])
 
                 print("=" * 40)
-                print(f"TEST SET's correct percentage:\t{round(100 * sum([1 for true, pred in zip(test_labels_indices, test_predictions) if true == pred]) / len(test_labels_indices), 2)}%")
+                print(
+                    f"TEST SET's correct percentage:\t{round(100 * sum([1 for true, pred in zip(test_labels_indices, test_predictions) if true == pred]) / len(test_labels_indices), 2)}%")
                 print("=" * 40)
                 print(classification_report(test_labels_indices, test_predictions,
                                             target_names=categories, labels=list(range(len(categories))),
@@ -239,13 +247,15 @@ if __name__ == "__main__":
                 rdf, raw_df = dataframe_results(testfiles, test_predictions, categories, top_N, raw_prediction)
                 rdf["TRUE"] = [categories[label] for label in test_labels_indices]
                 rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
-                rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_TEST_FOLD_{i + 1}.csv", index=False)
+                rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_TEST_FOLD_{i + 1}.csv",
+                           index=False)
 
                 if raw:
                     raw_df["TRUE"] = [categories[label] for label in test_labels_indices]
                     raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
-                    raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_TEST_RAW_FOLD_{i + 1}.csv",
-                                  index=False)
+                    raw_df.to_csv(
+                        f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_TEST_RAW_FOLD_{i + 1}.csv",
+                        index=False)
 
                 print(f"Test results for fold {i + 1} saved.")
         else:
@@ -270,22 +280,24 @@ if __name__ == "__main__":
                 logging_steps=log_step
             )
 
-
     if args.hf:
         # ----------------------------------------------
         # ----- UNCOMMENT for pushing to HF repo -------
         # ----------------------------------------------
         print(f"Deleting {args.revision} branch")
-        delete_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision, token=config.get("HF", "token"))
+        delete_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision,
+                      token=config.get("HF", "token"))
         print(f"Creating fresh {args.revision} branch")
-        create_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision, exist_ok=True, token=config.get("HF", "token"))
+        create_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision, exist_ok=True,
+                      token=config.get("HF", "token"))
 
         print(f"Loading {args.model} model")
 
         classifier.load_model(str(args.model))
 
-        classifier.push_to_hub(str(args.model), config.get("HF", "repo_name"), False, config.get("HF", "token"), config.get("HF", "revision"))
-        #----------------------------------------------
+        classifier.push_to_hub(str(args.model), config.get("HF", "repo_name"), False, config.get("HF", "token"),
+                               config.get("HF", "revision"))
+        # ----------------------------------------------
 
         # loading from repo
         classifier.load_from_hub(config.get("HF", "repo_name"), args.revision)
@@ -315,13 +327,16 @@ if __name__ == "__main__":
 
         rdf["TRUE"] = [categories[i] for i in test_labels_indices]
         rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
-        rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{number_of_rows}_{revision_model_name_local}_TOP-{top_N}_EVAL.csv", sep=",", index=False)
+        rdf.to_csv(
+            f"{output_dir}/tables/{time_stamp}_{number_of_rows}_{revision_model_name_local}_TOP-{top_N}_EVAL.csv",
+            sep=",", index=False)
         print(f"Evaluation results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
 
         if raw:
             raw_df["TRUE"] = [categories[i] for i in test_labels_indices]
             raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
-            raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{number_of_rows}_{revision_model_name_local}_EVAL_RAW.csv", sep=",", index=False)
+            raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{number_of_rows}_{revision_model_name_local}_EVAL_RAW.csv",
+                          sep=",", index=False)
             print(f"RAW Evaluation results are recorded into {output_dir}/tables/ directory")
 
         confusion_plot(eval_predictions,
@@ -358,7 +373,6 @@ if __name__ == "__main__":
         else:
             print(f"Could not determine base model for pattern: {args.average_pattern}")
 
-
     if args.file is not None:
         if not args.best:
             pred_scores = classifier.top_n_predictions(args.file, top_N)
@@ -374,7 +388,8 @@ if __name__ == "__main__":
 
             for rev, base_model in revision_best_models.items():
                 print(f"\nLoading best model for revision {rev} based on {base_model}...")
-                temp_classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories), store_dir=str(cp_dir))
+                temp_classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories),
+                                                  store_dir=str(cp_dir))
                 temp_model_name_local = f"model_{rev.replace('.', '')}"
                 temp_model_path = f"{model_dir}/{temp_model_name_local}"
 
@@ -386,7 +401,6 @@ if __name__ == "__main__":
                 scores = [round(i[1], 3) for i in pred_scores]
 
                 all_best_predictions[rev] = (labels, scores)
-
 
             print(f"\nFile {args.file} predictions from best models:")
             for rev, (labels, scores) in all_best_predictions.items():
@@ -421,15 +435,17 @@ if __name__ == "__main__":
                                                 raw_prediction)
 
                 rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
-                rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_TOP-{top_N}.csv", sep=",", index=False)
+                rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_TOP-{top_N}.csv", sep=",",
+                           index=False)
                 print(f"Results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
 
                 if raw:
                     raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
-                    raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_RAW.csv", sep=",", index=False)
+                    raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_RAW.csv", sep=",",
+                                  index=False)
                     print(f"RAW Results are recorded into {output_dir}/tables/ directory")
 
-            else: # chunked processing and saving
+            else:  # chunked processing and saving
                 print(f"Starting inference of {input_dir}, saving results in chunks of {chunk_size * batch} images...")
 
                 total = len(test_images)
@@ -517,7 +533,7 @@ if __name__ == "__main__":
                 test_predictions, _ = temp_classifier.infer_dataloader(test_loader, 1, False)
 
                 rdf, _ = dataframe_results(test_images, test_predictions,
-                                           categories,1,None)
+                                           categories, 1, None)
 
                 rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
                 all_best_predictions[rev] = rdf
@@ -534,10 +550,10 @@ if __name__ == "__main__":
                 else:
                     combined_df = pd.merge(combined_df, rdf_renamed, on=["FILE", "PAGE"], how="outer")
 
-            combined_df.to_csv(f"{output_dir}/tables/{time_stamp}_BEST_{len(revision_best_models.keys())}_models_TOP-1.csv", sep=",",
-                       index=False)
+            combined_df.to_csv(
+                f"{output_dir}/tables/{time_stamp}_BEST_{len(revision_best_models.keys())}_models_TOP-1.csv", sep=",",
+                index=False)
             print(f"Results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
-
 
 
 

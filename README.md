@@ -95,21 +95,21 @@ paper source into one of the categories - each responsible for the following con
 > or structured in tabular 📏 format text, as well as to mark the presence of the printed 🌄 or drawn 📈 graphic 
 > materials to be extracted from the page images.
 
+| Base Model                                 | Revision | max_cat | Best_Prec (%) | Best_Acc (%) | Fold | Note         |
+|--------------------------------------------|----------|---------|---------------|--------------|------|--------------|
+| **google/vit-base-patch16-224**            | **v2.3** | 14,000  | **98.79**     | **98.79**    | 5    | OK & Small   |
+| **google/vit-base-patch16-384**            | **v3.3** | 14,000  | **98.92**     | **98.92**    | 2    | Good & Small |
+| **google/vit-large-patch16-384**           | **v5.3** | 14,000  | **99.12**     | **99.12**    | 2    | Best & Large |
+| microsoft/dit-base-finetuned-rvlcdip       | v9.3     | 14,000  | 98.71         | 98.72        | 3    |              |
+| microsoft/dit-large-finetuned-rvlcdip      | v10.3    | 14,000  | 98.66         | 98.66        | 3    |              |
+| microsoft/dit-large                        | v11.3    | 14,000  | 98.53         | 98.53        | 2    |              |
+| timm/regnety_120.sw_in12k_ft_in1k          | v12.3    | 14,000  | 98.29         | 98.29        | 3    |              |
+| **timm/regnety_160.swag_ft_in1k**          | **v4.3** | 14,000  | **99.17**     | **99.16**    | 1    | Best & Small |
+| **timm/regnety_640.seer**                  | **v6.3** | 14,000  | **98.79**     | **98.79**    | 5    | OK & Large   |
+| timm/tf_efficientnetv2_l.in21k_ft_in1k     | v8.3     | 14,000  | 98.62         | 98.62        | 5    |              |
+| **timm/tf_efficientnetv2_m.in21k_ft_in1k** | **v1.3** | 14,000  | **98.83**     | **98.83**    | 1    | Good & Small |
+| timm/tf_efficientnetv2_s.in21k             | v7.3     | 14,000  | 97.90         | 97.87        | 1    |              |
 
-| Base Model                                 | Revision | max_cat | Best_Prec         | Best_Acc       | Fold | Note         |
-|--------------------------------------------|----------|---------|-------------------|----------------|------|--------------|
-| google/vit-base-patch16-224                | v12.3    | 14,000  | 98.89       %     | 98.88    %     | 1    |              |
-| **google/vit-base-patch16-384**            | **v3.3** | 14,000  | **99.01       %** | **98.99    %** | 5    | Good & Small |
-| **google/vit-large-patch16-384**           | **v5.3** | 14,000  | **99.25       %** | **99.25    %** | 2    | Best & Large |
-| microsoft/dit-base-finetuned-rvlcdip       | v9.3     | 14,000  | 98.71       %     | 98.72    %     | 3    |              |
-| microsoft/dit-large-finetuned-rvlcdip      | v10.3    | 14,000  | 98.66       %     | 98.66    %     | 3    |              |
-| microsoft/dit-large                        | v11.3    | 14,000  | 98.53       %     | 98.53    %     | 2    |              |
-| timm/regnety_120.sw_in12k_ft_in1k          | v6.3     | 14,000  | 98.29       %     | 98.29    %     | 3    |              |
-| **timm/regnety_160.swag_ft_in1k**          | **v2.3** | 14,000  | **99.21       %** | **99.21    %** | 1    | Best & Small |
-| timm/regnety_640.seer                      | v8.3     | 14,000  | 98.79       %     | 98.79    %     | 5    |              |
-| **timm/tf_efficientnetv2_l.in21k_ft_in1k** | **v4.3** | 14,000  | **98.79       %** | **98.77    %** | 1    | Good & Large |
-| **timm/tf_efficientnetv2_m.in21k_ft_in1k** | **v1.3** | 14,000  | **98.90       %** | **98.90    %** | 1    | Good & Small |
-| timm/tf_efficientnetv2_s.in21k             | v7.3     | 14,000  | 97.90       %     | 97.87    %     | 1    |              |
 
 The rows highlighted in bold correspond to the best models uploaded to the HF 😊 hub [^1] 🔗,
 
@@ -209,6 +209,11 @@ arrowheads, and rocks formerly drawn by hand and later illustrated with digital 
 
 ![data_timeline.png](dataset_timeline.png)
 
+Moreover,  the distribution of categories is shown on the figure below, where train, dev, and test subsets of all 5 cross-validation
+folds are combined together for better visualization. The timeline of the source documents is horizontally represented, 
+while the vertical axis shows the relative proportions of pages per category 🪧️ for each year.
+
+![fold_subset_category_proportions.png](fold_subset_category_proportions.png)
 
 ### Categories 🪧
 
@@ -617,9 +622,9 @@ results can be found in the [result](result) 📁 folder.
 | `v1.3`       | 98.83     | 99.96     |
 | `v2.3`       | 98.79     | 99.96     |
 | `v3.3`       | 98.92     | 99.98     |
-| `v4.3`       | 98.62     | 99.61     |
+| `v4.3`       | **99.16** | 99.96     |
 | `v5.3`       | **99.12** | 99.94     |
-| `v6.3`       | **99.16** | 99.96     |
+| `v6.3`       | 98.79     | 99.94     |
 
 `v2.2` Evaluation set's accuracy (**Top-1**):  **97.54%** 🏆
 
