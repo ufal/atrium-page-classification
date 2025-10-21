@@ -34,7 +34,7 @@ if __name__ == "__main__":
         "v3.3": "google/vit-base-patch16-384",
         "v4.3": "timm/regnety_160.swag_ft_in1k",
         "v5.3": "google/vit-large-patch16-384",
-        "v6.3": "timm/regnety_640.seer",
+        # "v6.3": "timm/regnety_640.seer",
     }
 
     def_categ = ["DRAW", "DRAW_L", "LINE_HW", "LINE_P", "LINE_T", "PHOTO", "PHOTO_L", "TEXT", "TEXT_HW", "TEXT_P",

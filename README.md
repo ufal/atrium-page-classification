@@ -48,11 +48,11 @@ of HF 😊 hub [^1] 🔗
 |  `v5.2` | `vit-large-patch16-384`          | 15855 | **5730**  | same data as `v2.2`, but the largest model base with higher resolution             |
 |  `v1.2` | `efficientnetv2_s.in21k`         | 15855 | **5730**  | same data as `v2.2`, but the smallest model base (CNN)                             |
 |  `v4.2` | `efficientnetv2_l.in21k_ft_in1k` | 15855 | **5730**  | same data as `v2.2`, CNN base model smaller than the largest, may be more accurate |
-|  `v2.3` | `regnety_160.swag_ft_in1k`       | 38625 | **37328** | new data annotation phase data, more single-page documents used, CNN model         |
+|  `v2.3` | `vit-base-patch16-224`           | 38625 | **37328** | new data annotation phase data, more single-page documents used, transformer model |
 |  `v3.3` | `vit-base-patch16-384`           | 38625 | **37328** | same data as `v2.3`, but a bit larger model base with higher resolution            |
 |  `v5.3` | `vit-large-patch16-384`          | 38625 | **37328** | same data as `v2.3`, but the largest model base with higher resolution             |
 |  `v1.3` | `efficientnetv2_m.in21k_ft_in1k` | 38625 | **37328** | same data as `v2.3`, but the smallest model base (CNN)                             |
-|  `v4.3` | `efficientnetv2_l.in21k_ft_in1k` | 38625 | **37328** | same data as `v2.3`, CNN base model smaller than the largest, may be more accurate |
+|  `v4.3` | `regnety_160.swag_ft_in1k`       | 38625 | **37328** | same data as `v2.3`, CNN base model bigger than the smallest, may be more accurate |
 
 <details>
 
@@ -62,10 +62,9 @@ of HF 😊 hub [^1] 🔗
 |----------------------------------|--------------------|-----------------|----------|
 | `efficientnetv2_s.in21k`         | 48                 | 300             | v2.X     |
 | `efficientnetv2_m.in21k_ft_in1k` | 54                 | 384             | v1.3     |
-| `regnety_160.swag_ft_in1k`       | 84                 | 224             | v2.3     |
+| `regnety_160.swag_ft_in1k`       | 84                 | 224             | v4.3     |
 | `vit-base-patch16-224`           | 87                 | 224             | v2.X     |
 | `vit-base-patch16-384`           | 87                 | 384             | v3.X     |
-| `efficientnetv2_l.in21k_ft_in1k` | 119                | 384             | v4.X     |
 | `vit-large-patch16-384`          | 305                | 384             | v5.X     |
 
 </details>
@@ -105,7 +104,7 @@ paper source into one of the categories - each responsible for the following con
 | microsoft/dit-large                        | v11.3    | 14,000  | 98.53         | 98.53        | 2    |              |
 | timm/regnety_120.sw_in12k_ft_in1k          | v12.3    | 14,000  | 98.29         | 98.29        | 3    |              |
 | **timm/regnety_160.swag_ft_in1k**          | **v4.3** | 14,000  | **99.17**     | **99.16**    | 1    | Best & Small |
-| **timm/regnety_640.seer**                  | **v6.3** | 14,000  | **98.79**     | **98.79**    | 5    | OK & Large   |
+| timm/regnety_640.see                       | v6.3     | 14,000  | 98.79         | 98.79        | 5    | OK & Large   |
 | timm/tf_efficientnetv2_l.in21k_ft_in1k     | v8.3     | 14,000  | 98.62         | 98.62        | 5    |              |
 | **timm/tf_efficientnetv2_m.in21k_ft_in1k** | **v1.3** | 14,000  | **98.83**     | **98.83**    | 1    | Good & Small |
 | timm/tf_efficientnetv2_s.in21k             | v7.3     | 14,000  | 97.90         | 97.87        | 1    |              |
@@ -485,13 +484,13 @@ the `batch` variable in the `[SETUP]` section.
 
 <summary>Rough estimations of disk space needed for trained model in relation to the base model 👀</summary>
 
-| **Version**             | **Disk space** |
-|-------------------------|----------------|
-| `efficientnetv2_s`      | 82 Mb          |
-| `vit-base-patch16-224`  | 344 Mb         |
-| `vit-base-patch16-384`  | 345 Mb         |
-| `efficientnetv2_l`      | 471 Mb         |
-| `vit-large-patch16-384` | 1.2 Gb         |
+| **Version**                | **Disk space** |
+|----------------------------|----------------|
+| `efficientnetv2_m`         | 213 Mb         |
+| `vit-base-patch16-224`     | 344 Mb         |
+| `vit-base-patch16-384`     | 345 Mb         |
+| `regnety_160.swag_ft_in1k` | 323 Mb         |
+| `vit-large-patch16-384`    | 1.2 Gb         |
 
 </details>
 
@@ -619,12 +618,13 @@ results can be found in the [result](result) 📁 folder.
 | `v3.2`       | 96.49     | 99.94     |
 | `v4.2`       | 97.73     | 99.87     |
 | `v5.2`       | 97.86     | 99.87     |
-| `v1.3`       | 98.83     | 99.96     |
+| `v1.3`       | 96.81     | 99.78     |
 | `v2.3`       | 98.79     | 99.96     |
 | `v3.3`       | 98.92     | 99.98     |
-| `v4.3`       | **99.16** | 99.96     |
+| `v4.3`       | 98.92     | **100.0** |
 | `v5.3`       | **99.12** | 99.94     |
 | `v6.3`       | 98.79     | 99.94     |
+
 
 `v2.2` Evaluation set's accuracy (**Top-1**):  **97.54%** 🏆
 
@@ -683,7 +683,7 @@ results can be found in the [result](result) 📁 folder.
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2Fmodel_v13_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20251020-1835_model_v13_conf_mat_TOP-1.png)
 
 </details>
 
@@ -693,7 +693,7 @@ results can be found in the [result](result) 📁 folder.
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2Fmodel_v23_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20251020-1841_model_v23_conf_mat_TOP-1.png)
 
 </details>
 
@@ -703,7 +703,7 @@ results can be found in the [result](result) 📁 folder.
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2Fmodel_v33_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20251020-1849_model_v33_conf_mat_TOP-1.png)
 
 </details>
 
@@ -713,7 +713,7 @@ results can be found in the [result](result) 📁 folder.
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2Fmodel_v43_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20251020-1856_model_v43_conf_mat_TOP-1.png)
 
 </details>
 
@@ -723,7 +723,7 @@ results can be found in the [result](result) 📁 folder.
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2Fmodel_v53_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20251020-1841_model_v23_conf_mat_TOP-1.png)
 
 </details>
 
@@ -733,7 +733,7 @@ results can be found in the [result](result) 📁 folder.
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2Fmodel_v63_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20251020-1835_model_v13_conf_mat_TOP-1.png)
 
 </details>
 
@@ -802,49 +802,53 @@ Demo files  `v4.2`:
 
 Demo files  `v2.3`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1136_5449_model_v23_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1835_5449_model_v23_TOP-1_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1137_5449_model_v23_TOP-3_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1842_5449_model_v23_TOP-3_EVAL.csv) 📎
 
-- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251004-2013_model_v23a5_TOP-1.csv)📎
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251020-1807_115_model_v23_TOP-1_EVAL.csv)📎
 
 Demo files  `v3.3`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-0827_5449_model_v33_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1841_5449_model_v33_TOP-1_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1145_5449_model_v33_TOP-3_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1854_5449_model_v33_TOP-3_EVAL.csv) 📎
 
-- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251004-2012_model_v33a5_TOP-1.csv)📎
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251020-1808_115_model_v33_TOP-1_EVAL.csv)📎
 
 Demo files  `v5.3`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251019-1411_5449_model_v53_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1856_5449_model_v53_TOP-1_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251019-1415_5449_model_v53_TOP-3_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1921_5449_model_v53_TOP-3_EVAL.csv) 📎
 
-- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251004-2011_model_v53a5_TOP-1.csv)📎
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251020-1809_115_model_v53_TOP-1_EVAL.csv.csv)📎
 
 Demo files  `v1.3`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251019-1328_5449_model_v13_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1825_5449_model_v13_TOP-1_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251019-1408_5449_model_v13_TOP-3_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1828_5449_model_v13_TOP-3_EVAL.csv) 📎
 
-- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251004-2011_model_v13a5_TOP-1.csv)📎
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251020-1807_115_model_v13_TOP-1_EVAL.csv)📎
 
 Demo files  `v4.3`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1135_5449_model_v43_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1849_5449_model_v43_TOP-1_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1135_5449_model_v43_TOP-3_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1908_5449_model_v43_TOP-3_EVAL.csv) 📎
 
-- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251004-2009_model_v43a5_TOP-1.csv)📎
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251020-1809_115_model_v43_TOP-1_EVAL.csv)📎
 
 Demo files  `v6.3`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1123_5449_model_v63_TOP-1_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1906_5449_model_v63_TOP-1_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1123_5449_model_v63_TOP-3_EVAL.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1937_5449_model_v63_TOP-3_EVAL.csv) 📎
+
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251020-1810_115_model_v63_TOP-1_EVAL.csv)📎
+
+Plus, the best model inference results of the small subset (`category_samples` 📁 folder) for all 6 versions: [best_models_TOP-1.csv](result%2Ftables%2F20251020-1812_BEST_6_models_TOP-1.csv)📎
 
 With the following **columns** 📋:
 
