@@ -618,7 +618,7 @@ results can be found in the [result](result) 📁 folder.
 | `v3.2`       | 96.49     | 99.94     |
 | `v4.2`       | 97.73     | 99.87     |
 | `v5.2`       | 97.86     | 99.87     |
-| `v1.3`       | 96.81     | 99.78     |
+| `v1.3`       | 98.83     | 99.78     |
 | `v2.3`       | 98.79     | 99.96     |
 | `v3.3`       | 98.92     | 99.98     |
 | `v4.3`       | 98.92     | **100.0** |
@@ -707,7 +707,7 @@ results can be found in the [result](result) 📁 folder.
 
 </details>
 
-`v4.3` Evaluation set's accuracy (**Top-1**):  **98.62%** 🏆
+`v4.3` Evaluation set's accuracy (**Top-1**):  **98.92%** 🏆
 
 <details>
 
@@ -727,7 +727,7 @@ results can be found in the [result](result) 📁 folder.
 
 </details>
 
-`v6.3` Evaluation set's accuracy (**Top-1**):  **99.16%** 🏆
+`v6.3` Evaluation set's accuracy (**Top-1**):  **98.79%** 🏆
 
 <details>
 
