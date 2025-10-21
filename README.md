@@ -723,7 +723,7 @@ results can be found in the [result](result) 📁 folder.
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20251020-1841_model_v23_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20251020-1905_model_v53_conf_mat_TOP-1.png)
 
 </details>
 
@@ -733,7 +733,7 @@ results can be found in the [result](result) 📁 folder.
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20251020-1835_model_v13_conf_mat_TOP-1.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20251020-1913_model_v63_conf_mat_TOP-1.png)
 
 </details>
 
