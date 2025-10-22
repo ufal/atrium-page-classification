@@ -416,18 +416,20 @@ After the model is downloaded, you should see a similar file structure:
             └── sort.sh
     ├── result
         ├── plots
-            ├── date-time_conf_mat.png
+            ├── date-time_<#samples>_model_<revision>_conf_mat_TOP-<top_N>.png
             └── ...
         └── tables
-            ├── date-time_TOP-N.csv
-            ├── date-time_TOP-N_EVAL.csv
-            ├── date-time_EVAL_RAW.csv
+            ├── date-time_<#samples>_model_<revision>_TOP-<top_N>.csv
+            ├── date-time_<#samples>_model_<revision>_RAW.csv
+            ├── date-time_<#samples>_model_<revision>_TOP-<top_N>_EVAL.csv
+            ├── date-time_<#samples>_model_<revision>_EVAL_RAW.csv
+            ├── date-time_<#samples>_BEST_<#models>_models_TOP-<top_N>.csv
             └── ...
         └── stats
             ├── model_accuracies.csv
             ├── model_accuracies_plot.png
             ├── model_accuracies_zero_plot.png
-            ├── date-time_model_<rev>_FOLD_<n>_DATASETS.txt
+            ├── date-time_model_<revision>_FOLD_<n>_DATASETS.txt
             └── ...
     ├── category_samples
         ├── DRAW
@@ -1186,6 +1188,7 @@ the key phases of the whole process (settings, training, evaluation) is provided
 | `run.py`              | Starting point of the program with its main function - can be edited for flags and function argument extensions                   |
 | `config.txt`          | Changeable variables for the program - should be edited                                                                           |
 | `job_run.sh`          | Running on a server node script                                                                                                   |
+| `result_analysis.sh`  | Computes performance scores for saved model results                                                                               |
 | `dataset_timeline.py` | Creates a plot of categories distribution over time based on filenames                                                            |
 | `img2jpeg_v3.py`      | Transforms any images into jpeg format                                                                                            |
 | `logs_stats.py`       | Creates a table of stats for each tensorboard directory with event logs                                                           |

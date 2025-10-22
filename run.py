@@ -247,14 +247,14 @@ if __name__ == "__main__":
                 rdf, raw_df = dataframe_results(testfiles, test_predictions, categories, top_N, raw_prediction)
                 rdf["TRUE"] = [categories[label] for label in test_labels_indices]
                 rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
-                rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_TEST_FOLD_{i + 1}.csv",
+                rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{len(test_labels_indices)}_{revision_model_name_local}_TEST_FOLD_{i + 1}.csv",
                            index=False)
 
                 if raw:
                     raw_df["TRUE"] = [categories[label] for label in test_labels_indices]
                     raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
                     raw_df.to_csv(
-                        f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_TEST_RAW_FOLD_{i + 1}.csv",
+                        f"{output_dir}/tables/{time_stamp}_{len(test_labels_indices)}_{revision_model_name_local}_TEST_RAW_FOLD_{i + 1}.csv",
                         index=False)
 
                 print(f"Test results for fold {i + 1} saved.")
@@ -453,8 +453,8 @@ if __name__ == "__main__":
 
                 # daily date-based filenames (YYYYMMDD)
                 date_stamp = time.strftime('%Y%m%d')
-                top_out_path = f"{output_dir}/tables/{date_stamp}_{revision_model_name_local}_TOP-{top_N}.csv"
-                raw_out_path = f"{output_dir}/tables/{date_stamp}_{revision_model_name_local}_RAW.csv"
+                top_out_path = f"{output_dir}/tables/{date_stamp}_{total}_{revision_model_name_local}_TOP-{top_N}.csv"
+                raw_out_path = f"{output_dir}/tables/{date_stamp}_{total}_{revision_model_name_local}_RAW.csv"
 
                 for chunk_idx, start in enumerate(range(0, total, chunk_size), start=1):
                     end = min(start + chunk_size, total)

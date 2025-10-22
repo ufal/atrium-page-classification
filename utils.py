@@ -137,6 +137,6 @@ def confusion_plot(predictions: list, trues: list, categories: list, out_model: 
     time_stamp = time.strftime("%Y%m%d-%H%M")
     disp.ax_.set_title(
         f"TOP-{top_N} Confusion matrix {out_model} - {round(100 * correct / len(trues), 2)}%")
-    out = f"{output_dir if output_dir else 'result'}/plots/{time_stamp}_{out_model}_conf_mat_TOP-{top_N}.png"
+    out = f"{output_dir if output_dir else 'result'}/plots/{time_stamp}_{len(trues)}_{out_model}_conf_mat_TOP-{top_N}.png"
     plt.savefig(out, bbox_inches='tight', dpi=300)
     plt.close()
