@@ -43,11 +43,11 @@ of HF 😊 hub [^1] 🔗
 |--------:|----------------------------------|:-----:|:---------:|:-----------------------------------------------------------------------------------|
 |  `v2.0` | `vit-base-patch16-224`           | 10073 | **3896**  | annotations with mistakes, more heterogenous data                                  |
 |  `v2.1` | `vit-base-patch16-224`           | 11940 | **5002**  | `main`: more diverse pages in each category, less annotation mistakes              |
-|  `v2.2` | `vit-base-patch16-224`           | 15855 | **5730**  | same data as `v2.1` + some restored pages from `v2.0`                              |
-|  `v3.2` | `vit-base-patch16-384`           | 15855 | **5730**  | same data as `v2.2`, but a bit larger model base with higher resolution            |
-|  `v5.2` | `vit-large-patch16-384`          | 15855 | **5730**  | same data as `v2.2`, but the largest model base with higher resolution             |
-|  `v1.2` | `efficientnetv2_s.in21k`         | 15855 | **5730**  | same data as `v2.2`, but the smallest model base (CNN)                             |
-|  `v4.2` | `efficientnetv2_l.in21k_ft_in1k` | 15855 | **5730**  | same data as `v2.2`, CNN base model smaller than the largest, may be more accurate |
+|  `v2.2` | `vit-base-patch16-224`           | 14270 | **5730**  | same data as `v2.1` + some restored pages from `v2.0`                              |
+|  `v3.2` | `vit-base-patch16-384`           | 14270 | **5730**  | same data as `v2.2`, but a bit larger model base with higher resolution            |
+|  `v5.2` | `vit-large-patch16-384`          | 14270 | **5730**  | same data as `v2.2`, but the largest model base with higher resolution             |
+|  `v1.2` | `efficientnetv2_s.in21k`         | 14270 | **5730**  | same data as `v2.2`, but the smallest model base (CNN)                             |
+|  `v4.2` | `efficientnetv2_l.in21k_ft_in1k` | 14270 | **5730**  | same data as `v2.2`, CNN base model smaller than the largest, may be more accurate |
 |  `v2.3` | `vit-base-patch16-224`           | 38625 | **37328** | new data annotation phase data, more single-page documents used, transformer model |
 |  `v3.3` | `vit-base-patch16-384`           | 38625 | **37328** | same data as `v2.3`, but a bit larger model base with higher resolution            |
 |  `v5.3` | `vit-large-patch16-384`          | 38625 | **37328** | same data as `v2.3`, but the largest model base with higher resolution             |
@@ -76,8 +76,8 @@ of HF 😊 hub [^1] 🔗
 🔲 **Fine-tuned** model repository: UFAL's **vit-historical-page** [^1] 🔗
 
 🔳 **Base** model repository: 
-- Google's **vit-base-patch16-224**,  **vit-base-patch16-384**, and  **vit-large-patch16-284** [^2] [^13] [^14] 🔗
-- timm's **regnety_160.swag_ft_in1k** and **efficientnetv2_m.in21k_ft_in1k** [^18] [^16] 🔗
+- Google's **vit-base-patch16-224**,  **vit-base-patch16-384**, and  **vit-large-patch16-384** [^2] [^13] [^14] 🔗
+- timm's **regnety_160.swag_ft_in1k** and **efficientnetv2_m.in21k_ft_in1k** [^18] [^19] 🔗
 
 The model was trained on the manually ✍️ annotated dataset of historical documents, in particular, images of pages 
 from the archival documents with paper sources that were scanned into digital form. 
@@ -531,7 +531,7 @@ directory with Python files and only then proceed.
 The following prediction should be run using the `-f` or `--file` flag with the path argument. Optionally, 
 you can use the `-tn` or `--topn` flag with the number of guesses you want to get, and also the `-m` or 
 `--model` flag with the path to the model folder argument. For the specific image file format collection from
-the input fictionary use `-ff` or `--file_format` flag with the format argument (default is `jpeg`).
+the input directory use `-ff` or `--file_format` flag with the format argument (default is `jpeg`).
 
 <details>
 
@@ -722,7 +722,7 @@ results can be found in the [result](result) 📁 folder.
 
 </details>
 
-`v4.3` Evaluation set's accuracy (**Top-1**):  **98.92%** 🏆
+`v4.3` Evaluation set's accuracy (**Top-1**):  **99.16%** 🏆
 
 <details>
 
@@ -837,7 +837,7 @@ Demo files  `v5.3`:
 
 - Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1921_5449_model_v53_TOP-3_EVAL.csv) 📎
 
-- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251020-1809_115_model_v53_TOP-1_EVAL.csv.csv)📎
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251020-1809_115_model_v53_TOP-1_EVAL.csv)📎
 
 Demo files  `v1.3`:
 
@@ -1306,7 +1306,7 @@ More about selecting the image transformation and the available ones you can rea
 
 After training is complete the model will be saved 💾 to its separate subdirectory in the `model` directory, by default, 
 the **naming of the model folder** corresponds to the `revision` variable in the `[HF]` section of 
-the [config.txt](config.txt) ⚙ file, which is shortened by removing any dots and saved like `model_v<revision>`.
+the [config.txt](config.txt) ⚙ file, which is shortened by removing any dots and saved like `model_<revision>`.
 
 <details>
 
@@ -1314,11 +1314,11 @@ the [config.txt](config.txt) ⚙ file, which is shortened by removing any dots a
     
     /local/folder/for/this/project/atrium-page-classification
     ├── model
-        ├── movel_v<HFrevision1> 
+        ├── movel_<HFrevision1> 
             ├── config.json
             ├── model.safetensors
             └── preprocessor_config.json
-        ├── movel_v<HFrevision2>
+        ├── movel_<HFrevision2>
         └── ...
     ├── checkpoint
         ├── models--google--vit-base-patch16-224
@@ -1379,9 +1379,9 @@ splitting strategy of 80-10-10% for training, dev, and evaluation subsets respec
 Moreover, the models trained in the cross-validation mode that have the same base model can be averaged and saved
 as a separate model for further evaluation or prediction inference. To do this, you should run the following command:
 
-    python3 run.py --average -ap model_v<revision>
+    python3 run.py --average -ap model_<revision>
 
-where `model_<revision>` is the common part of the model folders' names, for example, `model_v<revision>`. Which will result
+where `model_<revision>` is the common part of the model folders' names, for example, `model_<revision>`. Which will result
 in a new model saved as `model_<revision>a<#folds>` next to its parent models in the models' directory 📁.
 
 ### Evaluation 🏆
