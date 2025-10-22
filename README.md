@@ -77,7 +77,7 @@ of HF 😊 hub [^1] 🔗
 
 🔳 **Base** model repository: 
 - Google's **vit-base-patch16-224**,  **vit-base-patch16-384**, and  **vit-large-patch16-284** [^2] [^13] [^14] 🔗
-- timm's **regnety_160.swag_ft_in1k**,  **efficientnetv2_s.in21k**, **efficientnetv2_m.in21k_ft_in1k**, and **efficientnetv2_l.in21k_ft_in1k** [^18] [^15] [^16] [^19] 🔗
+- timm's **regnety_160.swag_ft_in1k** and **efficientnetv2_m.in21k_ft_in1k** [^18] [^16] 🔗
 
 The model was trained on the manually ✍️ annotated dataset of historical documents, in particular, images of pages 
 from the archival documents with paper sources that were scanned into digital form. 
@@ -110,7 +110,8 @@ paper source into one of the categories - each responsible for the following con
 | timm/tf_efficientnetv2_s.in21k             | v7.3     | 14,000  | 97.90         | 97.87        | 1    |              |
 
 
-The rows highlighted in bold correspond to the best models uploaded to the HF 😊 hub [^1] 🔗,
+The rows highlighted in bold correspond to the best models uploaded to the HF 😊 hub [^1] 🔗, and the versions correspond to 
+the training setup mapping adjusted for the HF 😊 hub revisions (which caused the strange order of base model versions).
 
 ![comparison_graph.png](model_acc_compared.png)
 
@@ -422,12 +423,24 @@ After the model is downloaded, you should see a similar file structure:
             ├── date-time_TOP-N_EVAL.csv
             ├── date-time_EVAL_RAW.csv
             └── ...
+        └── stats
+            ├── model_accuracies.csv
+            ├── model_accuracies_plot.png
+            ├── model_accuracies_zero_plot.png
+            ├── date-time_model_<rev>_FOLD_<n>_DATASETS.txt
+            └── ...
     ├── category_samples
         ├── DRAW
             ├── CTX193200994-24.png
             └── ...
         ├── DRAW_L
         └── ...
+    ├── supplement_scripts
+        ├── dataset_timeline.py
+        ├── img2jpeg_v3.py
+        ├── logs_stats.py
+        ├── visualize.py
+        └── job_run.sh
     ├── run.py
     ├── classifier.py
     ├── utils.py
@@ -574,7 +587,7 @@ for exactly TOP-3 guesses in tabular format from all images found in the given d
 
     python3 run.py --dir 
     
-    python3 run.py -rev v3.2 -b google/vit-base-patch16-384 --inner --dir
+    python3 run.py -rev v3.3 -b google/vit-base-patch16-384 --inner --dir
 
     python3 run.py -m "./models/model_v43" --dir -ff png
 
@@ -1166,12 +1179,17 @@ the key phases of the whole process (settings, training, evaluation) is provided
 
 <summary>Project files description 📋👀</summary>
 
-| File Name        | Description                                                                                                     |
-|------------------|-----------------------------------------------------------------------------------------------------------------|
-| `classifier.py`  | Model-specific classes and related functions including predefined values for training arguments                 |
-| `utils.py`       | Task-related algorithms                                                                                         |
-| `run.py`         | Starting point of the program with its main function - can be edited for flags and function argument extensions |
-| `config.txt`     | Changeable variables for the program - should be edited                                                         |
+| File Name             | Description                                                                                                                       |
+|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `classifier.py`       | Model-specific classes and related functions including predefined values for training arguments                                   |
+| `utils.py`            | Task-related algorithms                                                                                                           |
+| `run.py`              | Starting point of the program with its main function - can be edited for flags and function argument extensions                   |
+| `config.txt`          | Changeable variables for the program - should be edited                                                                           |
+| `job_run.sh`          | Running on a server node script                                                                                                   |
+| `dataset_timeline.py` | Creates a plot of categories distribution over time based on filenames                                                            |
+| `img2jpeg_v3.py`      | Transforms any images into jpeg format                                                                                            |
+| `logs_stats.py`       | Creates a table of stats for each tensorboard directory with event logs                                                           |
+| `visualize.py`        | Creates a plot of various model types comparison based on the input CSV like [model_accuracies_new.csv](model_accuracies_new.csv) |
 
 </details>
 
