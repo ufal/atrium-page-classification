@@ -76,13 +76,13 @@ def dataframe_results(
     # --- FIX 2: Check and align categories and scores ---
     # If the number of raw scores (columns) is greater than the number of categories, truncate the scores.
     if n_raw_scores > n_categories:
-        print(
-            f"[WARN] {n_raw_scores} prediction values but only {n_categories} categories. Truncating prediction scores to match categories.")
+        # print(
+        #     f"[WARN] {n_raw_scores} prediction values but only {n_categories} categories. Truncating prediction scores to match categories.")
         preds = preds[:, :n_categories]
     # If the number of raw scores is less than the number of categories, truncate the categories list.
     elif n_raw_scores < n_categories:
-        print(f"[WARN] {n_categories} categories but only {n_raw_scores} prediction scores. Truncating category list.")
-        categories = categories[:n_raw_scores]
+        # print(f"[WARN] {n_categories} categories but only {n_raw_scores} prediction scores. Truncating category list.")
+        # categories = categories[:n_raw_scores]
         n_categories = n_raw_scores
 
     # Re-evaluate n_images, n_categories after potential truncation

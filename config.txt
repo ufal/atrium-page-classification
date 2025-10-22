@@ -20,6 +20,7 @@ Training = False
 Testing = False
 
 [SETUP]
+files_format = png
 seed = 420
 base_model = ViT-B/16
 batch = 16
@@ -38,11 +39,10 @@ model_storage = /lnet/work/projects/atrium/cache/clip
 
 [INPUT]
 FOLDER_INPUT=./category_samples
-INPUT_FORMAT = png
 
 [HF]
 repo_name = ufal/clip-historical-page
 token = hf_qViUKX....ixyJpjstNxGO
 use_hf = False
-revision = v1.1.3.
+revision = v1.1.3
 latest = v1.1.3

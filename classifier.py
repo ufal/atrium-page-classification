@@ -402,7 +402,7 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
 
         model_name = Path(model_path).stem if model_path is not None else self.model_code_name
 
-        eval_dataset = ImageFolderCustom(eval_dir, max_category_samples=self.upper_category_limit_eval,
+        eval_dataset = ImageFolderCustom(eval_dir, max_category_samples=None,
                                          preprocess_fn=self.preprocess, img_size=self.preprocess.transforms[0].size,
                                          file_format=self.file_format, use_advanced_split=False,
                                          split_type='test', seed=self.seed, model_name=model_name)
@@ -460,8 +460,6 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
         table_path = Path(f'{self.output_dir}/tables')
         plot_path.mkdir(parents=True, exist_ok=True)
         time_stamp = time.strftime("%Y%m%d-%H%M")
-        plot_image = plot_path / f'{time_stamp}_EVAL_conf_{self.top_N}n_{self.upper_category_limit}c_{self.model_code_name}.png'
-        table_file = table_path / f'{time_stamp}_EVAL_table_{self.top_N}n_{self.upper_category_limit}c_{self.model_code_name}.csv'
 
         all_pred_scores = []
         all_predictions = []
@@ -499,13 +497,21 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
                 # images.append(images.cpu().numpy())
 
         acc = round(100 * np.sum(np.array(all_predictions) == np.array(all_true_labels)) / len(all_true_labels), 2)
+        print("=" * 40)
         print('\t*\tAccuracy: ', acc)
+        print("=" * 40)
 
         all_pred_scores = np.vstack(all_pred_scores)
 
         # max_logits = np.max(all_pred_scores, axis=1, keepdims=True)
         # exp_logits = np.exp(all_pred_scores - max_logits)
         # all_pred_probs = exp_logits / np.sum(exp_logits, axis=1, keepdims=True)
+
+        number_of_samples = all_pred_scores.shape[0]
+
+        plot_image = plot_path / f'{time_stamp}_{number_of_samples}_EVAL_TOP-{self.top_N}_{self.model_code_name}.png'
+        table_file = table_path / f'{time_stamp}_{number_of_samples}_EVAL_TOP-{self.top_N}_{self.model_code_name}.csv'
+
 
         if vis:
             # Ensure display labels match the order of predictions
@@ -521,7 +527,7 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
             disp.ax_.set_xticks(tick_positions)
             disp.ax_.set_xticklabels(short_labels)
 
-            disp.ax_.set_title(f"TOP {self.top_N} {self.model_code_name} CM")
+            disp.ax_.set_title(f"TOP {self.top_N} {self.model_code_name} CM  - {acc}%")
             plt.savefig(plot_image, bbox_inches='tight', dpi=300)
             plt.close()
             print(f"Confusion matrix saved to {plot_image}")
@@ -699,7 +705,111 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
         pred_labels = [self.categories[i] for i in best_n_indices]
         return best_n_scores, pred_labels
 
-    def predict_directory(self, folder_path: str, raw: bool = False, out_table: str = None):
+    def predict_directory(self, folder_path: str, raw: bool = False, out_table: str = None,
+                          chunk_size: int = 1000):
+        """
+        Predicts categories for all images in a directory and saves results to a CSV file.
+        Handles large directories (30,000+ files) efficiently with batch processing.
+
+        :param folder_path: Path to directory containing images
+        :param raw: Whether to save raw scores
+        :param out_table: Optional custom output path for results
+        :param batch_size: Number of images to process before writing to disk
+        :param recursive: Whether to search subdirectories
+        :return:
+        """
+        folder_path = Path(folder_path)
+
+        # Get all images (add recursive option if needed)
+        # if recursive:
+        #     images = []
+        #     for ext in self.file_format:
+        #         images.extend(folder_path.rglob(f"*.{ext}"))
+        #         images.extend(folder_path.rglob(f"*.{ext.upper()}"))
+        # else:
+        #     images = directory_scraper(folder_path, self.file_format)
+
+        images = directory_scraper(Path(folder_path), self.file_format)
+        print(f"Found {len(images)} images in {folder_path}")
+
+        time_stamp = time.strftime("%Y%m%d-%H%M")
+
+        # Prepare output paths
+        out_table = out_table if out_table is not None \
+            else f"{self.output_dir}/tables/{time_stamp}_result_{self.model_code_name}_TOP-{self.top_N}.csv"
+
+        raw_table = f"{self.output_dir}/tables/{time_stamp}_RAW_{self.model_code_name}.csv" if raw else None
+
+        # Process in batches
+        total_processed = 0
+        write_header = True
+
+        for batch_start in range(0, len(images), chunk_size):
+            batch_end = min(batch_start + chunk_size, len(images))
+            batch_images = images[batch_start:batch_end]
+
+            # --- FIX: Renamed lists for clarity ---
+            all_scores_list, tru_images = [], []
+
+            # Process batch
+            for img_path in tqdm(batch_images,
+                                 desc=f"Processing batch {batch_start // chunk_size + 1}/{(len(images) - 1) // chunk_size + 1}"):
+                try:
+                    image = Image.open(img_path)
+                    image_input = self.preprocess(image).unsqueeze(0).to(self.device)
+                    scores, indices, raw_scores = self.top_N_prediction(image_input, self.top_N)
+
+                    # --- FIX: Always append the full raw_scores list. Remove res_list (indices). ---
+                    all_scores_list.append(raw_scores.tolist())
+                    tru_images.append(img_path.name)
+
+                except Exception as e:
+                    print(f"Error processing file {img_path}: {e}")
+                    continue
+
+            # --- FIX: Check the correct list ---
+            if not all_scores_list:
+                continue
+
+            # --- FIX: Remove unnecessary concatenation of res_list ---
+            # res_list = np.concatenate(res_list, axis=0) # <--- REMOVED
+
+            # --- FIX: Pass the correct lists to dataframe_results ---
+            out_df, raw_df = dataframe_results(
+                test_images=tru_images,
+                test_predictions=all_scores_list,  # <--- Pass the full scores here
+                raw_scores=all_scores_list if raw else None, # <--- Pass scores if raw=True, else None
+                top_N=self.top_N,
+                categories=self.categories
+            )
+
+            out_df.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
+
+            # Append to CSV (write header only once)
+            out_df.to_csv(out_table, sep=",", index=False,
+                          mode='w' if write_header else 'a',
+                          header=write_header)
+
+            if raw:
+                raw_df.sort_values(self.categories, ascending=[False] * len(self.categories), inplace=True)
+                raw_df.to_csv(raw_table, sep=",", index=False,
+                              mode='w' if write_header else 'a',
+                              header=write_header)
+
+            write_header = False
+            total_processed += len(tru_images)
+
+            # Free memory
+            # --- FIX: Update del statement ---
+            del all_scores_list, tru_images, out_df
+            if raw:
+                del raw_df
+
+        print(f"Results for TOP-{self.top_N} predictions ({total_processed} images) saved to {out_table}")
+        if raw:
+            print(f"RAW Results saved to {raw_table}")
+
+    def predict_dir(self, folder_path: str, raw: bool = False, out_table: str = None):
         """
         Predicts categories for all images in a directory and saves results to a CSV file.
         :param folder_path:
@@ -1024,6 +1134,5 @@ def split_data_80_10_10(files: list, labels: list, random_seed: int, max_categ: 
     train_labels = labels[train_indices]
 
     return train_files, val_files, test_files, train_labels, val_labels, test_labels
-
 
 

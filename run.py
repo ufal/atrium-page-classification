@@ -1,5 +1,5 @@
 import argparse
-from huggingface_hub import create_branch
+from huggingface_hub import create_branch, delete_branch
 
 import configparser
 from classifier import *
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     top_N = config.getint('SETUP', 'top_N')  # top N predictions, 3 is enough, 11 for "raw" scores (most scores are 0)
 
     base_model = config.get('SETUP', 'base_model')  # do not change
-
+    config_format = config.get('SETUP', 'files_format')  # input image format, e.g. PNG
     raw = config.getboolean('SETUP', 'raw')
     avg = config.getboolean('SETUP', 'avg')  # average scores from multiple category description files
 
@@ -55,7 +55,6 @@ if __name__ == "__main__":
     model_path = Path(f"{hf_models_directory}/{model_name_local}")
 
     test_dir = config.get('INPUT', 'FOLDER_INPUT')
-    input_format = config.get('INPUT', 'INPUT_FORMAT')  # input image format, e.g. PNG
 
     epochs = config.getint("TRAIN", "epochs")
     max_categ = config.getint("TRAIN", "max_categ")  # max number of category samples
@@ -79,6 +78,7 @@ if __name__ == "__main__":
 
     # Prediction arguments
     parser.add_argument('-f', "--file", type=str, default=None, help="Single PNG page path for prediction.")
+    parser.add_argument('-ff', "--file_format", type=str, default=config_format, help="File format to look for in the directory (e.g., png or jpeg)")
     parser.add_argument('-d', "--directory", type=str, default=None,
                         help="Path to folder with PNG pages for prediction.")
     parser.add_argument("--dir", help="Predict a whole directory of images recursively.", action="store_true")
@@ -172,13 +172,14 @@ if __name__ == "__main__":
     output_dir.mkdir(exist_ok=True)
 
     cat_directory = str(cur / args.cat_dir)
-    clip_instance = CLIP(max_category_samples=args.max_categ, test_ratio=test_size,
-                         eval_max_category_samples=args.max_categ_eval,
-                         top_N=args.topn, model_name=args.model, device=device,
-                         categories_tsv=categ_file, seed=seed, input_format=input_format,
-                         output_dir=str(output_dir), categories_dir=cat_directory,
-                         model_dir=str(model_path), cp_dir=str(cp_dir), revision=args.revision.replace('.', ''),
-                         cat_prefix=args.cat_prefix, avg=args.avg, zero_shot=args.zero_shot)
+    if not args.vis:
+        clip_instance = CLIP(max_category_samples=args.max_categ, test_ratio=test_size,
+                             eval_max_category_samples=args.max_categ_eval,
+                             top_N=args.topn, model_name=args.model, device=device,
+                             categories_tsv=categ_file, seed=seed, input_format=args.file_format,
+                             output_dir=str(output_dir), categories_dir=cat_directory,
+                             model_dir=str(model_path), cp_dir=str(cp_dir), revision=args.revision.replace('.', ''),
+                             cat_prefix=args.cat_prefix, avg=args.avg, zero_shot=args.zero_shot)
 
     data_dir = config.get("TRAIN", "FOLDER_PAGES")
     data_dir_eval = config.get("EVAL", "FOLDER_PAGES")
@@ -198,13 +199,22 @@ if __name__ == "__main__":
         model_name_local = f"model_{args.model.replace('/', '').replace('@', '-')}_rev_{args.revision.replace('.', '')}"
         model_path = Path(cp_dir.parent / args.model_dir / model_name_local)
 
+        hf_model_name_local = f"model_{config.get('HF', 'revision').replace('.', '')}"
+        hf_model_path = f"{config.get('OUTPUT', 'FOLDER_MODELS')}/{hf_model_name_local}"
+
         # ----------------------------------------------
         # ----- UNCOMMENT for pushing to HF repo -------
         # ----------------------------------------------
-        clip_instance.load_model(str(model_path), args.revision, seed)
+        print(f"Deleting branch {config.get('HF', 'revision')}")
+        delete_branch(config.get("HF", "repo_name"), repo_type="model", branch=config.get("HF", "revision"),
+                      token=config.get("HF", "token"))
+        print(f"Creating fresh branch {config.get('HF', 'revision')}")
         create_branch(config.get("HF", "repo_name"), repo_type="model", branch=config.get("HF", "revision"),
                       exist_ok=True,
                       token=config.get("HF", "token"))
+        print(f"Loading local model from {model_path} for pushing to the HuggingFace hub {config.get('HF', 'repo_name')}")
+        clip_instance.load_model(str(model_path), args.revision, seed)
+        print(f"Pushing model to the HuggingFace hub branch {config.get('HF', 'revision')}")
         clip_instance.pushing_to_hub(config.get("HF", "repo_name"), False, config.get("HF", "token"),
                                      config.get("HF", "revision"))
         # ----------------------------------------------
@@ -213,12 +223,9 @@ if __name__ == "__main__":
         # loading from repo
         clip_instance.load_from_hub(config.get("HF", "repo_name"), args.revision)
 
-        # hf_model_name_local = f"model_{args.revision.replace('.', '')}"
-        # hf_model_path = f"{model_dir}/{hf_model_name_local}"
+        clip_instance.save_model(hf_model_path)
 
-        clip_instance.save_model(str(model_path))
-
-        clip_instance.load_model(str(model_path))
+        clip_instance.load_model(hf_model_path, config.get("HF", "revision"), seed)
 
     if args.train:
         if not os.path.isdir(data_dir):
@@ -286,13 +293,11 @@ if __name__ == "__main__":
             device=device,
             cat_prefix=args.cat_prefix,
             vis=True,
-            upper_categ_limit=args.max_categ_eval,
             random_seed=seed,
-            preprocess_func=clip_instance.preprocess,
-            input_format=input_format,
-            img_size=clip_instance.preprocess.transforms[0].size,
+            input_format=args.file_format,
             test_fraction=test_size,
             zero_shot=args.zero_shot,
+            top_N=args.topn
         )
     elif args.zero_shot:  # New branch for zero-shot prediction
         if args.file:
@@ -302,7 +307,7 @@ if __name__ == "__main__":
             input_dir_pred = Path(args.directory) if args.directory is not None else cur / 'test-images' / 'pages'
             table_out_path = output_dir / 'tables'
             table_out_path.mkdir(exist_ok=True, parents=True)
-            directory_result_output = str(table_out_path / f'{time_stamp}_zero_shot_{"raw" if raw else ""}_result_{model_name_local}_TOP-{args.topn}.csv')
+            directory_result_output = str(table_out_path / f'{time_stamp}_zero_shot_{model_name_local}_TOP-{args.topn}.csv')
             clip_instance.predict_directory(str(input_dir_pred), raw=raw, out_table=directory_result_output)
         else:
             print("Please specify a file (-f) or a directory (-d) for zero-shot prediction.")

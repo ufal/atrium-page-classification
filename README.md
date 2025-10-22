@@ -36,27 +36,31 @@ preparation scripts for PDF to PNG conversion
 ## Versions 🏁
 
 There are currently 4 version of the model available for download, both of them have the same set of categories, 
-but different data annotations. The latest approved `v1.1` is considered to be default and can be found in the `main` branch
+but different data annotations. The latest `v1.1.3` is considered to be default and can be found in the `main` branch
 of HF 😊 hub [^1] 🔗 
 
-| Version | Base code      | Pages |   PDFs   | Description                   |
-|--------:|----------------|:-----:|:--------:|:------------------------------|
-|  `v1.1` | `ViT-B/16`     | 15855 | **5730** | smallest (default)            |
-|  `v1.2` | `ViT-B/32`     | 15855 | **5730** | small with higher granularity |
-|  `v2.1` | `ViT-L/14`     | 15855 | **5730** | large                         |
-|  `v2.2` | `ViT-L/14@336` | 15855 | **5730** | large with highest resolution |
+|  Version | Base code      | Pages |   PDFs    | Description                   |
+|---------:|----------------|:-----:|:---------:|:------------------------------|
+|   `v1.1` | `ViT-B/16`     | 14270 | **5730**  | smallest (old default)        |
+|   `v1.2` | `ViT-B/32`     | 14270 | **5730**  | small with higher granularity |
+|   `v2.1` | `ViT-L/14`     | 14270 | **5730**  | large                         |
+|   `v2.2` | `ViT-L/14@336` | 14270 | **5730**  | large with highest resolution |
+| `v1.1.3` | `ViT-B/16`     | 38625 | **37328** | smallest and most accurate    |
+| `v1.2.3` | `ViT-B/32`     | 38625 | **37328** | small and 2nd in accuracy     |
+| `v2.1.3` | `ViT-B/14`     | 38625 | **37328** | larges and not too accurate   |
+| `v2.2.3` | `ViT-B/14@336` | 38625 | **37328** | larges and not too accurate   |
 
 
 <details>
 
 <summary>Base model - size 👀</summary>
 
-| **Version**                         | **Disk space** |
-|-------------------------------------|----------------|
-| `openai/clip-vit-base-patch16`      | 992 Mb         |
-| `openai/clip-vit-base-patch32`      | 1008 Mb        |
-| `openai/clip-vit-large-patch14`     | 1.5 Gb         |
-| `openai/clip-vit-large-patch14-336` | 1.5 Gb         |
+| **Version**                         | **Disk space** | **Parameters (Millions)** |
+|-------------------------------------|----------------|---------------------------|
+| `openai/clip-vit-base-patch16`      | 992 Mb         | 149.62 M                  |
+| `openai/clip-vit-base-patch32`      | 1008 Mb        | 151.28 M                  |
+| `openai/clip-vit-large-patch14`     | 1.5 Gb         | 427.62 M                  |
+| `openai/clip-vit-large-patch14-336` | 1.5 Gb         | 427.94 M                  |
 
 </details>
 
@@ -83,29 +87,104 @@ paper source into one of the categories - each responsible for the following con
 > or structured in tabular 📏 format text, as well as to mark the presence of the printed 🌄 or drawn 📈 graphic 
 > materials yet to be extracted from the page images.
 
+![comparison_graph.png](model_acc_compared.png)
+
+The figure above shows accuracy and parameters comparison of different base models tested on the same data, demonstrating
+best models overall (above the trendline) which mainly includes image-based models like CNNs and transformers, and the hybrid
+CLIP models themselves (best versions of each base model).
+
+
+Versions of CLIP models are grounded on the textual category description sets, all illustrated in 
+[descriptions_comparison_graph.png](result%2Fstats%2Fmodel_accuracy_plot.png) 📎 which is a graph containing separate and averaged results 
+of all category 🪧 descriptions. 
+
+As our experiments showed, the averaging strategy is not the best. Moreover, the smallest model
+ViT-B/16 showed the best results after fine-tuning model on some selected category 🪧 set.
+
+![description comparison graph](result%2Fstats%2Fmodel_accuracy_plot.png)
+
+Check out all of the prepared category 🪧 descriptions in the [category_descriptions](category_descriptions) 📁 folder.
+Which supports versions mapping from 1 to 9 for the csv files starting with `page_categories_` prefix. The separate set
+starting with `TOTAL` is a mixture of all category descriptions, a set starting with `GENERAL` is a simplified category 🪧 set 
+(only 4 classes), and a set starting with `EXPANDED` is an experimental more fine-grained in categories version of the category 🪧 descriptions.
+
+
 ### Data 📜
 
-The dataset is provided under Public Domain license, and consists of **15855** PNG images of pages from the archival documents.
-The source image files and their annotation can be found in the LINDAT repository [^16] 🔗.
+The dataset is provided under Public Domain license, and consists of **48,499** PNG images of pages from **37,328** archival documents.
+The source image files and their annotation can be found in the LINDAT repository [^16] 🔗. 
 
-**Training** 💪 set of the model: **14267** images 
+The annotation provided includes 5 different
+dataset splits of `vX.X.3` model versions, and it's recommended to average all 5 trained model weights to get a more robust
+model for prediction (in some cases, like `TEXT` and `TEXT_T` categories which samples very often look the same, the accuracy of those 
+problematic categories could drop below 90% with off-diagonal errors rising above 10% after the averaging of trained models). Anyhow, the
+averaged model usually score higher accuracy than any of its individual components... or sometimes causes a drop in accuracy for 
+the most ambiguous categories 🪧️ - depends mostly on the base model choice.
 
-> **90% of all** - proportion in categories 🪧 tabulated [below](#categories-)
+Our dataset is not split using a simple random shuffle. This is because the data contains structured and clustered 
+distributions of page types within many categories. A random shuffle would likely result in subsets with poor 
+representative variability.
 
-**Evaluation** 🏆 set:  **1583** images 
+Instead, we use a deterministic, periodic sampling method with a randomized offset. To maximize the size of the 
+training 💪 set, we select the development and test 🏆 subsets first. The training subset then consists of all remaining pages.
 
-> **10% of all** - same proportion in categories 🪧 as [below](#categories-) and demonstrated in [model_EVAL.csv](result%2Ftables%2FEVAL_table_1n_2000c_ViTB16_20250701-2159.csv) 📎
+Here's the per-category 🪧 procedure for selecting the development and test 🏆 sets:
 
-Manual ✍️ annotation was performed beforehand and took some time ⌛, the categories 🪧  were formed from
+1. For the category of size `N` compute  the desired subset size, `k`, as a fixed proportion (`test_ratio` which was 10%) of `N`
+2. Compute a selection step, `S`, as `S ≈ N/k` which serves a period base for the selection
+3. Apply a random shift to `S` - an integer index in the range `[S_i - S/4; S_i + S/4]` for every `i`-th of `k` steps of `S`.
+4. Select every `S`-th (`S`-thish in fact) element from the alphabetically ordered sequence after applying the random shift.
+5. Finally, Limit selected indices to be within the range of the category size `N`.
+
+This method produces subsets that:
+
+- Respect the original ordering and local clustering in the data
+- Preserve the proportional representation of each category
+- Introduce controlled randomness, so the selected samples are not strictly periodic
+
+This ensures that our subsets cover the full chronological and structural variability of the 
+collection, leading to a more robust and reliable model evaluation. 
+
+**Training** 💪 set of the model: **14270** images for `vX.X` 
+
+**Training** 💪 set of the model: **38625** images for `vX.X.3` 
+
+The training subsets above are followed by the test sets below:
+
+**Evaluation** 🏆 set:  **1290** images for `vX.X` models
+
+**Evaluation** 🏆 set:  **4823** images (for `vX.X.3` models)
+
+Manual ✍️ annotation was performed beforehand and took some time ⌛, the categories 🪧 tabulated  [below](#categories-) were formed from
 different sources of the archival documents originated in the 1920-2020 years span. 
+
+| Category        | Dataset 0   | Dataset 1    | Dataset 2    | Dataset 3     |
+|-----------------|-------------|--------------|--------------|---------------|
+| DRAW            | 1090 (9.1%) | 1368 (8.8%)  | 1472 (9.3%)  | 2709 (5.6%)   |
+| DRAW_L          | 1091 (9.1%) | 1383 (8.9%)  | 1402 (8.8%)  | 2921 (6.0%)   |
+| LINE_HW         | 1055 (8.8%) | 1113 (7.2%)  | 1115 (7.0%)  | 2514 (5.2%)   |
+| LINE_P          | 1092 (9.1%) | 1540 (9.9%)  | 1580 (10.0%) | 2439 (5.0%)   |
+| LINE_T          | 1098 (9.2%) | 1664 (10.7%) | 1668 (10.5%) | 9883 (20.4%)  |
+| PHOTO           | 1081 (9.1%) | 1632 (10.5%) | 1730 (10.9%) | 2691 (5.5%)   |
+| PHOTO_L         | 1087 (9.1%) | 1087 (7.0%)  | 1088 (6.9%)  | 2830 (5.8%)   |
+| TEXT            | 1091 (9.1%) | 1587 (10.3%) | 1592 (10.0%) | 14227 (29.3%) |
+| TEXT_HW         | 1091 (9.1%) | 1092 (7.1%)  | 1092 (6.9%)  | 2008 (4.1%)   |
+| TEXT_P          | 1083 (9.1%) | 1540 (9.9%)  | 1633 (10.3%) | 2312 (4.8%)   |
+| TEXT_T          | 1081 (9.1%) | 1476 (9.5%)  | 1482 (9.3%)  | 3965 (8.2%)   |
+| **Unique PDFs** | 5001        | 5694         | 5729         | 37328         |
+| **Total Pages** | 11,940      | 15,482       | 15,854       | 48,499        |
+
+
+The table above shows category distribution for different model versions, where the last column
+(`Dataset 3`) corresponds to the latest `vX.X.3` models data, which actually used 14,000 pages of
+`TEXT` category, while other columns cover all the used samples - specifically 80% as training 💪, 
+and 10% each as development and test 🏆 sets. The early model version used 90% of the data as training 💪
+and the remaining 10% as both development and test 🏆 set due to the lack of annotated (manually 
+classified) pages.
 
 > [!NOTE]
 > Disproportion of the categories 🪧 in both training data and provided evaluation [category_samples](category_samples) 📁 is
 > **NOT** intentional, but rather a result of the source data nature. 
-
-In total, several thousands of separate PDF files were selected and split into PNG pages, ~4k of scanned documents 
-were one-page long which covered around a third of all data, and ~2k of them were much longer (dozens and hundreds 
-of pages) covering the rest (more than 60% of all annotated data). 
 
 The specific content and language of the
 source data is irrelevant considering the model's vision resolution, however, all of the data samples were from **archaeological 
@@ -113,7 +192,7 @@ reports** which may somehow affect the drawing detection preferences due to the 
 arrowheads, and rocks formerly drawn by hand and later illustrated with digital tools (examples can be found in
 [category_samples/DRAW](category_samples%2FDRAW) 📁)
 
-![dataset_timeline](dataset_timeline.png)
+![data_timeline.png](dataset_timeline.png)
 
 ### Categories 🪧
 
@@ -265,19 +344,21 @@ to **pull the model from the HF 😊 hub repository [^1] 🔗** via:
 
     python3 run.py --hf
 
-**OR** for specific model version (e.g. `main`, `vX.1` or `vX.2`) use the `--revision` flag:
+**OR** for specific model version (e.g. `main`, `vX.1`, `vX.2` and `vX.X.3`) use the `--revision` flag:
  
     python3 run.py --hf -rev v1.1
 
-**OR** for specific base model version (e.g. `ViT-B/16`, `ViT-B/32`, `ViT-L/14` or `ViT-L/14@336px`) use the `--base` flag (only when the 
-trained model version demands such base model as described [above](#versions-)):
+**OR** for specific base model version (e.g. `ViT-B/16`, `ViT-B/32`, `ViT-L/14` or `ViT-L/14@336px`) use the `--model` 
+or `-m` flag (only when the trained model version demands such base model as described [above](#versions-)):
  
-    python3 run.py --hf -rev v2.2 -m `ViT-L/14@336`
+    python3 run.py --hf -rev v2.2.3 -m `ViT-L/14@336px`
+
 
 > [!IMPORTANT]
-> If you already have the model files in the `model/movel_<revision>`
-> directory next to this file, you do **NOT** have to use the `--hf` flag to download the
+> If you already have the model files in the `models/<base_code>_rev_<revision>`
+> directory (e.g., `models/ViT-B-16_rev_v1.1.3`), you do **NOT** have to use the `--hf` flag to download the
 > model files from the HF 😊 repo [^1] 🔗 (only for the **model version update**).
+
 
 You should see a message about loading the model from the hub and then saving it locally on
 your machine 🖥️. 
@@ -298,8 +379,8 @@ After the model is downloaded, you should see a similar file structure:
             ├── model.safetensors
             └── preprocessor_config.json
     ├── model_checkpoints
-        ├── model_<categ_limit>_<base_code>_<lr>.pt
-        ├── model_<categ_limit>_<base_code>_<lr>_cp.pt
+        ├── model_<categ_limit>_<base_code>_<lr>_<epoch>e.pt
+        ├── model_<categ_limit>_<base_code>_<lr>_<epoch>e_cp.pt
         └── ...
     ├── data_scripts
         ├── windows
@@ -312,12 +393,19 @@ After the model is downloaded, you should see a similar file structure:
             └── sort.sh
     ├── result
         ├── plots
-            ├── conf_mat_Nn_Cc_<base>_date-time.png
+            ├── date-time_<#samples>_EVAL_TOP-<top_N>_<base>_<revision>.png
             └── ...
         └── tables
-            ├── result_date-time_<base>_Nn_Cc.csv
-            ├── EVAL_table_Nn_Cc_<base>_date-time.csv
-            ├── date-time_<base>_RAW.csv
+            ├── date-time_<#samples>_EVAL_TOP-<top_N>_<base>_<revision>.csv
+            ├── date-time_<#samples>_result_modelL_<base>_<revision>_TOP-<top_N>.csv
+            ├── date-time_<#samples>_EVAL_<base>_<revision>_RAW.csv
+            └── ...
+        └── stats
+            ├── model_accuracies.csv
+            ├── model_accuracies_zero.csv
+            ├── model_accuracies_plot.png
+            ├── model_accuracies_zero_plot.png
+            ├── date-time_model_<rev>_<max_categ>c_<seed>r_DATASETS.txt
             └── ...
     ├── category_samples
         ├── DRAW
@@ -325,8 +413,13 @@ After the model is downloaded, you should see a similar file structure:
             └── ...
         ├── DRAW_L
         └── ...
+    ├── category_descriptions
+        ├── page_categories_init.csv
+        ├── TOTAL_page_categories.csv
+        └── ...
     ├── run.py
     ├── classifier.py
+    ├── minor_classes.py
     ├── utils.py
     ├── requirements.txt
     ├── config.txt
@@ -381,12 +474,12 @@ the `batch` variable in the `[SETUP]` section.
 
 <summary>Rough estimations of disk space needed for trained model in relation to the base model 👀</summary>
 
-| **Version**                         | **Disk space** |
-|-------------------------------------|----------------|
-| `openai/clip-vit-base-patch16`      | 992 Mb         |
-| `openai/clip-vit-base-patch32`      | 1008 Mb        |
-| `openai/clip-vit-large-patch14`     | 1.5 Gb         |
-| `openai/clip-vit-large-patch14-336` | 1.5 Gb         |
+| **Version**                         | **Disk space** | **Parameters (Millions)** |
+|-------------------------------------|----------------|---------------------------|
+| `openai/clip-vit-base-patch16`      | 992 Mb         | 149.62 M                  |
+| `openai/clip-vit-base-patch32`      | 1008 Mb        | 151.28 M                  |
+| `openai/clip-vit-large-patch14`     | 1.5 Gb         | 427.62 M                  |
+| `openai/clip-vit-large-patch14-336` | 1.5 Gb         | 427.94 M                  |
 
 </details>
 
@@ -461,7 +554,7 @@ for exactly TOP-3 guesses in tabular format from all images found in the given d
 
     python3 run.py --dir 
     
-    python3 run.py -rev v2.2 -m ViT-B/15 --dir
+    python3 run.py -rev v1.2 -m ViT-B/32 --dir
 
 
 </details>
@@ -472,11 +565,7 @@ folders defined in `[OUTPUT]` section of [config.txt](config.txt) ⚙ file.
 > [!TIP]
 > To additionally get raw class 🪧 probabilities from the model along with the TOP-N results, use
 > `--raw` flag when processing the directory (**NOT** available for single file processing)
- 
-> [!TIP]
-> To process all PNG files in the directory **AND its subdirectories** use the `--inner` flag
-> when processing the directory, or switch its default value to `True` in the `[SETUP]` section 
- 
+
 Naturally, processing of the large amount of PNG pages takes time ⌛ and progress of this process
 is recorded in the console via messages like `Processed <B×N> images` where `B`
 is batch size set in the `[SETUP]` section of the [config.txt](config.txt) ⚙ file, 
@@ -494,42 +583,42 @@ dataset (10% of the provided in `[TRAIN]`'s folder data). Both graphic plots and
 results can be found in the [result](result) 📁 folder.
 
 
-`v1.1` Evaluation set's accuracy (**Top-1**):  **100.00%** 🏆
+`v1.1.3` Evaluation set's accuracy (**Top-1**):  **99.14%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2Fconf_1n_2000c_ViTB16_20250701-1423.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20251020-1735_5449_EVAL_conf_1n_Nonec_ViT-B16_v1137.png)
 </details>
 
-`v1.2` Evaluation set's accuracy (**Top-1**):  **100.00%** 🏆
+`v1.2.3` Evaluation set's accuracy (**Top-1**):  **98.99%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2Fconf_1n_2000c_ViTB32_20250701-1426.png)
-
-</details>
-
-`v2.1` Evaluation set's accuracy (**Top-1**):  **99.94%** 🏆
-
-<details>
-
-<summary>Confusion matrix 📊 TOP-1 👀</summary>
-
-![TOP-1 confusion matrix](result%2Fplots%2Fconf_1n_2000c_ViTL14_20250701-1422.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20251020-1918_5449_EVAL_conf_1n_Nonec_ViT-B32_v123.png)
 
 </details>
 
-`v2.2` Evaluation set's accuracy (**Top-1**):  **99.87%** 🏆
+`v2.1.3` Evaluation set's accuracy (**Top-1**):  **98.97%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2Fconf_1n_2000c_ViTL14336px_20250701-1417.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20251020-2050_5449_EVAL_conf_1n_Nonec_ViT-L14_v2131.png)
+
+</details>
+
+`v2.2.3` Evaluation set's accuracy (**Top-1**):  **98.97%** 🏆
+
+<details>
+
+<summary>Confusion matrix 📊 TOP-1 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2F20251020-1956_5449_EVAL_conf_1n_Nonec_ViT-L14-336px_v2234.png)
 </details>
 
 > **Confusion matrices** provided above show the diagonal of matching gold and predicted categories 🪧
@@ -554,27 +643,27 @@ Additionally, results of prediction inference run on the directory level without
 
 <summary>General result tables 👀</summary>
 
-Demo files  `v1.1`:
+Demo files  `v1.1.3`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2FEVAL_table_1n_2000c_ViTB16_20250701-2159.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251021-2349_5449_EVAL_table_1n_Nonec_ViT-B16_v1137.csv) 📎
 
 - **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2Fresult_20250701-1816_ViT-B16_1n_2000c.csv)📎
 
-Demo files  `v1.2`:
+Demo files  `v1.2.3`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2FEVAL_table_1n_2000c_ViTB32_20250701-2207.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1918_5449_EVAL_table_1n_Nonec_ViT-B32_v123.csv) 📎
 
 - **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2Fresult_20250701-2216_ViT-B32_1n_2000c.csv)📎
 
-Demo files  `v2.1`:
+Demo files  `v2.1.3`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2FEVAL_table_1n_2000c_ViTL14_20250701-2129.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-2050_5449_EVAL_table_1n_Nonec_ViT-L14_v2131.csv) 📎
 
 - **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2Fresult_20250701-1742_ViT-L14_1n_2000c.csv)📎
 
-Demo files  `v2.2`:
+Demo files  `v2.2.3`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2FEVAL_table_1n_2000c_ViTL14336px_20250701-2150.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1956_5449_EVAL_table_1n_Nonec_ViT-L14-336px_v2234.csv) 📎
 
 - Manually ✍️ **checked** evaluation dataset (TOP-5): [model_TOP-5_EVAL.csv](result%2Ftables%2FEVAL_table_5n_2000c_ViTL14336px_20250702-0852.csv) 📎
 
@@ -609,7 +698,7 @@ Demo files `v2.1`:
 
 - **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250701-1743_ViT-L14_RAW.csv) 📎
 
-- Demo files `v2.2`:
+Demo files `v2.2`:
 
 - **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250701-2218_ViT-L14@336px_RAW.csv) 📎
 
@@ -868,7 +957,7 @@ set a path to the data folder. Make sure label directory names do **NOT** contai
 > for a maximum number of samples per category 🪧, in case you have **over-represented labels** significantly dominating in size.
 > Set `max_categ` higher than the number of samples in the largest category 🪧 to use **all** data samples. Similarly, 
 > `max_categ_e` parameter sets the maximum number of samples per category 🪧 for the evaluation dataset, and should be 
-> increased to very large numbers if you want to cover all samples from al categories 🪧.
+> increased to very large numbers if you want to cover all samples from all categories 🪧.
 
 From this point, you can start model training or evaluation process.
 
@@ -883,12 +972,17 @@ the key phases of the whole process (settings, training, evaluation) is provided
 
 <summary>Project files description 📋👀</summary>
 
-| File Name        | Description                                                                                                     |
-|------------------|-----------------------------------------------------------------------------------------------------------------|
-| `classifier.py`  | Model-specific classes and related functions including predefined values for training arguments                 |
-| `utils.py`       | Task-related algorithms                                                                                         |
-| `run.py`         | Starting point of the program with its main function - can be edited for flags and function argument extensions |
-| `config.txt`     | Changeable variables for the program - should be edited                                                         |
+| File Name             | Description                                                                                                     |
+|-----------------------|-----------------------------------------------------------------------------------------------------------------|
+| `classifier.py`       | Model-specific classes and related functions including predefined values for training arguments                 |
+| `minor_classes.py`   | Adjacent functions and support classes                                                                          |
+| `utils.py`            | Task-related algorithms                                                                                         |
+| `run.py`              | Starting point of the program with its main function - can be edited for flags and function argument extensions |
+| `config.txt`          | Changeable variables for the program - should be edited                                                         |
+| `job_run.sh`          | Running on a server node script                                                                                 |
+| `dataset_timeline.py` | Creates a plot of categories distribution over time based on filenames                                          |
+| `img2jpeg_v3.py`      | Transforms any images into jpeg format                                                                          |
+| `logs_stats.py`       | Creates a table of stats for each tensorboard directory with event logs                                         |
 
 </details>
 
@@ -968,18 +1062,28 @@ Above are the default hyperparameters or TrainingArguments [^11] used in the tra
 of the [config.txt](config.txt) ⚙ file. Importantly, `avg` - average configuration of all texts can be used.
 
 > [!IMPORTANT]
-> CLIP models accept not only images but also text inputs, in our case its [descriptions.tsv](category_description_total.tsv) 📎 file 
-> which summarizes the category 🪧 descriptions in the [category_samples](category_samples) 📁 folder. Optionally you can run the modesl
+> CLIP models accept not only images but also text inputs, in our case its [descriptions.tsv](category_descriptions%2FTOTAL_page_categories.csv) 📎 file 
+> which summarizes the category 🪧 descriptions in the [category_descriptions](category_descriptions) 📁 folder. Optionally you can run the modesl
 > with only a single table of category 🪧 descriptions (via `categories_file` variable), or use `--avg` flag to average all of the 
 > category 🪧 descriptions in the `description_folder` starting with the `categories_prefix` value.
 
 In case your descriptions table contains **more than 1 text per category 🪧**, the `--avg` flag will be set to `True` automatically.
 
-[descriptions_comparison_graph.png](descriptions_comparison.png) 📎 is a graph containing separate and averaged results 
-of all category 🪧 descriptions. Using averaged text embeddings of all label description seems to be the most powerful way to
-classify our images.
+[descriptions_comparison_graph.png](result%2Fstats%2Fmodel_accuracy_plot.png) 📎 is a graph containing separate and averaged results 
+of all category 🪧 descriptions. Using averaged text embeddings of all label description seemed to be the most powerful way to
+classify our images based on the zero-shot evaluations.
 
-![description comparison graph](descriptions_comparison.png)
+![description comparison graph_zero](result%2Fstats%2Fmodel_accuracy_plot_zero.png)
+
+As the following experiments showed, the averaging strategy is not the best. Moreover, the smallest model
+ViT-B/16 showed the best results after separately fine-tuning model on some category 🪧 sets.
+
+![description comparison graph](result%2Fstats%2Fmodel_accuracy_plot.png)
+
+Check out all of the prepared category 🪧 descriptions in the [category_descriptions](category_descriptions) 📁 folder.
+Which supports versions mapping from 1 to 9 for the csv files starting with `page_categories_` prefix. The separate set
+starting with `TOTAL` is a mixture of all category descriptions, a set starting with `GENERAL` is a simplified category 🪧 set 
+(only 4 classes), and a set starting with `EXPANDED` is an experimental more fine-grained in categories version of the category 🪧 descriptions.
 
 > You are free to play with the **learning rate** right in the training function arguments called in the [run.py](run.py) 📎 file, 
 > yet **warmup ratio and other hyperparameters** are accessible only through the [classifier.py](classifier.py) 📎 file.
@@ -1059,15 +1163,10 @@ for example `model_<S/B>_E` where `E` is the number of epochs, `B` is the batch 
 
 </details>
 
-> [!IMPORTANT] 
-> The `movel_<revision>` folder naming is generated from the HF 😊 repo [^1] 🔗 `revision` value and does **NOT** 
-> affect the trained model naming, other training parameters do. 
-> Since the length of the dataloader depends not only on the size of the dataset but also on the preset batch size, 
-> and test subset ratio. 
+
 
 You can slightly change the `test_size` and / or
-the `batch` variable value in the [config.txt](config.txt) ⚙ file to train a differently named model on the same dataset.
-Alternatively, adjust the **model naming generation** in the [classifier.py](classifier.py)'s 📎 training function.
+the `batch` variable value in the [config.txt](config.txt) ⚙ file.
 
 ### Evaluation 🏆
 
@@ -1085,7 +1184,7 @@ confusion matrix plot 📊 and additionally get raw class probabilities table ru
 
 **OR** when you don't remember the specific `[SETUP]` and `[TRAIN]` variables' values for the trained model, you can use:
 
-    python3 run.py --eval -model_path 'model_<categ_limit>_<base>_<lr>.pt'
+    python3 run.py --eval -model_path 'model_checkpoints/model_<categ_limit>_<base>_<lr>_<epoch>e.pt'
 
 To prove that initial models without finetuning show awful results you can run `--zero_shot` flag during the evalution.
 
