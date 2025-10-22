@@ -1431,7 +1431,7 @@ same as for the training pages directory - the category 🪧 subdirectories are 
 - **Shared by** ATRIUM [^4] & UFAL [^7] 🔗
 - **Model type:** 
   - fine-tuned ViT with a 224x224 [^2] 🔗 or 384x384 [^13] [^14] 🔗 resolution size 
-  - fine-tuned EffNetV2 with a 300x300 [^15] 🔗 or 384x384 [^16] 🔗 resolution size 
+  - fine-tuned RegNetY-16GF with a 224x224 resolution [^18] or EffNetV2 with a 384x384 [^19] 🔗 resolution size 
 
 **©️ 2022 UFAL & ATRIUM**
 
