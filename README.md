@@ -776,8 +776,6 @@ Demo files  `v2.2.3.4`:
 
 - **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251022-1230_114_result_ViT-L14-336px_v2.2.3.4_TOP-1.csv)📎
 
-Plus the small  **Unchecked with TRUE** values combination of the best 5 models: [models_TOP-1.csv](result%2Ftables%2F20251023-1412_BEST_5_models_TOP-1.csv)📎
-
 With the following **columns** 📋:
 
 - **FILE** - name of the file
@@ -824,6 +822,8 @@ The reason to use the `--raw` flag is the possible convenience of results review
 since the rows will be basically sorted by categories, and most ambiguous ones will
 have more small probabilities instead of zeros than the most obvious (for the model) 
 categories 🪧.
+
+Plus the small  **Unchecked with TRUE** values combination of the best 5 models: [models_TOP-1.csv](result%2Ftables%2F20251023-1412_BEST_5_models_TOP-1.csv)📎
 
 ----
 
