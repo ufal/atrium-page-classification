@@ -1,0 +1,9 @@
+model_name,accuracy
+ViT-B/32 zero mid,37.46
+ViT-B/16 zero mid,41.22
+ViT-L/14 zero mid,45.94
+ViT-L/14-336 zero mid,37.59
+ViT-B/32 zero avg,39.66
+ViT-B/16 zero avg,44.27
+ViT-L/14 zero avg,46.18
+ViT-L/14-336 zero avg,39.78

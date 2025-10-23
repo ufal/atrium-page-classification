@@ -20,8 +20,36 @@ if __name__ == "__main__":
         "v1.1.": "ViT-B/16",
         "v1.2.": "ViT-B/32",
         "v2.1.": "ViT-L/14",
-        "v2.2.": "ViT-L/14@336",
+        "v2.2.": "ViT-L/14@336px",
     }
+
+
+    revision_best_models = {
+        "v1.1.3.3": "ViT-B/16",
+        "v1.1.3.7": "ViT-B/16",
+        "v1.2.3": "ViT-B/32",
+        "v2.1.3.1": "ViT-L/14",
+        "v2.2.3.4": "ViT-L/14@336px",
+    }
+
+    category_sufix = {
+        "113": "average",
+        "123": "average",
+        "213": "average",
+        "223": "average",
+        "31": "init",
+        "32": "details",
+        "33": "extra",
+        "34": "gemini",
+        "35": "gpt",
+        "36": "large",
+        "37": "mid",
+        "38": "min",
+        "39": "short",
+    }
+
+
+
     # Initialize the parser
     config = configparser.ConfigParser()
     # Read the configuration file
@@ -55,6 +83,7 @@ if __name__ == "__main__":
     model_path = Path(f"{hf_models_directory}/{model_name_local}")
 
     test_dir = config.get('INPUT', 'FOLDER_INPUT')
+    chunk_size = config.getint('INPUT', 'chunk_size')
 
     epochs = config.getint("TRAIN", "epochs")
     max_categ = config.getint("TRAIN", "max_categ")  # max number of category samples
@@ -100,8 +129,13 @@ if __name__ == "__main__":
     # Category file arguments
     parser.add_argument('--cat_prefix', type=str, default=categ_prefix,
                         help='Prefix for category description TSV files.')
+    parser.add_argument('-cc', '--cat_csv', type=str, default=categ_file,
+                        help='Prefix for category description TSV files.')
     parser.add_argument('--cat_dir', type=str, default=categ_directory, help='Directory with category description files.'),
     parser.add_argument('--avg', action='store_true', default=avg, help='Average scores from multiple category description files.')
+    parser.add_argument("--best",
+                        help=f"Output all ({len(revision_best_models.keys())}) best models' scores (more time needed, and NO chunk, raw, or top_N>1 is available)",
+                        default=raw, action="store_true")
     parser.add_argument('--zero_shot', action='store_true', default=zero_shot, help='Perform zero-shot prediction (no training).')
     parser.add_argument('--vis', action='store_true',default=visualize, help='Visualize model accuracy statistics.')
 
@@ -112,7 +146,7 @@ if __name__ == "__main__":
     parser.add_argument("--eval", action="store_true", help="Evaluate a saved model.")
     parser.add_argument("--eval_dir", action="store_true", help="Evaluate a directory of saved models.")
     parser.add_argument("--model_path", type=str, default=None,
-                        help="Path to the saved model checkpoint (.pt file) for evaluation.")
+                        help="Path to the saved model checkpoint (.pt file) or a model folder (inside `models` folder).")
     parser.add_argument("--model_dir", type=str, default=hf_models_directory,
                         help="Path to the directory of saved model checkpoints (.pt files) for evaluation.")
 
@@ -124,7 +158,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     input_dir = Path(test_dir) if args.directory is None else Path(args.directory)
-    Training, top_N, raw, safety = args.train, args.topn, args.raw, args.safe
+    Training, top_N, raw, safety, categ_file = args.train, args.topn, args.raw, args.safe, args.cat_csv
 
     if args.revision is None: # using config file revision
         args.revision = hf_version
@@ -172,13 +206,13 @@ if __name__ == "__main__":
     output_dir.mkdir(exist_ok=True)
 
     cat_directory = str(cur / args.cat_dir)
-    if not args.vis:
+    if not args.vis and not args.best:
         clip_instance = CLIP(max_category_samples=args.max_categ, test_ratio=test_size,
                              eval_max_category_samples=args.max_categ_eval,
                              top_N=args.topn, model_name=args.model, device=device,
-                             categories_tsv=categ_file, seed=seed, input_format=args.file_format,
+                             categories_tsv=args.cat_csv, seed=seed, input_format=args.file_format,
                              output_dir=str(output_dir), categories_dir=cat_directory,
-                             model_dir=str(model_path), cp_dir=str(cp_dir), revision=args.revision.replace('.', ''),
+                             model_dir=str(model_path), cp_dir=str(cp_dir), model_revision=args.revision.replace('.', ''),
                              cat_prefix=args.cat_prefix, avg=args.avg, zero_shot=args.zero_shot)
 
     data_dir = config.get("TRAIN", "FOLDER_PAGES")
@@ -196,7 +230,7 @@ if __name__ == "__main__":
 
     if args.hf:
         # saving model to local path
-        model_name_local = f"model_{args.model.replace('/', '').replace('@', '-')}_rev_{args.revision.replace('.', '')}"
+        model_name_local = f"{args.model.replace('/', '').replace('@', '-')}_rev_{args.revision.replace('.', '')}"
         model_path = Path(cp_dir.parent / args.model_dir / model_name_local)
 
         hf_model_name_local = f"model_{config.get('HF', 'revision').replace('.', '')}"
@@ -205,18 +239,17 @@ if __name__ == "__main__":
         # ----------------------------------------------
         # ----- UNCOMMENT for pushing to HF repo -------
         # ----------------------------------------------
-        print(f"Deleting branch {config.get('HF', 'revision')}")
-        delete_branch(config.get("HF", "repo_name"), repo_type="model", branch=config.get("HF", "revision"),
-                      token=config.get("HF", "token"))
-        print(f"Creating fresh branch {config.get('HF', 'revision')}")
-        create_branch(config.get("HF", "repo_name"), repo_type="model", branch=config.get("HF", "revision"),
-                      exist_ok=True,
-                      token=config.get("HF", "token"))
-        print(f"Loading local model from {model_path} for pushing to the HuggingFace hub {config.get('HF', 'repo_name')}")
-        clip_instance.load_model(str(model_path), args.revision, seed)
-        print(f"Pushing model to the HuggingFace hub branch {config.get('HF', 'revision')}")
-        clip_instance.pushing_to_hub(config.get("HF", "repo_name"), False, config.get("HF", "token"),
-                                     config.get("HF", "revision"))
+        #print(f"Deleting branch {config.get('HF', 'revision')}")
+        #delete_branch(config.get("HF", "repo_name"), repo_type="model", branch=config.get("HF", "revision"), token=config.get("HF", "token"))
+        #print(f"Creating fresh branch {config.get('HF', 'revision')}")
+        #create_branch(config.get("HF", "repo_name"), repo_type="model", branch=config.get("HF", "revision"),
+         #             exist_ok=True,
+         #             token=config.get("HF", "token"))
+        #print(f"Loading local model from {model_path} for pushing to the HuggingFace hub {config.get('HF', 'repo_name')}")
+        #clip_instance.load_model(str(model_path), args.revision)
+        #print(f"Pushing model to the HuggingFace hub branch {config.get('HF', 'revision')}")
+        #clip_instance.pushing_to_hub(config.get("HF", "repo_name"), False, config.get("HF", "token"),
+         #                            config.get("HF", "revision"))
         # ----------------------------------------------
 
 
@@ -225,7 +258,7 @@ if __name__ == "__main__":
 
         clip_instance.save_model(hf_model_path)
 
-        clip_instance.load_model(hf_model_path, config.get("HF", "revision"), seed)
+        clip_instance.load_model(hf_model_path, config.get("HF", "revision"))
 
     if args.train:
         if not os.path.isdir(data_dir):
@@ -304,29 +337,137 @@ if __name__ == "__main__":
             prediction = clip_instance.predict_single(args.file)
             print(f"Zero-shot prediction for {args.file}: {prediction}")
         elif args.dir:
-            input_dir_pred = Path(args.directory) if args.directory is not None else cur / 'test-images' / 'pages'
-            table_out_path = output_dir / 'tables'
-            table_out_path.mkdir(exist_ok=True, parents=True)
-            directory_result_output = str(table_out_path / f'{time_stamp}_zero_shot_{model_name_local}_TOP-{args.topn}.csv')
-            clip_instance.predict_directory(str(input_dir_pred), raw=raw, out_table=directory_result_output)
+            input_dir_pred = Path(args.directory) if args.directory is not None else cur / 'category_samples'
+            clip_instance.predict_directory(str(input_dir_pred), raw=raw, chunk_size=chunk_size,)
         else:
             print("Please specify a file (-f) or a directory (-d) for zero-shot prediction.")
     else:
         if args.file:
-            if args.topn > 1:
-                scores, labels = clip_instance.predict_top(args.file)
-                print(f"File {args.file} predicted:")
-                for lab, sc in zip(labels, scores):
-                    print(f"\t{lab}:  {round(sc * 100, 2)}%")
+            if not args.best:
+                if args.topn > 1:
+                    scores, labels = clip_instance.predict_top_N(args.file)
+                    print(f"File {args.file} predicted:")
+                    for lab, sc in zip(labels, scores):
+                        print(f"\t{lab}:  {round(sc * 100, 2)}%")
+                else:
+                    prediction = clip_instance.predict_single_best(args.file)
+                    print(f"Prediction for {args.file}:\n{prediction}")
             else:
-                prediction = clip_instance.predict_single(args.file)
-                print(f"Prediction for {args.file}:\n{prediction}")
+                all_best_predictions = {}
+
+                for rev, base_model in revision_best_models.items():
+                    print(f"\nLoading best model for revision {rev} based on {base_model}...")
+                    model_name_local = f"{base_model.replace('/', '').replace('@', '-')}_rev_{rev}"
+                    hf_model_name_local = f"model_{rev.replace('.', '')}"
+                    model_path = Path(f"{hf_models_directory}/{model_name_local}")
+                    hf_model_path = Path(f"{hf_models_directory}/{hf_model_name_local}")
+
+                    if hf_model_path.is_dir():
+                        model_path = hf_model_path
+
+                    temp_avg = ".3." not in rev  # averaging is not used for .3.* best models
+
+                    # check if revision ends with one of the category sufix keys
+                    categ_file = None
+                    for sufix_key, sufix_value in category_sufix.items():
+                        if rev.replace(".", "").endswith(sufix_key):
+                            if temp_avg:
+                                categ_file = f"TOTAL_{args.cat_prefix}.tsv"
+                            else:
+                                categ_file = f"{args.cat_prefix}_{sufix_value}.tsv"
+                            print(f"Using category description file {categ_file} for revision {rev}")
+                            break
+
+                    category_csv_path = Path(cat_directory) / categ_file
+
+                    clip_instance = CLIP(max_category_samples=args.max_categ, test_ratio=test_size,
+                             eval_max_category_samples=args.max_categ_eval,
+                             top_N=args.topn, model_name=base_model, device=device,
+                             categories_tsv=str(category_csv_path), seed=seed, input_format=args.file_format,
+                             output_dir=str(output_dir), categories_dir=cat_directory,
+                             model_dir=str(model_path), cp_dir=str(cp_dir), model_revision=rev,
+                             cat_prefix=args.cat_prefix, avg=temp_avg, zero_shot=False)
+
+                    clip_instance.load_model(str(model_path), rev)
+
+                    if args.topn > 1:
+                        scores, labels = clip_instance.predict_top_N(args.file)
+                        all_best_predictions[rev] = (labels, scores)
+                    else:
+                        prediction = clip_instance.predict_single_best(args.file)
+                        all_best_predictions[rev] = (prediction, 1)
+
+                print(f"\nFile {args.file} predictions from best models:")
+                for rev, (labels, scores) in all_best_predictions.items():
+                    printed = 0
+                    print(f"\n--- Revision {rev} --- {revision_best_models[rev]} ---")
+                    for lab, sc in zip(labels, scores):
+                        if printed >= args.topn:
+                            break
+                        print(f"\t{lab}:  {round(sc * 100, 2)}%")
+                        printed += 1
 
         if args.dir or args.directory is not None:
-            table_out_path = output_dir / 'tables'
-            table_out_path.mkdir(exist_ok=True, parents=True)
-            directory_result_output = str(table_out_path / f'{time_stamp}_result_{model_name_local}_TOP-{args.topn}.csv')
-            clip_instance.predict_directory(str(input_dir), raw=raw, out_table=directory_result_output)
+            if not args.best:
+                clip_instance.predict_directory(str(input_dir), raw=raw, chunk_size=chunk_size)
+            else:
+                all_best_directory_output = {}
+
+                for rev, base_model in revision_best_models.items():
+                    print(f"\nLoading best model for revision {rev} based on {base_model}...")
+                    model_name_local = f"{base_model.replace('/', '').replace('@', '-')}_rev_{rev.replace('.', '')}"
+                    hf_model_name_local = f"model_{rev.replace('.', '')}"
+                    model_path = Path(f"{hf_models_directory}/{model_name_local}")
+                    hf_model_path = Path(f"{hf_models_directory}/{hf_model_name_local}")
+
+                    if hf_model_path.is_dir():
+                        model_path = hf_model_path
+
+                    temp_avg = ".3." not in rev
+
+                    categ_file = None
+                    for sufix_key, sufix_value in category_sufix.items():
+                        if rev.replace(".", "").endswith(sufix_key):
+                            if temp_avg:
+                                categ_file = f"TOTAL_{args.cat_prefix}.tsv"
+                            else:
+                                categ_file = f"{args.cat_prefix}_{sufix_value}.tsv"
+                            print(f"Using category description file {categ_file} for revision {rev}")
+                            break
+
+                    category_csv_path = Path(cat_directory) / categ_file
+
+                    clip_instance = CLIP(max_category_samples=args.max_categ, test_ratio=test_size,
+                                         eval_max_category_samples=args.max_categ_eval,
+                                         top_N=1, model_name=base_model, device=device,
+                                         categories_tsv=str(category_csv_path), seed=seed, input_format=args.file_format,
+                                         output_dir=str(output_dir), categories_dir=cat_directory,
+                                         model_dir=str(model_path), cp_dir=str(cp_dir), model_revision=rev,
+                                         cat_prefix=args.cat_prefix, avg=temp_avg, zero_shot=False)
+
+                    clip_instance.load_model(str(model_path), rev)
+
+                    rdf = clip_instance.predict_directory(str(input_dir), raw=raw, chunk_size=chunk_size)
+                    all_best_directory_output[rev] = rdf
+
+                # combine all best predictions into single file by first 2 columns
+                combined_df = pd.DataFrame()
+                for rev, rdf in all_best_directory_output.items():
+                    # rename columns to include revision
+                    renamed_columns = {col: f"{col}-{rev}" for col in rdf.columns if col not in ["FILE", "PAGE"]}
+                    rdf_renamed = rdf.rename(columns=renamed_columns)
+
+                    if combined_df.empty:
+                        combined_df = rdf_renamed
+                    else:
+                        combined_df = pd.merge(combined_df, rdf_renamed, on=["FILE", "PAGE"], how="outer")
+
+                combined_df.to_csv(
+                    f"{output_dir}/tables/{time_stamp}_BEST_{len(revision_best_models.keys())}_models_TOP-1.csv",
+                    sep=",",
+                    index=False)
+                print(f"Results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
+
 
 
 

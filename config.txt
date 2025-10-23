@@ -39,6 +39,7 @@ model_storage = /lnet/work/projects/atrium/cache/clip
 
 [INPUT]
 FOLDER_INPUT=./category_samples
+chunk_size = 1000
 
 [HF]
 repo_name = ufal/clip-historical-page

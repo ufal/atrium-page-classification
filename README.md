@@ -101,7 +101,7 @@ of all category 🪧 descriptions.
 As our experiments showed, the averaging strategy is not the best. Moreover, the smallest model
 ViT-B/16 showed the best results after fine-tuning model on some selected category 🪧 set.
 
-![description comparison graph](result%2Fstats%2Fmodel_accuracy_plot.png)
+![description comparison graph](result%2Fstats%2Fmodel_accuracy_plot_all.png)
 
 Check out all of the prepared category 🪧 descriptions in the [category_descriptions](category_descriptions) 📁 folder.
 Which supports versions mapping from 1 to 9 for the csv files starting with `page_categories_` prefix. The separate set
@@ -582,14 +582,81 @@ There are accuracy performance measurements and plots of confusion matrices for 
 dataset (10% of the provided in `[TRAIN]`'s folder data). Both graphic plots and tables with 
 results can be found in the [result](result) 📁 folder.
 
+| Version      | Base Model + category set | Accuracy (%) | Comment       |
+|:-------------|:--------------------------|-------------:|---------------|
+| **v1.1.3.1** | **ViT-B/16 init**         |     **99.1** | Very good     |
+| v1.1.3.2     | ViT-B/16 details          |        99.08 |               |
+| **v1.1.3.3** | **ViT-B/16 extra**        |    **99.12** | 2nd Best      |
+| **v1.1.3.4** | **ViT-B/16 gemini**       |     **99.1** | Very good     |
+| v1.1.3.5     | ViT-B/16 gpt              |        98.95 |               |
+| **v1.1.3.6** | **ViT-B/16 large**        |     **99.1** | Very good     |
+| **v1.1.3.7** | **ViT-B/16 mid**          |    **99.14** | Best          |
+| v1.1.3.8     | ViT-B/16 min              |        98.86 |               |
+| v1.1.3.9     | ViT-B/16 short            |        99.06 |               |
+| v1.1.3       | ViT-B/16 average          |        99.06 |               |
+| v1.2.3.1     | ViT-B/32 init             |        98.95 |               |
+| v1.2.3.3     | ViT-B/32 extra            |        98.92 |               |
+| v1.2.3.4     | ViT-B/32 gemini           |        98.94 |               |
+| v1.2.3.6     | ViT-B/32 large            |        98.97 |               |
+| v1.2.3.7     | ViT-B/32 mid              |        98.86 |               |
+| **v1.2.3**   | **ViT-B/32 average**      |    **98.99** | Larger & good |
+| **v2.2.3.1** | **ViT-L/14-336px init**   |    **98.86** | Large & OK    |
+| v2.2.3.3     | ViT-L/14-336px extra      |        98.59 |               |
+| v2.2.3.4     | ViT-L/14-336px gemini     |        98.97 |               |
+| v2.2.3.6     | ViT-L/14-336px large      |        98.68 |               |
+| v2.2.3.7     | ViT-L/14-336px mid        |        98.81 |               |
+| v2.2.3       | ViT-L/14-336px average    |        98.72 |               |
+| v2.1.3.1     | ViT-L/14 init             |        98.97 |               |
+| v2.1.3.3     | ViT-L/14 extra            |        98.83 |               |
+| **v2.1.3.4** | **ViT-L/14 gemini**       |    **98.86** | Large & OK    |
+| v2.1.3.6     | ViT-L/14 large            |        98.92 |               |
+| v2.1.3.7     | ViT-L/14 mid              |         98.9 |               |
+| v2.1.3       | ViT-L/14 average          |        98.81 |               |
 
-`v1.1.3` Evaluation set's accuracy (**Top-1**):  **99.14%** 🏆
+
+`v1.1.3.1` Evaluation set's accuracy (**Top-1**):  **99.1%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20251020-1735_5449_EVAL_conf_1n_Nonec_ViT-B16_v1137.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20251022-0335_5449_EVAL_TOP-1_ViT-B16_v1131.png)
+</details>
+
+`v1.1.3.3` Evaluation set's accuracy (**Top-1**):  **99.12%** 🏆
+
+<details>
+
+<summary>Confusion matrix 📊 TOP-1 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2F20251022-1435_5449_EVAL_TOP-1_ViT-B16_v1133.png)
+</details>
+
+`v1.1.3.4` Evaluation set's accuracy (**Top-1**):  **99.1%** 🏆
+
+<details>
+
+<summary>Confusion matrix 📊 TOP-1 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2F20251022-0411_5449_EVAL_TOP-1_ViT-B16_v1134.png)
+</details>
+
+`v1.1.3.6` Evaluation set's accuracy (**Top-1**):  **99.1%** 🏆
+
+<details>
+
+<summary>Confusion matrix 📊 TOP-1 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2F20251022-0435_5449_EVAL_TOP-1_ViT-B16_v1136.png)
+</details>
+
+`v1.1.3.7` Evaluation set's accuracy (**Top-1**):  **99.14%** 🏆
+
+<details>
+
+<summary>Confusion matrix 📊 TOP-1 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2F20251022-1656_5449_EVAL_TOP-1_ViT-B16_v1137.png)
 </details>
 
 `v1.2.3` Evaluation set's accuracy (**Top-1**):  **98.99%** 🏆
@@ -598,27 +665,27 @@ results can be found in the [result](result) 📁 folder.
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20251020-1918_5449_EVAL_conf_1n_Nonec_ViT-B32_v123.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20251022-1718_5449_EVAL_TOP-1_ViT-B32_v123.png)
 
 </details>
 
-`v2.1.3` Evaluation set's accuracy (**Top-1**):  **98.97%** 🏆
+`v2.1.3.1` Evaluation set's accuracy (**Top-1**):  **98.97%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20251020-2050_5449_EVAL_conf_1n_Nonec_ViT-L14_v2131.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20251022-1733_5449_EVAL_TOP-1_ViT-L14_v2131.png)
 
 </details>
 
-`v2.2.3` Evaluation set's accuracy (**Top-1**):  **98.97%** 🏆
+`v2.2.3.4` Evaluation set's accuracy (**Top-1**):  **98.97%** 🏆
 
 <details>
 
 <summary>Confusion matrix 📊 TOP-1 👀</summary>
 
-![TOP-1 confusion matrix](result%2Fplots%2F20251020-1956_5449_EVAL_conf_1n_Nonec_ViT-L14-336px_v2234.png)
+![TOP-1 confusion matrix](result%2Fplots%2F20251022-1457_5449_EVAL_TOP-1_ViT-L14-336px_v2234.png)
 </details>
 
 > **Confusion matrices** provided above show the diagonal of matching gold and predicted categories 🪧
@@ -643,31 +710,73 @@ Additionally, results of prediction inference run on the directory level without
 
 <summary>General result tables 👀</summary>
 
-Demo files  `v1.1.3`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251021-2349_5449_EVAL_table_1n_Nonec_ViT-B16_v1137.csv) 📎
+Demo files  `v1.1.3.1`:
 
-- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2Fresult_20250701-1816_ViT-B16_1n_2000c.csv)📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251022-0335_5449_EVAL_TOP-1_ViT-B16_v1131.csv) 📎
+
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-53EVAL.csv](result%2Ftables%2F20251022-0059_5449_EVAL_TOP-3_ViT-B16_v1131.csv) 📎
+- 
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251023-1412_114_result_ViT-B16_v1.1.3.1_TOP-1.csv)📎
+
+Demo files  `v1.1.3.3`:
+
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251022-1435_5449_EVAL_TOP-1_ViT-B16_v1133.csv) 📎
+
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-53EVAL.csv](result%2Ftables%2F20251022-1436_5449_EVAL_TOP-3_ViT-B16_v1133.csv) 📎
+
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251022-1223_114_result_ViT-B16_v1.1.3.3_TOP-1.csv)📎
+
+Demo files  `v1.1.3.4`:
+
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251022-0411_5449_EVAL_TOP-1_ViT-B16_v1134.csv) 📎
+
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-53EVAL.csv](result%2Ftables%2F20251022-0140_5449_EVAL_TOP-3_ViT-B16_v1134.csv) 📎
+
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251023-1413_114_result_ViT-B16_v1.1.3.4_TOP-1.csv)📎
+
+
+Demo files  `v1.1.3.6`:
+
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251022-0435_5449_EVAL_TOP-1_ViT-B16_v1136.csv) 📎
+
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-53EVAL.csv](result%2Ftables%2F20251022-0207_5449_EVAL_TOP-3_ViT-B16_v1136.csv) 📎
+
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251023-1413_114_result_ViT-B16_v1.1.3.6_TOP-1.csv)📎
+
+Demo files  `v1.1.3.7`:
+
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251022-1656_5449_EVAL_TOP-1_ViT-B16_v1137.csv) 📎
+
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-53EVAL.csv](result%2Ftables%2F20251022-1524_5449_EVAL_TOP-3_ViT-B16_v1137.csv) 📎
+
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251022-1224_114_result_ViT-B16_v1.1.3.7_TOP-1.csv)📎
 
 Demo files  `v1.2.3`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1918_5449_EVAL_table_1n_Nonec_ViT-B32_v123.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251022-1718_5449_EVAL_TOP-1_ViT-B32_v123.csv) 📎
 
-- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2Fresult_20250701-2216_ViT-B32_1n_2000c.csv)📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-53EVAL.csv](result%2Ftables%2F20251022-1537_5449_EVAL_TOP-3_ViT-B32_v123.csv) 📎
 
-Demo files  `v2.1.3`:
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251022-1226_114_result_ViT-B32_v1.2.3_TOP-1.csv)📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-2050_5449_EVAL_table_1n_Nonec_ViT-L14_v2131.csv) 📎
+Demo files  `v2.1.3.1`:
 
-- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2Fresult_20250701-1742_ViT-L14_1n_2000c.csv)📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251022-1733_5449_EVAL_TOP-1_ViT-L14_v2131.csv) 📎
+- 
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-53EVAL.csv](result%2Ftables%2F20251022-1551_5449_EVAL_TOP-3_ViT-L14_v2131.csv) 📎
 
-Demo files  `v2.2.3`:
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251022-1226_114_result_ViT-L14_v2.1.3.1_TOP-1.csv)📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1956_5449_EVAL_table_1n_Nonec_ViT-L14-336px_v2234.csv) 📎
+Demo files  `v2.2.3.4`:
 
-- Manually ✍️ **checked** evaluation dataset (TOP-5): [model_TOP-5_EVAL.csv](result%2Ftables%2FEVAL_table_5n_2000c_ViTL14336px_20250702-0852.csv) 📎
+- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251022-1457_5449_EVAL_TOP-1_ViT-L14-336px_v2234.csv) 📎
 
-- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2Fresult_20250701-2218_ViT-L14@336px_1n_2000c.csv)📎
+- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-53EVAL.csv](result%2Ftables%2F20251022-1452_5449_EVAL_TOP-3_ViT-L14-336px_v2234.csv) 📎
+
+- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251022-1230_114_result_ViT-L14-336px_v2.2.3.4_TOP-1.csv)📎
+
+Plus the small  **Unchecked with TRUE** values combination of the best 5 models: [models_TOP-1.csv](result%2Ftables%2F20251023-1412_BEST_5_models_TOP-1.csv)📎
 
 With the following **columns** 📋:
 
@@ -975,7 +1084,7 @@ the key phases of the whole process (settings, training, evaluation) is provided
 | File Name             | Description                                                                                                     |
 |-----------------------|-----------------------------------------------------------------------------------------------------------------|
 | `classifier.py`       | Model-specific classes and related functions including predefined values for training arguments                 |
-| `minor_classes.py`   | Adjacent functions and support classes                                                                          |
+| `minor_classes.py`    | Adjacent functions and support classes                                                                          |
 | `utils.py`            | Task-related algorithms                                                                                         |
 | `run.py`              | Starting point of the program with its main function - can be edited for flags and function argument extensions |
 | `config.txt`          | Changeable variables for the program - should be edited                                                         |
@@ -1078,7 +1187,7 @@ classify our images based on the zero-shot evaluations.
 As the following experiments showed, the averaging strategy is not the best. Moreover, the smallest model
 ViT-B/16 showed the best results after separately fine-tuning model on some category 🪧 sets.
 
-![description comparison graph](result%2Fstats%2Fmodel_accuracy_plot.png)
+![description comparison graph](result%2Fstats%2Fmodel_accuracy_plot_all.png)
 
 Check out all of the prepared category 🪧 descriptions in the [category_descriptions](category_descriptions) 📁 folder.
 Which supports versions mapping from 1 to 9 for the csv files starting with `page_categories_` prefix. The separate set
@@ -1216,7 +1325,7 @@ revision `v1.9.22` turns to `model_v1922` model folder), and only then run repo 
 - **Developed by** UFAL [^7] 👥
 - **Funded by** ATRIUM [^4]  💰
 - **Shared by** ATRIUM [^4] & UFAL [^7] 🔗
-- **Model type:** fine-tuned ViT with a 224x224 [^2] [^13] [^14] 🔗 or 336x336 [^15] 🔗 resolution size 
+- **Model type:** fine-tuned CLIP-ViT with a 224x224 [^2] [^13] [^14] 🔗 or 336x336 [^15] 🔗 resolution size 
 
 **©️ 2022 UFAL & ATRIUM**
 

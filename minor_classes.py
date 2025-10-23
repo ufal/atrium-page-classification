@@ -364,7 +364,7 @@ def visualize_results(csv_file: str, output_dir: str, zero_shot: bool = False):
 
     # Add values on top of each bar
     for i, (idx, row) in enumerate(plot_df.iterrows()):
-        plt.text(i, row['accuracy'], f"{row['accuracy']:.2f}",
+        plt.text(i, row['accuracy'], f"{round(float(row['accuracy']), 2)}",
                  ha='center', va='bottom', fontsize=12, color='black')
 
     # Add overall mean line
@@ -508,7 +508,7 @@ def evaluate_multiple_models(model_dir: str, eval_dir: str, categ_dir: str, devi
                                      top_N=1, model_name=base_name, device=device,
                                      categories_tsv=str(categ_tsv_path), seed=random_seed, input_format=input_format,
                                      output_dir=str(output_dir), categories_dir=categ_dir,
-                                     revision=model_revision,
+                                     model_revision=model_revision,
                                      cat_prefix=cat_prefix, avg=model_use_avg, zero_shot=False)
 
                 # Prepare evaluation dataset and dataloader once
@@ -571,7 +571,7 @@ def evaluate_multiple_models(model_dir: str, eval_dir: str, categ_dir: str, devi
                                          categories_tsv=str(categ_tsv_path), seed=random_seed, input_format=input_format,
                                          output_dir=str(output_dir), categories_dir=categ_dir,
                                          model_dir=str(model_path),
-                                         revision=model_revision,
+                                         model_revision=model_revision,
                                          cat_prefix=cat_prefix, avg=model_use_avg, zero_shot=False)
 
                     # Prepare evaluation dataset and dataloader once
