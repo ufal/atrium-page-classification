@@ -6,21 +6,22 @@ FOLDER_MODELS=./model
 [EVAL]
 FOLDER_PAGES=./category_samples
 
-
 [TRAIN]
 FOLDER_PAGES=./category_samples
 
+cross_runs = 0
 test_size = 0.1
-log_step = 10
-epochs = 10
+log_step = 100
+epochs = 3
 lr = 5e-5
-max_categ = 2000
+max_categ = 14000
 Training = False
 Testing = False
 
 [SETUP]
+files_format = jpeg
 seed = 420
-base_model = google/vit-base-patch16-224
+base_model = google/vit-large-patch16-384
 batch = 16
 top_N = 1
 raw = False
@@ -28,10 +29,12 @@ inner = False
 
 [INPUT]
 FOLDER_INPUT=./category_samples
+chunk_size = 100
+chunking = False
 
 [HF]
 repo_name = ufal/vit-historical-page
 token = hf_ALr...zdBL
 use_hf = False
-revision = v2.20.10.5p
-latest = v2.2
+revision = main
+latest = v5.3

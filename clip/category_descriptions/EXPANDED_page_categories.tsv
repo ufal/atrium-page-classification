@@ -1,0 +1,43 @@
+label	description
+DRAW	document page with drawing
+DRAW	document page with map
+DRAW	canvas with map
+DRAW	document page with painting
+DRAW	document page with schematics
+DRAW	document page with graphics
+DRAW_L	document page with drawing inside table or form
+DRAW_L	document page with map inside table or form
+DRAW_L	canvas with map and table legend
+DRAW_L	document page with painting inside table or form
+DRAW_L	document page with schematics inside table or form
+DRAW_L	document page with graphics inside table or form
+DRAW_L	document page with drawing and table legend
+DRAW_L	document page with painting and table legend
+DRAW_L	document page with schematics and table legend
+DRAW_L	document page with graphics and table legend
+LINE_HW	page with handwritten text inside table or form
+LINE_P	document page with printed text inside table or form
+LINE_T	page with typed text inside table or form 
+PHOTO	page with photos
+PHOTO	document page with photos
+PHOTO	page with cutouts from photos
+PHOTO	document page with cutouts from photos
+PHOTO_L	photos with a table caption, inside a table or form
+PHOTO_L	page with photos inside a table or form
+PHOTO_L	document page with photos with a tabular caption
+PHOTO_L	page with cutouts from photos with a tabular caption
+PHOTO_L	document page with cutouts from photos with a tabular caption
+PHOTO_L	page with photos with a tabular caption
+PHOTO_L	document page with photos inside a table or form
+PHOTO_L	page with cutouts from photos inside a table or form
+PHOTO_L	document page with cutouts from photos inside a table or form
+TEXT	page with mixed printed and handwritten texts
+TEXT	page with mixed typed and handwritten texts
+TEXT	page with mixed printed and typed texts
+TEXT	newspaper cutout with handwritten notes
+TEXT	printed text cutout with handwritten notes
+TEXT	typed text cutout with handwritten notes
+TEXT_HW	handwritten text page
+TEXT_P	printed document page
+TEXT_P	printed book page
+TEXT_T	typed document page

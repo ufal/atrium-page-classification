@@ -1,15 +1,3 @@
-import datetime
-import os
-import pickle
-import re
-from collections import Counter, defaultdict
-import random
-from pathlib import Path
-import argparse
-# from dotenv import load_dotenv
-
-import time
-
 import h5py
 from matplotlib import pyplot as plt
 import numpy as np
@@ -19,9 +7,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.preprocessing import MinMaxScaler
 
-import multiprocessing as mp
-
-import sys
 import torch
 import torch.utils.data
 from torch.utils.tensorboard import SummaryWriter
@@ -32,160 +17,13 @@ from tqdm import tqdm
 import clip
 from PIL import Image, ImageEnhance, ImageFilter
 
-Image.MAX_IMAGE_PIXELS = 700_000_000
-import csv
-import string
 from huggingface_hub import PyTorchModelHubMixin
+
+Image.MAX_IMAGE_PIXELS = 700_000_000
+import string
 import torch.nn as nn
 
-from utils import *
-
-
-# Added from few_shot_finetuning.py for balanced sampling during training
-class CLIP_BalancedBatchSampler(torch.utils.data.sampler.BatchSampler):
-    """
-    BatchSampler - from a MNIST-like dataset, samples n_classes and within these classes samples n_samples.
-    Returns batches of size n_classes * n_samples
-    """
-
-    def __init__(self, labels, n_classes, n_samples):
-        self.labels = labels
-        self.labels_set = list(set(self.labels.numpy()))
-        self.label_to_indices = {label: np.where(self.labels.numpy() == label)[0]
-                                 for label in self.labels_set}
-        for l in self.labels_set:
-            np.random.shuffle(self.label_to_indices[l])
-        self.used_label_indices_count = {label: 0 for label in self.labels_set}
-        self.count = 0
-        self.n_classes = n_classes
-        self.n_samples = n_samples
-        self.n_dataset = len(self.labels)
-        self.batch_size = self.n_samples * self.n_classes
-
-    def __iter__(self):
-        self.count = 0
-        while self.count + self.batch_size < self.n_dataset:
-            classes = np.random.choice(self.labels_set, self.n_classes, replace=False)
-            indices = []
-            for class_ in classes:
-                indices.extend(self.label_to_indices[class_][
-                               self.used_label_indices_count[class_]:self.used_label_indices_count[
-                                                                         class_] + self.n_samples])
-                self.used_label_indices_count[class_] += self.n_samples
-                if self.used_label_indices_count[class_] + self.n_samples > len(self.label_to_indices[class_]):
-                    np.random.shuffle(self.label_to_indices[class_])
-                    self.used_label_indices_count[class_] = 0
-            yield indices
-            self.count += self.n_classes * self.n_samples
-
-    def __len__(self):
-        return self.n_dataset // self.batch_size
-
-
-def append_to_csv(df, filepath):
-    """
-    Appends a DataFrame to a CSV file, or creates a new file if it doesn't exist.
-    """
-    if not os.path.exists(filepath):
-        df.to_csv(filepath, index=False, sep=",")
-    else:
-        df.to_csv(filepath, mode="a", header=False, index=False, sep=",")
-
-
-class ImageFolderCustom(torch.utils.data.Dataset):
-    """
-    Custom Dataset for loading images from a directory and assigning category labels.
-    Limits the number of samples per category if specified.
-    """
-
-    def __init__(self, targ_dir: str, max_category_samples: int | None, img_size: int, preprocess_fn=None,
-                 ignore_dir: str = None) -> None:
-        self.targ_dir = targ_dir
-        self.max_category_samples = max_category_samples
-        self.preprocess = preprocess_fn
-        self.size = img_size
-        self.classes = []
-        self.class_to_idx = {}
-        self.paths = []  # Will store image_path
-        self.targets = []  # Will store class_idx for compatibility with ImageFolder.targets
-
-        # Logic to find classes and limit samples per category
-        all_categories = sorted(entry.name for entry in os.scandir(targ_dir) if entry.is_dir())
-
-        if not all_categories:
-            raise FileNotFoundError(f"Couldn't find any classes in {targ_dir}.")
-
-        # Create class_to_idx mapping
-        self.class_to_idx = {cls_name: i for i, cls_name in enumerate(all_categories)}
-        self.classes = all_categories
-
-        print(f"Discovered categories: {self.classes}")
-
-        # Collect and filter image paths per category
-        for category_name in self.classes:
-            category_path = Path(targ_dir) / category_name
-            all_files_in_category = list(category_path.glob("*.png"))  # Assuming .png as per original
-
-            if ignore_dir is not None and os.path.exists(ignore_dir):
-                ignored_category = Path(ignore_dir) / category_name
-                ignored_files = list(ignored_category.glob("*.png"))
-                all_files_in_category = [f for f in all_files_in_category if f not in ignored_files]
-
-            # Shuffle and limit files if max_category_samples is set
-            if self.max_category_samples is not None and len(all_files_in_category) > self.max_category_samples:
-                import random
-                random.seed(42)  # Ensure reproducibility if needed
-                random.shuffle(all_files_in_category)
-                all_files_in_category = all_files_in_category[:self.max_category_samples]
-
-            class_idx = self.class_to_idx[category_name]
-            for file_path in all_files_in_category:
-                self.paths.append(file_path)
-                self.targets.append(class_idx)  # Populate targets list
-
-        (paths, _, labels, _) = train_test_split(np.array(self.paths),
-                                                 np.array(self.targets),
-                                                 test_size=0.1,
-                                                 random_state=42,
-                                                 stratify=np.array(
-                                                     self.targets))
-
-        print(f"Total images collected: {len(self.paths)}")
-
-    def load_image(self, index: int) -> Image.Image:
-        "opens an image via a path and returns it."
-        image_path = self.paths[index]
-        return Image.open(image_path)
-
-    def __len__(self) -> int:
-        "returns the total number of samples"
-        return len(self.paths)
-
-    def __getitem__(self, index: int) -> tuple[torch.Tensor, int]:
-        "returns one sample of data, data and label(X,y)"
-
-        try:
-            img = self.load_image(index)
-            # Ensure image is loaded eagerly to catch OSError here
-            img.load()
-
-            # Get class index from pre-calculated targets
-            class_idx = self.targets[index]
-
-            # Transform if necessary
-            if self.preprocess:
-                transformed_img = self.preprocess(img)
-            else:
-                transformed_img = img  # This might be a PIL Image if no transform
-
-            return transformed_img, class_idx
-        except OSError as e:
-            print(f"Skipping image at path {self.paths[index]} due to error: {e}")
-            # Return a dummy item. Dummy image size should match expected input for CLIP model (e.g., 3, 336, 336 for ViT-L/14@336px)
-            # dummy_image = torch.zeros(3, 336, 336)
-            dummy_image = torch.zeros(3, self.size, self.size)
-            dummy_label = 0
-            return dummy_image, dummy_label
+from minor_classes import *
 
 
 class CLIP(nn.Module, PyTorchModelHubMixin):
@@ -199,25 +37,42 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
                  eval_max_category_samples: int | None,
                  top_N: int,
                  model_name: str,
-                 device,
+                 model_revision: str | None,
+                 device: str,
+                 seed: int,
                  categories_tsv: str,
-                 categories_dir: str,
+                 categories_dir: str = "./category_descriptions",
+                 test_ratio: float = 0.1,
+                 input_format: str = "jpeg",
                  output_dir: str = None,
+                 model_dir: str = None,
+                 cp_dir: str = None,
                  cat_prefix: str = None,
-                 avg: bool = True,
+                 safety_check: bool = True,
+                 avg: bool = False,
                  zero_shot: bool = False):
         super().__init__()  # initialize nn.Module
         # all your existing init logic follows unchanged:
         self.upper_category_limit      = max_category_samples
         self.upper_category_limit_eval = eval_max_category_samples
         self.top_N                     = top_N
-        self.seed                      = 42
+        self.seed                      = seed
         self.avg                       = avg
         self.device                    = device
         self.zero_shot                 = zero_shot
 
-        self.output_dir = Path(__file__).parent / "results" if output_dir is None else Path(output_dir)
+        self.test_fraction = test_ratio
+        self.file_format = input_format
+        self.safe_load = safety_check
+
+        print(f"Chosen file handling:\t{self.file_format} format \n\tSafety load of images:\t{self.safe_load}")
+
+        self.output_dir = Path(__file__).parent / "result" if output_dir is None else Path(output_dir)
+        self.models_dir = Path(__file__).parent / "models" if model_dir is None else Path(model_dir)
+        self.checkpoints_dir = Path(__file__).parent / "model_checkpoints" if cp_dir is None else Path(cp_dir)
         self.download_root = '/lnet/work/projects/atrium/cache/clip'
+
+        self.model_code_name = f'{model_name.replace("/", "").replace("@", "-")}_{model_revision}'
 
         # Must set jit=False for training
         self.model, self.preprocess = clip.load(model_name, device=device,
@@ -265,25 +120,29 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
                 self.categories = sorted(loaded_cats.keys())
                 self.class_to_idx = {cat: i for i, cat in enumerate(self.categories)}
                 self.texts = loaded_cats  # dict of lists
-                print(f"Categories: {self.categories} with multiple descriptions per category.")
                 self.text_features = self._get_averaged_text_features()
-                for cat, descs in self.texts.items():
-                    print(f"Category: {cat}, Descriptions:")
-                    for desc in descs:
-                        print(f"  - {desc}")
                 self.avg = True
             else:
                 self.categories = [label for label, desc in loaded_cats]
                 self.texts = [desc for label, desc in loaded_cats]
                 self.text_inputs = torch.cat([clip.tokenize(f"a scan of {description}") for description in self.texts]).to(
                         device)
-                print(f"Categories: {self.categories} with single description per category.")
+            print(f"Categories: {self.categories} with single description per category.")
+            if isinstance(self.texts, list):
+                for cat, desc in zip(self.categories, self.texts):
+                    print(f"Category: {cat}, Description: {desc}")
+            else:
+                for cat, descs in self.texts.items():
+                    print(f"Category: {cat}, Descriptions:")
+                    for desc in descs:
+                        print(f"  - {desc}")
 
         self.model_name = model_name
 
         self.num_prediction_classes = len(self.categories)
-        print(f"Number of prediction classes: {self.num_prediction_classes}")
-        print(f"Model name: {self.model_name}")
+        print(f"\tNumber of prediction classes: {self.num_prediction_classes}")
+        print(f"\tModel name: {self.model_name}")
+        print(f"\tModel code name: {self.model_code_name}")
 
         self.categories_dir = categories_dir
         self.categories_tsv = categories_tsv
@@ -302,20 +161,17 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
                 all_features.append(mean_features)
         return torch.stack(all_features)
 
-    def train(self, train_dir: str, eval_dir: str, log_dir: str, num_epochs: int = 10, batch_size: int = 8,
-              learning_rate: float = 1e-7, save_interval: int = 1):
+    def train(self, train_dir: str, log_dir: str, eval_dir: str = None,
+              num_epochs: int = 5, batch_size: int = 8, learning_rate: float = 1e-7):
         """
         Fine-tunes the CLIP model based on the provided training and evaluation directories.
         """
-        print("Starting CLIP model fine-tuning...")
+        print("\t*\tStarting CLIP model fine-tuning...")
         torch.manual_seed(self.seed)
         random.seed(self.seed)
         np.random.seed(self.seed)
 
-        remove_punctuation = str.maketrans(string.punctuation, ' ' * len(string.punctuation))
-        model_name_sanitized = self.model_name.translate(remove_punctuation).replace(" ", "")
-
-        print(f"Current model name: \t{model_name_sanitized}")
+        print(f"\tCurrent model name (to save the trained weights as): \t{self.model_code_name}\n")
 
         def convert_models_to_fp32(model):
             for p in model.parameters():
@@ -329,19 +185,43 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
             clip.model.convert_weights(self.model)
 
         writer = SummaryWriter(log_dir=log_dir)
-        weights_path = Path("model_checkpoints")
-        weights_path.mkdir(exist_ok=True)
+        self.checkpoints_dir.mkdir(parents=True, exist_ok=True)
 
-        # Data Loaders
-        train_dataset = ImageFolderCustom(train_dir, max_category_samples=self.upper_category_limit,
-                                          preprocess_fn=self.preprocess, ignore_dir=eval_dir,
-                                          img_size=self.preprocess.transforms[0].size)
+        train_dataset = ImageFolderCustom(train_dir, model_name=self.model_code_name,
+                                        max_category_samples=self.upper_category_limit,
+                                        preprocess_fn=self.preprocess, safety=self.safe_load,
+                                        img_size=self.preprocess.transforms[0].size,
+                                        use_advanced_split=True,  # Enable new split
+                                        split_type='train', seed=self.seed,
+                                        file_format=self.file_format,
+                                        test_ratio=self.test_fraction)
+
         train_labels = torch.tensor(train_dataset.targets)
-        train_sampler = CLIP_BalancedBatchSampler(train_labels, batch_size, 1)
+
+        num_unique_classes = len(set(train_dataset.targets))
+        n_classes_for_sampler = min(batch_size, num_unique_classes)
+
+        if n_classes_for_sampler < batch_size:
+            print(f"Warning:\tOnly {num_unique_classes} unique classes found in the training dataset.")
+            # This warning helps explain why the effective batch size might be smaller than configured.
+            print(f"Warning:\tNumber of classes to be sampled per batch is reduced from {batch_size} to {n_classes_for_sampler}.")
+
+        # Pass the capped value to the sampler
+        # Since n_samples=1, the effective batch size will now be n_classes_for_sampler.
+        train_sampler = CLIP_BalancedBatchSampler(train_labels, n_classes_for_sampler, 1)
+
+        # train_sampler = CLIP_BalancedBatchSampler(train_labels, batch_size, 1)
         train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_sampler=train_sampler)
 
-        test_dataset = ImageFolderCustom(eval_dir, max_category_samples=self.upper_category_limit_eval,
-                                         preprocess_fn=self.preprocess, img_size=self.preprocess.transforms[0].size)
+        test_dataset = ImageFolderCustom(train_dir, model_name=self.model_code_name,
+                                          max_category_samples=self.upper_category_limit,
+                                          preprocess_fn=self.preprocess, safety=self.safe_load,
+                                          img_size=self.preprocess.transforms[0].size,
+                                          use_advanced_split=True,  # Enable new split
+                                          split_type='val', seed=self.seed,
+                                          file_format=self.file_format,
+                                          test_ratio=self.test_fraction)
+
         test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size)
 
         loss_img = torch.nn.CrossEntropyLoss()
@@ -354,13 +234,15 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs * num_batches_train,
                                                                eta_min=1e-10)
 
-        print(f"Number of training batches: \t{num_batches_train}")
-        print(f"Number of evaluation batches: \t{len(test_dataloader)}")
+        print(f"\ttraining batches: \t{num_batches_train}")
+        print(f"\tevaluation batches: \t{len(test_dataloader)}")
+
+        out_path = self.checkpoints_dir / f"model_{self.model_code_name.replace('_', '_rev_')}_{num_epochs}e.pt"
 
         ever_best_accuracy = 0.0
 
         for epoch in range(num_epochs):
-            print(f"Epoch: {epoch}/{num_epochs}")
+            print(f"\t*\tEpoch: {epoch+1}/{num_epochs}")
             epoch_train_loss, step = 0, 0
             self.model.train()
             for batch in tqdm(train_dataloader, total=num_batches_train, desc="Training"):
@@ -413,7 +295,7 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
             avg_train_loss = epoch_train_loss / num_batches_train
             writer.add_scalar("Loss/train", avg_train_loss, epoch)
             writer.add_scalar("Learning Rate", optimizer.param_groups[0]['lr'], epoch)
-            print(f"{model_name_sanitized}\t Epoch {epoch} train loss: {avg_train_loss:.4f}")
+            print(f"\n{self.model_code_name}\t Epoch {epoch+1} train loss:\t{avg_train_loss:.4f}\n")
 
             if epoch == num_epochs - 1:
                 torch.save(
@@ -422,26 +304,26 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
                         'model_state_dict': self.model.state_dict(),
                         'optimizer_state_dict': optimizer.state_dict(),
                         'loss': avg_train_loss,
+                        'rnd_data_seed': self.seed,
+                        'category_limit': self.upper_category_limit,
                     },
-                    weights_path / f"model_{model_name_sanitized}_{self.upper_category_limit}c_{str(learning_rate)}_{num_epochs}e.pt")
-                print(
-                    f"Saved weights to {weights_path}/model_{model_name_sanitized}_{self.upper_category_limit}c_{str(learning_rate)}_{num_epochs}e.pt.")
+                    out_path)
+                print(f"Saved weights to {out_path}")
 
             # Evaluation
             self.model.eval()
 
-            # Fix: Use the correct number of classes for torchmetrics
             if self.avg:
                 num_classes = len(self.categories)  # Use self.categories when avg=True
             else:
                 num_classes = len(test_dataset.classes)  # Use dataset classes when avg=False
 
             acc_top1_metric = torchmetrics.Accuracy(task="multiclass", num_classes=num_classes).to(self.device)
-            acc_top5_metric = torchmetrics.Accuracy(task="multiclass", num_classes=num_classes, top_k=5).to(self.device)
+            acc_top3_metric = torchmetrics.Accuracy(task="multiclass", num_classes=num_classes, top_k=3).to(self.device)
 
             # For evaluation, always use ALL pre-computed text features
             if self.avg:
-                text_features_eval = self.text_features  # Use the pre-computed full set of averaged text features
+                text_features_eval = self.text_features  # Use the pre-computed clip set of averaged text features
                 text_features_eval = text_features_eval / text_features_eval.norm(dim=-1,
                                                                                   keepdim=True)  # Ensure normalized
             else:
@@ -462,10 +344,10 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
                     similarity = (100.0 * image_features @ text_features_eval.T)
 
                     acc_top1_metric.update(similarity, class_ids)
-                    acc_top5_metric.update(similarity, class_ids)
+                    acc_top3_metric.update(similarity, class_ids)
 
             mean_top1_accuracy = acc_top1_metric.compute()
-            mean_top5_accuracy = acc_top5_metric.compute()
+            mean_top3_accuracy = acc_top3_metric.compute()
 
             if mean_top1_accuracy > ever_best_accuracy:
                 ever_best_accuracy = mean_top1_accuracy
@@ -475,41 +357,66 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
                         'model_state_dict': self.model.state_dict(),
                         'optimizer_state_dict': optimizer.state_dict(),
                         'loss': avg_train_loss,
-                    },
-                    weights_path / f"model_{model_name_sanitized}_{self.upper_category_limit}c_{str(learning_rate)}_cp.pt")
+                        'rnd_data_seed': self.seed,
+                        'category_limit': self.upper_category_limit,
+                    }, out_path)
                 print(
-                    f"Saved checkpoint weights to {weights_path}/model_{model_name_sanitized}_{self.upper_category_limit}c_{str(learning_rate)}_cp.pt.")
+                    f"\tSaved checkpoint weights to {out_path}")
 
             print(f"Mean Top 1 Accuracy: {mean_top1_accuracy.item() * 100:.2f}%.")
-            print(f"Mean Top 5 Accuracy: {mean_top5_accuracy.item() * 100:.2f}%.")
+            print(f"Mean Top 3 Accuracy: {mean_top3_accuracy.item() * 100:.2f}%.")
             writer.add_scalar("Test Accuracy/Top1", mean_top1_accuracy, epoch)
-            writer.add_scalar("Test Accuracy/Top5", mean_top5_accuracy, epoch)
+            writer.add_scalar("Test Accuracy/Top3", mean_top3_accuracy, epoch)
 
             acc_top1_metric.reset()
-            acc_top5_metric.reset()
+            acc_top3_metric.reset()
 
         writer.flush()
         writer.close()
-        print("Fine-tuning finished.")
+        print(f"\t*\tFine-tuning of {self.model_code_name} is finished.")
 
-        self.test(test_dataloader)
+        if not Path(self.models_dir).is_dir():
+            os.makedirs(self.models_dir, exist_ok=True)
+        self.save_model(str(self.models_dir))
+
+        test_dataset = ImageFolderCustom(train_dir if eval_dir is None else eval_dir,
+                                         model_name=self.model_code_name,
+                                         max_category_samples=self.upper_category_limit,
+                                         preprocess_fn=self.preprocess,
+                                         img_size=self.preprocess.transforms[0].size,
+                                         use_advanced_split=(eval_dir is None),  # Enable new split
+                                         split_type='test', seed=self.seed,
+                                         file_format=self.file_format,
+                                         test_ratio=self.test_fraction)
+
+        test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size)
+
+        self.test(test_dataloader, image_files=test_dataset.paths)
 
     def evaluate_saved_model(self, model_path: str, eval_dir: str, batch_size: int = 8):
         """
         Loads a saved model and evaluates its performance on the specified evaluation directory.
         """
         if model_path is not None:
-            print(f"Loading model from {model_path} for evaluation...")
-            checkpoint = torch.load(model_path, map_location=self.device)
-            self.model.load_state_dict(checkpoint['model_state_dict'])
-            print(f"Model loaded from epoch {checkpoint['epoch']} with loss {checkpoint['loss']:.4f}.")
+            if Path(model_path).is_file():
+                print(f"Loading model from {model_path} for evaluation...")
+                checkpoint = torch.load(model_path, map_location=self.device)
+                self.model.load_state_dict(checkpoint['model_state_dict'])
+                print(f"Model loaded from epoch {checkpoint['epoch']+1} with loss {checkpoint['loss']:.4f}.")
+            else:
+                print(f"Loading from directory {model_path} using HF Hub mixin...")
+                self.load_model(load_directory=model_path, revision=model_path.split("_")[-1] if "_" in model_path else "main")
 
-        eval_dataset = ImageFolderCustom(eval_dir, max_category_samples=self.upper_category_limit_eval,
-                                         preprocess_fn=self.preprocess, img_size=self.preprocess.transforms[0].size)
+        model_name = Path(model_path).stem if model_path is not None else self.model_code_name
+
+        eval_dataset = ImageFolderCustom(eval_dir, max_category_samples=None,
+                                         preprocess_fn=self.preprocess, img_size=self.preprocess.transforms[0].size,
+                                         file_format=self.file_format, use_advanced_split=False,
+                                         split_type='test', seed=self.seed, model_name=model_name)
         eval_dataloader = torch.utils.data.DataLoader(eval_dataset, batch_size=batch_size)
 
         print("Starting evaluation of the loaded model...")
-        self.test(eval_dataloader, image_files=eval_dataset.paths,)
+        self.test(eval_dataloader, image_files=eval_dataset.paths)
         print("Evaluation finished.")
 
     def top_N_prediction(self, image_data: torch.Tensor, N: int):
@@ -547,22 +454,19 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
         scores, indices, _ = self.top_N_prediction(image_data.unsqueeze(0), len(self.categories))
         return scores, indices[0]
 
-    def test(self, test_dataloader: torch.utils.data.DataLoader, model_name_sanitized: str = None,
-             vis: bool = True, tab: bool = True, image_files: list = []):
+    def test(self, test_dataloader: torch.utils.data.DataLoader, image_files: list,
+             vis: bool = True, tab: bool = True):
         """
         Evaluates the model on the provided test dataloader and generates a confusion matrix plot.
         :param test_dataloader:
+        :param vis:
         :return:
         """
-        remove_punctuation = str.maketrans(string.punctuation, ' ' * len(string.punctuation))
-        model_name_sanitized = self.model_name.translate(remove_punctuation).replace(" ", "") if model_name_sanitized is None else model_name_sanitized
 
         plot_path = Path(f'{self.output_dir}/plots')
         table_path = Path(f'{self.output_dir}/tables')
         plot_path.mkdir(parents=True, exist_ok=True)
         time_stamp = time.strftime("%Y%m%d-%H%M")
-        plot_image = plot_path / f'EVAL_conf_{self.top_N}n_{self.upper_category_limit}c_{model_name_sanitized}_{time_stamp}.png'
-        table_file = table_path / f'EVAL_table_{self.top_N}n_{self.upper_category_limit}c_{model_name_sanitized}_{time_stamp}.csv'
 
         all_pred_scores = []
         all_predictions = []
@@ -571,7 +475,7 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
         self.model.eval()
 
         if self.avg:
-            text_features_test = self.text_features  # Use the pre-computed full set of averaged text features
+            text_features_test = self.text_features  # Use the pre-computed cli set of averaged text features
             text_features_test /= text_features_test.norm(dim=-1, keepdim=True)  # Ensure normalized
         else:
             # Original logic for non-averaged categories
@@ -583,7 +487,6 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
                 text_features_test = self.model.encode_text(all_texts)
                 text_features_test /= text_features_test.norm(dim=-1, keepdim=True)
 
-        images = []
         with torch.no_grad():
             for images, class_ids in tqdm(test_dataloader, desc="Testing"):
                 images = images.to(self.device)
@@ -601,7 +504,21 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
                 # images.append(images.cpu().numpy())
 
         acc = round(100 * np.sum(np.array(all_predictions) == np.array(all_true_labels)) / len(all_true_labels), 2)
-        print('Accuracy: ', acc)
+        print("=" * 40)
+        print('\t*\tAccuracy: ', acc)
+        print("=" * 40)
+
+        all_pred_scores = np.vstack(all_pred_scores)
+
+        # max_logits = np.max(all_pred_scores, axis=1, keepdims=True)
+        # exp_logits = np.exp(all_pred_scores - max_logits)
+        # all_pred_probs = exp_logits / np.sum(exp_logits, axis=1, keepdims=True)
+
+        number_of_samples = all_pred_scores.shape[0]
+
+        plot_image = plot_path / f'{time_stamp}_{number_of_samples}{"_zero" if self.zero_shot else ""}_EVAL_TOP-{self.top_N}_{self.model_code_name}.png'
+        table_file = table_path / f'{time_stamp}_{number_of_samples}{"_zero" if self.zero_shot else ""}_EVAL_TOP-{self.top_N}_{self.model_code_name}.csv'
+
 
         if vis:
             # Ensure display labels match the order of predictions
@@ -617,7 +534,7 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
             disp.ax_.set_xticks(tick_positions)
             disp.ax_.set_xticklabels(short_labels)
 
-            disp.ax_.set_title(f"TOP {self.top_N} {self.upper_category_limit_eval}c {self.model_name} CM")
+            disp.ax_.set_title(f"TOP {self.top_N} {self.model_code_name} CM  - {acc}%")
             plt.savefig(plot_image, bbox_inches='tight', dpi=300)
             plt.close()
             print(f"Confusion matrix saved to {plot_image}")
@@ -629,7 +546,7 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
             out_df["TRUE"] = [self.categories[i] for i in all_true_labels]
             out_df.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
             out_df.to_csv(table_file, sep=",", index=False)
-            print(f"Results for TOP-{self.top_N} predictions are recorded into {self.output_dir}/tables/ directory")
+            print(f"Results for TOP-{self.top_N} predictions are recorded into {self.output_dir}/tables/ directory:\n{table_file}")
 
         return acc
 
@@ -649,6 +566,7 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
             "categories": self.categories,
             "texts": self.texts, # Save the texts for reconstruction
             "zero_shot": self.zero_shot,
+            "rnd_data_seed": self.seed,
             "image_size": self.preprocess.transforms[0].size,
             "image_mean": self.preprocess.transforms[-1].mean,
             "image_std": self.preprocess.transforms[-1].std
@@ -662,13 +580,17 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
         self.save_pretrained(save_directory, config=configs)
         print(f"Model and configuration saved to {save_directory}")
 
-    def load_model(self, load_directory: str):
+    def load_model(self, load_directory: str, revision: str):
         """
         Load a fine-tuned model and its configuration from the specified directory using PyTorchModelHubMixin.
         """
         # The from_pretrained method of PyTorchModelHubMixin loads the model into the current instance.
         # It also handles loading the associated configuration.
         loaded_model = self.from_pretrained(load_directory,
+                                            avg=self.avg,
+                                            revision=revision,
+                                            model_revision=revision,
+                                            seed=self.seed,
                                             max_category_samples=self.upper_category_limit,
                                             eval_max_category_samples=self.upper_category_limit_eval,
                                             top_N=self.top_N,
@@ -719,6 +641,7 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
             "categories": self.categories,
             "texts": self.texts,
             "zero_shot": self.zero_shot,
+            "rnf_data_seed": self.seed,
             "image_size": self.preprocess.transforms[0].size,
             "image_mean": self.preprocess.transforms[-1].mean,
             "image_std": self.preprocess.transforms[-1].std
@@ -736,6 +659,8 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
         # The from_pretrained method of PyTorchModelHubMixin loads the model and its configuration
         # directly into the current instance.
         loaded_model = self.from_pretrained(repo_id, revision=revision,
+                                            avg=self.avg, seed=self.seed,
+                                            model_revision=revision,
                                             max_category_samples=self.upper_category_limit,
                                             eval_max_category_samples=self.upper_category_limit_eval,
                                             top_N=self.top_N,
@@ -764,7 +689,7 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
         print(f"Model and configuration loaded from the Hugging Face Hub: {repo_id}")
 
 
-    def predict_single(self, image_file: str) -> str:
+    def predict_single_best(self, image_file: str) -> dict:
         """
         Predicts the category of a single image file.
         :param image_file:
@@ -773,11 +698,14 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
         image = Image.open(image_file)
         image_input = self.preprocess(image).unsqueeze(0).to(self.device)
 
-        _, best_n_indices, _ = self.top_N_prediction(image_input, self.top_N)
+        best_n_scores, best_n_indices, _ = self.top_N_prediction(image_input, self.top_N)
         pred_label = self.categories[best_n_indices[0]]
         return pred_label
+        # results = {label : score for label, score in zip([self.categories[i] for i in best_n_indices], best_n_scores)}
+        # return results
 
-    def predict_top(self, image_file: str) -> (list, list):
+
+    def predict_top_N(self, image_file: str) -> (list, list):
         """
         Predicts the TOP-N categories of a single image file.
         :param image_file:
@@ -791,7 +719,107 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
         pred_labels = [self.categories[i] for i in best_n_indices]
         return best_n_scores, pred_labels
 
-    def predict_directory(self, folder_path: str, raw: bool = False, out_table: str = None):
+    def predict_directory(self, folder_path: str, raw: bool = False, out_table: str = None,
+                          chunk_size: int = 1000):
+        """
+        Predicts categories for all images in a directory and saves results to a CSV file.
+        Handles large directories (30,000+ files) efficiently with batch processing.
+
+        :param folder_path: Path to directory containing images
+        :param raw: Whether to save raw scores
+        :param out_table: Optional custom output path for results
+        :param batch_size: Number of images to process before writing to disk
+        :param recursive: Whether to search subdirectories
+        :return:
+        """
+        folder_path = Path(folder_path)
+
+        images = directory_scraper(Path(folder_path), self.file_format)
+        print(f"Found {len(images)} images in {folder_path}")
+
+        time_stamp = time.strftime("%Y%m%d-%H%M")
+
+        # Prepare output paths
+        out_table = out_table if out_table is not None \
+            else f"{self.output_dir}/tables/{time_stamp}_{len(images)}_{'zero_' if self.zero_shot else ''}result_{self.model_code_name}_TOP-{self.top_N}.csv"
+
+        raw_table = f"{self.output_dir}/tables/{time_stamp}_{len(images)}_{'zero_' if self.zero_shot else ''}RAW_{self.model_code_name}.csv" if raw else None
+
+        # Process in batches
+        total_processed = 0
+        write_header = True
+
+        for batch_start in range(0, len(images), chunk_size):
+            batch_end = min(batch_start + chunk_size, len(images))
+            batch_images = images[batch_start:batch_end]
+
+            # --- FIX: Renamed lists for clarity ---
+            all_scores_list, tru_images = [], []
+
+            # Process batch
+            for img_path in tqdm(batch_images,
+                                 desc=f"Processing batch {batch_start // chunk_size + 1}/{(len(images) - 1) // chunk_size + 1}"):
+                try:
+                    image = Image.open(img_path)
+                    image_input = self.preprocess(image).unsqueeze(0).to(self.device)
+                    scores, indices, raw_scores = self.top_N_prediction(image_input, self.top_N)
+
+                    # --- FIX: Always append the full raw_scores list. Remove res_list (indices). ---
+                    all_scores_list.append(raw_scores.tolist())
+                    tru_images.append(img_path.name)
+
+                except Exception as e:
+                    print(f"Error processing file {img_path}: {e}")
+                    continue
+
+            # --- FIX: Check the correct list ---
+            if not all_scores_list:
+                continue
+
+            # --- FIX: Remove unnecessary concatenation of res_list ---
+            # res_list = np.concatenate(res_list, axis=0) # <--- REMOVED
+
+            # --- FIX: Pass the correct lists to dataframe_results ---
+            out_df, raw_df = dataframe_results(
+                test_images=tru_images,
+                test_predictions=all_scores_list,  # <--- Pass the full scores here
+                raw_scores=all_scores_list if raw else None, # <--- Pass scores if raw=True, else None
+                top_N=self.top_N,
+                categories=self.categories
+            )
+
+            out_df.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
+
+            # Append to CSV (write header only once)
+            out_df.to_csv(out_table, sep=",", index=False,
+                          mode='w' if write_header else 'a',
+                          header=write_header)
+
+            if raw:
+                raw_df.sort_values(self.categories, ascending=[False] * len(self.categories), inplace=True)
+                raw_df.to_csv(raw_table, sep=",", index=False,
+                              mode='w' if write_header else 'a',
+                              header=write_header)
+
+            write_header = False
+            total_processed += len(tru_images)
+
+            # Free memory
+            # --- FIX: Update del statement ---
+            del all_scores_list, tru_images, out_df
+            if raw:
+                del raw_df
+
+        print(f"Results for TOP-{self.top_N} predictions ({total_processed} images) saved to {out_table}")
+        if raw:
+            print(f"RAW Results saved to {raw_table}")
+
+        output_dataframe = pd.read_csv(out_table, sep=",", index_col=None)
+        return output_dataframe
+
+
+
+    def predict_dir(self, folder_path: str, raw: bool = False, out_table: str = None):
         """
         Predicts categories for all images in a directory and saves results to a CSV file.
         :param folder_path:
@@ -799,7 +827,7 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
         :param out_table:
         :return:
         """
-        images = directory_scraper(Path(folder_path), "png")
+        images = directory_scraper(Path(folder_path), self.file_format)
         print(f"Predicting {len(images)} images from {folder_path}")
 
         time_stamp = time.strftime("%Y%m%d-%H%M")  # for results files
@@ -826,273 +854,295 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
                                            top_N=self.top_N, categories=self.categories)
 
         out_df.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
+
+        out_table = out_table if out_table is not None \
+            else f"{self.output_dir}/tables/{time_stamp}_result_{self.model_code_name}_TOP-{self.top_N}.csv"
         out_df.to_csv(out_table, sep=",", index=False)
         print(f"Results for TOP-{self.top_N} predictions are recorded into {self.output_dir}/tables/ directory")
 
         if raw:
             raw_df.sort_values(self.categories, ascending=[False] * len(self.categories), inplace=True)
-            raw_df.to_csv(f"{self.output_dir}/tables/RAW_{self.model_name.replace('/', '')}_{time_stamp}.csv", sep=",", index=False)
+            raw_df.to_csv(f"{self.output_dir}/tables/{time_stamp}_RAW_{self.model_code_name}.csv", sep=",", index=False)
             print(f"RAW Results are recorded into {self.output_dir}/tables/ directory")
 
+    def predict_directory_chunk(self, folder_path: str, raw: bool = False, out_table: str = None, chunk: int = 1000):
+        """
+        Predicts categories for all images in a directory and saves results to a CSV file.
+        If chunk > 0, results are saved every `chunk` images into the same CSV (append mode).
+        :param folder_path:
+        :param raw:
+        :param out_table:
+        :param chunk: number of images to process before flushing results to disk (0 or None => no chunking)
+        :return:
+        """
 
-def load_categories(tsv_file, directory = None, prefix=None):
-    """
-    Loads categories and descriptions from TSV files for the CLIP model.
-    If prefix is provided, it loads all files starting with that prefix from the directory.
-    """
-    categories_data = defaultdict(list)
+        images = directory_scraper(Path(folder_path), self.file_format)
+        n_images = len(images)
+        print(f"Predicting {n_images} images from {folder_path}")
 
-    dir = directory if directory else "category_descriptions"
-    base_dir = Path(__file__).parent  # directory of tables
-    if not base_dir.is_dir():
-        print(f"Error: {base_dir} not a directory")
-        return {}
+        time_stamp = time.strftime("%Y%m%d-%H%M")  # for results files
 
-    if prefix:
-        files_to_load = list(base_dir.glob(f"{prefix}*.tsv")) + list(base_dir.glob(f"{prefix}*.csv"))
-        if not files_to_load:
-            print(f"Warning: No TSV files with prefix '{prefix}' found in {base_dir}. Using default categories.")
-            return {"DRAW": ["a drawing"], "PHOTO": ["a photo"], "TEXT": ["text"], "LINE": ["a table"]}
+        # If user didn't pass an explicit out_table use default naming
+        out_table = out_table if out_table is not None \
+            else f"{self.output_dir}/tables/{time_stamp}_result_{self.model_code_name}_TOP-{self.top_N}.csv"
 
-        print(f"Found {len(files_to_load)} category files with prefix '{prefix}'.")
-        for file_path in files_to_load:
-            try:
-                with open(file_path, "r") as file:
-                    reader = csv.DictReader(file, delimiter="\t") if file_path.suffix == '.tsv' else csv.DictReader(file, delimiter=",")
-                    for row in reader:
-                        categories_data[row["label"].replace("+AF8-", "_")].append(row["description"])
-            except Exception as e:
-                print(f"Error reading categories file {file_path}: {e}")
+        # Raw results file name (same pattern as before)
+        raw_out_table = f"{self.output_dir}/tables/{time_stamp}_RAW_{self.model_code_name}.csv"
 
-        # for cat, descs in categories_data.items():
-        #     print(f"Category: {cat}, Descriptions: {descs}")
-        return categories_data
-
-    else:  # Original behavior
-        categories = []
-        tsv_file_or_dir = base_dir / tsv_file
-
-        if not os.path.exists(tsv_file_or_dir):
-            print(f"Warning: Categories file not found at {tsv_file_or_dir}. Using default categories.")
-            return [("DRAW", "a drawing"), ("PHOTO", "a photo"), ("TEXT", "text"), ("LINE", "a table")]
-        try:
-            with open(tsv_file_or_dir, "r") as file:
-                reader = csv.DictReader(file, delimiter="\t") if tsv_file_or_dir.suffix == '.tsv' else csv.DictReader(file, delimiter=",")
-                for row in reader:
-                    categories.append((row["label"].replace("+AF8-", "_"), row["description"]))
-
-            uniques_categs = set([cat for cat, _ in categories])
-            if len(categories) > len(uniques_categs):
-                categories_data = defaultdict(list)
-                for cat, desc in categories:
-                    categories_data[cat].append(desc)
-                categories = {cat: descs for cat, descs in categories_data.items()}
-        except Exception as e:
-            print(f"Error reading categories file: {e}")
-            return []  # Fallback
-        print(f"Loaded {len(categories)} categories from {tsv_file_or_dir}")
-        return categories
-
-def evaluate_multiple_models(model_dir: str, eval_dir: str, device, cat_prefix: str, model_suffix: str = "05.pt", vis: bool = True,
-                                 batch_size: int = 8, zero_shot: bool = False):
-    """
-    Evaluates multiple saved models in a directory and records their Top-1 accuracy.
-    :param model_dir: Directory containing the saved model files.
-    :param eval_dir: Directory for evaluation data.
-    :param model_suffix: Suffix to filter model files (e.g., ".pt", "_cp.pt").
-    :param vis: If True, visualize results in a bar graph.
-    :param batch_size: Batch size for evaluation.
-    """
-    map_base_name = {
-        "ViTB32_": "ViT-B/32",
-        "ViTB16_": "ViT-B/16",
-        "ViTL14_": "ViT-L/14",
-        "ViTL14336px_": "ViT-L/14@336px",
-    }
-
-    category_sufix = {
-        "000c": "average",
-        "01c": "detail",  # 9
-        "02c": "extra",  # 8
-        "03c": "gemini",  # 6
-        "04c": "gpt",  # 4
-        "05c": "mid",  # 2
-        "06c": "min",  # 3
-        "07c": "short",  # 5
-        "08c": "init",  # 1
-    }
-
-    model_dir_path = Path(model_dir)
-    if not model_dir_path.is_dir():
-        print(f"Error: Model directory not found at {model_dir}")
-        return
-
-    model_files = list(model_dir_path.rglob(f"*{model_suffix}"))
-    if not model_files:
-        print(f"No model files found with suffix '{model_suffix}' in {model_dir}")
-        return
-
-    print(f"Found {len(model_files)} models with suffix '{model_suffix}'.")
-    accuracies = {}  # To store filename_stem: top1_accuracy
-
-    cur = Path(__file__).parent if '__file__' in globals() else Path.cwd()
-    output_dir = cur / "results"
-    output_dir.mkdir(exist_ok=True)
-
-    if zero_shot:
-        print("Zero-shot evaluation mode enabled. Using pre-computed text features.")
-        for base_name in map_base_name.values():
-            print(f"Using base model: {base_name}")
-            vis_model_name = f"{base_name} zero"
-
-            try:
-                clip_instance = CLIP(None, None, 1, base_name, device,
-                                     cat_prefix, str(output_dir), cat_prefix, True, False)
-
-                # Prepare evaluation dataset and dataloader once
-                eval_dataset = ImageFolderCustom(eval_dir, max_category_samples=None,
-                                                 preprocess_fn=clip_instance.preprocess,
-                                                 img_size=clip_instance.preprocess.transforms[0].size)
-                eval_dataloader = torch.utils.data.DataLoader(eval_dataset, batch_size=batch_size)
-
-                accuracies[vis_model_name] = clip_instance.test(eval_dataloader, vis=False)
-                print(f"Top 1 Accuracy for {vis_model_name} {base_name}: {accuracies[vis_model_name]:.2f}%")
-            except Exception as e:
-                print(f"Error evaluating model {base_name}: {e}")
-                if vis_model_name not in accuracies.keys():
-                    accuracies[vis_model_name] = "Error"  # Indicate error
-    else:
-        for model_path in sorted(model_files):
-            model_name_stem = model_path.stem
-            print(f"\nEvaluating model: {model_name_stem}")
-
-            base_name = None
-            for short, full in map_base_name.items():
-                if short in model_name_stem:
-                    base_name = full
-                    break
-
-            vis_categ = "UNK"  # Default category
-            for code, categ in category_sufix.items():
-                if code in model_name_stem:
-                    vis_categ = categ
-                    break
-
-            if base_name is None:
-                vis_model_name = f"{model_name_stem} {vis_categ}"
-                accuracies[vis_model_name] = "Error"  # Indicate error
-            else:
-                vis_model_name = f"{base_name.replace('@', '-')} {vis_categ}"
-                print(vis_model_name)
+        # For non-chunking behavior we keep similar buffers to your original code
+        if not chunk:
+            res_list, raw_list, tru_images = [], [], []
+            for img_path in tqdm(images, desc="Predicting directory"):
                 try:
-                    # Load model state dict
-                    clip_instance = CLIP(None, None, 1, base_name, device,
-                                         cat_prefix, str(output_dir), cat_prefix, True, False)
-
-                    # Prepare evaluation dataset and dataloader once
-                    eval_dataset = ImageFolderCustom(eval_dir, max_category_samples=None,
-                                                     preprocess_fn=clip_instance.preprocess,
-                                                     img_size=clip_instance.preprocess.transforms[0].size)
-                    eval_dataloader = torch.utils.data.DataLoader(eval_dataset, batch_size=batch_size)
-
-                    checkpoint = torch.load(model_path, map_location=device)
-                    clip_instance.model.load_state_dict(checkpoint['model_state_dict'])
-                    print(f"Model loaded from epoch {checkpoint['epoch']} with loss {checkpoint['loss']:.4f}.")
-
-                    accuracies[vis_model_name] = clip_instance.test(eval_dataloader, vis=False)
-                    print(f"Top 1 Accuracy for {vis_model_name} {model_name_stem}: {accuracies[vis_model_name]:.2f}%")
-
+                    image = Image.open(img_path)
+                    image_input = self.preprocess(image).unsqueeze(0).to(self.device)
+                    scores, indices, raw_scores = self.top_N_prediction(image_input, self.top_N)
+                    res_list.append(indices)
+                    if raw:
+                        raw_list.append(raw_scores.tolist())
+                    tru_images.append(img_path.name)
                 except Exception as e:
-                    print(f"Error evaluating model {model_name_stem}: {e}")
-                    if vis_model_name not in accuracies.keys():
-                        accuracies[vis_model_name] = "Error"  # Indicate error
+                    print(f"Error processing file {img_path}: {e}")
 
-    # Save results to a table
-    if accuracies:
-        results_df = pd.DataFrame(list(accuracies.items()), columns=['model_name', 'accuracy'])
+            if res_list:
+                res_array = np.concatenate(res_list, axis=0)
+            else:
+                res_array = np.empty((0, self.top_N), dtype=int)
 
-        # Create a dedicated directory for evaluation statistics
-        eval_stats_output_dir = Path(output_dir) / 'stats'
-        eval_stats_output_dir.mkdir(parents=True, exist_ok=True)
+            out_df, raw_df = dataframe_results(test_images=tru_images, test_predictions=res_array,
+                                               raw_scores=raw_list, top_N=self.top_N, categories=self.categories)
 
-        csv_output_path = eval_stats_output_dir / f"model_accuracies{'_zero' if zero_shot else ''}.csv"
-        results_df.to_csv(csv_output_path, index=False)
-        print(f"Evaluation results saved to {csv_output_path}")
+            out_df.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
 
-        if vis:
-            # sort results by vis order
-            visualize_results(str(csv_output_path), str(Path(output_dir) / 'stats'), zero_shot)
+            # ensure output directory exists
+            os.makedirs(os.path.dirname(out_table), exist_ok=True)
+            out_df.to_csv(out_table, sep=",", index=False)
+            print(f"Results for TOP-{self.top_N} predictions are recorded into {self.output_dir}/tables/ directory")
+
+            if raw:
+                raw_df.sort_values(self.categories, ascending=[False] * len(self.categories), inplace=True)
+                raw_df.to_csv(raw_out_table, sep=",", index=False)
+                print(f"RAW Results are recorded into {self.output_dir}/tables/ directory")
+
+            return
+
+        # --- Chunking / incremental write mode ---
+        # chunk > 0 here
+        os.makedirs(os.path.dirname(out_table), exist_ok=True)
+
+        chunk_images, chunk_res_list, chunk_raw_list = [], [], []
+        wrote_header = False
+        processed = 0
+
+        for img_path in tqdm(images, desc="Predicting directory"):
+            try:
+                image = Image.open(img_path)
+                image_input = self.preprocess(image).unsqueeze(0).to(self.device)
+                scores, indices, raw_scores = self.top_N_prediction(image_input, self.top_N)
+
+                chunk_images.append(img_path.name)
+                chunk_res_list.append(indices)  # indices expected to be something concatenable along axis=0
+                if raw:
+                    chunk_raw_list.append(raw_scores.tolist())
+
+                processed += 1
+
+                # flush when we have chunk images (or on last iteration below)
+                if processed % chunk == 0:
+                    # prepare arrays/lists for dataframe_results
+                    if chunk_res_list:
+                        chunk_res_array = np.concatenate(chunk_res_list, axis=0)
+                    else:
+                        chunk_res_array = np.empty((0, self.top_N), dtype=int)
+
+                    out_df_chunk, raw_df_chunk = dataframe_results(test_images=chunk_images,
+                                                                   test_predictions=chunk_res_array,
+                                                                   raw_scores=chunk_raw_list,
+                                                                   top_N=self.top_N, categories=self.categories)
+
+                    # append chunk to CSV
+                    mode = 'w' if not wrote_header else 'a'
+                    header = not wrote_header
+                    out_df_chunk.to_csv(out_table, sep=",", index=False, mode=mode, header=header)
+                    wrote_header = True
+                    print(f"Flushed {processed} images -> {out_table}")
+
+                    if raw:
+                        # append raw chunk to raw_out_table (sort later)
+                        mode_raw = 'w' if not os.path.exists(raw_out_table) else 'a'
+                        header_raw = not os.path.exists(raw_out_table)
+                        raw_df_chunk.to_csv(raw_out_table, sep=",", index=False, mode=mode_raw, header=header_raw)
+
+                    # reset chunk buffers
+                    chunk_images, chunk_res_list, chunk_raw_list = [], [], []
+
+            except Exception as e:
+                print(f"Error processing file {img_path}: {e}")
+
+        # flush remaining images (if any)
+        if chunk_images:
+            if chunk_res_list:
+                chunk_res_array = np.concatenate(chunk_res_list, axis=0)
+            else:
+                chunk_res_array = np.empty((0, self.top_N), dtype=int)
+
+            out_df_chunk, raw_df_chunk = dataframe_results(test_images=chunk_images,
+                                                           test_predictions=chunk_res_array,
+                                                           raw_scores=chunk_raw_list,
+                                                           top_N=self.top_N, categories=self.categories)
+
+            mode = 'w' if not wrote_header else 'a'
+            header = not wrote_header
+            out_df_chunk.to_csv(out_table, sep=",", index=False, mode=mode, header=header)
+            print(f"Flushed final {processed} images -> {out_table}")
+
+            if raw:
+                mode_raw = 'w' if not os.path.exists(raw_out_table) else 'a'
+                header_raw = not os.path.exists(raw_out_table)
+                raw_df_chunk.to_csv(raw_out_table, sep=",", index=False, mode=mode_raw, header=header_raw)
+
+        # Final pass: read entire CSV, sort, and re-write so final file is sorted like original behavior
+        try:
+            final_out = pd.read_csv(out_table)
+            if {'FILE', 'PAGE'}.issubset(final_out.columns):
+                final_out.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
+            final_out.to_csv(out_table, sep=",", index=False)
+            print(f"Final sorted results written to {out_table}")
+        except Exception as e:
+            print(f"Warning: could not reload/sort final output file {out_table}: {e}")
+
+        if raw:
+            try:
+                final_raw = pd.read_csv(raw_out_table)
+                # original behavior sorts raw_df by categories descending
+                if all(c in final_raw.columns for c in self.categories):
+                    final_raw.sort_values(self.categories, ascending=[False] * len(self.categories), inplace=True)
+                final_raw.to_csv(raw_out_table, sep=",", index=False)
+                print(f"Final RAW results written to {raw_out_table}")
+            except Exception as e:
+                print(f"Warning: could not reload/sort final RAW file {raw_out_table}: {e}")
+
+
+def split_data_80_10_10(files: list, labels: list, random_seed: int, max_categ: int,
+                        safe_check: bool = True):
+    """
+    Splits the data into training, validation, and test sets with an 80/10/10 ratio.
+    The split uses uniform distribution selection to maintain temporal distribution
+    across the sorted files (by creation date). Test and dev sets are selected first,
+    with remaining samples going to training.
+
+    Args:
+        files: List of file paths (should be sorted alphabetically by creation date)
+        labels: List of corresponding labels
+        random_seed: Random seed for reproducibility
+        max_categ: Maximum number of samples per category to consider
+        safe_check: If True, checks for corrupted images and excludes them
+    Returns:
+        tuple: (train_files, val_files, test_files, train_labels, val_labels, test_labels)
+    """
+    np.random.seed(random_seed)
+    random.seed(random_seed)
+
+    files = np.array(files)
+    labels = np.array(labels)
+
+    label_to_indices = defaultdict(list)
+    for idx, label in enumerate(labels):
+        label_to_indices[label].append(idx)
+
+    for label, indices in label_to_indices.items():
+        indices = np.array(indices)
+        n_samples = len(indices)
+
+        if n_samples > max_categ:
+            print(f"Label {label} has {n_samples} samples, limiting to {max_categ}.")
+            indices = np.random.choice(indices, size=max_categ, replace=False)
+
+        label_to_indices[label] = indices.tolist()
+
+    total_files = [files[idx] for label in label_to_indices for idx in label_to_indices[label]]
+    total_labels = [labels[idx] for label in label_to_indices for idx in label_to_indices[label]]
+
+    if safe_check:
+        print(f"Checking {len(total_files)} files for corrupted images...")
+        good_files, good_labels = [], []
+        for file, label in zip(total_files, total_labels):
+            try:
+                Image.open(file).load()
+                good_files.append(file)
+                good_labels.append(label)
+            except Exception as e:
+                print(f"File {file} is corrupted: {e}")
+                continue
+        print(f"Total usable images found: {len(good_files)} / {len(total_files)}")
     else:
-        print("No models were successfully evaluated.")
+        good_files, good_labels = total_files, total_labels
 
-def visualize_results(csv_file: str, output_dir: str, zero_shot: bool = False):
-    """
-    Generate a bar plot from a CSV file of model accuracies.
+    files, labels = np.array(good_files), np.array(good_labels)
+    label_to_indices = defaultdict(list)
+    for idx, label in enumerate(labels):
+        label_to_indices[label].append(idx)
 
-    :param csv_file: Path to the CSV file containing model accuracies.
-    :param output_dir: Directory where the plot will be saved.
-    :param vis_orders: Dictionary to define custom sorting order.
-    :param base_model_colors: Dictionary to map base model names to specific colors.
-    """
-    base_model_colors = {
-        "ViT-B/32 ": "steelblue",
-        "ViT-B/16 ": "indigo",
-        "ViT-L/14 ": "orange",
-        "ViT-L/14-336 ": "gold"
-    }
+    test_indices = []
+    val_indices = []
+    train_indices = []
 
-    category_codes = {
-        "average": 10,
-        "detail": 9,  # 9
-        "extra": 8,  # 8
-        "gemini": 6,  # 6
-        "gpt": 4,  # 4
-        "mid": 2,  # 2
-        "min": 3,  # 3
-        "short": 5,  # 5
-        "init": 1,  # 1
-    }
+    for label, indices in label_to_indices.items():
+        indices = np.array(indices)
+        n_samples = len(indices)
 
-    vis_order = {}
+        n_test = max(1, int(n_samples * 0.1))
+        n_val = max(1, int(n_samples * 0.1))
 
-    results_df = pd.read_csv(csv_file)
+        if n_test + n_val > n_samples:
+            n_test = n_samples // 2
+            n_val = n_samples - n_test
 
-    for vis_model_name in results_df['model_name'].tolist():
-        for code, order in category_codes.items():
-            if code in vis_model_name:
-                vis_order[vis_model_name] = order
-                break
+        if n_test > 0:
+            test_step = n_samples / n_test
+            test_positions = np.arange(0, n_samples, test_step)[:n_test]
+            test_positions += np.random.uniform(-test_step / 4, test_step / 4, size=len(test_positions))
+            test_positions = np.clip(test_positions, 0, n_samples - 1).astype(int)
+            selected_test = indices[test_positions]
+            test_indices.extend(selected_test)
 
-    # Load the CSV into a DataFrame
+        remaining_mask = np.ones(n_samples, dtype=bool)
+        if n_test > 0:
+            remaining_mask[test_positions] = False
+        remaining_indices = indices[remaining_mask]
+        n_remaining = len(remaining_indices)
 
-    if not zero_shot:
-        # Apply custom sorting based on vis_orders
-        results_df['vis_order'] = results_df['model_name'].apply(lambda x: vis_order.get(x, 0))
-        results_df.sort_values(by='vis_order', inplace=True, ascending=True)
-        results_df.drop(columns='vis_order', inplace=True)
+        if n_val > 0 and n_remaining > 0:
+            val_step = n_remaining / n_val if n_val <= n_remaining else 1
+            val_positions = np.arange(0, n_remaining, val_step)[:n_val]
+            if len(val_positions) > n_remaining:
+                val_positions = np.arange(n_remaining)
+            val_positions += np.random.uniform(-val_step / 4 if val_step > 1 else 0,
+                                               val_step / 4 if val_step > 1 else 0,
+                                               size=len(val_positions))
+            val_positions = np.clip(val_positions, 0, n_remaining - 1).astype(int)
+            selected_val = remaining_indices[val_positions]
+            val_indices.extend(selected_val)
 
-    # Assign colors based on base model
-    results_df['color'] = results_df['model_name'].apply(
-        lambda x: next((color for base, color in base_model_colors.items() if base in x), 'black')
-    )
+            val_mask = np.ones(n_remaining, dtype=bool)
+            val_mask[val_positions] = False
+            train_indices.extend(remaining_indices[val_mask])
+        else:
+            train_indices.extend(remaining_indices)
 
-    # Generate the bar plot
-    plt.figure(figsize=(12, 7))
-    plt.bar(results_df['model_name'], results_df['accuracy'], color=results_df['color'])
-    plt.xlabel("Model Name")
-    plt.ylabel("Top-1 Accuracy (%)")
-    plt.title("Model Accuracy Comparison")
-    plt.xticks(rotation=45, ha='right')
-    plt.grid(axis='y', linestyle='--', alpha=0.7)
-    plt.tight_layout()
+    test_indices = np.array(test_indices)
+    val_indices = np.array(val_indices)
+    train_indices = np.array(train_indices)
 
-    # set min-max y-axis values
-    plt.ylim(results_df['accuracy'].min()-1, 100 if results_df['accuracy'].max() == 100 else results_df['accuracy'].max()+1)
+    test_files = files[test_indices]
+    test_labels = labels[test_indices]
 
-    # Save the plot
-    plot_output_dir = Path(output_dir)
-    plot_output_dir.mkdir(parents=True, exist_ok=True)
-    plot_output_path = plot_output_dir / f"model_accuracy_plot{'_zero' if zero_shot else ''}.png"
-    plt.savefig(plot_output_path, dpi=300)
-    plt.close()
-    print(f"Accuracy plot saved to {plot_output_path}")
+    val_files = files[val_indices]
+    val_labels = labels[val_indices]
+
+    train_files = files[train_indices]
+    train_labels = labels[train_indices]
+
+    return train_files, val_files, test_files, train_labels, val_labels, test_labels
+
+
