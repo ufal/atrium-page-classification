@@ -4,7 +4,7 @@ FOLDER_CPOINTS=./model_checkpoints
 FOLDER_MODELS=./models
 
 [EVAL]
-FOLDER_PAGES=/lnet/work/projects/atrium/transformers/pages/test_F12345
+FOLDER_PAGES=./category_samples
 
 [TRAIN]
 FOLDER_PAGES=/lnet/work/projects/atrium/transformers/pages/train_5
@@ -45,5 +45,5 @@ chunk_size = 1000
 repo_name = ufal/clip-historical-page
 token = hf_qViUKX....ixyJpjstNxGO
 use_hf = False
-revision = v1.1.3
-latest = v1.1.3
+revision = main
+latest = v1.1.3.7

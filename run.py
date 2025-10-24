@@ -162,6 +162,7 @@ if __name__ == "__main__":
 
     input_dir = Path(test_dir) if args.directory is None else Path(args.directory)
     Training, top_N, raw, safety, categ_file = args.train, args.topn, args.raw, args.safe, args.cat_csv
+    model_path = args.model_path if args.model_path is not None else model_path
 
     if args.revision is None: # using config file revision
         args.revision = hf_version
@@ -224,17 +225,26 @@ if __name__ == "__main__":
     categories = def_categ
     print(f"Category input directories found: {categories}")
 
-    model_name_local = f"model_{args.model.replace('/', '').replace('@', '-')}_rev_{args.revision.replace('.', '')}"
-    model_path = Path(cp_dir.parent / args.model_dir / model_name_local)
-    model_cp_path = Path(cp_dir / f"{model_name_local}_{args.epochs}e.pt")
+    if model_path is None:
+        model_name_local = f"model_{args.model.replace('/', '').replace('@', '-')}_rev_{args.revision.replace('.', '')}"
+        model_path = Path(cp_dir.parent / args.model_dir / model_name_local)
+        print(f"Working with a local folder \t{model_path}")
+    else:
+        print(f"Working with a local folder \t{model_path}")
+        model_name_local = Path(model_path).stem
 
-    print(f"Working with a local folder \t{model_path}")
+    model_cp_path = Path(cp_dir / f"{model_name_local}_{args.epochs}e.pt")
     print(f"Model checkpoints folder \t{model_cp_path}")
 
     if args.hf:
         # saving model to local path
-        model_name_local = f"{args.model.replace('/', '').replace('@', '-')}_rev_{args.revision.replace('.', '')}"
-        model_path = Path(cp_dir.parent / args.model_dir / model_name_local)
+        if model_path is None:
+            model_name_local = f"{args.model.replace('/', '').replace('@', '-')}_rev_{args.revision.replace('.', '')}"
+            model_path = Path(cp_dir.parent / args.model_dir / model_name_local)
+            local_revision = args.revision
+        else:
+            model_name_local = Path(model_path).stem
+            local_revision = args.model_path.split("_")[-1]
 
         hf_model_name_local = f"model_{config.get('HF', 'revision').replace('.', '')}"
         hf_model_path = f"{config.get('OUTPUT', 'FOLDER_MODELS')}/{hf_model_name_local}"
@@ -244,15 +254,15 @@ if __name__ == "__main__":
         # ----------------------------------------------
         #print(f"Deleting branch {config.get('HF', 'revision')}")
         #delete_branch(config.get("HF", "repo_name"), repo_type="model", branch=config.get("HF", "revision"), token=config.get("HF", "token"))
-        #print(f"Creating fresh branch {config.get('HF', 'revision')}")
-        #create_branch(config.get("HF", "repo_name"), repo_type="model", branch=config.get("HF", "revision"),
-         #             exist_ok=True,
-         #             token=config.get("HF", "token"))
-        #print(f"Loading local model from {model_path} for pushing to the HuggingFace hub {config.get('HF', 'repo_name')}")
-        #clip_instance.load_model(str(model_path), args.revision)
-        #print(f"Pushing model to the HuggingFace hub branch {config.get('HF', 'revision')}")
-        #clip_instance.pushing_to_hub(config.get("HF", "repo_name"), False, config.get("HF", "token"),
-         #                            config.get("HF", "revision"))
+        # print(f"Creating fresh branch {config.get('HF', 'revision')}")
+        # create_branch(config.get("HF", "repo_name"), repo_type="model", branch=config.get("HF", "revision"),
+        #              exist_ok=True,
+        #              token=config.get("HF", "token"))
+        # print(f"Loading local model from {model_path} for pushing to the HuggingFace hub {config.get('HF', 'repo_name')}")
+        # clip_instance.load_model(str(model_path), local_revision)
+        # print(f"Pushing model to the HuggingFace hub branch {config.get('HF', 'revision')}")
+        # clip_instance.pushing_to_hub(config.get("HF", "repo_name"), False, config.get("HF", "token"),
+        #                             config.get("HF", "revision"))
         # ----------------------------------------------
 
 

@@ -36,19 +36,19 @@ preparation scripts for PDF to PNG conversion
 ## Versions 🏁
 
 There are currently 4 version of the model available for download, both of them have the same set of categories, 
-but different data annotations. The latest `v1.1.3` is considered to be default and can be found in the `main` branch
+but different data annotations. The latest `v1.1.3.7` is considered to be default and can be found in the `main` branch
 of HF 😊 hub [^1] 🔗 
 
-|  Version | Base code      | Pages |   PDFs    | Description                   |
-|---------:|----------------|:-----:|:---------:|:------------------------------|
-|   `v1.1` | `ViT-B/16`     | 14270 | **5730**  | smallest (old default)        |
-|   `v1.2` | `ViT-B/32`     | 14270 | **5730**  | small with higher granularity |
-|   `v2.1` | `ViT-L/14`     | 14270 | **5730**  | large                         |
-|   `v2.2` | `ViT-L/14@336` | 14270 | **5730**  | large with highest resolution |
-| `v1.1.3` | `ViT-B/16`     | 38625 | **37328** | smallest and most accurate    |
-| `v1.2.3` | `ViT-B/32`     | 38625 | **37328** | small and 2nd in accuracy     |
-| `v2.1.3` | `ViT-B/14`     | 38625 | **37328** | larges and not too accurate   |
-| `v2.2.3` | `ViT-B/14@336` | 38625 | **37328** | larges and not too accurate   |
+|              Version | Base code      | Pages |   PDFs    | Description                   |
+|---------------------:|----------------|:-----:|:---------:|:------------------------------|
+|               `v1.1` | `ViT-B/16`     | 14270 | **5730**  | smallest (old default)        |
+|               `v1.2` | `ViT-B/32`     | 14270 | **5730**  | small with higher granularity |
+|               `v2.1` | `ViT-L/14`     | 14270 | **5730**  | large                         |
+|               `v2.2` | `ViT-L/14@336` | 14270 | **5730**  | large with highest resolution |
+| `v1.1.3.[1,3,4,6,7]` | `ViT-B/16`     | 38625 | **37328** | smallest and most accurate    |
+|             `v1.2.3` | `ViT-B/32`     | 38625 | **37328** | small and 2nd in accuracy     |
+|           `v2.1.3.1` | `ViT-B/14`     | 38625 | **37328** | larges and not too accurate   |
+|           `v2.2.3.4` | `ViT-B/14@336` | 38625 | **37328** | larges and not too accurate   |
 
 
 <details>
