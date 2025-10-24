@@ -209,7 +209,7 @@ if __name__ == "__main__":
     output_dir.mkdir(exist_ok=True)
 
     cat_directory = str(cur / args.cat_dir)
-    if not args.vis and not args.best:
+    if not args.vis and not args.best and not args.eval_dir:
         clip_instance = CLIP(max_category_samples=args.max_categ, test_ratio=test_size,
                              eval_max_category_samples=args.max_categ_eval,
                              top_N=args.topn, model_name=args.model, device=device,

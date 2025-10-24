@@ -406,7 +406,6 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
             else:
                 print(f"Loading from directory {model_path} using HF Hub mixin...")
                 self.load_model(load_directory=model_path, revision=model_path.split("_")[-1] if "_" in model_path else "main")
-                print("Model loaded using HF Hub mixin.")
 
         model_name = Path(model_path).stem if model_path is not None else self.model_code_name
 

@@ -59,7 +59,7 @@ class ImageFolderCustom(torch.utils.data.Dataset):
         self.class_to_idx = {cls_name: i for i, cls_name in enumerate(all_categories)}
         self.classes = all_categories
 
-        print(f"Discovered categories: {self.classes}")
+        # print(f"Discovered categories: {self.classes}")
 
         for category_name in self.classes:
             category_path = Path(targ_dir) / category_name
@@ -171,18 +171,6 @@ class ImageFolderCustom(torch.utils.data.Dataset):
             elif split_type == 'test':
                 self.paths = test_files.tolist()
                 self.targets = test_labels.tolist()
-        # else:
-            # Original simple split
-            # (paths, _, labels, _) = train_test_split(
-            #     np.array(self.paths),
-            #     np.array(self.targets),
-            #     test_size=self.eval_ratio,
-            #     random_state=self.seed_random,
-            #     stratify=np.array(self.targets)
-            # )
-            # No split, whole data is used for training
-            # self.paths = self.paths
-            # self.targets = self.targets
 
         print(f"\t{split_type}'s set images loaded: {len(self.paths)}")
 
@@ -442,6 +430,10 @@ def evaluate_multiple_models(model_dir: str, eval_dir: str, categ_dir: str, devi
         "ViT-B16_rev_v11": "ViT-B/16",
         "ViT-L14_rev_v21": "ViT-L/14",
         "ViT-L14-336px_rev_v22": "ViT-L/14@336px",
+        "model_v12": "ViT-B/32",
+        "model_v11": "ViT-B/16",
+        "model_v21": "ViT-L/14",
+        "model_v22": "ViT-L/14@336px",
     }
 
     category_sufix = {
@@ -460,17 +452,33 @@ def evaluate_multiple_models(model_dir: str, eval_dir: str, categ_dir: str, devi
         "39": "short",
     }
 
+    category_order = ["init", "details", "extra", "gemini", "gpt", "large", "mid", "min", "short", "avg"]
+
+    category_ending = {
+        "13": "average",
+        "23": "average",
+        "31": "init",
+        "32": "details",
+        "33": "extra",
+        "34": "gemini",
+        "35": "gpt",
+        "36": "large",
+        "37": "mid",
+        "38": "min",
+        "39": "short",
+    }
+
     model_dir_path = Path(model_dir)
-    if not model_dir_path.is_dir():
+    if not model_dir_path.is_dir() and not zero_shot:
         print(f"Error: Model directory not found at {model_dir}")
         return
 
-    model_files = list(model_dir_path.rglob(f"*{model_suffix}"))
-    if not model_files:
+    model_files = list(model_dir_path.rglob(f"*{model_suffix}")) if model_dir.endswith("checkpoints") else list(model_dir_path.rglob(f"model_*"))
+    if not model_files and not zero_shot:
         print(f"No model files found with suffix '{model_suffix}' in {model_dir}")
         return
 
-    print(f"Found {len(model_files)} models with suffix '{model_suffix}'.")
+    print(f"Found {len(model_files)} models.")
     accuracies = {}  # To store filename_stem: top1_accuracy
 
     cur = Path(__file__).parent if '__file__' in globals() else Path.cwd()
@@ -480,51 +488,51 @@ def evaluate_multiple_models(model_dir: str, eval_dir: str, categ_dir: str, devi
     if zero_shot:
         print("Zero-shot evaluation mode enabled. Using pre-computed text features.")
         for base_filename, base_name in map_base_name.items():
+            if base_filename.startswith("model"):
+                continue
+
             print(f"Using base model: {base_name}")
-            vis_model_name = f"{base_name} zero"
 
-            vis_categ = "UNK"  # Default category
-            for code, categ in category_sufix.items():
-                if code in base_filename:
-                    vis_categ = categ
-                    break
 
-            categories_tsv = f"{cat_prefix}_{vis_categ}.tsv"
-            if vis_categ == "average" or vis_categ == "UNK":
-                categories_tsv = f"TOTAL_{cat_prefix}.tsv"
-                model_use_avg = True
-            else:
-                model_use_avg = False
-            categ_tsv_path = Path(__file__).parent / categ_dir / categories_tsv
+            for i, category_suffix in enumerate(category_order):
+                vis_model_name = f"{base_name} {category_suffix} zero"
+                if category_suffix == "avg":
+                    model_use_avg = True
+                    categories_tsv = f"TOTAL_{cat_prefix}.tsv"
+                else:
+                    model_use_avg = False
+                    categories_tsv = f"{cat_prefix}_{category_suffix}.tsv"
 
-            model_revision = base_filename.split('_rev_')[-1]
+                categ_tsv_path = Path(__file__).parent / categ_dir / categories_tsv
 
-            try:
-                # clip_instance = CLIP(None, None, 1, base_name, device,
-                #                      seed=random_seed, test_ratio=test_fraction, input_format=input_format,
-                #                      cat_prefix=cat_prefix, output_dir=str(output_dir), avg=True, zero_shot=False)
-                clip_instance = CLIP(max_category_samples=None, test_ratio=test_fraction,
-                                     eval_max_category_samples=None,
-                                     top_N=1, model_name=base_name, device=device,
-                                     categories_tsv=str(categ_tsv_path), seed=random_seed, input_format=input_format,
-                                     output_dir=str(output_dir), categories_dir=categ_dir,
-                                     model_revision=model_revision,
-                                     cat_prefix=cat_prefix, avg=model_use_avg, zero_shot=False)
+                model_revision = base_filename.split('_rev_')[-1] + "0"
 
-                # Prepare evaluation dataset and dataloader once
-                eval_dataset = ImageFolderCustom(eval_dir, max_category_samples=None, seed=random_seed,
-                                                 test_ratio=test_fraction, split_type='test',
-                                                 file_format=input_format, model_name=base_filename,
-                                                 preprocess_fn=clip_instance.preprocess, use_advanced_split=False,
-                                                 img_size=clip_instance.preprocess.transforms[0].size)
-                eval_dataloader = torch.utils.data.DataLoader(eval_dataset, batch_size=batch_size)
+                if category_suffix != "avg":
+                    model_revision += str(i+1)
 
-                accuracies[vis_model_name] = clip_instance.test(eval_dataloader, vis=vis, image_files=eval_dataset.paths)
-                print(f"Top 1 Accuracy for {vis_model_name} {base_name}: {accuracies[vis_model_name]:.2f}%")
-            except Exception as e:
-                print(f"Error evaluating model {base_name}: {e}")
-                if vis_model_name not in accuracies.keys():
-                    accuracies[vis_model_name] = "Error"  # Indicate error
+                try:
+                    clip_instance = CLIP(max_category_samples=None, test_ratio=test_fraction,
+                                         eval_max_category_samples=None,
+                                         top_N=1, model_name=base_name, device=device,
+                                         categories_tsv=str(categ_tsv_path), seed=random_seed, input_format=input_format,
+                                         output_dir=str(output_dir), categories_dir=categ_dir,
+                                         model_revision=model_revision,
+                                         cat_prefix=cat_prefix, avg=model_use_avg, zero_shot=True)
+
+                    # Prepare evaluation dataset and dataloader once
+                    eval_dataset = ImageFolderCustom(eval_dir, max_category_samples=None, seed=random_seed,
+                                                     test_ratio=test_fraction, split_type='test',
+                                                     file_format=input_format, model_name=base_filename,
+                                                     preprocess_fn=clip_instance.preprocess, use_advanced_split=False,
+                                                     img_size=clip_instance.preprocess.transforms[0].size)
+                    eval_dataloader = torch.utils.data.DataLoader(eval_dataset, batch_size=batch_size)
+
+                    accuracies[vis_model_name] = clip_instance.test(eval_dataloader, vis=vis, image_files=eval_dataset.paths)
+                    print(f"Top 1 Accuracy for {vis_model_name} {base_name}: {accuracies[vis_model_name]:.2f}%")
+                except Exception as e:
+                    print(f"Error evaluating model {base_name}: {e}")
+                    if vis_model_name not in accuracies.keys():
+                        accuracies[vis_model_name] = "Error"  # Indicate error
     else:
         for model_path in sorted(model_files):
             model_name_stem = model_path.stem
@@ -537,17 +545,23 @@ def evaluate_multiple_models(model_dir: str, eval_dir: str, categ_dir: str, devi
                     break
 
             vis_categ = "UNK"  # Default category
-            for code, categ in category_sufix.items():
-                if code in model_name_stem:
-                    vis_categ = categ
-                    break
+            if Path(model_path).is_file():
+                for code, categ in category_sufix.items():
+                    if code in model_name_stem:
+                        vis_categ = categ
+                        break
+            else:
+                for ending, categ in category_ending.items():
+                    if str(model_name_stem).endswith(ending):
+                        vis_categ = categ
+                        break
 
+            print(f"Base: {base_name} + {vis_categ}")
             if base_name is None:
                 vis_model_name = f"{model_name_stem} {vis_categ}"
                 accuracies[vis_model_name] = "Error"  # Indicate error
             else:
                 vis_model_name = f"{base_name.replace('@', '-')} {vis_categ}"
-                print(vis_model_name)
 
                 categories_tsv = f"{cat_prefix}_{vis_categ}.tsv"
                 if vis_categ == "average":
@@ -557,34 +571,42 @@ def evaluate_multiple_models(model_dir: str, eval_dir: str, categ_dir: str, devi
                     model_use_avg = False
                 categ_tsv_path = Path(__file__).parent / categ_dir / categories_tsv
 
-                model_revision = "main"
+                model_revision = None
                 filename_parts = model_name_stem.split('_')
                 for i, part in enumerate(filename_parts):
                     if part == "rev" and filename_parts[i+1].startswith('v'):
                         model_revision = filename_parts[i+1]
                         break
 
+                if model_revision is None:
+                    if filename_parts[-1].startswith('v'):
+                        model_revision = filename_parts[-1]
+
+                print(f"Evaluation of {model_revision} revision: {vis_model_name}")
                 try:
                     clip_instance = CLIP(max_category_samples=None, test_ratio=test_fraction,
                                          eval_max_category_samples=None,
                                          top_N=top_N, model_name=base_name, device=device,
-                                         categories_tsv=str(categ_tsv_path), seed=random_seed, input_format=input_format,
+                                         categories_tsv=str(categ_tsv_path), seed=random_seed,
+                                         input_format=input_format,
                                          output_dir=str(output_dir), categories_dir=categ_dir,
-                                         model_dir=str(model_path),
                                          model_revision=model_revision,
                                          cat_prefix=cat_prefix, avg=model_use_avg, zero_shot=False)
 
                     # Prepare evaluation dataset and dataloader once
                     eval_dataset = ImageFolderCustom(eval_dir, max_category_samples=None, seed=random_seed,
                                                      test_ratio=test_fraction, split_type='test',
-                                                     file_format=input_format, model_name=model_name_stem,
+                                                     file_format=input_format, model_name=vis_model_name,
                                                      preprocess_fn=clip_instance.preprocess, use_advanced_split=False,
                                                      img_size=clip_instance.preprocess.transforms[0].size)
                     eval_dataloader = torch.utils.data.DataLoader(eval_dataset, batch_size=batch_size)
 
-                    checkpoint = torch.load(model_path, map_location=device)
-                    clip_instance.model.load_state_dict(checkpoint['model_state_dict'])
-                    print(f"Model loaded from epoch {checkpoint['epoch']} with loss {checkpoint['loss']:.4f}.")
+                    if Path(model_path).is_file():
+                        checkpoint = torch.load(model_path, map_location=device)
+                        clip_instance.model.load_state_dict(checkpoint['model_state_dict'])
+                        print(f"Model loaded from epoch {checkpoint['epoch']} with loss {checkpoint['loss']:.4f}.")
+                    else:
+                        clip_instance.load_model(model_path, revision=model_revision)
 
                     accuracies[vis_model_name] = clip_instance.test(eval_dataloader, vis=vis, image_files=eval_dataset.paths)
                     print(f"Top 1 Accuracy for {vis_model_name} {model_name_stem}: {accuracies[vis_model_name]:.2f}%")

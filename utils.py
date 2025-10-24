@@ -155,7 +155,7 @@ def dataframe_results(
         raw_col = ["FILE", "PAGE"] + categories
         rawdf = pd.DataFrame(raws, columns=raw_col)
 
-    print(f"Created results table with {len(rdf)} rows and columns: {rdf.columns.tolist()}")
+    print(f"Created results table with {len(rdf.index)} rows and columns: {rdf.columns.tolist()}")
     if rawdf is not None:
         print(f"Created RAW results table with shape {rawdf.shape}")
 
