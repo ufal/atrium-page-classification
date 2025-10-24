@@ -286,11 +286,8 @@ def visualize_results(csv_file: str, output_dir: str, zero_shot: bool = False):
     # Load the CSV into a DataFrame
     results_df = pd.read_csv(csv_file)
 
-    for vis_model_name in results_df['model_name'].tolist():
-        for code, order in category_codes.items():
-            if code in vis_model_name:
-                vis_order[vis_model_name] = order
-                break
+
+
 
     # Store base model for each entry (for legend)
     # This MUST be created before sorting
@@ -299,6 +296,11 @@ def visualize_results(csv_file: str, output_dir: str, zero_shot: bool = False):
     )
 
     if not zero_shot:
+        for vis_model_name in results_df['model_name'].tolist():
+            for code, order in category_codes.items():
+                if code in vis_model_name:
+                    vis_order[vis_model_name] = order
+                    break
         # Apply custom sorting based on vis_orders
         results_df['vis_order'] = results_df['model_name'].apply(lambda x: vis_order.get(x, 0))
 
@@ -316,8 +318,9 @@ def visualize_results(csv_file: str, output_dir: str, zero_shot: bool = False):
     else:
         # --- ADDED SORT FOR ZERO-SHOT ---
         # For zero-shot, just sort alphabetically by base_model
+        results_df['vis_model'] = results_df['base_model'].apply(lambda x: " ".join(x.split(" ")[1:]))
         results_df.sort_values(
-            by=['base_model'],
+            by=['vis_model'],
             inplace=True,
             ascending=True,
             na_position='last'  # Put models with no base_model last
@@ -336,6 +339,7 @@ def visualize_results(csv_file: str, output_dir: str, zero_shot: bool = False):
         lambda row: row['model_name'].replace(row['base_model'] + ' ', '') if row['base_model'] else row['model_name'],
         axis=1
     )
+    results_df.sort_values(by=['short_label', 'color'], inplace=True)
 
     # Generate the bar plot
     plt.figure(figsize=(12, 7))
