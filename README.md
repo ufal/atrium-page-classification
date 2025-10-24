@@ -36,7 +36,7 @@ preparation scripts for PDF to PNG conversion
 ## Versions 🏁
 
 There are currently several version of the model available for download, both of them have the same set of categories, 
-but different data annotations. The latest `v5.3` is considered to be default and can be found in the `main` branch
+but different data annotations. The latest `v4.3` is considered to be default and can be found in the `main` branch
 of HF 😊 hub [^1] 🔗 
 
 | Version | Base                             | Pages |   PDFs    | Description                                                                        |
@@ -94,20 +94,20 @@ paper source into one of the categories - each responsible for the following con
 > or structured in tabular 📏 format text, as well as to mark the presence of the printed 🌄 or drawn 📈 graphic 
 > materials to be extracted from the page images.
 
-| Base Model                                 | Revision | max_cat | Best_Prec (%) | Best_Acc (%) | Fold | Note         |
-|--------------------------------------------|----------|---------|---------------|--------------|------|--------------|
-| **google/vit-base-patch16-224**            | **v2.3** | 14,000  | **98.79**     | **98.79**    | 5    | OK & Small   |
-| **google/vit-base-patch16-384**            | **v3.3** | 14,000  | **98.92**     | **98.92**    | 2    | Good & Small |
-| **google/vit-large-patch16-384**           | **v5.3** | 14,000  | **99.12**     | **99.12**    | 2    | Best & Large |
-| microsoft/dit-base-finetuned-rvlcdip       | v9.3     | 14,000  | 98.71         | 98.72        | 3    |              |
-| microsoft/dit-large-finetuned-rvlcdip      | v10.3    | 14,000  | 98.66         | 98.66        | 3    |              |
-| microsoft/dit-large                        | v11.3    | 14,000  | 98.53         | 98.53        | 2    |              |
-| timm/regnety_120.sw_in12k_ft_in1k          | v12.3    | 14,000  | 98.29         | 98.29        | 3    |              |
-| **timm/regnety_160.swag_ft_in1k**          | **v4.3** | 14,000  | **99.17**     | **99.16**    | 1    | Best & Small |
-| timm/regnety_640.see                       | v6.3     | 14,000  | 98.79         | 98.79        | 5    | OK & Large   |
-| timm/tf_efficientnetv2_l.in21k_ft_in1k     | v8.3     | 14,000  | 98.62         | 98.62        | 5    |              |
-| **timm/tf_efficientnetv2_m.in21k_ft_in1k** | **v1.3** | 14,000  | **98.83**     | **98.83**    | 1    | Good & Small |
-| timm/tf_efficientnetv2_s.in21k             | v7.3     | 14,000  | 97.90         | 97.87        | 1    |              |
+| Base Model                                 | Revision | Best_Prec (%) | Best_Acc (%) | Fold | Note                  |
+|--------------------------------------------|----------|---------------|--------------|------|-----------------------|
+| **google/vit-base-patch16-224**            | **v2.3** | **98.79**     | **98.79**    | 5    | OK & Small            |
+| **google/vit-base-patch16-384**            | **v3.3** | **98.92**     | **98.92**    | 2    | Good & Small          |
+| **google/vit-large-patch16-384**           | **v5.3** | **99.12**     | **99.12**    | 2    | Best & Large          |
+| microsoft/dit-base-finetuned-rvlcdip       | v9.3     | 98.71         | 98.72        | 3    |                       |
+| microsoft/dit-large-finetuned-rvlcdip      | v10.3    | 98.66         | 98.66        | 3    |                       |
+| microsoft/dit-large                        | v11.3    | 98.53         | 98.53        | 2    |                       |
+| timm/regnety_120.sw_in12k_ft_in1k          | v12.3    | 98.29         | 98.29        | 3    |                       |
+| **timm/regnety_160.swag_ft_in1k**          | **v4.3** | **99.17**     | **99.16**    | 1    | Best & Small (`main`) |
+| timm/regnety_640.see                       | v6.3     | 98.79         | 98.79        | 5    | OK & Large            |
+| timm/tf_efficientnetv2_l.in21k_ft_in1k     | v8.3     | 98.62         | 98.62        | 5    |                       |
+| **timm/tf_efficientnetv2_m.in21k_ft_in1k** | **v1.3** | **98.83**     | **98.83**    | 1    | Good & Small          |
+| timm/tf_efficientnetv2_s.in21k             | v7.3     | 97.90         | 97.87        | 1    |                       |
 
 
 The rows highlighted in bold correspond to the best models uploaded to the HF 😊 hub [^1] 🔗, and the versions correspond to 
