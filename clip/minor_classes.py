@@ -1,11 +1,17 @@
 import h5py
 from matplotlib import pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
+
 import numpy as np
 import pandas as pd
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.preprocessing import MinMaxScaler
+
+import seaborn as sns
+import matplotlib.gridspec as gridspec
+import matplotlib.colorbar as mcolorbar
 
 import torch
 import torch.utils.data
@@ -258,14 +264,15 @@ def visualize_results(csv_file: str, output_dir: str, zero_shot: bool = False):
     :param base_model_colors: Dictionary to map base model names to specific colors. (Note: This is defined internally now)
     """
     base_model_colors = {
-        "ViT-B/32 ": "indigo",
-        "ViT-B/16 ": "steelblue",
-        "ViT-L/14 ": "orange",
-        "ViT-L/14-336 ": "gold",
-        "ViT-L/14-336px ": "gold",
-        "ViT-L/14@336 ": "gold",
-        "ViT-L/14@336px ": "gold",
+        "ViT-B/16 ": "royalblue",
+        "ViT-B/32 ": "rebeccapurple",
+        "ViT-L/14 ": "sandybrown",
+        "ViT-L/14-336 ": "indianred",
+        "ViT-L/14-336px ": "indianred",
+        "ViT-L/14@336 ": "indianred",
+        "ViT-L/14@336px ": "indianred",
     }
+    colors = ["royalblue", "rebeccapurple","sandybrown", "indianred"]
 
     category_codes = {
         "average": 10,
@@ -286,57 +293,41 @@ def visualize_results(csv_file: str, output_dir: str, zero_shot: bool = False):
     # Load the CSV into a DataFrame
     results_df = pd.read_csv(csv_file)
 
-    for vis_model_name in results_df['model_name'].tolist():
-        for code, order in category_codes.items():
-            if code in vis_model_name:
-                vis_order[vis_model_name] = order
-                break
-
     # Store base model for each entry (for legend)
     # This MUST be created before sorting
     results_df['base_model'] = results_df['model_name'].apply(
         lambda x: next((base.strip() for base in base_model_colors.keys() if base in x), None)
     )
-
-    if not zero_shot:
-        # Apply custom sorting based on vis_orders
-        results_df['vis_order'] = results_df['model_name'].apply(lambda x: vis_order.get(x, 0))
-
-        # --- MODIFICATION ---
-        # Sort by category (vis_order) first, then alphabetically by base_model
-        results_df.sort_values(
-            by=['vis_order', 'base_model'],
-            inplace=True,
-            ascending=[True, True],
-            na_position='last'  # Put models with no base_model last within their category
-        )
-        # --- END MODIFICATION ---
-
-        results_df.drop(columns='vis_order', inplace=True)
-    else:
-        # --- ADDED SORT FOR ZERO-SHOT ---
-        # For zero-shot, just sort alphabetically by base_model
-        results_df.sort_values(
-            by=['base_model'],
-            inplace=True,
-            ascending=True,
-            na_position='last'  # Put models with no base_model last
-        )
-        # --- END ADDITION ---
-
     # Assign colors based on base model
     results_df['color'] = results_df['model_name'].apply(
         lambda x: next((color for base, color in base_model_colors.items() if base in x), 'black')
     )
 
-    # (base_model column is already created)
+    for vis_model_name in results_df['model_name'].tolist():
+        for code, order in category_codes.items():
+            if code in vis_model_name:
+                vis_order[vis_model_name] = order * 10
+                model_color = next((color for base, color in base_model_colors.items() if base in vis_model_name), None)
+                if model_color:
+                    vis_order[vis_model_name] += colors.index(model_color)
+                break
+    # Apply custom sorting based on vis_orders
+    results_df['vis_order'] = results_df['model_name'].apply(lambda x: vis_order.get(x, 0))
+
+    # Sort by category (vis_order) first, then alphabetically by base_model
+    results_df.sort_values(
+        by=['vis_order'],
+        inplace=True,
+        ascending=[True],
+        na_position='last'  # Put models with no vis_order last within their category
+    )
+    results_df.drop(columns='vis_order', inplace=True)
 
     # Create shortened labels by removing base model prefix
     results_df['short_label'] = results_df.apply(
-        lambda row: row['model_name'].replace(row['base_model'] + ' ', '') if row['base_model'] else row['model_name'],
+        lambda row: row['model_name'].replace(row['base_model'] + ' ', '').replace(' zero', '') if row['base_model'] else row['model_name'],
         axis=1
     )
-
     # Generate the bar plot
     plt.figure(figsize=(12, 7))
 
@@ -357,15 +348,18 @@ def visualize_results(csv_file: str, output_dir: str, zero_shot: bool = False):
 
     # Add overall mean line
     mean_accuracy = plot_df['accuracy'].mean()
-    mean_line = plt.axhline(y=mean_accuracy, color='red', linestyle='--', linewidth=2, alpha=0.7)
+    mean_line = plt.axhline(y=mean_accuracy, color='black', linestyle='--', linewidth=2, alpha=0.7)
 
     # Add steelblue (ViT-B/16) mean line
-    steelblue_line = None  # Initialize
-    if not zero_shot:
-        steelblue_df = plot_df[plot_df['color'] == 'steelblue']
-        if not steelblue_df.empty:
-            steelblue_mean = steelblue_df['accuracy'].mean()
-            steelblue_line = plt.axhline(y=steelblue_mean, color='black', linestyle='--', linewidth=2, alpha=0.4)
+    per_base_mean_linse = [None] * len(colors)  # Initialize
+    per_base_means = [0] * len(colors)
+    for idx, color in enumerate(colors):
+        color_df = plot_df[plot_df['color'] == color]
+        if not color_df.empty:
+            per_base_means[idx] = color_df['accuracy'].mean()
+            per_base_mean_linse[idx] = plt.axhline(y=per_base_means[idx],
+                                                   color=color, linestyle='--',
+                                                   linewidth=2, alpha=0.7)
 
     plt.xlabel("Model Name")
     plt.ylabel("Top-1 Accuracy (%)")
@@ -379,15 +373,18 @@ def visualize_results(csv_file: str, output_dir: str, zero_shot: bool = False):
     legend_bars = [handle for _, handle in legend_items]
     legend_labels.append(f'Overall Mean: {mean_accuracy:.2f}%')
     legend_bars.append(mean_line)
-    if not zero_shot and steelblue_line is not None:  # Check if steelblue_line was created
-        legend_labels.append(f'ViT-B/16 Mean: {steelblue_mean:.2f}%')
-        legend_bars.append(steelblue_line)
+
+    for base_line, base_mean in zip(per_base_mean_linse, per_base_means):
+        if base_line is not None and base_mean > 0:
+            legend_bars.append(base_line)
+            base_from_color = next((base for base, color in base_model_colors.items() if color == base_line.get_color()), None)
+            legend_labels.append(f'{base_from_color} Mean: {base_mean:.2f}%')
 
     # plot legend in the bottom left corner
-    plt.legend(legend_bars, legend_labels, loc='lower left', fontsize='small')
+    plt.legend(legend_bars, legend_labels, loc=f"{'lower' if not zero_shot else 'upper'} center", fontsize='small')
     plt.tight_layout()
 
-    offset = 0.1 if not zero_shot else 1
+    offset = 0.1 if not zero_shot else 2
     # set min-max y-axis values
     plt.ylim(plot_df['accuracy'].min() - offset,
              100 if plot_df['accuracy'].max() == 100 else plot_df['accuracy'].max() + offset)
@@ -400,6 +397,520 @@ def visualize_results(csv_file: str, output_dir: str, zero_shot: bool = False):
     plt.close()
     print(f"Accuracy plot saved to {plot_output_path}")
 
+
+def visualize_all_results(csv_file: str, output_dir: str):
+    """
+    Generate a stacked heatmap (matrix) from a CSV file containing both
+    zero-shot and few-shot model accuracies.
+
+    Rows are grouped by shot-type, then base model.
+    Columns are categories.
+    Colorbars are added at the top.
+
+    :param csv_file: Path to the CSV file containing model accuracies.
+                     Assumes 'model_name' column contains 'zero-shot' or 'zero'
+                     for zero-shot models.
+    :param output_dir: Directory where the plot will be saved.
+    """
+
+    # --- 1. Define Rows (Base Models), Colors, and Shot Types ---
+    # This mapping normalizes the messy keys from the original code
+    # to a clean row name and its color.
+    base_model_map = {
+        "ViT-B/32 ": ("ViT-B/32", "rebeccapurple"),
+        "ViT-B/16 ": ("ViT-B/16", "royalblue"),
+        "ViT-L/14 ": ("ViT-L/14", "sandybrown"),
+        "ViT-L/14-336 ": ("ViT-L/14@336px", "indianred"),
+        "ViT-L/14-336px ": ("ViT-L/14@336px", "indianred"),
+        "ViT-L/14@336 ": ("ViT-L/14@336px", "indianred"),
+        "ViT-L/14@336px ": ("ViT-L/14@336px", "indianred"),
+    }
+
+
+    # Get unique base models and their colors, preserving order
+    base_model_data = list(dict.fromkeys(base_model_map.values()))
+
+    shot_types_ordered = ["zero-shot", "few-shot"]
+    shot_labels = {"zero-shot": "Zero", "few-shot": "Few"}
+
+    # Build the final lists for all rows, their colors, and shot types
+    row_names = []  # e.g., "ViT-B/32 (Zero)"
+    row_colors = []  # e.g., "indigo"
+    row_shot_types = []  # e.g., "zero-shot"
+
+    for shot_type in shot_types_ordered:
+        for base_name, color in base_model_data:
+            row_name = f"{base_name} ({shot_labels[shot_type]})"
+            row_names.append(row_name)
+            row_colors.append(color)
+            row_shot_types.append(shot_type)
+
+
+    category_codes = {
+        "MEAN": 11,
+        "average": 10,
+        "avg": 10,
+        "details": 2,  # 9
+        "extra": 3,  # 8
+        "gemini": 4,  # 6
+        "gpt": 5,  # 4
+        "large": 6,  # 4
+        "mid": 7,  # 2
+        "min": 8,  # 3
+        "short": 9,  # 5
+        "init": 1,  # 1
+    }
+
+    revision_to_base_model = {
+        "v1.1.": "ViT-B/16",
+        "v1.2.": "ViT-B/32",
+        "v2.1.": "ViT-L/14",
+        "v2.2.": "ViT-L/14@336px",
+    }
+    base_to_revision = {v: k for k, v in revision_to_base_model.items()}
+
+
+    sorted_cats_by_code = sorted(category_codes.items(), key=lambda item: (item[1], item[0]))
+    col_names = [cat for cat, code in sorted_cats_by_code]
+    canonical_cat = 'average'
+    alias_cat = 'avg'
+    if alias_cat in col_names:
+        col_names.remove(alias_cat)
+
+    results_df = pd.read_csv(csv_file)
+
+    # Helper function to find base_model, category, and shot_type
+    def extract_info(model_name_raw):
+        # 1. Determine shot_type and get a "base" name to parse
+        model_name_l = model_name_raw.lower()
+        shot_type = "few-shot"  # Default
+        parse_name = model_name_raw  # Start with original case-sensitive name
+
+        if "zero-shot" in model_name_l:
+            shot_type = "zero-shot"
+            # Remove 'zero-shot' (case-insensitive) for parsing
+            parse_name = re.sub(r'zero-shot', '', parse_name, flags=re.IGNORECASE).strip()
+        elif "zero" in model_name_l:  # Handle 'zero' alias
+            shot_type = "zero-shot"
+            # Remove 'zero' (case-insensitive) for parsing
+            parse_name = re.sub(r'zero', '', parse_name, flags=re.IGNORECASE).strip()
+
+        # 2. Find base_model (using original logic on the cleaned name)
+        for base_key, (row_name, color) in base_model_map.items():
+            if base_key in parse_name:
+                # Found base model.
+                base_name_found = row_name  # This is the clean name, e.g., "ViT-B/32"
+
+                # 3. Find category from what's left
+                category = parse_name.replace(base_key, '').strip()
+
+                category_found = None
+                if category in category_codes.keys():
+                    category_found = category
+                else:
+                    # Check for substring (like original)
+                    for categ in category_codes.keys():
+                        if categ in category:
+                            category_found = categ
+                            break
+
+                if category_found:
+                    # Return all 3 pieces of info
+                    return base_name_found, category_found, shot_type
+
+        # If no match
+        return None, None, None
+
+    results_df[['base_model', 'category', 'shot_type']] = results_df['model_name'].apply(
+        lambda x: pd.Series(extract_info(x))
+    )
+
+    results_df['category'] = results_df['category'].replace(alias_cat, canonical_cat)
+    # results_df['category'] = results_df['category'].apply(lambda x: x if category_codes[x] > 9 else f"{x} v{category_codes[x]}")
+
+    # Drop rows that couldn't be parsed into all 3 parts
+    results_df.dropna(subset=['base_model', 'category', 'shot_type'], inplace=True)
+
+    # Add the new 'display_name' column for pivoting
+    def get_display_name(row):
+        shot_label = shot_labels[row['shot_type']]
+        return f"{row['base_model']} ({shot_label})"
+
+
+    # add means accuracy of categories per base model, as mean category
+    mean_values_rows = results_df.groupby(['base_model', 'shot_type'])["accuracy"].mean()
+    mean_values_rows_df = mean_values_rows.reset_index()
+    mean_values_rows_df["category"] = "MEAN"
+    print(mean_values_rows_df)
+
+    # results_df = results_df.merge(mean_values_rows_df, on=['base_model', 'shot_type', 'category', 'accuracy'], how='left')
+    results_df = pd.concat([results_df, mean_values_rows_df], ignore_index=True)
+    results_df['display_name'] = results_df.apply(get_display_name, axis=1)
+
+    print("Processed DataFrame:")
+    print(results_df)
+
+    if results_df.empty:
+        print(f"No valid data found in {csv_file} after processing. Skipping plot.")
+        return
+
+    try:
+
+        pivot_df = results_df.pivot_table(
+            index='display_name',
+            columns='category',
+            values='accuracy',
+            aggfunc='mean'
+        )
+    except Exception as e:
+        print(f"Error creating pivot table: {e}")
+        print("Processed DataFrame:")
+        print(results_df)
+        return
+
+
+    pivot_df = pivot_df.reindex(index=row_names, columns=col_names)
+
+    n_rows = len(row_names)  # e.g., 8
+    n_base_models = len(base_model_data)  # e.g., 4
+
+    # Taller figure to accommodate 8 rows + taller colorbars
+    fig = plt.figure(figsize=(16, 9.5))  # <-- INCREASED HEIGHT
+
+    # Create a 2-part gridspec:
+    # Top 2 rows for colorbars
+    # Bottom n_rows for heatmaps
+    gs = gridspec.GridSpec(
+        nrows=n_rows + 3,  # Total grid rows
+        ncols=n_base_models,  # Use 4 cols for cbar layout
+        hspace=0.1,  # Stack heatmaps closely
+        wspace=0.15,  # Space between cbars
+        height_ratios=[0.6, 0.6, 0.6] + [1] * n_rows  # 3 taller rows, 2 for cbars and 1 for means of columns
+    )
+
+    cbar_axes = []
+    # Top row of cbars (Zero-shot)
+    for i in range(n_base_models):
+        cbar_axes.append(fig.add_subplot(gs[0, i]))
+    # Bottom row of cbars (Few-shot)
+    for i in range(n_base_models):
+        cbar_axes.append(fig.add_subplot(gs[1, i]))
+
+    for i, (base_name, base_color) in enumerate(base_model_data):
+        # --- Zero-shot cbar ---
+        ax_zero = cbar_axes[i]
+        cmap_zero = LinearSegmentedColormap.from_list("custom_cmap_zero", ["#FFFFFF", base_color])
+        norm_zero = plt.Normalize(vmin=20, vmax=70)
+        cb_zero = mcolorbar.ColorbarBase(ax_zero, cmap=cmap_zero, norm=norm_zero, orientation='horizontal')
+
+        # add common title above
+        ax_zero.set_title(f"{base_name} {base_to_revision[base_name]}", fontsize=12, fontweight='bold')
+
+        ax_zero.text(0.5, 0.4, f"Upper Zero-Shot",
+                     ha='center', va='center',
+                     transform=ax_zero.transAxes,
+                     fontsize=12,  # Slightly smaller to fit better
+                     color='black',
+                     # Add a bounding box for readability
+                     bbox=dict(facecolor='white', alpha=0.7, pad=0.1, boxstyle='round,pad=0.2'))
+
+        cb_zero.set_ticks([20, 45, 70])
+
+        cb_zero.ax.tick_params(labelsize=10,
+                               bottom=False, top=True,  # Move ticks to top
+                               labelbottom=False, labeltop=True)  # Move labels to top
+
+        # --- Few-shot cbar ---
+        ax_few = cbar_axes[i + n_base_models]  # Offset by n_base_models
+        cmap_few = LinearSegmentedColormap.from_list("custom_cmap_few", ["#FFFFFF", base_color])
+        norm_few = plt.Normalize(vmin=98.5, vmax=99.5)
+        cb_few = mcolorbar.ColorbarBase(ax_few, cmap=cmap_few, norm=norm_few, orientation='horizontal')
+
+        ax_few.text(0.5, 0.6, f"Lower Few-Shot",
+                    ha='center', va='center',
+                    transform=ax_few.transAxes,
+                    fontsize=12,  # Slightly smaller to fit better
+                    color='black',
+                    # Add a bounding box for readability
+                    bbox=dict(facecolor='white', alpha=0.7, pad=0.1, boxstyle='round,pad=0.2'))
+
+        cb_few.set_ticks([98.5, 99.0, 99.5])
+        cb_few.set_ticklabels(['98.5', '99.0', '99.5'])
+
+        cb_few.ax.tick_params(labelsize=10,
+                              bottom=True, top=False,  # Move ticks to top
+                              labelbottom=True, labeltop=False)  # Move labels to top
+
+    heatmap_axes = []
+    for i in range(n_rows):
+        # Span all columns of the gridspec for the heatmap rows
+        heatmap_axes.append(fig.add_subplot(gs[i + 3, :]))  # +3 to skip cbar rows
+
+    # Create annotations (text in cells)
+    # annot_df = pivot_df.applymap(lambda x: f"{x:.2f}" if pd.notna(x) and x > 0 else "")
+    annot_df = pivot_df.map(lambda x: f"{x:.2f}" if pd.notna(x) and x > 0 else "")
+    print(annot_df)
+
+    for i, (ax, row_name) in enumerate(zip(heatmap_axes, row_names)):
+        row_color = row_colors[i]
+        shot_type = row_shot_types[i]  # Get the shot_type for this row
+
+        # Create a custom colormap: white -> row_color
+        cmap = LinearSegmentedColormap.from_list("custom_cmap", ["#FFFFFF", row_color])
+
+        # Get the data for this row
+        row_values = pivot_df.loc[[row_name]]  # Keep as 2D array (1xN)
+
+        # Mask values <= 0 (NaNs will be masked by default by seaborn)
+        plot_data = row_values.fillna(-1).values  # .values converts from DataFrame
+        masked_data = np.ma.masked_less_equal(plot_data, 0)  # Mask 0 and -1
+
+        # Use a "bad" color (white) for masked values (0 and NaN)
+        cmap.set_bad(color='#FFFFFF')
+
+        is_last_axis = (i == len(heatmap_axes) - 1)
+
+        is_zero_shot = (shot_type == 'zero-shot')
+        vmin = 20 if is_zero_shot else 98.5
+        vmax = 70 if is_zero_shot else 99.5
+
+        sns.heatmap(
+            masked_data,
+            ax=ax,
+            annot=annot_df.loc[[row_name]],
+            fmt='',  # Annotations are already strings
+            cmap=cmap,
+            cbar=False,  # Turn off individual colorbars
+            linewidths=0.5,
+            linecolor='lightgray',
+            yticklabels=False,
+            xticklabels=[col if category_codes[col] > 9 else f"{col} v{category_codes[col]}" for col in pivot_df.columns] if is_last_axis else False,
+            vmin=vmin,  # Dynamic vmin
+            vmax=vmax,  # Dynamic vmax
+            annot_kws={"size": 14, "color": "black"}
+        )
+        # Y-axis label styling
+        # ax.set_ylabel(row_name, rotation=0, ha='right', va='center', fontweight='bold')
+        # ax.tick_params(axis='y', length=0)  # Hide y-tick marks
+        # ax.set_xlabel("")  # Clear x-label for all but last
+
+    # column_names = heatmap_axes[-1].get_xticklabels()
+    # column_names = [lab if category_codes[lab.get_text()] > 9 else lab.set_text(f"{lab.get_text()} v{category_codes[lab.get_text()]}") for lab in column_names]
+    plt.setp(heatmap_axes[-1].get_xticklabels(), rotation=45, ha='right', fontsize=12)
+    heatmap_axes[-1].set_xlabel("Label set of Category Descriptions", fontsize=12)
+
+    # Add a title for the whole figure, positioned above colorbars
+    fig.suptitle(
+        "CLIP Model Accuracy Matrix (Combined)",
+        y=0.97,  # <-- ADJUSTED Y-POSITION
+        fontsize=16,
+        fontweight='bold'
+    )
+
+    # Adjust layout to prevent title/cbar overlap
+    fig.tight_layout(rect=[0, 0, 1, 1])  # rect=[left, bottom, right, top]
+
+    plot_output_dir = Path(output_dir)
+    plot_output_dir.mkdir(parents=True, exist_ok=True)
+    # New name for the combined plot
+    plot_output_path = plot_output_dir / "model_accuracy_matrix_combined.png"
+    fig.savefig(plot_output_path, dpi=300, bbox_inches='tight')
+    plt.close(fig)  # Close the figure
+
+    print(f"Accuracy matrix saved to {plot_output_path}")
+
+#
+#
+# def visualize_results(csv_file: str, output_dir: str, zero_shot: bool = False):
+#     """
+#     Generate a heatmap (matrix) from a CSV file of model accuracies.
+#     Rows: Base Models, Columns: Categories
+#
+#     :param csv_file: Path to the CSV file containing model accuracies.
+#     :param output_dir: Directory where the plot will be saved.
+#     :param zero_shot: Boolean flag to change the output file name.
+#     """
+#
+#     # --- 1. Define Rows (Base Models) and their colors ---
+#     # This mapping normalizes the messy keys from the original code
+#     # to a clean row name and its color.
+#     base_model_map = {
+#         "ViT-B/32 ": ("ViT-B/32", "indigo"),
+#         "ViT-B/16 ": ("ViT-B/16", "steelblue"),
+#         "ViT-L/14 ": ("ViT-L/14", "orange"),
+#         "ViT-L/14-336 ": ("ViT-L/14@336px", "gold"),
+#         "ViT-L/14-336px ": ("ViT-L/14@336px", "gold"),
+#         "ViT-L/14@336 ": ("ViT-L/14@336px", "gold"),
+#         "ViT-L/14@336px ": ("ViT-L/14@336px", "gold"),
+#     }
+#     # Get unique rows and their colors, preserving a reasonable order
+#     # dict.fromkeys preserves insertion order (Python 3.7+)
+#     row_data = list(dict.fromkeys(base_model_map.values()))
+#     row_names = [name for name, color in row_data]
+#     row_colors = [color for name, color in row_data]
+#
+#     # --- 2. Define Columns (Categories) and their order ---
+#     category_codes = {
+#         "average": 10,
+#         "avg": 10,
+#         "details": 2,  # 9
+#         "extra": 3,  # 8
+#         "gemini": 4,  # 6
+#         "gpt": 5,  # 4
+#         "large": 6,  # 4
+#         "mid": 7,  # 2
+#         "min": 8,  # 3
+#         "short": 9,  # 5
+#         "init": 1,  # 1
+#     }
+#
+#     # Get a list of all category names, sorted by their code, then name
+#     sorted_cats_by_code = sorted(category_codes.items(), key=lambda item: (item[1], item[0]))
+#     col_names = [cat for cat, code in sorted_cats_by_code]
+#
+#     canonical_cat = 'avg'
+#     alias_cat = 'average'
+#
+#     # Remove the alias from the list of columns to be plotted
+#     # This ensures only one column ("avg") is created in the final matrix.
+#     if alias_cat in col_names:
+#         col_names.remove(alias_cat)
+#
+#     # --- 3. Load and Process Data ---
+#     results_df = pd.read_csv(csv_file)
+#
+#     # Helper function to find base_model and category from model_name
+#     def extract_info(model_name):
+#         for base_key, (row_name, color) in base_model_map.items():
+#             if base_key in model_name:
+#                 # Found base model. Category is what's left.
+#                 category = model_name.replace(base_key, '').strip()
+#                 # Check if the found category is one of our known categories
+#                 if category in category_codes.keys():
+#                     return row_name, category
+#
+#                 for categ in category_codes.keys():
+#                     if categ in category:
+#                         return row_name, categ
+#         # If no match (e.g., data is malformed)
+#         return None, None
+#
+#     results_df[['base_model', 'category']] = results_df['model_name'].apply(
+#         lambda x: pd.Series(extract_info(x))
+#     )
+#
+#     results_df['category'] = results_df['category'].replace(alias_cat, canonical_cat)
+#
+#     print(results_df)
+#
+#     # Drop rows that couldn't be parsed into a base_model and category
+#     results_df.dropna(subset=['base_model', 'category'], inplace=True)
+#
+#     # --- 4. Create the Pivot Table (The Matrix) ---
+#     if results_df.empty:
+#         print(f"No valid data found in {csv_file} after processing. Skipping plot.")
+#         return
+#
+#     try:
+#         pivot_df = results_df.pivot_table(
+#             index='base_model',
+#             columns='category',
+#             values='accuracy',
+#             aggfunc='mean'  # Use mean in case of duplicate entries
+#         )
+#     except Exception as e:
+#         print(f"Error creating pivot table: {e}")
+#         print("Processed DataFrame:")
+#         print(results_df)
+#         return
+#
+#     # --- 5. Reorder Rows and Columns ---
+#     # Reindex the pivot table to match our desired row/col order
+#     # This will introduce NaNs for all missing data, which is what we want.
+#     pivot_df = pivot_df.reindex(index=row_names, columns=col_names)
+#
+#     # --- 6. Create the Plot ---
+#     # We create 4 separate 1-row heatmaps and stack them
+#     # to achieve the per-row custom colormap.
+#     fig, axes = plt.subplots(
+#         nrows=len(row_names),  # 4 rows
+#         ncols=1,
+#         figsize=(16, 3.5),  # Wider to fit 10-11 categories, shorter height
+#         sharex=True,
+#         gridspec_kw={'hspace': 0.05}  # Stack them closely
+#     )
+#
+#     if not isinstance(axes, np.ndarray):
+#         axes = [axes]  # Handle case if there's only 1 row
+#
+#
+#     # Create annotations (text in cells)
+#     # Format to 2 decimal places, but show nothing for 0 or NaN
+#     annot_df = pivot_df.applymap(lambda x: f"{x:.2f}" if pd.notna(x) and x > 0 else "")
+#
+#     for i, (ax, row_name) in enumerate(zip(axes, row_names)):
+#         row_color = row_colors[i]
+#
+#         # Create a custom colormap: white -> row_color
+#         cmap = LinearSegmentedColormap.from_list("custom_cmap", ["#FFFFFF", row_color])
+#
+#         # Get the data for this row
+#         row_values = pivot_df.loc[[row_name]]  # Keep as 2D array (1xN)
+#
+#         # Mask values <= 0 (NaNs will be masked by default by seaborn)
+#         # We also want to mask 0, so we fillna and then mask
+#         plot_data = row_values.fillna(-1).values  # .values converts from DataFrame
+#         masked_data = np.ma.masked_less_equal(plot_data, 0)  # Mask 0 and -1
+#
+#         # Use a "bad" color (white) for masked values (0 and NaN)
+#         cmap.set_bad(color='#FFFFFF')
+#
+#         is_last_axis = (i == len(axes) - 1)
+#
+#         sns.heatmap(
+#             masked_data,
+#             ax=ax,
+#             annot=annot_df.loc[[row_name]],
+#             fmt='',  # Annotations are already strings
+#             cmap=cmap,
+#             cbar=False,  # No colorbar
+#             linewidths=0.5,
+#             linecolor='lightgray',
+#             yticklabels=False,
+#             xticklabels=pivot_df.columns if is_last_axis else False,
+#             vmin=20 if zero_shot else 98.5,
+#             vmax=70 if zero_shot else 99.5,
+#             annot_kws={"size": 10, "color": "black"}
+#         )
+#         # Y-axis label styling
+#         ax.set_ylabel(row_name, rotation=0, ha='right', va='center', fontweight='bold')
+#         ax.tick_params(axis='y', length=0)  # Hide y-tick marks
+#         ax.set_xlabel("")  # Clear x-label for all but last
+#
+#     # --- 7. Final Touches ---
+#     # Set x-ticks only for the last (bottom) axes
+#     # The labels are now created *by* the last heatmap call.
+#     # We just need to get them and apply styling (rotation).
+#     plt.setp(axes[-1].get_xticklabels(), rotation=45, ha='right')
+#     axes[-1].set_xlabel("Category")
+#
+#     # Add a title for the whole figure
+#     fig.suptitle(
+#         f"Model {'Zero-Shot' if zero_shot else ''} Accuracy Matrix",
+#         y=1.15,  # Adjust y position to be above the plot
+#         fontsize=16,
+#         fontweight='bold'
+#     )
+#
+#     # --- 8. Save the Plot ---
+#     plot_output_dir = Path(output_dir)
+#     plot_output_dir.mkdir(parents=True, exist_ok=True)
+#     # New name for the new plot type
+#     plot_output_path = plot_output_dir / f"model_accuracy_matrix{'_zero' if zero_shot else ''}.png"
+#     fig.savefig(plot_output_path, dpi=300, bbox_inches='tight')
+#     plt.close(fig)  # Close the figure
+#
+#     print(f"Accuracy matrix saved to {plot_output_path}")
 
 
 def evaluate_multiple_models(model_dir: str, eval_dir: str, categ_dir: str, device: str,

@@ -133,7 +133,7 @@ if __name__ == "__main__":
     parser.add_argument('--cat_prefix', type=str, default=categ_prefix,
                         help='Prefix for category description TSV files.')
     parser.add_argument('-cc', '--cat_csv', type=str, default=categ_file,
-                        help='Prefix for category description TSV files.')
+                        help='Category descriptions file in TSV or CSV format.')
     parser.add_argument('--cat_dir', type=str, default=categ_directory, help='Directory with category description files.'),
     parser.add_argument('--avg', action='store_true', default=avg, help='Average scores from multiple category description files.')
     parser.add_argument("--best",
@@ -195,7 +195,7 @@ if __name__ == "__main__":
         ",".join(("{}={}".format(re.sub("(.)[^_]*_?", r"\1", k), v) for k, v in sorted(vars(args).items()) if v
                   is not None and k not in (
                       "file", "directory", "dir", "eval", "train", "model_path", "model", "cat_prefix", "model_dir",
-                      "eval_dir", "vis", "raw", "safe", "cat_dir", "hf", "")))
+                      "eval_dir", "vis", "raw", "safe", "cat_dir", "hf", "cat_csv", "file_format")))
     ))
 
     args.logdir += f"-{args.model.replace('/', '_')}" if args.model else ""
@@ -289,6 +289,12 @@ if __name__ == "__main__":
             batch_size=args.batch_size,
         )
     elif args.vis:
+        csv = output_dir / 'stats' / f"model_accuracies_total.csv"
+        if not csv.exists():
+            print(f"CSV file for visualization of all models not found at {csv}. Please run model evaluation first.")
+        else:
+            visualize_all_results(str(csv), str(output_dir / 'stats'))
+
         csv = output_dir / 'stats' / f"model_accuracies{'_zero' if args.zero_shot else ''}.csv"
         if not csv.exists():
             print(f"CSV file for visualization not found at {csv}. Please run model evaluation first.")
