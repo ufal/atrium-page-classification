@@ -1,0 +1,7 @@
+model_name,model_version,accuracy,status
+"tf_efficientnetv2_m.in21k_ft_in1k","v1.3",99.78,Success
+"vit-base-patch16-224","v2.3",99.96,Success
+"vit-base-patch16-384","v3.3",99.98,Success
+"regnety_160.swag_ft_in1k","v4.3",100.0,Success
+"vit-large-patch16-384","v5.3",99.94,Success
+"regnety_640.seer","v6.3",99.94,Success
