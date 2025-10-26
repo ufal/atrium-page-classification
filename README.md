@@ -1,16 +1,20 @@
-# Image classification using fine-tuned models - for historical document sorting
+# Image classification using finetuned models - for historical document sorting
 
-### Goal: solve a task of archive page images sorting (for their further content-based processing)
+### Goal: solve a task of archival page images classification based on their content (for further processing with relevant tools)
 
 **Scope:** Processing of images, training / evaluation of models,
-input file/directory processing, class (category) results of top
-N predictions output, predictions summarizing into a tabular format, 
-HF 😊 hub support for the model, multiplatform (Win/Lin) data 
-preparation scripts for PDF to PNG conversion
+input file / directory processing, class (category) results of top-N 
+predictions output, predictions summarizing into a tabular format, 
+HF 😊 hub support for the best models, multiplatform (Windows / Unix) data 
+preparation scripts for PDF conversion to PNGs / JPEGs of its pages.
 
-**CLIP**: [README.md](clip/README.md)
+#### Branches of the GitHub repository (and directories in the current branch):
 
-**ViT** (and EffNetV2): [README.md](vit/README.md)
+- **CLIP** - 8 base models (5 are ViT-B/16 variants): [local README.md](clip/README.md) and [branch](https://github.com/ufal/atrium-page-classification/tree/clip/README.md)
+  - HF 😊 hub: [https://huggingface.co/ufal/clip-historical-page](https://huggingface.co/ufal/clip-historical-page)
+
+- **ViT** - 3 base models (plus EffNetV2-M & RegNetY-16GF): [local README.md](vit/README.md) and [branch](https://github.com/ufal/atrium-page-classification/tree/vit/README.md)
+  - HF 😊 hub: [https://huggingface.co/ufal/vit-historical-page](https://huggingface.co/ufal/vit-historical-page)
 
 ## Contacts 📧
 
