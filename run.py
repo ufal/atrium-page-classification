@@ -284,9 +284,9 @@ if __name__ == "__main__":
         # ----------------------------------------------
         # ----- UNCOMMENT for pushing to HF repo -------
         # ----------------------------------------------
-        # print(f"Deleting {args.revision} branch")
-        # delete_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision,
-        #               token=config.get("HF", "token"))
+        #print(f"Deleting {args.revision} branch")
+        #delete_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision,
+        #              token=config.get("HF", "token"))
         # print(f"Creating fresh {args.revision} branch")
         # create_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision, exist_ok=True,
         #               token=config.get("HF", "token"))
@@ -453,8 +453,8 @@ if __name__ == "__main__":
 
                 # daily date-based filenames (YYYYMMDD)
                 date_stamp = time.strftime('%Y%m%d')
-                top_out_path = f"{output_dir}/tables/{date_stamp}_{total}_{revision_model_name_local}_TOP-{top_N}.csv"
-                raw_out_path = f"{output_dir}/tables/{date_stamp}_{total}_{revision_model_name_local}_RAW.csv"
+                top_out_path = f"{output_dir}/tables/{date_stamp}_{revision_model_name_local}_TOP-{top_N}.csv"
+                raw_out_path = f"{output_dir}/tables/{date_stamp}_{revision_model_name_local}_RAW.csv"
 
                 for chunk_idx, start in enumerate(range(0, total, chunk_size), start=1):
                     end = min(start + chunk_size, total)
