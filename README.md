@@ -927,6 +927,13 @@ since the rows will be basically sorted by categories, and most ambiguous ones w
 have more small probabilities instead of zeros than the most obvious (for the model) 
 categories 🪧.
 
+Importantly, there is a script for splitting any result table into document-specific
+tables stored in a specified directory:
+
+    python3 per_doc_split.py -i '/full/path/to/result_table.csv' 
+
+The splitting script [per_doc_split.py](per_doc_split.py) 📎 is adjusted for the filename as a first column inout.
+
 ----
 
 ## Data preparation 📦
