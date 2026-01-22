@@ -4,8 +4,8 @@
 
 **Scope:** This service provides a **FastAPI** interface for the Atrium Page Classification models. 
 It allows users to upload document images and receive structural classification predictions (e.g., 
-Text, Drawing, Table) using various fine-tuned deep learning models (ViT, EfficientNet, RegNetY). 
-It includes a basic static HTML frontend for testing.
+Text, Drawing, Table) using various fine-tuned on historical data [^17] deep learning models 
+(ViT, EfficientNet, RegNetY). It includes a basic static HTML frontend for testing.
 
 ### Table of contents 📑
 
@@ -54,13 +54,22 @@ atrium-page-classification/
 
 ### 1. Prerequisites
 * **Python 3.10+**
-* **CUDA-capable GPU** (Recommended for inference speed, though CPU is supported).
+* **CUDA-capable GPU** (Recommended for inference speed, though CPU is supported). [^10]
+* **Python 3.10+**
+* **NodeJS** (For client-side development)
+* **CUDA-capable GPU** (Recommended for **Server-side** inference speed, though CPU is supported).
+* **Standard CPU** (Sufficient for **Client-side** development).
 
-### 2. Install Dependencies
-Navigate to the root `atrium-page-classification` directory and install the required packages 
-using the service requirements file:
+### 2. Install Server Dependencies
+
+Navigate to the root `atrium-page-classification` directory, create a virtual environment, 
+and install the required packages:
 
 ```bash
+# Create and activate virtual environment
+cd atrium-page-classification
+python -m venv venv-api
+source venv-api/bin/activate
 pip install -r service/requirements.txt
 ```
 
@@ -74,13 +83,76 @@ Follow the instructions in the main repository to load the model weights correct
 
 ## Running the Server 🚀
 
-To start the API server with hot-reloading enabled (useful for development):
+To start the API server with hot-reloading enabled (useful for development), ensure your virtual 
+environment is activated in your **first console window**: [^3]
 
 ```bash
+source venv-api/bin/activate
 uvicorn service.api:app --reload
 ```
 
 The server will start at http://0.0.0.0:8000 (access to use the built-in visual testing tool).
+
+## Client Side Test 🎨
+
+This API service includes a lightweight vanilla JS frontend (`service/static/script.js`) for immediate testing. 
+However, the full LINDAT client integration is developed separately. [^5]
+
+For client-side development, open a **second console window** and follow these steps:
+
+1.  **Clone the repository:**
+    ```bash
+    git clone [https://github.com/ufal/lindat-common.git](https://github.com/ufal/lindat-common.git)
+    cd lindat-common
+    ```
+
+2.  **Install NodeJS environment** (unless you already have one):
+    ```bash
+    curl -o- [https://raw.githubusercontent.com/creationix/nvm/v0.25.4/install.sh](https://raw.githubusercontent.com/creationix/nvm/v0.25.4/install.sh) | bash
+    nvm install stable
+    nvm use stable
+    ```
+
+3.  **Install dependencies for development:**
+    ```bash
+    npm install
+    ```
+
+4. Move project files to `lindat-common` directory:
+    ```bash
+    cp -r atrium-page-classification .
+   # or
+   mv atrium-page-classification .
+   ```
+
+5. **Run development server:**
+    ```bash
+    make run
+    ```
+
+For further details, please refer to the **LINDAT Common Development Guide**:
+[https://github.com/ufal/lindat-common/?tab=readme-ov-file#development](https://github.com/ufal/lindat-common/?tab=readme-ov-file#development).
+
+### Using the client-side test interface
+
+Assuming your **second console** output end like this:
+
+```commandline
+> lindat-common@3.5.0 start
+> webpack-dev-server -p --debug --quiet
+
+(node:2985155) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ℹ ｢wds｣: Project is running at http://localhost:8080/
+ℹ ｢wds｣: webpack output is served from /
+ℹ ｢wds｣: Content not from webpack is served from /home.../lindat-common
+
+```
+
+Open the URL `http://localhost:8080` in your web browser to access the LINDAT client interface. 
+
+Follow the file tree to the `atrium-page-classification/service/static` directory. The frontend interface
+will open and allow you to upload images and test the API.
 
 ## API Usage 📡
 
@@ -148,11 +220,35 @@ The models classify pages into 11 distinct structural categories:
 | `PHOTO`   | 🌄 Photo (photographs/cutouts).                            |
 | `PHOTO_L` | 🌄📏 Structured Photo (photos in a table layout).          |
 
+## Contacts 📧
 
-## Client Side Development 🎨
+**For support write to:** lutsai.k@gmail.com responsible for this GitHub repository [^8] 🔗
 
-This API service includes a lightweight vanilla JS frontend (`service/static/script.js`) for immediate testing. 
-However, the full LINDAT client integration is developed separately.
+## Acknowledgements 🙏
 
-For client-side development instructions, please refer to the **LINDAT Common Development Guide**:
-[https://github.com/ufal/lindat-common/?tab=readme-ov-file#development](https://github.com/ufal/lindat-common/?tab=readme-ov-file#development).
+- **Developed by** UFAL [^7] 👥
+- **Funded by** ATRIUM [^4]  💰
+- **Shared by** ATRIUM [^4] & UFAL [^7] 🔗
+- **Model type:** 
+  - fine-tuned ViT with a 224x224 [^2] 🔗 or 384x384 [^13] [^14] 🔗 resolution size 
+  - fine-tuned RegNetY-16GF with a 224x224 resolution [^18] or EffNetV2 with a 384x384 [^19] 🔗 resolution size 
+
+**©️ 2026 UFAL & ATRIUM**
+
+----
+
+[^1]: https://huggingface.co/ufal/vit-historical-page
+[^2]: https://huggingface.co/google/vit-base-patch16-224
+[^3]: https://docs.python.org/3/library/venv.html
+[^4]: https://atrium-research.eu/
+[^5]: https://github.com/ufal/lindat-common
+[^6]: https://www.ghostscript.com/releases/gsdnld.html
+[^7]: https://ufal.mff.cuni.cz/home-page
+[^8]: https://github.com/ufal/atrium-page-classification
+[^10]: https://developer.nvidia.com/cuda-python
+[^13]: https://huggingface.co/google/vit-base-patch16-384
+[^14]: https://huggingface.co/google/vit-large-patch16-384
+[^17]: http://hdl.handle.net/20.500.12800/1-5959
+[^18]: https://huggingface.co/timm/regnety_160.swag_ft_in1k
+[^19]: https://huggingface.co/timm/tf_efficientnetv2_m.in21k_ft_in1k
+

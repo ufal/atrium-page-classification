@@ -1440,7 +1440,7 @@ same as for the training pages directory - the category 🪧 subdirectories are 
   - fine-tuned ViT with a 224x224 [^2] 🔗 or 384x384 [^13] [^14] 🔗 resolution size 
   - fine-tuned RegNetY-16GF with a 224x224 resolution [^18] or EffNetV2 with a 384x384 [^19] 🔗 resolution size 
 
-**©️ 2022 UFAL & ATRIUM**
+**©️ 2025 UFAL & ATRIUM**
 
 ----
 
