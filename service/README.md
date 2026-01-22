@@ -119,7 +119,8 @@ The server will start at http://0.0.0.0:8000 (access to use the built-in visual 
 
 ## Supported Models 🧠
 
-The API exposes specific model versions defined in `inference.py`. These map to different underlying base architectures, allowing users to balance speed vs. accuracy.
+The API exposes specific model versions defined in `inference.py`. These map to different underlying 
+base architectures, allowing users to balance speed vs. accuracy.
 
 | Version  | Base Architecture                   | Description                                     |
 |:---------|:------------------------------------|:------------------------------------------------|

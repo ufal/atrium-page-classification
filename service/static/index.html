@@ -11,6 +11,7 @@
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
                 color: #333;
                 line-height: 1.6;
+                margin: 0;
             }
             main {
                 flex: 1;
@@ -19,43 +20,78 @@
                 margin: 2rem auto;
                 padding: 0 1rem;
             }
-            
-            /* Section Styling */
-            .content-section {
-                margin-bottom: 3rem;
-                padding-bottom: 2rem;
-                border-bottom: 1px solid #eee;
+
+            /* Tab Navigation */
+            .tabs-nav {
+                display: flex;
+                border-bottom: 2px solid #eee;
+                margin-bottom: 2rem;
             }
-            .content-section:last-child { border-bottom: none; }
-            
+            .tab-btn {
+                padding: 1rem 2rem;
+                background: none;
+                border: none;
+                border-bottom: 3px solid transparent;
+                cursor: pointer;
+                font-size: 1rem;
+                font-weight: 600;
+                color: #666;
+                transition: all 0.2s;
+            }
+            .tab-btn:hover { color: #007bff; }
+            .tab-btn.active {
+                border-bottom-color: #007bff;
+                color: #007bff;
+            }
+
+            /* Tab Content */
+            .tab-content { display: none; }
+            .tab-content.active { display: block; animation: fadeIn 0.3s; }
+
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(5px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
             h1 { margin-bottom: 0.5rem; color: #111; }
             h2 { margin-top: 2rem; border-bottom: 2px solid #f0f0f0; padding-bottom: 0.5rem; }
             h3 { margin-top: 1.5rem; color: #444; }
-            
+
             /* Form & Upload Styling */
-            .upload-box { 
-                border: 2px dashed #ccc; 
-                padding: 2rem; 
-                text-align: center; 
-                border-radius: 8px; 
+            .upload-box {
+                border: 2px dashed #ccc;
+                padding: 2rem;
+                text-align: center;
+                border-radius: 8px;
                 background: #f9f9f9;
                 transition: border-color 0.3s;
                 cursor: pointer;
             }
             .upload-box:hover { border-color: #007bff; background: #f0f7ff; }
-            
+
             .results-box { margin-top: 2rem; }
-            .model-card { 
-                border: 1px solid #ddd; 
-                padding: 1.5rem; 
-                margin-bottom: 1rem; 
-                border-radius: 6px; 
+            .model-card {
+                border: 1px solid #ddd;
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+                border-radius: 6px;
                 box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             }
             .score-bar { height: 12px; background: #eee; border-radius: 6px; overflow: hidden; margin-top: 4px; }
             .score-fill { height: 100%; transition: width 0.5s ease-in-out; }
             .loading { display: none; color: #666; font-style: italic; margin-top: 1rem; text-align: center;}
-            
+
+            .form-group {
+                margin-top: 1.5rem;
+                text-align: center;
+                display: flex;
+                justify-content: center;
+                gap: 20px;
+                flex-wrap: wrap;
+            }
+
+            select { padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
+
             .btn-primary {
                 background-color: #007bff;
                 color: white;
@@ -71,18 +107,14 @@
             }
             .btn-primary:hover { background-color: #0056b3; }
 
-            /* Table Styling for Documentation */
+            /* Table Styling */
             table {
                 width: 100%;
                 border-collapse: collapse;
                 margin: 1rem 0;
                 font-size: 0.95rem;
             }
-            th, td {
-                padding: 10px;
-                border: 1px solid #ddd;
-                text-align: left;
-            }
+            th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
             th { background-color: #f5f5f5; font-weight: 600; }
             tr:nth-child(even) { background-color: #fcfcfc; }
             code {
@@ -92,14 +124,19 @@
                 font-family: monospace;
                 color: #d63384;
             }
-            
-            /* Utility */
+            pre {
+                background: #f4f4f4;
+                padding: 1rem;
+                border-radius: 5px;
+                overflow-x: auto;
+            }
+
             .text-muted { color: #666; font-size: 0.9rem; }
             .refbox-container { margin-top: 2rem; }
         </style>
-        
+
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        
+
         <script src="/dist/public/js/lindat-refbox.js"></script>
     </head>
     <body>
@@ -108,103 +145,23 @@
         </lindat-header>
 
         <main>
-            <div class="content-section">
-                <h1>Atrium Page Classification</h1>
-                <p class="text-muted">Classify historical document pages into structural categories (text, table, drawing, photo) to facilitate automated processing pipelines.</p>
+            <h1>ATRIUM Page Classification</h1>
+            <p class="text-muted">Historical document classification service using deep learning.</p>
 
-                <form id="classifyForm">
-                    <div class="upload-box" onclick="document.getElementById('imageInput').click()">
-                        <input type="file" id="imageInput" name="file" accept="image/jpeg, image/png" required style="display:none">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15"></line>
-                        </svg>
-                        <p style="margin-top: 10px; color: #666;"><strong>Click to upload</strong> or drag and drop<br>(JPG, PNG)</p>
-                    </div>
+            <nav class="tabs-nav">
+                <button class="tab-btn active" data-tab="tab-about">About</button>
+                <button class="tab-btn" data-tab="tab-run">Run Service</button>
+                <button class="tab-btn" data-tab="tab-api">API Docs</button>
+            </nav>
 
-                    <div style="margin-top: 1.5rem; text-align: center;">
-                        <label for="modelVersion"><strong>Model Version:</strong></label>
-                        <select id="modelVersion" name="version" style="padding: 8px; border-radius: 4px; border: 1px solid #ccc; margin-left: 10px;">
-                            <option value="v5.3" selected>v5.3 (ViT-Large 384 - Most Accurate)</option>
-                            <option value="v4.3">v4.3 (RegNetY 160 - Balanced)</option>
-                            <option value="v1.3">v1.3 (EfficientNetV2-M - Fast)</option>
-                            <option value="v2.3">v2.3 (ViT-Base 224)</option>
-                            <option value="v3.3">v3.3 (ViT-Base 384)</option>
-                            <option value="all">Run All Models</option>
-                        </select>
-                    </div>
+            <div id="tab-about" class="tab-content active">
+                <p>
+                    This service provides a <strong>FastAPI</strong> interface for the Atrium Page Classification models.
+                    It allows users to upload document images and receive structural classification predictions (e.g.,
+                    Text, Drawing, Table) using various fine-tuned deep learning models (ViT, EfficientNet, RegNetY).
+                </p>
 
-                    <button type="submit" class="btn-primary">Run Classification</button>
-                </form>
-
-                <div id="loading" class="loading">Processing image... please wait.</div>
-                <div id="results" class="results-box"></div>
-            </div>
-
-            <div class="content-section">
-                <h2>Category Descriptions</h2>
-                <p>The model classifies pages into 11 distinct categories based on content (Text, Photo, Drawing) and layout (Paragraph vs. Table/Linear). This sorting allows for content-specific downstream processing (e.g., OCR vs. Image Extraction).</p>
-                
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Label</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>TEXT</code></td>
-                            <td>📰 <strong>Mixed Text:</strong> Mixtures of printed, handwritten, or typed text, potentially with minor graphical elements.</td>
-                        </tr>
-                        <tr>
-                            <td><code>TEXT_T</code></td>
-                            <td>📄 <strong>Typed:</strong> Only machine-typed text in paragraph or block form.</td>
-                        </tr>
-                        <tr>
-                            <td><code>TEXT_P</code></td>
-                            <td>📄 <strong>Printed:</strong> Only printed text in paragraph or block form.</td>
-                        </tr>
-                        <tr>
-                            <td><code>TEXT_HW</code></td>
-                            <td>✏️📄 <strong>Handwritten:</strong> Only handwritten text in paragraph or block form.</td>
-                        </tr>
-                        <tr>
-                            <td><code>LINE_T</code></td>
-                            <td>📏 <strong>Typed Table:</strong> Machine-typed text organized in a tabular or form-like structure.</td>
-                        </tr>
-                        <tr>
-                            <td><code>LINE_P</code></td>
-                            <td>📏 <strong>Printed Table:</strong> Printed text organized in a tabular or form-like structure.</td>
-                        </tr>
-                        <tr>
-                            <td><code>LINE_HW</code></td>
-                            <td>✏️📏 <strong>Handwritten Table:</strong> Handwritten text organized in a tabular or form-like structure.</td>
-                        </tr>
-                        <tr>
-                            <td><code>DRAW</code></td>
-                            <td>📈 <strong>Drawing:</strong> Maps, paintings, schematics, or graphics (potentially with captions).</td>
-                        </tr>
-                        <tr>
-                            <td><code>DRAW_L</code></td>
-                            <td>📈📏 <strong>Structured Drawing:</strong> Drawings presented within a table-like layout or legend.</td>
-                        </tr>
-                        <tr>
-                            <td><code>PHOTO</code></td>
-                            <td>🌄 <strong>Photo:</strong> Photographs or photographic cutouts.</td>
-                        </tr>
-                        <tr>
-                            <td><code>PHOTO_L</code></td>
-                            <td>🌄📏 <strong>Structured Photo:</strong> Photos presented within a table-like layout.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="content-section">
-                <h2>Model Versions</h2>
-                <p>Models are fine-tuned on a dataset of ~48,000 archival pages. Choose a model based on your speed vs. accuracy requirements.</p>
+                <h2>Supported Models 🧠</h2>
                 <table>
                     <thead>
                         <tr>
@@ -216,22 +173,16 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td><strong>v5.3</strong></td>
-                            <td>ViT-Large (Patch16-384)</td>
-                            <td><strong>99.12%</strong></td>
-                            <td>Largest model, highest accuracy, slowest inference.</td>
-                        </tr>
-                        <tr>
                             <td><strong>v4.3</strong></td>
                             <td>RegNetY 160</td>
-                            <td>99.17%</td>
+                            <td><strong>99.17%</strong></td>
                             <td>Balanced option. Best performing "Small" model.</td>
                         </tr>
                         <tr>
-                            <td><strong>v1.3</strong></td>
-                            <td>EfficientNetV2-M</td>
-                            <td>98.83%</td>
-                            <td>CNN-based, faster inference, good for smaller hardware.</td>
+                            <td><strong>v5.3</strong></td>
+                            <td>ViT-Large (384)</td>
+                            <td>99.12%</td>
+                            <td>Largest model, highest accuracy, slowest inference.</td>
                         </tr>
                         <tr>
                             <td><strong>v2.3 / v3.3</strong></td>
@@ -239,25 +190,173 @@
                             <td>~98.8%</td>
                             <td>Standard Transformer baselines.</td>
                         </tr>
+                        <tr>
+                            <td><strong>v1.3</strong></td>
+                            <td>EfficientNetV2-M</td>
+                            <td>98.83%</td>
+                            <td>CNN-based, faster inference.</td>
+                        </tr>
+
                     </tbody>
                 </table>
-            </div>
 
-            <div class="content-section">
-                <h2>Acknowledgements</h2>
-                <p>
-                    Developed by <a href="https://ufal.mff.cuni.cz/home-page" target="_blank">UFAL</a>. 
-                    Funded by <a href="https://atrium-research.eu/" target="_blank">ATRIUM</a>.
-                </p>
-                <p>
-                    The models were trained on manually annotated datasets of historical documents (archaeological reports) spanning 1920-2020.
-                    Source code and datasets are available on <a href="https://github.com/ufal/atrium-page-classification" target="_blank">GitHub</a>.
-                </p>
+                <h2>Categories 🪧</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Label</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>TEXT</code></td>
+                            <td>📰 <strong>Mixed Text:</strong> Mixtures of printed, handwritten, or typed text.</td>
+                        </tr>
+                        <tr>
+                            <td><code>TEXT_T</code></td>
+                            <td>📄 <strong>Typed:</strong> Machine-typed paragraphs.</td>
+                        </tr>
+                        <tr>
+                            <td><code>TEXT_P</code></td>
+                            <td>📄 <strong>Printed:</strong> Published paragraphs.</td>
+                        </tr>
+                        <tr>
+                            <td><code>TEXT_HW</code></td>
+                            <td>✏️📄 <strong>Handwritten:</strong> Handwritten paragraphs.</td>
+                        </tr>
+                        <tr>
+                            <td><code>LINE_T</code></td>
+                            <td>📏 <strong>Typed Table:</strong> Machine-typed tabular structure.</td>
+                        </tr>
+                        <tr>
+                            <td><code>LINE_P</code></td>
+                            <td>📏 <strong>Printed Table:</strong> Printed tabular structure.</td>
+                        </tr>
+                        <tr>
+                            <td><code>LINE_HW</code></td>
+                            <td>✏️📏 <strong>Handwritten Table:</strong> Handwritten tabular structure.</td>
+                        </tr>
+                        <tr>
+                            <td><code>DRAW</code></td>
+                            <td>📈 <strong>Drawing:</strong> Maps, paintings, schematics.</td>
+                        </tr>
+                        <tr>
+                            <td><code>DRAW_L</code></td>
+                            <td>📈📏 <strong>Structured Drawing:</strong> Drawings in a layout/legend.</td>
+                        </tr>
+                        <tr>
+                            <td><code>PHOTO</code></td>
+                            <td>🌄 <strong>Photo:</strong> Photographs.</td>
+                        </tr>
+                        <tr>
+                            <td><code>PHOTO_L</code></td>
+                            <td>🌄📏 <strong>Structured Photo:</strong> Photos in a table layout.</td>
+                        </tr>
+                    </tbody>
+                </table>
 
                 <div class="refbox-container">
                     <div id="refbox" class="lindat-refbox"></div>
                 </div>
             </div>
+
+            <div id="tab-run" class="tab-content">
+                <form id="classifyForm">
+                    <div class="upload-box" onclick="document.getElementById('imageInput').click()">
+                        <input type="file" id="imageInput" name="file" accept="image/jpeg, image/png" required style="display:none">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <p style="margin-top: 10px; color: #666;"><strong>Click to upload</strong> or drag and drop<br>(JPG, PNG)</p>
+                    </div>
+
+                    <div class="form-group">
+                        <div>
+                            <label for="modelVersion"><strong>Model Version:</strong></label><br>
+                            <select id="modelVersion" name="version">
+                                <option value="v4.3">v4.3 (RegNetY 160)</option>
+                                <option value="v5.3" selected>v5.3 (ViT-Large 384)</option>
+                                <option value="v1.3">v1.3 (EfficientNetV2-M)</option>
+                                <option value="v2.3">v2.3 (ViT-Base 224)</option>
+                                <option value="v3.3">v3.3 (ViT-Base 384)</option>
+                                <option value="all">Run All Models (Averaged)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="topN"><strong>Top Results:</strong></label><br>
+                            <select id="topN" name="topn">
+                                <option value="1">Top 1</option>
+                                <option value="3" selected>Top 3</option>
+                                <option value="5">Top 5</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Run Classification</button>
+                </form>
+
+                <div id="loading" class="loading">Processing image... please wait.</div>
+                <div id="results" class="results-box"></div>
+            </div>
+
+            <div id="tab-api" class="tab-content">
+                <h2>API Endpoints 🔗</h2>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Path</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>GET</code></td>
+                            <td><code>/</code></td>
+                            <td>Serves this HTML interface.</td>
+                        </tr>
+                        <tr>
+                            <td><code>GET</code></td>
+                            <td><code>/info</code></td>
+                            <td>Returns metadata about available models and device.</td>
+                        </tr>
+                        <tr>
+                            <td><code>POST</code></td>
+                            <td><code>/predict</code></td>
+                            <td>Performs inference. Requires <code>file</code>, <code>version</code>, and <code>topn</code>.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Request Example 💻</h3>
+                <p><strong>POST</strong> <code>/predict</code></p>
+                <p><strong>Form Data:</strong></p>
+                <ul>
+                    <li><code>file</code>: Binary image (JPG/PNG).</li>
+                    <li><code>version</code>: <code>v5.3</code>, <code>v4.3</code>, etc., or <code>all</code>.</li>
+                    <li><code>topn</code>: Integer (e.g., 3).</li>
+                </ul>
+
+                <h3>Response Example (JSON)</h3>
+                <pre>
+{
+    "model_version": "google/vit-large-patch16-384 (v5.3)",
+    "best_category": "TEXT_T",
+    "score": 0.985,
+    "requested_topn": 3,
+    "predictions": [
+        { "label": "TEXT_T", "score": 0.985 },
+        { "label": "TEXT", "score": 0.012 },
+        { "label": "LINE_T", "score": 0.003 }
+    ]
+}
+                </pre>
+            </div>
+
         </main>
 
         <lindat-footer></lindat-footer>

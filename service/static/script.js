@@ -1,51 +1,66 @@
 /**
  * Renders the prediction results into the DOM.
- * Expects data structure: { predictions: { "v1.3": { label: "Typed", score: 0.99 }, ... } }
+ * Expects new data structure:
+ * {
+ * "model_version": "...",
+ * "predictions": [ { "label": "A", "score": 0.9 }, ... ]
+ * }
  */
 function renderResults(data) {
     const container = document.getElementById('results');
-    container.innerHTML = ''; // Clear previous results (safety check)
+    container.innerHTML = '';
 
     if (!data || !data.predictions) {
         container.innerHTML = `<div class="alert alert-warning">No predictions returned from server.</div>`;
         return;
     }
 
-    const predictions = data.predictions;
-    
-    Object.keys(predictions).forEach(version => {
-        const pred = predictions[version];
-        
-        // Handle potential error in single model
-        if(pred.error) {
-            container.innerHTML += `<div class="model-card"><strong>${version}</strong>: Error - ${pred.error}</div>`;
-            return;
-        }
+    // New format returns a single object with metadata and a list of predictions
+    // This is true even for 'all' now (which is averaged).
 
-        let html = `<div class="model-card"><h3>${version}</h3>`;
-        
-        // Handle both single object or array (top-N)
-        const items = Array.isArray(pred) ? pred : [pred];
-        
-        items.forEach(item => {
-            const scorePct = (item.score * 100).toFixed(2);
-            // Dynamic color for score bar (Green > 90%, Yellow > 50%, Red < 50%)
-            const color = item.score > 0.9 ? '#4CAF50' : (item.score > 0.5 ? '#FFC107' : '#F44336');
-            
-            html += `
-                <div style="margin-bottom: 0.5rem;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <span>${item.label}</span>
-                        <span>${scorePct}%</span>
-                    </div>
-                    <div class="score-bar">
-                        <div class="score-fill" style="width: ${scorePct}%; background-color: ${color};"></div>
-                    </div>
+    let html = `<div class="model-card">`;
+    html += `<h3>${data.model_version}</h3>`;
+
+    const items = data.predictions;
+
+    items.forEach(item => {
+        const scorePct = (item.score * 100).toFixed(2);
+        // Dynamic color for score bar (Green > 90%, Yellow > 50%, Red < 50%)
+        const color = item.score > 0.9 ? '#4CAF50' : (item.score > 0.5 ? '#FFC107' : '#F44336');
+
+        html += `
+            <div style="margin-bottom: 0.5rem;">
+                <div style="display:flex; justify-content:space-between;">
+                    <span><strong>${item.label}</strong></span>
+                    <span>${scorePct}%</span>
                 </div>
-            `;
+                <div class="score-bar">
+                    <div class="score-fill" style="width: ${scorePct}%; background-color: ${color};"></div>
+                </div>
+            </div>
+        `;
+    });
+    html += `</div>`;
+
+    container.innerHTML = html;
+}
+
+// --- Tab Switching Logic ---
+function initTabs() {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Remove active from all
+            tabs.forEach(t => t.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+
+            // Add active to current
+            tab.classList.add('active');
+            const targetId = tab.getAttribute('data-tab');
+            document.getElementById(targetId).classList.add('active');
         });
-        html += `</div>`;
-        container.innerHTML += html;
     });
 }
 
@@ -97,7 +112,10 @@ function switchHandle(handle, title) {
 function init() {
     console.log("Initializing App...");
 
-    // 1. Setup Form Handling (Vanilla JS) - PRIORITY
+    // Initialize Tabs
+    initTabs();
+
+    // 1. Setup Form Handling (Vanilla JS)
     const form = document.getElementById('classifyForm');
     if (form) {
         form.addEventListener('submit', async (e) => {
@@ -105,21 +123,22 @@ function init() {
             const formData = new FormData(e.target);
             const resultDiv = document.getElementById('results');
             const loader = document.getElementById('loading');
-            
+
             // UI Reset
             resultDiv.innerHTML = '';
             loader.style.display = 'block';
 
             try {
-                // Determine if we need to call a specific endpoint based on selection
-                // (Currently assumes a single /predict endpoint handles logic)
                 const response = await fetch('/predict', {
                     method: 'POST',
                     body: formData
                 });
-                
-                if (!response.ok) throw new Error(`Server Error: ${response.statusText}`);
-                
+
+                if (!response.ok) {
+                    const errJson = await response.json();
+                    throw new Error(errJson.detail || `Server Error: ${response.statusText}`);
+                }
+
                 const data = await response.json();
                 renderResults(data);
             } catch (err) {
@@ -142,7 +161,6 @@ function init() {
     var title = localStorage.getItem('title') || 'HamleDT 3.0';
     var url  = localStorage.getItem('url') || '';
 
-    // Safely attempt legacy injects
     try {
         injectStylesheets(url);
         switchHandle(handle, title);
@@ -151,17 +169,6 @@ function init() {
     }
 
     document.body.setAttribute('id', project);
-
-    // 3. AngularJS Legacy Handling (Safeguarded)
-    // Only run this if Angular is actually loaded in the HTML
-    if (typeof angular !== 'undefined') {
-        var app = angular.module('lindatApp', ['lindat']);
-        app.config(['$httpProvider', function($httpProvider) {
-            $httpProvider.defaults.useXDomain = true;
-        }]);
-    } else {
-        console.log("AngularJS not detected. Skipping Angular module init (this is expected for Vanilla JS app).");
-    }
 }
 
 // Execute on page load using jQuery
