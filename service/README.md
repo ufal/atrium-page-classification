@@ -44,10 +44,10 @@ atrium-page-classification/
 │   ├── api.py               # FastAPI application entry point
 │   ├── inference.py         # Model loading and prediction logic
 │   ├── requirements.txt     # Python dependencies
-│   └── frontend/              # 🎨 Frontend assets
+│   └── frontend/            # 🎨 Frontend assets
 │       ├── index.html       # Web interface
 │       └── script.js        # Logic for the web interface
-├── setup_api_server.sh                 # Setup script for environment, dependencies, and models
+├── setup_api_server.sh      # Setup script for environment, dependencies, and models
 ├── run.py                   # Script to download models manually
 └── classifier.py            # Base ImageClassifier class (imported by inference.py)
 ```
