@@ -11,14 +11,14 @@ Text, Drawing, Table) using various fine-tuned on historical data [^17] deep lea
 
 * [Service Description 📇](#service-description-)
 * [Directory Structure 📂](#directory-structure-)
-* [Installation & Setup 🛠](#installation--setup-)
-* [Running the Server 🚀](#running-the-server-)
-* [API Usage 📡](#api-usage-)
-    * [Endpoints 🔗](#endpoints-)
-    * [Request Example 💻](#request-example-)
 * [Supported Models 🧠](#supported-models-)
 * [Categories 🪧](#categories-)
-* [Client Side Development 🎨](#client-side-development-)
+* [API Usage 📡](#api-usage-)
+* [Installation & Setup 🛠](#installation--setup-)
+* [Client Side Test 🎨](#client-side-test-)
+* [Running the Server 🚀](#running-the-server-)
+* [Contacts 📧](#contacts-)
+* [Acknowledgements 🙏](#acknowledgements-)
 
 ---
 
@@ -44,12 +44,14 @@ atrium-page-classification/
 │   ├── api.py               # FastAPI application entry point
 │   ├── inference.py         # Model loading and prediction logic
 │   ├── requirements.txt     # Python dependencies
-│   └── static/              # 🎨 Frontend assets
+│   └── frontend/              # 🎨 Frontend assets
 │       ├── index.html       # Web interface
 │       └── script.js        # Logic for the web interface
+├── setup_api_server.sh                 # Setup script for environment, dependencies, and models
 ├── run.py                   # Script to download models manually
 └── classifier.py            # Base ImageClassifier class (imported by inference.py)
 ```
+
 ## Supported Models 🧠
 
 The API exposes specific model versions defined in `inference.py`. These map to different underlying 
@@ -156,11 +158,9 @@ python3 run.py --hf -rev vX.3
 ````
 where `X` is the model version (1, 2, 3, 4, or 5).
 
-
-
 ## Client Side Test 🎨
 
-This API service includes a lightweight vanilla JS frontend (`service/static/script.js`) for immediate testing. 
+This API service includes a lightweight vanilla JS frontend (`service/frontend/script.js`) for immediate testing. 
 However, the full LINDAT client integration is developed separately. [^5]
 
 For client-side development, open a **second console window** and follow these steps:
@@ -220,7 +220,7 @@ Assuming your **second console** output ends like this:
 
 Open the URL `http://localhost:8080` in your web browser to access the LINDAT client interface. 
 
-Follow the file tree to the `atrium-page-classification/service/static` directory. The frontend interface
+Follow the file tree to the `atrium-page-classification/service/frontend` directory. The frontend interface
 will open and allow you to upload images and test the API.
 
 ## Contacts 📧

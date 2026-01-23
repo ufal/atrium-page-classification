@@ -18,12 +18,12 @@ app.add_middleware(
 
 # --- PATH CONFIGURATION ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-STATIC_DIR = os.path.join(BASE_DIR, "static")
+STATIC_DIR = os.path.join(BASE_DIR, "frontend")
 LINDAT_DIST_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../dist"))
 
 # --- MOUNTS ---
 if os.path.exists(STATIC_DIR):
-    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+    app.mount("/frontend", StaticFiles(directory=STATIC_DIR), name="frontend")
 
 if os.path.exists(LINDAT_DIST_DIR):
     app.mount("/dist", StaticFiles(directory=LINDAT_DIST_DIR), name="lindat-dist")
