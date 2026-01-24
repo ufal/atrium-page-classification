@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 # --- CONFIGURATION FROM RUN.PY ---
 
 MODEL_BASE_PATH = Path(__file__).parent.parent / "model"
+HF_REPO_NAME = "ufal/vit-historical-page"
 
 CATEGORIES = ["DRAW", "DRAW_L", "LINE_HW", "LINE_P", "LINE_T", "PHOTO", "PHOTO_L", "TEXT", "TEXT_HW", "TEXT_P",
               "TEXT_T"]
@@ -74,18 +75,31 @@ class ModelManager:
             return self.models[version]
 
         base_model_id = self._get_base_model_id(version)
+        # Naming convention matches run.py: model_v53 from v5.3
         local_model_name = f"model_{version.replace('.', '')}"
         local_model_path = MODEL_BASE_PATH / local_model_name
 
-        if not local_model_path.exists():
-            logger.error(f"Local model directory not found: {local_model_path}")
-            raise FileNotFoundError(f"Model directory not found: {local_model_path}")
-
         logger.info(f"Initializing {version} using base '{base_model_id}' on {self.device}...")
 
+        # Initialize the classifier wrapper
         clf = ImageClassifier(checkpoint=base_model_id, num_labels=len(CATEGORIES))
-        logger.info(f"Loading fine-tuned weights from {local_model_path}...")
-        clf.load_model(str(local_model_path))
+
+        if local_model_path.exists():
+            logger.info(f"Loading fine-tuned weights locally from {local_model_path}...")
+            clf.load_model(str(local_model_path))
+        else:
+            logger.info(
+                f"Model not found locally at {local_model_path}. Attempting download from Hugging Face ({HF_REPO_NAME}, revision {version})...")
+            try:
+                # Download and load from HF Hub
+                clf.load_from_hub(HF_REPO_NAME, revision=version)
+
+                # Save locally so we don't need to download next time (matches run.py logic)
+                logger.info(f"Saving downloaded model to {local_model_path}...")
+                clf.save_model(str(local_model_path))
+            except Exception as e:
+                logger.error(f"Failed to download model {version} from Hugging Face: {e}")
+                raise RuntimeError(f"Model {version} not found locally and could not be downloaded: {e}")
 
         self.models[version] = clf
         return clf
