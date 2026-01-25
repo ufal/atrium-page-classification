@@ -7,8 +7,8 @@ import sys
 def main():
     # 1. Setup Argument Parser
     parser = argparse.ArgumentParser(description="Test the Atrium Page Classification API")
-    parser.add_argument("--f", required=True, help="Path to the image file")
-    parser.add_argument("--v", default="v4.3", help="Model version (e.g., v1.3, v5.3, all)")
+    parser.add_argument("-f", required=True, help="Path to the image file")
+    parser.add_argument("-v", default="v4.3", help="Model version (e.g., v1.3, v5.3, all)")
     parser.add_argument("--top", type=int, default=3, help="Number of top predictions to return")
 
     args = parser.parse_args()

@@ -1,8 +1,8 @@
-# Image classification using fine-tuned ViT or EffNetV2 - for historical document sorting
+# Image classification using fine-tuned ViT, RegNetY or EffNetV2 - for historical document sorting
 
 ### Goal: solve a task of archive page images sorting (for their further content-based processing)
 
-**Scope:** Processing of images, training / evaluation of ViT / EffNetV2 model,
+**Scope:** Processing of images, training / evaluation of ViT / RegNetY / EffNetV2 model,
 input file/directory processing, class 🪧  (category) results of top
 N predictions output, predictions summarizing into a tabular format, 
 HF 😊 hub [^1] 🔗 support for the model, multiplatform (Win/Lin) data 

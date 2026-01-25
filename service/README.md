@@ -1,4 +1,4 @@
-# Atrium Page Classification API Service 🚀
+# ATRIUM Page Classification API Service 🚀
 
 ### Goal: Serve historical document classification models via a lightweight REST API
 
@@ -15,8 +15,8 @@ Text, Drawing, Table) using various fine-tuned on historical data [^17] deep lea
 * [Categories 🪧](#categories-)
 * [API Usage 📡](#api-usage-)
 * [Installation & Setup 🛠](#installation--setup-)
+* [Quick API Test Launch 🚀](#quick-api-test-launch-)
 * [Client Side Test 🎨](#client-side-test-)
-* [Running the Server 🚀](#running-the-server-)
 * [Contacts 📧](#contacts-)
 * [Acknowledgements 🙏](#acknowledgements-)
 
@@ -30,8 +30,7 @@ It acts as a bridge between the fine-tuned PyTorch models and downstream applica
 Key features:
 * **Multiple Architectures:** Supports switching between ViT, RegNetY, and EfficientNet models dynamically.
 * **GPU Support:** Automatically detects and utilizes CUDA devices if available.
-* **Static Interface:** Serves a built-in HTML testing tool.
-
+* **Lightweight Frontend:** Includes a simple HTML/JS interface for manual testing of the API.
 
 ## Directory Structure 📂
 
@@ -43,7 +42,8 @@ atrium-page-classification/
 ├── service/                 # 🚀 API Source Code
 │   ├── api.py               # FastAPI application entry point
 │   ├── inference.py         # Model loading and prediction logic
-│   ├── requirements.txt     # Python dependencies
+│   ├── requirements.txt     # Python dependencies for the API
+│   ├── test_api.py          # Client script to test the API endpoints
 │   └── frontend/            # 🎨 Frontend assets
 │       ├── index.html       # Web interface
 │       └── script.js        # Logic for the web interface
@@ -102,22 +102,30 @@ The models classify pages into 11 distinct structural categories:
 * `version`: The model version string (e.g., `v5.3`, `v1.3`) or `all`.
 * `topn`: (Optional) Number of top predictions to return (Default: 3).
 
-**Response (JSON):**
+Request example using `curl`:
 
-```json
-{
-    "filename": "sample_page.jpg",
-    "requested_version": "v5.3",
-    "predictions": {
-        "v5.3": [
-            { "label": "TEXT_T", "score": 0.985 },
-            { "label": "TEXT", "score": 0.012 },
-            { "label": "LINE_T", "score": 0.003 }
-        ]
-    }
-}
+```bash
+curl -X POST "http://localhost:8000/predict" \
+  -F "file=@/path/to/image.png" \
+  -F "version=v2.3" \
+  -F "topn=1"
 ```
 
+Example JSON response:
+```json
+{
+  "model_version": "google/vit-base-patch16-224 (v2.3)",
+  "best_category": "TEXT",
+  "score": 0.975,
+  "requested_topn": 1,
+  "predictions": [
+    {
+      "label": "TEXT",
+      "score": 0.975
+    }
+  ]
+}
+```
 
 ## Installation & Setup 🛠
 
@@ -129,8 +137,8 @@ The models classify pages into 11 distinct structural categories:
 
 ### 2. Install Server Dependencies
 
-Navigate to the root `atrium-page-classification` directory, create a virtual environment, 
-and install the required packages:
+Navigate to the root `atrium-page-classification` directory, then run a setup script to 
+create a virtual environment, and install all of the required packages:
 
 ```bash
 # Create and activate virtual environment
@@ -149,14 +157,92 @@ libraries can be found in `service/requirements.txt` available for manual instal
 ### 3. Model Weights
 
 The setup script also downloads the fine-tuned model weights from the Hugging Face Hub [^1].
+It is done via 'run.py' script that saves the weights in the `model/` directory.
 
-If you prefer the manual approach, you can download the weights to the `model/` directory directly:
+> [!NOTE] The very first run may take some time as it downloads multiple model files to 
+> be cached locally. When using the WEB UI, `inference.py` will check for the models 
+> in the `model/` directory, and if not found, it will attempt to download them from
+> Hugging Face Hub automatically.
+
+If you prefer the manual approach, you can download the weights to the `model/` directory by yourself:
 
 ```bash
 source venv-api/bin/activate
 python3 run.py --hf -rev vX.3
 ````
 where `X` is the model version (1, 2, 3, 4, or 5).
+
+## Quick API Test Launch 🚀
+
+Use this guide to verify the inference service is communicating correctly with the model manager.
+
+### Launch Instructions
+
+Open two terminal windows (or tabs) and run the following commands:
+
+```bash
+source venv-api/bin/activate
+cd atrium-page-classification/service/
+```
+
+Then, in each window, execute the respective commands:
+
+
+| **Server Console (Window 1)**                                                                                                                                                                         | **Client Console (Window 2)**                                                                                                                                                                                        |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **1. Start the API:**<br><br>Run the FastAPI server from the service directory.<br><br>`python3 api.py`<br><br>You should see startup logs indicating the server is running on `http://0.0.0.0:8000`. | **2. Send a Request:**<br><br> Top-3 Classification of `image.png`:<br><br>`python3 test_api.py -<br/> -f .../image.png -v v5.3 --top 3`<br><br> where `-f` and `-v` stand for **input file** and **model version**. |
+
+### Expected Output
+
+```json
+{
+  "model_version": "google/vit-large-patch16-384 (v5.3)",
+  "best_category": "TEXT",
+  "score": 0.985,
+  "requested_topn": 3,
+  "predictions": [
+    {
+      "label": "TEXT",
+      "score": 0.985
+    },
+    {
+      "label": "TEXT_P",
+      "score": 0.010
+    },
+    {
+      "label": "LINE_P",
+      "score": 0.002
+    }
+  ]
+}
+```
+Or for `-v all` the best models ensemble (average of 5 class scores):
+
+```json
+{
+  "model_version": "Ensemble (Average of 5 Models)",
+  "best_category": "LINE_HW",
+  "score": 0.9997688055038452,
+  "requested_topn": 5,
+  "predictions": [
+    {"label": "LINE_HW",
+      "score": 0.9997688055038452
+    },
+    {"label": "LINE_T",
+      "score": 6.4081506344138e-05
+    },
+    {"label": "TEXT",
+      "score": 4.853471283947641e-05
+    },
+    {"label": "DRAW_L",
+      "score": 3.790065846882573e-05
+    },
+    {"label": "DRAW",
+      "score": 3.168964675463182e-05
+    }
+  ]
+}
+```
 
 ## Client Side Test 🎨
 
@@ -190,7 +276,7 @@ For client-side development, open a **second console window** and follow these s
 For further details, please refer to the **LINDAT Common Development Guide**:
 [https://github.com/ufal/lindat-common/?tab=readme-ov-file#development](https://github.com/ufal/lindat-common/?tab=readme-ov-file#development).
 
-## Running the Server 🚀
+### Running the Server 🚀
 
 To start the API server with hot-reloading enabled (useful for development), ensure your virtual 
 environment is activated in your **first console window**: [^3]
