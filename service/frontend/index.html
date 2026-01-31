@@ -56,6 +56,7 @@
             h1 { margin-bottom: 0.5rem; color: #111; }
             h2 { margin-top: 2rem; border-bottom: 2px solid #f0f0f0; padding-bottom: 0.5rem; }
             h3 { margin-top: 1.5rem; color: #444; }
+            h4 { margin-top: 1rem; margin-bottom: 0.5rem; color: #555; }
 
             /* Form & Upload Styling */
             .upload-box {
@@ -69,6 +70,12 @@
             }
             .upload-box:hover { border-color: #007bff; background: #f0f7ff; }
 
+            .file-selected-text {
+                margin-top: 10px;
+                font-weight: 600;
+                color: #007bff;
+            }
+
             .results-box { margin-top: 2rem; }
             .model-card {
                 border: 1px solid #ddd;
@@ -76,6 +83,7 @@
                 margin-bottom: 1rem;
                 border-radius: 6px;
                 box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                background-color: #fff;
             }
             .score-bar { height: 12px; background: #eee; border-radius: 6px; overflow: hidden; margin-top: 4px; }
             .score-fill { height: 100%; transition: width 0.5s ease-in-out; }
@@ -133,6 +141,46 @@
 
             .text-muted { color: #666; font-size: 0.9rem; }
             .refbox-container { margin-top: 2rem; }
+
+            .alert-warning { color: #856404; background-color: #fff3cd; border-color: #ffeeba; padding: 10px; border-radius: 4px; }
+            .alert-danger { color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; padding: 10px; border-radius: 4px; }
+
+            .result-row {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .thumb-col {
+        flex: 0 0 150px; /* Fixed width for thumbnail column */
+        text-align: center;
+        background: #f4f4f4;
+        padding: 10px;
+        border-radius: 4px;
+        min-height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .thumb-col img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        border: 1px solid #ccc;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .data-col {
+        flex: 1; /* Takes remaining width */
+    }
+
+    /* Responsive adjustment for small screens */
+    @media (max-width: 600px) {
+        .result-row { flex-direction: column; }
+        .thumb-col { width: 100%; flex: auto; }
+        .thumb-col img { max-width: 200px; margin: 0 auto; }
+    }
         </style>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -157,8 +205,8 @@
             <div id="tab-about" class="tab-content active">
                 <p>
                     This service provides a <strong>FastAPI</strong> interface for the Atrium Page Classification models.
-                    It allows users to upload document images and receive structural classification predictions (e.g.,
-                    Text, Drawing, Table) using various fine-tuned deep learning models (ViT, EfficientNet, RegNetY).
+                    It allows users to upload document images or PDFs and receive structural classification predictions (e.g.,
+                    Text, Drawing, Table) using various fine-tuned deep learning models.
                 </p>
 
                 <h2>Supported Models 🧠</h2>
@@ -196,7 +244,6 @@
                             <td>98.83%</td>
                             <td>CNN-based, faster inference.</td>
                         </tr>
-
                     </tbody>
                 </table>
 
@@ -264,13 +311,14 @@
             <div id="tab-run" class="tab-content">
                 <form id="classifyForm">
                     <div class="upload-box" onclick="document.getElementById('imageInput').click()">
-                        <input type="file" id="imageInput" name="file" accept="image/jpeg, image/png" required style="display:none">
+                        <input type="file" id="imageInput" name="file" accept="image/jpeg, image/png, application/pdf" required style="display:none">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                             <polyline points="17 8 12 3 7 8"></polyline>
                             <line x1="12" y1="3" x2="12" y2="15"></line>
                         </svg>
-                        <p style="margin-top: 10px; color: #666;"><strong>Click to upload</strong> or drag and drop<br>(JPG, PNG)</p>
+                        <p style="margin-top: 10px; color: #666;"><strong>Click to upload</strong> or drag and drop<br>(JPG, PNG, PDF)</p>
+                        <p id="fileNameDisplay" class="file-selected-text"></p>
                     </div>
 
                     <div class="form-group">
@@ -298,7 +346,7 @@
                     <button type="submit" class="btn-primary">Run Classification</button>
                 </form>
 
-                <div id="loading" class="loading">Processing image... please wait.</div>
+                <div id="loading" class="loading">Processing... please wait.</div>
                 <div id="results" class="results-box"></div>
             </div>
 
@@ -326,32 +374,34 @@
                         </tr>
                         <tr>
                             <td><code>POST</code></td>
-                            <td><code>/predict</code></td>
-                            <td>Performs inference. Requires <code>file</code>, <code>version</code>, and <code>topn</code>.</td>
+                            <td><code>/predict_image</code></td>
+                            <td>Inference for single image (JPG/PNG).</td>
+                        </tr>
+                        <tr>
+                            <td><code>POST</code></td>
+                            <td><code>/predict_document</code></td>
+                            <td>Inference for PDF documents (multipage).</td>
                         </tr>
                     </tbody>
                 </table>
 
-                <h3>Request Example 💻</h3>
-                <p><strong>POST</strong> <code>/predict</code></p>
+                <h3>Request Example (Image) 💻</h3>
+                <p><strong>POST</strong> <code>/predict_image</code></p>
                 <p><strong>Form Data:</strong></p>
                 <ul>
                     <li><code>file</code>: Binary image (JPG/PNG).</li>
-                    <li><code>version</code>: <code>v5.3</code>, <code>v4.3</code>, etc., or <code>all</code>.</li>
+                    <li><code>version</code>: e.g., <code>v5.3</code> or <code>all</code>.</li>
                     <li><code>topn</code>: Integer (e.g., 3).</li>
                 </ul>
 
-                <h3>Response Example (JSON)</h3>
+                <h3>Response Example</h3>
                 <pre>
 {
+    "type": "image",
     "model_version": "google/vit-large-patch16-384 (v5.3)",
-    "best_category": "TEXT_T",
-    "score": 0.985,
-    "requested_topn": 3,
     "predictions": [
-        { "label": "TEXT_T", "score": 0.985 },
-        { "label": "TEXT", "score": 0.012 },
-        { "label": "LINE_T", "score": 0.003 }
+        { "label": "TEXT_T", "score": 0.985, "description": "..." },
+        { "label": "TEXT", "score": 0.012, "description": "..." }
     ]
 }
                 </pre>
@@ -362,6 +412,6 @@
         <lindat-footer></lindat-footer>
 
         <script type="module" src="/dist/public/js/lindat.js"></script>
-        <script src="/static/script.js"></script>
+        <script src="script.js"></script>
     </body>
 </html>

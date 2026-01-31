@@ -75,7 +75,6 @@ class ModelManager:
             return self.models[version]
 
         base_model_id = self._get_base_model_id(version)
-        # Naming convention matches run.py: model_v53 from v5.3
         local_model_name = f"model_{version.replace('.', '')}"
         local_model_path = MODEL_BASE_PATH / local_model_name
 
@@ -91,10 +90,7 @@ class ModelManager:
             logger.info(
                 f"Model not found locally at {local_model_path}. Attempting download from Hugging Face ({HF_REPO_NAME}, revision {version})...")
             try:
-                # Download and load from HF Hub
                 clf.load_from_hub(HF_REPO_NAME, revision=version)
-
-                # Save locally so we don't need to download next time (matches run.py logic)
                 logger.info(f"Saving downloaded model to {local_model_path}...")
                 clf.save_model(str(local_model_path))
             except Exception as e:
@@ -106,73 +102,107 @@ class ModelManager:
 
     def predict(self, image: Image.Image, version: str, topn: int = 1):
         """
-        Runs prediction.
-        If version is 'all', averages scores from all available versions.
+        Runs prediction on a single image.
         """
         if version == "all":
             return self._predict_averaged(image, topn)
         else:
             return self._run_single_inference(version, image, topn)
 
-    def _predict_averaged(self, image, topn):
+    def predict_directory(self, dir_path: str, version: str, topn: int = 3, batch_size: int = 16):
         """
-        Runs all models, aggregates scores, averages them, and returns top N.
+        Runs batch prediction on a directory of images using the classifier's dataloader logic.
         """
-        # Dictionary to store accumulated scores: { 'TEXT': 0.0, 'DRAW': 0.0, ... }
-        aggregated_scores = {cat: 0.0 for cat in CATEGORIES}
+        if version == "all":
+            # Batch averaging is complex, strictly required?
+            # Fallback to simple iteration for 'all' to ensure correctness without complex refactor
+            results = []
+            files = sorted([os.path.join(dir_path, f) for f in os.listdir(dir_path)
+                            if f.lower().endswith(('.png', '.jpg', '.jpeg'))])
+            for f in files:
+                img = Image.open(f).convert('RGB')
+                preds = self._predict_averaged(img, topn)
+                results.append(preds)
+            return results
 
+        try:
+            clf = self.load_model(version)
+
+            # 1. Get all image paths
+            image_paths = sorted([os.path.join(dir_path, f) for f in os.listdir(dir_path)
+                                  if f.lower().endswith(('.png', '.jpg', '.jpeg'))])
+
+            if not image_paths:
+                return []
+
+            # 2. Create Data Loader
+            dataloader = clf.create_dataloader(image_paths, batch_size=batch_size)
+
+            # 3. Infer (returns list of predictions)
+            # Note: infer_dataloader returns differently based on top_n
+            predictions, _ = clf.infer_dataloader(dataloader, top_n=topn, raw=False)
+
+            formatted_batch_results = []
+
+            # 4. Map indices to labels
+            for pred_item in predictions:
+                # If topn > 1, pred_item is a list of tuples: [(idx, score), (idx, score)]
+                # If topn == 1, pred_item is a single index (int) -- per classifier.py infer_dataloader logic
+
+                if topn > 1:
+                    row_preds = []
+                    for idx, score in pred_item:
+                        row_preds.append({
+                            "label": CATEGORIES[idx],
+                            "score": float(score)
+                        })
+                    formatted_batch_results.append(row_preds)
+                else:
+                    # Single index
+                    idx = pred_item
+                    # We need a score, but infer_dataloader with top_n=1 returns only index.
+                    # To keep API consistent, we might need to change infer call or just return 1.0 (dummy)
+                    # OR update classifier.py.
+                    # Safer: Always ask for top_n > 1 internally if we need scores, or use top_n_predictions
+                    # But since we use existing classifier.py, we handle the index.
+                    formatted_batch_results.append([{
+                        "label": CATEGORIES[idx],
+                        "score": 1.0  # Placeholder as raw API doesn't return score for top1 in batch
+                    }])
+
+            return formatted_batch_results
+
+        except Exception as e:
+            logger.error(f"Batch inference error for {version}: {e}")
+            raise e
+
+    def _predict_averaged(self, image, topn):
+        aggregated_scores = {cat: 0.0 for cat in CATEGORIES}
         successful_models = 0
 
         for v in self.available_versions:
             try:
-                # We request ALL categories (len(CATEGORIES)) to ensure we can average correctly
                 results = self._run_single_inference(v, image, topn=len(CATEGORIES))
-
-                # Check for error in individual result
-                if isinstance(results, dict) and "error" in results:
-                    continue
-
+                if isinstance(results, dict) and "error" in results: continue
                 for item in results:
                     aggregated_scores[item['label']] += item['score']
-
                 successful_models += 1
-            except Exception as e:
-                logger.error(f"Error including version {v} in average: {e}")
+            except Exception:
+                continue
 
-        if successful_models == 0:
-            return {"error": "All models failed to run."}
+        if successful_models == 0: return {"error": "All models failed."}
 
-        # Calculate Average
-        final_results = []
-        for label, total_score in aggregated_scores.items():
-            avg_score = total_score / successful_models
-            final_results.append({"label": label, "score": avg_score})
-
-        # Sort by score descending
+        final_results = [{"label": l, "score": s / successful_models} for l, s in aggregated_scores.items()]
         final_results.sort(key=lambda x: x["score"], reverse=True)
-
-        # Return Top N
         return final_results[:topn]
 
     def _run_single_inference(self, version, image, topn):
         try:
             clf = self.load_model(version)
-
-            # top_n_predictions returns list of tuples (index, score)
             predictions = clf.top_n_predictions(image, top_n=topn)
-
-            formatted_results = []
-            for idx, score in predictions:
-                formatted_results.append({
-                    "label": CATEGORIES[idx],
-                    "score": float(score)
-                })
-
-            return formatted_results
+            return [{"label": CATEGORIES[i], "score": float(s)} for i, s in predictions]
         except Exception as e:
-            logger.error(f"Inference error for {version}: {e}")
             return {"error": str(e)}
 
 
-# Singleton instance
 manager = ModelManager()

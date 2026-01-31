@@ -1,38 +1,132 @@
 /**
+ * Category descriptions mapping to ensure labels are descriptive
+ * even if the backend only returns the raw label code.
+ */
+const CATEGORY_DESCRIPTIONS = {
+    "TEXT": "📰 Mixed Text: Mixtures of printed, handwritten, or typed text.",
+    "TEXT_T": "📄 Typed: Machine-typed paragraphs.",
+    "TEXT_P": "📄 Printed: Published paragraphs.",
+    "TEXT_HW": "✏️📄 Handwritten: Handwritten paragraphs.",
+    "LINE_T": "📏 Typed Table: Machine-typed tabular structure.",
+    "LINE_P": "📏 Printed Table: Printed tabular structure.",
+    "LINE_HW": "✏️📏 Handwritten Table: Handwritten tabular structure.",
+    "DRAW": "📈 Drawing: Maps, paintings, schematics.",
+    "DRAW_L": "📈📏 Structured Drawing: Drawings in a layout/legend.",
+    "PHOTO": "🌄 Photo: Photographs.",
+    "PHOTO_L": "🌄📏 Structured Photo: Photos in a table layout."
+};
+
+/**
  * Renders the prediction results into the DOM.
- * Expects new data structure:
- * {
- * "model_version": "...",
- * "predictions": [ { "label": "A", "score": 0.9 }, ... ]
- * }
+ * Handles both single image responses and multipage PDF responses.
  */
 function renderResults(data) {
     const container = document.getElementById('results');
     container.innerHTML = '';
 
-    if (!data || !data.predictions) {
-        container.innerHTML = `<div class="alert alert-warning">No predictions returned from server.</div>`;
+    if (!data) {
+        container.innerHTML = `<div class="alert alert-warning">No data returned from server.</div>`;
         return;
     }
 
-    // New format returns a single object with metadata and a list of predictions
-    // This is true even for 'all' now (which is averaged).
+    if (data.error) {
+         container.innerHTML = `<div class="alert alert-danger">Error: ${data.error}</div>`;
+         return;
+    }
+
+    // --- Scenario 1: PDF Document (Multiple Pages) ---
+    if (data.type === 'document') {
+        let html = `<div style="margin-bottom: 1rem;">`;
+        html += `<h2>Results for ${data.filename}</h2>`;
+        html += `<p class="text-muted">Model: ${data.model_version}</p>`;
+        html += `</div>`;
+
+        if (!data.pages || data.pages.length === 0) {
+            html += `<div class="alert alert-warning">No pages found in document.</div>`;
+        } else {
+            data.pages.forEach(page => {
+                html += `<div class="model-card">`;
+                html += `<div class="result-row">`; // Flex container
+
+                // 1. Thumbnail Column (From Backend Base64)
+                html += `<div class="thumb-col">`;
+                if (page.thumbnail) {
+                    html += `<img src="data:image/png;base64,${page.thumbnail}" alt="Page ${page.page} Thumbnail">`;
+                } else {
+                    html += `<span class="text-muted">No Preview</span>`;
+                }
+                html += `</div>`;
+
+                // 2. Data Column
+                html += `<div class="data-col">`;
+                html += `<h4>Page ${page.page}</h4>`;
+                html += renderPredictionsList(page.predictions);
+                html += `</div>`;
+
+                html += `</div>`; // End result-row
+                html += `</div>`; // End model-card
+            });
+        }
+        container.innerHTML = html;
+        return;
+    }
+
+    // --- Scenario 2: Single Image ---
+    // We get the local file object to create a preview, as the backend usually just sends JSON
+    const fileInput = document.getElementById('imageInput');
+    const localFile = fileInput.files.length > 0 ? fileInput.files[0] : null;
+    const thumbSrc = localFile ? URL.createObjectURL(localFile) : null;
 
     let html = `<div class="model-card">`;
-    html += `<h3>${data.model_version}</h3>`;
+    html += `<div class="result-row">`; // Flex container
 
-    const items = data.predictions;
+    // 1. Thumbnail Column (From Local File API)
+    html += `<div class="thumb-col">`;
+    if (thumbSrc) {
+        html += `<img src="${thumbSrc}" alt="Uploaded Image Preview">`;
+    } else {
+        html += `<span class="text-muted">No Preview</span>`;
+    }
+    html += `</div>`;
 
-    items.forEach(item => {
+    // 2. Data Column
+    html += `<div class="data-col">`;
+    html += `<h3>${data.model_version || 'Prediction Results'}</h3>`;
+    if (data.predictions) {
+        html += renderPredictionsList(data.predictions);
+    } else {
+        html += `<div class="alert alert-warning">No predictions returned.</div>`;
+    }
+    html += `</div>`;
+
+    html += `</div>`; // End result-row
+    html += `</div>`; // End model-card
+
+    container.innerHTML = html;
+}
+
+/**
+ * Helper to generate the list of bars for a set of predictions.
+ * Applies descriptions from backend or fallback map.
+ */
+function renderPredictionsList(predictions) {
+    if (!predictions || !predictions.length) return '<p>No scores available.</p>';
+
+    let html = '';
+    predictions.forEach(item => {
         const scorePct = (item.score * 100).toFixed(2);
         // Dynamic color for score bar (Green > 90%, Yellow > 50%, Red < 50%)
         const color = item.score > 0.9 ? '#4CAF50' : (item.score > 0.5 ? '#FFC107' : '#F44336');
 
+        // Logic: Use description from backend if exists, otherwise lookup in constant
+        const descriptionText = item.description || CATEGORY_DESCRIPTIONS[item.label] || "";
+        const descHtml = descriptionText ? `<br><small class="text-muted">${descriptionText}</small>` : '';
+
         html += `
-            <div style="margin-bottom: 0.5rem;">
-                <div style="display:flex; justify-content:space-between;">
-                    <span><strong>${item.label}</strong></span>
-                    <span>${scorePct}%</span>
+            <div style="margin-bottom: 0.8rem;">
+                <div style="display:flex; justify-content:space-between; align-items: flex-end;">
+                    <span><strong>${item.label}</strong>${descHtml}</span>
+                    <span style="font-weight:bold;">${scorePct}%</span>
                 </div>
                 <div class="score-bar">
                     <div class="score-fill" style="width: ${scorePct}%; background-color: ${color};"></div>
@@ -40,9 +134,7 @@ function renderResults(data) {
             </div>
         `;
     });
-    html += `</div>`;
-
-    container.innerHTML = html;
+    return html;
 }
 
 // --- Tab Switching Logic ---
@@ -59,7 +151,10 @@ function initTabs() {
             // Add active to current
             tab.classList.add('active');
             const targetId = tab.getAttribute('data-tab');
-            document.getElementById(targetId).classList.add('active');
+            const targetContent = document.getElementById(targetId);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
         });
     });
 }
@@ -96,16 +191,15 @@ function injectStylesheets(url) {
 
 function switchHandle(handle, title) {
   var refbox = $('#refbox');
-  // Only proceed if refbox plugin exists
-  if (!refbox.lindatRefBox) return;
-
-  localStorage.setItem('handle', handle);
-  localStorage.setItem('title', title);
-  refbox.attr('handle', handle);
-  refbox.attr('title', title);
-  refbox.lindatRefBox({
-    rest: 'https://lindat.mff.cuni.cz/repository/rest'
-  });
+  if (refbox.lindatRefBox) {
+      localStorage.setItem('handle', handle);
+      localStorage.setItem('title', title);
+      refbox.attr('handle', handle);
+      refbox.attr('title', title);
+      refbox.lindatRefBox({
+        rest: 'https://lindat.mff.cuni.cz/repository/rest'
+      });
+  }
 }
 
 // --- Main Initialization ---
@@ -115,24 +209,73 @@ function init() {
     // Initialize Tabs
     initTabs();
 
-    // 1. Setup Form Handling (Vanilla JS)
+    // File Input UI enhancement
+    const fileInput = document.getElementById('imageInput');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+                fileNameDisplay.textContent = "Selected: " + e.target.files[0].name;
+            } else {
+                fileNameDisplay.textContent = "";
+            }
+        });
+    }
+
+    // Setup Form Handling
     const form = document.getElementById('classifyForm');
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const formData = new FormData(e.target);
+
             const resultDiv = document.getElementById('results');
             const loader = document.getElementById('loading');
+
+            // Check file presence
+            if (!fileInput.files.length) {
+                alert("Please select a file first.");
+                return;
+            }
+
+            const file = fileInput.files[0];
+
+            // 1. Determine Correct Endpoint
+            const isPdf = file.type === 'application/pdf';
+            const endpointPath = isPdf ? '/predict_document' : '/predict_image';
+
+            // 2. Determine Base URL (Fix for Dev Environment)
+            // If running on localhost:8080 (Webpack Dev Server), point to Python API on 8000
+            let baseUrl = '';
+            if (window.location.hostname === 'localhost' && window.location.port === '8080') {
+                baseUrl = 'http://localhost:8000';
+                console.log("Dev environment detected: Targeting API at " + baseUrl);
+            }
+
+            const finalUrl = baseUrl + endpointPath;
 
             // UI Reset
             resultDiv.innerHTML = '';
             loader.style.display = 'block';
 
+            const formData = new FormData(e.target);
+
             try {
-                const response = await fetch('/predict', {
+                const response = await fetch(finalUrl, {
                     method: 'POST',
                     body: formData
                 });
+
+                // Robust Content-Type Check to prevent JSON parse errors
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") === -1) {
+                    const text = await response.text();
+                    // If we get HTML, it's likely a 404 from the dev server or proxy error
+                    if (text.trim().startsWith('<')) {
+                        throw new Error(`Server returned HTML instead of JSON. Ensure API is running at ${baseUrl || 'current origin'} and endpoints are correct.`);
+                    }
+                    throw new Error(`Invalid response type: ${contentType}`);
+                }
 
                 if (!response.ok) {
                     const errJson = await response.json();
@@ -141,9 +284,10 @@ function init() {
 
                 const data = await response.json();
                 renderResults(data);
+
             } catch (err) {
                 console.error(err);
-                resultDiv.innerHTML = `<div class="model-card" style="border-color: red; color: red;">
+                resultDiv.innerHTML = `<div class="model-card" style="border-color: #F44336; color: #721c24; background-color: #f8d7da;">
                     <strong>Error:</strong> ${err.message}
                 </div>`;
             } finally {
@@ -154,7 +298,7 @@ function init() {
         console.error("Form element 'classifyForm' not found!");
     }
 
-    // 2. Setup Legacy LINDAT settings
+    // Legacy LINDAT settings
     var lang = localStorage.getItem('lang') || 'en';
     var project = localStorage.getItem('project') || 'lindat-home';
     var handle = localStorage.getItem('handle') || '11234/1-1508';
