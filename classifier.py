@@ -354,6 +354,11 @@ class ImageClassifier:
         print(f"\tProcessing of {len(dataloader)} batches started at\t{start_time.strftime('%Y-%m-%d %H:%M:%S')}")
         with torch.no_grad():
             for ib, batch in enumerate(dataloader):
+                # Check if batch is None or the tuple (None, None) returned by custom_collate
+                if batch is None or (isinstance(batch, tuple) and batch[0] is None):
+                    print(f"Skipping batch {ib}: No valid images loaded.")
+                    continue  # Skip this loop iteration
+
                 inputs = batch['pixel_values']
                 outputs = self.model(pixel_values=inputs.to(self.device))
                 logits = outputs.logits

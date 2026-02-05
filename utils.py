@@ -6,7 +6,8 @@ import random
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, ConfusionMatrixDisplay
 from matplotlib import pyplot as plt
 import time
-from PIL import Image
+from PIL import Image, ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 import re  
 Image.MAX_IMAGE_PIXELS = 4221790634
 
