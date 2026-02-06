@@ -66,7 +66,7 @@ if __name__ == "__main__":
 
     config_input_dir = config.get('INPUT', 'FOLDER_INPUT')
     chunk_size = config.getint('INPUT', 'chunk_size')  # number of batches to process and save at once
-    chunked_result_record = config.getboolean('INPUT', 'chunking')
+    config_chunking = config.getboolean('INPUT', 'chunking')
 
     # cur = Path.cwd()  # directory with this script
     cur = Path(__file__).resolve().parent  # directory with this script
@@ -89,7 +89,7 @@ if __name__ == "__main__":
                         help="Number of the best result categories to consider")
     parser.add_argument("--dir", help="Process whole directory (if -d not used) but input set in CONFIG",
                         action="store_true")
-    parser.add_argument("--chunk", help="Process input directory and write predictions in chunks", action="store_true")
+    parser.add_argument("--chunk", default=config_chunking, help="Process input directory and write predictions in chunks", action="store_true")
     parser.add_argument("--inner", help="Process nested folders of the given directory (FALSE by default)",
                         default=inner, action="store_true")
     parser.add_argument("--train", help="Training model", default=Training, action="store_true")
