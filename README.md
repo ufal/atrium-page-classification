@@ -934,6 +934,43 @@ tables stored in a specified directory:
 
 The splitting script [per_doc_split.py](per_doc_split.py) 📎 is adjusted for the filename as a first column inout.
 
+#### Results post-processing 📉
+
+You may often want to combine predictions from **different** base architectures (e.g., averaging `RegNetY` and `ViT` 
+outputs for the same inputs) without reloading the heavy models.
+
+For this purpose, use the `averaging.py` script. It takes multiple prediction CSV files, aggregates the scores for 
+every class per page, calculates the mean score, and generates a new sorted TOP-N ranking.
+
+**Why use this?**
+* **Ensemble Learning:** Combining predictions from different models often smooths out errors and improves accuracy on ambiguous pages. 
+* **Flexibility:** You can merge a Top-1 result file with a Top-5 result file; the script dynamically handles different input shapes.
+
+<details>
+
+<summary>How to run post-processing 👀</summary>
+
+**Basic usage (Wildcards):**
+Process all CSVs in a folder and output a Top-3 summary:
+
+    python3 averaging.py --files "result/tables/*_TOP-3.csv" --top_n 3 --output ensemble_results.csv
+
+**Specific Models:**
+Combine specific model outputs (e.g., a ViT run and an EfficientNet run):
+
+    python3 averaging.py --files result/tables/model_v53.csv result/tables/model_v43.csv -n 1
+
+**Arguments:**
+* `-f`, `--files`: List of input files or glob pattern (required).
+* `-n`, `--top_n`: Number of top predictions to keep in the final output (default: 3).
+* `-o`, `--output`: Filename for the saved result (default: `averaged_results_sorted.csv`).
+
+</details>
+
+> [!NOTE]
+> The script expects input CSVs to follow the standard result format with `FILE`, `PAGE`, `CLASS-N`, and `SCORE-N` columns.
+
+
 ----
 
 ## Data preparation 📦
