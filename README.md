@@ -945,6 +945,7 @@ every class per page, calculates the mean score, and generates a new sorted TOP-
 **Why use this?**
 * **Ensemble Learning:** Combining predictions from different models often smooths out errors and improves accuracy on ambiguous pages. 
 * **Flexibility:** You can merge a Top-1 result file with a Top-5 result file; the script dynamically handles different input shapes.
+* **Time and Resources:** Since the preferred method of large collection processing is calling inference of different base models, computational resources and time needed to predict Top-1 or Top-N is are the same, but the level of details in ambiguous cases is higher for N > 2 Top-N predictions
 
 <details>
 
