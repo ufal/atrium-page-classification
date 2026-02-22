@@ -9,16 +9,16 @@ Text, Drawing, Table) using various fine-tuned on historical data [^17] deep lea
 
 ### Table of contents 📑
 
-* [Service Description 📇](#service-description-)
-* [Directory Structure 📂](#directory-structure-)
-* [Supported Models 🧠](#supported-models-)
-* [Categories 🪧](#categories-)
-* [API Usage 📡](#api-usage-)
-* [Installation & Setup 🛠](#installation--setup-)
-* [Quick API Test Launch 🚀](#quick-api-test-launch-)
-* [Client Side Test 🎨](#client-side-test-)
-* [Contacts 📧](#contacts-)
-* [Acknowledgements 🙏](#acknowledgements-)
+- [Service Description 📇](#service-description-)
+- [Directory Structure 📂](#directory-structure-)
+- [Supported Models 🧠](#supported-models-)
+- [Categories 🪧](#categories-)
+- [API Usage 📡](#api-usage-)
+- [Installation & Setup 🛠](#installation--setup-)
+- [Quick API Test Launch 🚀](#quick-api-test-launch-)
+- [Client Side Test 🎨](#client-side-test-)
+- [Contacts 📧](#contacts-)
+- [Acknowledgements 🙏](#acknowledgements-)
 
 ---
 

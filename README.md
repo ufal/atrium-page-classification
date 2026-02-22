@@ -934,7 +934,12 @@ tables stored in a specified directory:
 
 The splitting script [per_doc_split.py](per_doc_split.py) 📎 is adjusted for the filename as a first column inout.
 
-#### Results post-processing 📉
+### Results post-processing 📉
+
+> [!IMPORTANT]
+> The best way to classify a collection of messy files is to use several models - combine their predictions in a 
+> post-processing step and get results with higher accuracy. The 5 selected models provide different perspectives
+> on the data, and their ensemble can help to mitigate individual model errors. 
 
 You may often want to combine predictions from **different** base architectures (e.g., averaging `RegNetY` and `ViT` 
 outputs for the same inputs) without reloading the heavy models.
