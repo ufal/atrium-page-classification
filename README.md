@@ -968,8 +968,16 @@ Combine specific model outputs (e.g., a ViT run and an EfficientNet run):
 
 **Arguments:**
 * `-f`, `--files`: List of input files or glob pattern (required).
-* `-n`, `--top_n`: Number of top predictions to keep in the final output (default: 3).
-* `-o`, `--output`: Filename for the saved result (default: `averaged_results_sorted.csv`).
+* `-n`, `--top_n`: Number of top predictions to keep in the final output (default: `3`).
+* `-o`, `--output`: Saved result filename (e.g., `averaged_res_sorted.csv`).
+
+With the following **columns** 📋:
+
+- **FILE** - name of the file (document)
+- **PAGE** - number of the page
+- **vM.3** - separate columns for each of the models where `M` is in range from `1` to `5`, contains Top-`1` class label predicted by a model
+- **CLASS-K** - where `K` is in range from 1 to `N` (`N` is 3 by default), contains a Top-`N` class label of averaged `M` models` class scores
+- **SCORE-K** - averaged of all Top-`N` predictions of all `M` models, score from 0 to 1, where 0 are replaced with `NULL`
 
 </details>
 
