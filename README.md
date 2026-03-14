@@ -932,7 +932,7 @@ tables stored in a specified directory:
 
     python3 per_doc_split.py -i '/full/path/to/result_table.csv' 
 
-The splitting script [per_doc_split.py](data_scripts%2Fper_doc_split.py) 📎 is adjusted for the filename as a first column inout.
+The splitting script [per_doc_split.py](supplement_scripts%2Fper_doc_split.py) 📎 is adjusted for the filename as a first column inout.
 
 ### Results post-processing 📉
 
@@ -944,7 +944,7 @@ The splitting script [per_doc_split.py](data_scripts%2Fper_doc_split.py) 📎 is
 You may often want to combine predictions from **different** base architectures (e.g., averaging `RegNetY` and `ViT` 
 outputs for the same inputs) without reloading the heavy models.
 
-For this purpose, use the `averaging.py` script ([averaging.py](data_scripts%2Faveraging.py) 📎). It takes multiple prediction CSV files, aggregates the scores for 
+For this purpose, use the `averaging.py` script ([averaging.py](supplement_scripts%2Faveraging.py) 📎). It takes multiple prediction CSV files, aggregates the scores for 
 every class per page, calculates the mean score, and generates a new sorted TOP-N ranking.
 
 **Why use this?**
@@ -984,6 +984,9 @@ With the following **columns** 📋:
 > [!NOTE]
 > The script expects input CSVs to follow the standard result format with `FILE`, `PAGE`, `CLASS-N`, and `SCORE-N` columns.
 
+Examples: [ARUB_averaged_SHORT.csv](result%2FARUB_averaged_SHORT.csv) & [ARUP_averaged_SHORT.csv](result%2FARUP_averaged_SHORT.csv) 📎
+each created from 5 collection results (from the best 5 models) with a Top-3 setting (only 1/1000th part of the collection results was
+shared in this repository).
 
 ----
 

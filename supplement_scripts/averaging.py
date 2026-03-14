@@ -29,6 +29,12 @@ def parse_arguments():
         help="Filename for the output CSV"
     )
 
+    parser.add_argument(
+        '-z', '--zeros',
+        action="store_true", default=True,
+        help='Zero scores as empty pairs of CLASS-SCORE columns (default: True)'
+    )
+
     return parser.parse_args()
 
 
@@ -193,7 +199,16 @@ def main():
     final_output.sort_values(by=['FILE', 'PAGE'], ascending=[True, True], inplace=True)
 
     # Replace 0 and 0.0 with empty strings before saving
+    # CLASS labels are emptied only if -z flag is set
     final_output = final_output.replace({0: "", 0.0: ""})
+    if args.zeros:
+        # Replace 0 and 0.0 with empty strings, AND its CLASS label before saving
+        for i in range(2, args.top_n + 1):
+            score_col = f'SCORE-{i}'
+            class_col = f'CLASS-{i}'
+            if score_col in final_output.columns and class_col in final_output.columns:
+                # If score is empty string (was 0), clear the class label too
+                final_output.loc[final_output[score_col] == "", class_col] = ""
 
     final_output.to_csv(args.output, index=False)
 
