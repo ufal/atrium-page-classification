@@ -1,12 +1,15 @@
 # 🤝 Contributing to the Historical Document Sorting Pipeline of the ATRIUM project
 
-Welcome! This repository provides a robust workflow for sorting archive page images to 
+Welcome! Thank you for your interest in contributing. This repository provides a robust workflow for sorting archive page images to 
 facilitate further content-based processing. It addresses the common digital archive 
 challenge of organizing unstructured, scanned paper sources by automatically categorizing 
 them before specialized data extraction or OCR is applied.
 
 The next step: Routing classified pages into content-specific data processing pipelines 
 (e.g., machine-typed OCR, handwritten text recognition, or graphic extraction).
+
+This document describes the project's capabilities, development workflow, code conventions, 
+and rules for contributors.
 
 ## 🏗️ Project Contributions & Capabilities
 
@@ -63,6 +66,136 @@ needing to reload heavy models.
 `PAGE`, `CLASS-N` (Top-N predictions), and normalized `SCORE-N` for immediate review.
 * **Visual Evaluation:** Generates confusion matrices to easily visualize inter-class errors 
 and track model performance on evaluation datasets.
+
+---
+
+## 🌿 Branches & Environments
+
+| Branch   | Environment          | Rule                                                                            |
+|----------|----------------------|---------------------------------------------------------------------------------|
+| `test`   | Staging              | Base for all development. Always branch from `test`.                            |
+| `master` | Stable / Integration | Merged exclusively by a human reviewer. Do not open PRs directly into `master`. |
+
+```text
+test    ←  feature-<name>
+test    ←  bugfix-<name>
+master  ←  (humans only, after test stabilises)
+
+```
+
+### 🏷️ Branch Naming
+
+| Type             | Pattern          | Example                  |
+|------------------|------------------|--------------------------|
+| New feature      | `feature-<name>` | `feature-new-model`      |
+| Bug fix          | `bugfix-<name>`  | `bugfix-truncated-image` |
+| Hotfix on master | `hotfix-<name>`  | `hotfix-flags-priority`  |
+
+---
+
+## 🔁 Contributor Workflow
+
+1. **Create an issue** (or find an existing one) describing the problem or feature.
+2. **Branch from `test`:**
+```bash
+git checkout test
+git pull origin test
+git checkout -b feature-<name>
+```
+3. **Implement your changes** observing the project's code conventions.
+4. **Run the minimum tests** (see the Testing section).
+5. **Open a Pull Request** targeting the `test` branch.
+
+---
+
+## 📋 Pull Request Format
+
+Every PR must include:
+
+* **Issue link:** `Closes #<number>` or `Refs #<number>`
+* **Motivation:** why the change is needed
+* **Description of change:** what was changed and how
+* **Testing:** what was run, what passed, what could not be executed
+
+Use a **Draft PR** if the work is not ready for review.
+
+**Do not open PRs into `master` — merging into `master` is exclusively the 
+maintainers' responsibility.
+
+> **Note on issue tracking:** Issues reference the commits and PRs that resolved 
+> them — not the other way around. Commit messages describe *what changed*; the issue 
+> is the place to record *why* and link the resulting commits together.
+
+---
+
+## ✏️ Commit Messages
+
+Format:
+
+```text
+[type] concise description of what changed
+```
+
+Allowed types:
+
+| Type       | When to use                           |
+|------------|---------------------------------------|
+| `add`      | Added content (general)               |
+| `edit`     | Edited existing content (general)     |
+| `remove`   | Removed existing content (general)    |
+| `fix`      | Bug fix                               |
+| `refactor` | Refactoring without behaviour change  |
+| `test`     | Adding or updating tests              |
+| `docs`     | Documentation only                    |
+| `chore`    | Build, dependencies, CI configuration |
+| `style`    | Formatting, no logic change           |
+| `perf`     | Performance optimisation              |
+
+---
+
+## 🧪 Code Conventions & Testing
+
+### Code Conventions
+
+* **Comments:** informative but short, may be LLM-generated, added when function name does 
+not explain its functionality in detail
+* **Argument types:** set default type (e.g., `int`, `list`) for function arguments
+* **Console flags:** when a new one added, provide help message for it
+* **Config files:** when set of variables changes it should be reflected in repository documentation
+* **Generated code:** always should be manually launched and checked for mistakes before pushing
+
+### Minimum checks before every commit
+
+Always run basic validation locally before pushing:
+
+```bash
+# 1. Python compilation check
+python -m compileall -q .
+
+# 2. Pre-commit hooks (runs black, isort, flake8, etc.)
+pre-commit run --all-files
+
+```
+
+> [!NOTE]
+>  If specific scripts or extraction modules are updated, please run a smoke-test 
+> against the `data_samples/` directory to verify extraction integrity.
+
+---
+
+## 📁 Repository Documentation Management
+
+Each documentation file has one target audience and one responsibility. Rules are not repeated — cross-references are used instead.
+
+| File              | Audience        | Responsibility                                 |
+|-------------------|-----------------|------------------------------------------------|
+| `README.md`       | GitHub visitors | Project overview, workflow stages, quick start |
+| `CONTRIBUTING.md` | Developers      | Code conventions, branches, PRs, testing       |
+
+* **Do not duplicate rules:** if a rule is defined in `CONTRIBUTING.md`, other files 
+reference it rather than copying it.
+* **When changing a rule:** update the canonical source and verify that referencing files
+still point correctly.
 
 ---
 
