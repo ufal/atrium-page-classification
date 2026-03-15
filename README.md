@@ -1478,6 +1478,26 @@ same as for the training pages directory - the category 🪧 subdirectories are 
 
 ----
 
+## Paradata logging
+
+The project features an automatic paradata logging system that records provenance, configuration, 
+and performance statistics for every pipeline run. This is handled by the unified `ParadataLogger` module, 
+which silently monitors your image processing tasks in the background.
+
+**Key Features:**
+
+* **Automatic Generation:** A JSON log file is automatically created and saved in the [paradata](paradata) 📁 
+directory at the end of each run.
+* **Comprehensive Metrics:** Logs include exact start and end times, total duration in seconds, processing speed (files per minute), 
+and counts of successfully generated files (like CSVs or PNGs) versus skipped files.
+* **Configuration Snapshot:** The log captures the specific runtime configuration ⚙️ used, preserving a snapshot 
+of variables like the active model revision, base model, batch size, and command-line flags used during that specific run.
+* **Licensing:** All generated paradata files are released under the CC BY-NC 4.0 license.
+
+Example of the [category_samples](category_samples) 📁 directory processing paradata log: [260315-120442_page-classification.json](paradata%2F260315-120442_page-classification.json) 📎
+
+----
+
 ## Contacts 📧
 
 **For support write to:** lutsai.k@gmail.com responsible for this GitHub repository [^8] 🔗
