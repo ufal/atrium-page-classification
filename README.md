@@ -27,6 +27,7 @@ preparation scripts for PDF to PNG conversion
   * [For developers 🪛](#for-developers-)
     * [Training 💪](#training-)
     * [Evaluation 🏆](#evaluation-)
+  * [Paradata logging](#paradata-logging)
   * [Contacts 📧](#contacts-)
   * [Acknowledgements 🙏](#acknowledgements-)
   * [Appendix 🤓](#appendix-)
