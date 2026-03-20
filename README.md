@@ -8,8 +8,6 @@ N predictions output, predictions summarizing into a tabular format,
 HF 😊 hub [^1] 🔗 support for the model, multiplatform (Win/Lin) data 
 preparation scripts for PDF to PNG conversion
 
-[arXiv pre-print](https://arxiv.org/abs/2507.21114)
-
 ### Table of contents 📑
 
   * [Versions 🏁](#versions-)
@@ -30,7 +28,8 @@ preparation scripts for PDF to PNG conversion
     * [Training 💪](#training-)
     * [Evaluation 🏆](#evaluation-)
   * [Contacts 📧](#contacts-)
-  * [Acknowledgements 🙏](#acknowledgements-)
+    * [Preprint 📖](#preprint-)
+    * [Acknowledgements 🙏](#acknowledgements-)
   * [Appendix 🤓](#appendix-)
 
 ----
@@ -1325,7 +1324,18 @@ revision `v1.9.22` turns to `model_v1922` model folder), and only then run repo 
 > Information about the authors of this project, including their names and ORCIDs, can 
 > be found in the [CITATION.cff](CITATION.cff) 📎 file.
 
-## Acknowledgements 🙏
+### Preprint 📖
+
+For the full research background, check out our paper on arXiv:
+**[Page image classification for content-specific data processing](https://arxiv.org/abs/2507.21114)**
+
+It covers everything from raw data exploration and dataset construction 🗂️, through benchmarking 
+of multiple image classification approaches (Random Forest, EfficientNetV2, RegNetY, DiT, ViT, 
+and CLIP), to system architecture and real-world results on historical collections from Prague ⛪
+and Brno 🏛️.
+
+
+### Acknowledgements 🙏
 
 - **Developed by** UFAL [^7] 👥
 - **Funded by** ATRIUM [^4]  💰
