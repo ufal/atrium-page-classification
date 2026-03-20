@@ -8,6 +8,8 @@ N predictions output, predictions summarizing into a tabular format,
 HF 😊 hub [^1] 🔗 support for the model, multiplatform (Win/Lin) data 
 preparation scripts for PDF to PNG conversion
 
+[arXiv pre-print](https://arxiv.org/abs/2507.21114)
+
 ### Table of contents 📑
 
   * [Versions 🏁](#versions-)
