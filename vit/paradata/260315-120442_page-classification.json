@@ -1,0 +1,38 @@
+{
+  "license": "CC BY-NC 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+  "program": "page-classification",
+  "repository": "https://github.com/ufal/atrium-page-classification",
+  "python_version": "3.11.4 (main, Jul 26 2023, 14:53:35) [GCC 11.3.0]",
+  "run_id": "260315-120442",
+  "start_time": "2026-03-15T12:04:42.019197+00:00",
+  "end_time": "2026-03-15T12:05:52.810535+00:00",
+  "duration_seconds": 70.791,
+  "config": {
+    "model_path": "./model/model_v43",
+    "revision": "v4.3",
+    "base_model": "timm/regnety_160.swag_ft_in1k",
+    "top_n": 3,
+    "batch_size": "16",
+    "input_path": "",
+    "inner_dirs": "True",
+    "file_format": "png",
+    "mode": "directory",
+    "raw_output": "False",
+    "best_models": "False"
+  },
+  "statistics": {
+    "input_files_total": 115,
+    "successfully_processed": 115,
+    "skipped_files": 0,
+    "output_counts_by_type": {
+      "csv": 115,
+      "png": 0
+    },
+    "performance_per_minute": {
+      "csv": 97.4696,
+      "png": 0.0
+    }
+  },
+  "skipped_files_detail": []
+}

@@ -1,12 +1,13 @@
-# Image classification using fine-tuned ViT or EffNetV2 - for historical document sorting
+# Image classification using fine-tuned ViT, RegNetY or EffNetV2 - for historical document sorting
 
 ### Goal: solve a task of archive page images sorting (for their further content-based processing)
 
-**Scope:** Processing of images, training / evaluation of ViT / EffNetV2 model,
+**Scope:** Processing of images, training / evaluation of ViT / RegNetY / EffNetV2 model,
 input file/directory processing, class 🪧  (category) results of top
 N predictions output, predictions summarizing into a tabular format, 
 HF 😊 hub [^1] 🔗 support for the model, multiplatform (Win/Lin) data 
 preparation scripts for PDF to PNG conversion
+
 
 ### Table of contents 📑
 
@@ -27,8 +28,10 @@ preparation scripts for PDF to PNG conversion
   * [For developers 🪛](#for-developers-)
     * [Training 💪](#training-)
     * [Evaluation 🏆](#evaluation-)
+  * [Paradata logging](#paradata-logging)
   * [Contacts 📧](#contacts-)
-  * [Acknowledgements 🙏](#acknowledgements-)
+    * [Preprint 📖](#preprint-)
+    * [Acknowledgements 🙏](#acknowledgements-)
   * [Appendix 🤓](#appendix-)
 
 ----
@@ -36,7 +39,7 @@ preparation scripts for PDF to PNG conversion
 ## Versions 🏁
 
 There are currently several version of the model available for download, both of them have the same set of categories, 
-but different data annotations. The latest `v5.3` is considered to be default and can be found in the `main` branch
+but different data annotations. The latest `v4.3` is considered to be default and can be found in the `main` branch
 of HF 😊 hub [^1] 🔗 
 
 | Version | Base                             | Pages |   PDFs    | Description                                                                        |
@@ -94,20 +97,20 @@ paper source into one of the categories - each responsible for the following con
 > or structured in tabular 📏 format text, as well as to mark the presence of the printed 🌄 or drawn 📈 graphic 
 > materials to be extracted from the page images.
 
-| Base Model                                 | Revision | max_cat | Best_Prec (%) | Best_Acc (%) | Fold | Note         |
-|--------------------------------------------|----------|---------|---------------|--------------|------|--------------|
-| **google/vit-base-patch16-224**            | **v2.3** | 14,000  | **98.79**     | **98.79**    | 5    | OK & Small   |
-| **google/vit-base-patch16-384**            | **v3.3** | 14,000  | **98.92**     | **98.92**    | 2    | Good & Small |
-| **google/vit-large-patch16-384**           | **v5.3** | 14,000  | **99.12**     | **99.12**    | 2    | Best & Large |
-| microsoft/dit-base-finetuned-rvlcdip       | v9.3     | 14,000  | 98.71         | 98.72        | 3    |              |
-| microsoft/dit-large-finetuned-rvlcdip      | v10.3    | 14,000  | 98.66         | 98.66        | 3    |              |
-| microsoft/dit-large                        | v11.3    | 14,000  | 98.53         | 98.53        | 2    |              |
-| timm/regnety_120.sw_in12k_ft_in1k          | v12.3    | 14,000  | 98.29         | 98.29        | 3    |              |
-| **timm/regnety_160.swag_ft_in1k**          | **v4.3** | 14,000  | **99.17**     | **99.16**    | 1    | Best & Small |
-| timm/regnety_640.see                       | v6.3     | 14,000  | 98.79         | 98.79        | 5    | OK & Large   |
-| timm/tf_efficientnetv2_l.in21k_ft_in1k     | v8.3     | 14,000  | 98.62         | 98.62        | 5    |              |
-| **timm/tf_efficientnetv2_m.in21k_ft_in1k** | **v1.3** | 14,000  | **98.83**     | **98.83**    | 1    | Good & Small |
-| timm/tf_efficientnetv2_s.in21k             | v7.3     | 14,000  | 97.90         | 97.87        | 1    |              |
+| Base Model                                 | Revision | Best_Prec (%) | Best_Acc (%) | Fold | Note                  |
+|--------------------------------------------|----------|---------------|--------------|------|-----------------------|
+| **google/vit-base-patch16-224**            | **v2.3** | **98.79**     | **98.79**    | 5    | OK & Small            |
+| **google/vit-base-patch16-384**            | **v3.3** | **98.92**     | **98.92**    | 2    | Good & Small          |
+| **google/vit-large-patch16-384**           | **v5.3** | **99.12**     | **99.12**    | 2    | Best & Large          |
+| microsoft/dit-base-finetuned-rvlcdip       | v9.3     | 98.71         | 98.72        | 3    |                       |
+| microsoft/dit-large-finetuned-rvlcdip      | v10.3    | 98.66         | 98.66        | 3    |                       |
+| microsoft/dit-large                        | v11.3    | 98.53         | 98.53        | 2    |                       |
+| timm/regnety_120.sw_in12k_ft_in1k          | v12.3    | 98.29         | 98.29        | 3    |                       |
+| **timm/regnety_160.swag_ft_in1k**          | **v4.3** | **99.17**     | **99.16**    | 1    | Best & Small (`main`) |
+| timm/regnety_640.see                       | v6.3     | 98.79         | 98.79        | 5    | OK & Large            |
+| timm/tf_efficientnetv2_l.in21k_ft_in1k     | v8.3     | 98.62         | 98.62        | 5    |                       |
+| **timm/tf_efficientnetv2_m.in21k_ft_in1k** | **v1.3** | **98.83**     | **98.83**    | 1    | Good & Small          |
+| timm/tf_efficientnetv2_s.in21k             | v7.3     | 97.90         | 97.87        | 1    |                       |
 
 
 The rows highlighted in bold correspond to the best models uploaded to the HF 😊 hub [^1] 🔗, and the versions correspond to 
@@ -927,6 +930,67 @@ since the rows will be basically sorted by categories, and most ambiguous ones w
 have more small probabilities instead of zeros than the most obvious (for the model) 
 categories 🪧.
 
+Importantly, there is a script for splitting any result table into document-specific
+tables stored in a specified directory:
+
+    python3 per_doc_split.py -i '/full/path/to/result_table.csv' 
+
+The splitting script [per_doc_split.py](supplement_scripts%2Fper_doc_split.py) 📎 is adjusted for the filename as a first column inout.
+
+### Results post-processing 📉
+
+> [!IMPORTANT]
+> **The best way to classify a collection of messy files** is to use several models - combine their predictions in a 
+> post-processing step and get results with higher accuracy. The 5 selected models provide different perspectives
+> on the data, and their ensemble can help to mitigate individual model errors. 
+
+You may often want to combine predictions from **different** base architectures (e.g., averaging `RegNetY` and `ViT` 
+outputs for the same inputs) without reloading the heavy models.
+
+For this purpose, use the `averaging.py` script ([averaging.py](supplement_scripts%2Faveraging.py) 📎). It takes multiple prediction CSV files, aggregates the scores for 
+every class per page, calculates the mean score, and generates a new sorted TOP-N ranking.
+
+**Why use this?**
+* **Ensemble Learning:** Combining predictions from different models often smooths out errors and improves accuracy on ambiguous pages. 
+* **Flexibility:** You can merge a Top-1 result file with a Top-5 result file; the script dynamically handles different input shapes.
+* **Time and Resources:** Since the preferred method of large collection processing is calling inference of different base models, computational resources and time needed to predict Top-1 or Top-N is are the same, but the level of details in ambiguous cases is higher for N > 2 Top-N predictions
+
+<details>
+
+<summary>How to run post-processing 👀</summary>
+
+**Basic usage (Wildcards):**
+Process all CSVs in a folder and output a Top-3 summary:
+
+    python3 averaging.py --files "result/tables/*_TOP-3.csv" --top_n 3 --output ensemble_results.csv
+
+**Specific Models:**
+Combine specific model outputs (e.g., a ViT run and an EfficientNet run):
+
+    python3 averaging.py --files result/tables/model_v53.csv result/tables/model_v43.csv -n 1
+
+**Arguments:**
+* `-f`, `--files`: List of input files or glob pattern (required).
+* `-n`, `--top_n`: Number of top predictions to keep in the final output (default: `3`).
+* `-o`, `--output`: Saved result filename (e.g., `averaged_res_sorted.csv`).
+
+With the following **columns** 📋:
+
+- **FILE** - name of the file (document)
+- **PAGE** - number of the page
+- **vM.3** - separate columns for each of the models where `M` is in range from `1` to `5`, contains Top-`1` class label predicted by a model
+- **CLASS-K** - where `K` is in range from 1 to `N` (`N` is 3 by default), contains a Top-`N` class label of averaged `M` models` class scores
+- **SCORE-K** - averaged of all Top-`N` predictions of all `M` models, score from 0 to 1, where 0 are replaced with `NULL`
+
+</details>
+
+> [!NOTE]
+> The script expects input CSVs to follow the standard result format with `FILE`, `PAGE`, `CLASS-N`, and `SCORE-N` columns.
+
+Examples: [ARUB_averaged_SHORT.csv](result%2FARUB_averaged_SHORT.csv) & [ARUP_averaged_SHORT.csv](result%2FARUP_averaged_SHORT.csv) 📎
+each created from 5 collection results (from the best 5 models) with a Top-3 setting (only 1/1000th part of the collection results was
+shared in this repository).
+
 ----
 
 ## Data preparation 📦
@@ -1417,6 +1481,26 @@ same as for the training pages directory - the category 🪧 subdirectories are 
 
 ----
 
+## Paradata logging
+
+The project features an automatic paradata logging system that records provenance, configuration, 
+and performance statistics for every pipeline run. This is handled by the unified `ParadataLogger` module, 
+which silently monitors your image processing tasks in the background.
+
+**Key Features:**
+
+* **Automatic Generation:** A JSON log file is automatically created and saved in the [paradata](paradata) 📁 
+directory at the end of each run.
+* **Comprehensive Metrics:** Logs include exact start and end times, total duration in seconds, processing speed (files per minute), 
+and counts of successfully generated files (like CSVs or PNGs) versus skipped files.
+* **Configuration Snapshot:** The log captures the specific runtime configuration ⚙️ used, preserving a snapshot 
+of variables like the active model revision, base model, batch size, and command-line flags used during that specific run.
+* **Licensing:** All generated paradata files are released under the CC BY-NC 4.0 license.
+
+Example of the [category_samples](category_samples) 📁 directory processing paradata log: [260315-120442_page-classification.json](paradata%2F260315-120442_page-classification.json) 📎
+
+----
+
 ## Contacts 📧
 
 **For support write to:** lutsai.k@gmail.com responsible for this GitHub repository [^8] 🔗
@@ -1424,7 +1508,17 @@ same as for the training pages directory - the category 🪧 subdirectories are 
 > Information about the authors of this project, including their names and ORCIDs, can 
 > be found in the [CITATION.cff](CITATION.cff) 📎 file.
 
-## Acknowledgements 🙏
+### Preprint 📖
+
+For the full research background, check out our paper on arXiv:
+**[Page image classification for content-specific data processing](https://arxiv.org/abs/2507.21114)**
+
+It covers everything from raw data exploration and dataset construction 🗂️, through benchmarking 
+of multiple image classification approaches (Random Forest, EfficientNetV2, RegNetY, DiT, ViT, 
+and CLIP), to system architecture and real-world results on historical collections from Prague ⛪
+and Brno 🏛️.
+
+### Acknowledgements 🙏
 
 - **Developed by** UFAL [^7] 👥
 - **Funded by** ATRIUM [^4]  💰
@@ -1433,7 +1527,7 @@ same as for the training pages directory - the category 🪧 subdirectories are 
   - fine-tuned ViT with a 224x224 [^2] 🔗 or 384x384 [^13] [^14] 🔗 resolution size 
   - fine-tuned RegNetY-16GF with a 224x224 resolution [^18] or EffNetV2 with a 384x384 [^19] 🔗 resolution size 
 
-**©️ 2022 UFAL & ATRIUM**
+**©️ 2025 UFAL & ATRIUM**
 
 ----
 

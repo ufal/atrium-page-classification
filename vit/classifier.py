@@ -9,7 +9,7 @@ from utils import *
 
 from sklearn.model_selection import train_test_split, cross_val_score
 
-from PIL import ImageEnhance, ImageFilter
+from PIL import Image, ImageEnhance, ImageFilter # Added Image to imports
 from transformers import AutoImageProcessor, AutoModelForImageClassification, TrainingArguments, Trainer, default_data_collator
 from huggingface_hub import whoami
 # import timm
@@ -123,7 +123,7 @@ class BalancedBatchSampler(torch.utils.data.sampler.BatchSampler):
 
 
 class ImageClassifier:
-    def __init__(self, checkpoint: str, num_labels: int, store_dir: str = "/lnet/work/projects/atrium/transformers/local/chekcpoint"):
+    def __init__(self, checkpoint: str, num_labels: int, store_dir: str = "./chekcpoint"):
         """
         Initialize the image classifier with the specified checkpoint.
         """
@@ -196,11 +196,15 @@ class ImageClassifier:
         print(f"Dataloader of {'train' if train else 'eval'} dataset is ready:\t{len(image_paths)} images split into {len(dataloader)} batches of size {batch_size}")
         return dataloader
 
-    def preprocess_image(self, image_path: str, train: bool = True) -> torch.Tensor:
+    def preprocess_image(self, image_input, train: bool = True) -> torch.Tensor:
         """
         Preprocess a single image for training or evaluation.
         """
-        image = Image.open(image_path)
+        if isinstance(image_input, Image.Image):
+            image = image_input
+        else:
+            # Assume it is a string path
+            image = Image.open(image_input)
         # Check the image mode
         if image.mode != 'RGB':
             # Convert RGBA to RGB
@@ -303,25 +307,25 @@ class ImageClassifier:
 
         self.save_model(f"model/{out_model}")
 
-    def infer(self, image_path: str) -> int:
+    def infer(self, image_input) -> int:
         """
         Perform inference on a single image.
         """
         self.model.eval()
         with torch.no_grad():
-            inputs = self.preprocess_image(image_path, train=False)
+            inputs = self.preprocess_image(image_input, train=False)
             outputs = self.model(pixel_values=inputs)
             logits = outputs.logits
             predicted_class_idx = logits.argmax(-1).item()
             return predicted_class_idx
 
-    def top_n_predictions(self, image_path: str, top_n: int = 1) -> list:
+    def top_n_predictions(self, image_input, top_n: int = 1) -> list:
         """
         Perform inference and return top-N predictions with normalized probabilities.
         """
         self.model.eval()
         with torch.no_grad():
-            inputs = self.preprocess_image(image_path, train=False)
+            inputs = self.preprocess_image(image_input, train=False)
             outputs = self.model(pixel_values=inputs)
             logits = outputs.logits
             probabilities = torch.nn.functional.softmax(logits, dim=-1)
@@ -350,6 +354,11 @@ class ImageClassifier:
         print(f"\tProcessing of {len(dataloader)} batches started at\t{start_time.strftime('%Y-%m-%d %H:%M:%S')}")
         with torch.no_grad():
             for ib, batch in enumerate(dataloader):
+                # Check if batch is None or the tuple (None, None) returned by custom_collate
+                if batch is None or (isinstance(batch, tuple) and batch[0] is None):
+                    print(f"Skipping batch {ib}: No valid images loaded.")
+                    continue  # Skip this loop iteration
+
                 inputs = batch['pixel_values']
                 outputs = self.model(pixel_values=inputs.to(self.device))
                 logits = outputs.logits

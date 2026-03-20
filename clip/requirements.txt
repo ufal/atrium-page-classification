@@ -12,3 +12,4 @@ torchmetrics
 torchvision
 tqdm
 tensorboard
+seaborn

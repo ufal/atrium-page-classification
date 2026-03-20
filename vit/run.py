@@ -6,12 +6,14 @@ import math
 from classifier import *
 import time
 from huggingface_hub import create_branch, delete_branch
+from atrium_paradata import ParadataLogger
 
 if __name__ == "__main__":
     # Initialize the parser
     config = configparser.ConfigParser()
     # Read the configuration file
     config.read('config.txt')
+
 
     revision_to_base_model = {
         "v10.": "microsoft/dit-large-finetuned-rvlcdip",
@@ -66,7 +68,7 @@ if __name__ == "__main__":
 
     config_input_dir = config.get('INPUT', 'FOLDER_INPUT')
     chunk_size = config.getint('INPUT', 'chunk_size')  # number of batches to process and save at once
-    chunked_result_record = config.getboolean('INPUT', 'chunking')
+    config_chunking = config.getboolean('INPUT', 'chunking')
 
     # cur = Path.cwd()  # directory with this script
     cur = Path(__file__).resolve().parent  # directory with this script
@@ -89,7 +91,7 @@ if __name__ == "__main__":
                         help="Number of the best result categories to consider")
     parser.add_argument("--dir", help="Process whole directory (if -d not used) but input set in CONFIG",
                         action="store_true")
-    parser.add_argument("--chunk", help="Process input directory and write predictions in chunks", action="store_true")
+    parser.add_argument("--chunk", default=config_chunking, help="Process input directory and write predictions in chunks", action="store_true")
     parser.add_argument("--inner", help="Process nested folders of the given directory (FALSE by default)",
                         default=inner, action="store_true")
     parser.add_argument("--train", help="Training model", default=Training, action="store_true")
@@ -107,6 +109,29 @@ if __name__ == "__main__":
                         help="Pattern for models weights to average (e.g., 'model_v4')")
 
     args = parser.parse_args()
+
+    # ── paradata ──────────────────────────────────────────────────────────────
+    _paradata_cfg = {
+        # argparse / config.txt values – extend as needed
+        "model_path":    args.model  if hasattr(args, "model")    else config.get("SETUP", "model",    fallback=""),
+        "revision":      args.rev    if hasattr(args, "rev")       else config.get("HF",    "revision", fallback=""),
+        "base_model":    config.get("SETUP", "base_model",  fallback=""),
+        "top_n":         args.topn   if hasattr(args, "topn")      else config.get("SETUP", "top_n",    fallback=""),
+        "batch_size":    config.get("SETUP", "batch",       fallback=""),
+        "input_path":    str(args.file or args.directory or config.get("INPUT", "folder", fallback="")),
+        "inner_dirs":    config.get("SETUP", "inner",       fallback=""),
+        "file_format":   args.file_format if hasattr(args, "file_format") else "png",
+        "mode":          "file" if (hasattr(args, "file") and args.file) else "directory",
+        "raw_output":    str(getattr(args, "raw",  False)),
+        "best_models":   str(getattr(args, "best", False)),
+    }
+    _paradata_logger = ParadataLogger(
+        program="page-classification",
+        config=_paradata_cfg,
+        paradata_dir="paradata",
+        output_types=["csv", "png"],
+    )
+    # ── end paradata init ─────────────────────────────────────────────────────
 
     input_dir = Path(config_input_dir) if args.directory is None else Path(args.directory)
     Training, top_N, raw, chunked_result_record = args.train, args.topn, args.raw, args.chunk
@@ -284,9 +309,9 @@ if __name__ == "__main__":
         # ----------------------------------------------
         # ----- UNCOMMENT for pushing to HF repo -------
         # ----------------------------------------------
-        # print(f"Deleting {args.revision} branch")
-        # delete_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision,
-        #               token=config.get("HF", "token"))
+        #print(f"Deleting {args.revision} branch")
+        #delete_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision,
+        #              token=config.get("HF", "token"))
         # print(f"Creating fresh {args.revision} branch")
         # create_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision, exist_ok=True,
         #               token=config.get("HF", "token"))
@@ -344,6 +369,7 @@ if __name__ == "__main__":
                        categories,
                        revision_model_name_local,
                        top_N)
+        _paradata_logger.log_success("png")
 
         print(f"\t*\t--- Evaluation of {revision_model_name_local} completed ---")
 
@@ -373,188 +399,202 @@ if __name__ == "__main__":
         else:
             print(f"Could not determine base model for pattern: {args.average_pattern}")
 
-    if args.file is not None:
-        if not args.best:
-            pred_scores = classifier.top_n_predictions(args.file, top_N)
-
-            labels = [categories[i[0]] for i in pred_scores]
-            scores = [round(i[1], 3) for i in pred_scores]
-
-            print(f"File {args.file} predicted:")
-            for lab, sc in zip(labels, scores):
-                print(f"\t{lab}:  {round(sc * 100, 2)}%")
-        else:
-            all_best_predictions = {}
-
-            for rev, base_model in revision_best_models.items():
-                print(f"\nLoading best model for revision {rev} based on {base_model}...")
-                temp_classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories),
-                                                  store_dir=str(cp_dir))
-                temp_model_name_local = f"model_{rev.replace('.', '')}"
-                temp_model_path = f"{model_dir}/{temp_model_name_local}"
-
-                temp_classifier.load_model(temp_model_path)
-
-                pred_scores = temp_classifier.top_n_predictions(args.file, len(categories))
+    _total_inputs = 0
+    try:
+        if args.file is not None:
+            _total_inputs += 1
+            if not args.best:
+                pred_scores = classifier.top_n_predictions(args.file, top_N)
 
                 labels = [categories[i[0]] for i in pred_scores]
                 scores = [round(i[1], 3) for i in pred_scores]
 
-                all_best_predictions[rev] = (labels, scores)
-
-            print(f"\nFile {args.file} predictions from best models:")
-            for rev, (labels, scores) in all_best_predictions.items():
-                printed = 0
-                print(f"\n--- Revision {rev} --- {revision_best_models[rev]} ---")
+                print(f"File {args.file} predicted:")
                 for lab, sc in zip(labels, scores):
-                    if printed >= args.topn:
-                        break
                     print(f"\t{lab}:  {round(sc * 100, 2)}%")
-                    printed += 1
+                _paradata_logger.log_success("csv")
+            else:
+                all_best_predictions = {}
 
-    if args.dir or args.directory is not None:
-        print(f"Starting inference of {input_dir}, saving results in chunks...")
+                for rev, base_model in revision_best_models.items():
+                    print(f"\nLoading best model for revision {rev} based on {base_model}...")
+                    temp_classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories),
+                                                      store_dir=str(cp_dir))
+                    temp_model_name_local = f"model_{rev.replace('.', '')}"
+                    temp_model_path = f"{model_dir}/{temp_model_name_local}"
 
-        if args.inner:
-            test_images = sorted(directory_scraper(Path(input_dir), args.file_format))
-        else:
-            test_images = sorted(os.listdir(input_dir))
-            test_images = [os.path.join(input_dir, img) for img in test_images]
+                    temp_classifier.load_model(temp_model_path)
 
-        if not args.best:
+                    pred_scores = temp_classifier.top_n_predictions(args.file, len(categories))
 
-            if not chunked_result_record:  # all at once (no chunking)
-                test_loader = classifier.create_dataloader(test_images, batch)
+                    labels = [categories[i[0]] for i in pred_scores]
+                    scores = [round(i[1], 3) for i in pred_scores]
 
-                test_predictions, raw_prediction = classifier.infer_dataloader(test_loader, top_N, raw)
+                    all_best_predictions[rev] = (labels, scores)
 
-                rdf, raw_df = dataframe_results(test_images,
-                                                test_predictions,
-                                                categories,
-                                                top_N,
-                                                raw_prediction)
+                print(f"\nFile {args.file} predictions from best models:")
+                for rev, (labels, scores) in all_best_predictions.items():
+                    printed = 0
+                    print(f"\n--- Revision {rev} --- {revision_best_models[rev]} ---")
+                    for lab, sc in zip(labels, scores):
+                        if printed >= args.topn:
+                            break
+                        print(f"\t{lab}:  {round(sc * 100, 2)}%")
+                        printed += 1
+                _paradata_logger.log_success("csv", len(all_best_predictions.keys()))
 
-                rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
-                rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_TOP-{top_N}.csv", sep=",",
-                           index=False)
-                print(f"Results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
+        if args.dir or args.directory is not None:
+            print(f"Starting inference of {input_dir}, saving results in chunks...")
 
-                if raw:
-                    raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
-                    raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_RAW.csv", sep=",",
-                                  index=False)
-                    print(f"RAW Results are recorded into {output_dir}/tables/ directory")
+            if args.inner:
+                test_images = sorted(directory_scraper(Path(input_dir), args.file_format))
+            else:
+                test_images = sorted(os.listdir(input_dir))
+                test_images = [os.path.join(input_dir, img) for img in test_images]
 
-            else:  # chunked processing and saving
-                print(f"Starting inference of {input_dir}, saving results in chunks of {chunk_size * batch} images...")
+            _total_inputs = len(test_images)
 
-                total = len(test_images)
-                chunks = math.ceil(total / chunk_size)
+            if not args.best:
 
-                # daily date-based filenames (YYYYMMDD)
-                date_stamp = time.strftime('%Y%m%d')
-                top_out_path = f"{output_dir}/tables/{date_stamp}_{total}_{revision_model_name_local}_TOP-{top_N}.csv"
-                raw_out_path = f"{output_dir}/tables/{date_stamp}_{total}_{revision_model_name_local}_RAW.csv"
+                if not chunked_result_record:  # all at once (no chunking)
+                    test_loader = classifier.create_dataloader(test_images, batch)
 
-                for chunk_idx, start in enumerate(range(0, total, chunk_size), start=1):
-                    end = min(start + chunk_size, total)
-                    chunk_images = test_images[start:end]
-                    print(f"Processing images {start + 1}–{end} (chunk {chunk_idx}/{chunks})")
-
-                    # create dataloader and run inference for this chunk
-                    test_loader = classifier.create_dataloader(chunk_images, batch)
                     test_predictions, raw_prediction = classifier.infer_dataloader(test_loader, top_N, raw)
+                    rdf, raw_df = dataframe_results(test_images,
+                                                    test_predictions,
+                                                    categories,
+                                                    top_N,
+                                                    raw_prediction)
 
-                    # convert to dataframes for this chunk
-                    rdf_chunk, raw_df_chunk = dataframe_results(
-                        chunk_images,
-                        test_predictions,
-                        categories,
-                        top_N,
-                        raw_prediction
-                    )
+                    _paradata_logger.log_success("csv", len(rdf.index))
 
-                    # sort chunk for nicer local ordering (optional)
-                    rdf_chunk.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
 
-                    # append chunk to the daily TOP file (write header only if file doesn't exist)
-                    write_header = not os.path.exists(top_out_path)
-                    rdf_chunk.to_csv(top_out_path, sep=",", index=False, mode='a', header=write_header)
-                    if write_header:
-                        print(f"Created and wrote TOP-{top_N} daily file: {top_out_path} (chunk {chunk_idx})")
-                    else:
-                        print(f"Appended TOP-{top_N} chunk {chunk_idx} to {top_out_path}")
+                    rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
+                    rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_TOP-{top_N}.csv", sep=",",
+                               index=False)
+                    print(f"Results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
 
                     if raw:
-                        # sort raw chunk by category scores (descending) if possible
-                        if raw_df_chunk is not None and not raw_df_chunk.empty:
-                            raw_df_chunk.sort_values(categories, ascending=[False] * len(categories), inplace=True)
+                        raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
+                        raw_df.to_csv(f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_RAW.csv", sep=",",
+                                      index=False)
+                        print(f"RAW Results are recorded into {output_dir}/tables/ directory")
 
-                        write_header_raw = not os.path.exists(raw_out_path)
-                        raw_df_chunk.to_csv(raw_out_path, sep=",", index=False, mode='a', header=write_header_raw)
-                        if write_header_raw:
-                            print(f"Created and wrote RAW daily file: {raw_out_path} (chunk {chunk_idx})")
+                else:  # chunked processing and saving
+                    print(f"Starting inference of {input_dir}, saving results in chunks of {chunk_size * batch} images...")
+
+                    total = len(test_images)
+                    chunks = math.ceil(total / chunk_size)
+
+                    # daily date-based filenames (YYYYMMDD)
+                    date_stamp = time.strftime('%Y%m%d')
+                    top_out_path = f"{output_dir}/tables/{date_stamp}_{revision_model_name_local}_TOP-{top_N}.csv"
+                    raw_out_path = f"{output_dir}/tables/{date_stamp}_{revision_model_name_local}_RAW.csv"
+
+                    for chunk_idx, start in enumerate(range(0, total, chunk_size), start=1):
+                        end = min(start + chunk_size, total)
+                        chunk_images = test_images[start:end]
+                        print(f"Processing images {start + 1}–{end} (chunk {chunk_idx}/{chunks})")
+
+                        # create dataloader and run inference for this chunk
+                        test_loader = classifier.create_dataloader(chunk_images, batch)
+                        test_predictions, raw_prediction = classifier.infer_dataloader(test_loader, top_N, raw)
+
+                        # convert to dataframes for this chunk
+                        rdf_chunk, raw_df_chunk = dataframe_results(
+                            chunk_images,
+                            test_predictions,
+                            categories,
+                            top_N,
+                            raw_prediction
+                        )
+
+                        _paradata_logger.log_success("csv", len(rdf_chunk.index))
+
+                        # sort chunk for nicer local ordering (optional)
+                        rdf_chunk.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
+
+                        # append chunk to the daily TOP file (write header only if file doesn't exist)
+                        write_header = not os.path.exists(top_out_path)
+                        rdf_chunk.to_csv(top_out_path, sep=",", index=False, mode='a', header=write_header)
+                        if write_header:
+                            print(f"Created and wrote TOP-{top_N} daily file: {top_out_path} (chunk {chunk_idx})")
                         else:
-                            print(f"Appended RAW chunk {chunk_idx} to {raw_out_path}")
+                            print(f"Appended TOP-{top_N} chunk {chunk_idx} to {top_out_path}")
 
-                print(f"Processing complete. Daily files are in {output_dir}/tables/:")
-                print(f" - TOP file: {top_out_path}")
-                if raw:
-                    print(f" - RAW file: {raw_out_path}")
+                        if raw:
+                            # sort raw chunk by category scores (descending) if possible
+                            if raw_df_chunk is not None and not raw_df_chunk.empty:
+                                raw_df_chunk.sort_values(categories, ascending=[False] * len(categories), inplace=True)
 
-                # ensure ascending order in the final daily files
-                if os.path.exists(top_out_path):
-                    final_top_df = pd.read_csv(top_out_path)
-                    final_top_df.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
-                    final_top_df.to_csv(top_out_path, sep=",", index=False)
-                    print(f"Final TOP-{top_N} daily file sorted by FILE and PAGE.")
+                            write_header_raw = not os.path.exists(raw_out_path)
+                            raw_df_chunk.to_csv(raw_out_path, sep=",", index=False, mode='a', header=write_header_raw)
+                            if write_header_raw:
+                                print(f"Created and wrote RAW daily file: {raw_out_path} (chunk {chunk_idx})")
+                            else:
+                                print(f"Appended RAW chunk {chunk_idx} to {raw_out_path}")
 
-                # ensure raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
-                if raw and os.path.exists(raw_out_path):
-                    final_raw_df = pd.read_csv(raw_out_path)
-                    final_raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
-                    final_raw_df.to_csv(raw_out_path, sep=",", index=False)
-                    print(f"Final RAW daily file sorted by category scores.")
+                    print(f"Processing complete. Daily files are in {output_dir}/tables/:")
+                    print(f" - TOP file: {top_out_path}")
+                    if raw:
+                        print(f" - RAW file: {raw_out_path}")
 
-        else:  # args.best == True  chunking and top-n > 1 won't work
-            all_best_predictions = {}
+                    # ensure ascending order in the final daily files
+                    if os.path.exists(top_out_path):
+                        final_top_df = pd.read_csv(top_out_path)
+                        final_top_df.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
+                        final_top_df.to_csv(top_out_path, sep=",", index=False)
+                        print(f"Final TOP-{top_N} daily file sorted by FILE and PAGE.")
 
-            for rev, base_model in revision_best_models.items():
-                print(f"\nLoading best model for revision {rev} based on {base_model}...")
-                temp_classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories),
-                                                  store_dir=str(cp_dir))
-                temp_model_name_local = f"model_{rev.replace('.', '')}"
-                temp_model_path = f"{model_dir}/{temp_model_name_local}"
+                    # ensure raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
+                    if raw and os.path.exists(raw_out_path):
+                        final_raw_df = pd.read_csv(raw_out_path)
+                        final_raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
+                        final_raw_df.to_csv(raw_out_path, sep=",", index=False)
+                        print(f"Final RAW daily file sorted by category scores.")
 
-                temp_classifier.load_model(temp_model_path)
+            else:  # args.best == True  chunking and top-n > 1 won't work
+                all_best_predictions = {}
 
-                test_loader = temp_classifier.create_dataloader(test_images, batch)
+                for rev, base_model in revision_best_models.items():
+                    print(f"\nLoading best model for revision {rev} based on {base_model}...")
+                    temp_classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories),
+                                                      store_dir=str(cp_dir))
+                    temp_model_name_local = f"model_{rev.replace('.', '')}"
+                    temp_model_path = f"{model_dir}/{temp_model_name_local}"
 
-                test_predictions, _ = temp_classifier.infer_dataloader(test_loader, 1, False)
+                    temp_classifier.load_model(temp_model_path)
 
-                rdf, _ = dataframe_results(test_images, test_predictions,
-                                           categories, 1, None)
+                    test_loader = temp_classifier.create_dataloader(test_images, batch)
 
-                rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
-                all_best_predictions[rev] = rdf
+                    test_predictions, _ = temp_classifier.infer_dataloader(test_loader, 1, False)
 
-            # combine all best predictions into single file by first 2 columns
-            combined_df = pd.DataFrame()
-            for rev, rdf in all_best_predictions.items():
-                # rename columns to include revision
-                renamed_columns = {col: f"{col}-{rev}" for col in rdf.columns if col not in ["FILE", "PAGE"]}
-                rdf_renamed = rdf.rename(columns=renamed_columns)
+                    rdf, _ = dataframe_results(test_images, test_predictions,
+                                               categories, 1, None)
 
-                if combined_df.empty:
-                    combined_df = rdf_renamed
-                else:
-                    combined_df = pd.merge(combined_df, rdf_renamed, on=["FILE", "PAGE"], how="outer")
-
-            combined_df.to_csv(
-                f"{output_dir}/tables/{time_stamp}_BEST_{len(revision_best_models.keys())}_models_TOP-1.csv", sep=",",
-                index=False)
-            print(f"Results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
+                    _paradata_logger.log_success("csv", len(rdf.index))
 
 
+                    rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
+                    all_best_predictions[rev] = rdf
 
+                # combine all best predictions into single file by first 2 columns
+                combined_df = pd.DataFrame()
+                for rev, rdf in all_best_predictions.items():
+                    # rename columns to include revision
+                    renamed_columns = {col: f"{col}-{rev}" for col in rdf.columns if col not in ["FILE", "PAGE"]}
+                    rdf_renamed = rdf.rename(columns=renamed_columns)
+
+                    if combined_df.empty:
+                        combined_df = rdf_renamed
+                    else:
+                        combined_df = pd.merge(combined_df, rdf_renamed, on=["FILE", "PAGE"], how="outer")
+
+                combined_df.to_csv(
+                    f"{output_dir}/tables/{time_stamp}_BEST_{len(revision_best_models.keys())}_models_TOP-1.csv", sep=",",
+                    index=False)
+                print(f"Results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
+
+    finally:
+        _paradata_logger.finalize(_total_inputs)
 

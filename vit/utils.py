@@ -6,8 +6,10 @@ import random
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, ConfusionMatrixDisplay
 from matplotlib import pyplot as plt
 import time
-from PIL import Image
-Image.MAX_IMAGE_PIXELS = 886402639
+from PIL import Image, ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+import re  
+Image.MAX_IMAGE_PIXELS = 4221790634
 
 
 # get list of all files in the folder and nested folders by file format
@@ -23,12 +25,30 @@ def dataframe_results(test_images: list, test_predictions: list, categories: lis
                       raw_scores: list = None) -> (pd.DataFrame, pd.DataFrame):
     results = []
     raws = []
+    
+    # 2. Compile the regex pattern once for efficiency
+    # Pattern explanation:
+    # (.*)   -> Capture group 1: Everything up until the separator (greedy match)
+    # [-_]   -> Match a single hyphen OR underscore
+    # (\d+)  -> Capture group 2: One or more digits (the page number)
+    # $      -> End of the string
+    pattern = re.compile(r"(.*)[-_](\d+)$")
+
     for image_file, predict_scores in zip(test_images, test_predictions):
         image_name = Path(image_file).stem
-        name_parts = image_name.split("-")
-        page_num = int(name_parts[-1])
-        document = name_parts[0] if len(name_parts) == 2 else "-".join(name_parts[:-1])
+        
+        # 3. Apply the regex match
+        match = pattern.match(image_name)
+        
+        if match:
+            document = match.group(1)
+            page_num = int(match.group(2))
+        else:
+            # Fallback if file doesn't match the format (e.g., "cover_page.png")
+            document = image_name
+            page_num = 1 # Default value or handle error as needed
 
+        # --- Logic below remains unchanged ---
         labels = [categories[i[0]] for i in predict_scores] if top_N > 1 else [categories[predict_scores]]
         scores = [round(i[1], 3) for i in predict_scores] if top_N > 1 else [round(predict_scores, 3)]
 
@@ -48,6 +68,7 @@ def dataframe_results(test_images: list, test_predictions: list, categories: lis
     if raw_scores is not None:
         col = ["FILE", "PAGE"]
         rawdf = pd.DataFrame(raws, columns=col)
+        # Ensure raw_scores is a numpy array before rounding
         raw_weights = np.array(raw_scores).round(3)
         rawdf[categories] = raw_weights
 

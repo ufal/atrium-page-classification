@@ -28,7 +28,8 @@ preparation scripts for PDF to PNG conversion
     * [Training 💪](#training-)
     * [Evaluation 🏆](#evaluation-)
   * [Contacts 📧](#contacts-)
-  * [Acknowledgements 🙏](#acknowledgements-)
+    * [Preprint 📖](#preprint-)
+    * [Acknowledgements 🙏](#acknowledgements-)
   * [Appendix 🤓](#appendix-)
 
 ----
@@ -98,10 +99,13 @@ Versions of CLIP models are grounded on the textual category description sets, a
 [descriptions_comparison_graph.png](result%2Fstats%2Fmodel_accuracy_plot.png) 📎 which is a graph containing separate and averaged results 
 of all category 🪧 descriptions. 
 
-As our experiments showed, the averaging strategy is not the best. Moreover, the smallest model
-ViT-B/16 showed the best results after fine-tuning model on some selected category 🪧 set.
+![model_accuracy_plot_zero.png](result%2Fstats%2Fmodel_accuracy_plot_zero.png)
 
-![description comparison graph](result%2Fstats%2Fmodel_accuracy_plot_all.png)
+As our experiments showed, the averaging strategy is not the best. Moreover, the smallest model
+ViT-B/16 showed the best results after fine-tuning model on some selected category 🪧 set like 
+`mid` which as well as `avg` scored above average in all 4 base models.
+
+![description comparison graph](result%2Fstats%2Fmodel_accuracy_plot.png)
 
 Check out all of the prepared category 🪧 descriptions in the [category_descriptions](category_descriptions) 📁 folder.
 Which supports versions mapping from 1 to 9 for the csv files starting with `page_categories_` prefix. The separate set
@@ -1320,7 +1324,18 @@ revision `v1.9.22` turns to `model_v1922` model folder), and only then run repo 
 > Information about the authors of this project, including their names and ORCIDs, can 
 > be found in the [CITATION.cff](CITATION.cff) 📎 file.
 
-## Acknowledgements 🙏
+### Preprint 📖
+
+For the full research background, check out our paper on arXiv:
+**[Page image classification for content-specific data processing](https://arxiv.org/abs/2507.21114)**
+
+It covers everything from raw data exploration and dataset construction 🗂️, through benchmarking 
+of multiple image classification approaches (Random Forest, EfficientNetV2, RegNetY, DiT, ViT, 
+and CLIP), to system architecture and real-world results on historical collections from Prague ⛪
+and Brno 🏛️.
+
+
+### Acknowledgements 🙏
 
 - **Developed by** UFAL [^7] 👥
 - **Funded by** ATRIUM [^4]  💰
