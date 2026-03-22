@@ -57,7 +57,8 @@ if __name__ == "__main__":
     HF = config.getboolean('HF', 'use_hf')
     hf_version = config.get("HF", "revision")
 
-    cross_runs = config.get("TRAIN", "cross_runs")
+    # FIX: use getint so the default is an int, not a str "0"
+    cross_runs = config.getint("TRAIN", "cross_runs")
 
     # setting main to latest version by default
     # hf_version = hf_version if hf_version != 'main' else config.get('HF', 'latest')
@@ -110,29 +111,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # ── paradata ──────────────────────────────────────────────────────────────
-    _paradata_cfg = {
-        # argparse / config.txt values – extend as needed
-        "model_path":    args.model  if hasattr(args, "model")    else config.get("SETUP", "model",    fallback=""),
-        "revision":      args.rev    if hasattr(args, "rev")       else config.get("HF",    "revision", fallback=""),
-        "base_model":    config.get("SETUP", "base_model",  fallback=""),
-        "top_n":         args.topn   if hasattr(args, "topn")      else config.get("SETUP", "top_n",    fallback=""),
-        "batch_size":    config.get("SETUP", "batch",       fallback=""),
-        "input_path":    str(args.file or args.directory or config.get("INPUT", "folder", fallback="")),
-        "inner_dirs":    config.get("SETUP", "inner",       fallback=""),
-        "file_format":   args.file_format if hasattr(args, "file_format") else "png",
-        "mode":          "file" if (hasattr(args, "file") and args.file) else "directory",
-        "raw_output":    str(getattr(args, "raw",  False)),
-        "best_models":   str(getattr(args, "best", False)),
-    }
-    _paradata_logger = ParadataLogger(
-        program="page-classification",
-        config=_paradata_cfg,
-        paradata_dir="paradata",
-        output_types=["csv", "png"],
-    )
-    # ── end paradata init ─────────────────────────────────────────────────────
-
     input_dir = Path(config_input_dir) if args.directory is None else Path(args.directory)
     Training, top_N, raw, chunked_result_record = args.train, args.topn, args.raw, args.chunk
     args.folds = 0 if not args.train else args.folds
@@ -163,6 +141,36 @@ if __name__ == "__main__":
             args.base = revision_to_base_model[rev_code]
         else:
             print(f"Using base model\t{config_base_model} from CONFIG,\trevision\t{args.revision}.")
+
+        # Warn if revision="main" since revision_to_base_model lookup will fall through silently
+        if args.revision == "main":
+            print(f"WARNING: revision='main' — base model lookup fell back to config value '{config_base_model}'. "
+                  f"Consider specifying an explicit version tag.")
+
+    # ── paradata init ─────────────────────────────────────────────────────────
+    # Placed AFTER full arg resolution so model_path and revision are accurate.
+    _paradata_cfg = {
+        # argparse / config.txt values – extend as needed
+        "model_path":    args.model      if hasattr(args, "model")      else config.get("SETUP", "model",    fallback=""),
+        # FIX: was args.rev (AttributeError) – correct attribute name is args.revision
+        "revision":      args.revision   if hasattr(args, "revision")   else config.get("HF",    "revision", fallback=""),
+        "base_model":    config.get("SETUP", "base_model",  fallback=""),
+        "top_n":         args.topn       if hasattr(args, "topn")       else config.get("SETUP", "top_n",    fallback=""),
+        "batch_size":    config.get("SETUP", "batch",       fallback=""),
+        "input_path":    str(args.file or args.directory or config.get("INPUT", "folder", fallback="")),
+        "inner_dirs":    config.get("SETUP", "inner",       fallback=""),
+        "file_format":   args.file_format if hasattr(args, "file_format") else "png",
+        "mode":          "file" if (hasattr(args, "file") and args.file) else "directory",
+        "raw_output":    str(getattr(args, "raw",  False)),
+        "best_models":   str(getattr(args, "best", False)),
+    }
+    _paradata_logger = ParadataLogger(
+        program="page-classification",
+        config=_paradata_cfg,
+        paradata_dir="paradata",
+        output_types=["csv", "png"],
+    )
+    # ── end paradata init ─────────────────────────────────────────────────────
 
     print("Arguments:")
     for arg in vars(args):
@@ -256,10 +264,6 @@ if __name__ == "__main__":
                 test_predictions, raw_prediction = classifier.infer_dataloader(test_loader, top_N, raw)
                 # testLabels = [t for t in test_loader.image_labels if t is not None ]
                 test_labels_indices = np.argmax(testLabels, axis=-1).tolist()
-
-                # print(f"Head and tail of the predicted labels:")
-                # print(test_predictions[:3])
-                # print(test_predictions[-3:])
 
                 print("=" * 40)
                 print(
@@ -432,6 +436,11 @@ if __name__ == "__main__":
 
                     all_best_predictions[rev] = (labels, scores)
 
+                    # FIX: explicitly release GPU memory after each model to avoid accumulation
+                    del temp_classifier
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+
                 print(f"\nFile {args.file} predictions from best models:")
                 for rev, (labels, scores) in all_best_predictions.items():
                     printed = 0
@@ -578,6 +587,11 @@ if __name__ == "__main__":
                     rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
                     all_best_predictions[rev] = rdf
 
+                    # FIX: explicitly release GPU memory after each model to avoid accumulation
+                    del temp_classifier
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+
                 # combine all best predictions into single file by first 2 columns
                 combined_df = pd.DataFrame()
                 for rev, rdf in all_best_predictions.items():
@@ -597,4 +611,3 @@ if __name__ == "__main__":
 
     finally:
         _paradata_logger.finalize(_total_inputs)
-

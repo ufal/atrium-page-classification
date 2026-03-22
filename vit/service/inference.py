@@ -100,6 +100,18 @@ class ModelManager:
         self.models[version] = clf
         return clf
 
+    def warmup(self, versions: list = None):
+        """
+        Pre-load models at startup to avoid first-request latency spikes.
+        Call from the FastAPI startup event with the default version(s).
+        """
+        for v in (versions or self.available_versions):
+            try:
+                self.load_model(v)
+                logger.info(f"Warmed up model {v}")
+            except Exception as e:
+                logger.warning(f"Could not pre-load model {v}: {e}")
+
     def predict(self, image: Image.Image, version: str, topn: int = 1):
         """
         Runs prediction on a single image.
@@ -135,40 +147,29 @@ class ModelManager:
             if not image_paths:
                 return []
 
-            # 2. Create Data Loader
+            # 2. FIX: always request at least 2 predictions internally so we always
+            #    have real confidence scores. Results are then truncated to the
+            #    caller-requested topn before returning.
+            internal_topn = max(topn, 2)
+
+            # 3. Create Data Loader
             dataloader = clf.create_dataloader(image_paths, batch_size=batch_size)
 
-            # 3. Infer (returns list of predictions)
-            # Note: infer_dataloader returns differently based on top_n
-            predictions, _ = clf.infer_dataloader(dataloader, top_n=topn, raw=False)
+            # 4. Infer (returns list of predictions)
+            predictions, _ = clf.infer_dataloader(dataloader, top_n=internal_topn, raw=False)
 
             formatted_batch_results = []
 
-            # 4. Map indices to labels
+            # 5. Map indices to labels and truncate to the requested topn
             for pred_item in predictions:
-                # If topn > 1, pred_item is a list of tuples: [(idx, score), (idx, score)]
-                # If topn == 1, pred_item is a single index (int) -- per classifier.py infer_dataloader logic
-
-                if topn > 1:
-                    row_preds = []
-                    for idx, score in pred_item:
-                        row_preds.append({
-                            "label": CATEGORIES[idx],
-                            "score": float(score)
-                        })
-                    formatted_batch_results.append(row_preds)
-                else:
-                    # Single index
-                    idx = pred_item
-                    # We need a score, but infer_dataloader with top_n=1 returns only index.
-                    # To keep API consistent, we might need to change infer call or just return 1.0 (dummy)
-                    # OR update classifier.py.
-                    # Safer: Always ask for top_n > 1 internally if we need scores, or use top_n_predictions
-                    # But since we use existing classifier.py, we handle the index.
-                    formatted_batch_results.append([{
+                # With internal_topn >= 2, pred_item is always a list of (idx, score) tuples
+                row_preds = []
+                for idx, score in pred_item[:topn]:
+                    row_preds.append({
                         "label": CATEGORIES[idx],
-                        "score": 1.0  # Placeholder as raw API doesn't return score for top1 in batch
-                    }])
+                        "score": float(score)
+                    })
+                formatted_batch_results.append(row_preds)
 
             return formatted_batch_results
 

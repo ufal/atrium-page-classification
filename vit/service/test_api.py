@@ -11,6 +11,10 @@ def main():
     parser.add_argument("-f", required=True, help="Path to file (image or PDF)")
     parser.add_argument("-v", default="v4.3", help="Model version (e.g., v5.3, all)")
     parser.add_argument("--top", type=int, default=3, help="Top N predictions")
+    # FIX: parameterise server URL so the script works against remote or
+    # non-default-port deployments without source edits.
+    parser.add_argument("--url", default="http://localhost:8000",
+                        help="Base URL of the classification API (default: http://localhost:8000)")
 
     args = parser.parse_args()
 
@@ -23,7 +27,7 @@ def main():
     if not mime_type:
         mime_type = "application/octet-stream"
 
-    base_url = "http://localhost:8000"
+    base_url = args.url.rstrip("/")
 
     if mime_type == "application/pdf":
         endpoint = "/predict_document"
