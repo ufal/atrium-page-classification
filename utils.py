@@ -7,8 +7,10 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 from matplotlib import pyplot as plt
 import time
 from PIL import Image, ImageFile
+
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-import re  
+import re
+
 Image.MAX_IMAGE_PIXELS = 4221790634
 
 
@@ -25,7 +27,7 @@ def dataframe_results(test_images: list, test_predictions: list, categories: lis
                       raw_scores: list = None) -> (pd.DataFrame, pd.DataFrame):
     results = []
     raws = []
-    
+
     # 2. Compile the regex pattern once for efficiency
     # Pattern explanation:
     # (.*)   -> Capture group 1: Everything up until the separator (greedy match)
@@ -36,17 +38,17 @@ def dataframe_results(test_images: list, test_predictions: list, categories: lis
 
     for image_file, predict_scores in zip(test_images, test_predictions):
         image_name = Path(image_file).stem
-        
+
         # 3. Apply the regex match
         match = pattern.match(image_name)
-        
+
         if match:
             document = match.group(1)
             page_num = int(match.group(2))
         else:
             # Fallback if file doesn't match the format (e.g., "cover_page.png")
             document = image_name
-            page_num = 1 # Default value or handle error as needed
+            page_num = 1  # Default value or handle error as needed
 
         # --- Logic below remains unchanged ---
         labels = [categories[i[0]] for i in predict_scores] if top_N > 1 else [categories[predict_scores]]
@@ -61,8 +63,11 @@ def dataframe_results(test_images: list, test_predictions: list, categories: lis
     rdf = pd.DataFrame(results, columns=col)
 
     if top_N == 1:
+        # Keep CLASS-1 / SCORE-1 naming so downstream tools (e.g. averaging.py)
+        # can always expect consistent column names regardless of top_N value.
+        # A CATEGORY alias column is added for human-readable CSV output.
+        rdf["CATEGORY"] = rdf["CLASS-1"]
         rdf.drop(columns=["SCORE-1"], inplace=True)
-        rdf.rename(columns={"CLASS-1": "CATEGORY"}, inplace=True)
 
     rawdf = None
     if raw_scores is not None:
@@ -98,20 +103,16 @@ def collect_images(directory: str, ordered: bool = True) -> (list, list, list):
         print(f"{categories[int(label_id)]}:\t{label_count}\t{round(label_count / len(total_labels) * 100, 2)}%")
 
     if ordered:
-         # sorting in alphabetical order to ensure consistent order
+        # sorting in alphabetical order to ensure consistent order
         sorted_pairs = sorted(zip(total_files, total_labels), key=lambda pair: pair[0])
         total_files, total_labels = zip(*sorted_pairs)
         total_files, total_labels = list(total_files), list(total_labels)
 
-    # print(f"Head and tail of the collected files:")
-    # for f in total_files[:3] + total_files[-3:]:
-    #     print(f)
-
     return total_files, total_labels, categories
 
 
-def confusion_plot(predictions: list, trues: list, categories: list, out_model: str, top_N: int = 1, output_dir: str = None):
-
+def confusion_plot(predictions: list, trues: list, categories: list, out_model: str, top_N: int = 1,
+                   output_dir: str = None):
     single_pred = []
     correct = 0
     for j, pred_scores in enumerate(predictions):
@@ -132,7 +133,7 @@ def confusion_plot(predictions: list, trues: list, categories: list, out_model: 
                 correct += 1
 
     print("=" * 40)
-    print('Percentage correct: ',round(100 * correct / len(trues), 2))
+    print('Percentage correct: ', round(100 * correct / len(trues), 2))
     print("=" * 40)
     print(classification_report(trues, single_pred, target_names=categories, digits=4, zero_division=0))
 
@@ -143,7 +144,6 @@ def confusion_plot(predictions: list, trues: list, categories: list, out_model: 
     )
 
     short_labels = [f"{label[0]}{label.split('_')[-1][0] if '_' in label else ''}" for label in disp.display_labels]
-
 
     print(f"\t{' '.join(disp.display_labels)}")
     for ir, row in enumerate(disp.confusion_matrix):

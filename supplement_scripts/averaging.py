@@ -70,6 +70,12 @@ def load_and_melt(file_paths):
             df['PAGE'] = pd.to_numeric(df['PAGE'], errors='coerce')
             df = df.dropna(subset=['PAGE'])
 
+            # FIX: guard for top_N=1 output from utils.py which writes a CATEGORY
+            # column instead of CLASS-1.  Normalise to CLASS-1 so the rest of
+            # the pipeline always sees consistent column names.
+            if 'CLASS-1' not in df.columns and 'CATEGORY' in df.columns:
+                df = df.rename(columns={'CATEGORY': 'CLASS-1'})
+
             # Extract Top-1 class and dynamically generate column header
             filename = os.path.basename(fpath)
             match = re.search(r'_v(\d+)3_', filename)
@@ -141,12 +147,13 @@ def main():
         print("Error: No common pages found across all models. Exiting.")
         return
 
-    # Combine all models
-    combined_df = pd.concat(long_dfs, ignore_index=True)
-
-    # Filter combined_df to only include the intersection
-    combined_df['FILE_PAGE'] = list(zip(combined_df['FILE'], combined_df['PAGE']))
-    combined_df = combined_df[combined_df['FILE_PAGE'].isin(common_file_pages)].drop(columns=['FILE_PAGE'])
+    # FIX: filter each per-model DataFrame to the intersection BEFORE concat to
+    # avoid building a large intermediate DataFrame that is immediately discarded.
+    filtered = []
+    for df in long_dfs:
+        mask = pd.Series(list(zip(df['FILE'], df['PAGE']))).isin(common_file_pages)
+        filtered.append(df[mask.values])
+    combined_df = pd.concat(filtered, ignore_index=True)
 
     # 3. Aggregate Scores
     print("Aggregating scores...")

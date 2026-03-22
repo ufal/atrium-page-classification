@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 import tempfile
 import base64
@@ -11,7 +12,15 @@ from PIL import Image
 from pdf2image import convert_from_bytes
 import time
 
-from .inference import manager, AVAILABLE_VERSIONS, CATEGORIES
+# FIX: guard relative import so the module works both when launched via
+#   `uvicorn service.api:app`  (package mode, relative import works)
+#   `python api.py`            (direct execution, needs absolute import)
+try:
+    from .inference import manager, AVAILABLE_VERSIONS, CATEGORIES
+except ImportError:
+    # Fallback for direct execution: add this file's directory to sys.path
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from inference import manager, AVAILABLE_VERSIONS, CATEGORIES
 
 app = FastAPI(title="Atrium Page Classification API")
 
@@ -45,6 +54,14 @@ if os.path.exists(STATIC_DIR):
 
 if os.path.exists(LINDAT_DIST_DIR):
     app.mount("/dist", StaticFiles(directory=LINDAT_DIST_DIR), name="lindat-dist")
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Pre-load the default model at startup to avoid a latency spike on the
+    first request.  Only v4.3 is warmed up by default; extend the list if
+    multi-model latency on startup is acceptable."""
+    manager.warmup(["v4.3"])
 
 
 @app.get("/")
@@ -130,12 +147,10 @@ async def predict_document(
 
             formatted_pages = []
             for i, preds in enumerate(batch_predictions):
-                # --- NEW: Generate Thumbnail ---
-                # Get the original image from the list
+                # --- Generate Thumbnail ---
                 original_img = images[i]
 
                 # Resize for thumbnail (e.g., max height 300px to keep JSON light)
-                # Copy to avoid modifying the original if needed elsewhere
                 thumb = original_img.copy()
                 thumb.thumbnail((300, 300))
 
@@ -143,12 +158,12 @@ async def predict_document(
                 buffered = BytesIO()
                 thumb.save(buffered, format="PNG")
                 img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-                # -------------------------------
+                # -------------------------
 
                 formatted_pages.append({
                     "page": i + 1,
                     "predictions": preds,
-                    "thumbnail": img_str  # <--- Add to response
+                    "thumbnail": img_str
                 })
 
             return {
