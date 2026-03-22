@@ -11,15 +11,20 @@
 hostname
 date
 
-export HF_HOME=/lnet/work/projects/atrium/cache/
-export TORCH_HOME=/lnet/work/projects/atrium/cache/
+# --- REFINED: Portability using Slurm environment variables ---
+# Dynamically assigns the project root based on where the job was submitted from.
+# Uses a fallback to the original absolute path if SLURM_SUBMIT_DIR is not set.
+export PROJECT_DIR="${SLURM_SUBMIT_DIR:-/lnet/work/projects/atrium}"
 
-source /lnet/work/projects/atrium/alto_util/venv-lang/bin/activate
+export HF_HOME="${PROJECT_DIR}/cache/"
+export TORCH_HOME="${PROJECT_DIR}/cache/"
 
-cd /lnet/work/projects/atrium/alto_util
+source "${PROJECT_DIR}/alto_util/venv-lang/bin/activate"
+
+cd "${PROJECT_DIR}/alto_util" || exit
 
 ARG=( "$@" )
 
-python3 langID.py ${ARG[*]}
+python3 langID.py "${ARG[@]}"
 
 date

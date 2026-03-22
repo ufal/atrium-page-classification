@@ -56,6 +56,16 @@ if os.path.exists(LINDAT_DIST_DIR):
     app.mount("/dist", StaticFiles(directory=LINDAT_DIST_DIR), name="lindat-dist")
 
 
+# --- REFINED: Use environment variables for CORS, fallback to local dev defaults ---
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:8080,http://127.0.0.1:8080").split(",")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
+
 @app.on_event("startup")
 async def startup_event():
     """Pre-load the default model at startup to avoid a latency spike on the

@@ -244,14 +244,18 @@ function init() {
             const isPdf = file.type === 'application/pdf';
             const endpointPath = isPdf ? '/predict_document' : '/predict_image';
 
-            // 2. Determine Base URL (Fix for Dev Environment)
-            // If running on localhost:8080 (Webpack Dev Server), point to Python API on 8000
-            let baseUrl = '';
-            if (window.location.hostname === 'localhost' && window.location.port === '8080') {
-                baseUrl = 'http://localhost:8000';
-                console.log("Dev environment detected: Targeting API at " + baseUrl);
-            }
+            // --- REFINED: Derive base URL from the current origin dynamically ---
+            // Assumes API is hosted alongside the frontend, or uses a relative path
+            let baseUrl = window.location.origin;
 
+            // If the user manually provided a META tag for cross-origin APIs (optional architecture best practice)
+            const metaApiUrl = document.querySelector('meta[name="api-base-url"]');
+            if (metaApiUrl) {
+                baseUrl = metaApiUrl.getAttribute('content');
+            } else if (window.location.port === '8080') {
+                 // Dev fallback
+                 baseUrl = 'http://localhost:8000';
+            }
             const finalUrl = baseUrl + endpointPath;
 
             // UI Reset

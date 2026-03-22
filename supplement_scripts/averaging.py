@@ -90,21 +90,38 @@ def load_and_melt(file_paths):
             class_cols = [c for c in df.columns if c.startswith('CLASS-')]
             indices = [int(c.split('-')[1]) for c in class_cols if c.split('-')[1].isdigit()]
 
+            # --- REFINED: Vectorized Pandas Melt instead of a for-loop ---
             if not indices:
                 print(f"Warning: No CLASS-x columns found in {fpath}. Skipping.")
                 continue
 
-            # Melt each pair
-            file_parts = []
-            for i in indices:
-                cls_col = f'CLASS-{i}'
-                scr_col = f'SCORE-{i}'
+            # Isolate the relevant columns for melting
+            cols_to_keep = ['FILE', 'PAGE'] + [f'CLASS-{i}' for i in indices] + [f'SCORE-{i}' for i in indices]
+            # Ensure columns exist before filtering to prevent KeyErrors
+            cols_to_keep = [c for c in cols_to_keep if c in df.columns]
 
-                if cls_col in df.columns and scr_col in df.columns:
-                    temp = df[['FILE', 'PAGE', cls_col, scr_col]].rename(
-                        columns={cls_col: 'CLASS', scr_col: 'SCORE'}
-                    )
-                    file_parts.append(temp)
+            df_subset = df[cols_to_keep].copy()
+
+            # Use Pandas highly optimized C-level melting function
+            melted = pd.wide_to_long(
+                df_subset,
+                stubnames=['CLASS', 'SCORE'],
+                i=['FILE', 'PAGE'],
+                j='rank',
+                sep='-',
+                suffix=r'\d+'
+            ).reset_index().dropna(subset=['CLASS'])
+
+            if not melted.empty:
+                # Deduplicate WITHIN the model
+                melted = melted.groupby(['FILE', 'PAGE', 'CLASS'], as_index=False)['SCORE'].max()
+
+                # Track unique (FILE, PAGE) pairs for intersection
+                unique_pairs = set(zip(melted['FILE'], melted['PAGE']))
+                file_page_sets.append(unique_pairs)
+
+                long_dfs.append(melted)
+                loaded_models_count += 1
 
             if file_parts:
                 melted = pd.concat(file_parts, ignore_index=True).dropna(subset=['CLASS'])

@@ -3,29 +3,30 @@
 # Set output image quality (300 DPI)
 DPI=300
 
-# Find all PDF files in the current directory and process them in parallel
-find . -name "*.pdf" | while read -r pdf_file; do
-    {
-        # Get the filename without extension
-        filename=$(basename "$pdf_file" .pdf)
+# --- REFINED: Bounded parallelism using xargs ---
+# Find all PDF files in the current directory and process them in parallel safely.
+# -print0 and -0 safely handle filenames containing spaces.
+# -P $(nproc) limits the number of concurrent jobs to the number of available CPU cores.
+find . -name "*.pdf" -print0 | xargs -0 -I {} -P $(nproc) sh -c '
+    pdf_file="{}"
 
-        # Create a directory for the images from this PDF file
-        mkdir -p "$filename"
+    # Get the filename without extension
+    filename=$(basename "$pdf_file" .pdf)
 
-        # Convert each page of the PDF to a PNG image in the specified folder
-        pdftoppm -png -r $DPI "$pdf_file" "$filename/$filename"
+    # Create a directory for the images from this PDF file
+    mkdir -p "$filename"
 
-        # Check if conversion was successful
-        if [ $? -eq 0 ]; then
-            echo "Converted $pdf_file to PNG images in folder $filename"
-            # Remove the original PDF file
-            rm "$pdf_file"
-        else
-            echo "Failed to convert $pdf_file"
-        fi
-    } &
-done
+    # Convert each page of the PDF to a PNG image in the specified folder
+    pdftoppm -png -r '$DPI' "$pdf_file" "$filename/$filename"
 
-# Wait for all parallel jobs to complete
-wait
+    # Check if conversion was successful
+    if [ $? -eq 0 ]; then
+        echo "Converted $pdf_file to PNG images in folder $filename"
+        # Remove the original PDF file
+        rm "$pdf_file"
+    else
+        echo "Failed to convert $pdf_file"
+    fi
+'
 
+echo "All PDFs processed."

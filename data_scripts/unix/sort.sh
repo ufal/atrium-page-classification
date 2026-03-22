@@ -18,26 +18,38 @@ tail -n +2 "$input_csv" | while IFS=',' read -r filename page_number category; d
   # Check if subdirectory exists in input directory
   input_subdir="$input_dir/$filename"
   if [ -d "$input_subdir" ]; then
-    # Get the number of files in the input subdirectory
-    file_count=$(ls -1q "$input_subdir"/*.png 2>/dev/null | wc -l)
-    # Pad the page number with zeros to match the file name format
-    pn=$(printf "%0${#file_count}d" "$page_number")
 
-    # Find the file ending with the padded page number
-    file_to_copy=$(find "$input_subdir" -type f -name "*-$pn.png" -print -quit)
-    # Copy the file to the category subdirectory
-    if [ -n "$file_to_copy" ]; then
-      cp "$file_to_copy" "$category_dir/"
-    else
+    # --- REFINED: Construct the target path directly to avoid I/O bottlenecks ---
+    # Instead of executing 'find' which scans the whole directory on every loop,
+    # we check for the file using known padding formats natively.
+    file_found=false
+    for pad in "" "%02d" "%03d" "%04d"; do
+        if [ -z "$pad" ]; then
+            pn="$page_number"
+        else
+            pn=$(printf "$pad" "$page_number")
+        fi
+
+        expected_file="$input_subdir/${filename}-${pn}.png"
+
+        if [ -f "$expected_file" ]; then
+            cp "$expected_file" "$category_dir/"
+            file_found=true
+            break
+        fi
+    done
+
+    if [ "$file_found" = false ]; then
       echo "File ending with $page_number not found in $input_subdir."
     fi
+
   else
     # Use 'onepagers' as the default subdirectory
     default_subdir="$input_dir/onepagers"
-    # Find the file starting with the filename and ending with the page number
-    file_to_copy=$(find "$default_subdir" -type f -name "$filename-$page_number.png" -print -quit)
-    if [ -n "$file_to_copy" ]; then
-      cp "$file_to_copy" "$category_dir/"
+    expected_file="$default_subdir/${filename}-${page_number}.png"
+
+    if [ -f "$expected_file" ]; then
+      cp "$expected_file" "$category_dir/"
     else
       echo "File starting with $filename and ending with $page_number not found in $default_subdir."
     fi

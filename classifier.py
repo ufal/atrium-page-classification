@@ -127,7 +127,14 @@ class ImageClassifier:
         """
         Initialize the image classifier with the specified checkpoint.
         """
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # --- REFINED: Comprehensive hardware acceleration check ---
+        if torch.cuda.is_available():
+            self.device = torch.device('cuda')
+        elif torch.backends.mps.is_available():
+            self.device = torch.device('mps')
+        else:
+            self.device = torch.device('cpu')
+
         self.model_name = checkpoint
 
         if checkpoint.startswith("timm"):
@@ -140,7 +147,8 @@ class ImageClassifier:
 
             # print(self.model.config)
 
-            image_size = self.model.config.pretrained_cfg["input_size"][-1]  # For timm models, input_size is [batch_size, channels, height, width]
+            image_size = self.model.config.pretrained_cfg["input_size"][
+                -1]  # For timm models, input_size is [batch_size, channels, height, width]
             image_mean = self.model.config.pretrained_cfg["mean"]
             image_std = self.model.config.pretrained_cfg["std"]
             self.processor = None

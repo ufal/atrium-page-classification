@@ -26,12 +26,14 @@ def get_image_files(folder: Path) -> List[Path]:
     return image_files
 
 
-def process_tiff_image(img: Image.Image) -> Image.Image:
-    """Process TIFF images, handling multiple frames and bit depths."""
-    # Count frames
+def process_tiff_image(img: Image.Image, max_frames_to_check: int = 10) -> Image.Image:
+    """Process TIFF images, handling multiple frames and bit depths.
+       Bounds the evaluation to a maximum number of frames to prevent stalling on massive TIFFs.
+    """
+    # Count frames up to a safety limit
     try:
         n_frames = 0
-        while True:
+        while n_frames < max_frames_to_check:
             img.seek(n_frames)
             n_frames += 1
     except EOFError:
@@ -42,7 +44,7 @@ def process_tiff_image(img: Image.Image) -> Image.Image:
         img.seek(0)
         return img
 
-    # Find best frame (with most content)
+    # Find best frame (with most content) within the bounded range
     best_frame, max_std = 0, 0
     for i in range(n_frames):
         img.seek(i)
