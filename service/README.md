@@ -1,3 +1,4 @@
+
 # ATRIUM Page Classification API Service 🚀
 
 ### Goal: Serve historical document classification models via a lightweight REST API
@@ -5,7 +6,7 @@
 **Scope:** This service provides a **FastAPI** interface for the Atrium Page Classification models. 
 It allows users to upload document images and receive structural classification predictions (e.g., 
 Text, Drawing, Table) using various fine-tuned on historical data [^17] deep learning models 
-(ViT, EfficientNet, RegNetY). It includes a basic static HTML frontend for testing.
+(ViT, EfficientNet, RegNetY). It includes basic static HTML frontends for both standalone testing and LINDAT integration.
 
 ### Table of contents 📑
 
@@ -24,13 +25,13 @@ Text, Drawing, Table) using various fine-tuned on historical data [^17] deep lea
 
 ## Service Description 📇
 
-The API is built using **FastAPI** and is designed to run inference on single images. 
+The API is built using **FastAPI** and is designed to run inference on single images or multipage PDFs. 
 It acts as a bridge between the fine-tuned PyTorch models and downstream applications or web interfaces.
 
 Key features:
 * **Multiple Architectures:** Supports switching between ViT, RegNetY, and EfficientNet models dynamically.
 * **GPU Support:** Automatically detects and utilizes CUDA devices if available.
-* **Lightweight Frontend:** Includes a simple HTML/JS interface for manual testing of the API.
+* **Lightweight Frontends:** Includes simple HTML/JS interfaces for manual testing of the API, both as standalone and LINDAT-ready modules.
 
 ## Directory Structure 📂
 
@@ -44,10 +45,13 @@ atrium-page-classification/
 │   ├── inference.py         # Model loading and prediction logic
 │   ├── requirements.txt     # Python dependencies for the API
 │   ├── test_api.py          # Client script to test the API endpoints
-│   └── frontend/            # 🎨 Frontend assets
-│       ├── index.html       # Web interface
-│       └── script.js        # Logic for the web interface
-├── setup_api_server.sh      # Setup script for environment, dependencies, and models
+│   ├── frontend/            # 🎨 Standalone frontend assets (LINDAT-independent)
+│   │   ├── index.html       # Standalone web interface
+│   │   └── script.js        # Standalone logic
+│   └── frontend-lindat/     # 🎨 LINDAT-integrated frontend assets
+│       ├── index.html       # Web interface with LINDAT headers/footers
+│       └── script.js        # Logic handling LINDAT stylings
+├── setup_api_service.sh     # Setup script for environment, dependencies, and models
 ├── run.py                   # Script to download models manually
 └── classifier.py            # Base ImageClassifier class (imported by inference.py)
 ```
@@ -87,15 +91,16 @@ The models classify pages into 11 distinct structural categories:
 
 ### Endpoints 🔗
 
-| Method | Path       | Description                                                                                  |
-|:-------|:-----------|:---------------------------------------------------------------------------------------------|
-| `GET`  | `/`        | Serves the static `index.html` interface for manual testing.                                 |
-| `GET`  | `/info`    | Returns metadata about available models and the active computation device (`cpu` or `cuda`). |
-| `POST` | `/predict` | Performs inference on an uploaded image.                                                     |
+| Method | Path                | Description                                                                                  |
+|:-------|:--------------------|:---------------------------------------------------------------------------------------------|
+| `GET`  | `/`                 | Serves the static `index.html` interface for manual testing.                                 |
+| `GET`  | `/info`             | Returns metadata about available models and the active computation device (`cpu` or `cuda`). |
+| `POST` | `/predict_image`    | Performs inference on an uploaded single image (JPG/PNG).                                    |
+| `POST` | `/predict_document` | Performs inference on an uploaded multipage PDF document.                                    |
 
 ### Request Example 💻
 
-**Endpoint:** `/predict`
+**Endpoint:** `/predict_image`
 
 **Parameters (Form Data):**
 * `file`: The image file (JPEG or PNG).
@@ -105,7 +110,7 @@ The models classify pages into 11 distinct structural categories:
 Request example using `curl`:
 
 ```bash
-curl -X POST "http://localhost:8000/predict" \
+curl -X POST "http://localhost:8000/predict_image" \
   -F "file=@/path/to/image.png" \
   -F "version=v2.3" \
   -F "topn=1"
@@ -114,9 +119,8 @@ curl -X POST "http://localhost:8000/predict" \
 Example JSON response:
 ```json
 {
+  "type": "image",
   "model_version": "google/vit-base-patch16-224 (v2.3)",
-  "best_category": "TEXT",
-  "score": 0.975,
   "requested_topn": 1,
   "predictions": [
     {
@@ -127,11 +131,12 @@ Example JSON response:
 }
 ```
 
+
 ## Installation & Setup 🛠
 
 ### 1. Prerequisites
 * **Python 3.10+**
-* **NodeJS** (For client-side development)
+* **NodeJS** (For client-side development within LINDAT environment)
 * **Standard CPU** (Sufficient for **Client-side** development).
 * **CUDA-capable GPU** (Recommended for **Server-side** inference speed, though CPU is supported). [^10]
 
@@ -142,22 +147,22 @@ create a virtual environment, and install all of the required packages:
 
 ```bash
 # Create and activate virtual environment
-git clone https://github.com/ufal/atrium-page-classification.git
+git clone [https://github.com/ufal/atrium-page-classification.git](https://github.com/ufal/atrium-page-classification.git)
 cd atrium-page-classification
-chmod + x setup_api_server.sh
-./setup_api_server.sh
+chmod +x setup_api_service.sh
+./setup_api_service.sh
 ```
 
 Key libraries include: fastapi, uvicorn, python-multipart, pillow, torch, timm, transformers. These
 libraries can be found in `service/requirements.txt` available for manual installation if needed.
 
-> [!NOTE] The virtual environment name is stated in the setup script and can be changed to the already existing
+> [!NOTE] The virtual environment name is stated in the setup script and can be changed to an existing
 > one if needed.
 
 ### 3. Model Weights
 
 The setup script also downloads the fine-tuned model weights from the Hugging Face Hub [^1].
-It is done via 'run.py' script that saves the weights in the `model/` directory.
+It is done via the `run.py` script that saves the weights in the `model/` directory.
 
 > [!NOTE] The very first run may take some time as it downloads multiple model files to 
 > be cached locally. When using the WEB UI, `inference.py` will check for the models 
@@ -167,7 +172,7 @@ It is done via 'run.py' script that saves the weights in the `model/` directory.
 If you prefer the manual approach, you can download the weights to the `model/` directory by yourself:
 
 ```bash
-source venv-api/bin/activate
+source venv/bin/activate
 python3 run.py --hf -rev vX.3
 ````
 where `X` is the model version (1, 2, 3, 4, or 5).
@@ -181,24 +186,23 @@ Use this guide to verify the inference service is communicating correctly with t
 Open two terminal windows (or tabs) and run the following commands:
 
 ```bash
-source venv-api/bin/activate
+source venv/bin/activate
 cd atrium-page-classification/service/
 ```
 
 Then, in each window, execute the respective commands:
 
 
-| **Server Console (Window 1)**                                                                                                                                                                         | **Client Console (Window 2)**                                                                                                                                                                                        |
+| **Server Console (Window 1)** | **Client Console (Window 2)** |
 |-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **1. Start the API:**<br><br>Run the FastAPI server from the service directory.<br><br>`python3 api.py`<br><br>You should see startup logs indicating the server is running on `http://0.0.0.0:8000`. | **2. Send a Request:**<br><br> Top-3 Classification of `image.png`:<br><br>`python3 test_api.py -<br/> -f .../image.png -v v5.3 --top 3`<br><br> where `-f` and `-v` stand for **input file** and **model version**. |
+| **1. Start the API:**<br><br>Run the FastAPI server from the service directory.<br><br>`python3 api.py`<br><br>You should see startup logs indicating the server is running on `http://0.0.0.0:8000`. | **2. Send a Request:**<br><br> Top-3 Classification of `image.png`:<br><br>`python3 test_api.py -f .../image.png -v v5.3 --top 3`<br><br> where `-f` and `-v` stand for **input file** and **model version**. |
 
 ### Expected Output
 
 ```json
 {
+  "type": "image",
   "model_version": "google/vit-large-patch16-384 (v5.3)",
-  "best_category": "TEXT",
-  "score": 0.985,
   "requested_topn": 3,
   "predictions": [
     {
@@ -220,9 +224,8 @@ Or for `-v all` the best models ensemble (average of 5 class scores):
 
 ```json
 {
+  "type": "image",
   "model_version": "Ensemble (Average of 5 Models)",
-  "best_category": "LINE_HW",
-  "score": 0.9997688055038452,
   "requested_topn": 5,
   "predictions": [
     {"label": "LINE_HW",
@@ -246,18 +249,17 @@ Or for `-v all` the best models ensemble (average of 5 class scores):
 
 ## Client Side Test 🎨
 
-This API service includes a lightweight vanilla JS frontend (`service/frontend/script.js`) for immediate testing. 
-However, the full LINDAT client integration is developed separately. [^5]
+This API service includes two versions of the frontend for immediate testing:
+1. `service/frontend/`: A lightweight, standalone vanilla JS frontend.
+2. `service/frontend-lindat/`: A LINDAT-integrated client developed for usage inside the LINDAT ecosystem [^5].
 
-For client-side development, open a **second console window** and follow these steps:
+For client-side development within LINDAT, open a **second console window** and follow these steps:
 
-1.  **Clone the repository** and place `atrium-page-classification` project files to `lindat-common` directory
+1.  **Clone the repository** and place `atrium-page-classification` project files into the `lindat-common` directory:
     ```bash
     git clone [https://github.com/ufal/lindat-common.git](https://github.com/ufal/lindat-common.git)
     cd lindat-common
-    cp -r atrium-page-classification .
-    # or
-    mv atrium-page-classification .
+    cp -r ../atrium-page-classification .
     ```
 
 2.  **Install NodeJS environment** (unless you already have one) and **Install dependencies for development:**
@@ -283,13 +285,13 @@ environment is activated in your **first console window**: [^3]
 
 ```bash
 cd atrium-page-classification
-source venv-api/bin/activate
+source venv/bin/activate
 uvicorn service.api:app --reload
 ```
 
-The server will start at http://0.0.0.0:8000 (access to use the built-in visual testing tool).
+The server will start at `http://0.0.0.0:8000` (access this to use the built-in standalone visual testing tool located in `service/frontend`).
 
-### Using the client-side test interface
+### Using the LINDAT client-side test interface
 
 Assuming your **second console** output ends like this:
 
@@ -306,8 +308,7 @@ Assuming your **second console** output ends like this:
 
 Open the URL `http://localhost:8080` in your web browser to access the LINDAT client interface. 
 
-Follow the file tree to the `atrium-page-classification/service/frontend` directory. The frontend interface
-will open and allow you to upload images and test the API.
+Follow the file tree to the `atrium-page-classification/service/frontend-lindat` directory. The frontend interface will open and allow you to upload images and test the API.
 
 ## Contacts 📧
 
