@@ -1,3 +1,13 @@
+<p align="center">
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10+-blue.svg" title="Python Version"></a>
+  <a href="https://huggingface.co/ufal/vit-historical-page"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20HF-vit--historical--page-yellow.svg" title="Hugging Face Model"></a>
+  <a href="http://hdl.handle.net/20.500.12800/1-5959"><img src="https://img.shields.io/badge/dataset-LINDAT-orange.svg" title="LINDAT Dataset"></a>
+  <a href="https://opensource.org/license/mit/"><img src="https://img.shields.io/github/license/ufal/atrium-page-classification" title="MIT License"></a>
+  <a href="https://atrium-research.eu/"><img src="https://img.shields.io/badge/funded%20by-ATRIUM-8A2BE2.svg" title="ATRIUM Project"></a>
+</p>
+
+---
+
 # Image classification using fine-tuned ViT, RegNetY or EffNetV2 - for historical document sorting
 
 ### Goal: solve a task of archive page images sorting (for their further content-based processing)
