@@ -195,6 +195,54 @@ pre-commit run --all-files
 
 ---
 
+
+### Running the test suite
+
+The repository ships a lightweight `pytest` harness that requires **no ML models or GPU**
+for standard unit tests. Heavy tests that do require models or network access are marked
+`slow` and are excluded from the default run.
+
+```bash
+pip install -r requirements-test.txt  # pytest>=8.0 and pytest-cov only
+```
+
+```bash
+pytest -m "not slow" --tb=short                              # fast — use before every commit
+pytest --tb=short                                            # full suite (requires model setup)
+pytest -m "not slow" --cov=. --cov-report=term-missing      # with coverage
+```
+
+`tests/test_paradata.py` (`ParadataLogger`, `_sanitise`) is shared across all repos.
+Repo-specific modules and GPU-heavy tests are marked `@pytest.mark.slow` and skipped by default.
+
+<details>
+<summary>Test layout, per-repo targets, and fixture conventions</summary>
+
+```text
+tests/
+├── __init__.py              # empty
+├── conftest.py              # shared fixtures (tmp_path wrappers, sample data loaders)
+├── fixtures/                # small static test-data files committed to the repo
+└── test_<module>.py         # repo-specific unit tests
+```
+
+**Per-repo targets:**
+
+| Repository                | Test file           | Primary targets                                                                                                                                    |
+|---------------------------|---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `atrium-nlp-enrich`       | `test_keywords.py`  | `_extract_surface_text`, `_extract_lemmas`, `_extract_legacy`, `extract_keywords`, `_sort_csv_file`                                                |
+| `atrium-alto-postprocess` | `test_text_util.py` | Density/ratio helpers, detectors, `pre_filter_line`, `parse_line_splits`, `categorize_line` (ppl passed directly, no GPU), `compute_quality_score` |
+| `atrium-alto-postprocess` | `test_utils.py`     | `directory_scraper`, `dataframe_results` (Top-1 and Top-N), `collect_images`                                                                       |
+| `atrium-translator`       | `test_utils.py`     | `_resolve_namespaces`, `validate_xml_with_xsd`, `process_alto_xml`, `process_amcr_xml` (mock translator injected)                                  |
+
+**Slow tests** — any test loading a model checkpoint, calling an external API, or requiring a GPU must be decorated with `@pytest.mark.slow`. Document in the PR description which resource it requires and how to enable it locally.
+
+**Fixtures** — small, self-contained files committed under `tests/fixtures/`. Tests must not read from `data_samples/` directly. Add a minimal fixture file in the same commit as any test that needs new sample data.
+
+</details>
+
+---
+
 ## 📁 Repository Documentation Management
 
 Each documentation file has one target audience and one responsibility. Rules are not repeated — cross-references are used instead.
