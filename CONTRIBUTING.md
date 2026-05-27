@@ -24,6 +24,8 @@ and rules for contributors.
 | **v0.5.0**      | ViT finetuned for page classification (Training dataset refined, Supplied project with data scripts, Switch to HF base models for finetuning to the defined dataset of labeled pages, Single ViT model released)                                                                                    | Pre-release |
 | **v0.2.0**      | RFC low-dimension features (Random Forest Classifier from manually extracted image features (texture, color, etc.), Confusion matrix results are included, For the first time, labeled dataset is used, [FAILED])                                                                                   | Pre-release |
 | **v0.1.0**      | DeepDoctection (OCR + DLA) draft without golden truth (PDF input file recognized for layout and OCR -> manual algorithm of page categorization, Initial sketch for the project of page classification using recognized page content, [FAILED])                                                      | Pre-release |
+
+
 ## 🏗️ Project Contributions & Capabilities
 
 This pipeline contributes 4 major stages to the data processing lifecycle, as detailed 
