@@ -3,199 +3,396 @@ import pandas as pd
 import os
 import numpy as np
 import random
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, ConfusionMatrixDisplay
+from sklearn.metrics import (
+    accuracy_score, confusion_matrix, classification_report,
+    ConfusionMatrixDisplay,
+)
 from matplotlib import pyplot as plt
 import time
 import datetime
 import re
 import scipy.special
 
-# get list of all files in the folder and nested folders by file format
-def directory_scraper(folder_path: Path, file_format: str = "png", file_list: list = None) -> list[str]:
+
+# ── filesystem helpers ────────────────────────────────────────────────────────
+
+def directory_scraper(
+    folder_path: Path,
+    file_format: str = "png",
+    file_list: list = None,
+) -> list:
+    """Recursively collect all files matching *file_format* under *folder_path*."""
     if file_list is None:
         file_list = []
-    file_list += list(folder_path.rglob(f"*.{file_format}"))
-    print(f"[ {file_format.upper()} ] \tFrom directory {folder_path} collected {len(file_list)} {file_format} files")
+    file_list += list(Path(folder_path).rglob(f"*.{file_format}"))
+    print(
+        f"[ {file_format.upper()} ] \tFrom directory {folder_path} "
+        f"collected {len(file_list)} {file_format} files"
+    )
     return file_list
 
 
-def dataframe_results(
-        test_images: list,
-        test_predictions: list,
-        categories: list,
-        top_N: int,
-        raw_scores: list = None
-) -> (pd.DataFrame, pd.DataFrame):
+# ── dataset collection ────────────────────────────────────────────────────────
+
+def collect_images(
+    directory: str,
+    max_categ: int = None,
+    ordered: bool = False,
+) -> tuple:
     """
-    Processes image prediction results into two pandas DataFrames:
-    one for formatted top-N predictions and another for raw scores.
+    Walk *directory* for category sub-directories and return
+    (file_paths, one-hot_labels, category_names).
 
-    FIXED VERSION:
-      - Ensures test_predictions is flattened into an array of per-image scores.
-      - Safely handles cases where the number of prediction values does not match
-        the number of categories.
+    Parameters
+    ----------
+    directory  : root folder whose immediate sub-directories are category names
+    max_categ  : maximum images per category (None = unlimited)
+    ordered    : if True, sort the returned file list alphabetically
     """
-    print(f"Processing {len(test_images)} images with top_N={top_N} predictions "
-          f"of {len(categories)} possible labels...")
+    categories = sorted(os.listdir(directory))
+    print(f"Category input directories found: {categories}")
 
-    # --- FIX 1: Flatten test_predictions into a single array of per-image scores ---
-    # Convert list of batch arrays into a single list of per-image score arrays
-    flat_predictions = []
-    for batch_preds in test_predictions:
-        # Assuming batch_preds is a numpy array or torch tensor of shape (batch_size, n_classes)
-        # Convert to numpy array and ensure it's 2D
-        batch_preds = np.atleast_2d(np.asarray(batch_preds))
-        for row in batch_preds:
-            flat_predictions.append(row)
+    total_files, total_labels, total_classes = [], [], []
 
-    if not flat_predictions:
-        print("[ERROR] Flat predictions list is empty.")
-        return pd.DataFrame(), None
-
-
-    # Vertically stack all per-image score arrays
-    try:
-        preds = np.vstack(flat_predictions)
-    except ValueError as e:
-        print(f"[CRITICAL ERROR] Could not stack flat predictions: {e}")
-        return pd.DataFrame(), None
-
-    # Check if the number of images in predictions matches test_images
-    if preds.shape[0] != len(test_images):
-        print(f"[ERROR] Mismatch: {len(test_images)} images, but {preds.shape[0]} predictions.")
-        # If mismatch, truncate to the minimum count, which is usually the length of the images list
-        min_len = min(preds.shape[0], len(test_images))
-        preds = preds[:min_len]
-        test_images = test_images[:min_len]
-        # raw_scores would also need truncation if it was used, but we'll assume it's aligned or None
-
-    n_images, n_raw_scores = preds.shape
-    n_categories = len(categories)
-    print(f"Final prediction array shape: {preds.shape}")
-
-    # --- FIX 2: Check and align categories and scores ---
-    # If the number of raw scores (columns) is greater than the number of categories, truncate the scores.
-    if n_raw_scores > n_categories:
-        # print(
-        #     f"[WARN] {n_raw_scores} prediction values but only {n_categories} categories. Truncating prediction scores to match categories.")
-        preds = preds[:, :n_categories]
-    # If the number of raw scores is less than the number of categories, truncate the categories list.
-    elif n_raw_scores < n_categories:
-        # print(f"[WARN] {n_categories} categories but only {n_raw_scores} prediction scores. Truncating category list.")
-        # categories = categories[:n_raw_scores]
-        n_categories = n_raw_scores
-
-    # Re-evaluate n_images, n_categories after potential truncation
-    if preds.ndim == 2:
-        n_images, n_categories = preds.shape
-    else:  # Should not happen after np.vstack
-        print("[ERROR] Predictions are not a 2D array.")
-        return pd.DataFrame(), None
-
-    results, raws = [], []
-    valid_rows = 0
-
-    for image_file, scores in zip(test_images, preds):
-        # Skip fully zero/padded rows
-        if np.all(scores == 0) and not np.any(scores):
+    for category_idx, category in enumerate(categories):
+        cat_dir = os.path.join(directory, category)
+        if not os.path.isdir(cat_dir):
             continue
 
-        # --- Robust filename parsing ---
-        image_name = Path(image_file).stem
-        match = re.search(r'(\d+)$', image_name)
-        if match:
-            page_num = int(match.group(1))
-            document = image_name[:match.start()].rstrip("-_")
-        else:
-            page_num = None
-            document = image_name
+        all_category_files = [
+            os.path.join(cat_dir, f) for f in os.listdir(cat_dir)
+        ]
 
-        # --- Stable softmax normalization ---
-        # scores should already be clipped to n_categories from the checks above
-        valid_scores = scores
-        # Use scipy.special.softmax for robustness if available, otherwise the custom one
+        if max_categ is not None and len(all_category_files) > max_categ:
+            random.shuffle(all_category_files)
+            all_category_files = all_category_files[:max_categ]
+
+        print(f"Collected {len(all_category_files)} {category} category images")
+
+        label_template = np.zeros(len(categories))
+        label_template[category_idx] = 1.0
+
+        total_files  += all_category_files
+        total_labels += [label_template.copy() for _ in all_category_files]
+        total_classes += [category_idx] * len(all_category_files)
+
+    if ordered and total_files:
+        paired = sorted(zip(total_files, total_labels, total_classes),
+                        key=lambda x: str(x[0]))
+        total_files, total_labels, total_classes = map(list, zip(*paired))
+
+    label, count = np.unique(total_classes, return_counts=True)
+    for label_id, label_count in zip(label, count):
+        print(
+            f"{categories[int(label_id)]}:\t{label_count}\t"
+            f"{round(label_count / max(len(total_labels), 1) * 100, 2)}%"
+        )
+
+    return total_files, total_labels, categories
+
+
+# ── prediction → DataFrame ────────────────────────────────────────────────────
+
+def _parse_image_filename(image_file) -> tuple:
+    """
+    Extract (document_name, page_number) from an image filename.
+
+    Supports separators ``-`` and ``_`` before the trailing page digits.
+    Falls back to PAGE=1 when no trailing digits are found.
+
+    Examples
+    --------
+    ``CTX193200994-24.png``  → (``CTX193200994``, 24)
+    ``report_012.png``       → (``report``, 12)
+    ``report_2021_003.png``  → (``report_2021``, 3)
+    ``coverpage.png``        → (``coverpage``, 1)
+    """
+    stem = Path(str(image_file)).stem
+    m = re.search(r"(\d+)$", stem)
+    if m:
+        page_num = int(m.group(1))
+        document = stem[: m.start()].rstrip("-_")
+    else:
+        page_num = 1
+        document = stem
+    return document, page_num
+
+
+def dataframe_results(
+    test_images: list,
+    test_predictions,
+    categories: list,
+    top_N: int,
+    raw_scores: list = None,
+) -> tuple:
+    """
+    Convert image prediction results into two pandas DataFrames.
+
+    Accepted formats for *test_predictions*
+    ----------------------------------------
+    1. **int-index list** – ``[0, 2, 1, …]``
+       One integer class index per image (typically top-1 predictions).
+
+    2. **tuple list** – ``[[(idx, score), …], …]``
+       One inner list per image, each containing ``(class_index, score)``
+       pairs ordered best-first (top-N predictions with explicit scores).
+
+    3. **score matrix** – 2-D ``numpy.ndarray`` *or* list of 1-D score arrays
+       Raw per-class logits / probabilities; softmax is applied internally.
+
+    Returns
+    -------
+    (results_df, raw_df)
+        *results_df* always has ``FILE``, ``PAGE``, ``CLASS-1`` … ``CLASS-N``
+        columns.  When ``top_N == 1`` a ``CATEGORY`` alias column is added and
+        ``SCORE-1`` is omitted.
+        *raw_df* is ``None`` unless *raw_scores* is provided.
+    """
+    print(
+        f"Processing {len(test_images)} images with top_N={top_N} "
+        f"predictions of {len(categories)} possible labels..."
+    )
+
+    n_categories = len(categories)
+    effective_N  = max(1, min(top_N, n_categories))
+    results: list = []
+
+    # ── detect prediction format ──────────────────────────────────────────────
+    def _is_int_format(preds):
+        return (
+            len(preds) > 0
+            and isinstance(preds[0], (int, np.integer))
+        )
+
+    def _is_tuple_format(preds):
+        return (
+            len(preds) > 0
+            and isinstance(preds[0], (list, tuple))
+            and len(preds[0]) > 0
+            and isinstance(preds[0][0], (list, tuple))
+        )
+
+    # ── format 1 : plain class-index list ────────────────────────────────────
+    if _is_int_format(test_predictions):
+        for img, idx in zip(test_images, test_predictions):
+            doc, page = _parse_image_filename(img)
+            label = (
+                categories[idx] if 0 <= int(idx) < n_categories else str(idx)
+            )
+            results.append([doc, page, label])
+
+        cols = ["FILE", "PAGE", "CLASS-1"]
+        rdf  = pd.DataFrame(results, columns=cols)
+        rdf["CATEGORY"] = rdf["CLASS-1"]
+
+    # ── format 2 : list of (idx, score) tuples ────────────────────────────────
+    elif _is_tuple_format(test_predictions):
+        for img, pred_list in zip(test_images, test_predictions):
+            doc, page = _parse_image_filename(img)
+            row = [doc, page]
+            # class columns first
+            for j in range(effective_N):
+                if j < len(pred_list):
+                    idx = pred_list[j][0]
+                    row.append(
+                        categories[idx]
+                        if 0 <= int(idx) < n_categories
+                        else str(idx)
+                    )
+                else:
+                    row.append("")
+            # score columns second
+            for j in range(effective_N):
+                row.append(
+                    round(float(pred_list[j][1]), 3)
+                    if j < len(pred_list)
+                    else 0.0
+                )
+            results.append(row)
+
+        cols = (
+            ["FILE", "PAGE"]
+            + [f"CLASS-{j + 1}" for j in range(effective_N)]
+            + [f"SCORE-{j + 1}" for j in range(effective_N)]
+        )
+        rdf = pd.DataFrame(results, columns=cols)
+
+        if effective_N == 1:
+            rdf = rdf.drop(columns=["SCORE-1"])
+            rdf["CATEGORY"] = rdf["CLASS-1"]
+
+    # ── format 3 : raw score matrix (original behaviour) ─────────────────────
+    else:
+        # Flatten to a list of 1-D per-image score arrays
+        flat: list = []
+        for batch in test_predictions:
+            batch = np.atleast_2d(np.asarray(batch))
+            for row in batch:
+                flat.append(row)
+
+        if not flat:
+            print("[ERROR] Flat predictions list is empty.")
+            return pd.DataFrame(), None
+
         try:
-            probs = scipy.special.softmax(valid_scores)
-        except AttributeError:
-            exp_scores = np.exp(valid_scores - np.max(valid_scores))
-            probs = exp_scores / np.sum(exp_scores)
-        except FloatingPointError as e:
-            print(f"[WARN] Floating point error during softmax: {e}. Using uniform distribution.")
-            probs = np.full_like(valid_scores, 1.0 / len(valid_scores))
+            preds_matrix = np.vstack(flat)
+        except ValueError as exc:
+            print(f"[CRITICAL ERROR] Could not stack predictions: {exc}")
+            return pd.DataFrame(), None
 
-        # --- Top-N selection ---
-        top_N = max(1, min(top_N, n_categories))
-        top_idx = probs.argsort()[::-1][:top_N]
-        labels = [categories[i] for i in top_idx]
-        score_vals = [round(float(probs[i]), 3) for i in top_idx]
+        # Align lengths
+        n_images = min(preds_matrix.shape[0], len(test_images))
+        preds_matrix = preds_matrix[:n_images]
+        images_slice = list(test_images)[:n_images]
 
-        results.append([document, page_num] + labels + score_vals)
-        valid_rows += 1
+        # Align category dimension
+        n_scores = preds_matrix.shape[1]
+        if n_scores > n_categories:
+            preds_matrix = preds_matrix[:, :n_categories]
+        elif n_scores < n_categories:
+            effective_N = max(1, min(top_N, n_scores))
 
-        # --- Raw scores ---
-        if raw_scores is not None:
-            raws.append([document, page_num] + [round(float(s), 3) for s in valid_scores])
+        for img, scores in zip(images_slice, preds_matrix):
+            if np.all(scores == 0):
+                continue
+            doc, page = _parse_image_filename(img)
 
-    # ... (rest of the function for DataFrame construction remains the same) ...
+            try:
+                probs = scipy.special.softmax(scores)
+            except Exception:
+                exp_s = np.exp(scores - np.max(scores))
+                probs = exp_s / np.sum(exp_s)
 
-    if valid_rows == 0:
-        print("[ERROR] No valid prediction rows found — check input shapes or category count.")
-        return pd.DataFrame(), None
+            top_idx    = probs.argsort()[::-1][:effective_N]
+            labels     = [categories[i] for i in top_idx]
+            score_vals = [round(float(probs[i]), 3) for i in top_idx]
+            results.append([doc, page] + labels + score_vals)
 
-    # --- Construct formatted results DataFrame ---
-    col = ["FILE", "PAGE"] + [f"CLASS-{j + 1}" for j in range(top_N)] + [f"SCORE-{j + 1}" for j in range(top_N)]
-    rdf = pd.DataFrame(results, columns=col)
+        if not results:
+            print("[ERROR] No valid prediction rows found.")
+            return pd.DataFrame(), None
 
-    if top_N == 1:
-        rdf = rdf.rename(columns={"CLASS-1": "CATEGORY"}).drop(columns=["SCORE-1"])
+        cols = (
+            ["FILE", "PAGE"]
+            + [f"CLASS-{j + 1}" for j in range(effective_N)]
+            + [f"SCORE-{j + 1}" for j in range(effective_N)]
+        )
+        rdf = pd.DataFrame(results, columns=cols)
 
-    # --- Construct raw scores DataFrame ---
+        if effective_N == 1:
+            rdf = rdf.rename(columns={"CLASS-1": "CATEGORY"}).drop(
+                columns=["SCORE-1"]
+            )
+            rdf.insert(2, "CLASS-1", rdf["CATEGORY"])
+
+    # ── raw-scores DataFrame ──────────────────────────────────────────────────
     rawdf = None
     if raw_scores is not None:
-        raw_col = ["FILE", "PAGE"] + categories
-        rawdf = pd.DataFrame(raws, columns=raw_col)
+        raws: list = []
+        for img, scores in zip(test_images, raw_scores):
+            doc, page = _parse_image_filename(img)
+            raws.append([doc, page] + [round(float(s), 3) for s in scores])
 
-    print(f"Created results table with {len(rdf.index)} rows and columns: {rdf.columns.tolist()}")
+        if raws:
+            n_score_cols = len(raws[0]) - 2
+            raw_col = ["FILE", "PAGE"] + list(categories[:n_score_cols])
+            rawdf = pd.DataFrame(raws, columns=raw_col)
+
+    print(
+        f"Created results table with {len(rdf)} rows "
+        f"and columns: {rdf.columns.tolist()}"
+    )
     if rawdf is not None:
         print(f"Created RAW results table with shape {rawdf.shape}")
 
     return rdf, rawdf
 
 
-def collect_images(directory: str, max_categ: int) -> (list, list, list):
-    categories = sorted(os.listdir(directory))
-    print(f"Category input directories found: {categories}")
+# ── visualisation ─────────────────────────────────────────────────────────────
 
-    total_files, total_labels, total_classes = [], [], []
-    for category_idx, category in enumerate(categories):
-        all_category_files = os.listdir(os.path.join(directory, category))
-        if len(all_category_files) > max_categ:
-            random.shuffle(all_category_files)
-            all_category_files = all_category_files[:max_categ]
+def confusion_plot(
+    predictions,
+    true_labels: list,
+    categories: list,
+    model_name: str,
+    top_N: int = 1,
+    output_dir: str = None,
+) -> float:
+    """
+    Generate a normalised confusion matrix PNG and print a classification report.
 
-        print(f"Collected {len(all_category_files)} {category} category images")
+    Parameters
+    ----------
+    predictions  : list of int  *or*  list of [(idx, score), …]
+        For ``top_N == 1`` pass plain class indices.
+        For ``top_N > 1`` pass per-image lists of ``(class_index, score)``
+        pairs; the top-ranked index is used for the confusion matrix.
+    true_labels  : list of int – ground-truth class indices
+    categories   : list of str – ordered category names
+    model_name   : str – embedded in the output filename and plot title
+    top_N        : int – used in filename / title only
+    output_dir   : directory that contains (or will contain) a ``plots/``
+                   sub-directory.  Defaults to the current directory.
 
-        total_files += [os.path.join(directory, category, file) for file in all_category_files]
+    Returns
+    -------
+    float : top-1 accuracy in percent
+    """
+    # ── extract top-1 predicted index from any input format ──────────────────
+    if (
+        predictions
+        and isinstance(predictions[0], (list, tuple))
+        and predictions[0]
+        and isinstance(predictions[0][0], (list, tuple))
+    ):
+        # format: [[(idx, score), …], …]
+        pred_indices = [int(p[0][0]) for p in predictions]
+    else:
+        pred_indices = [int(p) for p in predictions]
 
-        label_template = np.zeros(len(categories))
-        label_template[category_idx] = 1
+    # ── output directory ──────────────────────────────────────────────────────
+    base_dir = Path(output_dir) if output_dir else Path(".")
+    plot_dir = base_dir / "plots"
+    plot_dir.mkdir(parents=True, exist_ok=True)
 
-        total_labels += [label_template] * len(all_category_files)
-        total_classes += [category_idx] * len(all_category_files)
+    time_stamp = time.strftime("%Y%m%d-%H%M%S")
+    plot_path  = plot_dir / f"{time_stamp}_{model_name}_TOP-{top_N}.png"
 
-    label, count = np.unique(total_classes, return_counts=True)
-    for label_id, label_count in zip(label, count):
-        print(f"{categories[int(label_id)]}:\t{label_count}\t{round(label_count / len(total_labels) * 100, 2)}%")
+    # ── metrics ───────────────────────────────────────────────────────────────
+    acc = accuracy_score(true_labels, pred_indices) * 100
 
-    return total_files, total_labels, categories
+    print("=" * 40)
+    print(f"\t*\tAccuracy: {acc:.2f}%")
+    print("=" * 40)
+    print(
+        classification_report(
+            true_labels,
+            pred_indices,
+            target_names=categories,
+            zero_division=0,
+        )
+    )
+
+    # ── plot ──────────────────────────────────────────────────────────────────
+    disp = ConfusionMatrixDisplay.from_predictions(
+        true_labels,
+        pred_indices,
+        display_labels=categories,
+        normalize="true",
+        cmap="inferno",
+    )
+    disp.ax_.set_title(f"TOP {top_N} {model_name} – {acc:.2f}%")
+    plt.savefig(plot_path, bbox_inches="tight", dpi=150)
+    plt.close()
+
+    print(f"Confusion matrix saved to {plot_path}")
+    return acc
 
 
-
+# ── misc ──────────────────────────────────────────────────────────────────────
 
 def append_to_csv(df, filepath):
-    """
-    Appends a DataFrame to a CSV file, or creates a new file if it doesn't exist.
-    """
+    """Append a DataFrame to a CSV file, or create it if it does not exist."""
     if not os.path.exists(filepath):
         df.to_csv(filepath, index=False, sep=",")
     else:

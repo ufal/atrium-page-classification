@@ -1023,28 +1023,116 @@ class CLIP(nn.Module, PyTorchModelHubMixin):
                 print(f"Warning: could not reload/sort final RAW file {raw_out_table}: {e}")
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# PATCH for classifier.py  –  two additions needed to fix test_classifier.py
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# 1. ADD custom_collate() as a module-level function (paste anywhere before the
+#    CLIP class definition, e.g. right after the imports block).
+#
+# 2. REPLACE the label-array setup lines near the top of split_data_80_10_10()
+#    so that one-hot label matrices are converted to integer class indices before
+#    the per-class grouping loop.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ── ADDITION 1 ── paste as a new module-level function ───────────────────────
+
+def custom_collate(batch):
+    """
+    Custom DataLoader collate function.
+
+    * Filters out ``None`` items (produced by datasets that return ``None``
+      for corrupt / unreadable files).
+    * Stacks ``pixel_values`` tensors into a single batch tensor.
+    * Stacks ``label`` values into a float tensor; items whose label is
+      ``None`` are silently omitted from the label tensor.
+    * Returns the sentinel ``(None, None)`` when *every* item in the batch
+      is ``None``, signalling the calling loop to skip this batch.
+
+    Parameters
+    ----------
+    batch : list of dict | None
+        Each element is either ``None`` or a dict with keys
+        ``"pixel_values"`` (torch.Tensor, shape C×H×W) and
+        ``"label"`` (Tensor / ndarray / list / None).
+
+    Returns
+    -------
+    dict with keys ``"pixel_values"`` and ``"labels"``, or ``(None, None)``.
+    """
+    valid = [item for item in batch if item is not None]
+    if not valid:
+        return (None, None)
+
+    pixel_values = torch.stack([item["pixel_values"] for item in valid])
+
+    label_tensors = []
+    for item in valid:
+        lbl = item.get("label")
+        if lbl is None:
+            continue
+        if isinstance(lbl, np.ndarray):
+            lbl = torch.tensor(lbl, dtype=torch.float32)
+        elif isinstance(lbl, list):
+            lbl = torch.tensor(lbl, dtype=torch.float32)
+        elif not isinstance(lbl, torch.Tensor):
+            lbl = torch.tensor(lbl, dtype=torch.float32)
+        else:
+            lbl = lbl.float()
+        label_tensors.append(lbl)
+
+    labels = torch.stack(label_tensors) if label_tensors else torch.tensor([])
+
+    return {"pixel_values": pixel_values, "labels": labels}
+
+
+# ── ADDITION 2 ── replace the array-setup lines in split_data_80_10_10 ───────
+#
+# FIND this block (near the top of split_data_80_10_10, after the seed lines):
+#
+#     files = np.array(files)
+#     labels = np.array(labels)
+#
+#     label_to_indices = defaultdict(list)
+#     for idx, label in enumerate(labels):
+#         label_to_indices[label].append(idx)
+#
+# REPLACE with:
+#
+#     files = np.array(files)
+#     labels = np.array(labels)
+#     # Accept both integer class-index vectors (1-D) and one-hot matrices (2-D)
+#     if labels.ndim == 2:
+#         labels = np.argmax(labels, axis=1)
+#
+#     label_to_indices = defaultdict(list)
+#     for idx, label in enumerate(labels):
+#         label_to_indices[label].append(idx)
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# The full corrected split_data_80_10_10 function is shown below for reference.
+# ─────────────────────────────────────────────────────────────────────────────
+
 def split_data_80_10_10(files: list, labels: list, random_seed: int, max_categ: int,
                         safe_check: bool = True):
     """
     Splits the data into training, validation, and test sets with an 80/10/10 ratio.
-    The split uses uniform distribution selection to maintain temporal distribution
-    across the sorted files (by creation date). Test and dev sets are selected first,
-    with remaining samples going to training.
 
-    Args:
-        files: List of file paths (should be sorted alphabetically by creation date)
-        labels: List of corresponding labels
-        random_seed: Random seed for reproducibility
-        max_categ: Maximum number of samples per category to consider
-        safe_check: If True, checks for corrupted images and excludes them
-    Returns:
-        tuple: (train_files, val_files, test_files, train_labels, val_labels, test_labels)
+    Accepts *labels* as either:
+    * a 1-D array of integer class indices, **or**
+    * a 2-D one-hot matrix (shape N × C) – converted to indices internally.
     """
     np.random.seed(random_seed)
     random.seed(random_seed)
 
-    files = np.array(files)
+    files  = np.array(files)
     labels = np.array(labels)
+
+    # ── NEW: support one-hot label matrices ───────────────────────────────────
+    if labels.ndim == 2:
+        labels = np.argmax(labels, axis=1)
+    # ──────────────────────────────────────────────────────────────────────────
 
     label_to_indices = defaultdict(list)
     for idx, label in enumerate(labels):
@@ -1060,69 +1148,70 @@ def split_data_80_10_10(files: list, labels: list, random_seed: int, max_categ: 
 
         label_to_indices[label] = indices.tolist()
 
-    total_files = [files[idx] for label in label_to_indices for idx in label_to_indices[label]]
+    total_files  = [files[idx]  for label in label_to_indices for idx in label_to_indices[label]]
     total_labels = [labels[idx] for label in label_to_indices for idx in label_to_indices[label]]
 
     if safe_check:
+        from PIL import Image as _Image
         print(f"Checking {len(total_files)} files for corrupted images...")
         good_files, good_labels = [], []
         for file, label in zip(total_files, total_labels):
             try:
-                Image.open(file).load()
+                _Image.open(file).load()
                 good_files.append(file)
                 good_labels.append(label)
-            except Exception as e:
-                print(f"File {file} is corrupted: {e}")
-                continue
+            except Exception as exc:
+                print(f"File {file} is corrupted: {exc}")
         print(f"Total usable images found: {len(good_files)} / {len(total_files)}")
     else:
         good_files, good_labels = total_files, total_labels
 
     files, labels = np.array(good_files), np.array(good_labels)
+
     label_to_indices = defaultdict(list)
     for idx, label in enumerate(labels):
         label_to_indices[label].append(idx)
 
-    test_indices = []
-    val_indices = []
-    train_indices = []
+    test_indices, val_indices, train_indices = [], [], []
 
     for label, indices in label_to_indices.items():
-        indices = np.array(indices)
+        indices   = np.array(indices)
         n_samples = len(indices)
 
         n_test = max(1, int(n_samples * 0.1))
-        n_val = max(1, int(n_samples * 0.1))
+        n_val  = max(1, int(n_samples * 0.1))
 
         if n_test + n_val > n_samples:
             n_test = n_samples // 2
-            n_val = n_samples - n_test
+            n_val  = n_samples - n_test
 
         if n_test > 0:
-            test_step = n_samples / n_test
+            test_step      = n_samples / n_test
             test_positions = np.arange(0, n_samples, test_step)[:n_test]
-            test_positions += np.random.uniform(-test_step / 4, test_step / 4, size=len(test_positions))
+            test_positions += np.random.uniform(
+                -test_step / 4, test_step / 4, size=len(test_positions)
+            )
             test_positions = np.clip(test_positions, 0, n_samples - 1).astype(int)
-            selected_test = indices[test_positions]
-            test_indices.extend(selected_test)
+            test_indices.extend(indices[test_positions])
 
         remaining_mask = np.ones(n_samples, dtype=bool)
         if n_test > 0:
             remaining_mask[test_positions] = False
         remaining_indices = indices[remaining_mask]
-        n_remaining = len(remaining_indices)
+        n_remaining       = len(remaining_indices)
 
         if n_val > 0 and n_remaining > 0:
-            val_step = n_remaining / n_val if n_val <= n_remaining else 1
+            val_step      = n_remaining / n_val if n_val <= n_remaining else 1
             val_positions = np.arange(0, n_remaining, val_step)[:n_val]
             if len(val_positions) > n_remaining:
                 val_positions = np.arange(n_remaining)
-            val_positions += np.random.uniform(-val_step / 4 if val_step > 1 else 0,
-                                               val_step / 4 if val_step > 1 else 0,
-                                               size=len(val_positions))
+            val_positions += np.random.uniform(
+                -val_step / 4 if val_step > 1 else 0,
+                 val_step / 4 if val_step > 1 else 0,
+                size=len(val_positions),
+            )
             val_positions = np.clip(val_positions, 0, n_remaining - 1).astype(int)
-            selected_val = remaining_indices[val_positions]
-            val_indices.extend(selected_val)
+            val_indices.extend(remaining_indices[val_positions])
 
             val_mask = np.ones(n_remaining, dtype=bool)
             val_mask[val_positions] = False
@@ -1130,19 +1219,11 @@ def split_data_80_10_10(files: list, labels: list, random_seed: int, max_categ: 
         else:
             train_indices.extend(remaining_indices)
 
-    test_indices = np.array(test_indices)
-    val_indices = np.array(val_indices)
+    test_indices  = np.array(test_indices)
+    val_indices   = np.array(val_indices)
     train_indices = np.array(train_indices)
 
-    test_files = files[test_indices]
-    test_labels = labels[test_indices]
-
-    val_files = files[val_indices]
-    val_labels = labels[val_indices]
-
-    train_files = files[train_indices]
-    train_labels = labels[train_indices]
-
-    return train_files, val_files, test_files, train_labels, val_labels, test_labels
-
-
+    return (
+        files[train_indices], files[val_indices],  files[test_indices],
+        labels[train_indices], labels[val_indices], labels[test_indices],
+    )
