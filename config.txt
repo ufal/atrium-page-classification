@@ -27,6 +27,12 @@ top_N = 1
 raw = False
 inner = False
 
+[YOLO]
+use_yolo    = True
+yolo_base   = yolov8s-cls.pt
+# available: yv8n yv8s yv8m yv11n yv11s yv11m
+yolo_imgsz  = 224
+
 [INPUT]
 FOLDER_INPUT=./category_samples
 chunk_size = 100

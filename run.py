@@ -4,6 +4,7 @@ import configparser
 import math
 
 from classifier import *
+from yolo_classifier import YOLOClassifier
 import time
 from huggingface_hub import create_branch, delete_branch
 from atrium_paradata import ParadataLogger
@@ -78,7 +79,7 @@ if __name__ == "__main__":
 
     time_stamp = time.strftime("%Y%m%d-%H%M")  # for results files
 
-    parser = argparse.ArgumentParser(description='Page sorter based on ViT')
+    parser = argparse.ArgumentParser(description='Page sorter based on ViT / YOLO-cls')
     parser.add_argument('-f', "--file", type=str, default=None, help="Single page image path")
     parser.add_argument('-ff', "--file_format", type=str, default=config_format,
                         help="File format to look for in the directory (e.g., png or jpeg)")
@@ -108,6 +109,19 @@ if __name__ == "__main__":
     parser.add_argument("--average", help="Averaging existing fold models", action="store_true")
     parser.add_argument("-ap", "--average_pattern", type=str, default=None,
                         help="Pattern for models weights to average (e.g., 'model_v4')")
+    # --- YOLO arguments ---
+    parser.add_argument(
+        "--yolo",
+        help="Use YOLO-cls model instead of ViT/CNN (overrides --base and --revision)",
+        action="store_true",
+        default=config.getboolean("YOLO", "use_yolo", fallback=False),
+    )
+    parser.add_argument(
+        "--yolo_base",
+        type=str,
+        default=config.get("YOLO", "yolo_base", fallback="yolov8s-cls.pt"),
+        help="YOLO base weights identifier (e.g. yolov8s-cls.pt)",
+    )
 
     args = parser.parse_args()
 
@@ -116,7 +130,12 @@ if __name__ == "__main__":
     args.folds = 0 if not args.train else args.folds
     args.average = False if args.average_pattern is None else args.average
 
-    if args.revision is None:  # using config file revision
+    # ── FIX 6: resolve YOLO name/path BEFORE paradata init so the log is accurate ──
+    if args.yolo:
+        yolo_tag = Path(args.yolo_base).stem.replace(".", "").replace("-", "")
+        revision_model_name_local = f"model_{yolo_tag}"
+        args.model = f"{model_dir}/{revision_model_name_local}"
+    elif args.revision is None:  # using config file revision
         args.revision = hf_version
         args.base = config_base_model
 
@@ -148,13 +167,13 @@ if __name__ == "__main__":
                   f"Consider specifying an explicit version tag.")
 
     # ── paradata init ─────────────────────────────────────────────────────────
-    # Placed AFTER full arg resolution so model_path and revision are accurate.
+    # Placed AFTER full arg resolution (including YOLO path) so logged paths are accurate.
     _paradata_cfg = {
         # argparse / config.txt values – extend as needed
         "model_path":    args.model      if hasattr(args, "model")      else config.get("SETUP", "model",    fallback=""),
         # FIX: was args.rev (AttributeError) – correct attribute name is args.revision
         "revision":      args.revision   if hasattr(args, "revision")   else config.get("HF",    "revision", fallback=""),
-        "base_model":    config.get("SETUP", "base_model",  fallback=""),
+        "base_model":    args.yolo_base  if args.yolo else config.get("SETUP", "base_model", fallback=""),
         "top_n":         args.topn       if hasattr(args, "topn")       else config.get("SETUP", "top_n",    fallback=""),
         "batch_size":    config.get("SETUP", "batch",       fallback=""),
         "input_path":    str(args.file or args.directory or config.get("INPUT", "folder", fallback="")),
@@ -163,6 +182,7 @@ if __name__ == "__main__":
         "mode":          "file" if (hasattr(args, "file") and args.file) else "directory",
         "raw_output":    str(getattr(args, "raw",  False)),
         "best_models":   str(getattr(args, "best", False)),
+        "yolo":          str(args.yolo),
     }
     _paradata_logger = ParadataLogger(
         program="page-classification",
@@ -190,6 +210,7 @@ if __name__ == "__main__":
     if not Path(model_dir).is_dir():
         os.makedirs(model_dir)
 
+    # ── data loading (train / eval) ───────────────────────────────────────────
     if args.train or args.eval:
         epochs = config.getint("TRAIN", "epochs")
         max_categ = config.getint("TRAIN", "max_categ")  # max number of category samples
@@ -202,153 +223,204 @@ if __name__ == "__main__":
         if args.train:
             total_files, total_labels, categories = collect_images(data_dir)
 
+    # ── FIX 1: eval data loaded once; classifier created once below ───────────
     if args.eval:
         data_dir = config.get("EVAL", "FOLDER_PAGES")
         testfiles, testLabels, categories = collect_images(data_dir)
-        # Initialize the classifier
-        classifier = ImageClassifier(checkpoint=args.base, num_labels=len(categories), store_dir=str(cp_dir))
+        # categories is now set from eval data; classifier constructed below
 
+    # ── single classifier instantiation (YOLO or standard) ───────────────────
+    if args.yolo:
+        # categories may have been set from training/eval data above; fall back
+        # to defaults if neither --train nor --eval was requested
+        if not (args.train or args.eval):
+            categories = def_categ
+        print(f"[YOLO] Using YOLO-cls backend: {args.yolo_base}")
+        classifier = YOLOClassifier(
+            checkpoint=args.yolo_base,
+            num_labels=len(categories),
+            categories=categories,
+            store_dir=str(cp_dir),
+            imgsz=config.getint("YOLO", "yolo_imgsz", fallback=224),
+        )
     else:
-        categories = def_categ
+        if not (args.train or args.eval):
+            categories = def_categ
         print(f"Category input directories found: {categories}")
-        # Initialize the classifier
-        classifier = ImageClassifier(checkpoint=args.base, num_labels=len(categories), store_dir=str(cp_dir))
+        classifier = ImageClassifier(
+            checkpoint=args.base,
+            num_labels=len(categories),
+            store_dir=str(cp_dir),
+        )
 
+    # ── training ──────────────────────────────────────────────────────────────
     if args.train:
+        if args.yolo:
+            # ── FIX 2 / FIX 3: YOLO single-run training (no DataLoader) ──────
+            (trainfiles, valfiles, testfiles,
+             trainLabels, valLabels, testLabels) = split_data_80_10_10(
+                total_files, total_labels, seed, max_categ
+            )
+            print(f"[YOLO] Training on {len(trainfiles)} images, validating on {len(valfiles)} images")
+            classifier.train_model(
+                trainfiles=list(trainfiles),
+                trainLabels=trainLabels,
+                valfiles=list(valfiles),
+                valLabels=valLabels,
+                out_model=revision_model_name_local,
+                num_epochs=epochs,
+                batch_size=batch,
+                learning_rate=learning_rate,
+                output_dir="./yolo_output",
+                logging_steps=log_step,
+            )
 
-        if args.folds > 0:
-            for i in range(args.folds):
-                print(f"--- Cross-Validation Fold {i + 1}/{args.folds} ---")
-                fold_seed = seed + i  # Use a different seed for each fold
+        else:
+            # ── standard ViT/CNN path ─────────────────────────────────────────
+            if args.folds > 0:
+                for i in range(args.folds):
+                    print(f"--- Cross-Validation Fold {i + 1}/{args.folds} ---")
+                    fold_seed = seed + i  # Use a different seed for each fold
 
+                    (trainfiles, valfiles, testfiles,
+                     trainLabels, valLabels, testLabels) = split_data_80_10_10(total_files, total_labels, fold_seed,
+                                                                               max_categ)
+
+                    # record datasets
+                    with open(f"{output_dir}/stats/{time_stamp}_{revision_model_name_local}_FOLD_{i + 1}_DATASETS.txt",
+                              "w") as f:
+                        f.write(f"Training set ({len(trainfiles)} images):\n")
+                        for file in trainfiles:
+                            f.write(f"{file}\n")
+                        f.write(f"\nValidation set ({len(valfiles)} images):\n")
+                        for file in valfiles:
+                            f.write(f"{file}\n")
+                        f.write(f"\nTest set ({len(testfiles)} images):\n")
+                        for file in testfiles:
+                            f.write(f"{file}\n")
+
+                    # Initialize a fresh classifier for each fold
+                    classifier = ImageClassifier(checkpoint=args.base, num_labels=len(categories), store_dir=str(cp_dir))
+
+                    train_loader = classifier.process_images(trainfiles, trainLabels, batch, True)
+                    eval_loader = classifier.process_images(valfiles, valLabels, batch, False)
+                    test_loader = classifier.process_images(testfiles, testLabels, batch, False)
+
+                    print(
+                        f"Fold {i + 1}: Training on {len(trainfiles)}, validating on {len(valfiles)}, testing on {len(testfiles)}.")
+
+                    # Train the model
+                    classifier.train_model(
+                        train_loader,
+                        eval_loader,
+                        output_dir=f"./model_output_fold_{i + 1}",
+                        out_model=f"{revision_model_name_local}{i + 1}",
+                        num_epochs=epochs,
+                        learning_rate=learning_rate,
+                        logging_steps=log_step
+                    )
+
+                    # Evaluate on the test set for the current fold
+                    print(f"--- Evaluating on test set for fold {i + 1} ---")
+                    test_predictions, raw_prediction = classifier.infer_dataloader(test_loader, top_N, raw)
+                    test_labels_indices = np.argmax(testLabels, axis=-1).tolist()
+
+                    print("=" * 40)
+                    print(
+                        f"TEST SET's correct percentage:\t{round(100 * sum([1 for true, pred in zip(test_labels_indices, test_predictions) if true == pred]) / len(test_labels_indices), 2)}%")
+                    print("=" * 40)
+                    print(classification_report(test_labels_indices, test_predictions,
+                                                target_names=categories, labels=list(range(len(categories))),
+                                                zero_division=0))
+
+                    rdf, raw_df = dataframe_results(testfiles, test_predictions, categories, top_N, raw_prediction)
+                    rdf["TRUE"] = [categories[label] for label in test_labels_indices]
+                    rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
+                    rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{len(test_labels_indices)}_{revision_model_name_local}_TEST_FOLD_{i + 1}.csv",
+                               index=False)
+
+                    if raw:
+                        raw_df["TRUE"] = [categories[label] for label in test_labels_indices]
+                        raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
+                        raw_df.to_csv(
+                            f"{output_dir}/tables/{time_stamp}_{len(test_labels_indices)}_{revision_model_name_local}_TEST_RAW_FOLD_{i + 1}.csv",
+                            index=False)
+
+                    print(f"Test results for fold {i + 1} saved.")
+
+            else:
+                # single-run (no cross-validation)
                 (trainfiles, valfiles, testfiles,
-                 trainLabels, valLabels, testLabels) = split_data_80_10_10(total_files, total_labels, fold_seed,
-                                                                           max_categ)
-
-                # record datasets
-                with open(f"{output_dir}/stats/{time_stamp}_{revision_model_name_local}_FOLD_{i + 1}_DATASETS.txt",
-                          "w") as f:
-                    f.write(f"Training set ({len(trainfiles)} images):\n")
-                    for file in trainfiles:
-                        f.write(f"{file}\n")
-                    f.write(f"\nValidation set ({len(valfiles)} images):\n")
-                    for file in valfiles:
-                        f.write(f"{file}\n")
-                    f.write(f"\nTest set ({len(testfiles)} images):\n")
-                    for file in testfiles:
-                        f.write(f"{file}\n")
-
-                # Initialize a new classifier for each fold
-                classifier = ImageClassifier(checkpoint=args.base, num_labels=len(categories), store_dir=str(cp_dir))
+                 trainLabels, valLabels, testLabels) = split_data_80_10_10(total_files, total_labels, seed, max_categ)
 
                 train_loader = classifier.process_images(trainfiles, trainLabels, batch, True)
                 eval_loader = classifier.process_images(valfiles, valLabels, batch, False)
-                test_loader = classifier.process_images(testfiles, testLabels, batch, False)
 
-                print(
-                    f"Fold {i + 1}: Training on {len(trainfiles)}, validating on {len(valfiles)}, testing on {len(testfiles)}.")
-
-                # Train the model
+                print(f"Training on {len(trainfiles)} images, evaluating on {len(valfiles)} images")
+                print(f"Base model: {args.base}, local model name: {revision_model_name_local}")
                 classifier.train_model(
                     train_loader,
                     eval_loader,
-                    output_dir=f"./model_output_fold_{i + 1}",
-                    out_model=f"{revision_model_name_local}{i + 1}",
+                    output_dir="./model_output",
+                    out_model=revision_model_name_local,
                     num_epochs=epochs,
                     learning_rate=learning_rate,
                     logging_steps=log_step
                 )
 
-                # Evaluate on the test set for the current fold
-                print(f"--- Evaluating on test set for fold {i + 1} ---")
-                test_predictions, raw_prediction = classifier.infer_dataloader(test_loader, top_N, raw)
-                # testLabels = [t for t in test_loader.image_labels if t is not None ]
-                test_labels_indices = np.argmax(testLabels, axis=-1).tolist()
-
-                print("=" * 40)
-                print(
-                    f"TEST SET's correct percentage:\t{round(100 * sum([1 for true, pred in zip(test_labels_indices, test_predictions) if true == pred]) / len(test_labels_indices), 2)}%")
-                print("=" * 40)
-                print(classification_report(test_labels_indices, test_predictions,
-                                            target_names=categories, labels=list(range(len(categories))),
-                                            zero_division=0))
-
-                rdf, raw_df = dataframe_results(testfiles, test_predictions, categories, top_N, raw_prediction)
-                rdf["TRUE"] = [categories[label] for label in test_labels_indices]
-                rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
-                rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{len(test_labels_indices)}_{revision_model_name_local}_TEST_FOLD_{i + 1}.csv",
-                           index=False)
-
-                if raw:
-                    raw_df["TRUE"] = [categories[label] for label in test_labels_indices]
-                    raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
-                    raw_df.to_csv(
-                        f"{output_dir}/tables/{time_stamp}_{len(test_labels_indices)}_{revision_model_name_local}_TEST_RAW_FOLD_{i + 1}.csv",
-                        index=False)
-
-                print(f"Test results for fold {i + 1} saved.")
-        else:
-
-            (trainfiles, valfiles, testfiles,
-             trainLabels, valLabels, testLabels) = split_data_80_10_10(total_files, total_labels, seed, max_categ)
-
-            # classifier = ImageClassifier(checkpoint=args.base, num_labels=len(categories), store_dir=str(cp_dir))
-
-            train_loader = classifier.process_images(trainfiles, trainLabels, batch, True)
-            eval_loader = classifier.process_images(valfiles, valLabels, batch, False)
-
-            print(f"Training on {len(trainfiles)} images, evaluating on {len(valfiles)} images")
-            print(f"Base model: {args.base}, local model name: {revision_model_name_local}")
-            classifier.train_model(
-                train_loader,
-                eval_loader,
-                output_dir="./model_output",
-                out_model=revision_model_name_local,
-                num_epochs=epochs,
-                learning_rate=learning_rate,
-                logging_steps=log_step
-            )
-
+    # ── HuggingFace hub ───────────────────────────────────────────────────────
     if args.hf:
-        # ----------------------------------------------
-        # ----- UNCOMMENT for pushing to HF repo -------
-        # ----------------------------------------------
-        #print(f"Deleting {args.revision} branch")
-        #delete_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision,
-        #              token=config.get("HF", "token"))
-        # print(f"Creating fresh {args.revision} branch")
-        # create_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision, exist_ok=True,
-        #               token=config.get("HF", "token"))
-        #
-        # print(f"Loading {args.model} model")
-        #
-        # classifier.load_model(str(args.model))
-        #
-        # classifier.push_to_hub(str(args.model), config.get("HF", "repo_name"), False, config.get("HF", "token"),
-        #                        config.get("HF", "revision"))
-        # ----------------------------------------------
+        # ── FIX 4: YOLO models are not on HF hub ─────────────────────────────
+        if args.yolo:
+            print("[YOLO] --hf is not supported for YOLO models. Skipping hub download.")
+        else:
+            # ----------------------------------------------
+            # ----- UNCOMMENT for pushing to HF repo -------
+            # ----------------------------------------------
+            #print(f"Deleting {args.revision} branch")
+            #delete_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision,
+            #              token=config.get("HF", "token"))
+            # print(f"Creating fresh {args.revision} branch")
+            # create_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision, exist_ok=True,
+            #               token=config.get("HF", "token"))
+            #
+            # print(f"Loading {args.model} model")
+            #
+            # classifier.load_model(str(args.model))
+            #
+            # classifier.push_to_hub(str(args.model), config.get("HF", "repo_name"), False, config.get("HF", "token"),
+            #                        config.get("HF", "revision"))
+            # ----------------------------------------------
 
-        # loading from repo
-        classifier.load_from_hub(config.get("HF", "repo_name"), args.revision)
+            # loading from repo
+            classifier.load_from_hub(config.get("HF", "repo_name"), args.revision)
 
-        hf_model_name_local = f"model_{args.revision.replace('.', '')}"
-        hf_model_path = f"{model_dir}/{hf_model_name_local}"
+            hf_model_name_local = f"model_{args.revision.replace('.', '')}"
+            hf_model_path = f"{model_dir}/{hf_model_name_local}"
 
-        classifier.save_model(hf_model_path)
+            classifier.save_model(hf_model_path)
 
-        classifier.load_model(hf_model_path)
+            classifier.load_model(hf_model_path)
 
     else:
         if not args.average and not args.best:
             classifier.load_model(args.model)
 
+    # ── evaluation ────────────────────────────────────────────────────────────
     if args.eval:
-        # revision_model_name_local = f"model_{args.revision.replace('.', '')}"
-
         print(f"\tModel loaded:\t{revision_model_name_local}\t{args.model}")
         print(f"\t*\t--- Evaluating on the test set ({len(testfiles)} images) ---")
-        test_loader = classifier.process_images(testfiles, testLabels, batch, False)
-        eval_predictions, raw_prediction = classifier.infer_dataloader(test_loader, top_N, raw)
+
+        # ── FIX 5: YOLO uses infer_dataloader(image_paths); ViT uses DataLoader ──
+        if args.yolo:
+            yolo_loader = classifier.create_dataloader(list(testfiles), batch)
+            eval_predictions, raw_prediction = classifier.infer_dataloader(
+                yolo_loader, top_N, raw
+            )
+        else:
+            test_loader = classifier.process_images(testfiles, testLabels, batch, False)
+            eval_predictions, raw_prediction = classifier.infer_dataloader(test_loader, top_N, raw)
+
         test_labels_indices = np.argmax(testLabels, axis=-1).tolist()
 
         rdf, raw_df = dataframe_results(testfiles, eval_predictions, categories, top_N, raw_prediction)
@@ -372,11 +444,13 @@ if __name__ == "__main__":
                        test_labels_indices,
                        categories,
                        revision_model_name_local,
-                       top_N)
+                       top_N,
+                       output_dir=str(output_dir))
         _paradata_logger.log_success("png")
 
         print(f"\t*\t--- Evaluation of {revision_model_name_local} completed ---")
 
+    # ── model averaging (ViT/CNN only) ────────────────────────────────────────
     if args.average:
         print("\n" + "=" * 60)
         print("AVERAGING EXISTING FOLD MODELS")
@@ -403,6 +477,7 @@ if __name__ == "__main__":
         else:
             print(f"Could not determine base model for pattern: {args.average_pattern}")
 
+    # ── inference ─────────────────────────────────────────────────────────────
     _total_inputs = 0
     try:
         if args.file is not None:
@@ -418,39 +493,43 @@ if __name__ == "__main__":
                     print(f"\t{lab}:  {round(sc * 100, 2)}%")
                 _paradata_logger.log_success("csv")
             else:
-                all_best_predictions = {}
+                # --best is a ViT-only feature; guard against YOLO misuse
+                if args.yolo:
+                    print("[YOLO] --best is not supported for YOLO models. Run without --best.")
+                else:
+                    all_best_predictions = {}
 
-                for rev, base_model in revision_best_models.items():
-                    print(f"\nLoading best model for revision {rev} based on {base_model}...")
-                    temp_classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories),
-                                                      store_dir=str(cp_dir))
-                    temp_model_name_local = f"model_{rev.replace('.', '')}"
-                    temp_model_path = f"{model_dir}/{temp_model_name_local}"
+                    for rev, base_model in revision_best_models.items():
+                        print(f"\nLoading best model for revision {rev} based on {base_model}...")
+                        temp_classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories),
+                                                          store_dir=str(cp_dir))
+                        temp_model_name_local = f"model_{rev.replace('.', '')}"
+                        temp_model_path = f"{model_dir}/{temp_model_name_local}"
 
-                    temp_classifier.load_model(temp_model_path)
+                        temp_classifier.load_model(temp_model_path)
 
-                    pred_scores = temp_classifier.top_n_predictions(args.file, len(categories))
+                        pred_scores = temp_classifier.top_n_predictions(args.file, len(categories))
 
-                    labels = [categories[i[0]] for i in pred_scores]
-                    scores = [round(i[1], 3) for i in pred_scores]
+                        labels = [categories[i[0]] for i in pred_scores]
+                        scores = [round(i[1], 3) for i in pred_scores]
 
-                    all_best_predictions[rev] = (labels, scores)
+                        all_best_predictions[rev] = (labels, scores)
 
-                    # FIX: explicitly release GPU memory after each model to avoid accumulation
-                    del temp_classifier
-                    if torch.cuda.is_available():
-                        torch.cuda.empty_cache()
+                        # FIX: explicitly release GPU memory after each model to avoid accumulation
+                        del temp_classifier
+                        if torch.cuda.is_available():
+                            torch.cuda.empty_cache()
 
-                print(f"\nFile {args.file} predictions from best models:")
-                for rev, (labels, scores) in all_best_predictions.items():
-                    printed = 0
-                    print(f"\n--- Revision {rev} --- {revision_best_models[rev]} ---")
-                    for lab, sc in zip(labels, scores):
-                        if printed >= args.topn:
-                            break
-                        print(f"\t{lab}:  {round(sc * 100, 2)}%")
-                        printed += 1
-                _paradata_logger.log_success("csv", len(all_best_predictions.keys()))
+                    print(f"\nFile {args.file} predictions from best models:")
+                    for rev, (labels, scores) in all_best_predictions.items():
+                        printed = 0
+                        print(f"\n--- Revision {rev} --- {revision_best_models[rev]} ---")
+                        for lab, sc in zip(labels, scores):
+                            if printed >= args.topn:
+                                break
+                            print(f"\t{lab}:  {round(sc * 100, 2)}%")
+                            printed += 1
+                    _paradata_logger.log_success("csv", len(all_best_predictions.keys()))
 
         if args.dir or args.directory is not None:
             print(f"Starting inference of {input_dir}, saving results in chunks...")
@@ -476,7 +555,6 @@ if __name__ == "__main__":
                                                     raw_prediction)
 
                     _paradata_logger.log_success("csv", len(rdf.index))
-
 
                     rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
                     rdf.to_csv(f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_TOP-{top_N}.csv", sep=",",
@@ -563,51 +641,53 @@ if __name__ == "__main__":
                         print(f"Final RAW daily file sorted by category scores.")
 
             else:  # args.best == True  chunking and top-n > 1 won't work
-                all_best_predictions = {}
+                if args.yolo:
+                    print("[YOLO] --best is not supported for YOLO models. Run without --best.")
+                else:
+                    all_best_predictions = {}
 
-                for rev, base_model in revision_best_models.items():
-                    print(f"\nLoading best model for revision {rev} based on {base_model}...")
-                    temp_classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories),
-                                                      store_dir=str(cp_dir))
-                    temp_model_name_local = f"model_{rev.replace('.', '')}"
-                    temp_model_path = f"{model_dir}/{temp_model_name_local}"
+                    for rev, base_model in revision_best_models.items():
+                        print(f"\nLoading best model for revision {rev} based on {base_model}...")
+                        temp_classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories),
+                                                          store_dir=str(cp_dir))
+                        temp_model_name_local = f"model_{rev.replace('.', '')}"
+                        temp_model_path = f"{model_dir}/{temp_model_name_local}"
 
-                    temp_classifier.load_model(temp_model_path)
+                        temp_classifier.load_model(temp_model_path)
 
-                    test_loader = temp_classifier.create_dataloader(test_images, batch)
+                        test_loader = temp_classifier.create_dataloader(test_images, batch)
 
-                    test_predictions, _ = temp_classifier.infer_dataloader(test_loader, 1, False)
+                        test_predictions, _ = temp_classifier.infer_dataloader(test_loader, 1, False)
 
-                    rdf, _ = dataframe_results(test_images, test_predictions,
-                                               categories, 1, None)
+                        rdf, _ = dataframe_results(test_images, test_predictions,
+                                                   categories, 1, None)
 
-                    _paradata_logger.log_success("csv", len(rdf.index))
+                        _paradata_logger.log_success("csv", len(rdf.index))
 
+                        rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
+                        all_best_predictions[rev] = rdf
 
-                    rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
-                    all_best_predictions[rev] = rdf
+                        # FIX: explicitly release GPU memory after each model to avoid accumulation
+                        del temp_classifier
+                        if torch.cuda.is_available():
+                            torch.cuda.empty_cache()
 
-                    # FIX: explicitly release GPU memory after each model to avoid accumulation
-                    del temp_classifier
-                    if torch.cuda.is_available():
-                        torch.cuda.empty_cache()
+                    # combine all best predictions into single file by first 2 columns
+                    combined_df = pd.DataFrame()
+                    for rev, rdf in all_best_predictions.items():
+                        # rename columns to include revision
+                        renamed_columns = {col: f"{col}-{rev}" for col in rdf.columns if col not in ["FILE", "PAGE"]}
+                        rdf_renamed = rdf.rename(columns=renamed_columns)
 
-                # combine all best predictions into single file by first 2 columns
-                combined_df = pd.DataFrame()
-                for rev, rdf in all_best_predictions.items():
-                    # rename columns to include revision
-                    renamed_columns = {col: f"{col}-{rev}" for col in rdf.columns if col not in ["FILE", "PAGE"]}
-                    rdf_renamed = rdf.rename(columns=renamed_columns)
+                        if combined_df.empty:
+                            combined_df = rdf_renamed
+                        else:
+                            combined_df = pd.merge(combined_df, rdf_renamed, on=["FILE", "PAGE"], how="outer")
 
-                    if combined_df.empty:
-                        combined_df = rdf_renamed
-                    else:
-                        combined_df = pd.merge(combined_df, rdf_renamed, on=["FILE", "PAGE"], how="outer")
-
-                combined_df.to_csv(
-                    f"{output_dir}/tables/{time_stamp}_BEST_{len(revision_best_models.keys())}_models_TOP-1.csv", sep=",",
-                    index=False)
-                print(f"Results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
+                    combined_df.to_csv(
+                        f"{output_dir}/tables/{time_stamp}_BEST_{len(revision_best_models.keys())}_models_TOP-1.csv", sep=",",
+                        index=False)
+                    print(f"Results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
 
     finally:
         _paradata_logger.finalize(_total_inputs)
