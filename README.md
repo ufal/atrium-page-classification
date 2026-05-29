@@ -8,9 +8,9 @@
 
 ---
 
-# Image classification using fine-tuned ViT, RegNetY or EffNetV2 - for historical document sorting
+# Image classification using fine-tuned ViT, RegNetY or EffNetV2 - for historical document routing
 
-### Goal: solve a task of archive page images sorting (for their further content-based processing)
+### Goal: solve a task of archive page images routing (for their further content-based processing)
 
 **Scope:** Processing of images, training / evaluation of ViT / RegNetY / EffNetV2 model,
 input file/directory processing, class 🪧  (category) results of top
@@ -34,7 +34,7 @@ preparation scripts for PDF to PNG conversion
   * [Data preparation 📦](#data-preparation-)
     + [PDF to PNG 📚](#pdf-to-png-)
     + [PNG pages annotation 🔎](#png-pages-annotation-)
-    + [PNG pages sorting for training 📬](#png-pages-sorting-for-training-)
+    + [PNG pages routing for training 📬](#png-pages-routing-for-training-)
     + [Dataset maitenance 🧹](#dataset-maintenance-)
   * [For developers 🪛](#for-developers-)
     * [Training 💪](#training-)
@@ -637,6 +637,10 @@ and `N` is an iteration of the current dataloader processing loop.
 Only after all images from the input directory are processed, the output table is
 saved 💾 in the `result/tables` folder. 
 
+![use-case.png](use-case.png)
+
+Multi-page document inference processing diagram
+
 ----
 
 ## Results 📊
@@ -1182,7 +1186,7 @@ correctly write a comma-separated CSV table.
 
 </details>
 
-### PNG pages sorting for training 📬
+### PNG pages routing for training 📬
 
 Cluster the annotated data into separate folders using the [sort.sh](data_scripts%2Funix%2Fsort.sh) 📎 or [sort.bat](data_scripts%2Fwindows%2Fsort.bat) 📎 
 script to copy data from the source folder to the training folder where each category 🪧 has its own subdirectory.
