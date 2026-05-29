@@ -4,10 +4,10 @@ FOLDER_CPOINTS=./checkpoint
 FOLDER_MODELS=./model
 
 [EVAL]
-FOLDER_PAGES=./category_samples
+FOLDER_PAGES=./small_data_samples
 
 [TRAIN]
-FOLDER_PAGES=./category_samples
+FOLDER_PAGES=./small_data_samples
 
 cross_runs = 0
 test_size = 0.1
@@ -19,22 +19,22 @@ Training = False
 Testing = False
 
 [SETUP]
-files_format = jpeg
+files_format = png
 seed = 420
 base_model = google/vit-large-patch16-384
 batch = 16
 top_N = 1
 raw = False
-inner = False
+inner = True
 
 [YOLO]
-use_yolo    = True
+use_yolo    = False
 yolo_base   = yolov8s-cls.pt
-# available: yv8n yv8s yv8m yv11n yv11s yv11m
+# available: yolov8n yv8s yv8m yv8l yv8x AND yolo11n y11s y11m y11l y11x
 yolo_imgsz  = 224
 
 [INPUT]
-FOLDER_INPUT=./category_samples
+FOLDER_INPUT=./small_data_samples
 chunk_size = 100
 chunking = False
 

@@ -662,6 +662,13 @@ if __name__ == "__main__":
                         rdf, _ = dataframe_results(test_images, test_predictions,
                                                    categories, 1, None)
 
+                        # dataframe_results adds a CATEGORY alias column when top_N==1
+                        # (for human-readable single-model CSVs).  In the --best combined
+                        # output it would create a redundant CATEGORY-{rev} column
+                        # alongside CLASS-1-{rev}, doubling the column count.  Drop it
+                        # here before the rename/merge step below.
+                        rdf.drop(columns=["CATEGORY"], inplace=True, errors="ignore")
+
                         _paradata_logger.log_success("csv", len(rdf.index))
 
                         rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
