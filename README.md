@@ -35,6 +35,7 @@ preparation scripts for PDF to PNG conversion
     + [PDF to PNG 📚](#pdf-to-png-)
     + [PNG pages annotation 🔎](#png-pages-annotation-)
     + [PNG pages sorting for training 📬](#png-pages-sorting-for-training-)
+    + [Dataset maitenance 🧹](#dataset-maintenance-)
   * [For developers 🪛](#for-developers-)
     * [Training 💪](#training-)
     * [Evaluation 🏆](#evaluation-)
@@ -97,7 +98,7 @@ from the archival documents with paper sources that were scanned into digital fo
 
 The images contain various combinations of texts ️📄, tables 📏, drawings 📈, and photos 🌄 - 
 categories 🪧 described [below](#categories-) were formed based on those archival documents. Page examples can be found in
-the [category_samples](category_samples) 📁 directory.
+the [small_data_samples](small_data_samples) 📁 directory.
 
 The key **use case** of the provided model and data processing pipeline is to classify an input PNG image from PDF scanned 
 paper source into one of the categories - each responsible for the following content-specific data processing pipeline.
@@ -211,14 +212,14 @@ and the remaining 10% as both development and test 🏆 set due to the lack of a
 classified) pages.
 
 > [!NOTE]
-> Disproportion of the categories 🪧 in both training data and provided evaluation [category_samples](category_samples) 📁 is
+> Disproportion of the categories 🪧 in both training data and provided evaluation [small_data_samples](small_data_samples) 📁 is
 > **NOT** intentional, but rather a result of the source data nature. 
 
 The specific content and language of the
 source data is irrelevant considering the model's vision resolution, however, all of the data samples were from **archaeological 
 reports** which may somehow affect the drawing detection preferences due to the common form of objects being ceramic pieces, 
 arrowheads, and rocks formerly drawn by hand and later illustrated with digital tools (examples can be found in
-[category_samples/DRAW](category_samples%2FDRAW) 📁)
+[small_data_samples/DRAW](small_data_samples%2FDRAW) 📁)
 
 ![data_timeline.png](dataset_timeline.png)
 
@@ -253,7 +254,7 @@ The categories were chosen to sort the pages by the following criteria:
 > The reasons for such distinction are different processing pipelines for different types of pages, which would be
 > applied after the classification as mentioned [above](#model-description-).
 
-Examples of pages sorted by category 🪧 can be found in the [category_samples](category_samples) 📁 directory
+Examples of pages sorted by category 🪧 can be found in the [small_data_samples](small_data_samples) 📁 directory
 which is also available as a testing subset of the training data (can be used to run evaluation and prediction with a
 necessary `--inner` flag).
 
@@ -444,7 +445,7 @@ After the model is downloaded, you should see a similar file structure:
             ├── model_accuracies_zero_plot.png
             ├── date-time_model_<revision>_FOLD_<n>_DATASETS.txt
             └── ...
-    ├── category_samples
+    ├── small_data_samples
         ├── DRAW
             ├── CTX193200994-24.png
             └── ...
@@ -876,7 +877,7 @@ Demo files  `v6.3`:
 
 - **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251020-1810_115_model_v63_TOP-1_EVAL.csv)📎
 
-Plus, the best model inference results of the small subset (`category_samples` 📁 folder) for all 6 versions [best_6_models_TOP-1.csv](result%2Ftables%2F20251020-1812_BEST_6_models_TOP-1.csv)📎
+Plus, the best model inference results of the small subset (`small_data_samples` 📁 folder) for all 6 versions [best_6_models_TOP-1.csv](result%2Ftables%2F20251020-1812_BEST_6_models_TOP-1.csv)📎
 and the best 5 versions [best_5_models_TOP-1.csv](result%2Ftables%2F20251021-2307_BEST_5_models_TOP-1.csv)📎 are provided for the demonstration.
 
 With the following **columns** 📋:
@@ -940,10 +941,15 @@ since the rows will be basically sorted by categories, and most ambiguous ones w
 have more small probabilities instead of zeros than the most obvious (for the model) 
 categories 🪧.
 
-Importantly, there is a script for splitting any result table into document-specific
-tables stored in a specified directory:
+**Result Extraction Tools:**
 
-    python3 per_doc_split.py -i '/full/path/to/result_table.csv' 
+* **Document Splitting:** Split any result table into document-specific CSVs using standard flags:
+```bash
+python3 supplement_scripts/per_doc_split.py -i result_table.csv -o /path/to/output_dir
+```
+
+* **Performance Scoring:** Automatically compute accuracy scores across multiple saved model outputs in 
+a directory using `supplement_scripts/result_analysis.sh -d result/tables/ --pattern "*_TOP-1_EVAL.csv"`.
 
 The splitting script [per_doc_split.py](supplement_scripts%2Fper_doc_split.py) 📎 is adjusted for the filename as a first column inout.
 
@@ -957,8 +963,11 @@ The splitting script [per_doc_split.py](supplement_scripts%2Fper_doc_split.py) �
 You may often want to combine predictions from **different** base architectures (e.g., averaging `RegNetY` and `ViT` 
 outputs for the same inputs) without reloading the heavy models.
 
-For this purpose, use the `averaging.py` script ([averaging.py](supplement_scripts%2Faveraging.py) 📎). It takes multiple prediction CSV files, aggregates the scores for 
-every class per page, calculates the mean score, and generates a new sorted TOP-N ranking.
+**Advanced Averaging Options:**
+The [averaging.py](supplement_scripts%2Faveraging.py) 📎 script also natively processes wide-format ensemble files (e.g., `BEST_5_models_TOP-1.csv`) 
+applying majority-vote probabilities automatically. You can use `--keep-zeros` to retain null scores, and 
+`--no-normalize` to disable the default hyphen-to-underscore filename formatting. 
+Check `python3 averaging.py --help` for routing details.
 
 **Why use this?**
 * **Ensemble Learning:** Combining predictions from different models often smooths out errors and improves accuracy on ambiguous pages. 
@@ -1039,34 +1048,32 @@ Firstly, copy the PDF-to-PNG converter script to the directory with PDF document
 
 </details>
 
-Now check the content and comments in [pdf2png.sh](data_scripts%2Funix%2Fpdf2png.sh) 📎 or [pdf2png.bat](data_scripts%2Fwindows%2Fpdf2png.bat) 📎 
-script, and run it. 
 
-> [!IMPORTANT]
-> You can optionally comment out the **removal of processed PDF files** from the script, yet it's **NOT** 
-> recommended in case you are going to launch the program several times from the same location. 
+> [!TIP]
+> All data preparation scripts now fully support command-line arguments. Use the `--help` (**Unix**) or
+> `/?` (**Windows**) flags to see all available options.
 
-<details>
-
-<summary>How to 👀</summary>
-
-**Windows**:
-
-    cd \full\path\to\your\folder\with\pdf\files
-    pdf2png.bat
+Run the converter script directly via CLI to specify your preferences. For example, you can set the source
+directory, output format, DPI, and whether to keep intermediate files:
 
 **Unix**:
 
-    cd /full/path/to/your/folder/with/pdf/files
-    pdf2png.sh
+```bash
+/path/to/pdf2png.sh --dir /folder/with/pdfs --format png --dpi 300
+```
 
-</details>
+**Windows**: *(Note: The batch version runs sequentially. For parallel processing on **Windows**, consider 
+porting the logic to PowerShell)*
 
-After the program is done, you will have a directory full of document-specific subdirectories
-containing page-specific images with a similar structure:
+```cmd
+\path\to\pdf2png.bat /d \folder\with\pdfs /f png /r 300
+```
+
+Similarly, the `move_single` scripts can be executed using `--source` and `--target` (or `/s` and `/t` on **Windows**) 
+flags to gather one-pagers without opening the code. Add `--dry-run` to safely preview the files that will be moved.
+
 
 <details>
-
 <summary>Unix folder tree 🌳 structure 👀</summary>
 
     /full/path/to/your/folder/with/pdf/files
@@ -1176,25 +1183,26 @@ Cluster the annotated data into separate folders using the [sort.sh](data_script
 script to copy data from the source folder to the training folder where each category 🪧 has its own subdirectory.
 This division of PNG images will be used as gold data in training and evaluation.
 
+
+
 > [!WARNING]
-> It does **NOT** matter from which directory you launch the sorting script, but you must check the top of the script for 
-> (**1**) the path to the previously described **CSV table with annotations**, (**2**) the path to the previously described 
-> directory containing **document-specific subdirectories of page-specific PNG pages**, and (**3**) the path to the directory
-> where you want to store the **training data of label-specific directories with annotated page images**.
+> It does **NOT** matter from which directory you launch the sorting script. Simply provide the paths via 
+> command-line flags: `-c` for the annotated CSV table, `-i` for the directory containing your converted 
+> document pages, and `-o` for the target training folder.
 
-<details>
+**Unix**:
 
-<summary>How to 👀</summary>
+```bash
+sort.sh -c annotations.csv -i /path/to/pages -o /path/to/train_dir --move
+```
 
 **Windows**:
 
-    sort.bat
+```cmd
+sort.bat /c annotations.csv /i \path\to\pages /o \path\to\train_dir
+```
 
-**Unix**:
-    
-    sort.sh
-
-</details>
+*Note: Use `--dry-run` to preview the distribution, or omit `--move` (**Unix**) to copy the files instead of moving them.*
 
 After the program is done, you will have a directory full of label-specific subdirectories 
 containing document-specific pages with a similar structure:
@@ -1244,6 +1252,17 @@ set a path to the data folder. Make sure label directory names do **NOT** contai
 
 From this point, you can start model training or evaluation process.
 
+### Dataset Maintenance 🧹
+
+Once your dataset is sorted, you might need to clean or prototype with it. The `supplement_scripts/` folder provides tools for this:
+
+* **Filtering:** If you manually delete mislabeled PNG images from your training folders, run 
+`python3 supplement_scripts/filtering.py -i annotations.csv -d train_dir` to 
+automatically remove the missing entries from your CSV.
+* **Downscaling:** To quickly prototype with lower-resolution images, use 
+`python3 supplement_scripts/downscale.py -i train_dir -o small_train_dir --scale 50`. This shrinks the images 
+while preserving the entire category-folder hierarchy.
+
 ----
 
 ## For developers 🪛
@@ -1269,6 +1288,18 @@ the key phases of the whole process (settings, training, evaluation) is provided
 | `visualize.py`        | Creates a plot of various model types comparison based on the input CSV like [model_accuracies_new.csv](model_accuracies_new.csv) |
 
 </details>
+
+**Command-Line Utility Scripts:**
+The analytical scripts in the [supplement_scripts](supplement_scripts)📁 directory have been standardized for single-line execution 
+without requiring internal path edits. Call any of them with `--help` for specific arguments:
+
+* [dataset_timeline.py](supplement_scripts/dataset_timeline.py): Generates the chronological category distribution 
+plot via `-i` (CSV input), `-o` (output plot), and `--regex` grouping flags.
+* [visualize.py](supplement_scripts/visualize.py): Renders the model parameter vs. accuracy scatter plots 
+instantly using `-i` and `-o` flags.
+* [logs_stats.py](supplement_scripts/logs_stats.py): Safely parses binary TFRecord event logs to extract training 
+metrics into a CSV. It now accepts external JSON mappings (`--gpu-map`, `--revision-map`) so you can track 
+custom infrastructure nodes and architectures.
 
 Most of the changeable variables are in the [config.txt](config.txt) ⚙ file, specifically,
 in the `[TRAIN]`, `[HF]`, and `[SETUP]` sections. 
@@ -1418,7 +1449,7 @@ the [config.txt](config.txt) ⚙ file, which is shortened by removing any dots a
     ├── result
         ├── plots
         └── tables
-    ├── category_samples
+    ├── small_data_samples
         ├── DRAW
         ├── DRAW_L
         └── ...
@@ -1507,7 +1538,7 @@ and counts of successfully generated files (like CSVs or PNGs) versus skipped fi
 of variables like the active model revision, base model, batch size, and command-line flags used during that specific run.
 * **Licensing:** All generated paradata files are released under the CC BY-NC 4.0 license.
 
-Example of the [category_samples](category_samples) 📁 directory processing paradata log: [260315-120442_page-classification.json](paradata%2F260315-120442_page-classification.json) 📎
+Example of the [small_data_samples](small_data_samples) 📁 directory processing paradata log: [260315-120442_page-classification.json](paradata%2F260315-120442_page-classification.json) 📎
 
 ----
 
