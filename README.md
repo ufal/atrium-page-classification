@@ -47,6 +47,11 @@ preparation scripts for PDF to PNG conversion
 
 ----
 
+Diagram of the inference methodology including the selected 5 best model versions:
+
+![page-sort.png](page-sort.png)
+
+
 ## Versions 🏁
 
 There are currently several version of the model available for download, both of them have the same set of categories, 
