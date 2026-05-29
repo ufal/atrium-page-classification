@@ -1,10 +1,19 @@
+import argparse
 import csv
 import os
-import sys
-from collections import defaultdict
 
 
-def split_csv_and_aggregate(input_file, output_dir='./per_document/'):
+def split_csv_and_aggregate(input_file: str, output_dir: str = './per_document/') -> None:
+    """Split a flat result CSV into one file per unique document in the FILE column.
+
+    Rows are streamed directly to disk so arbitrarily large CSVs can be split
+    without loading the entire file into memory.
+
+    Args:
+        input_file: Path to the result CSV (FILE, PAGE, CLASS-N, SCORE-N …).
+        output_dir: Directory where per-document CSV files will be written.
+                    Created automatically if it does not exist.
+    """
     output_dir = os.path.join(output_dir, '')
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -12,7 +21,7 @@ def split_csv_and_aggregate(input_file, output_dir='./per_document/'):
 
     try:
         print(f"Processing '{input_file}' in memory-safe stream mode...")
-        seen_files = set()
+        seen_files: set = set()
         row_count = 0
 
         with open(input_file, mode='r', encoding='utf-8', newline='') as f:
@@ -23,16 +32,16 @@ def split_csv_and_aggregate(input_file, output_dir='./per_document/'):
                 print("Error: Input file is empty.")
                 return
 
-            # --- REFINED: Write sequentially directly to disk (OOM Safe) ---
             for row in reader:
-                if not row: continue
+                if not row:
+                    continue
 
                 key = row[0].strip()
                 safe_filename = key.replace('/', '_').replace('\\', '_') + ".csv"
                 output_path = os.path.join(output_dir, safe_filename)
 
-                # If we haven't seen this file yet, overwrite ('w') and write header.
-                # If we have, append ('a').
+                # First occurrence of a document key: write header + row.
+                # Subsequent occurrences: append the row only.
                 mode = 'a' if key in seen_files else 'w'
 
                 with open(output_path, mode=mode, encoding='utf-8', newline='') as out_f:
@@ -44,19 +53,39 @@ def split_csv_and_aggregate(input_file, output_dir='./per_document/'):
 
                 row_count += 1
 
-        print(f"Loaded {row_count} rows. Aggregated into {len(seen_files)} unique files.")
-        print(f"Done! Check the '{output_dir}' folder.")
+        print(f"Processed {row_count} rows → {len(seen_files)} per-document file(s) in '{output_dir}'")
 
+    except FileNotFoundError:
+        print(f"Error: Input file '{input_file}' not found.")
     except Exception as e:
         print(f"An error occurred: {e}")
 
 
-
-
+# P1 FIX: the original used raw sys.argv which made -i/--input (as documented
+# in the README) silently pass the literal string "-i" as a filename.
+# Replaced with argparse to match the documented interface.
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python split_by_file.py <your_file.csv> [output_dir]")
-    else:
-        input_file = sys.argv[1]
-        output_dir = sys.argv[2] if len(sys.argv) >= 3 else './per_document/'
-        split_csv_and_aggregate(input_file, output_dir)
+    parser = argparse.ArgumentParser(
+        description="Split a flat result CSV into one file per document in the FILE column.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python per_doc_split.py -i result/tables/model_v43_TOP-3.csv
+  python per_doc_split.py -i result/tables/model_v43_TOP-3.csv -o ./split_results/
+        """,
+    )
+    parser.add_argument(
+        '-i', '--input',
+        required=True,
+        metavar='CSV_FILE',
+        help="Input result CSV file with FILE, PAGE, CLASS-N, SCORE-N columns",
+    )
+    parser.add_argument(
+        '-o', '--output-dir',
+        default='./per_document/',
+        metavar='DIR',
+        help="Output directory for per-document CSV files (default: ./per_document/)",
+    )
+    args = parser.parse_args()
+    split_csv_and_aggregate(args.input, args.output_dir)
+
