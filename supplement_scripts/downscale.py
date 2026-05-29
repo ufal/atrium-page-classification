@@ -51,9 +51,9 @@ def downscale(
     for src_dir in src_dirs:
         images = sorted(src_dir.glob(ext_pattern))
 
+        # P2 FIX: skip (and note) source subdirs with no matching images
+        # instead of creating an empty destination directory.
         if not images:
-            # P2 FIX: skip (and note) source subdirs with no matching images
-            # instead of creating an empty destination directory.
             if not quiet:
                 print(f"  [{src_dir.name}] no .{ext} file(s) — skipped.")
             continue
