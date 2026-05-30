@@ -187,8 +187,9 @@ if __name__ == "__main__":
     _paradata_logger = ParadataLogger(
         program="page-classification",
         config=_paradata_cfg,
-        paradata_dir="paradata",
+        paradata_dir=str(output_dir / "paradata"),
         output_types=["csv", "png"],
+        config_dir=str(cur),  # cur = Path(__file__).resolve().parent — find para_config.txt reliably
     )
     # ── end paradata init ─────────────────────────────────────────────────────
 
@@ -222,6 +223,10 @@ if __name__ == "__main__":
 
         if args.train:
             total_files, total_labels, categories = collect_images(data_dir)
+            # Training consumes the CC BY-NC-SA 4.0 LINDAT dataset, which makes
+            # the trained model (and this run's outputs) non-commercial + share-alike.
+            # Inference-only runs never reach here and stay MIT.
+            _paradata_logger.log_component("lindat_dataset")
 
     # ── FIX 1: eval data loaded once; classifier created once below ───────────
     if args.eval:

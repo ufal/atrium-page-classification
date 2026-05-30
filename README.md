@@ -139,7 +139,7 @@ demonstrates best models overall (above the trendline) and the table shows all t
 
 ### Data 📜
 
-The dataset is provided under Public Domain license, and consists of **48,499** PNG images of pages from **37,328** archival documents.
+The dataset is provided under CC BY-NC-SA 4.0 license, and consists of **48,499** PNG images of pages from **37,328** archival documents.
 The source image files and their annotation can be found in the LINDAT repository [^17] 🔗. 
 
 The annotation provided includes 5 different
@@ -887,7 +887,7 @@ Demo files  `v6.3`:
 - **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251020-1810_115_model_v63_TOP-1_EVAL.csv)📎
 
 Plus, the best model inference results of the small subset (`small_data_samples` 📁 folder) for all 6 versions [best_6_models_TOP-1.csv](result%2Ftables%2F20251020-1812_BEST_6_models_TOP-1.csv)📎
-and the best 5 versions [best_5_models_TOP-1.csv](result%2Ftables%2F20251021-2307_BEST_5_models_TOP-1.csv)📎 are provided for the demonstration.
+and the best 5 versions [best_5_models_TOP-1.csv](result%2Ftables%2F20260530-1234_BEST_5_models_TOP-1.csv)📎 are provided for the demonstration.
 
 With the following **columns** 📋:
 
@@ -1533,21 +1533,39 @@ same as for the training pages directory - the category 🪧 subdirectories are 
 
 ## Paradata logging
 
-The project features an automatic paradata logging system that records provenance, configuration, 
-and performance statistics for every pipeline run. This is handled by the unified `ParadataLogger` module, 
-which silently monitors your image processing tasks in the background.
+The project features an automatic paradata logging system that records provenance, configuration,
+and performance statistics for every pipeline run. This is handled by the unified `ParadataLogger`
+module ([atrium_paradata.py](atrium_paradata.py)📎), shared across all ATRIUM pipeline repositories and driven by a
+repository-specific [para-config.txt](para_config.txt)📎.
 
 **Key Features:**
 
-* **Automatic Generation:** A JSON log file is automatically created and saved in the [paradata](paradata) 📁 
-directory at the end of each run.
-* **Comprehensive Metrics:** Logs include exact start and end times, total duration in seconds, processing speed (files per minute), 
-and counts of successfully generated files (like CSVs or PNGs) versus skipped files.
-* **Configuration Snapshot:** The log captures the specific runtime configuration ⚙️ used, preserving a snapshot 
-of variables like the active model revision, base model, batch size, and command-line flags used during that specific run.
-* **Licensing:** All generated paradata files are released under the CC BY-NC 4.0 license.
+* **Automatic Generation:** A JSON log file is created at the end of each run, named
+`YYMMDD-HHmmss_page-classification.json`. It is written to the run's **output directory** so that
+paradata travels with the data it describes; the in-repo [paradata](result%2Fparadata) 📁 directory holds only
+example logs for development and is not where production logs belong.
+* **Comprehensive Metrics:** Logs include exact start and end times, total duration in seconds,
+processing speed (files per minute), and counts of successfully generated files (CSVs, PNGs) versus
+skipped files.
+* **Configuration Snapshot:** The log captures the specific runtime configuration ⚙️ used, preserving
+a snapshot of variables like the active model revision, base model, batch size, and command-line
+flags used during that run.
+* **Tool version & runner:** Each log records the `tool_version` (from [para-config.txt](para_config.txt)📎), the
+`repository` and `runner_ref`, and a `docker_image` field. The repository/runner values resolve
+dynamically from the `ATRIUM_RUNNER_REPO` / `ATRIUM_RUNNER_REF` / `ATRIUM_RUNNER_IMAGE` environment
+variables when running in a published container, so the reference points at the actual runner rather
+than a static fork URL. `docker_image` is an empty placeholder when run outside a container.
+* **Licensing:** The output license is **computed per run**, not fixed. The logger determines the
+effective license as the most restrictive license among the components (models, datasets, tools)
+actually used in that run, and records the supporting detail under `license_detail`. The model code
+and the fine-tuned classifiers are permissive (MIT) and DeepDoctection is Apache-2.0, so
+**inference and evaluation runs resolve to MIT**. **Training is different:** training your own model
+with this code over the shared LINDAT dataset [^17] pulls in that dataset's **CC BY-NC-SA 4.0** license, so
+`--train` runs resolve to **CC BY-NC-SA 4.0** (non-commercial, share-alike) — the trained weights and
+any derivatives inherit those terms.
 
-Example of the [small_data_samples](small_data_samples) 📁 directory processing paradata log: [260315-120442_page-classification.json](paradata%2F260315-120442_page-classification.json) 📎
+Example of the [small_data_samples](small_data_samples) 📁 directory processing paradata log:
+[260315-120442_page-classification.json](paradata%2F260315-120442_page-classification.json) 📎
 
 ----
 

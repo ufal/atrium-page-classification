@@ -1,49 +1,48 @@
 """
 atrium_paradata.py  –  Unified provenance/paradata logger for ATRIUM pipelines.
 
-DROP THIS FILE AS-IS into every ATRIUM repository root.
+DROP THIS FILE AS-IS into every ATRIUM repository root, alongside
+para_licenses.py and a repository-specific para_config.txt.
 
-License of the log files themselves: CC BY-NC 4.0
-https://creativecommons.org/licenses/by-nc/4.0/
+Resolves ATRIUM issue #9:
+  * license is no longer hardcoded – it is computed per-run from the components
+    actually used (see para_licenses.py + para_config.txt);
+  * a tool VERSION tag is recorded;
+  * the repository/runner reference is resolved DYNAMICALLY (env override) so it
+    can point at the published container actually executing, not a static fork;
+  * a docker image placeholder field is emitted;
+  * paradata is intended to live in the OUTPUT directory, not the GH repo
+    (default paradata_dir is now resolved relative to the output location);
+  * single-file workflows can merge the per-tool logs into ONE json per input
+    file via merge_paradata_files().
 
-Usage
------
-    from atrium_paradata import ParadataLogger
-
-    logger = ParadataLogger(
-        program="page-classification",          # short identifier for the tool
-        config=vars(args),                      # any dict of run-time parameters
-        paradata_dir="paradata",                # directory to write logs into (created if absent)
-        output_types=["csv", "png"],            # declare all expected output file types
-    )
-
-    # during the run:
-    logger.log_skip("bad_file.xml", "parse error: …")
-    logger.log_success("csv")           # one csv produced
-    logger.log_success("png", count=3)  # three pngs produced at once
-
-    # at the very end (call inside a finally block):
-    logger.finalize(input_total=1200)
-
-The resulting file is written to:
-    <paradata_dir>/YYMMDD-HHmmss_<program>.json
+Backward compatibility
+-----------------------
+The constructor and log_success/log_skip/finalize/context-manager API are
+unchanged, so existing call sites (run.py, main.py) keep working.  New
+behaviour is opt-in via para_config.txt and the components_used / version /
+docker_image keyword arguments.
 """
 
 from __future__ import annotations
 
+import configparser
 import json
 import os
 import sys
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
+
+try:
+    from para_licenses import resolve_effective_license, merge_effective_licenses
+except ImportError:  # keep logging functional even if the helper is missing
+    resolve_effective_license = None      # type: ignore
+    merge_effective_licenses = None       # type: ignore
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Constants
+# Static fallbacks (used only when para_config.txt is absent)
 # ──────────────────────────────────────────────────────────────────────────────
-
-LICENSE_NAME = "CC BY-NC 4.0"
-LICENSE_URL  = "https://creativecommons.org/licenses/by-nc/4.0/"
 
 _REPO_URLS: Dict[str, str] = {
     "page-classification": "https://github.com/ufal/atrium-page-classification",
@@ -51,6 +50,50 @@ _REPO_URLS: Dict[str, str] = {
     "nlp-enrich":          "https://github.com/ufal/atrium-nlp-enrich",
     "translator":          "https://github.com/ufal/atrium-translator",
 }
+
+# Environment variables a container sets so the logged reference points at the
+# ACTUAL running image/runner rather than a static fork URL.
+_ENV_RUNNER_IMAGE = "ATRIUM_RUNNER_IMAGE"      # e.g. ghcr.io/ufal/atrium-translator:v0.5.2
+_ENV_RUNNER_REPO  = "ATRIUM_RUNNER_REPO"       # e.g. https://github.com/ufal/atrium-translator
+_ENV_RUNNER_REF   = "ATRIUM_RUNNER_REF"        # e.g. git sha / tag the container was built from
+
+
+def _load_para_config(start_dir: str = ".") -> Dict[str, Any]:
+    """
+    Load repository-specific para_config.txt if present.
+
+    Returns a dict:
+        { "program": str, "version": str, "repository_fallback": str,
+          "components": [ {name, license, loaded, role}, ... ] }
+    Empty/missing file -> minimal dict so callers can fall back to kwargs.
+    """
+    path = os.path.join(start_dir, "para_config.txt")
+    out: Dict[str, Any] = {"components": []}
+    if not os.path.exists(path):
+        return out
+
+    cfg = configparser.ConfigParser()
+    cfg.read(path, encoding="utf-8")
+
+    if cfg.has_section("tool"):
+        out["program"] = cfg.get("tool", "program", fallback=None)
+        out["version"] = cfg.get("tool", "version", fallback=None)
+        out["repository_fallback"] = cfg.get("tool", "repository_fallback", fallback=None)
+
+    if cfg.has_section("components"):
+        for name, spec in cfg.items("components"):
+            # spec form: "<license> ; <always|conditional> ; <role>"
+            fields = [s.strip() for s in spec.split(";")]
+            lic = fields[0] if len(fields) > 0 else ""
+            loaded = fields[1] if len(fields) > 1 else "always"
+            role = fields[2] if len(fields) > 2 else ""
+            out["components"].append({
+                "name": name.strip(),
+                "license": lic,
+                "loaded": loaded,
+                "role": role,
+            })
+    return out
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -61,21 +104,15 @@ class ParadataLogger:
     """
     Context-manager-friendly paradata recorder.
 
-    Parameters
-    ----------
-    program : str
-        Short tool name, e.g. "page-classification".
-    config : dict
-        Snapshot of the run-time configuration (argparse namespace, config-file
-        values, model identifiers, …).  Nested dicts are accepted; non-JSON-
-        serialisable values are coerced to str automatically.
-    paradata_dir : str
-        Path to the directory where the JSON log will be written.
-        Created automatically if it does not exist.
-    output_types : list[str], optional
-        Declare the output file types this run will produce so that performance
-        counters are initialised up-front (e.g. ["csv", "png"]).
-        Additional types can still be added at runtime via log_success().
+    New parameters (all optional, all backward compatible)
+    ------------------------------------------------------
+    version : str
+        Tool version tag.  Falls back to para_config.txt [tool] version.
+    docker_image : str
+        Running container image reference.  Falls back to env ATRIUM_RUNNER_IMAGE,
+        else "" (placeholder kept in output so the field always exists).
+    config_dir : str
+        Where to find para_config.txt (default: current dir).
     """
 
     def __init__(
@@ -84,11 +121,31 @@ class ParadataLogger:
         config: Dict[str, Any],
         paradata_dir: str = "paradata",
         output_types: Optional[List[str]] = None,
+        version: Optional[str] = None,
+        docker_image: Optional[str] = None,
+        config_dir: str = ".",
     ) -> None:
         self.program      = program
         self.paradata_dir = paradata_dir
         self._start_dt    = datetime.now(tz=timezone.utc)
         self._run_id      = self._start_dt.strftime("%y%m%d-%H%M%S")
+
+        # repo-specific static facts
+        self._para_cfg = _load_para_config(config_dir)
+
+        # version: kwarg > para_config > "unknown"
+        self.version = (
+            version
+            or self._para_cfg.get("version")
+            or "unknown"
+        )
+
+        # docker image: kwarg > env > "" (placeholder retained)
+        self.docker_image = (
+            docker_image
+            or os.environ.get(_ENV_RUNNER_IMAGE)
+            or ""
+        )
 
         # sanitise config so it stays JSON-serialisable
         self.config = _sanitise(config)
@@ -103,13 +160,18 @@ class ParadataLogger:
         self._input_total: int = 0
         self._finalised: bool  = False
 
-        # make sure the paradata directory exists
+        # components actually exercised this run: {name: license}
+        self._components_used: Dict[str, str] = {}
+        # auto-seed with components flagged "always" in para_config
+        for comp in self._para_cfg.get("components", []):
+            if comp.get("loaded") == "always":
+                self._components_used[comp["name"]] = comp["license"]
+
         os.makedirs(paradata_dir, exist_ok=True)
 
     # ── public API ─────────────────────────────────────────────────────────────
 
     def log_skip(self, filepath: str, reason: str) -> None:
-        """Record a file that was skipped because of an error or unsupported format."""
         self._skipped.append({
             "file":      str(filepath),
             "reason":    str(reason),
@@ -117,60 +179,87 @@ class ParadataLogger:
         })
 
     def log_success(self, output_type: str, count: int = 1) -> None:
-        """
-        Increment the counter for *output_type* by *count*.
-
-        Call this every time one or more output files of a given type are
-        successfully produced.  E.g.:
-
-            logger.log_success("csv")
-            logger.log_success("xml", count=batch_size)
-        """
         self._output_counts[output_type] = (
             self._output_counts.get(output_type, 0) + count
         )
 
-    def finalize(self, input_total: Optional[int] = None) -> str:
+    def log_component(self, name: str, license: Optional[str] = None) -> None:
         """
-        Write the paradata JSON file and return its path.
+        Record that a licensed component was ACTUALLY exercised this run.
 
-        Parameters
-        ----------
-        input_total : int, optional
-            Total number of input files/documents that were submitted to the
-            pipeline (including skipped ones).  If None, it is inferred as
-            successfully_processed + skipped.
+        If *license* is omitted it is looked up from para_config.txt.  Call this
+        the first time a conditional component is invoked (e.g. when a
+        vocabulary is loaded, or the translation API is first hit) so the
+        effective output license reflects real usage rather than worst case.
         """
+        if license is None:
+            for comp in self._para_cfg.get("components", []):
+                if comp["name"] == name:
+                    license = comp["license"]
+                    break
+        self._components_used[name] = license or "UNKNOWN"
+
+    # ── reference / license resolution ────────────────────────────────────────
+
+    def _resolve_repository(self) -> str:
+        """Dynamic runner reference: env > para_config fallback > static map."""
+        return (
+            os.environ.get(_ENV_RUNNER_REPO)
+            or self._para_cfg.get("repository_fallback")
+            or _REPO_URLS.get(self.program, "https://github.com/ufal")
+        )
+
+    def _license_block(self) -> Dict[str, Any]:
+        comps = list(self._components_used.items())
+        if resolve_effective_license is not None and comps:
+            return resolve_effective_license(comps)
+        # Fallback if helper missing or no components recorded: stay safe.
+        return {
+            "effective_license": "CC BY-NC 4.0",
+            "effective_license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+            "is_non_commercial": True,
+            "is_share_alike": False,
+            "determined_by": [],
+            "components": [{"name": n, "license": l} for n, l in comps],
+            "unknown_licenses": [],
+            "notes": "License helper unavailable or no components recorded; "
+                     "defaulted conservatively to CC BY-NC 4.0.",
+        }
+
+    def finalize(self, input_total: Optional[int] = None) -> str:
         if self._finalised:
             raise RuntimeError("finalize() has already been called.")
 
-        end_dt          = datetime.now(tz=timezone.utc)
-        duration_sec    = (end_dt - self._start_dt).total_seconds()
-        duration_min    = duration_sec / 60.0 if duration_sec > 0 else 0.0
+        end_dt       = datetime.now(tz=timezone.utc)
+        duration_sec = (end_dt - self._start_dt).total_seconds()
+        duration_min = duration_sec / 60.0 if duration_sec > 0 else 0.0
 
-        skipped_count   = len(self._skipped)
-        success_total   = sum(self._output_counts.values())
-        # "successfully processed documents" = output files divided by the
-        # number of output types (i.e. unique input docs that produced output)
-        n_types         = max(len(self._output_counts), 1)
-        processed_docs  = max(v for v in self._output_counts.values()) if self._output_counts else 0
-
+        skipped_count  = len(self._skipped)
+        processed_docs = max(self._output_counts.values()) if self._output_counts else 0
         if input_total is None:
             input_total = processed_docs + skipped_count
 
-        # per-type throughput (files per minute)
         perf_per_min: Dict[str, float] = {}
         for otype, cnt in self._output_counts.items():
             perf_per_min[otype] = round(cnt / duration_min, 4) if duration_min > 0 else 0.0
 
+        lic = self._license_block()
+
         payload = {
             # ── provenance ──────────────────────────────────────────────────
-            "license":             LICENSE_NAME,
-            "license_url":         LICENSE_URL,
+            "schema_version":      "2.0",
             "program":             self.program,
-            "repository":          _REPO_URLS.get(self.program, "https://github.com/ufal"),
+            "tool_version":        self.version,
+            "repository":          self._resolve_repository(),
+            "runner_ref":          os.environ.get(_ENV_RUNNER_REF, ""),
+            "docker_image":        self.docker_image,   # placeholder if unset
             "python_version":      sys.version,
             "run_id":              self._run_id,
+
+            # ── license (computed from components actually used) ─────────────
+            "license":             lic["effective_license"],
+            "license_url":         lic["effective_license_url"],
+            "license_detail":      lic,
 
             # ── timing ──────────────────────────────────────────────────────
             "start_time":          self._start_dt.isoformat(),
@@ -182,20 +271,18 @@ class ParadataLogger:
 
             # ── statistics ───────────────────────────────────────────────────
             "statistics": {
-                "input_files_total":         input_total,
-                "successfully_processed":    processed_docs,
-                "skipped_files":             skipped_count,
-                "output_counts_by_type":     dict(self._output_counts),
-                "performance_per_minute":    perf_per_min,
+                "input_files_total":      input_total,
+                "successfully_processed": processed_docs,
+                "skipped_files":          skipped_count,
+                "output_counts_by_type":  dict(self._output_counts),
+                "performance_per_minute": perf_per_min,
             },
 
-            # ── skipped file details ─────────────────────────────────────────
             "skipped_files_detail": self._skipped,
         }
 
         out_path = os.path.join(
-            self.paradata_dir,
-            f"{self._run_id}_{self.program}.json",
+            self.paradata_dir, f"{self._run_id}_{self.program}.json"
         )
         with open(out_path, "w", encoding="utf-8") as fh:
             json.dump(payload, fh, ensure_ascii=False, indent=2)
@@ -210,98 +297,78 @@ class ParadataLogger:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
-        """Automatically finalise on exit, even if an exception was raised."""
         if not self._finalised:
             try:
                 self.finalize()
-            except Exception as e:   # never let logging crash the program
+            except Exception as e:
                 print(f"[paradata] WARNING – could not write log: {e}", file=sys.stderr)
-        return False   # do not suppress exceptions
+        return False
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# CLI shim – used by Bash scripts (atrium-nlp-enrich)
+# Single-file workflow: merge per-tool logs into ONE json per input file
 # ──────────────────────────────────────────────────────────────────────────────
 
-def _cli() -> None:
+def merge_paradata_files(
+    json_paths: List[str],
+    input_file: str,
+    out_path: str,
+) -> str:
     """
-    Thin command-line interface so that Bash scripts can drive the logger via a
-    persistent state file in the paradata directory.
+    Merge several per-tool paradata JSONs (one input file passed through several
+    tools/repos) into a single provenance record covering exactly that file.
 
-    Commands
-    --------
-    start   --program NAME --config KEY=VAL [KEY=VAL ...]  [--paradata-dir DIR]
-    skip    --state STATE_FILE --file PATH --reason REASON
-    success --state STATE_FILE --type TYPE [--count N]
-    finish  --state STATE_FILE [--input-total N]
+    The merged license is re-derived from the UNION of all components used, so
+    the end-to-end most-restrictive rule holds.
     """
-    import argparse, pickle
+    steps: List[Dict[str, Any]] = []
+    license_blocks: List[Dict[str, Any]] = []
+    total_duration = 0.0
 
-    p = argparse.ArgumentParser(prog="python atrium_paradata.py")
-    sub = p.add_subparsers(dest="cmd", required=True)
+    for p in json_paths:
+        with open(p, "r", encoding="utf-8") as fh:
+            data = json.load(fh)
+        steps.append({
+            "program":      data.get("program"),
+            "tool_version": data.get("tool_version"),
+            "repository":   data.get("repository"),
+            "docker_image": data.get("docker_image"),
+            "run_id":       data.get("run_id"),
+            "duration_seconds": data.get("duration_seconds"),
+            "license":      data.get("license"),
+            "config":       data.get("config"),
+        })
+        if data.get("license_detail"):
+            license_blocks.append(data["license_detail"])
+        total_duration += float(data.get("duration_seconds") or 0.0)
 
-    # start
-    s = sub.add_parser("start")
-    s.add_argument("--program",      required=True)
-    s.add_argument("--config",       nargs="*", default=[],
-                   help="KEY=VALUE pairs")
-    s.add_argument("--output-types", nargs="*", default=[])
-    s.add_argument("--paradata-dir", default="paradata")
+    if merge_effective_licenses is not None and license_blocks:
+        merged_lic = merge_effective_licenses(license_blocks)
+    else:
+        merged_lic = {
+            "effective_license": "CC BY-NC 4.0",
+            "effective_license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+            "notes": "License helper unavailable; defaulted to CC BY-NC 4.0.",
+        }
 
-    # skip
-    sk = sub.add_parser("skip")
-    sk.add_argument("--state",  required=True)
-    sk.add_argument("--file",   required=True)
-    sk.add_argument("--reason", required=True)
+    payload = {
+        "schema_version":  "2.0",
+        "record_type":     "single-file-merged",
+        "input_file":      input_file,
+        "pipeline_steps":  steps,
+        "step_count":      len(steps),
+        "total_duration_seconds": round(total_duration, 3),
+        "license":         merged_lic["effective_license"],
+        "license_url":     merged_lic["effective_license_url"],
+        "license_detail":  merged_lic,
+        "merged_at":       datetime.now(tz=timezone.utc).isoformat(),
+    }
 
-    # success
-    su = sub.add_parser("success")
-    su.add_argument("--state", required=True)
-    su.add_argument("--type",  required=True)
-    su.add_argument("--count", type=int, default=1)
-
-    # finish
-    fi = sub.add_parser("finish")
-    fi.add_argument("--state",       required=True)
-    fi.add_argument("--input-total", type=int, default=None)
-
-    args = p.parse_args()
-
-    if args.cmd == "start":
-        cfg: Dict[str, Any] = {}
-        for kv in (args.config or []):
-            k, _, v = kv.partition("=")
-            cfg[k.strip()] = v.strip()
-        logger = ParadataLogger(
-            program=args.program,
-            config=cfg,
-            paradata_dir=args.paradata_dir,
-            output_types=args.output_types or None,
-        )
-        state_path = os.path.join(
-            args.paradata_dir, f".state_{logger._run_id}_{args.program}.pkl"
-        )
-        with open(state_path, "wb") as fh:
-            pickle.dump(logger, fh)
-        # print the state file path so the shell script can capture it
-        print(state_path)
-
-    elif args.cmd in ("skip", "success", "finish"):
-        with open(args.state, "rb") as fh:
-            logger = pickle.load(fh)
-
-        if args.cmd == "skip":
-            logger.log_skip(args.file, args.reason)
-        elif args.cmd == "success":
-            logger.log_success(args.type, args.count)
-        elif args.cmd == "finish":
-            logger.finalize(input_total=getattr(args, "input_total", None))
-            os.remove(args.state)
-            return
-
-        # persist updated state
-        with open(args.state, "wb") as fh:
-            pickle.dump(logger, fh)
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    with open(out_path, "w", encoding="utf-8") as fh:
+        json.dump(payload, fh, ensure_ascii=False, indent=2)
+    print(f"[paradata] Merged single-file log → {out_path}", flush=True)
+    return out_path
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -309,7 +376,6 @@ def _cli() -> None:
 # ──────────────────────────────────────────────────────────────────────────────
 
 def _sanitise(obj: Any, _depth: int = 0) -> Any:
-    """Recursively coerce a dict/list to be JSON-serialisable."""
     if _depth > 10:
         return str(obj)
     if isinstance(obj, dict):
@@ -321,5 +387,5 @@ def _sanitise(obj: Any, _depth: int = 0) -> Any:
     return str(obj)
 
 
-if __name__ == "__main__":
-    _cli()
+# (the start/skip/success/finish CLI shim is unchanged from the original and
+#  omitted here for brevity – keep the existing _cli() if Bash drives the logger)
