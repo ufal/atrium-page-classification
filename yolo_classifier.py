@@ -108,6 +108,9 @@ class YOLOClassifier:
         self.store_dir   = store_dir
         self.imgsz       = imgsz
         self.model: YOLO | None = None
+        # Records the Ultralytics run directory (output_dir/out_model) so we can
+        # reliably locate best.pt after training even if trainer.best is missing.
+        self._last_run_dir: Path | None = None
 
         # device string for Ultralytics ("0" for first GPU, "cpu")
         if torch.cuda.is_available():
@@ -140,6 +143,11 @@ class YOLOClassifier:
         """
         _assert_ultralytics()
         Path(output_dir).mkdir(parents=True, exist_ok=True)
+
+        # Record where Ultralytics will write this run (project/name), so that
+        # save_model() can locate weights/best.pt even on Ultralytics versions
+        # where trainer.best is unset after train() returns.
+        self._last_run_dir = Path(output_dir) / out_model
 
         # ── 1. Build temporary on-disk dataset ───────────────────────────────
         tmp_root = Path(tempfile.mkdtemp(prefix="yolo_data_"))
@@ -174,6 +182,11 @@ class YOLOClassifier:
                 mosaic=0.0,
                 perspective=0.0,
             )
+
+            # Prefer the actual run directory the trainer reports, if available.
+            trainer = getattr(self.model, "trainer", None)
+            if trainer is not None and getattr(trainer, "save_dir", None):
+                self._last_run_dir = Path(trainer.save_dir)
 
             # ── 4. Persist fine-tuned weights ────────────────────────────────
             self.save_model(f"model/{out_model}")
@@ -284,17 +297,37 @@ class YOLOClassifier:
     # ── persistence ──────────────────────────────────────────────────────────
 
     def save_model(self, save_directory: str):
+        """
+        Persist the fine-tuned YOLO weights to <save_directory>/model.pt.
+
+        Prefers the trainer's best.pt (best-epoch weights) over the current
+        in-memory model. If best.pt cannot be located, falls back to exporting
+        the in-memory model but warns loudly, because that may NOT be the
+        best-epoch checkpoint.
+        """
         if self.model is None:
             raise RuntimeError("Nothing to save – model has not been trained or loaded.")
         Path(save_directory).mkdir(parents=True, exist_ok=True)
         dest = Path(save_directory) / "model.pt"
-        # best.pt lives inside the YOLO run directory; copy it to our standard location
+
         best_pt = self._find_best_pt()
-        if best_pt and best_pt != dest:
+        if best_pt and best_pt.resolve() != dest.resolve():
             shutil.copy2(best_pt, dest)
+            print(f"[YOLO] Best weights copied: {best_pt} → {dest}")
+        elif best_pt and best_pt.resolve() == dest.resolve():
+            print(f"[YOLO] Best weights already at {dest}")
         else:
+            print(f"[YOLO] WARNING: could not locate best.pt — saving the "
+                  f"current in-memory model instead. This may not be the "
+                  f"best-epoch checkpoint.")
             self.model.save(str(dest))
-        print(f"[YOLO] Model saved → {dest}")
+
+        # Verify the save actually landed where run.py expects to load it from.
+        if not dest.exists():
+            raise RuntimeError(
+                f"[YOLO] Save failed: {dest} does not exist after save_model()."
+            )
+        print(f"[YOLO] Model saved → {dest}  ({dest.stat().st_size / 1e6:.1f} MB)")
 
     def load_model(self, load_directory: str):
         _assert_ultralytics()
@@ -322,9 +355,33 @@ class YOLOClassifier:
     # ── internal ─────────────────────────────────────────────────────────────
 
     def _find_best_pt(self) -> Path | None:
-        """Locate the best.pt written by Ultralytics trainer."""
-        if self.model and hasattr(self.model, "trainer") and self.model.trainer:
-            best = Path(self.model.trainer.best)
-            if best.exists():
-                return best
+        """Locate the best.pt written by Ultralytics trainer.
+
+        Tries, in order:
+          1. trainer.best (the canonical attribute, may be str or Path)
+          2. trainer.save_dir / "weights" / "best.pt"
+          3. a recursive glob for best.pt under the recorded run directory
+        """
+        # 1. canonical trainer.best
+        trainer = getattr(self.model, "trainer", None) if self.model else None
+        if trainer is not None:
+            best_attr = getattr(trainer, "best", None)
+            if best_attr:
+                best = Path(best_attr)
+                if best.exists():
+                    return best
+            # 2. reconstruct from save_dir
+            save_dir = getattr(trainer, "save_dir", None)
+            if save_dir:
+                cand = Path(save_dir) / "weights" / "best.pt"
+                if cand.exists():
+                    return cand
+
+        # 3. fall back to globbing the known run output directory
+        if self._last_run_dir is not None and Path(self._last_run_dir).exists():
+            matches = sorted(Path(self._last_run_dir).rglob("best.pt"))
+            if matches:
+                # most-recently modified wins
+                return max(matches, key=lambda p: p.stat().st_mtime)
+
         return None
