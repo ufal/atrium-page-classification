@@ -32,6 +32,11 @@ use_yolo    = False
 yolo_base   = yolov8s-cls.pt
 # available: yolov8n yv8s yv8m yv8l yv8x AND yolo11n y11s y11m y11l y11x
 yolo_imgsz  = 224
+yolo_epochs   = 30
+yolo_patience = 20
+yolo_lr0      = 0
+yolo_dropout  = 0.1
+yolo_cache    = True
 
 [INPUT]
 FOLDER_INPUT=./small_data_samples

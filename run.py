@@ -267,17 +267,32 @@ if __name__ == "__main__":
                 total_files, total_labels, seed, max_categ
             )
             print(f"[YOLO] Training on {len(trainfiles)} images, validating on {len(valfiles)} images")
+
+            # ── YOLO-specific training hyperparameters from [YOLO] config ──────
+            # yolo_epochs / yolo_lr0 override the generic [TRAIN] epochs / lr when
+            # set; yolo_lr0 == 0 is treated as "unset" → fall back to TRAIN.lr
+            # (lr0=0 would be a degenerate learning rate).
+            yolo_epochs   = config.getint("YOLO", "yolo_epochs", fallback=epochs)
+            yolo_patience = config.getint("YOLO", "yolo_patience", fallback=100)
+            yolo_lr0_cfg  = config.getfloat("YOLO", "yolo_lr0", fallback=0.0)
+            yolo_lr0      = yolo_lr0_cfg if yolo_lr0_cfg > 0 else learning_rate
+            yolo_dropout  = config.getfloat("YOLO", "yolo_dropout", fallback=0.0)
+            yolo_cache    = config.getboolean("YOLO", "yolo_cache", fallback=False)
+
             classifier.train_model(
                 trainfiles=list(trainfiles),
                 trainLabels=trainLabels,
                 valfiles=list(valfiles),
                 valLabels=valLabels,
                 out_model=revision_model_name_local,
-                num_epochs=epochs,
+                num_epochs=yolo_epochs,
                 batch_size=batch,
-                learning_rate=learning_rate,
+                learning_rate=yolo_lr0,
                 output_dir="./yolo_output",
                 logging_steps=log_step,
+                patience=yolo_patience,
+                dropout=yolo_dropout,
+                cache=yolo_cache,
             )
 
         else:

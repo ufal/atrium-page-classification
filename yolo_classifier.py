@@ -134,6 +134,9 @@ class YOLOClassifier:
         learning_rate: float = 5e-5,
         output_dir: str = "./yolo_output",
         logging_steps: int = 10,     # kept for API parity, unused by YOLO
+        patience: int = 100,         # early-stopping patience (epochs)
+        dropout: float = 0.0,        # classifier head dropout
+        cache: bool = False,         # cache images in RAM/disk for faster epochs
     ):
         """
         Prepare a temporary YOLO dataset, fine-tune, and save.
@@ -161,7 +164,8 @@ class YOLOClassifier:
 
             # ── 3. Train ─────────────────────────────────────────────────────
             print(f"[YOLO] Training {self.checkpoint} for {num_epochs} epochs "
-                  f"(batch={batch_size}, lr={learning_rate}) on {self._device_label}")
+                  f"(batch={batch_size}, lr={learning_rate}, patience={patience}, "
+                  f"dropout={dropout}, cache={cache}) on {self._device_label}")
 
             self.model.train(
                 data=str(tmp_root),
@@ -170,6 +174,9 @@ class YOLOClassifier:
                 batch=batch_size,
                 lr0=learning_rate,
                 lrf=learning_rate * 0.01,   # final LR fraction
+                patience=patience,
+                dropout=dropout,
+                cache=cache,
                 device=self.device,
                 project=output_dir,
                 name=out_model,
