@@ -1,0 +1,15 @@
+# Requires NVIDIA Container Toolkit on the host AND a CUDA-enabled image
+# (build with --build-arg TORCH_INDEX_URL=https://download.pytorch.org/whl/cu121).
+# Usage: docker compose -f docker-compose.yml -f docker-compose.gpu.yml run --rm classify
+services:
+  classify: &gpu
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: ["gpu"]
+  api: *gpu

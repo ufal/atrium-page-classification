@@ -6,3 +6,4 @@ numpy
 torch
 timm
 transformers
+pdf2image
