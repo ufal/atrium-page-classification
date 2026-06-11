@@ -462,10 +462,12 @@ class ImageClassifier:
         """
         print(f"Accessing the Hugging Face Hub repository {repo_id}, revision {revision}...")
 
-        # Load the model from the repository
-        model = AutoModelForImageClassification.from_pretrained(repo_id, revision=revision)
-
-        # Load the processor from the repository
+        model = AutoModelForImageClassification.from_pretrained(
+            repo_id,
+            revision=revision,
+            num_labels=self.model.config.num_labels,  # ← pass through num_labels
+            ignore_mismatched_sizes=True,  # ← allow head size mismatch
+        )
         processor = AutoImageProcessor.from_pretrained(repo_id, revision=revision)
 
         self.model, self.processor = model, processor

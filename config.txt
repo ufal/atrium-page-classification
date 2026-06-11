@@ -21,9 +21,9 @@ Testing = False
 [SETUP]
 files_format = png
 seed = 420
-base_model = google/vit-large-patch16-384
+base_model = timm/regnety_160.swag_ft_in1k
 batch = 16
-top_N = 1
+top_N = 3
 raw = False
 inner = True
 
