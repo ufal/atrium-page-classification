@@ -87,7 +87,11 @@ class TestParadataLoggerLifecycle:
         assert data["program"] == PROGRAM_NAME
 
     def test_license_field_present(self, tmp_path):
-        logger = ParadataLogger(PROGRAM_NAME, {}, paradata_dir=str(tmp_path))
+        # config_dir isolated so the repo's para_config.txt is NOT discovered;
+        # deterministically exercises the conservative fallback license block
+        # regardless of which repo runs this (shared) test.
+        logger = ParadataLogger(PROGRAM_NAME, {}, paradata_dir=str(tmp_path),
+                                config_dir=str(tmp_path))
         path = logger.finalize()
         data = json.loads(Path(path).read_text())
         assert "CC BY-NC 4.0" in data["license"]

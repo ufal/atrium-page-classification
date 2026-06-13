@@ -8,8 +8,7 @@ from yolo_classifier import YOLOClassifier
 import time
 from huggingface_hub import create_branch, delete_branch
 from atrium_paradata import ParadataLogger
-# Issue #3: opt-in parallel engine for --best (one data pass instead of N).
-from parallel_best import run_best_directory, predict_file_best
+from parallel_best import run_best_models  # [add] memory-aware best-models engine + averaging
 
 if __name__ == "__main__":
     # Initialize the parser
@@ -104,17 +103,14 @@ if __name__ == "__main__":
                         action="store_true")
     parser.add_argument("--raw", help="Output raw scores for all categories", default=raw, action="store_true")
     parser.add_argument("--best",
-                        help=f"Output all ({len(revision_best_models.keys())}) best models' scores (more time needed, and NO chunk, raw, or top_N>1 is available)",
+                        help=f"Output all ({len(revision_best_models.keys())}) best models' scores. Result is automatically averaged into a final TOP-N CSV.",
                         default=False, action="store_true")
-    # Issue #3: opt-in parallel engine for --best. Only meaningful together with
-    # --best on a directory run; loads as many models as fit in VRAM and streams
-    # the input ONCE (one data pass instead of N). Requires CUDA — falls back to
-    # the sequential --best path on CPU/MPS or whenever it cannot stay safe.
-    parser.add_argument("--parallel",
-                        help="With --best: load as many models as fit in VRAM and decode the input once "
-                             "(one data pass instead of N). Requires CUDA; falls back to sequential otherwise. "
-                             "No effect without --best.",
-                        default=False, action="store_true")
+
+    # [add] Averaging open choice flags
+    parser.add_argument("--no-average-best", action="store_true",
+                        help="Skip automatically averaging the results when running with --best.")
+    parser.add_argument("--save-intermediates", action="store_true",
+                        help="Save the individual CSVs for each model during a --best run.")
     parser.add_argument("--folds", type=int, default=cross_runs,
                         help="Number of folds for cross-validation with 80/10/10 split. Default is 0 (no cross-validation).")
     parser.add_argument("--average", help="Averaging existing fold models", action="store_true")
@@ -191,9 +187,9 @@ if __name__ == "__main__":
         "inner_dirs":    config.get("SETUP", "inner",       fallback=""),
         "file_format":   args.file_format if hasattr(args, "file_format") else "png",
         "mode":          "file" if (hasattr(args, "file") and args.file) else "directory",
-        "raw_output":    str(getattr(args, "raw",  False)),
-        "best_models":   str(getattr(args, "best", False)),
-        "parallel_best": str(getattr(args, "parallel", False)),
+        "raw_output":    str(getattr(args, "raw",      False)),
+        "best_models":   str(getattr(args, "best",     False)),
+        "parallel_best": str(getattr(args, "parallel", False)),  # [add] log parallel flag
         "yolo":          str(args.yolo),
     }
     _paradata_logger = ParadataLogger(
@@ -529,23 +525,31 @@ if __name__ == "__main__":
                 if args.yolo:
                     print("[YOLO] --best is not supported for YOLO models. Run without --best.")
                 else:
-                    # Single-file --best is sequential (no parallel benefit for one
-                    # image). predict_file_best replaces the previously copy-pasted
-                    # per-model load/predict loop.
-                    all_best_predictions = predict_file_best(
-                        revision_best_models, args.file, categories, str(model_dir), str(cp_dir)
+                    # [change] Run all best models and automatically average the results.
+                    # The averaged CSV is written to result/tables/ and its top-N rows
+                    # are printed to console for immediate feedback.
+                    avg_csv_path = run_best_models(
+                        test_images=[args.file],
+                        categories=categories,
+                        revision_best_models=revision_best_models,
+                        model_dir=str(model_dir),
+                        cp_dir=str(cp_dir),
+                        batch=batch,
+                        top_N=args.topn,
+                        output_dir=str(output_dir),
+                        time_stamp=time_stamp,
+                        paradata_logger=_paradata_logger,
+                        parallel=args.parallel,
+                        save_intermediate=True,
                     )
-
-                    print(f"\nFile {args.file} predictions from best models:")
-                    for rev, (labels, scores) in all_best_predictions.items():
-                        printed = 0
-                        print(f"\n--- Revision {rev} --- {revision_best_models[rev]} ---")
-                        for lab, sc in zip(labels, scores):
-                            if printed >= args.topn:
-                                break
-                            print(f"\t{lab}:  {round(sc * 100, 2)}%")
-                            printed += 1
-                    _paradata_logger.log_success("csv", len(all_best_predictions.keys()))
+                    # Print top-N from the averaged CSV for immediate console feedback
+                    avg_df = pd.read_csv(avg_csv_path)
+                    print(f"\nFile {args.file} — averaged predictions from {len(revision_best_models)} best models:")
+                    for _, row in avg_df.iterrows():
+                        for n in range(1, args.topn + 1):
+                            cls_col, scr_col = f"CLASS-{n}", f"SCORE-{n}"
+                            if cls_col in avg_df.columns and pd.notna(row.get(cls_col)) and row.get(cls_col) != "":
+                                print(f"\t{row[cls_col]}:  {round(float(row[scr_col]) * 100, 2)}%")
 
         if args.dir or args.directory is not None:
             print(f"Starting inference of {input_dir}, saving results in chunks...")
@@ -656,27 +660,30 @@ if __name__ == "__main__":
                         final_raw_df.to_csv(raw_out_path, sep=",", index=False)
                         print(f"Final RAW daily file sorted by category scores.")
 
-            else:  # args.best == True  chunking and top-n > 1 won't work
+            else:  # args.best == True  (chunking and top-n > 1 not available in best mode)
                 if args.yolo:
                     print("[YOLO] --best is not supported for YOLO models. Run without --best.")
                 else:
-                    # Directory --best. The engine (sequential vs parallel one-pass)
-                    # is chosen inside run_best_directory based on --parallel and CUDA
-                    # availability; output, column order and paradata counts are
-                    # byte-identical across engines so averaging.py is unaffected.
-                    run_best_directory(
-                        revision_best_models=revision_best_models,
+                    # [change] Run all best models and automatically average the results.
+                    # --parallel enables memory-aware grouped single-pass execution (Issue #3);
+                    # falls back silently to sequential when CUDA is unavailable or unsafe.
+                    # The intermediate wide CSV (BEST_N_models_TOP-1) is still written so
+                    # existing downstream tooling (averaging.py, external scripts) is unaffected.
+                    avg_csv_path = run_best_models(
                         test_images=test_images,
                         categories=categories,
-                        batch=batch,
+                        revision_best_models=revision_best_models,
                         model_dir=str(model_dir),
                         cp_dir=str(cp_dir),
+                        batch=batch,
+                        top_N=top_N,
                         output_dir=str(output_dir),
                         time_stamp=time_stamp,
-                        use_parallel=bool(getattr(args, "parallel", False)),
                         paradata_logger=_paradata_logger,
+                        parallel=args.parallel,
+                        save_intermediate=True,
                     )
-                    print(f"Results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
+                    print(f"Averaged results for TOP-{top_N} predictions → {avg_csv_path}")
 
     finally:
         _paradata_logger.finalize(_total_inputs)

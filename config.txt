@@ -48,4 +48,4 @@ repo_name = ufal/vit-historical-page
 token = hf_ALr...zdBL
 use_hf = False
 revision = main
-latest = v5.3
+latest = v4.3
