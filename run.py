@@ -21,7 +21,7 @@ if __name__ == "__main__":
         "v10.": "microsoft/dit-large-finetuned-rvlcdip",
         "v11.": "microsoft/dit-large",
         "v12.": "timm/tf_efficientnetv2_m.in21k_ft_in1k",
-        "v1.3": "timm/tf_efficientnetv2_s.in21k",
+        "v1.3": "timm/tf_efficientnetv2_m.in21k_ft_in1k", # Corrected architecture
         "v2.3": "google/vit-base-patch16-224",
         "v3.": "google/vit-base-patch16-384",
         "v4.": "timm/tf_efficientnetv2_l.in21k_ft_in1k",
