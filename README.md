@@ -372,7 +372,6 @@ Installation of Python dependencies can be done via:
 > is checked for the first time, later it's also checked every time before the model initialization
 > (for training, evaluation or prediction run).
 
-
 > [!IMPORTANT]
 > **Library compatibility — `transformers` major version.**
 > This project targets the **`transformers` 4.x** line. On **`transformers` 5.x**
@@ -380,17 +379,6 @@ Installation of Python dependencies can be done via:
 > and the **timm**-based architectures used here (RegNetY `v4.3`, EfficientNetV2
 > `v1.3`) run shape-deriving ops (`torch.unique`, `.item()`) *during* their
 > builder — these have no meta kernel and raise
-> `NotImplementedError: aten::_unique2 … with Meta tensors` *before any weights
-> load*. The ViT/DiT models (`google/…`, `microsoft/…`) are unaffected because
-> they do no computation in `__init__`.
->
-> Two supported resolutions:
-> * **Recommended:** keep this environment on `transformers < 5` (the version
->   the published checkpoints were trained with). This repo needs nothing from
->   the 5.x line.
-> * **If you must stay on 5.x:** the timm `from_pretrained` calls in
->   [classifier.py](classifier.py) already pass `low_cpu_mem_usage=False`, which
->   forces real-device construction and avoids the meta path.
 
 After the dependencies installation is finished successfully, in the same virtual environment, you can
 run the Python program.  
@@ -615,17 +603,6 @@ the hardware's memory capacity requirements for different batch sizes tabulated 
 Moreover, in case you have a large amount of files (more than 500,000) that you attempt to process in one run,
 you should keep in mind that even listing all of the files from all of the subdirectories may take a while ⌛,
 not to mention the actual processing time.
-
-<details>
-
-<summary>How to 👀</summary>
-
-    ### Best-models ensemble (`--best`) 🏅
-
-The `--best` flag runs the **5 selected models** (`v1.3`, `v2.3`, `v3.3`,
-`v4.3`, `v5.3`) over the same inputs and **averages their predictions in one
-step** — you no longer need a separate `averaging.py` pass to get a final
-table. It works for both single-file (`-f`) and directory (`--dir`) processing.
 
 <details>
 
