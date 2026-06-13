@@ -1626,13 +1626,6 @@ The engine separates **measured, machine-specific** facts from
   packing with zero GPU before any profile exists, and (c) weight a future
   multi-GPU split.
 
-> [!CAUTION]
-> `params_bytes` is **not** a reliable peak proxy — the peak/params ratio across
-> the 5 models ranges from ~2.3× (ViT-large, weight-heavy) to ~6.5× (RegNetY at
-> 384 px, activation-heavy). The no-measurement fallback therefore over-estimates
-> from `params_bytes` (biasing toward isolating a model in its own group) so it
-> can never under-provision and OOM.
-
 Example record:
 
 ```json
@@ -1650,6 +1643,13 @@ On a free 24 GB card the 5 models (summed peak ≈ 7.9 GB) pack into a **single
 group**, i.e. one data pass over all models.
 
 </details>
+
+> [!CAUTION]
+> `params_bytes` is **not** a reliable peak proxy — the peak/params ratio across
+> the 5 models ranges from ~2.3× (ViT-large, weight-heavy) to ~6.5× (RegNetY at
+> 384 px, activation-heavy). The no-measurement fallback therefore over-estimates
+> from `params_bytes` (biasing toward isolating a model in its own group) so it
+> can never under-provision and OOM.
 
 <details>
 
