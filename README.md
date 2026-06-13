@@ -372,6 +372,26 @@ Installation of Python dependencies can be done via:
 > is checked for the first time, later it's also checked every time before the model initialization
 > (for training, evaluation or prediction run).
 
+
+> [!IMPORTANT]
+> **Library compatibility — `transformers` major version.**
+> This project targets the **`transformers` 4.x** line. On **`transformers` 5.x**
+> model construction moves to the **`meta` device** inside `from_pretrained`,
+> and the **timm**-based architectures used here (RegNetY `v4.3`, EfficientNetV2
+> `v1.3`) run shape-deriving ops (`torch.unique`, `.item()`) *during* their
+> builder — these have no meta kernel and raise
+> `NotImplementedError: aten::_unique2 … with Meta tensors` *before any weights
+> load*. The ViT/DiT models (`google/…`, `microsoft/…`) are unaffected because
+> they do no computation in `__init__`.
+>
+> Two supported resolutions:
+> * **Recommended:** keep this environment on `transformers < 5` (the version
+>   the published checkpoints were trained with). This repo needs nothing from
+>   the 5.x line.
+> * **If you must stay on 5.x:** the timm `from_pretrained` calls in
+>   [classifier.py](classifier.py) already pass `low_cpu_mem_usage=False`, which
+>   forces real-device construction and avoids the meta path.
+
 After the dependencies installation is finished successfully, in the same virtual environment, you can
 run the Python program.  
 
@@ -600,35 +620,50 @@ not to mention the actual processing time.
 
 <summary>How to 👀</summary>
 
-    python3 run.py -tn 3 -d '/full/path/to/directory' -m '/full/path/to/model/folder'
+    ### Best-models ensemble (`--best`) 🏅
 
-for exactly TOP-3 guesses in tabular format from all images found in the given directory.
+The `--best` flag runs the **5 selected models** (`v1.3`, `v2.3`, `v3.3`,
+`v4.3`, `v5.3`) over the same inputs and **averages their predictions in one
+step** — you no longer need a separate `averaging.py` pass to get a final
+table. It works for both single-file (`-f`) and directory (`--dir`) processing.
 
-**OR** if you are really sure about default variables set in the [config.txt](config.txt) ⚙:
+<details>
 
-    python3 run.py --dir 
-    
-    python3 run.py -rev v3.3 -b google/vit-base-patch16-384 --inner --dir
+<summary>How to 👀</summary>
 
-    python3 run.py -m "./models/model_v43" --dir -ff png
-
-Also, to run all the best models (sequentially) on all PNG files in the given directory:
+Run all best models on a directory and get one averaged Top-N table:
 
     python3 run.py --dir --inner --best
 
+Memory-aware single-pass execution on a CUDA GPU (see [below](#memory-aware-best-engine-)):
+
+    python3 run.py --dir --inner --best --parallel
+
+Also keep each model's individual Top-N table alongside the combined output:
+
+    python3 run.py --dir --inner --best --save-intermediates
+
+Skip the in-engine averaging and only emit the wide per-model votes file
+(for manual re-averaging with [averaging.py](supplement_scripts%2Faveraging.py) 📎):
+
+    python3 run.py --dir --inner --best --no-average-best
+
+Single page across all best models:
+
+    python3 run.py -f '/full/path/to/file.png' --best
+
 </details>
 
-The classification results of PNG pages collected from the directory will be saved 💾 to related [results](result) 📁
-folders defined in `[OUTPUT]` section of [config.txt](config.txt) ⚙ file.
+> [!NOTE]
+> `--parallel` only changes *how* the models are scheduled on the GPU; the
+> output files are identical to a plain `--best` run, so a parallel run can be
+> diffed byte-for-byte against a sequential one.
 
 > [!TIP]
-> To additionally get raw class 🪧 probabilities from the model along with the TOP-N results, use
-> `--raw` flag when processing the directory (**NOT** available for single file processing)
- 
-> [!TIP]
-> To process all PNG files in the directory **AND its subdirectories** use the `--inner` flag
-> when processing the directory, or switch its default value to `True` in the `[SETUP]` section 
- 
+> `--best` honours the same `-tn`/`--topn` setting as normal runs. The averaged
+> table keeps `top_N` ranked classes per page; the per-model vote columns are
+> always Top-1.
+
 Naturally, processing of the large amount of PNG pages takes time ⌛ and progress of this process
 is recorded in the console via messages like `Processed <B×N> images` where `B`
 is batch size set in the `[SETUP]` section of the [config.txt](config.txt) ⚙ file, 
@@ -962,62 +997,86 @@ a directory using `supplement_scripts/result_analysis.sh -d result/tables/ --pat
 
 The splitting script [per_doc_split.py](supplement_scripts%2Fper_doc_split.py) 📎 is adjusted for the filename as a first column inout.
 
-### Results post-processing 📉
-
-> [!IMPORTANT]
-> **The best way to classify a collection of messy files** is to use several models - combine their predictions in a 
-> post-processing step and get results with higher accuracy. The 5 selected models provide different perspectives
-> on the data, and their ensemble can help to mitigate individual model errors. 
-
-You may often want to combine predictions from **different** base architectures (e.g., averaging `RegNetY` and `ViT` 
-outputs for the same inputs) without reloading the heavy models.
-
-**Advanced Averaging Options:**
-The [averaging.py](supplement_scripts%2Faveraging.py) 📎 script also natively processes wide-format ensemble files (e.g., `BEST_5_models_TOP-1.csv`) 
-applying majority-vote probabilities automatically. You can use `--keep-zeros` to retain null scores, and 
-`--no-normalize` to disable the default hyphen-to-underscore filename formatting. 
-Check `python3 averaging.py --help` for routing details.
-
-**Why use this?**
-* **Ensemble Learning:** Combining predictions from different models often smooths out errors and improves accuracy on ambiguous pages. 
-* **Flexibility:** You can merge a Top-1 result file with a Top-5 result file; the script dynamically handles different input shapes.
-* **Time and Resources:** Since the preferred method of large collection processing is calling inference of different base models, computational resources and time needed to predict Top-1 or Top-N is are the same, but the level of details in ambiguous cases is higher for N > 2 Top-N predictions
-
 <details>
 
-<summary>How to run post-processing 👀</summary>
+<summary>Best-models ensemble tables 👀</summary>
 
-**Basic usage (Wildcards):**
-Process all CSVs in a folder and output a Top-3 summary:
+**Wide per-model votes** — `{date-time}_BEST_5_models_TOP-1.csv`:
 
-    python3 averaging.py --files "result/tables/*_TOP-3.csv" --top_n 3 --output ensemble_results.csv
+- **FILE** — name of the file (document)
+- **PAGE** — number of the page
+- **CLASS-1-vM.3** — Top-1 class predicted by model `vM.3` (`M` = 1…5); one
+  column per model
 
-**Specific Models:**
-Combine specific model outputs (e.g., a ViT run and an EfficientNet run):
+**Averaged result** — `{date-time}_BEST_5_models_AVG_TOP-{N}.csv` (same column
+set as the example `ARUP_averaged.csv`):
 
-    python3 averaging.py --files result/tables/model_v53.csv result/tables/model_v43.csv -n 1
-
-**Arguments:**
-* `-f`, `--files`: List of input files or glob pattern (required).
-* `-n`, `--top_n`: Number of top predictions to keep in the final output (default: `3`).
-* `-o`, `--output`: Saved result filename (e.g., `averaged_res_sorted.csv`).
-
-With the following **columns** 📋:
-
-- **FILE** - name of the file (document)
-- **PAGE** - number of the page
-- **vM.3** - separate columns for each of the models where `M` is in range from `1` to `5`, contains Top-`1` class label predicted by a model
-- **CLASS-K** - where `K` is in range from 1 to `N` (`N` is 3 by default), contains a Top-`N` class label of averaged `M` models` class scores
-- **SCORE-K** - averaged of all Top-`N` predictions of all `M` models, score from 0 to 1, where 0 are replaced with `NULL`
+- **FILE** — name of the file (document)
+- **PAGE** — number of the page
+- **VM.3** — Top-1 vote of model `vM.3` (`M` = 1…5), in canonical model order
+- **CLASS-K** — `K`-th class (`K` = 1…`N`) of the **probability-averaged** ensemble
+- **SCORE-K** — averaged probability for `CLASS-K`, in `[0, 1]`; empty when zero
+  (the paired `CLASS-K` is blanked too, so a class never appears with a blank score)
 
 </details>
 
-> [!NOTE]
-> The script expects input CSVs to follow the standard result format with `FILE`, `PAGE`, `CLASS-N`, and `SCORE-N` columns.
 
-Examples: [ARUB_averaged_SHORT.csv](result%2FARUB_averaged_SHORT.csv) & [ARUP_averaged_SHORT.csv](result%2FARUP_averaged_SHORT.csv) 📎
-each created from 5 collection results (from the best 5 models) with a Top-3 setting (only 1/1000th part of the collection results was
-shared in this repository).
+### Results post-processing 📉
+
+> [!IMPORTANT]
+> **The best way to classify a collection of messy files** is to combine the
+> predictions of several models. The 5 selected models give different
+> perspectives on the data, and their ensemble mitigates individual model
+> errors. With `--best` this ensembling now happens **inside the program**.
+
+When you run with `--best`, the program loads each of the 5 models, runs
+inference, and writes **two** files to `result/tables/`:
+
+| File                                        | Contents                                                                                                   |
+|---------------------------------------------|------------------------------------------------------------------------------------------------------------|
+| `{date-time}_BEST_5_models_TOP-1.csv`       | **Wide per-model votes** — one Top-1 column per model (`CLASS-1-v1.3` … `CLASS-1-v5.3`).                   |
+| `{date-time}_BEST_5_models_AVG_TOP-{N}.csv` | **Final averaged result** — per-model votes (`V1.3` … `V5.3`) plus the probability-averaged Top-N classes. |
+
+The averaging is a **mean of the softmax probabilities** across models (not a
+plain majority vote), so confident models carry more weight than uncertain
+ones. A page on which all 5 models agree therefore scores `1.0`.
+
+> [!NOTE]
+> The wide `BEST_5_models_TOP-1.csv` is byte-compatible with
+> [averaging.py](supplement_scripts%2Faveraging.py) 📎, so the standalone script
+> remains available for **manual re-averaging**, for mixing in models outside
+> the default 5, or for recomputing with a different `top_N`. It is no longer a
+> required step — `--best` produces the averaged table directly.
+
+**When to reach for `averaging.py` instead of `--best`:**
+* You already have saved per-model CSVs and want to re-combine them without
+  re-running inference (`--best --save-intermediates` writes those per-model files).
+* You want to ensemble an arbitrary set of models / runs, not just the default 5.
+
+<details>
+
+<summary>Manual re-averaging with averaging.py 👀</summary>
+
+Combine saved per-model results into a Top-3 summary:
+
+    python3 averaging.py --files "result/tables/*_TOP-3.csv" --top_n 3 --output ensemble_results.csv
+
+Re-average the wide votes file directly (majority-vote fallback when no scores
+are present):
+
+    python3 averaging.py --files result/tables/20260613-1002_BEST_5_models_TOP-1.csv -n 1
+
+`--keep-zeros` retains null scores and `--no-normalize` disables the
+hyphen→underscore filename normalisation. See `python3 averaging.py --help`.
+
+</details>
+
+Examples shipped in the repo: the wide
+[best_5_models_TOP-1.csv](result%2Ftables%2F20260530-1234_BEST_5_models_TOP-1.csv) 📎
+and the averaged [ARUB_averaged_SHORT.csv](result%2FARUB_averaged_SHORT.csv) &
+[ARUP_averaged_SHORT.csv](result%2FARUP_averaged_SHORT.csv) 📎 (each derived from
+the best 5 models with a Top-3 setting; only ~1/1000 of the collection results
+is shared here for demonstration).
 
 ----
 
@@ -1528,6 +1587,105 @@ revision `v1.9.22` turns to `model_v1922` model folder), and only then run repo 
 Alternatively, you can evaluate models on a separate dataset of pages, which should be stored in a directory 📁 and 
 provided in the `[EVAL]` section of the [config.txt](config.txt) ⚙ file. The directory structure should be the 
 same as for the training pages directory - the category 🪧 subdirectories are required.
+
+
+
+### Memory-aware `--best` engine 🧠 <a name="memory-aware-best-engine-"></a>
+
+The `--best` ensemble is implemented in
+[parallel_best.py](parallel_best.py) 📎. By default it runs **sequentially** —
+one model at a time, a full data pass each — which is the guaranteed-safe path
+and the behaviour you get with `--best` alone. The optional `--parallel` flag
+enables a **memory-aware grouped engine** on CUDA.
+
+> [!NOTE]
+> **What `--parallel` does and does not buy you (single GPU).** A single GPU
+> serialises kernels across co-resident models, so holding several models in
+> VRAM does **not** reduce GPU math time. The win is reorganising *5 passes over
+> the data* (one per model, decoding every page 5×) into **one pass** that loads
+> all models that fit and streams the inputs once — removing redundant
+> disk-decode and load/unload churn. The size of that win depends on the
+> I/O-vs-compute ratio and should be measured, not assumed. **The real speedup
+> is multi-GPU** (one model/group per device), planned as a follow-up.
+
+How the parallel engine schedules work:
+
+1. **Profile** — on first use it measures each model's peak VRAM over the first
+   2 batches and records it in `model/gpu_profile.json`.
+2. **Pack** — models are greedily grouped (first-fit-decreasing) so each group's
+   summed peak fits the **live free VRAM** at runtime (90% of free, minus a
+   512 MB margin). On a small GPU this naturally degrades to groups of 1
+   (≡ sequential, still safe).
+3. **Run** — each group is loaded together and the inputs are streamed once
+   through every resident model.
+4. **Guard** — after the first 2 batches, if live peak memory approaches
+   capacity the largest model is dropped from the group and deferred to the
+   sequential fallback.
+
+`--parallel` **forces the sequential path** (no behaviour change) whenever it is
+not safe: on CPU/MPS (no CUDA memory APIs), when the dataset is too small to
+profile, when the saved profile is stale and re-profiling fails, or when the
+overflow guard cannot keep a group within budget.
+
+<details>
+
+<summary>GPU profile registry & static model catalog 👀</summary>
+
+The engine separates **measured, machine-specific** facts from
+**intrinsic, hardware-independent** ones:
+
+* **`model/gpu_profile.json`** — *dynamic*. Records the GPU fingerprint
+  (`name`, `total_vram_bytes`, `torch` version), the `batch` it was measured
+  at, and each model's `peak_bytes`. It is treated as **stale** (and
+  re-measured) when the GPU, the torch version, or the batch size changes, or
+  when it does not cover every required model. `peak_bytes` is the **only**
+  input to packing.
+
+* **`MODEL_STATIC`** (in [parallel_best.py](parallel_best.py)) — *static and
+  committed*. Per-model `params_bytes` (fp32 weight size), `resolution`, and
+  `base_model`. These never depend on the GPU, torch version, or batch, so they
+  are not stored in the dynamic profile. They are used to (a) **sanity-check**
+  measured peaks (`peak_bytes` must exceed `params_bytes`), (b) **bootstrap**
+  packing with zero GPU before any profile exists, and (c) weight a future
+  multi-GPU split.
+
+> [!CAUTION]
+> `params_bytes` is **not** a reliable peak proxy — the peak/params ratio across
+> the 5 models ranges from ~2.3× (ViT-large, weight-heavy) to ~6.5× (RegNetY at
+> 384 px, activation-heavy). The no-measurement fallback therefore over-estimates
+> from `params_bytes` (biasing toward isolating a model in its own group) so it
+> can never under-provision and OOM.
+
+Example record:
+
+```json
+{
+  "gpu":   { "name": "NVIDIA A30", "total_vram_bytes": 25229983744, "torch": "2.7.1+cu126" },
+  "batch": 16,
+  "models": {
+    "v4.3": { "base_model": "timm/regnety_160.swag_ft_in1k", "resolution": 384, "peak_bytes": 2098562560 },
+    "v5.3": { "base_model": "google/vit-large-patch16-384",  "resolution": 384, "peak_bytes": 2771266560 }
+  }
+}
+```
+
+On a free 24 GB card the 5 models (summed peak ≈ 7.9 GB) pack into a **single
+group**, i.e. one data pass over all models.
+
+</details>
+
+<details>
+
+<summary>Open-choice flags for --best 👀</summary>
+
+| Flag                   | Effect                                                                                           |
+|------------------------|--------------------------------------------------------------------------------------------------|
+| `--parallel`           | Enable the memory-aware grouped engine (CUDA only; silently falls back to sequential otherwise). |
+| `--save-intermediates` | Also write each model's individual `{date-time}_{revision}_TOP-{N}.csv` before averaging.        |
+| `--no-average-best`    | Skip in-engine averaging; emit only the wide `BEST_5_models_TOP-1.csv` for manual processing.    |
+
+</details>
+
 
 ----
 

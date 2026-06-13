@@ -25,11 +25,19 @@ HF_REPO_NAME = "ufal/vit-historical-page"
 CATEGORIES = ["DRAW", "DRAW_L", "LINE_HW", "LINE_P", "LINE_T", "PHOTO", "PHOTO_L", "TEXT", "TEXT_HW", "TEXT_P",
               "TEXT_T"]
 
+# The v*.3 keys MUST agree with run.py's `revision_best_models` and
+# parallel_best.MODEL_STATIC — the base architecture is what ImageClassifier is
+# constructed with before the fine-tuned weights are loaded, so a mismatch
+# silently builds the wrong network and corrupts/blocks the weight load.
+#
+# FIX: v1.3 is EfficientNetV2-**M** (tf_efficientnetv2_m.in21k_ft_in1k), not
+# the *_s variant. The stored checkpoint is ~52.9M params, which is the M model;
+# the old `tf_efficientnetv2_s.in21k` entry was a different architecture.
 REVISION_TO_BASE_MODEL = {
     "v10.": "microsoft/dit-large-finetuned-rvlcdip",
     "v11.": "microsoft/dit-large",
     "v12.": "timm/tf_efficientnetv2_m.in21k_ft_in1k",
-    "v1.3": "timm/tf_efficientnetv2_s.in21k",
+    "v1.3": "timm/tf_efficientnetv2_m.in21k_ft_in1k",
     "v2.3": "google/vit-base-patch16-224",
     "v3.": "google/vit-base-patch16-384",
     "v3.3": "google/vit-base-patch16-384",
@@ -43,6 +51,7 @@ REVISION_TO_BASE_MODEL = {
     "v9.": "microsoft/dit-base-finetuned-rvlcdip",
 }
 
+# Same five revisions the CLI ensembles with (run.py: revision_best_models).
 AVAILABLE_VERSIONS = ["v1.3", "v2.3", "v3.3", "v4.3", "v5.3"]
 
 
@@ -125,42 +134,73 @@ class ModelManager:
         """
         Runs batch prediction on a directory of images using the classifier's dataloader logic.
         """
+        image_paths = sorted([os.path.join(dir_path, f) for f in os.listdir(dir_path)
+                              if f.lower().endswith(('.png', '.jpg', '.jpeg'))])
+        if not image_paths:
+            return []
+
         if version == "all":
-            # Batch averaging is complex, strictly required?
-            # Fallback to simple iteration for 'all' to ensure correctness without complex refactor
-            results = []
-            files = sorted([os.path.join(dir_path, f) for f in os.listdir(dir_path)
-                            if f.lower().endswith(('.png', '.jpg', '.jpeg'))])
-            for f in files:
-                img = Image.open(f).convert('RGB')
-                preds = self._predict_averaged(img, topn)
-                results.append(preds)
-            return results
+            # Directory/PDF ensemble. Mirrors the CLI --best path: run each model
+            # once over the whole batch (parallel_best.run_best_sequential), then
+            # average the per-page softmax distributions (parallel_best.average_rdfs).
+            #
+            # Each model is queried for the FULL category distribution
+            # (top_n=len(CATEGORIES)) so every model contributes a real probability
+            # to every class, then the mean is taken over the models that
+            # succeeded — identical mean-of-softmax semantics to average_rdfs and
+            # supplement_scripts/averaging.py. This replaces the previous
+            # one-image-at-a-time loop with one batched pass per model.
+            n = len(image_paths)
+            aggregated = [dict.fromkeys(CATEGORIES, 0.0) for _ in range(n)]
+            successful_models = 0
+
+            for v in self.available_versions:
+                try:
+                    clf = self.load_model(v)
+                    dataloader = clf.create_dataloader(image_paths, batch_size=batch_size)
+                    predictions, _ = clf.infer_dataloader(
+                        dataloader, top_n=len(CATEGORIES), raw=False
+                    )
+                    for i, pred_item in enumerate(predictions):
+                        if i >= n:
+                            break
+                        for idx, score in pred_item:
+                            aggregated[i][CATEGORIES[idx]] += float(score)
+                    successful_models += 1
+                except Exception as e:
+                    logger.warning(f"Ensemble: model {v} failed on directory, skipping: {e}")
+                    continue
+
+            if successful_models == 0:
+                logger.error("Ensemble batch inference failed: all models errored.")
+                return [[] for _ in image_paths]
+
+            formatted_batch_results = []
+            for scores in aggregated:
+                ranked = sorted(
+                    ((label, total / successful_models) for label, total in scores.items()),
+                    key=lambda kv: kv[1], reverse=True,
+                )[:topn]
+                formatted_batch_results.append(
+                    [{"label": label, "score": min(score, 1.0)} for label, score in ranked]
+                )
+            return formatted_batch_results
 
         try:
             clf = self.load_model(version)
 
-            # 1. Get all image paths
-            image_paths = sorted([os.path.join(dir_path, f) for f in os.listdir(dir_path)
-                                  if f.lower().endswith(('.png', '.jpg', '.jpeg'))])
-
-            if not image_paths:
-                return []
-
-            # 2. FIX: always request at least 2 predictions internally so we always
-            #    have real confidence scores. Results are then truncated to the
-            #    caller-requested topn before returning.
+            # FIX: always request at least 2 predictions internally so we always
+            # have real confidence scores. Results are then truncated to the
+            # caller-requested topn before returning.
             internal_topn = max(topn, 2)
 
-            # 3. Create Data Loader
             dataloader = clf.create_dataloader(image_paths, batch_size=batch_size)
 
-            # 4. Infer (returns list of predictions)
             predictions, _ = clf.infer_dataloader(dataloader, top_n=internal_topn, raw=False)
 
             formatted_batch_results = []
 
-            # 5. Map indices to labels and truncate to the requested topn
+            # Map indices to labels and truncate to the requested topn
             for pred_item in predictions:
                 # With internal_topn >= 2, pred_item is always a list of (idx, score) tuples
                 row_preds = []
@@ -178,6 +218,9 @@ class ModelManager:
             raise e
 
     def _predict_averaged(self, image, topn):
+        # Single-image ensemble. Same mean-of-softmax semantics as the CLI --best
+        # engine (parallel_best.average_rdfs): average each model's full softmax
+        # distribution across the models that succeeded, then take the Top-N.
         aggregated_scores = {cat: 0.0 for cat in CATEGORIES}
         successful_models = 0
 
@@ -193,7 +236,10 @@ class ModelManager:
 
         if successful_models == 0: return {"error": "All models failed."}
 
-        final_results = [{"label": l, "score": s / successful_models} for l, s in aggregated_scores.items()]
+        # Divide by the number of successful models and clip to 1.0, matching
+        # average_rdfs' `(SCORE / num_models).clip(upper=1.0)`.
+        final_results = [{"label": l, "score": min(s / successful_models, 1.0)}
+                         for l, s in aggregated_scores.items()]
         final_results.sort(key=lambda x: x["score"], reverse=True)
         return final_results[:topn]
 

@@ -17,11 +17,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# GPU (CUDA 12.1) torch by default — CPU-only is not supported for inference.
+# GPU (CUDA 12.6) torch by default — CPU-only is not supported for inference.
 # To build a CPU image explicitly pass --build-arg TORCH_INDEX_URL=https://download.pytorch.org/whl/cpu
-ARG TORCH_INDEX_URL="https://download.pytorch.org/whl/cu121"
-# Pin exact versions to match the local environment
-RUN pip install --index-url ${TORCH_INDEX_URL} torch==2.12.0 torchvision==0.22.1 transformers<5"
+ARG TORCH_INDEX_URL="https://download.pytorch.org/whl/cu126"
+# Pin exact versions to match the local environment (torch 2.7.1+cu126,
+# torchvision 0.22.1).  Installed from the CUDA index FIRST so the later
+# `pip install -r requirements.txt` sees torch/torchvision already satisfied
+# and does not pull a CPU-only wheel from PyPI.
+#
+# NOTE: `transformers<5` is intentionally NOT pinned here — it is pinned in
+# requirements.txt (and service/requirements.txt). transformers 5.x constructs
+# models on the `meta` device, which crashes the timm builders for the RegNetY
+# (v4.3) and EfficientNetV2 (v1.3) checkpoints used by --best; the <5 pin is the
+# meta-device fix and must stay consistent across every requirements file.
+RUN pip install --index-url ${TORCH_INDEX_URL} torch==2.7.1 torchvision==0.22.1
 
 COPY requirements.txt requirements-test.txt ./
 COPY service/requirements.txt ./service-requirements.txt
@@ -43,5 +52,12 @@ RUN useradd --create-home --uid 10001 atrium \
     && chown -R atrium:atrium /app /cache /data
 USER atrium
 
+# Default: single-model directory inference (v4.3).  Args are passed straight
+# through to run.py, so the memory-aware ensemble engine is available too, e.g.:
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml \
+#       run --rm classify --dir --inner --best --parallel
+# The GPU profile registry (model/gpu_profile.json) is written into the
+# page-model volume and is hardware/torch/batch-keyed, so it is reused across
+# runs on the same GPU and auto-invalidated (re-profiled) on a different one.
 ENTRYPOINT ["sh", "-c", "python3 /app/gpu_check.py && exec python3 run.py \"$@\"", "--"]
 CMD ["-d", "/data/input", "--hf", "-rev", "v4.3"]
