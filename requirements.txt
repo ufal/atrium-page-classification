@@ -7,7 +7,7 @@ Pillow
 scikit-learn
 torch
 torchvision
-transformers
+transformers<5
 timm
 tensorboard
 ultralytics

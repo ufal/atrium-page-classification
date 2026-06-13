@@ -20,7 +20,8 @@ WORKDIR /app
 # GPU (CUDA 12.1) torch by default — CPU-only is not supported for inference.
 # To build a CPU image explicitly pass --build-arg TORCH_INDEX_URL=https://download.pytorch.org/whl/cpu
 ARG TORCH_INDEX_URL="https://download.pytorch.org/whl/cu121"
-RUN pip install --index-url ${TORCH_INDEX_URL} torch torchvision
+# Pin exact versions to match the local environment
+RUN pip install --index-url ${TORCH_INDEX_URL} torch==2.12.0 torchvision==0.22.1 transformers<5"
 
 COPY requirements.txt requirements-test.txt ./
 COPY service/requirements.txt ./service-requirements.txt

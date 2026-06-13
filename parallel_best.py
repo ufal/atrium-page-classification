@@ -1,43 +1,43 @@
 """
-parallel_best.py  –  Memory-aware parallel execution of the --best model ensemble.
+parallel_best.py  –  Memory-aware execution of the --best model ensemble.
 
 Implements the design from Issue #3:
   * Per-model GPU-size registry  (model/gpu_profile.json)
   * On-demand 2-batch profiling
-  * Memory-aware packing scheduler
+  * Memory-aware packing scheduler (pack_models)
+  * Registry freshness check (registry_is_fresh)
   * Grouped single-pass execution + runtime overflow guard
-  * True Top-N in-memory probability averaging → final averaged CSV
+  * Wide combined frame builder (merge_best) -> BEST_{N}_models_TOP-1.csv
+  * True Top-N in-memory probability averaging -> final averaged CSV
   * Sequential fallback whenever parallel is unsafe
 
-The output of run_best_models is always a fully averaged CSV
-(CLASS-1, SCORE-1 … SCORE-N per page).  Intermediate per-model CSVs
-are written only when --save-intermediates is passed.
+Output contract
+---------------
+`run_best_models` writes (and the engine therefore guarantees):
 
-Public surface used by run.py
-------------------------------
-  run_best_models(
-      test_images, categories, revision_best_models,
-      model_dir, cp_dir, batch, top_N,
-      output_dir, time_stamp, paradata_logger,
-      parallel=False,
-      save_intermediates=False,
-      average_best=True,
-  ) -> str   # path to the averaged CSV
+  1. `{ts}_BEST_{n}_models_TOP-1.csv`     (always)
+     Wide per-model votes: FILE, PAGE, CLASS-1-v1.3, CLASS-1-v2.3, …
+     Byte-compatible with supplement_scripts/averaging.py's _WIDE_MODEL_RE.
+
+  2. `{ts}_BEST_{n}_models_AVG_TOP-{N}.csv`  (when average_best, the default)
+     The same column set as ARUP_averaged.csv:
+        FILE, PAGE, V1.3, V2.3, V3.3, V4.3, V5.3,
+        CLASS-1, SCORE-1, CLASS-2, SCORE-2, CLASS-3, SCORE-3
+     i.e. per-model top-1 vote columns followed by the averaged Top-N.
+
+Public surface used by run.py is unchanged:
+    run_best_models(...) -> str   # path to the averaged CSV (or "" if skipped)
 """
 from __future__ import annotations
 
 import json
-import os
-import sys
 import time
 from collections import OrderedDict
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Iterable, List, Optional, Tuple
 
-import numpy as np
 import pandas as pd
 import torch
-
 
 # ---------------------------------------------------------------------------
 # GPU profile registry
@@ -48,13 +48,129 @@ _PROFILING_BATCHES = 2          # measure peak over first N batches
 _MEMORY_SAFETY_MARGIN = 0.90    # use at most 90 % of free VRAM
 _HEADROOM_BYTES = 512 * 1024 * 1024   # 512 MB hard margin
 
+# Hardware/torch/batch-independent model facts (fp32 weights, params only).
+# Safe to commit; bootstraps packing before any GPU profile exists.
+MODEL_STATIC = {
+    "v1.3": {"base_model": "timm/tf_efficientnetv2_m.in21k_ft_in1k", "resolution": 384, "params_bytes": 211489788},
+    "v2.3": {"base_model": "google/vit-base-patch16-224",            "resolution": 224, "params_bytes": 343228460},
+    "v3.3": {"base_model": "google/vit-base-patch16-384",            "resolution": 384, "params_bytes": 344395820},
+    "v4.3": {"base_model": "timm/regnety_160.swag_ft_in1k",          "resolution": 384, "params_bytes": 322393660},
+    "v5.3": {"base_model": "google/vit-large-patch16-384",           "resolution": 384, "params_bytes": 1214808108},
+}
+
 
 def _profile_path(model_dir: str) -> Path:
     return Path(model_dir) / _PROFILE_FILENAME
 
 
+# ---------------------------------------------------------------------------
+# Helper: per-model top-1 vote column name  (v1.3 -> V1.3)
+# ---------------------------------------------------------------------------
+
+def _vote_col_name(rev: str) -> str:
+    """Map a revision string to its ARUP-style vote column header.
+
+    'v1.3' -> 'V1.3'  (uppercase the leading 'v'); matches averaging.py's
+    display-name convention so the engine output and the standalone post-
+    processor stay column-compatible.
+    """
+    return (rev[0].upper() + rev[1:]) if rev else rev
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Memory-aware packing scheduler
+# ═══════════════════════════════════════════════════════════════════════════
+
+def pack_models(
+    sizes: Dict[str, int],
+    budget_bytes: int,
+    max_group: Optional[int] = None,
+) -> List[List[str]]:
+    """Greedy first-fit-decreasing bin-packing of models into VRAM groups.
+
+    Args:
+        sizes:        {revision: peak_bytes} footprint per model.
+        budget_bytes: VRAM budget a single group may not exceed.
+        max_group:    Optional cap on how many models share one group
+                      (e.g. 2 reproduces the issue's "two at a time").
+
+    Returns:
+        List of groups; each group is a list of revision strings.
+
+    Behaviour:
+        * Largest model anchors the first group (FFD).
+        * A model whose footprint alone exceeds the budget gets its own group.
+        * budget_bytes <= 0 degrades to one model per group (safe fallback).
+        * Deterministic for a given input.
+    """
+    sorted_revs = sorted(sizes, key=lambda r: sizes[r], reverse=True)
+
+    # Non-positive budget => cannot co-resident anything safely.
+    if budget_bytes <= 0:
+        return [[rev] for rev in sorted_revs]
+
+    groups: List[List[str]] = []
+    current: List[str] = []
+    current_cost = 0
+
+    for rev in sorted_revs:
+        cost = sizes[rev]
+        fits = (current_cost + cost) <= budget_bytes
+        within_cap = (max_group is None) or (len(current) < max_group)
+
+        # Close the current group when the next model would overflow either
+        # the byte budget or the explicit member cap.
+        if current and (not fits or not within_cap):
+            groups.append(current)
+            current = []
+            current_cost = 0
+
+        current.append(rev)
+        current_cost += cost
+
+    if current:
+        groups.append(current)
+
+    return groups
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Registry freshness
+# ═══════════════════════════════════════════════════════════════════════════
+
+def registry_is_fresh(
+    profile: Optional[dict],
+    gpu_name: str,
+    total_vram_bytes: int,
+    batch: int,
+    required_revs: Iterable[str],
+) -> bool:
+    """Return True iff a stored gpu_profile.json is reusable for this run.
+
+    A profile is reusable only when the recorded hardware fingerprint and
+    batch size match the current run AND it covers every required revision.
+    A profile that covers MORE models than required is still fresh.
+    """
+    if not profile:
+        return False
+
+    gpu = profile.get("gpu", {})
+    if gpu.get("name") != gpu_name:
+        return False
+    if gpu.get("total_vram_bytes") != total_vram_bytes:
+        return False
+    if profile.get("batch") != batch:
+        return False
+
+    recorded = set(profile.get("models", {}).keys())
+    if not set(required_revs).issubset(recorded):
+        return False
+
+    return True
+
+
 def _current_gpu_key() -> Optional[dict]:
-    """Return a hardware fingerprint dict, or None if CUDA unavailable."""
+    """Hardware fingerprint for the active CUDA device, or None on CPU/MPS."""
     if not torch.cuda.is_available():
         return None
     props = torch.cuda.get_device_properties(0)
@@ -66,8 +182,12 @@ def _current_gpu_key() -> Optional[dict]:
     }
 
 
-def _load_profile(model_dir: str, batch: int) -> Optional[dict]:
-    """Load profile if it exists and matches the current hardware + batch."""
+def _load_profile(
+    model_dir: str,
+    batch: int,
+    required_revs: Iterable[str],
+) -> Optional[dict]:
+    """Load gpu_profile.json and return its 'models' block when still fresh."""
     p = _profile_path(model_dir)
     if not p.exists():
         return None
@@ -75,22 +195,21 @@ def _load_profile(model_dir: str, batch: int) -> Optional[dict]:
         data = json.loads(p.read_text())
     except Exception:
         return None
-    gpu_key = _current_gpu_key()
-    if gpu_key is None:
+
+    gpu = _current_gpu_key()
+    if gpu is None:
         return None
-    stored_gpu = data.get("gpu", {})
-    if (stored_gpu.get("name") != gpu_key["name"]
-            or stored_gpu.get("total_vram_bytes") != gpu_key["total_vram_bytes"]
-            or data.get("batch") != batch):
-        print("[parallel_best] Profile stale (hardware or batch changed) — will re-profile.")
+
+    if not registry_is_fresh(data, gpu["name"], gpu["total_vram_bytes"], batch, required_revs):
+        print("[parallel_best] Profile stale (hardware / batch / coverage) — will re-profile.")
         return None
-    return data
+
+    return data["models"]
 
 
 def _save_profile(model_dir: str, batch: int, models_peak: dict) -> None:
-    gpu_key = _current_gpu_key()
     data = {
-        "gpu": gpu_key,
+        "gpu": _current_gpu_key(),
         "batch": batch,
         "measured_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "models": models_peak,
@@ -99,6 +218,10 @@ def _save_profile(model_dir: str, batch: int, models_peak: dict) -> None:
     p.write_text(json.dumps(data, indent=2))
     print(f"[parallel_best] GPU profile saved → {p}")
 
+
+# ═══════════════════════════════════════════════════════════════════════════
+# On-demand profiling
+# ═══════════════════════════════════════════════════════════════════════════
 
 def _measure_model_peak(
     rev: str,
@@ -147,20 +270,22 @@ def profile_best_models(
     categories: list,
     force: bool = False,
 ) -> Optional[dict]:
-    """
-    Return a models dict  {rev: {base_model, peak_bytes, …}}  for packing.
-    Loads from the on-disk registry when valid; re-profiles otherwise.
-    Returns None if CUDA unavailable.
+    """Return {rev: {base_model, peak_bytes}} for packing, or None on CPU/MPS.
+
+    Loads from the on-disk registry when it is fresh AND covers every required
+    revision; re-profiles otherwise.
     """
     if not torch.cuda.is_available():
         print("[parallel_best] No CUDA — profiling skipped.")
         return None
 
+    required_revs = list(revision_best_models.keys())
+
     if not force:
-        profile = _load_profile(model_dir, batch)
-        if profile is not None:
+        models = _load_profile(model_dir, batch, required_revs)
+        if models is not None:
             print(f"[parallel_best] Loaded cached GPU profile from {_profile_path(model_dir)}")
-            return profile["models"]
+            return models
 
     print("[parallel_best] Profiling GPU memory for each best model …")
     models_peak: dict = {}
@@ -170,78 +295,21 @@ def profile_best_models(
             peak = _measure_model_peak(
                 rev, base_model, model_dir, cp_dir, sample_images, batch, categories
             )
-            models_peak[rev] = {
-                "base_model": base_model,
-                "peak_bytes": peak,
-            }
+            models_peak[rev] = {"base_model": base_model, "peak_bytes": peak}
             props = torch.cuda.get_device_properties(0)
             print(f"  {rev}: peak {peak / 1e9:.2f} GB / {props.total_memory / 1e9:.2f} GB total")
         except Exception as e:
             print(f"  [WARNING] Could not profile {rev}: {e}")
-            # Assign infinite cost so this model is always its own group
-            models_peak[rev] = {
-                "base_model": base_model,
-                "peak_bytes": int(1e18),
-            }
+            # Infinite cost => this model always becomes its own group.
+            models_peak[rev] = {"base_model": base_model, "peak_bytes": int(1e18)}
 
     _save_profile(model_dir, batch, models_peak)
     return models_peak
 
 
-# ---------------------------------------------------------------------------
-# Memory-aware packing scheduler
-# ---------------------------------------------------------------------------
-
-def pack_models(models_peak: dict, max_group: Optional[int] = None) -> List[List[str]]:
-    """
-    Greedy descending-size bin-packing into groups whose cumulative
-    peak_bytes fits within the available VRAM budget.
-
-    Returns a list of groups (each group is a list of revision strings).
-    A model whose footprint alone exceeds the budget gets its own group
-    (single-model sequential fallback within the parallel engine).
-    """
-    if not torch.cuda.is_available():
-        return [[rev] for rev in models_peak]
-
-    free, total = torch.cuda.mem_get_info(0)
-    budget = int(free * _MEMORY_SAFETY_MARGIN) - _HEADROOM_BYTES
-    print(f"[parallel_best] VRAM budget: {budget / 1e9:.2f} GB "
-          f"(free={free / 1e9:.2f} GB, total={total / 1e9:.2f} GB)")
-
-    # Sort descending by peak so the biggest models anchor their own group
-    sorted_revs = sorted(models_peak, key=lambda r: models_peak[r]["peak_bytes"], reverse=True)
-
-    groups: List[List[str]] = []
-    current_group: List[str] = []
-    current_cost = 0
-
-    for rev in sorted_revs:
-        cost = models_peak[rev]["peak_bytes"]
-        fits_in_current = current_cost + cost <= budget
-        within_cap = (max_group is None) or (len(current_group) < max_group)
-
-        if current_group and (not fits_in_current or not within_cap):
-            groups.append(current_group)
-            current_group = []
-            current_cost = 0
-
-        current_group.append(rev)
-        current_cost += cost
-
-    if current_group:
-        groups.append(current_group)
-
-    print(f"[parallel_best] Packing plan: {len(groups)} group(s)")
-    for i, g in enumerate(groups):
-        costs = [models_peak[r]["peak_bytes"] / 1e9 for r in g]
-        print(f"  group {i + 1}: {g}  cumulative={sum(costs):.2f} GB")
-    return groups
-
-
-# ---------------------------------------------------------------------------
+# ═══════════════════════════════════════════════════════════════════════════
 # Grouped single-pass execution
-# ---------------------------------------------------------------------------
+# ═══════════════════════════════════════════════════════════════════════════
 
 def _run_group(
     group: List[str],
@@ -254,19 +322,18 @@ def _run_group(
     models_peak: Optional[dict],
     top_N: int,
 ) -> Tuple[Dict[str, pd.DataFrame], List[str]]:
-    """
-    Load all models in group simultaneously, stream test_images once,
-    return {rev: rdf} containing Top-N classes and raw probability scores.
+    """Load all models in a group, stream test_images once, return {rev: rdf}.
 
-    Includes a 2-batch overflow guard: after the first PROFILING_BATCHES
-    batches, if peak memory usage exceeds the safety threshold, drop the
-    largest model from the group and defer it (the caller handles the
-    deferred list via fallback).
+    Each rdf carries FILE, PAGE, CLASS-1…CLASS-N, SCORE-1…SCORE-N.
+
+    Includes a 2-batch overflow guard: after the first _PROFILING_BATCHES
+    batches, if live peak memory exceeds the safety threshold the largest
+    model is dropped from the group and deferred to sequential fallback.
     """
     from classifier import ImageClassifier
     from utils import dataframe_results
 
-    classifiers: OrderedDict[str, ImageClassifier] = OrderedDict()
+    classifiers: "OrderedDict[str, ImageClassifier]" = OrderedDict()
     for rev in group:
         base_model = revision_best_models[rev]
         local_name = f"model_{rev.replace('.', '')}"
@@ -276,12 +343,9 @@ def _run_group(
         clf.load_model(str(local_path))
         classifiers[rev] = clf
 
-    # Each model has its own transform / resolution; per-model dataloaders
-    # are required.  The real saving is avoiding repeated load/unload churn.
-    loaders = {
-        rev: clf.create_dataloader(test_images, batch)
-        for rev, clf in classifiers.items()
-    }
+    # Each model has its own resolution / processor, so per-model dataloaders
+    # are required; the win is avoiding load/unload churn, not decode sharing.
+    loaders = {rev: clf.create_dataloader(test_images, batch) for rev, clf in classifiers.items()}
 
     all_predictions: Dict[str, list] = {rev: [] for rev in group}
     all_raw_scores: Dict[str, list] = {rev: [] for rev in group}
@@ -294,22 +358,31 @@ def _run_group(
     loader_iters = {rev: iter(ld) for rev, ld in loaders.items()}
 
     for batch_idx, batches in enumerate(zip_longest(*[loader_iters[rev] for rev in classifiers])):
-        for rev_i, (rev, b) in enumerate(zip(list(classifiers.keys()), batches)):
+        for rev, b in zip(list(classifiers.keys()), batches):
             if b is None or (isinstance(b, tuple) and b[0] is None):
                 continue
             clf = classifiers[rev]
             with torch.no_grad():
                 inputs = b["pixel_values"].to(clf.device)
                 outputs = clf.model(pixel_values=inputs)
-                logits = outputs.logits
-                probs = torch.nn.functional.softmax(logits, dim=-1)
+                probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
 
-                # Store Top-N indices and full softmax probabilities
-                topk = torch.topk(probs, top_N, dim=-1)
-                all_predictions[rev].extend(topk.indices.cpu().tolist())
+                # FIX: build predictions in the SAME shape infer_dataloader
+                # produces so dataframe_results reads (idx, score) correctly.
+                # The previous code stored bare top-k indices, which made
+                # dataframe_results interpret an index as the score.
                 all_raw_scores[rev].extend(probs.cpu().tolist())
+                if top_N > 1:
+                    topk_probs, topk_idx = torch.topk(probs, top_N, dim=-1)
+                    for idxs, prs in zip(topk_idx, topk_probs):
+                        prs_norm = prs / prs.sum()
+                        all_predictions[rev].append(
+                            list(zip(idxs.cpu().tolist(), prs_norm.cpu().tolist()))
+                        )
+                else:
+                    all_predictions[rev].extend(probs.argmax(dim=-1).cpu().tolist())
 
-        # Overflow guard after first PROFILING_BATCHES batches
+        # Overflow guard after the first profiling-window batches.
         if torch.cuda.is_available() and not guard_done and batch_idx >= _PROFILING_BATCHES - 1:
             guard_done = True
             _, total = torch.cuda.mem_get_info(dev)
@@ -324,18 +397,17 @@ def _run_group(
                 else:
                     victim = list(classifiers.keys())[-1]
                 print(f"  [overflow guard] Dropping {victim} from group — "
-                      f"live peak {live_peak / 1e9:.2f} GB > "
-                      f"{danger_threshold / 1e9:.2f} GB")
+                      f"live peak {live_peak / 1e9:.2f} GB > {danger_threshold / 1e9:.2f} GB")
                 dropped.append(victim)
                 del classifiers[victim]
                 torch.cuda.empty_cache()
 
-    # Build Top-N rdfs with actual softmax scores
+    # Build per-model rdfs.  Dropped models produce no usable predictions.
     rdfs: Dict[str, pd.DataFrame] = {}
-    for rev in all_predictions.keys():
+    for rev in list(all_predictions.keys()):
         preds = all_predictions[rev]
         raws = all_raw_scores[rev]
-        if not preds:
+        if not preds or rev in dropped:
             continue
         rdf, _ = dataframe_results(test_images, preds, categories, top_N=top_N, raw_scores=raws)
         rdf.drop(columns=["CATEGORY"], inplace=True, errors="ignore")
@@ -349,9 +421,9 @@ def _run_group(
     return rdfs, dropped
 
 
-# ---------------------------------------------------------------------------
+# ═══════════════════════════════════════════════════════════════════════════
 # Sequential execution (guaranteed fallback)
-# ---------------------------------------------------------------------------
+# ═══════════════════════════════════════════════════════════════════════════
 
 def run_best_sequential(
     test_images: list,
@@ -363,11 +435,7 @@ def run_best_sequential(
     top_N: int,
     paradata_logger=None,
 ) -> Dict[str, pd.DataFrame]:
-    """
-    Original sequential loop: one model at a time, full data pass each.
-    Captures full Top-N softmax probabilities for downstream averaging.
-    Returns {rev: rdf (FILE, PAGE, CLASS-1 … CLASS-N, SCORE-1 … SCORE-N)}.
-    """
+    """One model at a time, full data pass each.  Returns {rev: rdf}."""
     from classifier import ImageClassifier
     from utils import dataframe_results
 
@@ -381,7 +449,6 @@ def run_best_sequential(
         clf.load_model(str(local_path))
         loader = clf.create_dataloader(test_images, batch)
 
-        # raw=True returns full softmax vector per image for probability averaging
         preds, raw_scores = clf.infer_dataloader(loader, top_n=top_N, raw=True)
 
         rdf, _ = dataframe_results(test_images, preds, categories, top_N=top_N, raw_scores=raw_scores)
@@ -398,27 +465,58 @@ def run_best_sequential(
     return all_rdfs
 
 
-# ---------------------------------------------------------------------------
-# In-Memory Probability Averaging
-# ---------------------------------------------------------------------------
+# ═══════════════════════════════════════════════════════════════════════════
+# Wide combined frame  (BEST_{N}_models_TOP-1.csv)
+# ═══════════════════════════════════════════════════════════════════════════
 
-def average_rdfs(all_rdfs: Dict[str, pd.DataFrame], top_N: int) -> pd.DataFrame:
+def merge_best(
+    revision_best_models: dict,
+    rdf_by_rev: Dict[str, pd.DataFrame],
+) -> pd.DataFrame:
+    """Outer-merge per-model frames into the wide CLASS-1-{rev} layout.
+
+    Column order follows `revision_best_models` (canonical) regardless of the
+    insertion order of `rdf_by_rev` (groups may finish out of order).  Every
+    non-key column is suffixed with `-{rev}`, reproducing the historical
+    inline merge byte-for-byte so averaging.py's `^CLASS-(\\d+)-(.+)$`
+    parsing keeps working.
     """
-    Aggregates per-model DataFrames by computing the mean softmax probability
-    for each class across all models, then re-ranking to yield a Top-N DataFrame.
+    combined = pd.DataFrame()
+    for rev in revision_best_models:
+        if rev not in rdf_by_rev:
+            continue
+        rdf = rdf_by_rev[rev]
+        renamed = {c: f"{c}-{rev}" for c in rdf.columns if c not in ("FILE", "PAGE")}
+        rdf_renamed = rdf.rename(columns=renamed)
+        if combined.empty:
+            combined = rdf_renamed
+        else:
+            combined = pd.merge(combined, rdf_renamed, on=["FILE", "PAGE"], how="outer")
+    return combined
 
-    This replaces the legacy wide-CSV majority-vote approach: instead of each
-    model casting a binary vote, its full probability distribution is averaged,
-    so confident models carry more weight than uncertain ones.
+
+# ═══════════════════════════════════════════════════════════════════════════
+# In-memory probability averaging  (final ARUP-style output)
+# ═══════════════════════════════════════════════════════════════════════════
+
+def average_rdfs(
+    all_rdfs: Dict[str, pd.DataFrame],
+    top_N: int,
+    revision_best_models: Optional[dict] = None,
+) -> pd.DataFrame:
+    """Average per-model softmax probabilities and re-rank to Top-N.
+
+    The result matches ARUP_averaged.csv's column set:
+        FILE, PAGE, V1.3 … V5.3, CLASS-1, SCORE-1, … CLASS-N, SCORE-N
+    where V-columns are each model's top-1 vote (in canonical revision order)
+    and CLASS-/SCORE- columns are the probability-averaged ensemble.
     """
     long_dfs = []
     num_models = len(all_rdfs)
 
-    # 1. Melt each per-model DataFrame into long form (FILE, PAGE, CLASS, SCORE)
-    for rev, rdf in all_rdfs.items():
+    for rdf in all_rdfs.values():
         class_cols = [c for c in rdf.columns if str(c).startswith('CLASS-')]
         indices = [int(c.split('-')[1]) for c in class_cols if c.split('-')[1].isdigit()]
-
         if not indices:
             continue
 
@@ -430,43 +528,42 @@ def average_rdfs(all_rdfs: Dict[str, pd.DataFrame], top_N: int) -> pd.DataFrame:
         cols_to_keep = [c for c in cols_to_keep if c in rdf.columns]
         df_subset = rdf[cols_to_keep].copy()
 
-        melted = pd.wide_to_long(
-            df_subset,
-            stubnames=['CLASS', 'SCORE'],
-            i=['FILE', 'PAGE'],
-            j='rank',
-            sep='-',
-            suffix=r'\d+',
-        ).reset_index().dropna(subset=['CLASS'])
+        # A Top-1 rdf has no SCORE column (utils.py drops SCORE-1); treat the
+        # single vote as score 1.0 so it still contributes to the average.
+        if not any(c.startswith('SCORE-') for c in df_subset.columns):
+            melted = (
+                df_subset.rename(columns={'CLASS-1': 'CLASS'})
+                .assign(SCORE=1.0)
+                .dropna(subset=['CLASS'])
+            )[['FILE', 'PAGE', 'CLASS', 'SCORE']]
+        else:
+            melted = pd.wide_to_long(
+                df_subset, stubnames=['CLASS', 'SCORE'],
+                i=['FILE', 'PAGE'], j='rank', sep='-', suffix=r'\d+',
+            ).reset_index().dropna(subset=['CLASS'])
 
-        # Keep the highest score seen for each (file, page, class) within this model
         melted = melted.groupby(['FILE', 'PAGE', 'CLASS'], as_index=False)['SCORE'].max()
         long_dfs.append(melted)
 
     if not long_dfs:
-        return pd.DataFrame(
-            columns=["FILE", "PAGE"]
+        empty_cols = (
+            ["FILE", "PAGE"]
             + [f"CLASS-{i}" for i in range(1, top_N + 1)]
             + [f"SCORE-{i}" for i in range(1, top_N + 1)]
         )
+        return pd.DataFrame(columns=empty_cols)
 
     combined = pd.concat(long_dfs, ignore_index=True)
 
-    # 2. Average the raw probabilities across all models
     grouped = combined.groupby(['FILE', 'PAGE', 'CLASS'])['SCORE'].sum().reset_index()
     grouped['AVG_SCORE'] = (grouped['SCORE'] / num_models).clip(upper=1.0)
 
-    # 3. Re-rank Top-N by averaged score
     grouped.sort_values(['FILE', 'PAGE', 'AVG_SCORE'], ascending=[True, True, False], inplace=True)
     grouped['rank'] = grouped.groupby(['FILE', 'PAGE']).cumcount() + 1
     top_n_df = grouped[grouped['rank'] <= top_N].copy()
 
-    # 4. Pivot back to standard CLASS-N / SCORE-N column format
     pivot = top_n_df.pivot_table(
-        index=['FILE', 'PAGE'],
-        columns='rank',
-        values=['CLASS', 'AVG_SCORE'],
-        aggfunc='first',
+        index=['FILE', 'PAGE'], columns='rank', values=['CLASS', 'AVG_SCORE'], aggfunc='first',
     )
 
     flat = pd.DataFrame(index=pivot.index)
@@ -477,13 +574,43 @@ def average_rdfs(all_rdfs: Dict[str, pd.DataFrame], top_N: int) -> pd.DataFrame:
 
     result = flat.reset_index()
     result = result.replace({0: "", 0.0: ""})
+
+    # Mirror averaging.py: when a SCORE-i slot is blank (was zero), clear its
+    # paired CLASS-i label too, so a class never appears with an empty score
+    # (matches ARUP_averaged.csv, where both cells are empty/NaN together).
+    for i in range(2, top_N + 1):
+        score_col, class_col = f"SCORE-{i}", f"CLASS-{i}"
+        if score_col in result.columns and class_col in result.columns:
+            result.loc[result[score_col] == "", class_col] = ""
+
+    # ── per-model top-1 vote columns (V1.3 … V5.3) in canonical order ──────
+    order = (
+        [r for r in revision_best_models if r in all_rdfs]
+        if revision_best_models else list(all_rdfs.keys())
+    )
+    vote_cols: List[str] = []
+    for rev in order:
+        rdf = all_rdfs[rev]
+        if 'CLASS-1' not in rdf.columns:
+            continue
+        col = _vote_col_name(rev)
+        vcol = (
+            rdf[['FILE', 'PAGE', 'CLASS-1']]
+            .drop_duplicates(['FILE', 'PAGE'])
+            .rename(columns={'CLASS-1': col})
+        )
+        result = result.merge(vcol, on=['FILE', 'PAGE'], how='left')
+        vote_cols.append(col)
+
+    avg_cols = [c for c in result.columns if c not in (['FILE', 'PAGE'] + vote_cols)]
+    result = result[['FILE', 'PAGE'] + vote_cols + avg_cols]
     result.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
     return result
 
 
-# ---------------------------------------------------------------------------
+# ═══════════════════════════════════════════════════════════════════════════
 # Main entry point used by run.py
-# ---------------------------------------------------------------------------
+# ═══════════════════════════════════════════════════════════════════════════
 
 def run_best_models(
     test_images: list,
@@ -500,27 +627,10 @@ def run_best_models(
     save_intermediates: bool = False,
     average_best: bool = True,
 ) -> str:
-    """
-    Run all best models and return the path to the final averaged CSV.
+    """Run all best models and write the wide + averaged result CSVs.
 
-    Parameters
-    ----------
-    parallel : bool
-        When True, attempt memory-aware grouped single-pass execution.
-        Falls back silently to sequential when CUDA is unavailable or
-        profiling fails.
-    save_intermediates : bool
-        When True, write one standard Top-N CSV per model before averaging.
-        Off by default; individual CSVs are natively compatible with
-        averaging.py for manual re-averaging if needed.
-    average_best : bool
-        When False (--no-average-best), skip the averaging step and return
-        an empty string.  Intermediate CSVs are still written when
-        save_intermediates is True.
-
-    Returns
-    -------
-    str  Path to the averaged output CSV, or "" when average_best is False.
+    Returns the path to the averaged CSV, or "" when average_best is False
+    (the wide BEST_{n}_models_TOP-1.csv is still written in that case).
     """
     out_tables = Path(output_dir) / "tables"
     out_tables.mkdir(parents=True, exist_ok=True)
@@ -532,12 +642,9 @@ def run_best_models(
     # Choose execution engine
     # ------------------------------------------------------------------
     use_parallel = parallel and torch.cuda.is_available()
-
-    if use_parallel:
-        # Need at least 2*batch images to profile; fall back if dataset tiny
-        if len(test_images) < _PROFILING_BATCHES * batch:
-            print("[parallel_best] Dataset too small for profiling — falling back to sequential.")
-            use_parallel = False
+    if use_parallel and len(test_images) < _PROFILING_BATCHES * batch:
+        print("[parallel_best] Dataset too small for profiling — falling back to sequential.")
+        use_parallel = False
 
     if use_parallel:
         try:
@@ -551,9 +658,17 @@ def run_best_models(
             use_parallel = False
 
     if use_parallel:
-        groups = pack_models(models_peak)
-        deferred: List[str] = []
+        free, total = torch.cuda.mem_get_info(0)
+        budget = int(free * _MEMORY_SAFETY_MARGIN) - _HEADROOM_BYTES
+        sizes = {rev: info["peak_bytes"] for rev, info in models_peak.items()}
+        groups = pack_models(sizes, budget)
 
+        print(f"[parallel_best] VRAM budget {budget / 1e9:.2f} GB → {len(groups)} group(s)")
+        for i, g in enumerate(groups):
+            print(f"  group {i + 1}: {g}  "
+                  f"cumulative={sum(sizes[r] for r in g) / 1e9:.2f} GB")
+
+        deferred: List[str] = []
         for g_idx, group in enumerate(groups):
             print(f"\n[parallel_best] Running group {g_idx + 1}/{len(groups)}: {group}")
             try:
@@ -567,19 +682,16 @@ def run_best_models(
                     for rdf in rdfs.values():
                         paradata_logger.log_success("csv", len(rdf.index))
             except Exception as e:
-                print(f"[parallel_best] Group {g_idx + 1} failed ({e}) — "
-                      f"running its models sequentially.")
+                print(f"[parallel_best] Group {g_idx + 1} failed ({e}) — running sequentially.")
                 deferred.extend(group)
 
-        # Run overflow victims sequentially
         if deferred:
             print(f"\n[parallel_best] Running {len(deferred)} deferred model(s) sequentially …")
             deferred_map = {r: revision_best_models[r] for r in deferred if r in revision_best_models}
-            deferred_rdfs = run_best_sequential(
+            all_rdfs.update(run_best_sequential(
                 test_images, categories, deferred_map,
                 model_dir, cp_dir, batch, top_N, paradata_logger,
-            )
-            all_rdfs.update(deferred_rdfs)
+            ))
     else:
         if parallel and not torch.cuda.is_available():
             print("[parallel_best] --parallel requested but no CUDA — running sequentially.")
@@ -589,7 +701,21 @@ def run_best_models(
         )
 
     # ------------------------------------------------------------------
-    # Optional: save individual per-model CSVs before averaging
+    # Wide per-model vote file  (always)  — averaging.py-compatible
+    # ------------------------------------------------------------------
+    top1_rdfs = {
+        rev: rdf[["FILE", "PAGE", "CLASS-1"]].copy()
+        for rev, rdf in all_rdfs.items()
+        if "CLASS-1" in rdf.columns
+    }
+    wide_df = merge_best(revision_best_models, top1_rdfs)
+    wide_df.sort_values(["FILE", "PAGE"], ascending=[True, True], inplace=True)
+    wide_path = str(out_tables / f"{time_stamp}_BEST_{n_models}_models_TOP-1.csv")
+    wide_df.to_csv(wide_path, index=False)
+    print(f"[parallel_best] Wide per-model votes → {wide_path}")
+
+    # ------------------------------------------------------------------
+    # Optional per-model Top-N intermediates
     # ------------------------------------------------------------------
     if save_intermediates:
         for rev, rdf in all_rdfs.items():
@@ -598,17 +724,17 @@ def run_best_models(
             print(f"[parallel_best] Saved intermediate model CSV → {path}")
 
     # ------------------------------------------------------------------
-    # Average and write the final result CSV
+    # Averaged final result (ARUP-style columns)
     # ------------------------------------------------------------------
     if not average_best:
-        print("\n[parallel_best] Averaging bypassed (--no-average-best).")
+        print("\n[parallel_best] Averaging bypassed (--no-average-best). "
+              f"Wide votes available at {wide_path}")
         return ""
 
     print(f"\n[parallel_best] Averaging {n_models} models → TOP-{top_N} result …")
-    avg_df = average_rdfs(all_rdfs, top_N)
+    avg_df = average_rdfs(all_rdfs, top_N, revision_best_models)
 
-    engine_tag = "parallel" if (parallel and torch.cuda.is_available()) else "best"
-    avg_path = str(out_tables / f"{time_stamp}_{engine_tag}_{n_models}_models_AVG_TOP-{top_N}.csv")
+    avg_path = str(out_tables / f"{time_stamp}_BEST_{n_models}_models_AVG_TOP-{top_N}.csv")
     avg_df.to_csv(avg_path, index=False)
     print(f"[parallel_best] Averaged result CSV → {avg_path}")
 
