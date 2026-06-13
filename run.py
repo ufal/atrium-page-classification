@@ -8,6 +8,8 @@ from yolo_classifier import YOLOClassifier
 import time
 from huggingface_hub import create_branch, delete_branch
 from atrium_paradata import ParadataLogger
+# Issue #3: opt-in parallel engine for --best (one data pass instead of N).
+from parallel_best import run_best_directory, predict_file_best
 
 if __name__ == "__main__":
     # Initialize the parser
@@ -103,7 +105,16 @@ if __name__ == "__main__":
     parser.add_argument("--raw", help="Output raw scores for all categories", default=raw, action="store_true")
     parser.add_argument("--best",
                         help=f"Output all ({len(revision_best_models.keys())}) best models' scores (more time needed, and NO chunk, raw, or top_N>1 is available)",
-                        default=raw, action="store_true")
+                        default=False, action="store_true")
+    # Issue #3: opt-in parallel engine for --best. Only meaningful together with
+    # --best on a directory run; loads as many models as fit in VRAM and streams
+    # the input ONCE (one data pass instead of N). Requires CUDA — falls back to
+    # the sequential --best path on CPU/MPS or whenever it cannot stay safe.
+    parser.add_argument("--parallel",
+                        help="With --best: load as many models as fit in VRAM and decode the input once "
+                             "(one data pass instead of N). Requires CUDA; falls back to sequential otherwise. "
+                             "No effect without --best.",
+                        default=False, action="store_true")
     parser.add_argument("--folds", type=int, default=cross_runs,
                         help="Number of folds for cross-validation with 80/10/10 split. Default is 0 (no cross-validation).")
     parser.add_argument("--average", help="Averaging existing fold models", action="store_true")
@@ -182,6 +193,7 @@ if __name__ == "__main__":
         "mode":          "file" if (hasattr(args, "file") and args.file) else "directory",
         "raw_output":    str(getattr(args, "raw",  False)),
         "best_models":   str(getattr(args, "best", False)),
+        "parallel_best": str(getattr(args, "parallel", False)),
         "yolo":          str(args.yolo),
     }
     _paradata_logger = ParadataLogger(
@@ -517,28 +529,12 @@ if __name__ == "__main__":
                 if args.yolo:
                     print("[YOLO] --best is not supported for YOLO models. Run without --best.")
                 else:
-                    all_best_predictions = {}
-
-                    for rev, base_model in revision_best_models.items():
-                        print(f"\nLoading best model for revision {rev} based on {base_model}...")
-                        temp_classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories),
-                                                          store_dir=str(cp_dir))
-                        temp_model_name_local = f"model_{rev.replace('.', '')}"
-                        temp_model_path = f"{model_dir}/{temp_model_name_local}"
-
-                        temp_classifier.load_model(temp_model_path)
-
-                        pred_scores = temp_classifier.top_n_predictions(args.file, len(categories))
-
-                        labels = [categories[i[0]] for i in pred_scores]
-                        scores = [round(i[1], 3) for i in pred_scores]
-
-                        all_best_predictions[rev] = (labels, scores)
-
-                        # FIX: explicitly release GPU memory after each model to avoid accumulation
-                        del temp_classifier
-                        if torch.cuda.is_available():
-                            torch.cuda.empty_cache()
+                    # Single-file --best is sequential (no parallel benefit for one
+                    # image). predict_file_best replaces the previously copy-pasted
+                    # per-model load/predict loop.
+                    all_best_predictions = predict_file_best(
+                        revision_best_models, args.file, categories, str(model_dir), str(cp_dir)
+                    )
 
                     print(f"\nFile {args.file} predictions from best models:")
                     for rev, (labels, scores) in all_best_predictions.items():
@@ -664,56 +660,22 @@ if __name__ == "__main__":
                 if args.yolo:
                     print("[YOLO] --best is not supported for YOLO models. Run without --best.")
                 else:
-                    all_best_predictions = {}
-
-                    for rev, base_model in revision_best_models.items():
-                        print(f"\nLoading best model for revision {rev} based on {base_model}...")
-                        temp_classifier = ImageClassifier(checkpoint=base_model, num_labels=len(categories),
-                                                          store_dir=str(cp_dir))
-                        temp_model_name_local = f"model_{rev.replace('.', '')}"
-                        temp_model_path = f"{model_dir}/{temp_model_name_local}"
-
-                        temp_classifier.load_model(temp_model_path)
-
-                        test_loader = temp_classifier.create_dataloader(test_images, batch)
-
-                        test_predictions, _ = temp_classifier.infer_dataloader(test_loader, 1, False)
-
-                        rdf, _ = dataframe_results(test_images, test_predictions,
-                                                   categories, 1, None)
-
-                        # dataframe_results adds a CATEGORY alias column when top_N==1
-                        # (for human-readable single-model CSVs).  In the --best combined
-                        # output it would create a redundant CATEGORY-{rev} column
-                        # alongside CLASS-1-{rev}, doubling the column count.  Drop it
-                        # here before the rename/merge step below.
-                        rdf.drop(columns=["CATEGORY"], inplace=True, errors="ignore")
-
-                        _paradata_logger.log_success("csv", len(rdf.index))
-
-                        rdf.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
-                        all_best_predictions[rev] = rdf
-
-                        # FIX: explicitly release GPU memory after each model to avoid accumulation
-                        del temp_classifier
-                        if torch.cuda.is_available():
-                            torch.cuda.empty_cache()
-
-                    # combine all best predictions into single file by first 2 columns
-                    combined_df = pd.DataFrame()
-                    for rev, rdf in all_best_predictions.items():
-                        # rename columns to include revision
-                        renamed_columns = {col: f"{col}-{rev}" for col in rdf.columns if col not in ["FILE", "PAGE"]}
-                        rdf_renamed = rdf.rename(columns=renamed_columns)
-
-                        if combined_df.empty:
-                            combined_df = rdf_renamed
-                        else:
-                            combined_df = pd.merge(combined_df, rdf_renamed, on=["FILE", "PAGE"], how="outer")
-
-                    combined_df.to_csv(
-                        f"{output_dir}/tables/{time_stamp}_BEST_{len(revision_best_models.keys())}_models_TOP-1.csv", sep=",",
-                        index=False)
+                    # Directory --best. The engine (sequential vs parallel one-pass)
+                    # is chosen inside run_best_directory based on --parallel and CUDA
+                    # availability; output, column order and paradata counts are
+                    # byte-identical across engines so averaging.py is unaffected.
+                    run_best_directory(
+                        revision_best_models=revision_best_models,
+                        test_images=test_images,
+                        categories=categories,
+                        batch=batch,
+                        model_dir=str(model_dir),
+                        cp_dir=str(cp_dir),
+                        output_dir=str(output_dir),
+                        time_stamp=time_stamp,
+                        use_parallel=bool(getattr(args, "parallel", False)),
+                        paradata_logger=_paradata_logger,
+                    )
                     print(f"Results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
 
     finally:
