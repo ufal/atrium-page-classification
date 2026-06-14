@@ -1,5 +1,10 @@
 import datetime
+import os
+import random
+import re
+from collections import defaultdict, OrderedDict
 
+import numpy as np
 import torch
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
@@ -9,20 +14,21 @@ from utils import *
 
 from sklearn.model_selection import train_test_split, cross_val_score
 
-from PIL import Image, ImageEnhance, ImageFilter # Added Image to imports
-from transformers import AutoImageProcessor, AutoModelForImageClassification, TrainingArguments, Trainer, default_data_collator
+from PIL import Image, ImageEnhance, ImageFilter  # Added Image to imports
+from transformers import (
+    AutoImageProcessor,
+    AutoModelForImageClassification,
+    TrainingArguments,
+    Trainer,
+    default_data_collator,
+)
 from huggingface_hub import whoami
 # import timm
 # from timm.data import resolve_data_config
 # from transformers import TimmWrapperModel, TimmWrapperImageProcessor
 
-import random
-from collections import defaultdict, OrderedDict
-import numpy as np
-
-import torch
-import numpy as np
-from torch.utils.data import DataLoader
+# REVIEW FIX (Nit I): removed duplicated imports (torch / numpy / DataLoader
+# were each imported twice in the original).
 
 
 def custom_collate(batch: list) -> dict:
@@ -87,9 +93,9 @@ class BalancedBatchSampler(torch.utils.data.sampler.BatchSampler):
     Returns batches of size n_classes * n_samples
     """
 
-    def __init__(self, labels_one_hot: np.array , n_classes_per_batch, n_samples_of_class):
+    def __init__(self, labels_one_hot: np.array, n_classes_per_batch, n_samples_of_class):
         self.labels = labels_one_hot
-        self.labels_set = list(np.unique(self.labels.argmax(axis=-1))) # Modified for one-hot
+        self.labels_set = list(np.unique(self.labels.argmax(axis=-1)))  # Modified for one-hot
         self.label_to_indices = {label: np.where(self.labels.argmax(axis=-1) == label)[0]  # Modified for one-hot
                                  for label in self.labels_set}
         for l in self.labels_set:
@@ -121,9 +127,12 @@ class BalancedBatchSampler(torch.utils.data.sampler.BatchSampler):
         return self.n_dataset // self.batch_size
 
 
-
 class ImageClassifier:
-    def __init__(self, checkpoint: str, num_labels: int, store_dir: str = "./chekcpoint"):
+    # REVIEW FIX (Minor I): default store_dir corrected from the typo
+    # "./chekcpoint" to "./checkpoint", matching config.txt FOLDER_CPOINTS and
+    # avoiding a stray misspelled cache directory (service/inference.py
+    # constructs ImageClassifier without store_dir, so it relied on this default).
+    def __init__(self, checkpoint: str, num_labels: int, store_dir: str = "./checkpoint"):
         """
         Initialize the image classifier with the specified checkpoint.
         """
@@ -186,9 +195,6 @@ class ImageClassifier:
             transforms.Normalize(mean=image_mean, std=image_std)
         ])
 
-
-
-
     def process_images(self, image_paths: list, image_labels: list, batch_size: int, train: bool = True, ignored_paths: list = None) -> DataLoader:
         """
         Process a list of image file paths into batches.
@@ -200,7 +206,7 @@ class ImageClassifier:
         else:
             dataloader = DataLoader(dataset, collate_fn=custom_collate,
                                 batch_size=batch_size)
-       
+
         print(f"Dataloader of {'train' if train else 'eval'} dataset is ready:\t{len(image_paths)} images split into {len(dataloader)} batches of size {batch_size}")
         return dataloader
 
@@ -386,13 +392,21 @@ class ImageClassifier:
                     elapsed_minutes = (datetime.datetime.now() - start_time).total_seconds() / 60
                     print(f"{ib}-th batch\t\tProcessed {len(predictions)} images in\t{elapsed_minutes:.2f} min")
 
-
         end_time = datetime.datetime.now()
         total_minutes = (end_time - start_time).total_seconds() / 60
-        avg_seconds_per_image = (end_time - start_time).total_seconds() / len(predictions)
+
+        # REVIEW FIX (Minor B): guard against an empty prediction set (every
+        # batch skipped because all images were unreadable).  The original
+        # divided by len(predictions) unconditionally → ZeroDivisionError.
+        n_pred = len(predictions)
+        if n_pred == 0:
+            print("\tWARNING: no images were successfully processed (all batches skipped).")
+            return predictions, (None if not raw else raw_scores)
+
+        avg_seconds_per_image = (end_time - start_time).total_seconds() / n_pred
 
         print(
-            f"\tProcessing of {len(dataloader)} batches ({len(predictions)} images) finished at\t{end_time.strftime('%Y-%m-%d %H:%M:%S')}")
+            f"\tProcessing of {len(dataloader)} batches ({n_pred} images) finished at\t{end_time.strftime('%Y-%m-%d %H:%M:%S')}")
         print(
             f"\tTotal time: {total_minutes:.2f} min\n\tAverage time: {avg_seconds_per_image:.4f} sec/img")
 
@@ -448,7 +462,7 @@ class ImageClassifier:
 
         print(f"Model and processor pushed to the Hugging Face Hub: {repo_id}")
 
-    def load_from_hub(self, repo_id: str,  revision: str = "main"):
+    def load_from_hub(self, repo_id: str, revision: str = "main"):
         """
         Load a model and its processor from the Hugging Face Hub.
 
@@ -472,7 +486,6 @@ class ImageClassifier:
 
         self.model, self.processor = model, processor
         print(f"Model and processor loaded from the Hugging Face Hub: {repo_id}")
-
 
     @staticmethod
     def compute_metrics(eval_pred: list) -> dict:
@@ -560,7 +573,6 @@ def split_data_80_10_10(files: list, labels: list, random_seed: int, max_categ: 
     label_to_indices = defaultdict(list)
     for idx, label in enumerate(labels):
         label_to_indices[label.argmax()].append(idx)
-
 
     for label, indices in label_to_indices.items():
         indices = np.array(indices)
@@ -748,7 +760,14 @@ def average_model_weights(model_dir: str, model_name_pattern: str, base_model: s
     # Find all fold models matching the pattern
     fold_pattern = f"{model_name_pattern}*"
     fold_dirs = list(model_dir.glob(fold_pattern))
-    fold_dirs = [f for f in fold_dirs if str(f)[-2] != "a"]
+
+    # REVIEW FIX (Minor I): exclude already-averaged models robustly.  The
+    # original used `str(f)[-2] != "a"`, a fragile negative-index char test that
+    # breaks on names like "model_v4a10" (the 'a' is not at [-2]) or any name
+    # whose second-to-last char happens to be 'a'.  Match the documented
+    # averaged-model suffix `…a<N>` explicitly instead.
+    _averaged_re = re.compile(r"a\d+$")
+    fold_dirs = [f for f in fold_dirs if not _averaged_re.search(f.name)]
 
     if not fold_dirs:
         raise ValueError(f"No fold models found matching pattern: {fold_pattern}")
@@ -825,5 +844,3 @@ def average_model_weights(model_dir: str, model_name_pattern: str, base_model: s
         print(f"Warning: Could not save processor: {e}")
 
     return output_path
-
-

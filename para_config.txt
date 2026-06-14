@@ -1,7 +1,9 @@
 # para_config.txt — atrium-page-classification
 [tool]
 program = page-classification
-version = v1.2.1-beta
+# REVIEW FIX (Minor J): bumped to the current release (was v1.2.1-beta; the
+# CONTRIBUTING.md release history lists v1.3.0-beta as the latest pre-release).
+version = v1.3.0-beta
 repository_fallback = https://github.com/ufal/atrium-page-classification
 
 [components]

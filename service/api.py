@@ -1,8 +1,9 @@
 import os
 import sys
-import shutil
-import tempfile
 import base64
+import tempfile
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
@@ -10,7 +11,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from io import BytesIO
 from PIL import Image
 from pdf2image import convert_from_bytes
-import time
 
 # FIX: guard relative import so the module works both when launched via
 #   `uvicorn service.api:app`  (package mode, relative import works)
@@ -22,14 +22,23 @@ except ImportError:
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from inference import manager, AVAILABLE_VERSIONS, CATEGORIES
 
-app = FastAPI(title="Atrium Page Classification API")
+# ── REVIEW FIX (Major F/K): request limits to bound the DoS surface ──────────
+# convert_from_bytes() rasterises every page of an uploaded PDF and we hold a
+# base64 thumbnail per page in memory, so both the upload size and the page
+# count must be capped.  Overridable via environment for larger deployments.
+MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_BYTES", str(50 * 1024 * 1024)))   # 50 MB
+MAX_PDF_PAGES    = int(os.getenv("MAX_PDF_PAGES", "200"))
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
+# ── REVIEW FIX (Minor H/I): lifespan handler replaces the deprecated
+#    @app.on_event("startup") hook.  Default model is warmed up on startup. ──
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    manager.warmup(["v4.3"])
+    yield
+
+
+app = FastAPI(title="Atrium Page Classification API", lifespan=lifespan)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "frontend")
@@ -56,22 +65,20 @@ if os.path.exists(LINDAT_DIST_DIR):
     app.mount("/dist", StaticFiles(directory=LINDAT_DIST_DIR), name="lindat-dist")
 
 
-# --- REFINED: Use environment variables for CORS, fallback to local dev defaults ---
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:8080,http://127.0.0.1:8080").split(",")
+# ── REVIEW FIX (Major F/K): CORS is registered EXACTLY ONCE, from the
+#    environment-driven allow-list.  The previous code added the middleware
+#    twice — the first with allow_origins=["*"] — which silently defeated the
+#    restricted second policy.  Default falls back to local dev origins. ──────
+ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS", "http://localhost:8080,http://127.0.0.1:8080"
+).split(",")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=[o.strip() for o in ALLOWED_ORIGINS if o.strip()],
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
-
-@app.on_event("startup")
-async def startup_event():
-    """Pre-load the default model at startup to avoid a latency spike on the
-    first request.  Only v4.3 is warmed up by default; extend the list if
-    multi-model latency on startup is acceptable."""
-    manager.warmup(["v4.3"])
 
 
 @app.get("/")
@@ -101,10 +108,20 @@ async def predict_image(
     if file.content_type not in ["image/jpeg", "image/png", "image/jpg"]:
         raise HTTPException(status_code=400, detail="Invalid file type. Only JPEG/PNG allowed.")
 
-    if topn < 1: topn = 1
+    if topn < 1:
+        topn = 1
 
     try:
         contents = await file.read()
+
+        # REVIEW FIX (Major F/K): enforce the upload-size cap.
+        if len(contents) > MAX_UPLOAD_BYTES:
+            raise HTTPException(
+                status_code=413,
+                detail=f"File too large ({len(contents)} bytes). "
+                       f"Limit is {MAX_UPLOAD_BYTES} bytes.",
+            )
+
         image = Image.open(BytesIO(contents)).convert("RGB")
 
         results = manager.predict(image, version, topn)
@@ -118,8 +135,16 @@ async def predict_image(
         return {
             "type": "image",
             "model_version": manager.get_model_details(version),
+            # REVIEW FIX (Minor F/J): echo requested_topn for parity with the
+            # documented schema and the /predict_document response.
+            "requested_topn": topn,
             "predictions": results
         }
+    # REVIEW FIX (Major F): re-raise HTTPException unchanged.  The previous
+    # broad `except Exception` caught our deliberate 500/413/400 and re-wrapped
+    # them as 400, corrupting every status code.
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error processing image: {str(e)}")
 
@@ -133,11 +158,21 @@ async def predict_document(
     if file.content_type != "application/pdf":
         raise HTTPException(status_code=400, detail="Invalid file type. Only PDF allowed.")
 
-    if topn < 1: topn = 1
+    if topn < 1:
+        topn = 1
 
     with tempfile.TemporaryDirectory() as temp_dir:
         try:
             contents = await file.read()
+
+            # REVIEW FIX (Major F/K): enforce the upload-size cap before the
+            # (memory-heavy) rasterisation.
+            if len(contents) > MAX_UPLOAD_BYTES:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"File too large ({len(contents)} bytes). "
+                           f"Limit is {MAX_UPLOAD_BYTES} bytes.",
+                )
 
             # Convert PDF to images
             try:
@@ -147,6 +182,14 @@ async def predict_document(
 
             if not images:
                 raise HTTPException(status_code=400, detail="PDF contains no readable pages.")
+
+            # REVIEW FIX (Major F/K): cap the page count to bound memory.
+            if len(images) > MAX_PDF_PAGES:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"PDF has too many pages ({len(images)}). "
+                           f"Limit is {MAX_PDF_PAGES}.",
+                )
 
             # Save pages as images for batch processing
             for i, img in enumerate(images):
@@ -184,10 +227,15 @@ async def predict_document(
                 "pages": formatted_pages
             }
 
+        # REVIEW FIX (Major F): re-raise HTTPException unchanged so the inner
+        # 400/413 are not rewritten as a generic 500 by the broad handler below.
+        except HTTPException:
+            raise
         except Exception as e:
             # Log the full error for debugging
             print(f"Error processing PDF: {e}")
             raise HTTPException(status_code=500, detail=f"Document processing failed: {str(e)}")
+
 
 if __name__ == "__main__":
     import uvicorn

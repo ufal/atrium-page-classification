@@ -45,7 +45,13 @@ chunking = False
 
 [HF]
 repo_name = ufal/vit-historical-page
-token = hf_ALr...zdBL
+# REVIEW FIX (Blocker D/K): the HF access token must NOT be committed here.
+# It is read from the HF_TOKEN environment variable at runtime (see run.py).
+# Leave this blank in version control. Public models need no token; only gated
+# models / push_to_hub require one.
+#   export HF_TOKEN=hf_xxx   (Unix)
+#   setx HF_TOKEN hf_xxx     (Windows)
+token =
 use_hf = False
 revision = main
 latest = v4.3

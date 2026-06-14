@@ -26,6 +26,9 @@ except ImportError:
     exit(1)
 
 
+# NOTE: keys follow the TRAINING-TIME revision scheme (run.py:revision_to_base_model),
+# NOT the HF-published .3 scheme. v1=S, v4=EffNetV2-L, v6=RegNetY-120,
+# v7=RegNetY-160, v8=RegNetY-640, v12=M. Do not "correct" against the HF table.
 # ── Built-in GPU node specs (UFAL cluster) ────────────────────────────────
 # These can be overridden or extended at runtime via --gpu-map <json_file>.
 # Format:  { "node-name": { "gpu_type": "...", "gpuram": "...", "threads": N } }

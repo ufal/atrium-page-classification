@@ -1,5 +1,8 @@
-# Requires NVIDIA Container Toolkit on the host AND a CUDA-enabled image
-# (build with --build-arg TORCH_INDEX_URL=https://download.pytorch.org/whl/cu121).
+# Requires NVIDIA Container Toolkit on the host AND a CUDA-enabled image.
+# REVIEW FIX (Nit H): build arg corrected to cu126 to match the Dockerfile pin
+# (torch 2.7.1+cu126).  The base image defaults to a CPU wheel, so a GPU image
+# must be built explicitly:
+#   docker build --build-arg TORCH_INDEX_URL=https://download.pytorch.org/whl/cu126 .
 # Usage: docker compose -f docker-compose.yml -f docker-compose.gpu.yml run --rm classify
 services:
   classify: &gpu

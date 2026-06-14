@@ -4,7 +4,6 @@ Requires: pip install ultralytics
 """
 from __future__ import annotations
 
-import os
 import shutil
 import tempfile
 from pathlib import Path
@@ -82,19 +81,40 @@ class YOLOClassifier:
         classifier.load_model(...)
     """
 
-    # Mapping from short version tag to Ultralytics model identifier
+    # Mapping from short version tag to Ultralytics model identifier.
+    # REVIEW FIX (Minor I): keys corrected to the documented short tags
+    # (config.txt comment lists `yv8s`, `y11s`, …) and the map is now actually
+    # USED via _resolve_checkpoint() below — previously it was dead code.
     BASE_MODELS = {
-        "yv8n": "yolov8n-cls.pt",
-        "yv8s": "yolov8s-cls.pt",
-        "yv8m": "yolov8m-cls.pt",
-        "yv11n": "yolo11n-cls.pt",
-        "yv11s": "yolo11s-cls.pt",
-        "yv11m": "yolo11m-cls.pt",
+        "yv8n":  "yolov8n-cls.pt",
+        "yv8s":  "yolov8s-cls.pt",
+        "yv8m":  "yolov8m-cls.pt",
+        "yv8l":  "yolov8l-cls.pt",
+        "yv8x":  "yolov8x-cls.pt",
+        "y11n":  "yolo11n-cls.pt",
+        "y11s":  "yolo11s-cls.pt",
+        "y11m":  "yolo11m-cls.pt",
+        "y11l":  "yolo11l-cls.pt",
+        "y11x":  "yolo11x-cls.pt",
     }
+
+    @classmethod
+    def _resolve_checkpoint(cls, checkpoint: str) -> str:
+        """Resolve a checkpoint identifier.
+
+        Accepts, in order of precedence:
+          1. a short tag from BASE_MODELS (e.g. "yv8s")  → mapped to "yolov8s-cls.pt"
+          2. an existing local .pt path                  → returned unchanged
+          3. any other string (e.g. "yolov8s-cls.pt")    → returned unchanged
+             (Ultralytics resolves / downloads it itself)
+        """
+        if checkpoint in cls.BASE_MODELS:
+            return cls.BASE_MODELS[checkpoint]
+        return checkpoint
 
     def __init__(
         self,
-        checkpoint: str,          # e.g. "yolov8s-cls.pt" or a local .pt path
+        checkpoint: str,          # short tag ("yv8s"), Ultralytics id, or local .pt path
         num_labels: int,
         categories: list,
         store_dir: str = "./checkpoint",
@@ -102,7 +122,7 @@ class YOLOClassifier:
     ):
         _assert_ultralytics()
 
-        self.checkpoint  = checkpoint
+        self.checkpoint  = self._resolve_checkpoint(checkpoint)
         self.num_labels  = num_labels
         self.categories  = categories
         self.store_dir   = store_dir

@@ -2,6 +2,7 @@ import argparse
 
 import configparser
 import math
+import os
 
 from classifier import *
 from yolo_classifier import YOLOClassifier
@@ -16,12 +17,11 @@ if __name__ == "__main__":
     # Read the configuration file
     config.read('config.txt')
 
-
     revision_to_base_model = {
         "v10.": "microsoft/dit-large-finetuned-rvlcdip",
         "v11.": "microsoft/dit-large",
         "v12.": "timm/tf_efficientnetv2_m.in21k_ft_in1k",
-        "v1.3": "timm/tf_efficientnetv2_m.in21k_ft_in1k", # Corrected architecture
+        "v1.3": "timm/tf_efficientnetv2_m.in21k_ft_in1k",  # Corrected architecture
         "v2.3": "google/vit-base-patch16-224",
         "v3.": "google/vit-base-patch16-384",
         "v4.": "timm/tf_efficientnetv2_l.in21k_ft_in1k",
@@ -62,6 +62,12 @@ if __name__ == "__main__":
     # FIX: use getint so the default is an int, not a str "0"
     cross_runs = config.getint("TRAIN", "cross_runs")
 
+    # REVIEW FIX (Blocker D/K): the HF token is no longer read from config.txt.
+    # It comes from the HF_TOKEN environment variable (config.txt keeps the key
+    # blank).  config fallback is retained only for backward compatibility and
+    # is empty in version control.
+    hf_token = os.environ.get("HF_TOKEN") or config.get("HF", "token", fallback="")
+
     # setting main to latest version by default
     # hf_version = hf_version if hf_version != 'main' else config.get('HF', 'latest')
 
@@ -70,7 +76,7 @@ if __name__ == "__main__":
     config_model_path = f"{model_dir}/{config_model_name_local}"
 
     config_input_dir = config.get('INPUT', 'FOLDER_INPUT')
-    chunk_size = config.getint('INPUT', 'chunk_size')  # number of batches to process and save at once
+    chunk_size = config.getint('INPUT', 'chunk_size')  # number of IMAGES per chunk written at once
     config_chunking = config.getboolean('INPUT', 'chunking')
 
     # cur = Path.cwd()  # directory with this script
@@ -94,14 +100,28 @@ if __name__ == "__main__":
                         help="Number of the best result categories to consider")
     parser.add_argument("--dir", help="Process whole directory (if -d not used) but input set in CONFIG",
                         action="store_true")
-    parser.add_argument("--chunk", default=config_chunking, help="Process input directory and write predictions in chunks", action="store_true")
-    parser.add_argument("--inner", help="Process nested folders of the given directory (FALSE by default)",
-                        default=inner, action="store_true")
-    parser.add_argument("--train", help="Training model", default=Training, action="store_true")
-    parser.add_argument("--eval", help="Evaluating model", default=Testing, action="store_true")
-    parser.add_argument("--hf", help="Use model and processor from the HuggingFace repository", default=HF,
-                        action="store_true")
-    parser.add_argument("--raw", help="Output raw scores for all categories", default=raw, action="store_true")
+    # REVIEW FIX (Minor B/I): flags whose default comes from a (possibly True)
+    # config value now use BooleanOptionalAction so they can be turned OFF from
+    # the CLI (e.g. --no-inner, --no-chunk).  The original store_true flags
+    # could only ever set True, so a config value of True was uncloseable.
+    parser.add_argument("--chunk", default=config_chunking,
+                        action=argparse.BooleanOptionalAction,
+                        help="Process input directory and write predictions in chunks (use --no-chunk to disable)")
+    parser.add_argument("--inner", default=inner,
+                        action=argparse.BooleanOptionalAction,
+                        help="Process nested folders of the given directory (use --no-inner to disable)")
+    parser.add_argument("--train", default=Training,
+                        action=argparse.BooleanOptionalAction,
+                        help="Training model (use --no-train to disable a config default)")
+    parser.add_argument("--eval", default=Testing,
+                        action=argparse.BooleanOptionalAction,
+                        help="Evaluating model (use --no-eval to disable a config default)")
+    parser.add_argument("--hf", default=HF,
+                        action=argparse.BooleanOptionalAction,
+                        help="Use model and processor from the HuggingFace repository (use --no-hf to disable)")
+    parser.add_argument("--raw", default=raw,
+                        action=argparse.BooleanOptionalAction,
+                        help="Output raw scores for all categories (use --no-raw to disable)")
     parser.add_argument("--best",
                         help=f"Output all ({len(revision_best_models.keys())}) best models' scores. Result is automatically averaged into a final TOP-N CSV.",
                         default=False, action="store_true")
@@ -123,15 +143,15 @@ if __name__ == "__main__":
     # --- YOLO arguments ---
     parser.add_argument(
         "--yolo",
-        help="Use YOLO-cls model instead of ViT/CNN (overrides --base and --revision)",
-        action="store_true",
+        help="Use YOLO-cls model instead of ViT/CNN (overrides --base and --revision; use --no-yolo to disable)",
+        action=argparse.BooleanOptionalAction,
         default=config.getboolean("YOLO", "use_yolo", fallback=False),
     )
     parser.add_argument(
         "--yolo_base",
         type=str,
         default=config.get("YOLO", "yolo_base", fallback="yolov8s-cls.pt"),
-        help="YOLO base weights identifier (e.g. yolov8s-cls.pt)",
+        help="YOLO base weights identifier (short tag e.g. yv8s, an Ultralytics id e.g. yolov8s-cls.pt, or a local .pt path)",
     )
 
     args = parser.parse_args()
@@ -187,7 +207,9 @@ if __name__ == "__main__":
         "base_model":    args.yolo_base  if args.yolo else config.get("SETUP", "base_model", fallback=""),
         "top_n":         args.topn       if hasattr(args, "topn")       else config.get("SETUP", "top_n",    fallback=""),
         "batch_size":    config.get("SETUP", "batch",       fallback=""),
-        "input_path":    str(args.file or args.directory or config.get("INPUT", "folder", fallback="")),
+        # REVIEW FIX (Minor E): the directory input lives under [INPUT] FOLDER_INPUT,
+        # not [INPUT] folder.  The old key never resolved and logged an empty path.
+        "input_path":    str(args.file or args.directory or config.get("INPUT", "FOLDER_INPUT", fallback="")),
         "inner_dirs":    config.get("SETUP", "inner",       fallback=""),
         "file_format":   args.file_format if hasattr(args, "file_format") else "png",
         "mode":          "file" if (hasattr(args, "file") and args.file) else "directory",
@@ -409,18 +431,20 @@ if __name__ == "__main__":
             # ----------------------------------------------
             # ----- UNCOMMENT for pushing to HF repo -------
             # ----------------------------------------------
+            # REVIEW FIX (Blocker D/K): push path now uses the env-sourced
+            # hf_token instead of config.get("HF","token").
             #print(f"Deleting {args.revision} branch")
             #delete_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision,
-            #              token=config.get("HF", "token"))
+            #              token=hf_token)
             # print(f"Creating fresh {args.revision} branch")
             # create_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision, exist_ok=True,
-            #               token=config.get("HF", "token"))
+            #               token=hf_token)
             #
             # print(f"Loading {args.model} model")
             #
             # classifier.load_model(str(args.model))
             #
-            # classifier.push_to_hub(str(args.model), config.get("HF", "repo_name"), False, config.get("HF", "token"),
+            # classifier.push_to_hub(str(args.model), config.get("HF", "repo_name"), False, hf_token,
             #                        config.get("HF", "revision"))
             # ----------------------------------------------
 
@@ -591,7 +615,10 @@ if __name__ == "__main__":
                         print(f"RAW Results are recorded into {output_dir}/tables/ directory")
 
                 else:  # chunked processing and saving
-                    print(f"Starting inference of {input_dir}, saving results in chunks of {chunk_size * batch} images...")
+                    # REVIEW FIX (Minor B): the chunk size is a count of IMAGES,
+                    # not batches; the previous message multiplied by `batch`
+                    # and overstated the chunk size by a factor of `batch`.
+                    print(f"Starting inference of {input_dir}, saving results in chunks of {chunk_size} images...")
 
                     total = len(test_images)
                     chunks = math.ceil(total / chunk_size)
