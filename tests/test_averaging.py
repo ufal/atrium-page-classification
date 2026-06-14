@@ -1,7 +1,7 @@
 """
 tests/test_averaging.py
 =======================
-Unit tests for supplement_scripts/averaging.py.
+Unit tests for supplementary/averaging.py.
 
 Scope
 -----
@@ -19,7 +19,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-# supplement_scripts/ is on sys.path via conftest.py
+# supplementary/ is on sys.path via conftest.py
 from averaging import load_and_melt
 
 

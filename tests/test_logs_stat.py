@@ -1,7 +1,7 @@
 """
 tests/test_logs_stat.py
 =======================
-Unit tests for supplement_scripts/logs_stat.py.
+Unit tests for supplementary/logs_stat.py.
 
 Scope
 -----

@@ -1,7 +1,7 @@
 """
 tests/test_visualize.py
 =======================
-Unit tests for supplement_scripts/visualize.py.
+Unit tests for supplementary/visualize.py.
 
 Scope
 -----

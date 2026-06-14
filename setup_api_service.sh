@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-VENV_DIR="venv"
+VENV_DIR="../venv"
 REQUIREMENTS="requirements.txt"
 SERV_REQUIREMENTS="service/requirements.txt"
 MODEL_DIR="model"

@@ -1,7 +1,7 @@
 """
 tests/test_downscale.py
 =======================
-Unit tests for supplement_scripts/downscale.py.
+Unit tests for supplementary/downscale.py.
 
 Scope
 -----

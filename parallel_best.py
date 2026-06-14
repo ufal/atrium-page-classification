@@ -17,7 +17,7 @@ Output contract
 
   1. `{ts}_BEST_{n}_models_TOP-1.csv`     (always)
      Wide per-model votes: FILE, PAGE, CLASS-1-v1.3, CLASS-1-v2.3, …
-     Byte-compatible with supplement_scripts/averaging.py's _WIDE_MODEL_RE.
+     Byte-compatible with supplementary/averaging.py's _WIDE_MODEL_RE.
 
   2. `{ts}_BEST_{n}_models_AVG_TOP-{N}.csv`  (when average_best, the default)
      The same column set as ARUP_averaged.csv:

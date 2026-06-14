@@ -1,7 +1,7 @@
 """
 tests/test_per_doc_split.py
 ===========================
-Unit tests for supplement_scripts/per_doc_split.py.
+Unit tests for supplementary/per_doc_split.py.
 
 Scope
 -----

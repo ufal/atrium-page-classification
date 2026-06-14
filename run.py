@@ -283,7 +283,7 @@ if __name__ == "__main__":
             imgsz=config.getint("YOLO", "yolo_imgsz", fallback=224),
         )
     else:
-        if not (args.train or args.eval):
+        if not (args.train or args.eval) or args.best:
             categories = def_categ
         print(f"Category input directories found: {categories}")
         classifier = ImageClassifier(

@@ -49,7 +49,7 @@ preparation scripts for PDF to PNG conversion
 
 Diagram of the inference methodology including the selected 5 best model versions:
 
-![page-sort.png](page-sort.png)
+![page-sort.png](supplementary/figures/page-sort.png)
 
 
 ## Versions 🏁
@@ -90,7 +90,7 @@ of HF 😊 hub [^1] 🔗
 
 ## Model description 📇
 
-![architecture.png](architecture.png)
+![architecture.png](supplementary/figures/architecture.png)
 
 🔲 **Fine-tuned** model repository: UFAL's **vit-historical-page** [^1] 🔗
 
@@ -132,7 +132,7 @@ paper source into one of the categories - each responsible for the following con
 The rows highlighted in bold correspond to the best models uploaded to the HF 😊 hub [^1] 🔗, and the versions correspond to 
 the training setup mapping adjusted for the HF 😊 hub revisions (which caused the strange order of base model versions).
 
-![comparison_graph.png](model_acc_compared.png)
+![comparison_graph.png](supplementary/figures/model_acc_compared.png)
 
 The table and figure above show accuracy and parameters comparison of different base models tested on the same data. The figure 
 demonstrates best models overall (above the trendline) and the table shows all the tested models with their best accuracy and precision scores.
@@ -226,13 +226,13 @@ reports** which may somehow affect the drawing detection preferences due to the 
 arrowheads, and rocks formerly drawn by hand and later illustrated with digital tools (examples can be found in
 [small_data_samples/DRAW](small_data_samples%2FDRAW) 📁)
 
-![data_timeline.png](dataset_timeline.png)
+![data_timeline.png](supplementary/figures/dataset_timeline.png)
 
 Moreover,  the distribution of categories is shown on the figure below, where train, dev, and test subsets of all 5 cross-validation
 folds are combined together for better visualization. The timeline of the source documents is horizontally represented, 
 while the vertical axis shows the relative proportions of pages per category 🪧️ for each year.
 
-![fold_subset_category_proportions.png](fold_subset_category_proportions.png)
+![fold_subset_category_proportions.png](supplementary/figures/fold_subset_category_proportions.png)
 
 ### Categories 🪧
 
@@ -649,7 +649,7 @@ and `N` is an iteration of the current dataloader processing loop.
 Only after all images from the input directory are processed, the output table is
 saved 💾 in the `result/tables` folder. 
 
-![use-case.png](use-case.png)
+![use-case.png](supplementary/figures/use-case.png)
 
 Multi-page document inference processing diagram
 
@@ -966,7 +966,7 @@ categories 🪧.
 
 * **Document Splitting:** Split any result table into document-specific CSVs using standard flags:
 ```bash
-python3 supplement_scripts/per_doc_split.py -i result_table.csv -o /path/to/output_dir
+python3 supplementary/scripts/per_doc_split.py -i result_table.csv -o /path/to/output_dir
 ```
 
 * **Performance Scoring:** Automatically compute accuracy scores across multiple saved model outputs in 
@@ -1335,14 +1335,14 @@ the key phases of the whole process (settings, training, evaluation) is provided
 </details>
 
 **Command-Line Utility Scripts:**
-The analytical scripts in the [supplement_scripts](supplement_scripts)📁 directory have been standardized for single-line execution 
+The analytical scripts in the [supplement_scripts](supplementary)📁 directory have been standardized for single-line execution 
 without requiring internal path edits. Call any of them with `--help` for specific arguments:
 
-* [dataset_timeline.py](supplement_scripts/dataset_timeline.py): Generates the chronological category distribution 
+* [dataset_timeline.py](supplementary/scripts/dataset_timeline.py): Generates the chronological category distribution 
 plot via `-i` (CSV input), `-o` (output plot), and `--regex` grouping flags.
-* [visualize.py](supplement_scripts/visualize.py): Renders the model parameter vs. accuracy scatter plots 
+* [visualize.py](supplementary/scripts/visualize.py): Renders the model parameter vs. accuracy scatter plots 
 instantly using `-i` and `-o` flags.
-* [logs_stats.py](supplement_scripts/logs_stats.py): Safely parses binary TFRecord event logs to extract training 
+* [logs_stats.py](supplementary/scripts/logs_stats.py): Safely parses binary TFRecord event logs to extract training 
 metrics into a CSV. It now accepts external JSON mappings (`--gpu-map`, `--revision-map`) so you can track 
 custom infrastructure nodes and architectures.
 

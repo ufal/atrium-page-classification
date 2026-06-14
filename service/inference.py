@@ -148,7 +148,7 @@ class ModelManager:
             # (top_n=len(CATEGORIES)) so every model contributes a real probability
             # to every class, then the mean is taken over the models that
             # succeeded — identical mean-of-softmax semantics to average_rdfs and
-            # supplement_scripts/averaging.py. This replaces the previous
+            # supplementary/averaging.py. This replaces the previous
             # one-image-at-a-time loop with one batched pass per model.
             n = len(image_paths)
             aggregated = [dict.fromkeys(CATEGORIES, 0.0) for _ in range(n)]

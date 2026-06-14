@@ -1,7 +1,7 @@
 """
 tests/test_filtering.py
 =======================
-Unit tests for supplement_scripts/filtering.py.
+Unit tests for supplementary/filtering.py.
 
 Scope
 -----

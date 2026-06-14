@@ -1,7 +1,7 @@
 """
 tests/test_dataset_timeline.py
 ==============================
-Unit tests for supplement_scripts/dataset_timeline.py.
+Unit tests for supplementary/dataset_timeline.py.
 
 Scope
 -----
