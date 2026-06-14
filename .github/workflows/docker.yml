@@ -18,7 +18,7 @@ jobs:
         with: { python-version: "3.11" }
       - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1 libglib2.0-0 poppler-utils
       - run: pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
-      - run: pip install -r requirements.txt -r requirements-test.txt
+      - run: pip install -r setup/requirements.txt -r setup/requirements-test.txt
       - run: pytest -m "not slow"
   build-and-push:
     needs: test

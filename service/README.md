@@ -51,7 +51,8 @@ atrium-page-classification/
 │   └── frontend-lindat/     # 🎨 LINDAT-integrated frontend assets
 │       ├── index.html       # Web interface with LINDAT headers/footers
 │       └── script.js        # Logic handling LINDAT stylings
-├── setup_api_service.sh     # Setup script for environment, dependencies, and models
+├── setup/                   # ⚙️ Project configuration & setup scripts
+│   └── setup_api_service.sh # Setup script for environment, dependencies, and models
 ├── run.py                   # Script to download models manually
 └── classifier.py            # Base ImageClassifier class (imported by inference.py)
 ```
@@ -149,8 +150,8 @@ create a virtual environment, and install all of the required packages:
 # Create and activate virtual environment
 git clone [https://github.com/ufal/atrium-page-classification.git](https://github.com/ufal/atrium-page-classification.git)
 cd atrium-page-classification
-chmod +x setup_api_service.sh
-./setup_api_service.sh
+chmod +x ./setup/setup_api_service.sh
+./setup/setup_api_service.sh
 ```
 
 Key libraries include: fastapi, uvicorn, python-multipart, pillow, torch, timm, transformers. These

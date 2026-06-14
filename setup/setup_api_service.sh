@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Configuration
-VENV_DIR="../venv"
+VENV_DIR="../../venv"
 REQUIREMENTS="requirements.txt"
-SERV_REQUIREMENTS="service/requirements.txt"
-MODEL_DIR="model"
+SERV_REQUIREMENTS="../service/requirements.txt"
+MODEL_DIR="../model"
 # List of model versions to check/download
 # Maps specific revision tags (e.g., v5.3) to expected folder names (e.g., model_v53)
 declare -A MODELS=( 

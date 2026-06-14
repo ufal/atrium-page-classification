@@ -364,7 +364,7 @@ and then inside your virtual environment, you should install Python libraries (t
 
 Installation of Python dependencies can be done via:
 
-    pip install -r requirements.txt
+    pip install -r setup/requirements.txt
 
 > [!NOTE]
 > The so-called **CUDA [^10] support** for Python's PyTorch library is supposed to be automatically installed
@@ -421,7 +421,7 @@ After the model is downloaded, you should see a similar file structure:
     
     /local/folder/for/this/project/atrium-page-classification
     ├── model
-        └── movel_<revision> 
+        └── model_<revision> 
             ├── config.json
             ├── model.safetensors
             └── preprocessor_config.json
@@ -458,23 +458,28 @@ After the model is downloaded, you should see a similar file structure:
             ├── model_accuracies_zero_plot.png
             ├── date-time_model_<revision>_FOLD_<n>_DATASETS.txt
             └── ...
+    ├── setup
+        ├── config.txt
+        ├── para_config.txt
+        ├── requirements.txt
+        ├── requirements-test.txt
+        └── setup_api_service.sh
     ├── small_data_samples
         ├── DRAW
             ├── CTX193200994-24.png
             └── ...
         ├── DRAW_L
         └── ...
-    ├── supplement_scripts
-        ├── dataset_timeline.py
-        ├── img2jpeg_v3.py
-        ├── logs_stats.py
-        ├── visualize.py
-        └── job_run.sh
+    ├── supplementary
+        └── scripts
+            ├── dataset_timeline.py
+            ├── img2jpeg_v3.py
+            ├── logs_stats.py
+            ├── visualize.py
+            └── job_run.sh
     ├── run.py
     ├── classifier.py
     ├── utils.py
-    ├── requirements.txt
-    ├── config.txt
     ├── README.md
     └── ...
 
@@ -492,7 +497,7 @@ There are two main ways to run the program:
 - **Single PNG file classification** 📄
 - **Directory with PNG files classification** 📁
 
-To begin with, open [config.txt](config.txt) ⚙ and change folder path in the `[INPUT]` section, then 
+To begin with, open [config.txt](setup/config.txt) ⚙ and change folder path in the `[INPUT]` section, then 
 optionally change `top_N` and `batch` in the `[SETUP]` section.
 
 > [!NOTE]
@@ -570,7 +575,7 @@ Run the program from its starting point [run.py](run.py) 📎 with optional flag
 
 for exactly TOP-3 guesses with a console output.
 
-**OR** if you are sure about default variables set in the [config.txt](config.txt) ⚙:
+**OR** if you are sure about default variables set in the [config.txt](setup/config.txt) ⚙:
 
     python3 run.py -f '/full/path/to/file.png'
 
@@ -588,7 +593,7 @@ to run all the best models on a single PNG file - the output will be in the cons
 ### Directory processing 📁
 
 The following prediction type does **NOT** require explicit directory path setting with the `-d` or `--directory`, 
-since its default value is set in the [config.txt](config.txt) ⚙ file and awakens when the `--dir` flag 
+since its default value is set in the [config.txt](setup/config.txt) ⚙ file and awakens when the `--dir` flag 
 is used. The same flags for the number of guesses and the model folder path as for the single-page 
 processing can be used. In addition, 2 directory-specific flags  `--inner` and `--raw` are available. 
 
@@ -643,7 +648,7 @@ Single page across all best models:
 
 Naturally, processing of the large amount of PNG pages takes time ⌛ and progress of this process
 is recorded in the console via messages like `Processed <B×N> images` where `B`
-is batch size set in the `[SETUP]` section of the [config.txt](config.txt) ⚙ file, 
+is batch size set in the `[SETUP]` section of the [config.txt](setup/config.txt) ⚙ file, 
 and `N` is an iteration of the current dataloader processing loop. 
 
 Only after all images from the input directory are processed, the output table is
@@ -1287,11 +1292,11 @@ containing document-specific pages with a similar structure:
 The sorting script can help you in moderating mislabeled samples before the training. Accurate data annotation
 directly affects the model performance. 
 
-Before running the training, make sure to check the [config.txt](config.txt) ⚙️ file for the `[TRAIN]` section variables, where you should
+Before running the training, make sure to check the [config.txt](setup/config.txt) ⚙️ file for the `[TRAIN]` section variables, where you should
 set a path to the data folder. Make sure label directory names do **NOT** contain special characters like spaces, tabs or paragraph splits.
 
 > [!TIP]
-> In the [config.txt](config.txt) ⚙️ file tweak the parameter of `max_categ`
+> In the [config.txt](setup/config.txt) ⚙️ file tweak the parameter of `max_categ`
 > for a maximum number of samples per category 🪧, in case you have **over-represented labels** significantly dominating in size.
 > Set `max_categ` higher than the number of samples in the largest category 🪧 to use **all** data samples.
 
@@ -1346,7 +1351,7 @@ instantly using `-i` and `-o` flags.
 metrics into a CSV. It now accepts external JSON mappings (`--gpu-map`, `--revision-map`) so you can track 
 custom infrastructure nodes and architectures.
 
-Most of the changeable variables are in the [config.txt](config.txt) ⚙ file, specifically,
+Most of the changeable variables are in the [config.txt](setup/config.txt) ⚙ file, specifically,
 in the `[TRAIN]`, `[HF]`, and `[SETUP]` sections. 
 
 In the dev sections of the configuration ⚙ file, you will find many boolean variables that can be changed from the default `False` 
@@ -1358,7 +1363,7 @@ file, where you will find some predefined values not used in the [run.py](run.py
 
 > [!IMPORTANT]
 > For both training and evaluation, you must make sure that the training pages directory is set right in the 
-> [config.txt](config.txt) ⚙ and it contains category 🪧 subdirectories with images inside. 
+> [config.txt](setup/config.txt) ⚙ and it contains category 🪧 subdirectories with images inside. 
 > Names of the category 🪧 subdirectories are sorted in the alphabetic order and become actual
 > label names and replace the default categories 🪧 list
 
@@ -1419,7 +1424,7 @@ depending on your machine's 🖥️ CPU / GPU memory size and prepared dataset s
 
 Above are the default hyperparameters or TrainingArguments [^11] used in the training process that can be partially
 (only `epoch` and `log_step`) changed in the `[TRAIN]` section, plus `batch` in the `[SETUP]`section, 
-of the [config.txt](config.txt) ⚙ file.
+of the [config.txt](setup/config.txt) ⚙ file.
 
 > You are free to play with the **learning rate** right in the training function arguments called in the [run.py](run.py) 📎 file, 
 > yet **warmup ratio and other hyperparameters** are accessible only through the [classifier.py](classifier.py) 📎 file.
@@ -1456,7 +1461,7 @@ More about selecting the image transformation and the available ones you can rea
 
 After training is complete the model will be saved 💾 to its separate subdirectory in the `model` directory, by default, 
 the **naming of the model folder** corresponds to the `revision` variable in the `[HF]` section of 
-the [config.txt](config.txt) ⚙ file, which is shortened by removing any dots and saved like `model_<revision>`.
+the [config.txt](setup/config.txt) ⚙ file, which is shortened by removing any dots and saved like `model_<revision>`.
 
 <details>
 
@@ -1464,12 +1469,12 @@ the [config.txt](config.txt) ⚙ file, which is shortened by removing any dots a
     
     /local/folder/for/this/project/atrium-page-classification
     ├── model
-        ├── movel_<HFrevision1> 
-            ├── config.json
-            ├── model.safetensors
-            └── preprocessor_config.json
-        ├── movel_<HFrevision2>
-        └── ...
+    ├── model_<HFrevision1> 
+        ├── config.json
+        ├── model.safetensors
+        └── preprocessor_config.json
+    ├── model_<HFrevision2>
+    └── ...
     ├── checkpoint
         ├── models--google--vit-base-patch16-224
             ├── blobs
@@ -1494,6 +1499,12 @@ the [config.txt](config.txt) ⚙ file, which is shortened by removing any dots a
     ├── result
         ├── plots
         └── tables
+    ├── setup
+        ├── config.txt
+        ├── para_config.txt
+        ├── requirements.txt
+        ├── requirements-test.txt
+        └── setup_api_service.sh
     ├── small_data_samples
         ├── DRAW
         ├── DRAW_L
@@ -1515,13 +1526,13 @@ the [config.txt](config.txt) ⚙ file, which is shortened by removing any dots a
 In terms of the input data splitting, **this project is adapted to the filenames containing date stamps** which are leveraged
 in the filenames sorting, and then randomized step selection, of separate categories 🪧 for the final evaluation and the 
 training-time-evaluation (so-called, dev) subsets - both of the same `test_ratio` size. This behaviour is specifically
-triggered when the `--folds` argument or `cross_runs` variable in the `[TRAIN]` section of the [config.txt](config.txt) ⚙ file 
+triggered when the `--folds` argument or `cross_runs` variable in the `[TRAIN]` section of the [config.txt](setup/config.txt) ⚙ file 
 is set above 0, as well as when the `--train` flag is used for a single run of training, which applies the same 
 splitting strategy of 80-10-10% for training, dev, and evaluation subsets respectively.
 
 > [!TIP]
 > The cross-validation takes more time and reselects the data subsets for each run based on a `seed` variable of the
-> `[SETUP]` section in the [config.txt](config.txt) ⚙ file which gets simply incremented by one for each fold (run) of the
+> `[SETUP]` section in the [config.txt](setup/config.txt) ⚙ file which gets simply incremented by one for each fold (run) of the
 > cross-validation process. The listed data splits are recorded as `.txt` files in the `result/stats` directory 📁 for 
 > each fold of the overall model training run, as well as the fold's final test set predictions are saved in 
 > `result/tables` directory 📁. The trained models are saved as model_<revision><fold>.
@@ -1559,10 +1570,10 @@ revision `v1.9.22` turns to `model_v1922` model folder), and only then run repo 
 > [!CAUTION]
 > Set your own `repo_name` to the empty one of yours on HF 😊 hub, then in the **Settings** of your HF 😊 account
 > find the **Access Tokens** section and generate a new token - copy and paste its value to the `token` variable. Before committing 
-> those [config.txt](config.txt) ⚙ file changes via git replace the full `token` value with its shortened version for security reasons.
+> those [config.txt](setup/config.txt) ⚙ file changes via git replace the full `token` value with its shortened version for security reasons.
 
 Alternatively, you can evaluate models on a separate dataset of pages, which should be stored in a directory 📁 and 
-provided in the `[EVAL]` section of the [config.txt](config.txt) ⚙ file. The directory structure should be the 
+provided in the `[EVAL]` section of the [config.txt](setup/config.txt) ⚙ file. The directory structure should be the 
 same as for the training pages directory - the category 🪧 subdirectories are required.
 
 
@@ -1671,7 +1682,7 @@ group**, i.e. one data pass over all models.
 The project features an automatic paradata logging system that records provenance, configuration,
 and performance statistics for every pipeline run. This is handled by the unified `ParadataLogger`
 module ([atrium_paradata.py](atrium_paradata.py)📎), shared across all ATRIUM pipeline repositories and driven by a
-repository-specific [para-config.txt](para_config.txt)📎.
+repository-specific [para-config.txt](setup/para_config.txt)📎.
 
 **Key Features:**
 
@@ -1685,7 +1696,7 @@ skipped files.
 * **Configuration Snapshot:** The log captures the specific runtime configuration ⚙️ used, preserving
 a snapshot of variables like the active model revision, base model, batch size, and command-line
 flags used during that run.
-* **Tool version & runner:** Each log records the `tool_version` (from [para-config.txt](para_config.txt)📎), the
+* **Tool version & runner:** Each log records the `tool_version` (from [para-config.txt](setup/para_config.txt)📎), the
 `repository` and `runner_ref`, and a `docker_image` field. The repository/runner values resolve
 dynamically from the `ATRIUM_RUNNER_REPO` / `ATRIUM_RUNNER_REF` / `ATRIUM_RUNNER_IMAGE` environment
 variables when running in a published container, so the reference points at the actual runner rather

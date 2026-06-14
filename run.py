@@ -15,7 +15,7 @@ if __name__ == "__main__":
     # Initialize the parser
     config = configparser.ConfigParser()
     # Read the configuration file
-    config.read('config.txt')
+    config.read(os.path.join(os.path.dirname(__file__), 'setup', 'config.txt'))
 
     revision_to_base_model = {
         "v10.": "microsoft/dit-large-finetuned-rvlcdip",
@@ -223,7 +223,7 @@ if __name__ == "__main__":
         config=_paradata_cfg,
         paradata_dir=str(output_dir / "paradata"),
         output_types=["csv", "png"],
-        config_dir=str(cur),  # cur = Path(__file__).resolve().parent — find para_config.txt reliably
+        config_dir=str(cur / "setup"),  # Point to the setup folder
     )
     # ── end paradata init ─────────────────────────────────────────────────────
 
