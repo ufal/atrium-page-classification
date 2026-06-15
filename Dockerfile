@@ -37,7 +37,6 @@ WORKDIR /app
 ARG TORCH_INDEX_URL="https://download.pytorch.org/whl/cpu"
 RUN pip install --index-url ${TORCH_INDEX_URL} torch==2.7.1 torchvision==0.22.1
 
-COPY requirements.txt requirements-test.txt ./
 COPY setup/requirements.txt setup/requirements-test.txt ./
 RUN pip install -r requirements.txt -r service-requirements.txt -r requirements-test.txt
 
