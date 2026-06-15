@@ -12,6 +12,16 @@ Responsibilities:
 """
 import sys
 import matplotlib
+from pathlib import Path
+
+# 1. Define the project root relative to this conftest.py file
+PROJECT_ROOT = Path(__file__).parent.parent
+
+# 2. Add the root directory so modules like 'classifier' and 'parallel_best' are found
+sys.path.insert(0, str(PROJECT_ROOT))
+
+# 3. Add the NEW scripts directory so the supplementary modules are found
+sys.path.insert(0, str(PROJECT_ROOT / "supplementary" / "scripts"))
 
 # ── 1. Non-interactive backend ──────────────────────────────────────────────
 # Must be set before the first `import matplotlib.pyplot` anywhere in the
