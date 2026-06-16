@@ -1,0 +1,22 @@
+name: Docker Build & Publish
+
+on:
+  push:
+    branches: [main, test, master]
+    tags: ['v*']
+  pull_request:
+    branches: [main, test, master]
+  release:
+    types: [published]
+
+jobs:
+  build:
+    uses: ufal/atrium-project/.github/workflows/docker-tool.reusable.yml@main
+    secrets: inherit
+    with:
+      image-name: ufal/atrium-page-classification
+      apt-packages: build-essential g++ libgl1 libglib2.0-0 poppler-utils
+      pre-install-torch: torch==2.7.1 torchvision==0.22.1
+      requirements: setup/requirements.txt setup/requirements-test.txt
+      hf-model-cache: true
+      build-targets: '["base"]'

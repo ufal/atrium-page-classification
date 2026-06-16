@@ -38,6 +38,7 @@ ARG TORCH_INDEX_URL="https://download.pytorch.org/whl/cpu"
 RUN pip install --index-url ${TORCH_INDEX_URL} torch==2.7.1 torchvision==0.22.1
 
 COPY setup/requirements.txt setup/requirements-test.txt ./
+COPY service/requirements.txt ./service-requirements.txt
 RUN pip install -r requirements.txt -r service-requirements.txt -r requirements-test.txt
 
 COPY . .
