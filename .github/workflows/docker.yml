@@ -20,6 +20,6 @@ jobs:
       image-name: ufal/atrium-page-classification
       apt-packages: build-essential g++ libgl1 libglib2.0-0 poppler-utils
       pre-install-torch: torch==2.7.1 torchvision==0.22.1
-      requirements: setup/requirements.txt setup/requirements-test.txt
+      requirements: setup/requirements.txt setup/requirements-test.txt service/requirements.txt
       hf-model-cache: true
       build-targets: '["base"]'
