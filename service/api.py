@@ -24,8 +24,6 @@ logger = logging.getLogger(__name__)
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB limit for safety
 MAX_PDF_PAGES = 50
 
-# ... [rest of the service/api.py file remains unchanged] ...
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Warm up models on startup
@@ -44,11 +42,15 @@ app = FastAPI(
 )
 
 # CORS hardening
-ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "*").split(",")
+ALLOWED_ORIGINS = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "*").split(",")]
+# A wildcard origin must not be combined with credentials (browsers reject it).
+if "*" in ALLOWED_ORIGINS and os.environ.get("ALLOW_CREDENTIALS", "true").lower() == "true":
+    ALLOWED_ORIGINS.remove("*")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=True,
+    allow_credentials=ALLOWED_ORIGINS != ["*"],
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
@@ -102,7 +104,7 @@ async def predict_image(
         file: UploadFile = File(...)
 ):
     """Classify a single uploaded image."""
-    if not file.content_type.startswith("image/"):
+    if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
 
     content = await file.read()
@@ -117,6 +119,8 @@ async def predict_image(
             raise HTTPException(status_code=500, detail=predictions["error"])
 
         return ImageResponse(type="image", predictions=predictions)
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error processing image: {e}")
         raise HTTPException(status_code=500, detail="Error processing image.")
@@ -129,7 +133,7 @@ async def predict_document(
         file: UploadFile = File(...)
 ):
     """Extracts pages from a PDF and classifies each page."""
-    if file.content_type != "application/pdf":
+    if not file.content_type or file.content_type != "application/pdf":
         raise HTTPException(status_code=400, detail="Invalid file type. Please upload a PDF.")
 
     content = await file.read()

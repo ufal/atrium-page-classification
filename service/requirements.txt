@@ -8,3 +8,4 @@ timm
 transformers<5
 pdf2image
 requests
+pymupdf
