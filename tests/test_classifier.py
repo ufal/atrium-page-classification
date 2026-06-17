@@ -14,12 +14,73 @@ Intentionally excluded (require GPU / Hugging Face download):
 
 No GPU, no trained model, and no network access required.
 """
-import numpy as np
 import pytest
 import torch
+import numpy as np
 
-# Project root is already on sys.path via conftest.py
 from classifier import custom_collate, split_data_80_10_10
+
+
+def test_custom_collate_filters_none():
+    """Ensure custom_collate gracefully drops None records resulting from corrupt images."""
+    mock_batch = [
+        {"pixel_values": torch.zeros((3, 224, 224)), "label": torch.tensor([1.0, 0.0])},
+        None,
+        {"pixel_values": torch.ones((3, 224, 224)), "label": torch.tensor([0.0, 1.0])}
+    ]
+
+    result = custom_collate(mock_batch)
+    assert result is not None
+    assert result["pixel_values"].shape == (2, 3, 224, 224)
+    assert result["labels"].shape == (2, 2)
+    assert torch.all(result["labels"][1] == torch.tensor([0.0, 1.0]))
+
+
+def test_custom_collate_empty():
+    """Ensure custom_collate handles entirely empty/corrupt batches."""
+    assert custom_collate([None, None]) == (None, None)
+    assert custom_collate([]) == (None, None)
+
+
+def test_split_data_80_10_10_stratification():
+    """Verify temporal distribution stratification in train/val/test splits."""
+    # Generate 100 fake files for 2 classes
+    files = [f"file_{i}.png" for i in range(100)]
+
+    # Class 0: 60 items, Class 1: 40 items (One-hot encoded)
+    labels = [np.array([1, 0])] * 60 + [np.array([0, 1])] * 40
+
+    train_f, val_f, test_f, train_l, val_l, test_l = split_data_80_10_10(
+        files, labels, random_seed=42, max_categ=100, safe_check=False
+    )
+
+    # Check total sum matches original 100
+    assert len(train_f) + len(val_f) + len(test_f) == 100
+
+    # Class 0 should have 6 in test, 6 in val (10% of 60)
+    test_class_0 = sum(1 for l in test_l if l[0] == 1)
+    val_class_0 = sum(1 for l in val_l if l[0] == 1)
+    assert test_class_0 == 6
+    assert val_class_0 == 6
+
+    # Class 1 should have 4 in test, 4 in val (10% of 40)
+    test_class_1 = sum(1 for l in test_l if l[1] == 1)
+    val_class_1 = sum(1 for l in val_l if l[1] == 1)
+    assert test_class_1 == 4
+    assert val_class_1 == 4
+
+
+@pytest.mark.slow
+def test_image_classifier_instantiation():
+    """Test actual model loading logic (marked slow to skip in fast CI)."""
+    from classifier import ImageClassifier
+    try:
+        clf = ImageClassifier(checkpoint="google/vit-base-patch16-224", num_labels=11)
+        assert clf.model is not None
+        assert clf.processor is not None
+        assert clf.model.config.num_labels == 11
+    except Exception as e:
+        pytest.fail(f"Failed to load checkpoint: {e}")
 
 
 # ════════════════════════════════════════════════════════════════════════════

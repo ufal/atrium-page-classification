@@ -485,6 +485,17 @@ After the model is downloaded, you should see a similar file structure:
 
 </details>
 
+> [!NOTE]
+> **Runtime Directories:** The folders `model/`, `result/`, and `checkpoint/` are git-ignored runtime directories. 
+> They are automatically created when the pipeline runs. If you deploy using Docker, these directories are mounted 
+> as volumes to persist data and downloaded models between container restarts.
+
+> [!TIP]
+> **API Service Deployment:** To run the FastAPI service securely, we use a Docker compose profile rather than a 
+> separate build target. The service includes deployment hardening (strict payload size limits and PDF page caps). 
+> Run `docker compose --profile api up --build` to start the classification service on port 8000.
+
+
 Some of the folders may be missing, like mentioned [later](#for-developers-) `model_output` which is automatically created
 only after launching the model.
 

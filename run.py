@@ -1,15 +1,18 @@
 import argparse
-
 import configparser
 import math
 import os
+import time
+from pathlib import Path
 
 from classifier import *
 from yolo_classifier import YOLOClassifier
-import time
 from huggingface_hub import create_branch, delete_branch
 from atrium_paradata import ParadataLogger
 from parallel_best import run_best_models  # [add] memory-aware best-models engine + averaging
+
+# [NEW] Import from central model registry
+from model_registry import REVISION_TO_BASE_MODEL, REVISION_BEST_MODELS, CATEGORIES as def_categ
 
 if __name__ == "__main__":
     # Initialize the parser
@@ -17,32 +20,8 @@ if __name__ == "__main__":
     # Read the configuration file
     config.read(os.path.join(os.path.dirname(__file__), 'setup', 'config.txt'))
 
-    revision_to_base_model = {
-        "v10.": "microsoft/dit-large-finetuned-rvlcdip",
-        "v11.": "microsoft/dit-large",
-        "v12.": "timm/tf_efficientnetv2_m.in21k_ft_in1k",
-        "v1.3": "timm/tf_efficientnetv2_m.in21k_ft_in1k",  # Corrected architecture
-        "v2.3": "google/vit-base-patch16-224",
-        "v3.": "google/vit-base-patch16-384",
-        "v4.": "timm/tf_efficientnetv2_l.in21k_ft_in1k",
-        "v5.": "google/vit-large-patch16-384",
-        "v6.": "timm/regnety_120.sw_in12k_ft_in1k",
-        "v7.": "timm/regnety_160.swag_ft_in1k",
-        "v8.": "timm/regnety_640.seer",
-        "v9.": "microsoft/dit-base-finetuned-rvlcdip",
-    }
-
-    revision_best_models = {
-        "v1.3": "timm/tf_efficientnetv2_m.in21k_ft_in1k",
-        "v2.3": "google/vit-base-patch16-224",
-        "v3.3": "google/vit-base-patch16-384",
-        "v4.3": "timm/regnety_160.swag_ft_in1k",
-        "v5.3": "google/vit-large-patch16-384",
-        # "v6.3": "timm/regnety_640.seer",
-    }
-
-    def_categ = ["DRAW", "DRAW_L", "LINE_HW", "LINE_P", "LINE_T", "PHOTO", "PHOTO_L", "TEXT", "TEXT_HW", "TEXT_P",
-                 "TEXT_T"]
+    revision_to_base_model = REVISION_TO_BASE_MODEL
+    revision_best_models = REVISION_BEST_MODELS
 
     seed = config.getint('SETUP', 'seed')
     batch = config.getint('SETUP', 'batch')  # depends on GPU/CPU capabilities
@@ -68,9 +47,6 @@ if __name__ == "__main__":
     # is empty in version control.
     hf_token = os.environ.get("HF_TOKEN") or config.get("HF", "token", fallback="")
 
-    # setting main to latest version by default
-    # hf_version = hf_version if hf_version != 'main' else config.get('HF', 'latest')
-
     config_model_name_local = f"model_{hf_version.replace('.', '')}"
     model_dir = config.get('OUTPUT', 'FOLDER_MODELS')
     config_model_path = f"{model_dir}/{config_model_name_local}"
@@ -79,7 +55,6 @@ if __name__ == "__main__":
     chunk_size = config.getint('INPUT', 'chunk_size')  # number of IMAGES per chunk written at once
     config_chunking = config.getboolean('INPUT', 'chunking')
 
-    # cur = Path.cwd()  # directory with this script
     cur = Path(__file__).resolve().parent  # directory with this script
     output_dir = Path(config.get('OUTPUT', 'FOLDER_RESULTS'))
     cp_dir = Path(config.get('OUTPUT', 'FOLDER_CPOINTS'))
@@ -192,23 +167,17 @@ if __name__ == "__main__":
         else:
             print(f"Using base model\t{config_base_model} from CONFIG,\trevision\t{args.revision}.")
 
-        # Warn if revision="main" since revision_to_base_model lookup will fall through silently
         if args.revision == "main":
             print(f"WARNING: revision='main' — base model lookup fell back to config value '{config_base_model}'. "
                   f"Consider specifying an explicit version tag.")
 
     # ── paradata init ─────────────────────────────────────────────────────────
-    # Placed AFTER full arg resolution (including YOLO path) so logged paths are accurate.
     _paradata_cfg = {
-        # argparse / config.txt values – extend as needed
         "model_path":    args.model      if hasattr(args, "model")      else config.get("SETUP", "model",    fallback=""),
-        # FIX: was args.rev (AttributeError) – correct attribute name is args.revision
         "revision":      args.revision   if hasattr(args, "revision")   else config.get("HF",    "revision", fallback=""),
         "base_model":    args.yolo_base  if args.yolo else config.get("SETUP", "base_model", fallback=""),
         "top_n":         args.topn       if hasattr(args, "topn")       else config.get("SETUP", "top_n",    fallback=""),
         "batch_size":    config.get("SETUP", "batch",       fallback=""),
-        # REVIEW FIX (Minor E): the directory input lives under [INPUT] FOLDER_INPUT,
-        # not [INPUT] folder.  The old key never resolved and logged an empty path.
         "input_path":    str(args.file or args.directory or config.get("INPUT", "FOLDER_INPUT", fallback="")),
         "inner_dirs":    config.get("SETUP", "inner",       fallback=""),
         "file_format":   args.file_format if hasattr(args, "file_format") else "png",
@@ -232,10 +201,8 @@ if __name__ == "__main__":
         if getattr(args, arg) is not None and getattr(args, arg) != False and getattr(args, arg) != 0:
             print(arg, "\t=\t", getattr(args, arg))
 
-    # locally creating new directory paths instead of context.txt variables loaded with mistakes
     if not output_dir.is_dir():
         os.makedirs(output_dir)
-
         os.makedirs(f"{output_dir}/tables")
         os.makedirs(f"{output_dir}/plots")
 
@@ -257,21 +224,14 @@ if __name__ == "__main__":
 
         if args.train:
             total_files, total_labels, categories = collect_images(data_dir)
-            # Training consumes the CC BY-NC-SA 4.0 LINDAT dataset, which makes
-            # the trained model (and this run's outputs) non-commercial + share-alike.
-            # Inference-only runs never reach here and stay MIT.
             _paradata_logger.log_component("lindat_dataset")
 
-    # ── FIX 1: eval data loaded once; classifier created once below ───────────
     if args.eval:
         data_dir = config.get("EVAL", "FOLDER_PAGES")
         testfiles, testLabels, categories = collect_images(data_dir)
-        # categories is now set from eval data; classifier constructed below
 
     # ── single classifier instantiation (YOLO or standard) ───────────────────
     if args.yolo:
-        # categories may have been set from training/eval data above; fall back
-        # to defaults if neither --train nor --eval was requested
         if not (args.train or args.eval):
             categories = def_categ
         print(f"[YOLO] Using YOLO-cls backend: {args.yolo_base}")
@@ -295,17 +255,12 @@ if __name__ == "__main__":
     # ── training ──────────────────────────────────────────────────────────────
     if args.train:
         if args.yolo:
-            # ── FIX 2 / FIX 3: YOLO single-run training (no DataLoader) ──────
             (trainfiles, valfiles, testfiles,
              trainLabels, valLabels, testLabels) = split_data_80_10_10(
                 total_files, total_labels, seed, max_categ
             )
             print(f"[YOLO] Training on {len(trainfiles)} images, validating on {len(valfiles)} images")
 
-            # ── YOLO-specific training hyperparameters from [YOLO] config ──────
-            # yolo_epochs / yolo_lr0 override the generic [TRAIN] epochs / lr when
-            # set; yolo_lr0 == 0 is treated as "unset" → fall back to TRAIN.lr
-            # (lr0=0 would be a degenerate learning rate).
             yolo_epochs   = config.getint("YOLO", "yolo_epochs", fallback=epochs)
             yolo_patience = config.getint("YOLO", "yolo_patience", fallback=100)
             yolo_lr0_cfg  = config.getfloat("YOLO", "yolo_lr0", fallback=0.0)
@@ -330,17 +285,15 @@ if __name__ == "__main__":
             )
 
         else:
-            # ── standard ViT/CNN path ─────────────────────────────────────────
             if args.folds > 0:
                 for i in range(args.folds):
                     print(f"--- Cross-Validation Fold {i + 1}/{args.folds} ---")
-                    fold_seed = seed + i  # Use a different seed for each fold
+                    fold_seed = seed + i
 
                     (trainfiles, valfiles, testfiles,
                      trainLabels, valLabels, testLabels) = split_data_80_10_10(total_files, total_labels, fold_seed,
                                                                                max_categ)
 
-                    # record datasets
                     with open(f"{output_dir}/stats/{time_stamp}_{revision_model_name_local}_FOLD_{i + 1}_DATASETS.txt",
                               "w") as f:
                         f.write(f"Training set ({len(trainfiles)} images):\n")
@@ -353,7 +306,6 @@ if __name__ == "__main__":
                         for file in testfiles:
                             f.write(f"{file}\n")
 
-                    # Initialize a fresh classifier for each fold
                     classifier = ImageClassifier(checkpoint=args.base, num_labels=len(categories), store_dir=str(cp_dir))
 
                     train_loader = classifier.process_images(trainfiles, trainLabels, batch, True)
@@ -363,7 +315,6 @@ if __name__ == "__main__":
                     print(
                         f"Fold {i + 1}: Training on {len(trainfiles)}, validating on {len(valfiles)}, testing on {len(testfiles)}.")
 
-                    # Train the model
                     classifier.train_model(
                         train_loader,
                         eval_loader,
@@ -374,7 +325,6 @@ if __name__ == "__main__":
                         logging_steps=log_step
                     )
 
-                    # Evaluate on the test set for the current fold
                     print(f"--- Evaluating on test set for fold {i + 1} ---")
                     test_predictions, raw_prediction = classifier.infer_dataloader(test_loader, top_N, raw)
                     test_labels_indices = np.argmax(testLabels, axis=-1).tolist()
@@ -403,7 +353,6 @@ if __name__ == "__main__":
                     print(f"Test results for fold {i + 1} saved.")
 
             else:
-                # single-run (no cross-validation)
                 (trainfiles, valfiles, testfiles,
                  trainLabels, valLabels, testLabels) = split_data_80_10_10(total_files, total_labels, seed, max_categ)
 
@@ -424,40 +373,14 @@ if __name__ == "__main__":
 
     # ── HuggingFace hub ───────────────────────────────────────────────────────
     if args.hf:
-        # ── FIX 4: YOLO models are not on HF hub ─────────────────────────────
         if args.yolo:
             print("[YOLO] --hf is not supported for YOLO models. Skipping hub download.")
         else:
-            # ----------------------------------------------
-            # ----- UNCOMMENT for pushing to HF repo -------
-            # ----------------------------------------------
-            # REVIEW FIX (Blocker D/K): push path now uses the env-sourced
-            # hf_token instead of config.get("HF","token").
-            #print(f"Deleting {args.revision} branch")
-            #delete_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision,
-            #              token=hf_token)
-            # print(f"Creating fresh {args.revision} branch")
-            # create_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision, exist_ok=True,
-            #               token=hf_token)
-            #
-            # print(f"Loading {args.model} model")
-            #
-            # classifier.load_model(str(args.model))
-            #
-            # classifier.push_to_hub(str(args.model), config.get("HF", "repo_name"), False, hf_token,
-            #                        config.get("HF", "revision"))
-            # ----------------------------------------------
-
-            # loading from repo
             classifier.load_from_hub(config.get("HF", "repo_name"), args.revision)
-
             hf_model_name_local = f"model_{args.revision.replace('.', '')}"
             hf_model_path = f"{model_dir}/{hf_model_name_local}"
-
             classifier.save_model(hf_model_path)
-
             classifier.load_model(hf_model_path)
-
     else:
         if not args.average and not args.best:
             classifier.load_model(args.model)
@@ -467,7 +390,6 @@ if __name__ == "__main__":
         print(f"\tModel loaded:\t{revision_model_name_local}\t{args.model}")
         print(f"\t*\t--- Evaluating on the test set ({len(testfiles)} images) ---")
 
-        # ── FIX 5: YOLO uses infer_dataloader(image_paths); ViT uses DataLoader ──
         if args.yolo:
             yolo_loader = classifier.create_dataloader(list(testfiles), batch)
             eval_predictions, raw_prediction = classifier.infer_dataloader(
@@ -512,7 +434,6 @@ if __name__ == "__main__":
         print("AVERAGING EXISTING FOLD MODELS")
         print("=" * 60)
 
-        # Average specific pattern
         base_model_for_pattern = None
         for version_key, model_path in revision_to_base_model.items():
             if version_key.rstrip('.') in args.average_pattern:
@@ -549,7 +470,6 @@ if __name__ == "__main__":
                     print(f"\t{lab}:  {round(sc * 100, 2)}%")
                 _paradata_logger.log_success("csv")
             else:
-                # --best is a ViT-only feature; guard against YOLO misuse
                 if args.yolo:
                     print("[YOLO] --best is not supported for YOLO models. Run without --best.")
                 else:
@@ -615,15 +535,11 @@ if __name__ == "__main__":
                         print(f"RAW Results are recorded into {output_dir}/tables/ directory")
 
                 else:  # chunked processing and saving
-                    # REVIEW FIX (Minor B): the chunk size is a count of IMAGES,
-                    # not batches; the previous message multiplied by `batch`
-                    # and overstated the chunk size by a factor of `batch`.
                     print(f"Starting inference of {input_dir}, saving results in chunks of {chunk_size} images...")
 
                     total = len(test_images)
                     chunks = math.ceil(total / chunk_size)
 
-                    # daily date-based filenames (YYYYMMDD)
                     date_stamp = time.strftime('%Y%m%d')
                     top_out_path = f"{output_dir}/tables/{date_stamp}_{revision_model_name_local}_TOP-{top_N}.csv"
                     raw_out_path = f"{output_dir}/tables/{date_stamp}_{revision_model_name_local}_RAW.csv"
@@ -633,11 +549,9 @@ if __name__ == "__main__":
                         chunk_images = test_images[start:end]
                         print(f"Processing images {start + 1}–{end} (chunk {chunk_idx}/{chunks})")
 
-                        # create dataloader and run inference for this chunk
                         test_loader = classifier.create_dataloader(chunk_images, batch)
                         test_predictions, raw_prediction = classifier.infer_dataloader(test_loader, top_N, raw)
 
-                        # convert to dataframes for this chunk
                         rdf_chunk, raw_df_chunk = dataframe_results(
                             chunk_images,
                             test_predictions,
@@ -647,11 +561,8 @@ if __name__ == "__main__":
                         )
 
                         _paradata_logger.log_success("csv", len(rdf_chunk.index))
-
-                        # sort chunk for nicer local ordering (optional)
                         rdf_chunk.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
 
-                        # append chunk to the daily TOP file (write header only if file doesn't exist)
                         write_header = not os.path.exists(top_out_path)
                         rdf_chunk.to_csv(top_out_path, sep=",", index=False, mode='a', header=write_header)
                         if write_header:
@@ -660,7 +571,6 @@ if __name__ == "__main__":
                             print(f"Appended TOP-{top_N} chunk {chunk_idx} to {top_out_path}")
 
                         if raw:
-                            # sort raw chunk by category scores (descending) if possible
                             if raw_df_chunk is not None and not raw_df_chunk.empty:
                                 raw_df_chunk.sort_values(categories, ascending=[False] * len(categories), inplace=True)
 
@@ -676,14 +586,12 @@ if __name__ == "__main__":
                     if raw:
                         print(f" - RAW file: {raw_out_path}")
 
-                    # ensure ascending order in the final daily files
                     if os.path.exists(top_out_path):
                         final_top_df = pd.read_csv(top_out_path)
                         final_top_df.sort_values(['FILE', 'PAGE'], ascending=[True, True], inplace=True)
                         final_top_df.to_csv(top_out_path, sep=",", index=False)
                         print(f"Final TOP-{top_N} daily file sorted by FILE and PAGE.")
 
-                    # ensure raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
                     if raw and os.path.exists(raw_out_path):
                         final_raw_df = pd.read_csv(raw_out_path)
                         final_raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)

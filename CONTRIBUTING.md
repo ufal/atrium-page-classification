@@ -192,14 +192,15 @@ Always run basic validation locally before pushing:
 # 1. Python compilation check
 python -m compileall -q .
 
-# 2. Pre-commit hooks (runs black, isort, flake8, etc.)
-pre-commit run --all-files
-
+# 2. Linter checks (runs Ruff to catch syntax and style issues)
+ruff check .
 ```
 
 > [!NOTE]
->  If specific scripts or extraction modules are updated, please run a smoke-test 
+> If specific scripts or extraction modules are updated, please run a smoke-test
 > against the `data_samples/` directory to verify extraction integrity.
+> **LLM-Generated Code:** The core pipeline and memory-aware ensemble engines include LLM-generated optimizations. 
+> Any modifications to these files must be manually launched and verified on edge cases (e.g., OOM scenarios) before pushing.
 
 ---
 

@@ -30,6 +30,105 @@ from huggingface_hub import whoami
 # REVIEW FIX (Nit I): removed duplicated imports (torch / numpy / DataLoader
 # were each imported twice in the original).
 
+from tqdm import tqdm
+
+from model_registry import CATEGORIES
+
+class PageImageDataset(Dataset):
+    def __init__(self, image_paths, labels, processor):
+        self.image_paths = image_paths
+        self.labels = labels
+        self.processor = processor
+
+    def __len__(self):
+        return len(self.image_paths)
+
+    def __getitem__(self, idx):
+        try:
+            image = Image.open(self.image_paths[idx]).convert("RGB")
+            encoding = self.processor(images=image, return_tensors="pt")
+            item = {k: v.squeeze() for k, v in encoding.items()}
+            if self.labels is not None:
+                item['labels'] = torch.tensor(self.labels[idx])
+            return item
+        except Exception as e:
+            # Drop corrupted images safely without breaking the batch
+            return None
+
+
+def custom_collate(batch):
+    batch = [b for b in batch if b is not None]
+    if not batch:
+        return None
+    return torch.utils.data.dataloader.default_collate(batch)
+
+
+class ImageClassifier:
+    def __init__(self, checkpoint: str, num_labels: int, store_dir: str = "./checkpoints"):
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.checkpoint = checkpoint
+        self.num_labels = num_labels
+        self.store_dir = store_dir
+
+        self.processor = AutoImageProcessor.from_pretrained(self.checkpoint, cache_dir=self.store_dir)
+        self.model = AutoModelForImageClassification.from_pretrained(
+            self.checkpoint,
+            num_labels=self.num_labels,
+            ignore_mismatched_sizes=True,
+            cache_dir=self.store_dir
+        ).to(self.device)
+
+    def create_dataloader(self, image_paths, batch_size, labels=None, shuffle=False):
+        dataset = PageImageDataset(image_paths, labels, self.processor)
+        return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, collate_fn=custom_collate)
+
+    def infer_dataloader(self, dataloader, top_n=1, raw=False):
+        self.model.eval()
+        all_preds = []
+        all_raws = []
+
+        with torch.no_grad():
+            for batch in tqdm(dataloader, desc="Inference"):
+                if batch is None:
+                    continue
+                inputs = batch["pixel_values"].to(self.device)
+                outputs = self.model(pixel_values=inputs)
+                probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
+
+                if raw:
+                    all_raws.extend(probs.cpu().tolist())
+
+                if top_n > 1:
+                    topk_probs, topk_idx = torch.topk(probs, top_n, dim=-1)
+                    for idxs, prs in zip(topk_idx, topk_probs):
+                        prs_norm = prs / prs.sum()
+                        all_preds.append(list(zip(idxs.cpu().tolist(), prs_norm.cpu().tolist())))
+                else:
+                    all_preds.extend(probs.argmax(dim=-1).cpu().tolist())
+
+        return all_preds, all_raws
+
+    def top_n_predictions(self, image_path, top_n=3):
+        loader = self.create_dataloader([image_path], batch_size=1)
+        preds, _ = self.infer_dataloader(loader, top_n=top_n)
+        return preds[0] if preds else []
+
+    def load_model(self, model_path):
+        self.model.load_state_dict(torch.load(f"{model_path}/pytorch_model.bin", map_location=self.device))
+
+    def save_model(self, model_path):
+        os.makedirs(model_path, exist_ok=True)
+        torch.save(self.model.state_dict(), f"{model_path}/pytorch_model.bin")
+        self.processor.save_pretrained(model_path)
+
+    def load_from_hub(self, repo_name, revision):
+        self.model = AutoModelForImageClassification.from_pretrained(
+            repo_name, revision=revision, cache_dir=self.store_dir
+        ).to(self.device)
+        self.processor = AutoImageProcessor.from_pretrained(
+            repo_name, revision=revision, cache_dir=self.store_dir
+        )
+
 
 def custom_collate(batch: list) -> dict:
     """

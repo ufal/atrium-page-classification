@@ -1,0 +1,14 @@
+# Base Ruff configuration for ATRIUM tools
+line-length = 120
+
+extend-exclude = [
+    "data_samples/",
+    "result/",
+    "supplementary/",
+    "tests/fixtures/",
+    "service/frontend*/"
+]
+
+[lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501"] # Defer strict line-length checks initially
