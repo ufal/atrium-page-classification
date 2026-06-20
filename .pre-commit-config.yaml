@@ -1,0 +1,32 @@
+# .pre-commit-config.yaml — atrium-page-classification
+#
+# Install once per clone:  pip install pre-commit && pre-commit install
+# Update pinned revisions: pre-commit autoupdate
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]   # keep model weights / data blobs out of git
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.0
+    hooks:
+      - id: ruff          # lint  (reads ./ruff.toml)
+        args: ["--fix"]
+      - id: ruff-format   # formatting
+
+  # The repo ships 8 shell scripts (setup/setup_api_service.sh,
+  # supplementary/scripts/job_run.sh, data_scripts/unix/*.sh, etc.)
+  # Run shellcheck in check-only mode; scope to data_scripts/ and setup/.
+  # Relax SC1091 (sourced file not found at hook run time).
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.10.0
+    hooks:
+      - id: shellcheck
+        args: ["-e", "SC1091", "-e", "SC2148"]
+        files: ^(data_scripts|setup|supplementary/scripts)/.*\.sh$

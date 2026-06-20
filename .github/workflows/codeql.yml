@@ -1,0 +1,33 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [test, master]
+  pull_request:
+    branches: [test, master]
+  schedule:
+    - cron: "30 5 * * 1"   # weekly, catches advisories published since last push
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    strategy:
+      matrix:
+        language: ["python"]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none   # Python is interpreted — no build step needed
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{ matrix.language }}"

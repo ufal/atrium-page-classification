@@ -1,16 +1,10 @@
 # para_config.txt — atrium-page-classification
 [tool]
 program = page-classification
-# REVIEW FIX (Minor J): bumped to the current release (was v1.2.1-beta; the
-# CONTRIBUTING.md release history lists v1.3.0-beta as the latest pre-release).
-version = v1.3.0-beta
+version = v1.4.1-beta
 repository_fallback = https://github.com/ufal/atrium-page-classification
 
 [components]
 deepdoctection = Apache-2.0       ; conditional ; layout analysis tool
 vit_models     = MIT              ; always      ; fine-tuned ViT/EffNet/RegNetY/CLIP classifiers
-# The LINDAT training dataset is CC BY-NC-SA 4.0 and only applies when the user
-# TRAINS their own model with this code + the shared dataset. It must NOT count
-# toward the license of inference/prediction-only runs, so it is conditional and
-# logged only on the training path (see run.py: log_component on --train).
-lindat_dataset = CC BY-NC-SA 4.0  ; conditional ; LINDAT training dataset (48k+ pages)
+lindat_dataset = CC BY-NC 4.0     ; conditional ; LINDAT training dataset (48k+ pages)

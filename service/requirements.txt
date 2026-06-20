@@ -3,9 +3,11 @@ uvicorn[standard]
 python-multipart
 pillow
 numpy
-torch
+torch==2.7.1
+torchvision==0.22.1
 timm
 transformers<5
 pdf2image
 requests
 pymupdf
+httpx2

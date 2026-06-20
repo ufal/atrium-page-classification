@@ -1,0 +1,88 @@
+name: Version Consistency
+
+on:
+  pull_request:
+    branches: [test, master]
+  push:
+    branches: [test, master]
+    tags: ['v*']
+
+# page-classification keeps para_config under setup/
+env:
+  CITATION_PATH: "CITATION.cff"
+  PARA_PATH: "setup/para_config.txt"
+
+jobs:
+  version-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check CITATION.cff <-> para_config <-> tag
+        env:
+          TAG_REF: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
+        run: |
+          python - <<'PY'
+          import configparser, os, re, sys
+
+          def citation_version(path):
+              with open(path, encoding="utf-8") as fh:
+                  for line in fh:
+                      m = re.match(r'version:\s*["\']?v?([^"\'\s]+)', line)
+                      if m:
+                          return m.group(1)
+              return None
+
+          def paraconfig_version(path):
+              cp = configparser.ConfigParser()
+              cp.read(path, encoding="utf-8")
+              v = cp.get("tool", "version", fallback=None)
+              return v[1:] if v and v.lower().startswith("v") else v
+
+          cit  = citation_version(os.environ["CITATION_PATH"])
+          para = paraconfig_version(os.environ["PARA_PATH"])
+          tag  = os.environ.get("TAG_REF", "")
+          tag  = tag[1:] if tag.lower().startswith("v") else tag
+          print(f"CITATION.cff={cit!r}  para_config={para!r}  tag={tag!r}")
+
+          errors = []
+          if not cit:  errors.append(f"could not parse version from {os.environ['CITATION_PATH']}")
+          if not para: errors.append(f"could not parse [tool] version from {os.environ['PARA_PATH']}")
+          if cit and para and cit != para:
+              errors.append(f"version mismatch: CITATION.cff={cit} != para_config={para}")
+          if tag and cit and tag != cit:
+              errors.append(f"tag v{tag} != CITATION.cff {cit}")
+
+          for e in errors:
+              print(f"::error::{e}")
+          sys.exit(1 if errors else 0)
+          PY
+
+      - name: Check torch/torchvision pins agree across requirements files
+        run: |
+          python - <<'PY'
+          import re, sys, pathlib
+
+          def pin(path, pkg):
+              p = pathlib.Path(path)
+              if not p.exists():
+                  return None
+              for ln in p.read_text().splitlines():
+                  m = re.match(rf'\s*{pkg}\s*==\s*([0-9.]+)', ln)
+                  if m:
+                      return m.group(1)
+              return None
+
+          errs = []
+          for pkg in ("torch", "torchvision"):
+              a = pin("setup/requirements.txt", pkg)
+              b = pin("service/requirements.txt", pkg)
+              if a and b and a != b:
+                  errs.append(f"{pkg}: setup={a} != service={b}")
+              elif a and not b:
+                  errs.append(f"{pkg}: pinned in setup/requirements.txt ({a}) but missing/unpinned in service/requirements.txt")
+
+          for e in errs:
+              print(f"::error::{e}")
+          sys.exit(1 if errs else 0)
+          PY
