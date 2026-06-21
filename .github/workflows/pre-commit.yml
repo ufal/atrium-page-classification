@@ -10,9 +10,17 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
-      # The official action automatically handles caching and runs --all-files
-      - uses: pre-commit/action@v3.0.1
+          cache: "pip"
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Run pre-commit
+        # --show-diff-on-failure ensures that if ruff or shellcheck modifies a file
+        # or flags an error, the exact diff is printed to the GitHub Actions console.
+        run: pre-commit run --all-files --show-diff-on-failure
