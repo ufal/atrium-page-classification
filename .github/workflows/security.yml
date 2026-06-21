@@ -1,0 +1,24 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ "test", "clip", "vit",  "master" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ "test", "clip", "vit", "master" ]
+  schedule:
+    - cron: '0 3 * * 1' # Weekly scan
+
+jobs:
+  security-scan:
+    permissions:
+      contents: read
+      packages: read
+      security-events: write # Required to upload SARIF to the Security tab
+    uses: ufal/atrium-project/.github/workflows/security.reusable.yml@test
+    secrets: inherit
+    with:
+      image-ref: ghcr.io/ufal/atrium-page-classification:latest
+      citation-path: CITATION.cff
+      # CRITICAL: Page classification stores this in the setup folder
+      para-config-path: setup/para_config.txt
