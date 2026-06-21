@@ -1,7 +1,7 @@
 # para_config.txt — atrium-page-classification
 [tool]
 program = page-classification
-version = v1.4.1-beta
+version = v1.4.2-beta
 repository_fallback = https://github.com/ufal/atrium-page-classification
 
 [components]
