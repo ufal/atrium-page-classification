@@ -10,6 +10,7 @@ Design notes
   only PROGRAM_NAME at the top changes per repo.
 * All file I/O uses pytest's `tmp_path` fixture so tests are hermetic.
 """
+
 import json
 import time
 from pathlib import Path
@@ -55,10 +56,10 @@ class TestSanitise:
         """Depth guard (> 10 levels) must return a string, not raise."""
         node: dict = {}
         inner = node
-        for _ in range(13):   # deliberately exceed the 10-level limit
+        for _ in range(13):  # deliberately exceed the 10-level limit
             inner["k"] = {}
             inner = inner["k"]
-        inner["leaf"] = object()   # non-serialisable at depth > 10
+        inner["leaf"] = object()  # non-serialisable at depth > 10
         result = _sanitise(node)
         # Top-level dict is intact; deep value coerced to str somewhere
         assert isinstance(result, dict)
@@ -68,7 +69,6 @@ class TestSanitise:
 # ParadataLogger – lifecycle
 # ════════════════════════════════════════════════════════════════════════════
 class TestParadataLoggerLifecycle:
-
     def test_finalize_creates_json_file(self, tmp_path):
         logger = ParadataLogger(PROGRAM_NAME, {"k": "v"}, paradata_dir=str(tmp_path))
         path = logger.finalize(input_total=10)
@@ -90,8 +90,7 @@ class TestParadataLoggerLifecycle:
         # config_dir isolated so the repo's para_config.txt is NOT discovered;
         # deterministically exercises the conservative fallback license block
         # regardless of which repo runs this (shared) test.
-        logger = ParadataLogger(PROGRAM_NAME, {}, paradata_dir=str(tmp_path),
-                                config_dir=str(tmp_path))
+        logger = ParadataLogger(PROGRAM_NAME, {}, paradata_dir=str(tmp_path), config_dir=str(tmp_path))
         path = logger.finalize()
         data = json.loads(Path(path).read_text())
         assert "CC BY-NC 4.0" in data["license"]
@@ -104,11 +103,10 @@ class TestParadataLoggerLifecycle:
         assert data["statistics"]["input_files_total"] == 42
 
     def test_input_total_inferred_from_successes_and_skips(self, tmp_path):
-        logger = ParadataLogger(PROGRAM_NAME, {}, output_types=["csv"],
-                                paradata_dir=str(tmp_path))
+        logger = ParadataLogger(PROGRAM_NAME, {}, output_types=["csv"], paradata_dir=str(tmp_path))
         logger.log_success("csv", 8)
         logger.log_skip("bad.png", "unreadable")
-        path = logger.finalize()   # input_total=None → infer
+        path = logger.finalize()  # input_total=None → infer
         data = json.loads(Path(path).read_text())
         # processed(8) + skipped(1) = 9
         assert data["statistics"]["input_files_total"] == 9
@@ -134,7 +132,7 @@ class TestParadataLoggerLifecycle:
 
     def test_timing_fields_present_and_non_negative(self, tmp_path):
         logger = ParadataLogger(PROGRAM_NAME, {}, paradata_dir=str(tmp_path))
-        time.sleep(0.01)   # ensure measurable duration
+        time.sleep(0.01)  # ensure measurable duration
         path = logger.finalize()
         data = json.loads(Path(path).read_text())
         assert "start_time" in data
@@ -146,27 +144,23 @@ class TestParadataLoggerLifecycle:
 # ParadataLogger – success / skip counters
 # ════════════════════════════════════════════════════════════════════════════
 class TestParadataLoggerCounters:
-
     def test_log_success_single_call(self, tmp_path):
-        logger = ParadataLogger(PROGRAM_NAME, {}, output_types=["csv"],
-                                paradata_dir=str(tmp_path))
+        logger = ParadataLogger(PROGRAM_NAME, {}, output_types=["csv"], paradata_dir=str(tmp_path))
         logger.log_success("csv", count=5)
         path = logger.finalize()
         data = json.loads(Path(path).read_text())
         assert data["statistics"]["output_counts_by_type"]["csv"] == 5
 
     def test_log_success_accumulates_across_calls(self, tmp_path):
-        logger = ParadataLogger(PROGRAM_NAME, {}, output_types=["csv"],
-                                paradata_dir=str(tmp_path))
+        logger = ParadataLogger(PROGRAM_NAME, {}, output_types=["csv"], paradata_dir=str(tmp_path))
         logger.log_success("csv", count=3)
-        logger.log_success("csv")          # default count=1
+        logger.log_success("csv")  # default count=1
         path = logger.finalize()
         data = json.loads(Path(path).read_text())
         assert data["statistics"]["output_counts_by_type"]["csv"] == 4
 
     def test_log_success_multiple_output_types(self, tmp_path):
-        logger = ParadataLogger(PROGRAM_NAME, {}, output_types=["csv", "png"],
-                                paradata_dir=str(tmp_path))
+        logger = ParadataLogger(PROGRAM_NAME, {}, output_types=["csv", "png"], paradata_dir=str(tmp_path))
         logger.log_success("csv", 10)
         logger.log_success("png", 3)
         path = logger.finalize()
@@ -214,7 +208,6 @@ class TestParadataLoggerCounters:
 # ParadataLogger – context manager
 # ════════════════════════════════════════════════════════════════════════════
 class TestParadataLoggerContextManager:
-
     def test_with_block_writes_json_on_clean_exit(self, tmp_path):
         with ParadataLogger(PROGRAM_NAME, {}, paradata_dir=str(tmp_path)) as logger:
             logger.log_success("csv", 5)
@@ -242,7 +235,6 @@ class TestParadataLoggerContextManager:
 # ParadataLogger – config snapshot
 # ════════════════════════════════════════════════════════════════════════════
 class TestParadataLoggerConfigSnapshot:
-
     def test_config_dict_persisted(self, tmp_path):
         cfg = {"model": "regnety_160", "batch_size": 16, "top_n": 3}
         logger = ParadataLogger(PROGRAM_NAME, cfg, paradata_dir=str(tmp_path))
@@ -255,14 +247,14 @@ class TestParadataLoggerConfigSnapshot:
         class Opaque:
             pass
 
-        logger = ParadataLogger(PROGRAM_NAME, {"obj": Opaque()},
-                                paradata_dir=str(tmp_path))
+        logger = ParadataLogger(PROGRAM_NAME, {"obj": Opaque()}, paradata_dir=str(tmp_path))
         path = logger.finalize()
         data = json.loads(Path(path).read_text())
         assert isinstance(data["config"]["obj"], str)
 
     def test_python_version_recorded(self, tmp_path):
         import sys as _sys
+
         logger = ParadataLogger(PROGRAM_NAME, {}, paradata_dir=str(tmp_path))
         path = logger.finalize()
         data = json.loads(Path(path).read_text())

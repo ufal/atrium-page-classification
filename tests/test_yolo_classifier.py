@@ -1,4 +1,3 @@
-
 import numpy as np
 
 from yolo_classifier import YOLOClassifier, build_yolo_dataset
@@ -17,11 +16,13 @@ def test_build_yolo_dataset(tmp_path):
 
     # Mock data
     cats = ["DRAW", "TEXT"]
-    labels = np.array([
-        [1, 0],  # DRAW
-        [0, 1],  # TEXT
-        [1, 0]  # DRAW
-    ])
+    labels = np.array(
+        [
+            [1, 0],  # DRAW
+            [0, 1],  # TEXT
+            [1, 0],  # DRAW
+        ]
+    )
 
     # Create fake files
     files = []

@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB limit for safety
 MAX_PDF_PAGES = 50
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Warm up models on startup
@@ -37,7 +38,7 @@ app = FastAPI(
     title="ATRIUM Page Classification API",
     version="1.4.0-beta",
     description="API for classifying historical document page images.",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # CORS hardening
@@ -82,34 +83,37 @@ def get_info():
         from model_registry import CATEGORIES
     except ImportError:
         # Fallback if accessed abnormally
-        CATEGORIES = ["DRAW", "DRAW_L", "LINE_HW", "LINE_P", "LINE_T", "PHOTO", "PHOTO_L", "TEXT", "TEXT_HW", "TEXT_P",
-                      "TEXT_T"]
+        CATEGORIES = [
+            "DRAW",
+            "DRAW_L",
+            "LINE_HW",
+            "LINE_P",
+            "LINE_T",
+            "PHOTO",
+            "PHOTO_L",
+            "TEXT",
+            "TEXT_HW",
+            "TEXT_P",
+            "TEXT_T",
+        ]
 
-    model_info = {
-        v: manager.get_model_details(v) for v in manager.available_versions
-    }
+    model_info = {v: manager.get_model_details(v) for v in manager.available_versions}
     model_info["all"] = manager.get_model_details("all")
 
-    return {
-        "categories": CATEGORIES,
-        "available_models": model_info
-    }
+    return {"categories": CATEGORIES, "available_models": model_info}
 
 
 @app.post("/predict_image", response_model=ImageResponse)
-async def predict_image(
-        version: str = Form("all"),
-        topn: int = Form(3),
-        file: UploadFile = File(...)
-):
+async def predict_image(version: str = Form("all"), topn: int = Form(3), file: UploadFile = File(...)):
     """Classify a single uploaded image."""
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
 
     content = await file.read()
     if len(content) > MAX_UPLOAD_BYTES:
-        raise HTTPException(status_code=413,
-                            detail=f"File too large. Maximum size is {MAX_UPLOAD_BYTES // (1024 * 1024)}MB.")
+        raise HTTPException(
+            status_code=413, detail=f"File too large. Maximum size is {MAX_UPLOAD_BYTES // (1024 * 1024)}MB."
+        )
 
     try:
         image = Image.open(io.BytesIO(content)).convert("RGB")
@@ -126,22 +130,20 @@ async def predict_image(
 
 
 @app.post("/predict_document")
-async def predict_document(
-        version: str = Form("all"),
-        topn: int = Form(3),
-        file: UploadFile = File(...)
-):
+async def predict_document(version: str = Form("all"), topn: int = Form(3), file: UploadFile = File(...)):
     """Extracts pages from a PDF and classifies each page."""
     if not file.content_type or file.content_type != "application/pdf":
         raise HTTPException(status_code=400, detail="Invalid file type. Please upload a PDF.")
 
     content = await file.read()
     if len(content) > MAX_UPLOAD_BYTES:
-        raise HTTPException(status_code=413,
-                            detail=f"File too large. Maximum size is {MAX_UPLOAD_BYTES // (1024 * 1024)}MB.")
+        raise HTTPException(
+            status_code=413, detail=f"File too large. Maximum size is {MAX_UPLOAD_BYTES // (1024 * 1024)}MB."
+        )
 
     try:
         import fitz  # PyMuPDF
+
         pdf_document = fitz.open(stream=content, filetype="pdf")
 
         if len(pdf_document) > MAX_PDF_PAGES:
@@ -154,10 +156,7 @@ async def predict_document(
             img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
 
             predictions = manager.predict(img, version=version, topn=topn)
-            page_results.append({
-                "page": page_num + 1,
-                "predictions": predictions
-            })
+            page_results.append({"page": page_num + 1, "predictions": predictions})
 
         return {"type": "document", "pages": page_results}
     except HTTPException:

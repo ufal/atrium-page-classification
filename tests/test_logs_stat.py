@@ -17,6 +17,7 @@ and excluded from the default run.
 
 No GPU, no trained model, no network required.
 """
+
 import struct
 
 from logs_stat import (
@@ -36,14 +37,11 @@ class TestParseLogFolderName:
 
     def test_returns_dict_with_all_required_keys(self):
         result = parse_log_folder_name("any_folder")
-        required = {"script", "timestamp", "learning_rate", "epochs",
-                    "model", "revision", "batch_size"}
+        required = {"script", "timestamp", "learning_rate", "epochs", "model", "revision", "batch_size"}
         assert required.issubset(result.keys())
 
     def test_detects_classifierpy_script(self):
-        result = parse_log_folder_name(
-            "classifierpy_2024-01-01_120000_lr=5e-5-e=3-m=vit-base-model_v23"
-        )
+        result = parse_log_folder_name("classifierpy_2024-01-01_120000_lr=5e-5-e=3-m=vit-base-model_v23")
         assert result["script"] == "classifier.py"
 
     def test_detects_runpy_script(self):
@@ -191,10 +189,10 @@ class TestIterTfrecords:
         """Wrap raw bytes in a minimal valid TFRecord frame (CRC zeroed)."""
         length = len(payload)
         return (
-            struct.pack('<Q', length)  # 8-byte length
-            + b'\x00\x00\x00\x00'     # 4-byte CRC of length (skipped)
+            struct.pack("<Q", length)  # 8-byte length
+            + b"\x00\x00\x00\x00"  # 4-byte CRC of length (skipped)
             + payload
-            + b'\x00\x00\x00\x00'     # 4-byte CRC of payload (skipped)
+            + b"\x00\x00\x00\x00"  # 4-byte CRC of payload (skipped)
         )
 
     def test_single_record_yielded(self, tmp_path):
@@ -219,15 +217,15 @@ class TestIterTfrecords:
         """Only 3 of the required 12 header bytes present → iterator stops
         gracefully without raising an exception."""
         f = tmp_path / "truncated.tfevents"
-        f.write_bytes(b"\x05\x00\x00")   # incomplete header
+        f.write_bytes(b"\x05\x00\x00")  # incomplete header
         records = list(_iter_tfrecords(f))
         assert records == []
 
     def test_truncated_payload_terminates_cleanly(self, tmp_path):
         """Length header claims 100 bytes but file contains only 10 → stop."""
         f = tmp_path / "short_payload.tfevents"
-        length_says_100 = struct.pack('<Q', 100) + b'\x00\x00\x00\x00'
-        f.write_bytes(length_says_100 + b'\x00' * 10)   # only 10 payload bytes
+        length_says_100 = struct.pack("<Q", 100) + b"\x00\x00\x00\x00"
+        f.write_bytes(length_says_100 + b"\x00" * 10)  # only 10 payload bytes
         records = list(_iter_tfrecords(f))
         assert records == []
 

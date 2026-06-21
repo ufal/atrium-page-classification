@@ -39,7 +39,7 @@ class PageImageDataset(Dataset):
             encoding = self.processor(images=image, return_tensors="pt")
             item = {k: v.squeeze() for k, v in encoding.items()}
             if self.labels is not None:
-                item['labels'] = torch.tensor(self.labels[idx])
+                item["labels"] = torch.tensor(self.labels[idx])
             return item
         except Exception:
             # Drop corrupted images safely without breaking the batch
@@ -61,9 +61,9 @@ def custom_collate(batch: list) -> dict:
     labels = []
 
     for item in batch:
-        pixel_values.append(item['pixel_values'])
-        if item['label'] is not None:
-            labels.append(item['label'])
+        pixel_values.append(item["pixel_values"])
+        if item["label"] is not None:
+            labels.append(item["label"])
 
     # Stack pixel_values (assuming they're already tensors from transforms)
     if len(pixel_values) > 0:
@@ -95,10 +95,7 @@ def custom_collate(batch: list) -> dict:
     else:
         labels = torch.tensor([])
 
-    return {
-        'pixel_values': pixel_values,
-        'labels': labels
-    }
+    return {"pixel_values": pixel_values, "labels": labels}
 
 
 # Added from few_shot_finetuning.py for balanced sampling during training
@@ -111,8 +108,10 @@ class BalancedBatchSampler(torch.utils.data.sampler.BatchSampler):
     def __init__(self, labels_one_hot: np.array, n_classes_per_batch, n_samples_of_class):
         self.labels = labels_one_hot
         self.labels_set = list(np.unique(self.labels.argmax(axis=-1)))  # Modified for one-hot
-        self.label_to_indices = {label: np.where(self.labels.argmax(axis=-1) == label)[0]  # Modified for one-hot
-                                 for label in self.labels_set}
+        self.label_to_indices = {
+            label: np.where(self.labels.argmax(axis=-1) == label)[0]  # Modified for one-hot
+            for label in self.labels_set
+        }
         for lbl in self.labels_set:
             np.random.shuffle(self.label_to_indices[lbl])
         self.used_label_indices_count = {label: 0 for label in self.labels_set}
@@ -128,9 +127,11 @@ class BalancedBatchSampler(torch.utils.data.sampler.BatchSampler):
             classes = np.random.choice(self.labels_set, self.n_classes, replace=False)
             indices = []
             for class_ in classes:
-                indices.extend(self.label_to_indices[class_][
-                               self.used_label_indices_count[class_]:self.used_label_indices_count[
-                                                                         class_] + self.n_samples])
+                indices.extend(
+                    self.label_to_indices[class_][
+                        self.used_label_indices_count[class_] : self.used_label_indices_count[class_] + self.n_samples
+                    ]
+                )
                 self.used_label_indices_count[class_] += self.n_samples
                 if self.used_label_indices_count[class_] + self.n_samples > len(self.label_to_indices[class_]):
                     np.random.shuffle(self.label_to_indices[class_])
@@ -153,11 +154,11 @@ class ImageClassifier:
         """
         # --- REFINED: Comprehensive hardware acceleration check ---
         if torch.cuda.is_available():
-            self.device = torch.device('cuda')
+            self.device = torch.device("cuda")
         elif torch.backends.mps.is_available():
-            self.device = torch.device('mps')
+            self.device = torch.device("mps")
         else:
-            self.device = torch.device('cpu')
+            self.device = torch.device("cpu")
 
         self.model_name = checkpoint
 
@@ -172,7 +173,8 @@ class ImageClassifier:
             # print(self.model.config)
 
             image_size = self.model.config.pretrained_cfg["input_size"][
-                -1]  # For timm models, input_size is [batch_size, channels, height, width]
+                -1
+            ]  # For timm models, input_size is [batch_size, channels, height, width]
             image_mean = self.model.config.pretrained_cfg["mean"]
             image_std = self.model.config.pretrained_cfg["std"]
             self.processor = None
@@ -185,44 +187,62 @@ class ImageClassifier:
                 ignore_mismatched_sizes=True,
             ).to(self.device)
             self.processor = AutoImageProcessor.from_pretrained(checkpoint)
-            image_size = self.processor.size['height']
+            image_size = self.processor.size["height"]
             image_mean = self.processor.image_mean
             image_std = self.processor.image_std
 
         # Define transformations
-        self.train_transforms = transforms.Compose([
-            transforms.RandomApply([
-                transforms.ColorJitter(brightness=0.5),
-                transforms.ColorJitter(contrast=0.5),
-                transforms.ColorJitter(saturation=0.5),
-                transforms.ColorJitter(hue=0.5),
-                transforms.Lambda(lambda img: ImageEnhance.Sharpness(img).enhance(random.uniform(0.5, 1.5))),
-                transforms.Lambda(lambda img: img.filter(ImageFilter.GaussianBlur(radius=random.uniform(0, 2))))
-            ], p=0.5),
-            transforms.Resize((image_size, image_size)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=image_mean, std=image_std)
-        ])
+        self.train_transforms = transforms.Compose(
+            [
+                transforms.RandomApply(
+                    [
+                        transforms.ColorJitter(brightness=0.5),
+                        transforms.ColorJitter(contrast=0.5),
+                        transforms.ColorJitter(saturation=0.5),
+                        transforms.ColorJitter(hue=0.5),
+                        transforms.Lambda(lambda img: ImageEnhance.Sharpness(img).enhance(random.uniform(0.5, 1.5))),
+                        transforms.Lambda(
+                            lambda img: img.filter(ImageFilter.GaussianBlur(radius=random.uniform(0, 2)))
+                        ),
+                    ],
+                    p=0.5,
+                ),
+                transforms.Resize((image_size, image_size)),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=image_mean, std=image_std),
+            ]
+        )
 
-        self.eval_transforms = transforms.Compose([
-            transforms.Resize((image_size, image_size)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=image_mean, std=image_std)
-        ])
+        self.eval_transforms = transforms.Compose(
+            [
+                transforms.Resize((image_size, image_size)),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=image_mean, std=image_std),
+            ]
+        )
 
-    def process_images(self, image_paths: list, image_labels: list, batch_size: int, train: bool = True, ignored_paths: list = None) -> DataLoader:
+    def process_images(
+        self, image_paths: list, image_labels: list, batch_size: int, train: bool = True, ignored_paths: list = None
+    ) -> DataLoader:
         """
         Process a list of image file paths into batches.
         """
-        dataset = ImageDataset(image_paths, image_labels, self.train_transforms if train else self.eval_transforms, ignored_paths=ignored_paths)
+        dataset = ImageDataset(
+            image_paths,
+            image_labels,
+            self.train_transforms if train else self.eval_transforms,
+            ignored_paths=ignored_paths,
+        )
         if train:
-            dataloader = DataLoader(dataset, collate_fn=custom_collate,
-                                batch_sampler=BalancedBatchSampler(image_labels, batch_size, 1))
+            dataloader = DataLoader(
+                dataset, collate_fn=custom_collate, batch_sampler=BalancedBatchSampler(image_labels, batch_size, 1)
+            )
         else:
-            dataloader = DataLoader(dataset, collate_fn=custom_collate,
-                                batch_size=batch_size)
+            dataloader = DataLoader(dataset, collate_fn=custom_collate, batch_size=batch_size)
 
-        print(f"Dataloader of {'train' if train else 'eval'} dataset is ready:\t{len(image_paths)} images split into {len(dataloader)} batches of size {batch_size}")
+        print(
+            f"Dataloader of {'train' if train else 'eval'} dataset is ready:\t{len(image_paths)} images split into {len(dataloader)} batches of size {batch_size}"
+        )
         return dataloader
 
     def preprocess_image(self, image_input, train: bool = True) -> torch.Tensor:
@@ -235,23 +255,34 @@ class ImageClassifier:
             # Assume it is a string path
             image = Image.open(image_input)
         # Check the image mode
-        if image.mode != 'RGB':
+        if image.mode != "RGB":
             # Convert RGBA to RGB
-            image_alpha = image.convert('RGBA')
+            image_alpha = image.convert("RGBA")
             new_image = Image.new("RGBA", image_alpha.size, "WHITE")  # Create a white rgba background
-            new_image.paste(image_alpha, (0, 0),
-                            image_alpha)  # Paste the image on the background. Go to the links given below for details.
-            image = new_image.convert('RGB')
+            new_image.paste(
+                image_alpha, (0, 0), image_alpha
+            )  # Paste the image on the background. Go to the links given below for details.
+            image = new_image.convert("RGB")
         transform = self.train_transforms if train else self.eval_transforms
         tensor = transform(image).unsqueeze(0).to(self.device)
         return tensor
 
-    def train_model(self, train_dataloader, eval_dataloader, output_dir: str, out_model: str,
-                    num_epochs: int = 3, learning_rate: float = 1e-5, logging_steps: int = 10):
+    def train_model(
+        self,
+        train_dataloader,
+        eval_dataloader,
+        output_dir: str,
+        out_model: str,
+        num_epochs: int = 3,
+        learning_rate: float = 1e-5,
+        logging_steps: int = 10,
+    ):
         """
         Train the model using the provided training and evaluation data loaders.
         """
-        print(f"Training for {num_epochs} epochs on {len(train_dataloader)} train samples and evaluation on {len(eval_dataloader)} samples")
+        print(
+            f"Training for {num_epochs} epochs on {len(train_dataloader)} train samples and evaluation on {len(eval_dataloader)} samples"
+        )
 
         # Define optimizer and scheduler
         # For the optimizer, we typically pass model.parameters()
@@ -288,7 +319,7 @@ class ImageClassifier:
         log_dir = "{}-{}-{}".format(
             os.path.basename(current_file_name),
             datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S"),
-            "lr={:.1e}".format(learning_rate).replace("-", "_")  # Simplified version
+            "lr={:.1e}".format(learning_rate).replace("-", "_"),  # Simplified version
         )
         log_dir += f"-e={num_epochs}-m={self.model_name}-{out_model}"  # Example of adding more info
         log_dir = os.path.join("logs", log_dir.replace(" ", "_").replace("/", "_")).replace(".", "")
@@ -328,7 +359,7 @@ class ImageClassifier:
             eval_dataset=eval_dataloader.dataset,
             data_collator=lambda data: custom_collate(data),
             compute_metrics=self.compute_metrics,
-            #optimizers=(optimizer, scheduler_cosine)  # Pass the optimizer and scheduler
+            # optimizers=(optimizer, scheduler_cosine)  # Pass the optimizer and scheduler
             # optimizer_cls_and_kwargs=(torch.optim.AdamW, {'lr': learning_rate, 'weight_decay': 0.0001}),
         )
 
@@ -368,7 +399,9 @@ class ImageClassifier:
         """
         dataset = ImageDataset(image_paths, transform=self.eval_transforms, ignored_paths=ignored_paths)
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=custom_collate)
-        print(f"Dataloader of directory dataset is ready:\t{len(image_paths)} images split into {len(dataloader)} batches of size {batch_size}")
+        print(
+            f"Dataloader of directory dataset is ready:\t{len(image_paths)} images split into {len(dataloader)} batches of size {batch_size}"
+        )
         return dataloader
 
     def infer_dataloader(self, dataloader, top_n: int, raw: bool = False) -> (list, list):
@@ -388,7 +421,7 @@ class ImageClassifier:
                     print(f"Skipping batch {ib}: No valid images loaded.")
                     continue  # Skip this loop iteration
 
-                inputs = batch['pixel_values']
+                inputs = batch["pixel_values"]
                 outputs = self.model(pixel_values=inputs.to(self.device))
                 logits = outputs.logits
 
@@ -421,9 +454,9 @@ class ImageClassifier:
         avg_seconds_per_image = (end_time - start_time).total_seconds() / n_pred
 
         print(
-            f"\tProcessing of {len(dataloader)} batches ({n_pred} images) finished at\t{end_time.strftime('%Y-%m-%d %H:%M:%S')}")
-        print(
-            f"\tTotal time: {total_minutes:.2f} min\n\tAverage time: {avg_seconds_per_image:.4f} sec/img")
+            f"\tProcessing of {len(dataloader)} batches ({n_pred} images) finished at\t{end_time.strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        print(f"\tTotal time: {total_minutes:.2f} min\n\tAverage time: {avg_seconds_per_image:.4f} sec/img")
 
         raw_scores = None if not raw else raw_scores
         return predictions, raw_scores
@@ -447,8 +480,9 @@ class ImageClassifier:
         self.model = AutoModelForImageClassification.from_pretrained(load_directory).to(self.device)
         print(f"Model and processor loaded from {load_directory}")
 
-    def push_to_hub(self, load_directory: str, repo_id: str, private: bool = False,
-                    token: str = None, revision: str = "main"):
+    def push_to_hub(
+        self, load_directory: str, repo_id: str, private: bool = False, token: str = None, revision: str = "main"
+    ):
         """
         Upload the fine-tuned model and processor to the Hugging Face Model Hub.
 
@@ -468,8 +502,10 @@ class ImageClassifier:
         self.model.save_pretrained(load_directory)
         self.processor.save_pretrained(load_directory)
 
-        print(f"Model and processor saved locally to {load_directory}, preparing to push "
-              f"revision {revision} to the Hub repository {repo_id}...")
+        print(
+            f"Model and processor saved locally to {load_directory}, preparing to push "
+            f"revision {revision} to the Hub repository {repo_id}..."
+        )
 
         # Upload to the Hub
         self.model.push_to_hub(repo_id, private=private, token=token, revision=revision)
@@ -509,6 +545,7 @@ class ImageClassifier:
         """
         import numpy as np
         from evaluate import load
+
         accuracy = load("accuracy")
         logits, labels = eval_pred
         predictions = np.argmax(logits, axis=-1)
@@ -526,7 +563,9 @@ class ImageDataset(Dataset):
             # Filter out ignored paths
             self.image_paths = [path for path in image_paths if path not in ignored_paths]
             if image_labels is not None:
-                self.image_labels = [label for path, label in zip(image_paths, image_labels) if path not in ignored_paths]
+                self.image_labels = [
+                    label for path, label in zip(image_paths, image_labels) if path not in ignored_paths
+                ]
 
         self.known = True
 
@@ -541,12 +580,12 @@ class ImageDataset(Dataset):
         try:
             image = Image.open(image_path)
             # Check the image mode
-            if image.mode != 'RGB':
+            if image.mode != "RGB":
                 # Convert RGBA to RGB
-                image_alpha = image.convert('RGBA')
+                image_alpha = image.convert("RGBA")
                 new_image = Image.new("RGBA", image_alpha.size, "WHITE")
                 new_image.paste(image_alpha, (0, 0), image_alpha)
-                image = new_image.convert('RGB')
+                image = new_image.convert("RGB")
             if self.transform:
                 image = self.transform(image)
 
@@ -554,13 +593,15 @@ class ImageDataset(Dataset):
             label = self.image_labels[idx] if self.known else None
             # Keep the one-hot encoding as is - the collate function will handle tensor conversion
 
-            return {'pixel_values': image, 'label': label}
+            return {"pixel_values": image, "label": label}
         except Exception as e:
             print(image_path, e)
             return None
 
 
-def split_data_80_10_10(files: list, labels: list, random_seed: int, max_categ: int, safe_check: bool = True) -> (list, list, list, list, list, list):
+def split_data_80_10_10(
+    files: list, labels: list, random_seed: int, max_categ: int, safe_check: bool = True
+) -> (list, list, list, list, list, list):
     """
     Splits the data into training, validation, and test sets with an 80/10/10 ratio.
     The split uses uniform distribution selection to maintain temporal distribution
@@ -674,9 +715,9 @@ def split_data_80_10_10(files: list, labels: list, random_seed: int, max_categ: 
             if len(val_positions) > n_remaining:
                 val_positions = np.arange(n_remaining)
             # Add small random offset
-            val_positions += np.random.uniform(-val_step / 4 if val_step > 1 else 0,
-                                               val_step / 4 if val_step > 1 else 0,
-                                               size=len(val_positions))
+            val_positions += np.random.uniform(
+                -val_step / 4 if val_step > 1 else 0, val_step / 4 if val_step > 1 else 0, size=len(val_positions)
+            )
             val_positions = np.clip(val_positions, 0, n_remaining - 1).astype(int)
             selected_val = remaining_indices[val_positions]
             val_indices.extend(selected_val)
@@ -751,12 +792,19 @@ def split_data_80_10_10_simple(files: list, labels: list, random_seed: int) -> (
     all_indices = np.arange(len(files))
     train_indices = np.setdiff1d(all_indices, np.concatenate([test_indices, val_indices]))
 
-    return (files[train_indices], files[val_indices], files[test_indices],
-            labels[train_indices], labels[val_indices], labels[test_indices])
+    return (
+        files[train_indices],
+        files[val_indices],
+        files[test_indices],
+        labels[train_indices],
+        labels[val_indices],
+        labels[test_indices],
+    )
 
 
-def average_model_weights(model_dir: str, model_name_pattern: str, base_model: str,
-                          num_labels: int, output_name: str = None):
+def average_model_weights(
+    model_dir: str, model_name_pattern: str, base_model: str, num_labels: int, output_name: str = None
+):
     """
     Average the weights of multiple fold models using PyTorch state_dict.
 
@@ -796,10 +844,7 @@ def average_model_weights(model_dir: str, model_name_pattern: str, base_model: s
     print(f"\nLoading first model from: {first_model_path}")
 
     # Load model and get its state dict
-    first_model = AutoModelForImageClassification.from_pretrained(
-        str(first_model_path),
-        num_labels=num_labels
-    )
+    first_model = AutoModelForImageClassification.from_pretrained(str(first_model_path), num_labels=num_labels)
 
     # Initialize averaged state dict with first model's weights
     averaged_state_dict = OrderedDict()
@@ -811,10 +856,7 @@ def average_model_weights(model_dir: str, model_name_pattern: str, base_model: s
         print(f"Adding weights from: {fold_dir.name}")
 
         # Load model
-        model = AutoModelForImageClassification.from_pretrained(
-            str(fold_dir),
-            num_labels=num_labels
-        )
+        model = AutoModelForImageClassification.from_pretrained(str(fold_dir), num_labels=num_labels)
 
         # Add weights to running average
         for key, param in model.state_dict().items():
@@ -832,9 +874,7 @@ def average_model_weights(model_dir: str, model_name_pattern: str, base_model: s
 
     # Create new model with averaged weights
     averaged_model = AutoModelForImageClassification.from_pretrained(
-        base_model,
-        num_labels=num_labels,
-        ignore_mismatched_sizes=True
+        base_model, num_labels=num_labels, ignore_mismatched_sizes=True
     )
 
     # Load the averaged weights

@@ -11,12 +11,14 @@ Scope
 
 No GPU, no trained model, no network required.
 """
+
 import csv
 from pathlib import Path
 
 from per_doc_split import split_csv_and_aggregate
 
 # ── helpers ────────────────────────────────────────────────────────────────
+
 
 def write_csv(path: Path, rows: list) -> None:
     with open(path, "w", newline="", encoding="utf-8") as f:
@@ -32,7 +34,6 @@ def read_csv(path: Path) -> list:
 # split_csv_and_aggregate
 # ════════════════════════════════════════════════════════════════════════════
 class TestSplitCsvAndAggregate:
-
     def test_output_directory_created_when_absent(self, tmp_path):
         out_dir = tmp_path / "new_subdir"
         inp = tmp_path / "input.csv"
@@ -42,12 +43,15 @@ class TestSplitCsvAndAggregate:
 
     def test_one_output_file_per_unique_document(self, tmp_path):
         inp = tmp_path / "input.csv"
-        write_csv(inp, [
-            ["FILE", "PAGE", "CLASS-1"],
-            ["docA", "1", "TEXT"],
-            ["docB", "2", "LINE_P"],
-            ["docA", "3", "DRAW"],
-        ])
+        write_csv(
+            inp,
+            [
+                ["FILE", "PAGE", "CLASS-1"],
+                ["docA", "1", "TEXT"],
+                ["docB", "2", "LINE_P"],
+                ["docA", "3", "DRAW"],
+            ],
+        )
         out_dir = tmp_path / "out"
         split_csv_and_aggregate(str(inp), str(out_dir))
         assert len(list(out_dir.glob("*.csv"))) == 2
@@ -70,12 +74,15 @@ class TestSplitCsvAndAggregate:
 
     def test_all_rows_for_document_written(self, tmp_path):
         inp = tmp_path / "input.csv"
-        write_csv(inp, [
-            ["FILE", "PAGE", "CLASS-1"],
-            ["doc", "1", "TEXT"],
-            ["doc", "2", "LINE_P"],
-            ["doc", "3", "DRAW"],
-        ])
+        write_csv(
+            inp,
+            [
+                ["FILE", "PAGE", "CLASS-1"],
+                ["doc", "1", "TEXT"],
+                ["doc", "2", "LINE_P"],
+                ["doc", "3", "DRAW"],
+            ],
+        )
         out_dir = tmp_path / "out"
         split_csv_and_aggregate(str(inp), str(out_dir))
         rows = read_csv(out_dir / "doc.csv")
@@ -84,11 +91,14 @@ class TestSplitCsvAndAggregate:
 
     def test_rows_from_different_documents_not_mixed(self, tmp_path):
         inp = tmp_path / "input.csv"
-        write_csv(inp, [
-            ["FILE", "PAGE", "CLASS-1"],
-            ["docA", "1", "TEXT"],
-            ["docB", "1", "DRAW"],
-        ])
+        write_csv(
+            inp,
+            [
+                ["FILE", "PAGE", "CLASS-1"],
+                ["docA", "1", "TEXT"],
+                ["docB", "1", "DRAW"],
+            ],
+        )
         out_dir = tmp_path / "out"
         split_csv_and_aggregate(str(inp), str(out_dir))
         rows_a = read_csv(out_dir / "docA.csv")

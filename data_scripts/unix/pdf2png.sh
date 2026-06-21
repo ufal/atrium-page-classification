@@ -98,6 +98,7 @@ fi
 # -print0 / -0 handles filenames with spaces safely.
 export FORMAT_FLAG DPI OUTPUT_DIR KEEP EXT
 
+# shellcheck disable=SC2016
 find "$SOURCE_DIR" -maxdepth 1 -name "*.pdf" -print0 \
 | xargs -0 -I {} -P "$(nproc)" bash -c '
     pdf_file="{}"

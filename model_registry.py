@@ -3,8 +3,17 @@ model_registry.py - Single source of truth for ATRIUM Page Classification model 
 """
 
 CATEGORIES = [
-    "DRAW", "DRAW_L", "LINE_HW", "LINE_P", "LINE_T",
-    "PHOTO", "PHOTO_L", "TEXT", "TEXT_HW", "TEXT_P", "TEXT_T"
+    "DRAW",
+    "DRAW_L",
+    "LINE_HW",
+    "LINE_P",
+    "LINE_T",
+    "PHOTO",
+    "PHOTO_L",
+    "TEXT",
+    "TEXT_HW",
+    "TEXT_P",
+    "TEXT_T",
 ]
 
 REVISION_TO_BASE_MODEL = {
@@ -37,8 +46,8 @@ REVISION_BEST_MODELS = {
 # Hardware/torch/batch-independent model facts (fp32 weights, params only).
 MODEL_STATIC = {
     "v1.3": {"base_model": "timm/tf_efficientnetv2_m.in21k_ft_in1k", "resolution": 384, "params_bytes": 211489788},
-    "v2.3": {"base_model": "google/vit-base-patch16-224",            "resolution": 224, "params_bytes": 343228460},
-    "v3.3": {"base_model": "google/vit-base-patch16-384",            "resolution": 384, "params_bytes": 344395820},
-    "v4.3": {"base_model": "timm/regnety_160.swag_ft_in1k",          "resolution": 384, "params_bytes": 322393660},
-    "v5.3": {"base_model": "google/vit-large-patch16-384",           "resolution": 384, "params_bytes": 1214808108},
+    "v2.3": {"base_model": "google/vit-base-patch16-224", "resolution": 224, "params_bytes": 343228460},
+    "v3.3": {"base_model": "google/vit-base-patch16-384", "resolution": 384, "params_bytes": 344395820},
+    "v4.3": {"base_model": "timm/regnety_160.swag_ft_in1k", "resolution": 384, "params_bytes": 322393660},
+    "v5.3": {"base_model": "google/vit-large-patch16-384", "resolution": 384, "params_bytes": 1214808108},
 }

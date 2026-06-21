@@ -12,6 +12,7 @@ Scope
 Matplotlib uses the non-interactive Agg backend (activated in conftest.py).
 No GPU, no trained model, no network required.
 """
+
 import csv
 from pathlib import Path
 
@@ -19,6 +20,7 @@ import pytest
 from visualize import get_model_type, plot_comparison, short_model_name
 
 # ── helpers ────────────────────────────────────────────────────────────────
+
 
 def write_model_csv(path: Path, rows: list) -> None:
     with open(path, "w", newline="", encoding="utf-8") as f:
@@ -87,12 +89,15 @@ class TestPlotComparison:
 
     def test_png_created_for_valid_csv(self, tmp_path):
         f = tmp_path / "models.csv"
-        write_model_csv(f, [
-            ["model", "param", "acc"],
-            ["vit-base-patch16-224",   "87",  "98.79"],
-            ["regnety_160.swag_ft_in1k", "84", "99.17"],
-            ["vit-large-patch16-384", "305", "99.12"],
-        ])
+        write_model_csv(
+            f,
+            [
+                ["model", "param", "acc"],
+                ["vit-base-patch16-224", "87", "98.79"],
+                ["regnety_160.swag_ft_in1k", "84", "99.17"],
+                ["vit-large-patch16-384", "305", "99.12"],
+            ],
+        )
         out = tmp_path / "chart.png"
         plot_comparison(str(f), str(out), title="Test Chart", show=False)
         assert out.exists()
@@ -102,30 +107,30 @@ class TestPlotComparison:
         f = tmp_path / "bad.csv"
         write_model_csv(f, [["param", "acc"], ["84", "99.17"]])
         with pytest.raises(ValueError, match="missing required column"):
-            plot_comparison(str(f), str(tmp_path / "out.png"),
-                            title="Test", show=False)
+            plot_comparison(str(f), str(tmp_path / "out.png"), title="Test", show=False)
 
     def test_missing_param_column_raises_value_error(self, tmp_path):
         f = tmp_path / "bad.csv"
         write_model_csv(f, [["model", "acc"], ["vit", "98.0"]])
         with pytest.raises(ValueError):
-            plot_comparison(str(f), str(tmp_path / "out.png"),
-                            title="Test", show=False)
+            plot_comparison(str(f), str(tmp_path / "out.png"), title="Test", show=False)
 
     def test_missing_acc_column_raises_value_error(self, tmp_path):
         f = tmp_path / "bad.csv"
         write_model_csv(f, [["model", "param"], ["vit", "87"]])
         with pytest.raises(ValueError):
-            plot_comparison(str(f), str(tmp_path / "out.png"),
-                            title="Test", show=False)
+            plot_comparison(str(f), str(tmp_path / "out.png"), title="Test", show=False)
 
     def test_single_row_does_not_raise(self, tmp_path):
         """One data point cannot produce a trendline, but must not crash."""
         f = tmp_path / "single.csv"
-        write_model_csv(f, [
-            ["model", "param", "acc"],
-            ["vit-base-patch16-224", "87", "98.79"],
-        ])
+        write_model_csv(
+            f,
+            [
+                ["model", "param", "acc"],
+                ["vit-base-patch16-224", "87", "98.79"],
+            ],
+        )
         out = tmp_path / "single.png"
         plot_comparison(str(f), str(out), title="Solo", show=False)
         assert out.exists()
@@ -133,13 +138,16 @@ class TestPlotComparison:
     def test_multiple_model_families_all_plotted(self, tmp_path):
         """One row per family — each should appear without errors."""
         f = tmp_path / "multi.csv"
-        write_model_csv(f, [
-            ["model", "param", "acc"],
-            ["vit-base-patch16-224",      "87",  "98.79"],
-            ["regnety_160.swag_ft_in1k",  "84",  "99.17"],
-            ["tf_efficientnetv2_m.in21k", "54",  "98.83"],
-            ["dit-base-finetuned-rvlcdip","86",  "98.72"],
-        ])
+        write_model_csv(
+            f,
+            [
+                ["model", "param", "acc"],
+                ["vit-base-patch16-224", "87", "98.79"],
+                ["regnety_160.swag_ft_in1k", "84", "99.17"],
+                ["tf_efficientnetv2_m.in21k", "54", "98.83"],
+                ["dit-base-finetuned-rvlcdip", "86", "98.72"],
+            ],
+        )
         out = tmp_path / "multi.png"
         plot_comparison(str(f), str(out), title="Multi-family", show=False)
         assert out.exists()

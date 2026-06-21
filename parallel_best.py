@@ -19,8 +19,10 @@ _PROFILING_BATCHES = 2
 _MEMORY_SAFETY_MARGIN = 0.90
 _HEADROOM_BYTES = 512 * 1024 * 1024
 
+
 def _profile_path(model_dir: str) -> Path:
     return Path(model_dir) / _PROFILE_FILENAME
+
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Memory-aware packing scheduler
@@ -83,6 +85,7 @@ def registry_is_fresh(
         return False
     return True
 
+
 def _current_gpu_key() -> Optional[dict]:
     if not torch.cuda.is_available():
         return None
@@ -93,6 +96,7 @@ def _current_gpu_key() -> Optional[dict]:
         "device_index": 0,
         "torch": torch.__version__,
     }
+
 
 def _load_profile(
     model_dir: str,
@@ -116,6 +120,7 @@ def _load_profile(
         return None
 
     return data["models"]
+
 
 def _save_profile(model_dir: str, batch: int, models_peak: dict) -> None:
     data = {
@@ -142,6 +147,7 @@ def _measure_model_peak(
     categories: list,
 ) -> int:
     from classifier import ImageClassifier
+
     dev = 0
     torch.cuda.empty_cache()
     torch.cuda.reset_peak_memory_stats(dev)
@@ -152,7 +158,7 @@ def _measure_model_peak(
     clf = ImageClassifier(checkpoint=base_model, num_labels=len(categories), store_dir=str(cp_dir))
     clf.load_model(str(local_path))
 
-    probe = sample_images[:_PROFILING_BATCHES * batch]
+    probe = sample_images[: _PROFILING_BATCHES * batch]
     loader = clf.create_dataloader(probe, batch)
 
     with torch.no_grad():
@@ -167,6 +173,7 @@ def _measure_model_peak(
     del clf
     torch.cuda.empty_cache()
     return int(peak)
+
 
 def profile_best_models(
     revision_best_models: dict,
@@ -194,9 +201,7 @@ def profile_best_models(
     for rev, base_model in revision_best_models.items():
         print(f"  profiling {rev} ({base_model}) …")
         try:
-            peak = _measure_model_peak(
-                rev, base_model, model_dir, cp_dir, sample_images, batch, categories
-            )
+            peak = _measure_model_peak(rev, base_model, model_dir, cp_dir, sample_images, batch, categories)
             models_peak[rev] = {"base_model": base_model, "peak_bytes": peak}
             props = torch.cuda.get_device_properties(0)
             print(f"  {rev}: peak {peak / 1e9:.2f} GB / {props.total_memory / 1e9:.2f} GB total")
@@ -245,6 +250,7 @@ def _run_group(
     guard_done = False
 
     from itertools import zip_longest
+
     loader_iters = {rev: iter(ld) for rev, ld in loaders.items()}
 
     for batch_idx, batches in enumerate(zip_longest(*[loader_iters[rev] for rev in classifiers])):
@@ -262,9 +268,7 @@ def _run_group(
                     topk_probs, topk_idx = torch.topk(probs, top_N, dim=-1)
                     for idxs, prs in zip(topk_idx, topk_probs):
                         prs_norm = prs / prs.sum()
-                        all_predictions[rev].append(
-                            list(zip(idxs.cpu().tolist(), prs_norm.cpu().tolist()))
-                        )
+                        all_predictions[rev].append(list(zip(idxs.cpu().tolist(), prs_norm.cpu().tolist())))
                 else:
                     all_predictions[rev].extend(probs.argmax(dim=-1).cpu().tolist())
 
@@ -281,8 +285,10 @@ def _run_group(
                     )
                 else:
                     victim = list(classifiers.keys())[-1]
-                print(f"  [overflow guard] Dropping {victim} from group — "
-                      f"live peak {live_peak / 1e9:.2f} GB > {danger_threshold / 1e9:.2f} GB")
+                print(
+                    f"  [overflow guard] Dropping {victim} from group — "
+                    f"live peak {live_peak / 1e9:.2f} GB > {danger_threshold / 1e9:.2f} GB"
+                )
                 dropped.append(victim)
                 del classifiers[victim]
                 torch.cuda.empty_cache()
@@ -399,9 +405,7 @@ def run_best_models(
 
     if use_parallel:
         try:
-            models_peak = profile_best_models(
-                revision_best_models, model_dir, cp_dir, test_images, batch, categories
-            )
+            models_peak = profile_best_models(revision_best_models, model_dir, cp_dir, test_images, batch, categories)
             if models_peak is None:
                 use_parallel = False
         except Exception as e:
@@ -416,16 +420,22 @@ def run_best_models(
 
         print(f"[parallel_best] VRAM budget {budget / 1e9:.2f} GB → {len(groups)} group(s)")
         for i, g in enumerate(groups):
-            print(f"  group {i + 1}: {g}  "
-                  f"cumulative={sum(sizes[r] for r in g) / 1e9:.2f} GB")
+            print(f"  group {i + 1}: {g}  cumulative={sum(sizes[r] for r in g) / 1e9:.2f} GB")
 
         deferred: List[str] = []
         for g_idx, group in enumerate(groups):
             print(f"\n[parallel_best] Running group {g_idx + 1}/{len(groups)}: {group}")
             try:
                 rdfs, dropped = _run_group(
-                    group, revision_best_models, test_images,
-                    categories, batch, model_dir, cp_dir, models_peak, top_N,
+                    group,
+                    revision_best_models,
+                    test_images,
+                    categories,
+                    batch,
+                    model_dir,
+                    cp_dir,
+                    models_peak,
+                    top_N,
                 )
                 all_rdfs.update(rdfs)
                 deferred.extend(dropped)
@@ -439,22 +449,34 @@ def run_best_models(
         if deferred:
             print(f"\n[parallel_best] Running {len(deferred)} deferred model(s) sequentially …")
             deferred_map = {r: revision_best_models[r] for r in deferred if r in revision_best_models}
-            all_rdfs.update(run_best_sequential(
-                test_images, categories, deferred_map,
-                model_dir, cp_dir, batch, top_N, paradata_logger,
-            ))
+            all_rdfs.update(
+                run_best_sequential(
+                    test_images,
+                    categories,
+                    deferred_map,
+                    model_dir,
+                    cp_dir,
+                    batch,
+                    top_N,
+                    paradata_logger,
+                )
+            )
     else:
         if parallel and not torch.cuda.is_available():
             print("[parallel_best] --parallel requested but no CUDA — running sequentially.")
         all_rdfs = run_best_sequential(
-            test_images, categories, revision_best_models,
-            model_dir, cp_dir, batch, top_N, paradata_logger,
+            test_images,
+            categories,
+            revision_best_models,
+            model_dir,
+            cp_dir,
+            batch,
+            top_N,
+            paradata_logger,
         )
 
     top1_rdfs = {
-        rev: rdf[["FILE", "PAGE", "CLASS-1"]].copy()
-        for rev, rdf in all_rdfs.items()
-        if "CLASS-1" in rdf.columns
+        rev: rdf[["FILE", "PAGE", "CLASS-1"]].copy() for rev, rdf in all_rdfs.items() if "CLASS-1" in rdf.columns
     }
     wide_df = merge_best(revision_best_models, top1_rdfs)
     wide_df.sort_values(["FILE", "PAGE"], ascending=[True, True], inplace=True)
@@ -469,8 +491,7 @@ def run_best_models(
             print(f"[parallel_best] Saved intermediate model CSV → {path}")
 
     if not average_best:
-        print("\n[parallel_best] Averaging bypassed (--no-average-best). "
-              f"Wide votes available at {wide_path}")
+        print(f"\n[parallel_best] Averaging bypassed (--no-average-best). Wide votes available at {wide_path}")
         return ""
 
     print(f"\n[parallel_best] Averaging {n_models} models → TOP-{top_N} result …")

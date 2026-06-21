@@ -14,6 +14,7 @@ No GPU, no trained model, and no network access required.
 The Agg matplotlib backend is activated by conftest.py before this module
 is imported, so no display is needed.
 """
+
 from pathlib import Path
 
 import numpy as np
@@ -24,8 +25,17 @@ from utils import collect_images, confusion_plot, dataframe_results, directory_s
 
 # ── shared fixture data ──────────────────────────────────────────────────────
 ALL_CATEGORIES = [
-    "DRAW", "DRAW_L", "LINE_HW", "LINE_P", "LINE_T",
-    "PHOTO", "PHOTO_L", "TEXT", "TEXT_HW", "TEXT_P", "TEXT_T",
+    "DRAW",
+    "DRAW_L",
+    "LINE_HW",
+    "LINE_P",
+    "LINE_T",
+    "PHOTO",
+    "PHOTO_L",
+    "TEXT",
+    "TEXT_HW",
+    "TEXT_P",
+    "TEXT_T",
 ]
 
 
@@ -39,7 +49,7 @@ class TestDirectoryScraper:
     def test_counts_matching_files_in_flat_directory(self, tmp_path):
         (tmp_path / "a.png").touch()
         (tmp_path / "b.png").touch()
-        (tmp_path / "c.jpg").touch()    # different extension – must be excluded
+        (tmp_path / "c.jpg").touch()  # different extension – must be excluded
         result = directory_scraper(tmp_path, "png")
         assert len(result) == 2
 
@@ -161,7 +171,6 @@ class TestDataframeResultsTopN:
 # dataframe_results – raw scores
 # ════════════════════════════════════════════════════════════════════════════
 class TestDataframeResultsRawScores:
-
     def test_raw_dataframe_has_one_column_per_category(self):
         cats = ["A", "B"]
         raw = [[0.6, 0.4]]
@@ -172,15 +181,17 @@ class TestDataframeResultsRawScores:
     def test_raw_dataframe_row_count_matches_images(self):
         raw = [[0.6, 0.4], [0.3, 0.7]]
         _, rawdf = dataframe_results(
-            ["a-1.png", "b-2.png"], [0, 1], ["A", "B"],
-            top_N=1, raw_scores=raw,
+            ["a-1.png", "b-2.png"],
+            [0, 1],
+            ["A", "B"],
+            top_N=1,
+            raw_scores=raw,
         )
         assert len(rawdf) == 2
 
     def test_raw_scores_rounded_to_3dp(self):
         raw = [[0.999999, 0.000001]]
-        _, rawdf = dataframe_results(["doc-001.png"], [0], ["A", "B"],
-                                     top_N=1, raw_scores=raw)
+        _, rawdf = dataframe_results(["doc-001.png"], [0], ["A", "B"], top_N=1, raw_scores=raw)
         assert rawdf.iloc[0]["A"] == pytest.approx(1.0, abs=1e-3)
 
 
@@ -278,17 +289,15 @@ class TestConfusionPlot:
         cats = ["DRAW", "TEXT"]
         preds = [0, 1, 0, 1]
         trues = [0, 1, 0, 1]
-        confusion_plot(preds, trues, cats, "test_model",
-                       top_N=1, output_dir=self._output_dir(tmp_path))
+        confusion_plot(preds, trues, cats, "test_model", top_N=1, output_dir=self._output_dir(tmp_path))
         pngs = list((tmp_path / "plots").glob("*.png"))
         assert len(pngs) == 1
 
     def test_creates_png_with_classification_errors(self, tmp_path):
         cats = ["A", "B", "C"]
         preds = [0, 1, 2, 0, 1, 2]
-        trues = [0, 1, 1, 0, 2, 2]    # 2 misclassifications
-        confusion_plot(preds, trues, cats, "test_model",
-                       top_N=1, output_dir=self._output_dir(tmp_path))
+        trues = [0, 1, 1, 0, 2, 2]  # 2 misclassifications
+        confusion_plot(preds, trues, cats, "test_model", top_N=1, output_dir=self._output_dir(tmp_path))
         pngs = list((tmp_path / "plots").glob("*.png"))
         assert len(pngs) == 1
 
@@ -297,19 +306,19 @@ class TestConfusionPlot:
         the top-2 candidates should count as correct."""
         cats = ["A", "B"]
         # each prediction: [(best_idx, score), (second_idx, score)]
-        preds = [[(0, 0.9), (1, 0.1)],   # true=0, top-1 correct
-                 [(1, 0.8), (0, 0.2)],   # true=1, top-1 correct
-                 [(0, 0.55), (1, 0.45)]] # true=1, top-1 wrong but top-2 correct
+        preds = [
+            [(0, 0.9), (1, 0.1)],  # true=0, top-1 correct
+            [(1, 0.8), (0, 0.2)],  # true=1, top-1 correct
+            [(0, 0.55), (1, 0.45)],
+        ]  # true=1, top-1 wrong but top-2 correct
         trues = [0, 1, 1]
-        confusion_plot(preds, trues, cats, "test_model",
-                       top_N=2, output_dir=self._output_dir(tmp_path))
+        confusion_plot(preds, trues, cats, "test_model", top_N=2, output_dir=self._output_dir(tmp_path))
         pngs = list((tmp_path / "plots").glob("*.png"))
         assert len(pngs) == 1
 
     def test_png_filename_embeds_model_name_and_topn(self, tmp_path):
         cats = ["X", "Y"]
-        confusion_plot([0, 1], [0, 1], cats, "mymodel_v43",
-                       top_N=1, output_dir=self._output_dir(tmp_path))
+        confusion_plot([0, 1], [0, 1], cats, "mymodel_v43", top_N=1, output_dir=self._output_dir(tmp_path))
         pngs = list((tmp_path / "plots").glob("*.png"))
         assert len(pngs) == 1
         fname = pngs[0].name

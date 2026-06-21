@@ -21,10 +21,10 @@ export TORCH_HOME="${PROJECT_DIR}/cache/"
 
 source /lnet/work/projects/atrium/transformers/venv/bin/activate
 
-cd /lnet/work/projects/atrium/transformers/local
+cd /lnet/work/projects/atrium/transformers/local || exit 1
 
 ARG=( "$@" )
 
-python3 run.py ${ARG[*]}
+python3 run.py "${ARG[@]}"
 
 date

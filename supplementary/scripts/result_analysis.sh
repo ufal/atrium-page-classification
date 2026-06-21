@@ -110,7 +110,8 @@ parse_model_info() {
 
     if [[ $version =~ a([0-9])?$ ]]; then
         fold="avg"
-        version_core=$(echo "$version" | sed 's/a[0-9]*$//')
+        # Replace: version_core=$(echo "$version" | sed 's/a[0-9]*$//')
+        version_core="${version%a*}"
     elif [[ -n "${version_to_base_model[$version]:-}" ]]; then
         fold="?"
         version_core=$version
@@ -342,8 +343,8 @@ if [[ -s "$tmpfile" ]]; then
     echo "-----------------------------------------"
     printf "%3s %-45s %-6s %10s\n" "#" "Base Model" "Ver" "Mean_Acc1"
     rank=1
-    sort -t'|' -k1,1nr "$tmpfile" | head -n "$TOP_N" | while IFS='|' read -r mean base ver samples; do
-        mean_n="${mean//,/.}"
+    # Replace: ... | while IFS='|' read -r mean base ver samples; do
+    sort -t'|' -k1,1nr "$tmpfile" | head -n "$TOP_N" | while IFS='|' read -r mean base ver _; do        mean_n="${mean//,/.}"
         mean_d=$(awk -v m="$mean_n" 'BEGIN{printf "%.2f", m}')
         printf "%3d %-45s %-6s %8s%%\n" "$rank" "$base" "$ver" "$mean_d"
         rank=$((rank + 1))

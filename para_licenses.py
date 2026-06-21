@@ -36,33 +36,33 @@ from typing import Dict, Iterable, List, Tuple
 # licenses rank highest because they forbid the commercial use case entirely.
 
 LICENSE_RANK: Dict[str, int] = {
-    "Public Domain":     0,
-    "CC0":               0,
-    "MIT":               1,
-    "Apache-2.0":        1,
-    "BSD-3-Clause":      1,
-    "MPL 2.0":           2,   # weak copyleft – file-level source obligation
-    "LGPL-3.0":          3,
-    "GPL-3.0":           4,   # strong copyleft – still commercial-OK, viral
-    "CC BY 4.0":         1,   # attribution only
-    "CC BY-SA 4.0":      3,   # attribution + share-alike
-    "CC BY-NC 4.0":      5,   # non-commercial
-    "CC BY-NC-SA 4.0":   6,   # non-commercial + share-alike (most restrictive)
+    "Public Domain": 0,
+    "CC0": 0,
+    "MIT": 1,
+    "Apache-2.0": 1,
+    "BSD-3-Clause": 1,
+    "MPL 2.0": 2,  # weak copyleft – file-level source obligation
+    "LGPL-3.0": 3,
+    "GPL-3.0": 4,  # strong copyleft – still commercial-OK, viral
+    "CC BY 4.0": 1,  # attribution only
+    "CC BY-SA 4.0": 3,  # attribution + share-alike
+    "CC BY-NC 4.0": 5,  # non-commercial
+    "CC BY-NC-SA 4.0": 6,  # non-commercial + share-alike (most restrictive)
 }
 
 # Canonical URLs for the licenses we emit.
 LICENSE_URL: Dict[str, str] = {
-    "Public Domain":   "https://creativecommons.org/publicdomain/mark/1.0/",
-    "CC0":             "https://creativecommons.org/publicdomain/zero/1.0/",
-    "MIT":             "https://opensource.org/license/mit/",
-    "Apache-2.0":      "https://www.apache.org/licenses/LICENSE-2.0",
-    "BSD-3-Clause":    "https://opensource.org/license/bsd-3-clause/",
-    "MPL 2.0":         "https://www.mozilla.org/en-US/MPL/2.0/",
-    "LGPL-3.0":        "https://www.gnu.org/licenses/lgpl-3.0.html",
-    "GPL-3.0":         "https://www.gnu.org/licenses/gpl-3.0.html",
-    "CC BY 4.0":       "https://creativecommons.org/licenses/by/4.0/",
-    "CC BY-SA 4.0":    "https://creativecommons.org/licenses/by-sa/4.0/",
-    "CC BY-NC 4.0":    "https://creativecommons.org/licenses/by-nc/4.0/",
+    "Public Domain": "https://creativecommons.org/publicdomain/mark/1.0/",
+    "CC0": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "MIT": "https://opensource.org/license/mit/",
+    "Apache-2.0": "https://www.apache.org/licenses/LICENSE-2.0",
+    "BSD-3-Clause": "https://opensource.org/license/bsd-3-clause/",
+    "MPL 2.0": "https://www.mozilla.org/en-US/MPL/2.0/",
+    "LGPL-3.0": "https://www.gnu.org/licenses/lgpl-3.0.html",
+    "GPL-3.0": "https://www.gnu.org/licenses/gpl-3.0.html",
+    "CC BY 4.0": "https://creativecommons.org/licenses/by/4.0/",
+    "CC BY-SA 4.0": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "CC BY-NC 4.0": "https://creativecommons.org/licenses/by-nc/4.0/",
     "CC BY-NC-SA 4.0": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
 }
 
@@ -140,12 +140,14 @@ def resolve_effective_license(
     for name, raw_lic in components_used:
         lic = normalise_license(raw_lic)
         rank = LICENSE_RANK.get(lic)
-        catalogue.append({
-            "name": name,
-            "license": lic,
-            "license_url": LICENSE_URL.get(lic, ""),
-            "rank": rank if rank is not None else -1,
-        })
+        catalogue.append(
+            {
+                "name": name,
+                "license": lic,
+                "license_url": LICENSE_URL.get(lic, ""),
+                "rank": rank if rank is not None else -1,
+            }
+        )
         if rank is None:
             unknown.append(lic)
             # Unknown licenses are treated conservatively as maximally
@@ -160,8 +162,7 @@ def resolve_effective_license(
             best_license = lic
 
     determined_by = [
-        c["name"] for c in catalogue
-        if (LICENSE_RANK.get(str(c["license"]), max(LICENSE_RANK.values())) == best_rank)
+        c["name"] for c in catalogue if (LICENSE_RANK.get(str(c["license"]), max(LICENSE_RANK.values())) == best_rank)
     ]
 
     is_nc = best_license in _NON_COMMERCIAL
@@ -169,8 +170,7 @@ def resolve_effective_license(
 
     parts: List[str] = []
     parts.append(
-        f"Effective output license is {best_license}, the most restrictive "
-        f"among {len(catalogue)} component(s) used."
+        f"Effective output license is {best_license}, the most restrictive among {len(catalogue)} component(s) used."
     )
     if is_nc:
         parts.append(
@@ -178,10 +178,7 @@ def resolve_effective_license(
             "permitted while this component is in the pipeline."
         )
     if is_sa:
-        parts.append(
-            "SHARE-ALIKE applies: derivatives must be licensed under the same "
-            "terms."
-        )
+        parts.append("SHARE-ALIKE applies: derivatives must be licensed under the same terms.")
     if unknown:
         parts.append(
             "WARNING: unrecognised license(s) "
@@ -190,14 +187,14 @@ def resolve_effective_license(
         )
 
     return {
-        "effective_license":     best_license,
+        "effective_license": best_license,
         "effective_license_url": LICENSE_URL.get(best_license, ""),
-        "is_non_commercial":     is_nc,
-        "is_share_alike":        is_sa,
-        "determined_by":         determined_by,
-        "components":            catalogue,
-        "unknown_licenses":      sorted(set(unknown)),
-        "notes":                 " ".join(parts),
+        "is_non_commercial": is_nc,
+        "is_share_alike": is_sa,
+        "determined_by": determined_by,
+        "components": catalogue,
+        "unknown_licenses": sorted(set(unknown)),
+        "notes": " ".join(parts),
     }
 
 

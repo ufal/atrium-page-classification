@@ -3,9 +3,9 @@
 
 ### Goal: Serve historical document classification models via a lightweight REST API
 
-**Scope:** This service provides a **FastAPI** interface for the Atrium Page Classification models. 
-It allows users to upload document images and receive structural classification predictions (e.g., 
-Text, Drawing, Table) using various fine-tuned on historical data [^17] deep learning models 
+**Scope:** This service provides a **FastAPI** interface for the Atrium Page Classification models.
+It allows users to upload document images and receive structural classification predictions (e.g.,
+Text, Drawing, Table) using various fine-tuned on historical data [^17] deep learning models
 (ViT, EfficientNet, RegNetY). It includes basic static HTML frontends for both standalone testing and LINDAT integration.
 
 ### Table of contents 📑
@@ -25,7 +25,7 @@ Text, Drawing, Table) using various fine-tuned on historical data [^17] deep lea
 
 ## Service Description 📇
 
-The API is built using **FastAPI** and is designed to run inference on single images or multipage PDFs. 
+The API is built using **FastAPI** and is designed to run inference on single images or multipage PDFs.
 It acts as a bridge between the fine-tuned PyTorch models and downstream applications or web interfaces.
 
 Key features:
@@ -59,7 +59,7 @@ atrium-page-classification/
 
 ## Supported Models 🧠
 
-The API exposes specific model versions defined in `inference.py`. These map to different underlying 
+The API exposes specific model versions defined in `inference.py`. These map to different underlying
 base architectures, allowing users to balance speed vs. accuracy.
 
 | Version  | Base Architecture                   | Description                                     |
@@ -143,7 +143,7 @@ Example JSON response:
 
 ### 2. Install Server Dependencies
 
-Navigate to the root `atrium-page-classification` directory, then run a setup script to 
+Navigate to the root `atrium-page-classification` directory, then run a setup script to
 create a virtual environment, and install all of the required packages:
 
 ```bash
@@ -165,8 +165,8 @@ libraries can be found in `service/requirements.txt` available for manual instal
 The setup script also downloads the fine-tuned model weights from the Hugging Face Hub [^1].
 It is done via the `run.py` script that saves the weights in the `model/` directory.
 
-> [!NOTE] The very first run may take some time as it downloads multiple model files to 
-> be cached locally. When using the WEB UI, `inference.py` will check for the models 
+> [!NOTE] The very first run may take some time as it downloads multiple model files to
+> be cached locally. When using the WEB UI, `inference.py` will check for the models
 > in the `model/` directory, and if not found, it will attempt to download them from
 > Hugging Face Hub automatically.
 
@@ -281,7 +281,7 @@ For further details, please refer to the **LINDAT Common Development Guide**:
 
 ### Running the Server 🚀
 
-To start the API server with hot-reloading enabled (useful for development), ensure your virtual 
+To start the API server with hot-reloading enabled (useful for development), ensure your virtual
 environment is activated in your **first console window**: [^3]
 
 ```bash
@@ -307,7 +307,7 @@ Assuming your **second console** output ends like this:
 > Content not from webpack is served from /home.../lindat-common
 ```
 
-Open the URL `http://localhost:8080` in your web browser to access the LINDAT client interface. 
+Open the URL `http://localhost:8080` in your web browser to access the LINDAT client interface.
 
 Follow the file tree to the `atrium-page-classification/service/frontend-lindat` directory. The frontend interface will open and allow you to upload images and test the API.
 
@@ -320,9 +320,9 @@ Follow the file tree to the `atrium-page-classification/service/frontend-lindat`
 - **Developed by** UFAL [^7] 👥
 - **Funded by** ATRIUM [^4]  💰
 - **Shared by** ATRIUM [^4] & UFAL [^7] 🔗
-- **Model type:** 
-  - fine-tuned ViT with a 224x224 [^2] 🔗 or 384x384 [^13] [^14] 🔗 resolution size 
-  - fine-tuned RegNetY-16GF with a 224x224 resolution [^18] or EffNetV2 with a 384x384 [^19] 🔗 resolution size 
+- **Model type:**
+  - fine-tuned ViT with a 224x224 [^2] 🔗 or 384x384 [^13] [^14] 🔗 resolution size
+  - fine-tuned RegNetY-16GF with a 224x224 resolution [^18] or EffNetV2 with a 384x384 [^19] 🔗 resolution size
 
 **©️ 2026 UFAL & ATRIUM**
 
@@ -342,4 +342,3 @@ Follow the file tree to the `atrium-page-classification/service/frontend-lindat`
 [^17]: http://hdl.handle.net/20.500.12800/1-5959
 [^18]: https://huggingface.co/timm/regnety_160.swag_ft_in1k
 [^19]: https://huggingface.co/timm/tf_efficientnetv2_m.in21k_ft_in1k
-

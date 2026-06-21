@@ -2,6 +2,7 @@
 yolo_classifier.py  –  YOLO-cls wrapper that mirrors the ImageClassifier interface.
 Requires: pip install ultralytics
 """
+
 from __future__ import annotations
 
 import shutil
@@ -21,11 +22,10 @@ except ImportError:
 
 # ── helper ───────────────────────────────────────────────────────────────────
 
+
 def _assert_ultralytics():
     if YOLO is None:
-        raise ImportError(
-            "ultralytics is not installed. Run: pip install ultralytics"
-        )
+        raise ImportError("ultralytics is not installed. Run: pip install ultralytics")
 
 
 def build_yolo_dataset(
@@ -66,6 +66,7 @@ def build_yolo_dataset(
 
 # ── main class ────────────────────────────────────────────────────────────────
 
+
 class YOLOClassifier:
     """
     YOLO classification wrapper.
@@ -86,16 +87,16 @@ class YOLOClassifier:
     # (config.txt comment lists `yv8s`, `y11s`, …) and the map is now actually
     # USED via _resolve_checkpoint() below — previously it was dead code.
     BASE_MODELS = {
-        "yv8n":  "yolov8n-cls.pt",
-        "yv8s":  "yolov8s-cls.pt",
-        "yv8m":  "yolov8m-cls.pt",
-        "yv8l":  "yolov8l-cls.pt",
-        "yv8x":  "yolov8x-cls.pt",
-        "y11n":  "yolo11n-cls.pt",
-        "y11s":  "yolo11s-cls.pt",
-        "y11m":  "yolo11m-cls.pt",
-        "y11l":  "yolo11l-cls.pt",
-        "y11x":  "yolo11x-cls.pt",
+        "yv8n": "yolov8n-cls.pt",
+        "yv8s": "yolov8s-cls.pt",
+        "yv8m": "yolov8m-cls.pt",
+        "yv8l": "yolov8l-cls.pt",
+        "yv8x": "yolov8x-cls.pt",
+        "y11n": "yolo11n-cls.pt",
+        "y11s": "yolo11s-cls.pt",
+        "y11m": "yolo11m-cls.pt",
+        "y11l": "yolo11l-cls.pt",
+        "y11x": "yolo11x-cls.pt",
     }
 
     @classmethod
@@ -114,7 +115,7 @@ class YOLOClassifier:
 
     def __init__(
         self,
-        checkpoint: str,          # short tag ("yv8s"), Ultralytics id, or local .pt path
+        checkpoint: str,  # short tag ("yv8s"), Ultralytics id, or local .pt path
         num_labels: int,
         categories: list,
         store_dir: str = "./checkpoint",
@@ -122,11 +123,11 @@ class YOLOClassifier:
     ):
         _assert_ultralytics()
 
-        self.checkpoint  = self._resolve_checkpoint(checkpoint)
-        self.num_labels  = num_labels
-        self.categories  = categories
-        self.store_dir   = store_dir
-        self.imgsz       = imgsz
+        self.checkpoint = self._resolve_checkpoint(checkpoint)
+        self.num_labels = num_labels
+        self.categories = categories
+        self.store_dir = store_dir
+        self.imgsz = imgsz
         self.model: YOLO | None = None
         # Records the Ultralytics run directory (output_dir/out_model) so we can
         # reliably locate best.pt after training even if trainer.best is missing.
@@ -153,10 +154,10 @@ class YOLOClassifier:
         batch_size: int = 16,
         learning_rate: float = 5e-5,
         output_dir: str = "./yolo_output",
-        logging_steps: int = 10,     # kept for API parity, unused by YOLO
-        patience: int = 100,         # early-stopping patience (epochs)
-        dropout: float = 0.0,        # classifier head dropout
-        cache: bool = False,         # cache images in RAM/disk for faster epochs
+        logging_steps: int = 10,  # kept for API parity, unused by YOLO
+        patience: int = 100,  # early-stopping patience (epochs)
+        dropout: float = 0.0,  # classifier head dropout
+        cache: bool = False,  # cache images in RAM/disk for faster epochs
     ):
         """
         Prepare a temporary YOLO dataset, fine-tune, and save.
@@ -177,15 +178,17 @@ class YOLOClassifier:
         try:
             print(f"[YOLO] Building dataset in {tmp_root} …")
             build_yolo_dataset(trainfiles, trainLabels, self.categories, tmp_root, "train")
-            build_yolo_dataset(valfiles,   valLabels,   self.categories, tmp_root, "val")
+            build_yolo_dataset(valfiles, valLabels, self.categories, tmp_root, "val")
 
             # ── 2. Initialise model from pretrained weights ───────────────────
             self.model = YOLO(self.checkpoint)
 
             # ── 3. Train ─────────────────────────────────────────────────────
-            print(f"[YOLO] Training {self.checkpoint} for {num_epochs} epochs "
-                  f"(batch={batch_size}, lr={learning_rate}, patience={patience}, "
-                  f"dropout={dropout}, cache={cache}) on {self._device_label}")
+            print(
+                f"[YOLO] Training {self.checkpoint} for {num_epochs} epochs "
+                f"(batch={batch_size}, lr={learning_rate}, patience={patience}, "
+                f"dropout={dropout}, cache={cache}) on {self._device_label}"
+            )
 
             self.model.train(
                 data=str(tmp_root),
@@ -193,7 +196,7 @@ class YOLOClassifier:
                 imgsz=self.imgsz,
                 batch=batch_size,
                 lr0=learning_rate,
-                lrf=learning_rate * 0.01,   # final LR fraction
+                lrf=learning_rate * 0.01,  # final LR fraction
                 patience=patience,
                 dropout=dropout,
                 cache=cache,
@@ -244,14 +247,13 @@ class YOLOClassifier:
         probs = results[0].probs.data  # torch.Tensor, shape (num_classes,)
 
         top_indices = probs.argsort(descending=True)[:top_n]
-        top_probs   = probs[top_indices]
+        top_probs = probs[top_indices]
         # Normalise so scores sum to 1 (matches ViT behaviour)
-        top_probs   = top_probs / top_probs.sum()
+        top_probs = top_probs / top_probs.sum()
 
         return list(zip(top_indices.tolist(), top_probs.tolist()))
 
-    def create_dataloader(self, image_paths: list, batch_size: int,
-                          ignored_paths: list = None) -> list:
+    def create_dataloader(self, image_paths: list, batch_size: int, ignored_paths: list = None) -> list:
         """
         For API parity with ImageClassifier.create_dataloader().
         YOLO predict handles batching internally, so we just filter the list
@@ -262,12 +264,10 @@ class YOLOClassifier:
             image_paths = [p for p in image_paths if p not in ignored]
         # Store batch_size so infer_dataloader can use it
         self._batch_size = batch_size
-        print(f"[YOLO] Dataloader ready: {len(image_paths)} images "
-              f"(batch_size={batch_size})")
-        return image_paths   # plain list – YOLO streams from paths
+        print(f"[YOLO] Dataloader ready: {len(image_paths)} images (batch_size={batch_size})")
+        return image_paths  # plain list – YOLO streams from paths
 
-    def infer_dataloader(self, image_paths: list, top_n: int,
-                         raw: bool = False) -> tuple[list, list | None]:
+    def infer_dataloader(self, image_paths: list, top_n: int, raw: bool = False) -> tuple[list, list | None]:
         """
         Batch inference over a list of image paths.
 
@@ -283,15 +283,15 @@ class YOLOClassifier:
         if self.model is None:
             raise RuntimeError("No model loaded. Call load_model() first.")
 
-        batch_size  = getattr(self, "_batch_size", 16)
+        batch_size = getattr(self, "_batch_size", 16)
         predictions = []
-        raw_scores  = [] if raw else None
+        raw_scores = [] if raw else None
 
         total = len(image_paths)
         print(f"[YOLO] Running inference on {total} images …")
 
         for start in range(0, total, batch_size):
-            chunk  = image_paths[start : start + batch_size]
+            chunk = image_paths[start : start + batch_size]
             results = self.model.predict(
                 source=chunk,
                 imgsz=self.imgsz,
@@ -307,12 +307,10 @@ class YOLOClassifier:
                     raw_scores.append(probs.cpu().tolist())
 
                 if top_n > 1:
-                    top_idx   = probs.argsort(descending=True)[:top_n]
+                    top_idx = probs.argsort(descending=True)[:top_n]
                     top_probs = probs[top_idx]
                     top_probs = top_probs / top_probs.sum()
-                    predictions.append(
-                        list(zip(top_idx.tolist(), top_probs.tolist()))
-                    )
+                    predictions.append(list(zip(top_idx.tolist(), top_probs.tolist())))
                 else:
                     predictions.append(int(probs.argmax().item()))
 
@@ -344,16 +342,16 @@ class YOLOClassifier:
         elif best_pt and best_pt.resolve() == dest.resolve():
             print(f"[YOLO] Best weights already at {dest}")
         else:
-            print("[YOLO] WARNING: could not locate best.pt — saving the "
-                  "current in-memory model instead. This may not be the "
-                  "best-epoch checkpoint.")
+            print(
+                "[YOLO] WARNING: could not locate best.pt — saving the "
+                "current in-memory model instead. This may not be the "
+                "best-epoch checkpoint."
+            )
             self.model.save(str(dest))
 
         # Verify the save actually landed where run.py expects to load it from.
         if not dest.exists():
-            raise RuntimeError(
-                f"[YOLO] Save failed: {dest} does not exist after save_model()."
-            )
+            raise RuntimeError(f"[YOLO] Save failed: {dest} does not exist after save_model().")
         print(f"[YOLO] Model saved → {dest}  ({dest.stat().st_size / 1e6:.1f} MB)")
 
     def load_model(self, load_directory: str):
@@ -363,17 +361,14 @@ class YOLOClassifier:
             # Fallback: search for any .pt in the directory
             candidates = list(Path(load_directory).glob("*.pt"))
             if not candidates:
-                raise FileNotFoundError(
-                    f"No .pt file found in {load_directory}"
-                )
+                raise FileNotFoundError(f"No .pt file found in {load_directory}")
             pt_path = candidates[0]
         self.model = YOLO(str(pt_path))
         print(f"[YOLO] Model loaded from {pt_path}")
 
     def load_from_hub(self, *args, **kwargs):
         raise NotImplementedError(
-            "YOLO models are not stored on HuggingFace. "
-            "Use --model to point to a local directory."
+            "YOLO models are not stored on HuggingFace. Use --model to point to a local directory."
         )
 
     def push_to_hub(self, *args, **kwargs):

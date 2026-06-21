@@ -36,8 +36,8 @@ from typing import Any, Dict, List, Optional
 try:
     from para_licenses import merge_effective_licenses, resolve_effective_license
 except ImportError:  # keep logging functional even if the helper is missing
-    resolve_effective_license = None      # type: ignore
-    merge_effective_licenses = None       # type: ignore
+    resolve_effective_license = None  # type: ignore
+    merge_effective_licenses = None  # type: ignore
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -46,16 +46,16 @@ except ImportError:  # keep logging functional even if the helper is missing
 
 _REPO_URLS: Dict[str, str] = {
     "page-classification": "https://github.com/ufal/atrium-page-classification",
-    "alto-postprocess":    "https://github.com/ufal/atrium-alto-postprocess",
-    "nlp-enrich":          "https://github.com/ufal/atrium-nlp-enrich",
-    "translator":          "https://github.com/ufal/atrium-translator",
+    "alto-postprocess": "https://github.com/ufal/atrium-alto-postprocess",
+    "nlp-enrich": "https://github.com/ufal/atrium-nlp-enrich",
+    "translator": "https://github.com/ufal/atrium-translator",
 }
 
 # Environment variables a container sets so the logged reference points at the
 # ACTUAL running image/runner rather than a static fork URL.
-_ENV_RUNNER_IMAGE = "ATRIUM_RUNNER_IMAGE"      # e.g. ghcr.io/ufal/atrium-translator:v0.5.2
-_ENV_RUNNER_REPO  = "ATRIUM_RUNNER_REPO"       # e.g. https://github.com/ufal/atrium-translator
-_ENV_RUNNER_REF   = "ATRIUM_RUNNER_REF"        # e.g. git sha / tag the container was built from
+_ENV_RUNNER_IMAGE = "ATRIUM_RUNNER_IMAGE"  # e.g. ghcr.io/ufal/atrium-translator:v0.5.2
+_ENV_RUNNER_REPO = "ATRIUM_RUNNER_REPO"  # e.g. https://github.com/ufal/atrium-translator
+_ENV_RUNNER_REF = "ATRIUM_RUNNER_REF"  # e.g. git sha / tag the container was built from
 
 
 def _load_para_config(start_dir: str = ".") -> Dict[str, Any]:
@@ -87,18 +87,21 @@ def _load_para_config(start_dir: str = ".") -> Dict[str, Any]:
             lic = fields[0] if len(fields) > 0 else ""
             loaded = fields[1] if len(fields) > 1 else "always"
             role = fields[2] if len(fields) > 2 else ""
-            out["components"].append({
-                "name": name.strip(),
-                "license": lic,
-                "loaded": loaded,
-                "role": role,
-            })
+            out["components"].append(
+                {
+                    "name": name.strip(),
+                    "license": lic,
+                    "loaded": loaded,
+                    "role": role,
+                }
+            )
     return out
 
 
 # ──────────────────────────────────────────────────────────────────────────────
 # ParadataLogger
 # ──────────────────────────────────────────────────────────────────────────────
+
 
 class ParadataLogger:
     """
@@ -125,27 +128,19 @@ class ParadataLogger:
         docker_image: Optional[str] = None,
         config_dir: str = ".",
     ) -> None:
-        self.program      = program
+        self.program = program
         self.paradata_dir = paradata_dir
-        self._start_dt    = datetime.now(tz=timezone.utc)
-        self._run_id      = self._start_dt.strftime("%y%m%d-%H%M%S")
+        self._start_dt = datetime.now(tz=timezone.utc)
+        self._run_id = self._start_dt.strftime("%y%m%d-%H%M%S")
 
         # repo-specific static facts
         self._para_cfg = _load_para_config(config_dir)
 
         # version: kwarg > para_config > "unknown"
-        self.version = (
-            version
-            or self._para_cfg.get("version")
-            or "unknown"
-        )
+        self.version = version or self._para_cfg.get("version") or "unknown"
 
         # docker image: kwarg > env > "" (placeholder retained)
-        self.docker_image = (
-            docker_image
-            or os.environ.get(_ENV_RUNNER_IMAGE)
-            or ""
-        )
+        self.docker_image = docker_image or os.environ.get(_ENV_RUNNER_IMAGE) or ""
 
         # sanitise config so it stays JSON-serialisable
         self.config = _sanitise(config)
@@ -156,9 +151,9 @@ class ParadataLogger:
             for t in output_types:
                 self._output_counts[t] = 0
 
-        self._skipped:  List[Dict[str, str]] = []
+        self._skipped: List[Dict[str, str]] = []
         self._input_total: int = 0
-        self._finalised: bool  = False
+        self._finalised: bool = False
 
         # components actually exercised this run: {name: license}
         self._components_used: Dict[str, str] = {}
@@ -172,16 +167,16 @@ class ParadataLogger:
     # ── public API ─────────────────────────────────────────────────────────────
 
     def log_skip(self, filepath: str, reason: str) -> None:
-        self._skipped.append({
-            "file":      str(filepath),
-            "reason":    str(reason),
-            "timestamp": datetime.now(tz=timezone.utc).isoformat(),
-        })
+        self._skipped.append(
+            {
+                "file": str(filepath),
+                "reason": str(reason),
+                "timestamp": datetime.now(tz=timezone.utc).isoformat(),
+            }
+        )
 
     def log_success(self, output_type: str, count: int = 1) -> None:
-        self._output_counts[output_type] = (
-            self._output_counts.get(output_type, 0) + count
-        )
+        self._output_counts[output_type] = self._output_counts.get(output_type, 0) + count
 
     def log_component(self, name: str, license: Optional[str] = None) -> None:
         """
@@ -222,19 +217,18 @@ class ParadataLogger:
             "determined_by": [],
             "components": [{"name": n, "license": lic_str} for n, lic_str in comps],
             "unknown_licenses": [],
-            "notes": "License helper unavailable or no components recorded; "
-                     "defaulted conservatively to CC BY-NC 4.0.",
+            "notes": "License helper unavailable or no components recorded; defaulted conservatively to CC BY-NC 4.0.",
         }
 
     def finalize(self, input_total: Optional[int] = None) -> str:
         if self._finalised:
             raise RuntimeError("finalize() has already been called.")
 
-        end_dt       = datetime.now(tz=timezone.utc)
+        end_dt = datetime.now(tz=timezone.utc)
         duration_sec = (end_dt - self._start_dt).total_seconds()
         duration_min = duration_sec / 60.0 if duration_sec > 0 else 0.0
 
-        skipped_count  = len(self._skipped)
+        skipped_count = len(self._skipped)
         processed_docs = max(self._output_counts.values()) if self._output_counts else 0
         if input_total is None:
             input_total = processed_docs + skipped_count
@@ -247,43 +241,36 @@ class ParadataLogger:
 
         payload = {
             # ── provenance ──────────────────────────────────────────────────
-            "schema_version":      "2.0",
-            "program":             self.program,
-            "tool_version":        self.version,
-            "repository":          self._resolve_repository(),
-            "runner_ref":          os.environ.get(_ENV_RUNNER_REF, ""),
-            "docker_image":        self.docker_image,   # placeholder if unset
-            "python_version":      sys.version,
-            "run_id":              self._run_id,
-
+            "schema_version": "2.0",
+            "program": self.program,
+            "tool_version": self.version,
+            "repository": self._resolve_repository(),
+            "runner_ref": os.environ.get(_ENV_RUNNER_REF, ""),
+            "docker_image": self.docker_image,  # placeholder if unset
+            "python_version": sys.version,
+            "run_id": self._run_id,
             # ── license (computed from components actually used) ─────────────
-            "license":             lic["effective_license"],
-            "license_url":         lic["effective_license_url"],
-            "license_detail":      lic,
-
+            "license": lic["effective_license"],
+            "license_url": lic["effective_license_url"],
+            "license_detail": lic,
             # ── timing ──────────────────────────────────────────────────────
-            "start_time":          self._start_dt.isoformat(),
-            "end_time":            end_dt.isoformat(),
-            "duration_seconds":    round(duration_sec, 3),
-
+            "start_time": self._start_dt.isoformat(),
+            "end_time": end_dt.isoformat(),
+            "duration_seconds": round(duration_sec, 3),
             # ── configuration snapshot ───────────────────────────────────────
-            "config":              self.config,
-
+            "config": self.config,
             # ── statistics ───────────────────────────────────────────────────
             "statistics": {
-                "input_files_total":      input_total,
+                "input_files_total": input_total,
                 "successfully_processed": processed_docs,
-                "skipped_files":          skipped_count,
-                "output_counts_by_type":  dict(self._output_counts),
+                "skipped_files": skipped_count,
+                "output_counts_by_type": dict(self._output_counts),
                 "performance_per_minute": perf_per_min,
             },
-
             "skipped_files_detail": self._skipped,
         }
 
-        out_path = os.path.join(
-            self.paradata_dir, f"{self._run_id}_{self.program}.json"
-        )
+        out_path = os.path.join(self.paradata_dir, f"{self._run_id}_{self.program}.json")
         with open(out_path, "w", encoding="utf-8") as fh:
             json.dump(payload, fh, ensure_ascii=False, indent=2)
 
@@ -309,6 +296,7 @@ class ParadataLogger:
 # Single-file workflow: merge per-tool logs into ONE json per input file
 # ──────────────────────────────────────────────────────────────────────────────
 
+
 def merge_paradata_files(
     json_paths: List[str],
     input_file: str,
@@ -328,16 +316,18 @@ def merge_paradata_files(
     for p in json_paths:
         with open(p, "r", encoding="utf-8") as fh:
             data = json.load(fh)
-        steps.append({
-            "program":      data.get("program"),
-            "tool_version": data.get("tool_version"),
-            "repository":   data.get("repository"),
-            "docker_image": data.get("docker_image"),
-            "run_id":       data.get("run_id"),
-            "duration_seconds": data.get("duration_seconds"),
-            "license":      data.get("license"),
-            "config":       data.get("config"),
-        })
+        steps.append(
+            {
+                "program": data.get("program"),
+                "tool_version": data.get("tool_version"),
+                "repository": data.get("repository"),
+                "docker_image": data.get("docker_image"),
+                "run_id": data.get("run_id"),
+                "duration_seconds": data.get("duration_seconds"),
+                "license": data.get("license"),
+                "config": data.get("config"),
+            }
+        )
         if data.get("license_detail"):
             license_blocks.append(data["license_detail"])
         total_duration += float(data.get("duration_seconds") or 0.0)
@@ -352,16 +342,16 @@ def merge_paradata_files(
         }
 
     payload = {
-        "schema_version":  "2.0",
-        "record_type":     "single-file-merged",
-        "input_file":      input_file,
-        "pipeline_steps":  steps,
-        "step_count":      len(steps),
+        "schema_version": "2.0",
+        "record_type": "single-file-merged",
+        "input_file": input_file,
+        "pipeline_steps": steps,
+        "step_count": len(steps),
         "total_duration_seconds": round(total_duration, 3),
-        "license":         merged_lic["effective_license"],
-        "license_url":     merged_lic["effective_license_url"],
-        "license_detail":  merged_lic,
-        "merged_at":       datetime.now(tz=timezone.utc).isoformat(),
+        "license": merged_lic["effective_license"],
+        "license_url": merged_lic["effective_license_url"],
+        "license_detail": merged_lic,
+        "merged_at": datetime.now(tz=timezone.utc).isoformat(),
     }
 
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
@@ -374,6 +364,7 @@ def merge_paradata_files(
 # ──────────────────────────────────────────────────────────────────────────────
 # Helpers
 # ──────────────────────────────────────────────────────────────────────────────
+
 
 def _sanitise(obj: Any, _depth: int = 0) -> Any:
     if _depth > 10:

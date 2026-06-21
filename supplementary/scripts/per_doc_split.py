@@ -88,4 +88,3 @@ Examples:
     )
     args = parser.parse_args()
     split_csv_and_aggregate(args.input, args.output_dir)
-

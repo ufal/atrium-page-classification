@@ -14,8 +14,11 @@ def main():
     parser.add_argument("--top", type=int, default=3, help="Top N predictions")
     # FIX: parameterise server URL so the script works against remote or
     # non-default-port deployments without source edits.
-    parser.add_argument("--url", default="http://localhost:8000",
-                        help="Base URL of the classification API (default: http://localhost:8000)")
+    parser.add_argument(
+        "--url",
+        default="http://localhost:8000",
+        help="Base URL of the classification API (default: http://localhost:8000)",
+    )
 
     args = parser.parse_args()
 

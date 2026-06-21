@@ -21,6 +21,7 @@ integration environment and are intentionally NOT covered here.
 parallel_best imports torch/classifier lazily, so importing it (and these
 helpers) needs only pandas.
 """
+
 import pandas as pd
 
 # parallel_best lives in the project root (on sys.path via conftest.py)
@@ -108,7 +109,7 @@ class TestRegistryIsFresh:
     it covers every required model revision."""
 
     @staticmethod
-    def _profile(name="NVIDIA A40", vram=48 * 1024 ** 3, batch=16, revs=("v1.3", "v2.3")):
+    def _profile(name="NVIDIA A40", vram=48 * 1024**3, batch=16, revs=("v1.3", "v2.3")):
         return {
             "gpu": {"name": name, "total_vram_bytes": vram},
             "batch": batch,
@@ -117,7 +118,7 @@ class TestRegistryIsFresh:
 
     def test_fresh_when_everything_matches(self):
         p = self._profile()
-        assert registry_is_fresh(p, "NVIDIA A40", 48 * 1024 ** 3, 16, ["v1.3", "v2.3"])
+        assert registry_is_fresh(p, "NVIDIA A40", 48 * 1024**3, 16, ["v1.3", "v2.3"])
 
     def test_none_profile_is_stale(self):
         assert not registry_is_fresh(None, "NVIDIA A40", 1, 16, ["v1.3"])
@@ -127,24 +128,24 @@ class TestRegistryIsFresh:
 
     def test_gpu_name_mismatch_is_stale(self):
         p = self._profile(name="NVIDIA A40")
-        assert not registry_is_fresh(p, "NVIDIA A100", 48 * 1024 ** 3, 16, ["v1.3", "v2.3"])
+        assert not registry_is_fresh(p, "NVIDIA A100", 48 * 1024**3, 16, ["v1.3", "v2.3"])
 
     def test_total_vram_mismatch_is_stale(self):
-        p = self._profile(vram=48 * 1024 ** 3)
-        assert not registry_is_fresh(p, "NVIDIA A40", 40 * 1024 ** 3, 16, ["v1.3", "v2.3"])
+        p = self._profile(vram=48 * 1024**3)
+        assert not registry_is_fresh(p, "NVIDIA A40", 40 * 1024**3, 16, ["v1.3", "v2.3"])
 
     def test_batch_mismatch_is_stale(self):
         p = self._profile(batch=16)
-        assert not registry_is_fresh(p, "NVIDIA A40", 48 * 1024 ** 3, 32, ["v1.3", "v2.3"])
+        assert not registry_is_fresh(p, "NVIDIA A40", 48 * 1024**3, 32, ["v1.3", "v2.3"])
 
     def test_missing_required_revision_is_stale(self):
         p = self._profile(revs=("v1.3", "v2.3"))
-        assert not registry_is_fresh(p, "NVIDIA A40", 48 * 1024 ** 3, 16, ["v1.3", "v2.3", "v5.3"])
+        assert not registry_is_fresh(p, "NVIDIA A40", 48 * 1024**3, 16, ["v1.3", "v2.3", "v5.3"])
 
     def test_extra_recorded_revision_is_still_fresh(self):
         """A profile that covers MORE models than needed is fine."""
         p = self._profile(revs=("v1.3", "v2.3", "v3.3"))
-        assert registry_is_fresh(p, "NVIDIA A40", 48 * 1024 ** 3, 16, ["v1.3", "v2.3"])
+        assert registry_is_fresh(p, "NVIDIA A40", 48 * 1024**3, 16, ["v1.3", "v2.3"])
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -154,7 +155,7 @@ def _original_inline_merge(revision_best_models, rdf_by_rev):
     """Verbatim reproduction of run.py's pre-refactor merge loop, used as the
     golden reference for byte-identity."""
     combined_df = pd.DataFrame()
-    for rev, rdf in rdf_by_rev.items():        # original iterated insertion order
+    for rev, rdf in rdf_by_rev.items():  # original iterated insertion order
         renamed_columns = {col: f"{col}-{rev}" for col in rdf.columns if col not in ["FILE", "PAGE"]}
         rdf_renamed = rdf.rename(columns=renamed_columns)
         if combined_df.empty:
@@ -178,7 +179,7 @@ class TestMergeBest:
         revs = {"v1.3": "m1", "v2.3": "m2", "v3.3": "m3"}
         rdf_by_rev = {
             "v1.3": self._rdf({("atrium", 1): "TEXT_P", ("atrium", 2): "LINE_P"}),
-            "v2.3": self._rdf({("atrium", 1): "TEXT",   ("atrium", 2): "LINE_P"}),
+            "v2.3": self._rdf({("atrium", 1): "TEXT", ("atrium", 2): "LINE_P"}),
             "v3.3": self._rdf({("atrium", 1): "LINE_P", ("atrium", 2): "LINE_P"}),
         }
         return revs, rdf_by_rev
@@ -186,9 +187,7 @@ class TestMergeBest:
     def test_column_order_is_canonical(self):
         revs, rdf_by_rev = self._sample()
         out = merge_best(revs, rdf_by_rev)
-        assert list(out.columns) == [
-            "FILE", "PAGE", "CLASS-1-v1.3", "CLASS-1-v2.3", "CLASS-1-v3.3"
-        ]
+        assert list(out.columns) == ["FILE", "PAGE", "CLASS-1-v1.3", "CLASS-1-v2.3", "CLASS-1-v3.3"]
 
     def test_values_preserved_per_model(self):
         revs, rdf_by_rev = self._sample()
@@ -211,9 +210,7 @@ class TestMergeBest:
         shuffled = {"v3.3": rdf_by_rev["v3.3"], "v1.3": rdf_by_rev["v1.3"], "v2.3": rdf_by_rev["v2.3"]}
         out = merge_best(revs, shuffled)
         # Column order follows revs (canonical), not shuffled insertion order
-        assert list(out.columns) == [
-            "FILE", "PAGE", "CLASS-1-v1.3", "CLASS-1-v2.3", "CLASS-1-v3.3"
-        ]
+        assert list(out.columns) == ["FILE", "PAGE", "CLASS-1-v1.3", "CLASS-1-v2.3", "CLASS-1-v3.3"]
 
     def test_outer_merge_unions_disjoint_pages(self):
         revs = {"v1.3": "m1", "v2.3": "m2"}

@@ -173,4 +173,3 @@ Examples:
 
     counts_df = parse_csv_by_category(args.input, args.regex)
     plot_stacked_timeline(counts_df, output_path=args.output, show=args.show)
-

@@ -90,7 +90,8 @@ find_png() {
         # Try no padding, then 2-, 3-, 4-digit zero-padding
         for fmt in "" "%02d" "%03d" "%04d"; do
             local pn="$page_number"
-            [[ -n "$fmt" ]] && pn=$(printf "$fmt" "$page_number")
+            # shellcheck disable=SC2059
+            [[ -n "$fmt" ]] && printf -v pn "$fmt" "$page_number"
             local candidate="${subdir}/${filename}-${pn}.png"
             if [[ -f "$candidate" ]]; then
                 echo "$candidate"

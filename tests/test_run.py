@@ -8,11 +8,7 @@ def test_cli_help_flag():
     run_script = Path(__file__).parent.parent / "run.py"
 
     # Run the script with --help
-    result = subprocess.run(
-        [sys.executable, str(run_script), "--help"],
-        capture_output=True,
-        text=True
-    )
+    result = subprocess.run([sys.executable, str(run_script), "--help"], capture_output=True, text=True)
 
     # The script should exit cleanly and show the custom arguments
     assert result.returncode == 0
@@ -27,9 +23,7 @@ def test_cli_invalid_revision():
     run_script = Path(__file__).parent.parent / "run.py"
 
     result = subprocess.run(
-        [sys.executable, str(run_script), "-rev", "v99.9", "--eval"],
-        capture_output=True,
-        text=True
+        [sys.executable, str(run_script), "-rev", "v99.9", "--eval"], capture_output=True, text=True
     )
 
     # Expect failure due to unsupported revision

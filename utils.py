@@ -22,8 +22,9 @@ def directory_scraper(folder_path: Path, file_format: str = "png", file_list: li
     return file_list
 
 
-def dataframe_results(test_images: list, test_predictions: list, categories: list, top_N: int,
-                      raw_scores: list = None) -> (pd.DataFrame, pd.DataFrame):
+def dataframe_results(
+    test_images: list, test_predictions: list, categories: list, top_N: int, raw_scores: list = None
+) -> (pd.DataFrame, pd.DataFrame):
     results = []
     raws = []
 
@@ -110,8 +111,9 @@ def collect_images(directory: str, ordered: bool = True) -> (list, list, list):
     return total_files, total_labels, categories
 
 
-def confusion_plot(predictions: list, trues: list, categories: list, out_model: str, top_N: int = 1,
-                   output_dir: str = None):
+def confusion_plot(
+    predictions: list, trues: list, categories: list, out_model: str, top_N: int = 1, output_dir: str = None
+):
     single_pred = []
     correct = 0
     for j, pred_scores in enumerate(predictions):
@@ -132,22 +134,20 @@ def confusion_plot(predictions: list, trues: list, categories: list, out_model: 
                 correct += 1
 
     print("=" * 40)
-    print('Percentage correct: ', round(100 * correct / len(trues), 2))
+    print("Percentage correct: ", round(100 * correct / len(trues), 2))
     print("=" * 40)
     print(classification_report(trues, single_pred, target_names=categories, digits=4, zero_division=0))
 
     # Confusion matrix display and normalized output
     disp = ConfusionMatrixDisplay.from_predictions(
-        trues, single_pred, cmap='inferno',
-        normalize="true", display_labels=np.array(categories)
+        trues, single_pred, cmap="inferno", normalize="true", display_labels=np.array(categories)
     )
 
     short_labels = [f"{label[0]}{label.split('_')[-1][0] if '_' in label else ''}" for label in disp.display_labels]
 
     print(f"\t{' '.join(disp.display_labels)}")
     for ir, row in enumerate(disp.confusion_matrix):
-        print(
-            f"{disp.display_labels[ir]}\t{'   '.join([str(val) if val > 0 else ' -- ' for val in np.round(row, 2)])}")
+        print(f"{disp.display_labels[ir]}\t{'   '.join([str(val) if val > 0 else ' -- ' for val in np.round(row, 2)])}")
 
     # Customize x-axis tick labels to show only the first character of each label
     tick_positions = disp.ax_.get_xticks()
@@ -155,8 +155,9 @@ def confusion_plot(predictions: list, trues: list, categories: list, out_model: 
     disp.ax_.set_xticklabels(short_labels)
 
     time_stamp = time.strftime("%Y%m%d-%H%M")
-    disp.ax_.set_title(
-        f"TOP-{top_N} Confusion matrix {out_model} - {round(100 * correct / len(trues), 2)}%")
-    out = f"{output_dir if output_dir else 'result'}/plots/{time_stamp}_{len(trues)}_{out_model}_conf_mat_TOP-{top_N}.png"
-    plt.savefig(out, bbox_inches='tight', dpi=300)
+    disp.ax_.set_title(f"TOP-{top_N} Confusion matrix {out_model} - {round(100 * correct / len(trues), 2)}%")
+    out = (
+        f"{output_dir if output_dir else 'result'}/plots/{time_stamp}_{len(trues)}_{out_model}_conf_mat_TOP-{top_N}.png"
+    )
+    plt.savefig(out, bbox_inches="tight", dpi=300)
     plt.close()

@@ -10,6 +10,7 @@ Scope
 
 No GPU, no trained model, no network required.
 """
+
 from pathlib import Path
 
 from filtering import build_valid_set, parse_stem
@@ -104,10 +105,13 @@ class TestBuildValidSet:
         assert ("map_survey", 13, "DRAW") in valid
 
     def test_same_filename_different_categories_indexed_separately(self, tmp_path):
-        self._make_dir(tmp_path, {
-            "TEXT": ["doc-1.png"],
-            "DRAW": ["doc-1.png"],
-        })
+        self._make_dir(
+            tmp_path,
+            {
+                "TEXT": ["doc-1.png"],
+                "DRAW": ["doc-1.png"],
+            },
+        )
         valid, _ = build_valid_set(tmp_path)
         assert ("doc", 1, "TEXT") in valid
         assert ("doc", 1, "DRAW") in valid
@@ -143,16 +147,19 @@ class TestBuildValidSet:
 
     def test_non_png_files_ignored(self, tmp_path):
         (tmp_path / "TEXT").mkdir()
-        (tmp_path / "TEXT" / "doc-1.jpg").touch()   # JPEG — skipped
-        (tmp_path / "TEXT" / "doc-2.png").touch()   # PNG  — included
+        (tmp_path / "TEXT" / "doc-1.jpg").touch()  # JPEG — skipped
+        (tmp_path / "TEXT" / "doc-2.png").touch()  # PNG  — included
         valid, _ = build_valid_set(tmp_path)
         assert len(valid) == 1
         assert ("doc", 2, "TEXT") in valid
 
     def test_nested_category_files_indexed(self, tmp_path):
-        self._make_dir(tmp_path, {
-            "PHOTO": ["photo-001.png", "photo-002.png", "photo-003.png"],
-        })
+        self._make_dir(
+            tmp_path,
+            {
+                "PHOTO": ["photo-001.png", "photo-002.png", "photo-003.png"],
+            },
+        )
         valid, _ = build_valid_set(tmp_path)
         assert len(valid) == 3
 

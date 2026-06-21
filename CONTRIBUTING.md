@@ -1,14 +1,14 @@
 # 🤝 Contributing to the Historical Document Sorting Pipeline of the ATRIUM project
 
-Welcome! Thank you for your interest in contributing. This repository provides a robust workflow for sorting archive page images to 
-facilitate further content-based processing. It addresses the common digital archive 
-challenge of organizing unstructured, scanned paper sources by automatically categorizing 
+Welcome! Thank you for your interest in contributing. This repository provides a robust workflow for sorting archive page images to
+facilitate further content-based processing. It addresses the common digital archive
+challenge of organizing unstructured, scanned paper sources by automatically categorizing
 them before specialized data extraction or OCR is applied.
 
-The next step: Routing classified pages into content-specific data processing pipelines 
+The next step: Routing classified pages into content-specific data processing pipelines
 (e.g., machine-typed OCR, handwritten text recognition, or graphic extraction).
 
-This document describes the project's capabilities, development workflow, code conventions, 
+This document describes the project's capabilities, development workflow, code conventions,
 and rules for contributors.
 
 ## 📦 Release History
@@ -34,23 +34,23 @@ and rules for contributors.
 
 ## 🏗️ Project Contributions & Capabilities
 
-This pipeline contributes 4 major stages to the data processing lifecycle, as detailed 
+This pipeline contributes 4 major stages to the data processing lifecycle, as detailed
 in the [README 📑 Table of contents](README.md#table-of-contents-).
 
 ### 1. Granular Data Management & Preparation
 
-The project provides multiplatform utilities to transition from document-level files to 
+The project provides multiplatform utilities to transition from document-level files to
 page-level management.
 
-* **PDF to PNG Conversion:** Automatically breaks down document-level PDF files into individual, 
+* **PDF to PNG Conversion:** Automatically breaks down document-level PDF files into individual,
 page-specific PNG images using provided Unix (`.sh`) and Windows (`.bat`) scripts.
-* **Automated Sorting:** Includes clustering scripts to seamlessly organize annotated images into 
+* **Automated Sorting:** Includes clustering scripts to seamlessly organize annotated images into
 category-specific subdirectories, preparing them for model training or evaluation.
 
 ### 2. Multi-Model Image Classification
 
-Archive managers can choose from several pre-trained and fine-tuned visual models downloaded 
-directly from the Hugging Face hub, allowing you to balance available hardware 
+Archive managers can choose from several pre-trained and fine-tuned visual models downloaded
+directly from the Hugging Face hub, allowing you to balance available hardware
 (CPU vs. GPU) with desired accuracy.
 
 | Base Model Type              | Model Size / Name          | Best For...               | Key Feature                                                                                       |
@@ -62,9 +62,9 @@ directly from the Hugging Face hub, allowing you to balance available hardware
 
 ### 3. Archival Content Categorization
 
-A core contribution of this project is its highly specific categorization system, 
-trained on historical archaeological reports from 1920–2020. The pipeline evaluates each page 
-based on three main criteria: **presence of graphical elements**, **type of text**, and 
+A core contribution of this project is its highly specific categorization system,
+trained on historical archaeological reports from 1920–2020. The pipeline evaluates each page
+based on three main criteria: **presence of graphical elements**, **type of text**, and
 **presence of tabular layouts**.
 
 **Data Categories:**
@@ -76,16 +76,16 @@ based on three main criteria: **presence of graphical elements**, **type of text
 
 ### 4. Inference, Ensembling, & Reporting
 
-The project supports both single-page processing and large-scale directory batching, 
+The project supports both single-page processing and large-scale directory batching,
 generating clean analytical data for archive managers.
 
-* **Ensemble Learning (`averaging.py`):** A post-processing tool that combines predictions 
-from different base architectures (e.g., merging a ViT run with a RegNetY run). This smooths 
-out individual model errors and significantly improves accuracy on ambiguous pages without 
+* **Ensemble Learning (`averaging.py`):** A post-processing tool that combines predictions
+from different base architectures (e.g., merging a ViT run with a RegNetY run). This smooths
+out individual model errors and significantly improves accuracy on ambiguous pages without
 needing to reload heavy models.
-* **Tabular Outputs:** Automatically generates detailed CSV files containing the `FILE`, 
+* **Tabular Outputs:** Automatically generates detailed CSV files containing the `FILE`,
 `PAGE`, `CLASS-N` (Top-N predictions), and normalized `SCORE-N` for immediate review.
-* **Visual Evaluation:** Generates confusion matrices to easily visualize inter-class errors 
+* **Visual Evaluation:** Generates confusion matrices to easily visualize inter-class errors
 and track model performance on evaluation datasets.
 
 ---
@@ -140,11 +140,11 @@ Every PR must include:
 
 Use a **Draft PR** if the work is not ready for review.
 
-**Do not open PRs into `master` — merging into `master` is exclusively the 
+**Do not open PRs into `master` — merging into `master` is exclusively the
 maintainers' responsibility.
 
-> **Note on issue tracking:** Issues reference the commits and PRs that resolved 
-> them — not the other way around. Commit messages describe *what changed*; the issue 
+> **Note on issue tracking:** Issues reference the commits and PRs that resolved
+> them — not the other way around. Commit messages describe *what changed*; the issue
 > is the place to record *why* and link the resulting commits together.
 
 ---
@@ -178,7 +178,7 @@ Allowed types:
 
 ### Code Conventions
 
-* **Comments:** informative but short, may be LLM-generated, added when function name does 
+* **Comments:** informative but short, may be LLM-generated, added when function name does
 not explain its functionality in detail
 * **Argument types:** set default type (e.g., `int`, `list`) for function arguments
 * **Console flags:** when a new one added, provide help message for it
@@ -200,7 +200,7 @@ ruff check .
 > [!NOTE]
 > If specific scripts or extraction modules are updated, please run a smoke-test
 > against the `data_samples/` directory to verify extraction integrity.
-> **LLM-Generated Code:** The core pipeline and memory-aware ensemble engines include LLM-generated optimizations. 
+> **LLM-Generated Code:** The core pipeline and memory-aware ensemble engines include LLM-generated optimizations.
 > Any modifications to these files must be manually launched and verified on edge cases (e.g., OOM scenarios) before pushing.
 
 ---
@@ -262,7 +262,7 @@ Each documentation file has one target audience and one responsibility. Rules ar
 | `README.md`       | GitHub visitors | Project overview, workflow stages, quick start |
 | `CONTRIBUTING.md` | Developers      | Code conventions, branches, PRs, testing       |
 
-* **Do not duplicate rules:** if a rule is defined in `CONTRIBUTING.md`, other files 
+* **Do not duplicate rules:** if a rule is defined in `CONTRIBUTING.md`, other files
 reference it rather than copying it.
 * **When changing a rule:** update the canonical source and verify that referencing files
 still point correctly.
@@ -271,7 +271,7 @@ still point correctly.
 
 ## 📞 Contacts & Acknowledgements
 
-For support regarding this repository, please contact **lutsai.k@gmail.com**. 
+For support regarding this repository, please contact **lutsai.k@gmail.com**.
 
 * **Developed by:** UFAL [^1]
 * **Funded & Shared by:** ATRIUM [^2] & UFAL

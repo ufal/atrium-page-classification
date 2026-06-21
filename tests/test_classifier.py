@@ -14,6 +14,7 @@ Intentionally excluded (require GPU / Hugging Face download):
 
 No GPU, no trained model, and no network access required.
 """
+
 import numpy as np
 import pytest
 import torch
@@ -26,7 +27,7 @@ def test_custom_collate_filters_none():
     mock_batch = [
         {"pixel_values": torch.zeros((3, 224, 224)), "label": torch.tensor([1.0, 0.0])},
         None,
-        {"pixel_values": torch.ones((3, 224, 224)), "label": torch.tensor([0.0, 1.0])}
+        {"pixel_values": torch.ones((3, 224, 224)), "label": torch.tensor([0.0, 1.0])},
     ]
 
     result = custom_collate(mock_batch)
@@ -74,6 +75,7 @@ def test_split_data_80_10_10_stratification():
 def test_image_classifier_instantiation():
     """Test actual model loading logic (marked slow to skip in fast CI)."""
     from classifier import ImageClassifier
+
     try:
         clf = ImageClassifier(checkpoint="google/vit-base-patch16-224", num_labels=11)
         assert clf.model is not None
@@ -86,6 +88,7 @@ def test_image_classifier_instantiation():
 # ════════════════════════════════════════════════════════════════════════════
 # Helpers
 # ════════════════════════════════════════════════════════════════════════════
+
 
 def _pixel_tensor(b=3, h=4, w=4):
     """Return a minimal (C, H, W) float tensor suitable for pixel_values."""
@@ -186,28 +189,22 @@ class TestSplitData801010:
 
     def test_returns_six_elements(self):
         files, labels = _make_data(20, 2)
-        result = split_data_80_10_10(
-            files, labels, random_seed=0, max_categ=100, safe_check=False
-        )
+        result = split_data_80_10_10(files, labels, random_seed=0, max_categ=100, safe_check=False)
         assert len(result) == 6
 
     def test_splits_sum_to_total_dataset_size(self):
-        n_per_class, n_classes = 30, 3   # 90 files total
+        n_per_class, n_classes = 30, 3  # 90 files total
         files, labels = _make_data(n_per_class, n_classes)
-        train_f, val_f, test_f, *_ = split_data_80_10_10(
-            files, labels, random_seed=42, max_categ=200, safe_check=False
-        )
+        train_f, val_f, test_f, *_ = split_data_80_10_10(files, labels, random_seed=42, max_categ=200, safe_check=False)
         assert len(train_f) + len(val_f) + len(test_f) == n_per_class * n_classes
 
     def test_no_overlap_between_any_two_splits(self):
         files, labels = _make_data(20, 2)
-        train_f, val_f, test_f, *_ = split_data_80_10_10(
-            files, labels, random_seed=7, max_categ=100, safe_check=False
-        )
+        train_f, val_f, test_f, *_ = split_data_80_10_10(files, labels, random_seed=7, max_categ=100, safe_check=False)
         train_set, val_set, test_set = set(train_f), set(val_f), set(test_f)
-        assert train_set.isdisjoint(val_set),  "train and val overlap"
+        assert train_set.isdisjoint(val_set), "train and val overlap"
         assert train_set.isdisjoint(test_set), "train and test overlap"
-        assert val_set.isdisjoint(test_set),   "val and test overlap"
+        assert val_set.isdisjoint(test_set), "val and test overlap"
 
     def test_file_and_label_arrays_have_matching_lengths(self):
         files, labels = _make_data(15, 4)
@@ -215,23 +212,19 @@ class TestSplitData801010:
             files, labels, random_seed=1, max_categ=100, safe_check=False
         )
         assert len(train_f) == len(train_l)
-        assert len(val_f)   == len(val_l)
-        assert len(test_f)  == len(test_l)
+        assert len(val_f) == len(val_l)
+        assert len(test_f) == len(test_l)
 
     def test_training_split_is_the_largest(self):
         files, labels = _make_data(30, 3)
-        train_f, val_f, test_f, *_ = split_data_80_10_10(
-            files, labels, random_seed=0, max_categ=200, safe_check=False
-        )
+        train_f, val_f, test_f, *_ = split_data_80_10_10(files, labels, random_seed=0, max_categ=200, safe_check=False)
         assert len(train_f) > len(val_f)
         assert len(train_f) > len(test_f)
 
     def test_max_categ_caps_samples_per_class(self):
         """With max_categ=5 and 2 classes the total must not exceed 10."""
-        files, labels = _make_data(50, 2)   # 100 files; cap to 5 each → 10
-        train_f, val_f, test_f, *_ = split_data_80_10_10(
-            files, labels, random_seed=42, max_categ=5, safe_check=False
-        )
+        files, labels = _make_data(50, 2)  # 100 files; cap to 5 each → 10
+        train_f, val_f, test_f, *_ = split_data_80_10_10(files, labels, random_seed=42, max_categ=5, safe_check=False)
         total = len(train_f) + len(val_f) + len(test_f)
         assert total <= 10
 
@@ -246,21 +239,17 @@ class TestSplitData801010:
 
     def test_different_seeds_produce_different_splits(self):
         files, labels = _make_data(30, 2)
-        r1 = split_data_80_10_10(files, labels, random_seed=0,  max_categ=100, safe_check=False)
+        r1 = split_data_80_10_10(files, labels, random_seed=0, max_categ=100, safe_check=False)
         r2 = split_data_80_10_10(files, labels, random_seed=99, max_categ=100, safe_check=False)
         # Very unlikely that different seeds produce identical test splits
-        assert list(r1[2]) != list(r2[2]), (
-            "Different seeds produced identical test splits – check RNG seeding"
-        )
+        assert list(r1[2]) != list(r2[2]), "Different seeds produced identical test splits – check RNG seeding"
 
     def test_val_and_test_sizes_approximately_10pct_each(self):
         """Each held-out split should be ≈10 % of the full dataset."""
-        n_per_class, n_classes = 50, 2   # 100 total; expect ~10 per split per class
+        n_per_class, n_classes = 50, 2  # 100 total; expect ~10 per split per class
         files, labels = _make_data(n_per_class, n_classes)
-        _, val_f, test_f, *_ = split_data_80_10_10(
-            files, labels, random_seed=0, max_categ=200, safe_check=False
-        )
-        total = n_per_class * n_classes         # 100
+        _, val_f, test_f, *_ = split_data_80_10_10(files, labels, random_seed=0, max_categ=200, safe_check=False)
+        total = n_per_class * n_classes  # 100
         # Allow ±3 files tolerance around the expected 10 %
-        assert abs(len(val_f)  - total * 0.10) <= 3
+        assert abs(len(val_f) - total * 0.10) <= 3
         assert abs(len(test_f) - total * 0.10) <= 3

@@ -10,6 +10,7 @@ Responsibilities:
      there (averaging, filtering, downscale, …) can be imported as flat
      modules without an __init__.py.
 """
+
 import sys
 from pathlib import Path
 

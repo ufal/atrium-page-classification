@@ -68,7 +68,8 @@ class ModelManager:
             clf.load_model(str(local_model_path))
         else:
             logger.info(
-                f"Model not found locally at {local_model_path}. Attempting download from Hugging Face ({HF_REPO_NAME}, revision {version})...")
+                f"Model not found locally at {local_model_path}. Attempting download from Hugging Face ({HF_REPO_NAME}, revision {version})..."
+            )
             try:
                 clf.load_from_hub(HF_REPO_NAME, revision=version)
                 logger.info(f"Saving downloaded model to {local_model_path}...")
@@ -81,7 +82,7 @@ class ModelManager:
         return clf
 
     def warmup(self, versions: list = None):
-        for v in (versions or self.available_versions):
+        for v in versions or self.available_versions:
             try:
                 self.load_model(v)
                 logger.info(f"Warmed up model {v}")
@@ -95,8 +96,9 @@ class ModelManager:
             return self._run_single_inference(version, image, topn)
 
     def predict_directory(self, dir_path: str, version: str, topn: int = 3, batch_size: int = 16):
-        image_paths = sorted([os.path.join(dir_path, f) for f in os.listdir(dir_path)
-                              if f.lower().endswith(('.png', '.jpg', '.jpeg'))])
+        image_paths = sorted(
+            [os.path.join(dir_path, f) for f in os.listdir(dir_path) if f.lower().endswith((".png", ".jpg", ".jpeg"))]
+        )
         if not image_paths:
             return []
 
@@ -108,14 +110,13 @@ class ModelManager:
                 try:
                     clf = self.load_model(v)
                     dataloader = clf.create_dataloader(image_paths, batch_size=batch_size)
-                    predictions, _ = clf.infer_dataloader(
-                        dataloader, top_n=len(CATEGORIES), raw=False
-                    )
+                    predictions, _ = clf.infer_dataloader(dataloader, top_n=len(CATEGORIES), raw=False)
 
                     model_preds = []
                     for pred_item in predictions:
                         model_preds.append(
-                            [{"label": CATEGORIES[idx], "score": float(score)} for idx, score in pred_item])
+                            [{"label": CATEGORIES[idx], "score": float(score)} for idx, score in pred_item]
+                        )
                     all_model_predictions.append(model_preds)
                 except Exception as e:
                     logger.warning(f"Ensemble: model {v} failed on directory, skipping: {e}")
@@ -145,10 +146,7 @@ class ModelManager:
             for pred_item in predictions:
                 row_preds = []
                 for idx, score in pred_item[:topn]:
-                    row_preds.append({
-                        "label": CATEGORIES[idx],
-                        "score": float(score)
-                    })
+                    row_preds.append({"label": CATEGORIES[idx], "score": float(score)})
                 formatted_batch_results.append(row_preds)
 
             return formatted_batch_results

@@ -7,12 +7,12 @@ SERV_REQUIREMENTS="../service/requirements.txt"
 MODEL_DIR="../model"
 # List of model versions to check/download
 # Maps specific revision tags (e.g., v5.3) to expected folder names (e.g., model_v53)
-declare -A MODELS=( 
-    ["v1.3"]="model_v13" 
-    ["v2.3"]="model_v23" 
-    ["v3.3"]="model_v33" 
-    ["v4.3"]="model_v43" 
-    ["v5.3"]="model_v53" 
+declare -A MODELS=(
+    ["v1.3"]="model_v13"
+    ["v2.3"]="model_v23"
+    ["v3.3"]="model_v33"
+    ["v4.3"]="model_v43"
+    ["v5.3"]="model_v53"
 )
 
 echo "🚀 Starting Atrium Page Classification Service Setup..."
@@ -56,16 +56,15 @@ for VER in "${!MODELS[@]}"; do
 
     if [ ! -d "$TARGET_PATH" ]; then
         echo "⬇️ Model $VER not found at $TARGET_PATH. Downloading from HuggingFace via run.py..."
-        
+
         # Check if run.py exists before running
         if [ -f "run.py" ]; then
-            python3 run.py --hf -rev $VER
-            
-            if [ $? -eq 0 ]; then
-                echo "✅ Successfully downloaded $VER."
-            else
-                echo "❌ Failed to download $VER."
-            fi
+            # Replace the existing block with:
+          if python3 run.py --hf -rev "$VER"; then
+              echo "✅ Successfully downloaded $VER."
+          else
+              echo "❌ Failed to download $VER."
+          fi
         else
             echo "❌ Error: run.py not found in root. Cannot download model $VER."
         fi

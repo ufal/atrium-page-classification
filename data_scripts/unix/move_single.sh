@@ -89,4 +89,3 @@ if [[ "$DRY_RUN" == true ]]; then
 else
     echo "Done. Moved $moved file(s) to '$TARGET_DIR/' | $skipped multi-file director(ies) skipped."
 fi
-
