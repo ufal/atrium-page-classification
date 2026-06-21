@@ -5,7 +5,7 @@
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -14,7 +14,7 @@ repos:
         args: ["--maxkb=15360"]   # keep model weights / data blobs out of git
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.0
+    rev: v0.15.18
     hooks:
       - id: ruff          # lint  (reads ./ruff.toml)
         args: ["--fix"]
@@ -25,7 +25,7 @@ repos:
   # Run shellcheck in check-only mode; scope to data_scripts/ and setup/.
   # Relax SC1091 (sourced file not found at hook run time).
   - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: v0.10.0
+    rev: v0.11.0
     hooks:
       - id: shellcheck
         args: ["-e", "SC1091", "-e", "SC2148"]
