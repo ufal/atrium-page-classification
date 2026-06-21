@@ -16,9 +16,7 @@ import csv
 from pathlib import Path
 
 import pytest
-
 from visualize import get_model_type, plot_comparison, short_model_name
-
 
 # ── helpers ────────────────────────────────────────────────────────────────
 

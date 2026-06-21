@@ -2,37 +2,27 @@ import datetime
 import os
 import random
 import re
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict, defaultdict
+from pathlib import Path
 
 import numpy as np
 import torch
+from PIL import Image, ImageEnhance, ImageFilter  # Added Image to imports
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
-import transformers
 
-from utils import *
-
-from sklearn.model_selection import train_test_split, cross_val_score
-
-from PIL import Image, ImageEnhance, ImageFilter  # Added Image to imports
-from transformers import (
-    AutoImageProcessor,
-    AutoModelForImageClassification,
-    TrainingArguments,
-    Trainer,
-    default_data_collator,
-)
-from huggingface_hub import whoami
 # import timm
 # from timm.data import resolve_data_config
 # from transformers import TimmWrapperModel, TimmWrapperImageProcessor
-
 # REVIEW FIX (Nit I): removed duplicated imports (torch / numpy / DataLoader
 # were each imported twice in the original).
+from transformers import (
+    AutoImageProcessor,
+    AutoModelForImageClassification,
+    Trainer,
+    TrainingArguments,
+)
 
-from tqdm import tqdm
-
-from model_registry import CATEGORIES
 
 class PageImageDataset(Dataset):
     def __init__(self, image_paths, labels, processor):
@@ -51,83 +41,9 @@ class PageImageDataset(Dataset):
             if self.labels is not None:
                 item['labels'] = torch.tensor(self.labels[idx])
             return item
-        except Exception as e:
+        except Exception:
             # Drop corrupted images safely without breaking the batch
             return None
-
-
-def custom_collate(batch):
-    batch = [b for b in batch if b is not None]
-    if not batch:
-        return None
-    return torch.utils.data.dataloader.default_collate(batch)
-
-
-class ImageClassifier:
-    def __init__(self, checkpoint: str, num_labels: int, store_dir: str = "./checkpoints"):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.checkpoint = checkpoint
-        self.num_labels = num_labels
-        self.store_dir = store_dir
-
-        self.processor = AutoImageProcessor.from_pretrained(self.checkpoint, cache_dir=self.store_dir)
-        self.model = AutoModelForImageClassification.from_pretrained(
-            self.checkpoint,
-            num_labels=self.num_labels,
-            ignore_mismatched_sizes=True,
-            cache_dir=self.store_dir
-        ).to(self.device)
-
-    def create_dataloader(self, image_paths, batch_size, labels=None, shuffle=False):
-        dataset = PageImageDataset(image_paths, labels, self.processor)
-        return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, collate_fn=custom_collate)
-
-    def infer_dataloader(self, dataloader, top_n=1, raw=False):
-        self.model.eval()
-        all_preds = []
-        all_raws = []
-
-        with torch.no_grad():
-            for batch in tqdm(dataloader, desc="Inference"):
-                if batch is None:
-                    continue
-                inputs = batch["pixel_values"].to(self.device)
-                outputs = self.model(pixel_values=inputs)
-                probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
-
-                if raw:
-                    all_raws.extend(probs.cpu().tolist())
-
-                if top_n > 1:
-                    topk_probs, topk_idx = torch.topk(probs, top_n, dim=-1)
-                    for idxs, prs in zip(topk_idx, topk_probs):
-                        prs_norm = prs / prs.sum()
-                        all_preds.append(list(zip(idxs.cpu().tolist(), prs_norm.cpu().tolist())))
-                else:
-                    all_preds.extend(probs.argmax(dim=-1).cpu().tolist())
-
-        return all_preds, all_raws
-
-    def top_n_predictions(self, image_path, top_n=3):
-        loader = self.create_dataloader([image_path], batch_size=1)
-        preds, _ = self.infer_dataloader(loader, top_n=top_n)
-        return preds[0] if preds else []
-
-    def load_model(self, model_path):
-        self.model.load_state_dict(torch.load(f"{model_path}/pytorch_model.bin", map_location=self.device))
-
-    def save_model(self, model_path):
-        os.makedirs(model_path, exist_ok=True)
-        torch.save(self.model.state_dict(), f"{model_path}/pytorch_model.bin")
-        self.processor.save_pretrained(model_path)
-
-    def load_from_hub(self, repo_name, revision):
-        self.model = AutoModelForImageClassification.from_pretrained(
-            repo_name, revision=revision, cache_dir=self.store_dir
-        ).to(self.device)
-        self.processor = AutoImageProcessor.from_pretrained(
-            repo_name, revision=revision, cache_dir=self.store_dir
-        )
 
 
 def custom_collate(batch: list) -> dict:
@@ -197,8 +113,8 @@ class BalancedBatchSampler(torch.utils.data.sampler.BatchSampler):
         self.labels_set = list(np.unique(self.labels.argmax(axis=-1)))  # Modified for one-hot
         self.label_to_indices = {label: np.where(self.labels.argmax(axis=-1) == label)[0]  # Modified for one-hot
                                  for label in self.labels_set}
-        for l in self.labels_set:
-            np.random.shuffle(self.label_to_indices[l])
+        for lbl in self.labels_set:
+            np.random.shuffle(self.label_to_indices[lbl])
         self.used_label_indices_count = {label: 0 for label in self.labels_set}
         self.count = 0
         self.n_classes = n_classes_per_batch
@@ -339,33 +255,33 @@ class ImageClassifier:
 
         # Define optimizer and scheduler
         # For the optimizer, we typically pass model.parameters()
-        optimizer = torch.optim.AdamW(self.model.parameters(), lr=learning_rate, weight_decay=0.0001)
-        num_batches_train = len(train_dataloader)
-        scheduler_poly = transformers.get_scheduler(
-            name="polynomial",
-            optimizer=optimizer,
-            num_warmup_steps=250,
-            num_training_steps=num_epochs * num_batches_train,
-            scheduler_specific_kwargs={
-                "power": 1.0,  # Polynomial decay power
-                "lr_end": 1e-10,  # Final learning rate at the end of training
-            },
-        )
-        scheduler_linear = transformers.get_scheduler(
-            name="linear",
-            optimizer=optimizer,
-            num_training_steps=num_epochs * num_batches_train,
-            num_warmup_steps=250,
-        )
-        scheduler_cosine = transformers.get_scheduler(
-            name="cosine",
-            optimizer=optimizer,
-            num_warmup_steps=250,
-            num_training_steps=num_epochs * num_batches_train,
-            scheduler_specific_kwargs={
-                "num_cycles": 0.5,  # Number of cosine cycles
-            }
-        )
+        # optimizer = torch.optim.AdamW(self.model.parameters(), lr=learning_rate, weight_decay=0.0001)
+        # num_batches_train = len(train_dataloader)
+        # scheduler_poly = transformers.get_scheduler(
+        #     name="polynomial",
+        #     optimizer=optimizer,
+        #     num_warmup_steps=250,
+        #     num_training_steps=num_epochs * num_batches_train,
+        #     scheduler_specific_kwargs={
+        #         "power": 1.0,  # Polynomial decay power
+        #         "lr_end": 1e-10,  # Final learning rate at the end of training
+        #     },
+        # )
+        # scheduler_linear = transformers.get_scheduler(
+        #     name="linear",
+        #     optimizer=optimizer,
+        #     num_training_steps=num_epochs * num_batches_train,
+        #     num_warmup_steps=250,
+        # )
+        # scheduler_cosine = transformers.get_scheduler(
+        #     name="cosine",
+        #     optimizer=optimizer,
+        #     num_warmup_steps=250,
+        #     num_training_steps=num_epochs * num_batches_train,
+        #     scheduler_specific_kwargs={
+        #         "num_cycles": 0.5,  # Number of cosine cycles
+        #     }
+        # )
 
         # Generate log_dir dynamically, similar to clip_full.py
         current_file_name = os.path.basename(__file__)
@@ -591,8 +507,8 @@ class ImageClassifier:
         """
         Compute accuracy metrics for evaluation.
         """
-        from evaluate import load
         import numpy as np
+        from evaluate import load
         accuracy = load("accuracy")
         logits, labels = eval_pred
         predictions = np.argmax(logits, axis=-1)

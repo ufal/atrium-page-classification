@@ -14,10 +14,7 @@ No GPU, no trained model, no network required.
 import csv
 from pathlib import Path
 
-import pytest
-
 from per_doc_split import split_csv_and_aggregate
-
 
 # ── helpers ────────────────────────────────────────────────────────────────
 

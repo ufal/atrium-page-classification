@@ -1,9 +1,10 @@
-import requests
 import argparse
+import json
 import mimetypes
 import os
 import sys
-import json
+
+import requests
 
 
 def main():

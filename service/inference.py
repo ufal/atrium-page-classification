@@ -1,21 +1,22 @@
-import sys
-import os
-from pathlib import Path
-from PIL import Image
-import torch
 import logging
+import os
+import sys
+from pathlib import Path
+
+import torch
+from PIL import Image
 
 # Add parent directory to path to import original modules
 sys.path.append(str(Path(__file__).parent.parent))
 
 try:
     from classifier import ImageClassifier
-    from model_registry import REVISION_TO_BASE_MODEL, REVISION_BEST_MODELS, CATEGORIES
     from ensemble import average_prediction_dicts
+    from model_registry import CATEGORIES, REVISION_BEST_MODELS, REVISION_TO_BASE_MODEL
 except ImportError:
     from classifier import ImageClassifier
-    from model_registry import REVISION_TO_BASE_MODEL, REVISION_BEST_MODELS, CATEGORIES
     from ensemble import average_prediction_dicts
+    from model_registry import CATEGORIES, REVISION_BEST_MODELS, REVISION_TO_BASE_MODEL
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -48,7 +49,7 @@ class ModelManager:
         try:
             base = self._get_base_model_id(version)
             return f"{base} ({version})"
-        except:
+        except Exception:
             return f"Unknown Base ({version})"
 
     def load_model(self, version: str):
@@ -162,12 +163,14 @@ class ModelManager:
         for v in self.available_versions:
             try:
                 results = self._run_single_inference(v, image, topn=len(CATEGORIES))
-                if isinstance(results, dict) and "error" in results: continue
+                if isinstance(results, dict) and "error" in results:
+                    continue
                 predictions_list.append(results)
             except Exception:
                 continue
 
-        if not predictions_list: return {"error": "All models failed."}
+        if not predictions_list:
+            return {"error": "All models failed."}
         return average_prediction_dicts(predictions_list, CATEGORIES, topn)
 
     def _run_single_inference(self, version, image, topn):

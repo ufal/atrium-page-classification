@@ -31,10 +31,10 @@ import json
 import os
 import sys
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 try:
-    from para_licenses import resolve_effective_license, merge_effective_licenses
+    from para_licenses import merge_effective_licenses, resolve_effective_license
 except ImportError:  # keep logging functional even if the helper is missing
     resolve_effective_license = None      # type: ignore
     merge_effective_licenses = None       # type: ignore
@@ -220,7 +220,7 @@ class ParadataLogger:
             "is_non_commercial": True,
             "is_share_alike": False,
             "determined_by": [],
-            "components": [{"name": n, "license": l} for n, l in comps],
+            "components": [{"name": n, "license": lic_str} for n, lic_str in comps],
             "unknown_licenses": [],
             "notes": "License helper unavailable or no components recorded; "
                      "defaulted conservatively to CC BY-NC 4.0.",

@@ -13,11 +13,8 @@ No GPU, no trained model, no network required.
 """
 from pathlib import Path
 
-import pytest
-from PIL import Image
-
 from downscale import downscale
-
+from PIL import Image
 
 # ── fixture helpers ────────────────────────────────────────────────────────
 

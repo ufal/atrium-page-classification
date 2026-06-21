@@ -16,8 +16,6 @@ import csv
 from pathlib import Path
 
 import pandas as pd
-import pytest
-
 from dataset_timeline import parse_csv_by_category, plot_stacked_timeline
 
 DEFAULT_REGEX = r'((?:19|20)\d{2})'

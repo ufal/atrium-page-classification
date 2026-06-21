@@ -14,9 +14,9 @@ Intentionally excluded (require GPU / Hugging Face download):
 
 No GPU, no trained model, and no network access required.
 """
+import numpy as np
 import pytest
 import torch
-import numpy as np
 
 from classifier import custom_collate, split_data_80_10_10
 
@@ -58,14 +58,14 @@ def test_split_data_80_10_10_stratification():
     assert len(train_f) + len(val_f) + len(test_f) == 100
 
     # Class 0 should have 6 in test, 6 in val (10% of 60)
-    test_class_0 = sum(1 for l in test_l if l[0] == 1)
-    val_class_0 = sum(1 for l in val_l if l[0] == 1)
+    test_class_0 = sum(1 for lbl in test_l if lbl[0] == 1)
+    val_class_0 = sum(1 for lbl in val_l if lbl[0] == 1)
     assert test_class_0 == 6
     assert val_class_0 == 6
 
     # Class 1 should have 4 in test, 4 in val (10% of 40)
-    test_class_1 = sum(1 for l in test_l if l[1] == 1)
-    val_class_1 = sum(1 for l in val_l if l[1] == 1)
+    test_class_1 = sum(1 for lbl in test_l if lbl[1] == 1)
+    val_class_1 = sum(1 for lbl in val_l if lbl[1] == 1)
     assert test_class_1 == 4
     assert val_class_1 == 4
 

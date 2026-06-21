@@ -344,9 +344,9 @@ class YOLOClassifier:
         elif best_pt and best_pt.resolve() == dest.resolve():
             print(f"[YOLO] Best weights already at {dest}")
         else:
-            print(f"[YOLO] WARNING: could not locate best.pt — saving the "
-                  f"current in-memory model instead. This may not be the "
-                  f"best-epoch checkpoint.")
+            print("[YOLO] WARNING: could not locate best.pt — saving the "
+                  "current in-memory model instead. This may not be the "
+                  "best-epoch checkpoint.")
             self.model.save(str(dest))
 
         # Verify the save actually landed where run.py expects to load it from.

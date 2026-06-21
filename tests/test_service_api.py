@@ -1,15 +1,15 @@
 # filepath: ufal/atrium-page-classification/atrium-page-classification-test/tests/test_service_api.py
 import io
+import sys
+from pathlib import Path
+
 import pytest
 from fastapi.testclient import TestClient
 from PIL import Image
 
-import sys
-from pathlib import Path
-
 sys.path.append(str(Path(__file__).parent.parent))
 
-from service.api import app, MAX_UPLOAD_BYTES, MAX_PDF_PAGES
+from service.api import MAX_UPLOAD_BYTES, app
 
 client = TestClient(app)
 

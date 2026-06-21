@@ -11,8 +11,9 @@ Responsibilities:
      modules without an __init__.py.
 """
 import sys
-import matplotlib
 from pathlib import Path
+
+import matplotlib
 
 # 1. Define the project root relative to this conftest.py file
 PROJECT_ROOT = Path(__file__).parent.parent

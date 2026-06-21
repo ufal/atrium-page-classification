@@ -12,8 +12,6 @@ No GPU, no trained model, no network required.
 """
 from pathlib import Path
 
-import pytest
-
 from filtering import build_valid_set, parse_stem
 
 

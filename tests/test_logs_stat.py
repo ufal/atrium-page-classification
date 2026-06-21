@@ -18,9 +18,6 @@ and excluded from the default run.
 No GPU, no trained model, no network required.
 """
 import struct
-from pathlib import Path
-
-import pytest
 
 from logs_stat import (
     _iter_tfrecords,

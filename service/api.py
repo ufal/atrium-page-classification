@@ -1,16 +1,15 @@
-import os
 import io
 import logging
+import os
 from contextlib import asynccontextmanager
-from typing import List, Dict, Any
 from pathlib import Path
+from typing import List
 
-from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Request
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
 from PIL import Image
+from pydantic import BaseModel
 
 # [FIX]: Use a relative import to support pytest running from the repo root,
 # with a fallback for direct script execution.

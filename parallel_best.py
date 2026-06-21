@@ -9,7 +9,6 @@ from typing import Dict, Iterable, List, Optional, Tuple
 import pandas as pd
 import torch
 
-from model_registry import MODEL_STATIC
 from ensemble import average_rdfs
 
 # ---------------------------------------------------------------------------

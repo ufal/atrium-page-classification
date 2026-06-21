@@ -22,7 +22,6 @@ import pytest
 # supplementary/ is on sys.path via conftest.py
 from averaging import load_and_melt
 
-
 # ── helpers ────────────────────────────────────────────────────────────────
 
 def write_csv(tmp_path: Path, name: str, content: str) -> Path:

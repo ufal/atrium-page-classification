@@ -1,5 +1,7 @@
-import pandas as pd
 from typing import Dict, List, Optional
+
+import pandas as pd
+
 
 def _vote_col_name(rev: str) -> str:
     """Map a revision string to its ARUP-style vote column header."""
@@ -73,7 +75,7 @@ def average_rdfs(
         flat[f'SCORE-{r}'] = pivot.get(('AVG_SCORE', r), pd.NA)
 
     result = flat.reset_index()
-    result = result.replace({0: "", 0.0: ""})
+    result = result.replace({0: ""})
 
     for i in range(2, top_N + 1):
         score_col, class_col = f"SCORE-{i}", f"CLASS-{i}"
@@ -123,8 +125,8 @@ def average_prediction_dicts(
             aggregated_scores[item['label']] += item['score']
 
     final_results = [
-        {"label": l, "score": min(s / num_models, 1.0)}
-        for l, s in aggregated_scores.items()
+        {"label": lbl, "score": min(s / num_models, 1.0)}
+        for lbl, s in aggregated_scores.items()
     ]
     final_results.sort(key=lambda x: x["score"], reverse=True)
     return final_results[:top_n]

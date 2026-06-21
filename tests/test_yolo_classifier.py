@@ -1,7 +1,5 @@
-import pytest
+
 import numpy as np
-import tempfile
-from pathlib import Path
 
 from yolo_classifier import YOLOClassifier, build_yolo_dataset
 

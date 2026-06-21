@@ -1,16 +1,15 @@
-from pathlib import Path
-import pandas as pd
 import os
-import numpy as np
-import random
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, ConfusionMatrixDisplay
-from matplotlib import pyplot as plt
+import re
 import time
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
 from PIL import Image, ImageFile
+from sklearn.metrics import ConfusionMatrixDisplay, classification_report
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-import re
-
 Image.MAX_IMAGE_PIXELS = 4221790634
 
 

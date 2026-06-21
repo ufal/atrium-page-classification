@@ -5,14 +5,19 @@ import os
 import time
 from pathlib import Path
 
-from classifier import *
-from yolo_classifier import YOLOClassifier
-from huggingface_hub import create_branch, delete_branch
+import numpy as np
+import pandas as pd
+from sklearn.metrics import classification_report
+
 from atrium_paradata import ParadataLogger
-from parallel_best import run_best_models  # [add] memory-aware best-models engine + averaging
+from classifier import ImageClassifier, average_model_weights, split_data_80_10_10
+from model_registry import CATEGORIES as def_categ
 
 # [NEW] Import from central model registry
-from model_registry import REVISION_TO_BASE_MODEL, REVISION_BEST_MODELS, CATEGORIES as def_categ
+from model_registry import REVISION_BEST_MODELS, REVISION_TO_BASE_MODEL
+from parallel_best import run_best_models  # [add] memory-aware best-models engine + averaging
+from utils import collect_images, confusion_plot, dataframe_results, directory_scraper
+from yolo_classifier import YOLOClassifier
 
 if __name__ == "__main__":
     # Initialize the parser
@@ -198,7 +203,7 @@ if __name__ == "__main__":
 
     print("Arguments:")
     for arg in vars(args):
-        if getattr(args, arg) is not None and getattr(args, arg) != False and getattr(args, arg) != 0:
+        if getattr(args, arg) is not None and getattr(args, arg) is not False and getattr(args, arg) != 0:
             print(arg, "\t=\t", getattr(args, arg))
 
     if not output_dir.is_dir():
@@ -596,7 +601,7 @@ if __name__ == "__main__":
                         final_raw_df = pd.read_csv(raw_out_path)
                         final_raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
                         final_raw_df.to_csv(raw_out_path, sep=",", index=False)
-                        print(f"Final RAW daily file sorted by category scores.")
+                        print("Final RAW daily file sorted by category scores.")
 
             else:  # args.best == True
                 if args.yolo:

@@ -22,7 +22,6 @@ parallel_best imports torch/classifier lazily, so importing it (and these
 helpers) needs only pandas.
 """
 import pandas as pd
-import pytest
 
 # parallel_best lives in the project root (on sys.path via conftest.py)
 from parallel_best import merge_best, pack_models, registry_is_fresh

@@ -14,7 +14,6 @@ No GPU, no trained model, and no network access required.
 The Agg matplotlib backend is activated by conftest.py before this module
 is imported, so no display is needed.
 """
-import os
 from pathlib import Path
 
 import numpy as np
@@ -22,7 +21,6 @@ import pytest
 
 # Project root is already on sys.path via conftest.py
 from utils import collect_images, confusion_plot, dataframe_results, directory_scraper
-
 
 # ── shared fixture data ──────────────────────────────────────────────────────
 ALL_CATEGORIES = [

@@ -21,8 +21,7 @@ licensing owner can review and adjust them without touching code paths.
 
 from __future__ import annotations
 
-from typing import Dict, Iterable, List, Optional, Tuple
-
+from typing import Dict, Iterable, List, Tuple
 
 # ──────────────────────────────────────────────────────────────────────────────
 # License catalogue
