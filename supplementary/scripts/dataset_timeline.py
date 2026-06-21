@@ -6,10 +6,7 @@ import matplotlib.pyplot as plt
 
 
 # ── Category definitions ──────────────────────────────────────────────────
-CATEGORIES = [
-    'DRAW', 'DRAW_L', 'LINE_HW', 'LINE_P', 'LINE_T',
-    'PHOTO', 'PHOTO_L', 'TEXT', 'TEXT_HW', 'TEXT_P', 'TEXT_T',
-]
+from model_registry import CATEGORIES
 
 LABEL_COLOR_MAP = {
     'DRAW':    'indigo',

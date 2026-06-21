@@ -2,6 +2,7 @@ import argparse
 import configparser
 import math
 import os
+import sys
 import time
 from pathlib import Path
 
@@ -43,13 +44,8 @@ if __name__ == "__main__":
     HF = config.getboolean("HF", "use_hf")
     hf_version = config.get("HF", "revision")
 
-    # FIX: use getint so the default is an int, not a str "0"
     cross_runs = config.getint("TRAIN", "cross_runs")
 
-    # REVIEW FIX (Blocker D/K): the HF token is no longer read from config.txt.
-    # It comes from the HF_TOKEN environment variable (config.txt keeps the key
-    # blank).  config fallback is retained only for backward compatibility and
-    # is empty in version control.
     hf_token = os.environ.get("HF_TOKEN") or config.get("HF", "token", fallback="")
 
     config_model_name_local = f"model_{hf_version.replace('.', '')}"
@@ -89,10 +85,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dir", help="Process whole directory (if -d not used) but input set in CONFIG", action="store_true"
     )
-    # REVIEW FIX (Minor B/I): flags whose default comes from a (possibly True)
-    # config value now use BooleanOptionalAction so they can be turned OFF from
-    # the CLI (e.g. --no-inner, --no-chunk).  The original store_true flags
-    # could only ever set True, so a config value of True was uncloseable.
     parser.add_argument(
         "--chunk",
         default=config_chunking,
@@ -141,8 +133,6 @@ if __name__ == "__main__":
         default=False,
         action="store_true",
     )
-
-    # [add] Averaging open-choice flags
     parser.add_argument(
         "--no-average-best",
         action="store_true",
@@ -153,7 +143,6 @@ if __name__ == "__main__":
         action="store_true",
         help="Save the individual Top-N CSVs for each model during a --best run.",
     )
-
     parser.add_argument(
         "--folds",
         type=int,
@@ -168,7 +157,6 @@ if __name__ == "__main__":
         default=None,
         help="Pattern for models weights to average (e.g., 'model_v4')",
     )
-    # --- YOLO arguments ---
     parser.add_argument(
         "--yolo",
         help="Use YOLO-cls model instead of ViT/CNN (overrides --base and --revision; use --no-yolo to disable)",
@@ -189,12 +177,11 @@ if __name__ == "__main__":
     args.folds = 0 if not args.train else args.folds
     args.average = False if args.average_pattern is None else args.average
 
-    # ── FIX 6: resolve YOLO name/path BEFORE paradata init so the log is accurate ──
     if args.yolo:
         yolo_tag = Path(args.yolo_base).stem.replace(".", "").replace("-", "")
         revision_model_name_local = f"model_{yolo_tag}"
         args.model = f"{model_dir}/{revision_model_name_local}"
-    elif args.revision is None:  # using config file revision
+    elif args.revision is None:
         args.revision = hf_version
         args.base = config_base_model
 
@@ -204,7 +191,7 @@ if __name__ == "__main__":
             args.model = config_model_path
             revision_model_name_local = config_model_name_local
 
-    else:  # using command line argument revision from flag --revision / -rev
+    else:
         if not any(args.revision.startswith(key) for key in revision_to_base_model.keys()):
             raise ValueError(
                 f"Revision {args.revision} is not supported. Available revisions: {list(revision_to_base_model.keys())}"
@@ -214,7 +201,7 @@ if __name__ == "__main__":
         args.model = f"{model_dir}/{revision_model_name_local}"
         rev_code = key = next(key for key in revision_to_base_model.keys() if args.revision.startswith(key))
 
-        if args.base != config_base_model:  # flag argument provided
+        if args.base != config_base_model:
             print(
                 f"Base model {config_base_model} does not match the revision {args.revision}. Using {revision_to_base_model[rev_code]} instead."
             )
@@ -249,7 +236,7 @@ if __name__ == "__main__":
         config=_paradata_cfg,
         paradata_dir=str(output_dir / "paradata"),
         output_types=["csv", "png"],
-        config_dir=str(cur / "setup"),  # Point to the setup folder
+        config_dir=str(cur / "setup"),
     )
     # ── end paradata init ─────────────────────────────────────────────────────
 
@@ -269,10 +256,30 @@ if __name__ == "__main__":
     if not Path(model_dir).is_dir():
         os.makedirs(model_dir)
 
+    # ── [FIX] EARLY EXIT FOR EMPTY INFERENCE INPUTS ───────────────────────────
+    if not args.train and not args.eval and not args.average:
+        _test_images = []
+        if args.file is not None and Path(args.file).is_file():
+            _test_images = [args.file]
+        elif args.dir or args.directory is not None:
+            if Path(input_dir).is_dir():
+                if args.inner:
+                    _test_images = directory_scraper(Path(input_dir), args.file_format)
+                else:
+                    _test_images = [f for f in os.listdir(input_dir) if not f.startswith(".")]
+
+        if not _test_images:
+            print(
+                f"No valid image files found to process in {input_dir if (args.dir or args.directory) else args.file}. Exiting."
+            )
+            _paradata_logger.finalize(0)
+            sys.exit(0)
+    # ──────────────────────────────────────────────────────────────────────────
+
     # ── data loading (train / eval) ───────────────────────────────────────────
     if args.train or args.eval:
         epochs = config.getint("TRAIN", "epochs")
-        max_categ = config.getint("TRAIN", "max_categ")  # max number of category samples
+        max_categ = config.getint("TRAIN", "max_categ")
         log_step = config.getint("TRAIN", "log_step")
         test_size = config.getfloat("TRAIN", "test_size")
         learning_rate = config.getfloat("TRAIN", "lr")

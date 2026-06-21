@@ -79,23 +79,9 @@ def read_root():
 @app.get("/info")
 def get_info():
     """Return available model versions and categories."""
-    try:
-        from model_registry import CATEGORIES
-    except ImportError:
-        # Fallback if accessed abnormally
-        CATEGORIES = [
-            "DRAW",
-            "DRAW_L",
-            "LINE_HW",
-            "LINE_P",
-            "LINE_T",
-            "PHOTO",
-            "PHOTO_L",
-            "TEXT",
-            "TEXT_HW",
-            "TEXT_P",
-            "TEXT_T",
-        ]
+    # [FIX]: Removed the hardcoded fallback list.
+    # model_registry is the single source of truth.
+    from model_registry import CATEGORIES
 
     model_info = {v: manager.get_model_details(v) for v in manager.available_versions}
     model_info["all"] = manager.get_model_details("all")
