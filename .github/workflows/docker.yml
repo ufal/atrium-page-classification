@@ -2,10 +2,10 @@ name: Docker Build & Publish
 
 on:
   push:
-    branches: [main, test, master]
+    branches: [vit, test, clip, master]
     tags: ['v*']
   pull_request:
-    branches: [main, test, master]
+    branches: [vit, test, clip, master]
   release:
     types: [published]
 
