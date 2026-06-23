@@ -1,5 +1,5 @@
 evaluate>=0.4
-configparser>=5.0
+configparser>=7.2.0
 matplotlib>=3.11.0
 numpy>=2.4.0,<3.0
 pandas>=3.0.3
