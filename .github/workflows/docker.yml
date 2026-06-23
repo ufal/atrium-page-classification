@@ -14,7 +14,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: ufal/atrium-project/.github/workflows/docker-tool.reusable.yml@main
+    uses: ufal/atrium-project/.github/workflows/docker-tool.reusable.yml@test
     secrets: inherit
     with:
       image-name: ufal/atrium-page-classification
