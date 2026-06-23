@@ -13,7 +13,7 @@ jobs:
   gpu-tests:
     runs-on: [self-hosted, gpu]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Show GPU
         run: nvidia-smi
