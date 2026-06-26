@@ -1,0 +1,57 @@
+[OUTPUT]
+FOLDER_RESULTS=./result
+FOLDER_CPOINTS=./checkpoint
+FOLDER_MODELS=./model
+
+[EVAL]
+FOLDER_PAGES=./small_data_samples
+
+[TRAIN]
+FOLDER_PAGES=./small_data_samples
+
+cross_runs = 0
+test_size = 0.1
+log_step = 100
+epochs = 3
+lr = 5e-5
+max_categ = 14000
+Training = False
+Testing = False
+
+[SETUP]
+files_format = png
+seed = 420
+base_model = timm/regnety_160.swag_ft_in1k
+batch = 16
+top_N = 3
+raw = False
+inner = True
+
+[YOLO]
+use_yolo    = False
+yolo_base   = yolov8s-cls.pt
+# available: yolov8n yv8s yv8m yv8l yv8x AND yolo11n y11s y11m y11l y11x
+yolo_imgsz  = 224
+yolo_epochs   = 30
+yolo_patience = 20
+yolo_lr0      = 0
+yolo_dropout  = 0.1
+yolo_cache    = True
+
+[INPUT]
+FOLDER_INPUT=./small_data_samples
+chunk_size = 100
+chunking = False
+
+[HF]
+repo_name = ufal/vit-historical-page
+# REVIEW FIX (Blocker D/K): the HF access token must NOT be committed here.
+# It is read from the HF_TOKEN environment variable at runtime (see run.py).
+# Leave this blank in version control. Public models need no token; only gated
+# models / push_to_hub require one.
+#   export HF_TOKEN=hf_xxx   (Unix)
+#   setx HF_TOKEN hf_xxx     (Windows)
+token =
+use_hf = False
+revision = main
+latest = v4.3

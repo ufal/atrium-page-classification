@@ -1,0 +1,29 @@
+.git
+.gitignore
+.idea
+.vscode
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+.venv/
+venv/
+env/
+# large committed media not needed in the image (use-case.png alone is ~17 MB)
+/use-case.png
+/*.png
+/README.html
+# sample data + generated outputs (mounted at runtime instead)
+small_data_samples/
+result/
+model/
+model_output/
+checkpoint/
+# weights / caches / secrets
+*.bin
+*.pt
+*.onnx
+.cache/
+*.log
+.env

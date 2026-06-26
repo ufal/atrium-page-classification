@@ -1,0 +1,10 @@
+# para_config.txt — atrium-page-classification
+[tool]
+program = page-classification
+version = v1.4.3-beta
+repository_fallback = https://github.com/ufal/atrium-page-classification
+
+[components]
+deepdoctection = Apache-2.0       ; conditional ; layout analysis tool
+vit_models     = MIT              ; always      ; fine-tuned ViT/EffNet/RegNetY/CLIP classifiers
+lindat_dataset = CC BY-NC 4.0     ; conditional ; LINDAT training dataset (48k+ pages)
