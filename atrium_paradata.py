@@ -1,27 +1,5 @@
 """
 atrium_paradata.py  –  Unified provenance/paradata logger for ATRIUM pipelines.
-
-DROP THIS FILE AS-IS into every ATRIUM repository root, alongside
-para_licenses.py and a repository-specific para_config.txt.
-
-Resolves ATRIUM issue #9:
-  * license is no longer hardcoded – it is computed per-run from the components
-    actually used (see para_licenses.py + para_config.txt);
-  * a tool VERSION tag is recorded;
-  * the repository/runner reference is resolved DYNAMICALLY (env override) so it
-    can point at the published container actually executing, not a static fork;
-  * a docker image placeholder field is emitted;
-  * paradata is intended to live in the OUTPUT directory, not the GH repo
-    (default paradata_dir is now resolved relative to the output location);
-  * single-file workflows can merge the per-tool logs into ONE json per input
-    file via merge_paradata_files().
-
-Backward compatibility
------------------------
-The constructor and log_success/log_skip/finalize/context-manager API are
-unchanged, so existing call sites (run.py, main.py) keep working.  New
-behaviour is opt-in via para_config.txt and the components_used / version /
-docker_image keyword arguments.
 """
 
 from __future__ import annotations
@@ -35,14 +13,17 @@ from typing import Any, Dict, List, Optional
 
 try:
     from para_licenses import merge_effective_licenses, resolve_effective_license
-except ImportError:  # keep logging functional even if the helper is missing
+except ImportError:
     resolve_effective_license = None  # type: ignore
     merge_effective_licenses = None  # type: ignore
 
+# ──────────────────────────────────────────────────────────────────────────────
+# Constants & Schema version
+# ──────────────────────────────────────────────────────────────────────────────
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Static fallbacks (used only when para_config.txt is absent)
-# ──────────────────────────────────────────────────────────────────────────────
+SCHEMA_VERSION = "2.0"
+LICENSE_NAME = "CC BY-NC 4.0"
+LICENSE_URL = "https://creativecommons.org/licenses/by-nc/4.0/"
 
 _REPO_URLS: Dict[str, str] = {
     "page-classification": "https://github.com/ufal/atrium-page-classification",
@@ -51,22 +32,12 @@ _REPO_URLS: Dict[str, str] = {
     "translator": "https://github.com/ufal/atrium-translator",
 }
 
-# Environment variables a container sets so the logged reference points at the
-# ACTUAL running image/runner rather than a static fork URL.
-_ENV_RUNNER_IMAGE = "ATRIUM_RUNNER_IMAGE"  # e.g. ghcr.io/ufal/atrium-translator:v0.5.2
-_ENV_RUNNER_REPO = "ATRIUM_RUNNER_REPO"  # e.g. https://github.com/ufal/atrium-translator
-_ENV_RUNNER_REF = "ATRIUM_RUNNER_REF"  # e.g. git sha / tag the container was built from
+_ENV_RUNNER_IMAGE = "ATRIUM_RUNNER_IMAGE"
+_ENV_RUNNER_REPO = "ATRIUM_RUNNER_REPO"
+_ENV_RUNNER_REF = "ATRIUM_RUNNER_REF"
 
 
 def _load_para_config(start_dir: str = ".") -> Dict[str, Any]:
-    """
-    Load repository-specific para_config.txt if present.
-
-    Returns a dict:
-        { "program": str, "version": str, "repository_fallback": str,
-          "components": [ {name, license, loaded, role}, ... ] }
-    Empty/missing file -> minimal dict so callers can fall back to kwargs.
-    """
     path = os.path.join(start_dir, "para_config.txt")
     out: Dict[str, Any] = {"components": []}
     if not os.path.exists(path):
@@ -82,7 +53,6 @@ def _load_para_config(start_dir: str = ".") -> Dict[str, Any]:
 
     if cfg.has_section("components"):
         for name, spec in cfg.items("components"):
-            # spec form: "<license> ; <always|conditional> ; <role>"
             fields = [s.strip() for s in spec.split(";")]
             lic = fields[0] if len(fields) > 0 else ""
             loaded = fields[1] if len(fields) > 1 else "always"
@@ -98,26 +68,7 @@ def _load_para_config(start_dir: str = ".") -> Dict[str, Any]:
     return out
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# ParadataLogger
-# ──────────────────────────────────────────────────────────────────────────────
-
-
 class ParadataLogger:
-    """
-    Context-manager-friendly paradata recorder.
-
-    New parameters (all optional, all backward compatible)
-    ------------------------------------------------------
-    version : str
-        Tool version tag.  Falls back to para_config.txt [tool] version.
-    docker_image : str
-        Running container image reference.  Falls back to env ATRIUM_RUNNER_IMAGE,
-        else "" (placeholder kept in output so the field always exists).
-    config_dir : str
-        Where to find para_config.txt (default: current dir).
-    """
-
     def __init__(
         self,
         program: str,
@@ -133,38 +84,27 @@ class ParadataLogger:
         self._start_dt = datetime.now(tz=timezone.utc)
         self._run_id = self._start_dt.strftime("%y%m%d-%H%M%S")
 
-        # repo-specific static facts
         self._para_cfg = _load_para_config(config_dir)
-
-        # version: kwarg > para_config > "unknown"
         self.version = version or self._para_cfg.get("version") or "unknown"
-
-        # docker image: kwarg > env > "" (placeholder retained)
         self.docker_image = docker_image or os.environ.get(_ENV_RUNNER_IMAGE) or ""
-
-        # sanitise config so it stays JSON-serialisable
         self.config = _sanitise(config)
 
-        # counters
         self._output_counts: Dict[str, int] = {}
         if output_types:
             for t in output_types:
                 self._output_counts[t] = 0
 
-        self._skipped: List[Dict[str, str]] = []
-        self._input_total: int = 0
-        self._finalised: bool = False
-
-        # components actually exercised this run: {name: license}
+        self._docs_processed: int = 0
         self._components_used: Dict[str, str] = {}
-        # auto-seed with components flagged "always" in para_config
         for comp in self._para_cfg.get("components", []):
             if comp.get("loaded") == "always":
                 self._components_used[comp["name"]] = comp["license"]
 
-        os.makedirs(paradata_dir, exist_ok=True)
+        self._skipped: List[Dict[str, str]] = []
+        self._input_total: int = 0
+        self._finalised: bool = False
 
-    # ── public API ─────────────────────────────────────────────────────────────
+        os.makedirs(paradata_dir, exist_ok=True)
 
     def log_skip(self, filepath: str, reason: str) -> None:
         self._skipped.append(
@@ -178,15 +118,10 @@ class ParadataLogger:
     def log_success(self, output_type: str, count: int = 1) -> None:
         self._output_counts[output_type] = self._output_counts.get(output_type, 0) + count
 
-    def log_component(self, name: str, license: Optional[str] = None) -> None:
-        """
-        Record that a licensed component was ACTUALLY exercised this run.
+    def log_document_success(self) -> None:
+        self._docs_processed += 1
 
-        If *license* is omitted it is looked up from para_config.txt.  Call this
-        the first time a conditional component is invoked (e.g. when a
-        vocabulary is loaded, or the translation API is first hit) so the
-        effective output license reflects real usage rather than worst case.
-        """
+    def log_component(self, name: str, license: Optional[str] = None) -> None:
         if license is None:
             for comp in self._para_cfg.get("components", []):
                 if comp["name"] == name:
@@ -194,10 +129,7 @@ class ParadataLogger:
                     break
         self._components_used[name] = license or "UNKNOWN"
 
-    # ── reference / license resolution ────────────────────────────────────────
-
     def _resolve_repository(self) -> str:
-        """Dynamic runner reference: env > para_config fallback > static map."""
         return (
             os.environ.get(_ENV_RUNNER_REPO)
             or self._para_cfg.get("repository_fallback")
@@ -208,28 +140,42 @@ class ParadataLogger:
         comps = list(self._components_used.items())
         if resolve_effective_license is not None and comps:
             return resolve_effective_license(comps)
-        # Fallback if helper missing or no components recorded: stay safe.
         return {
-            "effective_license": "CC BY-NC 4.0",
-            "effective_license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+            "effective_license": LICENSE_NAME,
+            "effective_license_url": LICENSE_URL,
             "is_non_commercial": True,
             "is_share_alike": False,
             "determined_by": [],
-            "components": [{"name": n, "license": lic_str} for n, lic_str in comps],
+            "components": [{"name": n, "license": lic} for n, lic in comps],
             "unknown_licenses": [],
             "notes": "License helper unavailable or no components recorded; defaulted conservatively to CC BY-NC 4.0.",
         }
 
-    def finalize(self, input_total: Optional[int] = None) -> str:
+    def finalize(
+        self,
+        input_total: Optional[int] = None,
+        processed_total: Optional[int] = None,
+    ) -> str:
+        """
+        Write the paradata JSON.
+        Precedence for processed_docs: processed_total (arg) -> _docs_processed -> max(output_counts).
+        """
         if self._finalised:
-            raise RuntimeError("finalize() has already been called.")
+            raise RuntimeError("finalize() has already been called.") from None
 
         end_dt = datetime.now(tz=timezone.utc)
         duration_sec = (end_dt - self._start_dt).total_seconds()
         duration_min = duration_sec / 60.0 if duration_sec > 0 else 0.0
 
         skipped_count = len(self._skipped)
-        processed_docs = max(self._output_counts.values()) if self._output_counts else 0
+
+        if processed_total is not None:
+            processed_docs = processed_total
+        elif self._docs_processed > 0:
+            processed_docs = self._docs_processed
+        else:
+            processed_docs = max(self._output_counts.values()) if self._output_counts else 0
+
         if input_total is None:
             input_total = processed_docs + skipped_count
 
@@ -240,26 +186,21 @@ class ParadataLogger:
         lic = self._license_block()
 
         payload = {
-            # ── provenance ──────────────────────────────────────────────────
-            "schema_version": "2.0",
+            "schema_version": SCHEMA_VERSION,
             "program": self.program,
             "tool_version": self.version,
             "repository": self._resolve_repository(),
             "runner_ref": os.environ.get(_ENV_RUNNER_REF, ""),
-            "docker_image": self.docker_image,  # placeholder if unset
+            "docker_image": self.docker_image,
             "python_version": sys.version,
             "run_id": self._run_id,
-            # ── license (computed from components actually used) ─────────────
             "license": lic["effective_license"],
             "license_url": lic["effective_license_url"],
             "license_detail": lic,
-            # ── timing ──────────────────────────────────────────────────────
             "start_time": self._start_dt.isoformat(),
             "end_time": end_dt.isoformat(),
             "duration_seconds": round(duration_sec, 3),
-            # ── configuration snapshot ───────────────────────────────────────
             "config": self.config,
-            # ── statistics ───────────────────────────────────────────────────
             "statistics": {
                 "input_files_total": input_total,
                 "successfully_processed": processed_docs,
@@ -278,8 +219,6 @@ class ParadataLogger:
         print(f"[paradata] Log written → {out_path}", flush=True)
         return out_path
 
-    # ── context manager support ───────────────────────────────────────────────
-
     def __enter__(self) -> "ParadataLogger":
         return self
 
@@ -291,31 +230,91 @@ class ParadataLogger:
                 print(f"[paradata] WARNING – could not write log: {e}", file=sys.stderr)
         return False
 
+    def _to_state_dict(self) -> Dict[str, Any]:
+        return {
+            "program": self.program,
+            "version": self.version,
+            "config": self.config,
+            "paradata_dir": self.paradata_dir,
+            "output_counts": self._output_counts,
+            "components_used": self._components_used,
+            "skipped": self._skipped,
+            "docs_processed": self._docs_processed,
+            "start_iso": self._start_dt.isoformat(),
+            "run_id": self._run_id,
+            "para_cfg": self._para_cfg,
+        }
+
+    @classmethod
+    def _from_state_dict(cls, d: Dict[str, Any]) -> "ParadataLogger":
+        inst = cls.__new__(cls)
+        inst.program = d["program"]
+        inst.version = d.get("version", "unknown")
+        inst.config = d["config"]
+        inst.paradata_dir = d["paradata_dir"]
+        inst._output_counts = d["output_counts"]
+        inst._components_used = d.get("components_used", {})
+        inst._skipped = d["skipped"]
+        inst._docs_processed = d.get("docs_processed", 0)
+        inst._run_id = d["run_id"]
+        inst._start_dt = datetime.fromisoformat(d["start_iso"])
+        inst._para_cfg = d.get("para_cfg", {"components": []})
+        inst.docker_image = d.get("docker_image", "")
+        inst._input_total = 0
+        inst._finalised = False
+        return inst
+
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Single-file workflow: merge per-tool logs into ONE json per input file
+# Reader & Migration
 # ──────────────────────────────────────────────────────────────────────────────
 
 
-def merge_paradata_files(
-    json_paths: List[str],
-    input_file: str,
-    out_path: str,
-) -> str:
-    """
-    Merge several per-tool paradata JSONs (one input file passed through several
-    tools/repos) into a single provenance record covering exactly that file.
+def _migrate_1_0_to_2_0(record: Dict[str, Any]) -> Dict[str, Any]:
+    new_record = dict(record)
+    new_record["schema_version"] = "2.0"
+    if "docker_image" not in new_record:
+        new_record["docker_image"] = ""
+    return new_record
 
-    The merged license is re-derived from the UNION of all components used, so
-    the end-to-end most-restrictive rule holds.
-    """
+
+def migrate_paradata(record: Dict[str, Any]) -> Dict[str, Any]:
+    """Applies schema migrations up to the current SCHEMA_VERSION."""
+    v = record.get("schema_version")
+    if not v or v.startswith("1."):
+        record = _migrate_1_0_to_2_0(record)
+    return record
+
+
+def load_paradata(path: str) -> Dict[str, Any]:
+    """Reads a paradata file, migrating older schemas transparently."""
+    with open(path, "r", encoding="utf-8") as fh:
+        data = json.load(fh)
+
+    v = data.get("schema_version", "1.0")
+    major = int(v.split(".")[0])
+    current_major = int(SCHEMA_VERSION.split(".")[0])
+
+    if major > current_major:
+        raise ValueError(f"Schema version {v} is newer than supported {SCHEMA_VERSION}. Please update tools.")
+    elif major < current_major:
+        data = migrate_paradata(data)
+
+    return data
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Merging Logic
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+def merge_paradata_files(json_paths: List[str], input_file: str, out_path: str) -> str:
     steps: List[Dict[str, Any]] = []
     license_blocks: List[Dict[str, Any]] = []
     total_duration = 0.0
 
     for p in json_paths:
-        with open(p, "r", encoding="utf-8") as fh:
-            data = json.load(fh)
+        data = load_paradata(p)
         steps.append(
             {
                 "program": data.get("program"),
@@ -336,13 +335,13 @@ def merge_paradata_files(
         merged_lic = merge_effective_licenses(license_blocks)
     else:
         merged_lic = {
-            "effective_license": "CC BY-NC 4.0",
-            "effective_license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+            "effective_license": LICENSE_NAME,
+            "effective_license_url": LICENSE_URL,
             "notes": "License helper unavailable; defaulted to CC BY-NC 4.0.",
         }
 
     payload = {
-        "schema_version": "2.0",
+        "schema_version": SCHEMA_VERSION,
         "record_type": "single-file-merged",
         "input_file": input_file,
         "pipeline_steps": steps,
@@ -361,9 +360,131 @@ def merge_paradata_files(
     return out_path
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Helpers
-# ──────────────────────────────────────────────────────────────────────────────
+def merge_run_paradata(
+    json_paths: List[str],
+    out_path: str,
+    pipeline: Optional[str] = None,
+    method: Optional[str] = None,
+    skipped_stages: Optional[List[str]] = None,
+) -> str:
+    stages: List[Dict[str, Any]] = []
+    license_blocks: List[Dict[str, Any]] = []
+    formats: Dict[str, int] = {}
+    total_duration = 0.0
+    total_inputs = 0
+    total_processed = 0
+    total_skipped = 0
+    all_skips: List[Dict[str, Any]] = []
+    repo = ""
+    tool_version = ""
+    earliest: Optional[str] = None
+    latest: Optional[str] = None
+    first_stage = True
+
+    for order, p in enumerate(json_paths, 1):
+        data = load_paradata(p)
+
+        repo = repo or data.get("repository", "")
+        tool_version = tool_version or data.get("tool_version", "")
+
+        cfg = data.get("config", {}) or {}
+        stats = data.get("statistics", {}) or {}
+        out_counts = stats.get("output_counts_by_type", {}) or {}
+
+        for ftype, cnt in out_counts.items():
+            formats[ftype] = formats.get(ftype, 0) + int(cnt or 0)
+
+        total_duration += float(data.get("duration_seconds") or 0.0)
+
+        # Only take input_files_total from the very first stage
+        if first_stage:
+            total_inputs = int(stats.get("input_files_total") or 0)
+            first_stage = False
+
+        # Overwrite successfully processed so the final value mirrors the last stage's successes
+        total_processed = int(stats.get("successfully_processed") or 0)
+        total_skipped += int(stats.get("skipped_files") or 0)
+        all_skips.extend(data.get("skipped_files_detail", []) or [])
+
+        st = data.get("start_time")
+        en = data.get("end_time")
+        if st and (earliest is None or st < earliest):
+            earliest = st
+        if en and (latest is None or en > latest):
+            latest = en
+
+        stages.append(
+            {
+                "order": order,
+                "program": data.get("program"),
+                "script": cfg.get("script"),
+                "method": cfg.get("method"),
+                "run_id": data.get("run_id"),
+                "input_dir": cfg.get("input_dir"),
+                "input_csv": cfg.get("input_csv"),
+                "output_dir": cfg.get("output_dir") or cfg.get("output_csv") or cfg.get("output_manifest"),
+                "output_formats": out_counts,
+                "duration_seconds": data.get("duration_seconds"),
+                "license": data.get("license"),
+                "input_files_total": stats.get("input_files_total"),
+                "successfully_processed": stats.get("successfully_processed"),
+                "skipped_files": stats.get("skipped_files"),
+            }
+        )
+
+        if data.get("license_detail"):
+            license_blocks.append(data["license_detail"])
+
+    if merge_effective_licenses is not None and license_blocks:
+        merged_lic = merge_effective_licenses(license_blocks)
+    else:
+        merged_lic = {
+            "effective_license": LICENSE_NAME,
+            "effective_license_url": LICENSE_URL,
+            "notes": "License helper unavailable; defaulted to CC BY-NC 4.0.",
+        }
+
+    payload = {
+        "schema_version": SCHEMA_VERSION,
+        "record_type": "pipeline-run-merged",
+        "pipeline": pipeline or (stages[0].get("program") if stages else "unknown"),
+        "method": method or "",
+        "repository": repo,
+        "tool_version": tool_version,
+        "runner_ref": os.environ.get(_ENV_RUNNER_REF, ""),
+        "request_id": os.environ.get("ATRIUM_REQUEST_ID", ""),
+        "python_version": sys.version,
+        "run_id": datetime.now(tz=timezone.utc).strftime("%y%m%d-%H%M%S"),
+        "stage_count": len(stages),
+        "pipeline_stages": stages,
+        "intermediate_formats": formats,
+        "license": merged_lic["effective_license"],
+        "license_url": merged_lic["effective_license_url"],
+        "license_detail": merged_lic,
+        "start_time": earliest or "",
+        "end_time": latest or "",
+        "total_duration_seconds": round(total_duration, 3),
+        "statistics": {
+            "stages_total": len(stages),
+            "input_files_total": total_inputs,
+            "successfully_processed": total_processed,
+            "skipped_files": total_skipped,
+        },
+        "skipped_files_detail": all_skips,
+        "skipped_stages": skipped_stages or [],
+        "license_note": (
+            "Effective license/intermediate_formats reflect EXECUTED stages only; skipped: " + ", ".join(skipped_stages)
+        )
+        if skipped_stages
+        else "",
+        "merged_at": datetime.now(tz=timezone.utc).isoformat(),
+    }
+
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    with open(out_path, "w", encoding="utf-8") as fh:
+        json.dump(payload, fh, ensure_ascii=False, indent=2)
+    print(f"[paradata] Merged pipeline-run log → {out_path}", flush=True)
+    return out_path
 
 
 def _sanitise(obj: Any, _depth: int = 0) -> Any:
@@ -378,5 +499,99 @@ def _sanitise(obj: Any, _depth: int = 0) -> Any:
     return str(obj)
 
 
-# (the start/skip/success/finish CLI shim is unchanged from the original and
-#  omitted here for brevity – keep the existing _cli() if Bash drives the logger)
+def _cli() -> None:
+    import argparse
+
+    p = argparse.ArgumentParser(prog="python atrium_paradata.py")
+    sub = p.add_subparsers(dest="cmd", required=True)
+
+    s = sub.add_parser("start")
+    s.add_argument("--program", required=True)
+    s.add_argument("--config", nargs="*", default=[])
+    s.add_argument("--output-types", nargs="*", default=[])
+    s.add_argument("--paradata-dir", default="paradata")
+    s.add_argument("--component", nargs="*", default=[])
+
+    sk = sub.add_parser("skip")
+    sk.add_argument("--state", required=True)
+    sk.add_argument("--file", required=True)
+    sk.add_argument("--reason", required=True)
+
+    su = sub.add_parser("success")
+    su.add_argument("--state", required=True)
+    su.add_argument("--type", required=True)
+    su.add_argument("--count", type=int, default=1)
+    su.add_argument("--component", nargs="*", default=[])
+
+    co = sub.add_parser("component")
+    co.add_argument("--state", required=True)
+    co.add_argument("--name", required=True)
+    co.add_argument("--license", default=None)
+
+    fi = sub.add_parser("finish")
+    fi.add_argument("--state", required=True)
+    fi.add_argument("--input-total", type=int, default=None)
+
+    me = sub.add_parser("merge")
+    me.add_argument("--paths", nargs="+", required=True)
+    me.add_argument("--out", required=True)
+    me.add_argument("--pipeline", default=None)
+
+    mi = sub.add_parser("migrate")
+    mi.add_argument("--path", required=True)
+
+    args = p.parse_args()
+
+    if args.cmd == "start":
+        cfg: Dict[str, Any] = {}
+        for kv in args.config or []:
+            k, _, v = kv.partition("=")
+            cfg[k.strip()] = v.strip()
+        logger = ParadataLogger(
+            program=args.program,
+            config=cfg,
+            paradata_dir=args.paradata_dir,
+            output_types=args.output_types or None,
+        )
+        for name in args.component or []:
+            logger.log_component(name)
+        state_path = os.path.join(args.paradata_dir, f".state_{logger._run_id}_{args.program}.json")
+        with open(state_path, "w", encoding="utf-8") as fh:
+            json.dump(logger._to_state_dict(), fh, ensure_ascii=False)
+        print(state_path)
+
+    elif args.cmd == "merge":
+        merge_run_paradata(args.paths, args.out, pipeline=args.pipeline)
+        return
+
+    elif args.cmd == "migrate":
+        data = load_paradata(args.path)
+        with open(args.path, "w", encoding="utf-8") as fh:
+            json.dump(data, fh, ensure_ascii=False, indent=2)
+        print(f"[paradata] Migrated {args.path} to {SCHEMA_VERSION}", flush=True)
+        return
+
+    elif args.cmd in ("skip", "success", "component", "finish"):
+        with open(args.state, "r", encoding="utf-8") as fh:
+            state_dict = json.load(fh)
+        logger = ParadataLogger._from_state_dict(state_dict)
+
+        if args.cmd == "skip":
+            logger.log_skip(args.file, args.reason)
+        elif args.cmd == "success":
+            logger.log_success(args.type, args.count)
+            for name in args.component or []:
+                logger.log_component(name)
+        elif args.cmd == "component":
+            logger.log_component(args.name, args.license)
+        elif args.cmd == "finish":
+            logger.finalize(input_total=getattr(args, "input_total", None))
+            os.remove(args.state)
+            return
+
+        with open(args.state, "w", encoding="utf-8") as fh:
+            json.dump(logger._to_state_dict(), fh, ensure_ascii=False)
+
+
+if __name__ == "__main__":
+    _cli()

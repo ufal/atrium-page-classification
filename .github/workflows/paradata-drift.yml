@@ -1,0 +1,10 @@
+name: Paradata Canonical Drift
+on:
+  push:
+    branches: [ test, master ]
+  pull_request:
+    branches: [ test ]
+
+jobs:
+  check-drift:
+    uses: ufal/atrium-project/.github/workflows/paradata-drift.reusable.yml@test
