@@ -1,0 +1,63 @@
+{
+  "schema_version": "2.0",
+  "program": "page-classification",
+  "tool_version": "v1.2.1-beta",
+  "repository": "https://github.com/ufal/atrium-page-classification",
+  "runner_ref": "",
+  "docker_image": "",
+  "python_version": "3.10.12 (main, Mar  3 2026, 11:56:32) [GCC 11.4.0]",
+  "run_id": "260613-144948",
+  "license": "MIT",
+  "license_url": "https://opensource.org/license/mit/",
+  "license_detail": {
+    "effective_license": "MIT",
+    "effective_license_url": "https://opensource.org/license/mit/",
+    "is_non_commercial": false,
+    "is_share_alike": false,
+    "determined_by": [
+      "vit_models"
+    ],
+    "components": [
+      {
+        "name": "vit_models",
+        "license": "MIT",
+        "license_url": "https://opensource.org/license/mit/",
+        "rank": 1
+      }
+    ],
+    "unknown_licenses": [],
+    "notes": "Effective output license is MIT, the most restrictive among 1 component(s) used."
+  },
+  "start_time": "2026-06-13T14:49:48.104862+00:00",
+  "end_time": "2026-06-13T14:51:13.674832+00:00",
+  "duration_seconds": 85.57,
+  "config": {
+    "model_path": "./model/model_v43",
+    "revision": "v4.3",
+    "base_model": "timm/regnety_160.swag_ft_in1k",
+    "top_n": 3,
+    "batch_size": "16",
+    "input_path": "",
+    "inner_dirs": "True",
+    "file_format": "png",
+    "mode": "directory",
+    "raw_output": "False",
+    "best_models": "True",
+    "parallel_best": "True",
+    "yolo": "False"
+  },
+  "statistics": {
+    "input_files_total": 229,
+    "successfully_processed": 0,
+    "skipped_files": 0,
+    "output_counts_by_type": {
+      "csv": 0,
+      "png": 0
+    },
+    "performance_per_minute": {
+      "csv": 0.0,
+      "png": 0.0
+    }
+  },
+  "skipped_files_detail": []
+}

@@ -1,11 +1,21 @@
-# Image classification using fine-tuned ViT, RegNetY or EffNetV2 - for historical document sorting
+<p align="center">
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10+-blue.svg" title="Python Version"></a>
+  <a href="https://huggingface.co/ufal/vit-historical-page"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20HF-vit--historical--page-yellow.svg" title="Hugging Face Model"></a>
+  <a href="http://hdl.handle.net/20.500.12800/1-6184"><img src="https://img.shields.io/badge/dataset-LINDAT-orange.svg" title="LINDAT Dataset"></a>
+  <a href="https://opensource.org/license/mit/"><img src="https://img.shields.io/github/license/ufal/atrium-page-classification" title="MIT License"></a>
+  <a href="https://atrium-research.eu/"><img src="https://img.shields.io/badge/funded%20by-ATRIUM-8A2BE2.svg" title="ATRIUM Project"></a>
+</p>
 
-### Goal: solve a task of archive page images sorting (for their further content-based processing)
+---
+
+# Image classification using fine-tuned ViT, RegNetY or EffNetV2 - for historical document routing
+
+### Goal: solve a task of archive page images routing (for their further content-based processing)
 
 **Scope:** Processing of images, training / evaluation of ViT / RegNetY / EffNetV2 model,
 input file/directory processing, class 🪧  (category) results of top
-N predictions output, predictions summarizing into a tabular format, 
-HF 😊 hub [^1] 🔗 support for the model, multiplatform (Win/Lin) data 
+N predictions output, predictions summarizing into a tabular format,
+HF 😊 hub [^1] 🔗 support for the model, multiplatform (Win/Lin) data
 preparation scripts for PDF to PNG conversion
 
 
@@ -24,7 +34,8 @@ preparation scripts for PDF to PNG conversion
   * [Data preparation 📦](#data-preparation-)
     + [PDF to PNG 📚](#pdf-to-png-)
     + [PNG pages annotation 🔎](#png-pages-annotation-)
-    + [PNG pages sorting for training 📬](#png-pages-sorting-for-training-)
+    + [PNG pages routing for training 📬](#png-pages-routing-for-training-)
+    + [Dataset maitenance 🧹](#dataset-maintenance-)
   * [For developers 🪛](#for-developers-)
     * [Training 💪](#training-)
     * [Evaluation 🏆](#evaluation-)
@@ -36,11 +47,16 @@ preparation scripts for PDF to PNG conversion
 
 ----
 
+Diagram of the inference methodology including the selected 5 best model versions:
+
+![page-sort.png](supplementary/figures/page-sort.png)
+
+
 ## Versions 🏁
 
-There are currently several version of the model available for download, both of them have the same set of categories, 
+There are currently several version of the model available for download, both of them have the same set of categories,
 but different data annotations. The latest `v4.3` is considered to be default and can be found in the `main` branch
-of HF 😊 hub [^1] 🔗 
+of HF 😊 hub [^1] 🔗
 
 | Version | Base                             | Pages |   PDFs    | Description                                                                        |
 |--------:|----------------------------------|:-----:|:---------:|:-----------------------------------------------------------------------------------|
@@ -74,27 +90,27 @@ of HF 😊 hub [^1] 🔗
 
 ## Model description 📇
 
-![architecture.png](architecture.png)
+![architecture.png](supplementary/figures/architecture.png)
 
 🔲 **Fine-tuned** model repository: UFAL's **vit-historical-page** [^1] 🔗
 
-🔳 **Base** model repository: 
+🔳 **Base** model repository:
 - Google's **vit-base-patch16-224**,  **vit-base-patch16-384**, and  **vit-large-patch16-384** [^2] [^13] [^14] 🔗
 - timm's **regnety_160.swag_ft_in1k** and **efficientnetv2_m.in21k_ft_in1k** [^18] [^19] 🔗
 
-The model was trained on the manually ✍️ annotated dataset of historical documents, in particular, images of pages 
-from the archival documents with paper sources that were scanned into digital form. 
+The model was trained on the manually ✍️ annotated dataset of historical documents, in particular, images of pages
+from the archival documents with paper sources that were scanned into digital form.
 
-The images contain various combinations of texts ️📄, tables 📏, drawings 📈, and photos 🌄 - 
+The images contain various combinations of texts ️📄, tables 📏, drawings 📈, and photos 🌄 -
 categories 🪧 described [below](#categories-) were formed based on those archival documents. Page examples can be found in
-the [category_samples](category_samples) 📁 directory.
+the [small_data_samples](small_data_samples) 📁 directory.
 
-The key **use case** of the provided model and data processing pipeline is to classify an input PNG image from PDF scanned 
+The key **use case** of the provided model and data processing pipeline is to classify an input PNG image from PDF scanned
 paper source into one of the categories - each responsible for the following content-specific data processing pipeline.
 
-> In other words, when several APIs for different OCR subtasks are at your disposal - run this classifier first to 
-> mark the input data as machine-typed (old style fonts) / handwritten ✏️ / just printed plain ️📄 text 
-> or structured in tabular 📏 format text, as well as to mark the presence of the printed 🌄 or drawn 📈 graphic 
+> In other words, when several APIs for different OCR subtasks are at your disposal - run this classifier first to
+> mark the input data as machine-typed (old style fonts) / handwritten ✏️ / just printed plain ️📄 text
+> or structured in tabular 📏 format text, as well as to mark the presence of the printed 🌄 or drawn 📈 graphic
 > materials to be extracted from the page images.
 
 | Base Model                                 | Revision | Best_Prec (%) | Best_Acc (%) | Fold | Note                  |
@@ -113,31 +129,31 @@ paper source into one of the categories - each responsible for the following con
 | timm/tf_efficientnetv2_s.in21k             | v7.3     | 97.90         | 97.87        | 1    |                       |
 
 
-The rows highlighted in bold correspond to the best models uploaded to the HF 😊 hub [^1] 🔗, and the versions correspond to 
+The rows highlighted in bold correspond to the best models uploaded to the HF 😊 hub [^1] 🔗, and the versions correspond to
 the training setup mapping adjusted for the HF 😊 hub revisions (which caused the strange order of base model versions).
 
-![comparison_graph.png](model_acc_compared.png)
+![comparison_graph.png](supplementary/figures/model_acc_compared.png)
 
-The table and figure above show accuracy and parameters comparison of different base models tested on the same data. The figure 
+The table and figure above show accuracy and parameters comparison of different base models tested on the same data. The figure
 demonstrates best models overall (above the trendline) and the table shows all the tested models with their best accuracy and precision scores.
 
 ### Data 📜
 
-The dataset is provided under Public Domain license, and consists of **48,499** PNG images of pages from **37,328** archival documents.
-The source image files and their annotation can be found in the LINDAT repository [^17] 🔗. 
+The dataset is provided under CC BY-NC-SA 4.0 license, and consists of **48,499** PNG images of pages from **37,328** archival documents.
+The source image files and their annotation can be found in the LINDAT repository [^17] 🔗.
 
 The annotation provided includes 5 different
 dataset splits of `vX.3` model versions, and it's recommended to average all 5 trained model weights to get a more robust
-model for prediction (in some cases, like `TEXT` and `TEXT_T` categories which samples very often look the same, the accuracy of those 
+model for prediction (in some cases, like `TEXT` and `TEXT_T` categories which samples very often look the same, the accuracy of those
 problematic categories could drop below 90% with off-diagonal errors rising above 10% after the averaging of trained models). Anyhow, the
-averaged model usually score higher accuracy than any of its individual components... or sometimes causes a drop in accuracy for 
+averaged model usually score higher accuracy than any of its individual components... or sometimes causes a drop in accuracy for
 the most ambiguous categories 🪧️ - depends mostly on the base model choice.
 
-Our dataset is not split using a simple random shuffle. This is because the data contains structured and clustered 
-distributions of page types within many categories. A random shuffle would likely result in subsets with poor 
+Our dataset is not split using a simple random shuffle. This is because the data contains structured and clustered
+distributions of page types within many categories. A random shuffle would likely result in subsets with poor
 representative variability.
 
-Instead, we use a deterministic, periodic sampling method with a randomized offset. To maximize the size of the 
+Instead, we use a deterministic, periodic sampling method with a randomized offset. To maximize the size of the
 training 💪 set, we select the development and test 🏆 subsets first. The training subset then consists of all remaining pages.
 
 Here's the per-category 🪧 procedure for selecting the development and test 🏆 sets:
@@ -154,7 +170,7 @@ This method produces subsets that:
 - Preserve the proportional representation of each category
 - Introduce controlled randomness, so the selected samples are not strictly periodic
 
-This ensures that our subsets cover the full chronological and structural variability of the 
+This ensures that our subsets cover the full chronological and structural variability of the
 collection, leading to a more robust and reliable model evaluation. At the last stages, the whole
 procedure was performed several times in terms of the cross-validation training, when each new fold
 used a incremented by 1 random seed for the random shifts step.
@@ -163,9 +179,9 @@ used a incremented by 1 random seed for the random shifts step.
 
 **Training** 💪 set of the model: **10745** images for `v2.1`
 
-**Training** 💪 set of the model: **14565** images for `vX.2` 
+**Training** 💪 set of the model: **14565** images for `vX.2`
 
-**Training** 💪 set of the model: **38625** images for `vX.3` 
+**Training** 💪 set of the model: **38625** images for `vX.3`
 
 The training subsets above are followed by the test sets below:
 
@@ -174,7 +190,7 @@ The training subsets above are followed by the test sets below:
 **Evaluation** 🏆 set:  **4823** images (for `vX.3` models)
 
 Manual ✍️ annotation was performed beforehand and took some time ⌛, the categories 🪧 tabulated  [below](#categories-) were formed from
-different sources of the archival documents originated in the 1920-2020 years span. 
+different sources of the archival documents originated in the 1920-2020 years span.
 
 | Category        | Dataset 0   | Dataset 1    | Dataset 2    | Dataset 3     |
 |-----------------|-------------|--------------|--------------|---------------|
@@ -195,28 +211,28 @@ different sources of the archival documents originated in the 1920-2020 years sp
 
 The table above shows category distribution for different model versions, where the last column
 (`Dataset 3`) corresponds to the latest `vX.3` models data, which actually used 14,000 pages of
-`TEXT` category, while other columns cover all the used samples - specifically 80% as training 💪, 
+`TEXT` category, while other columns cover all the used samples - specifically 80% as training 💪,
 and 10% each as development and test 🏆 sets. The early model version used 90% of the data as training 💪
-and the remaining 10% as both development and test 🏆 set due to the lack of annotated (manually 
+and the remaining 10% as both development and test 🏆 set due to the lack of annotated (manually
 classified) pages.
 
 > [!NOTE]
-> Disproportion of the categories 🪧 in both training data and provided evaluation [category_samples](category_samples) 📁 is
-> **NOT** intentional, but rather a result of the source data nature. 
+> Disproportion of the categories 🪧 in both training data and provided evaluation [small_data_samples](small_data_samples) 📁 is
+> **NOT** intentional, but rather a result of the source data nature.
 
 The specific content and language of the
-source data is irrelevant considering the model's vision resolution, however, all of the data samples were from **archaeological 
-reports** which may somehow affect the drawing detection preferences due to the common form of objects being ceramic pieces, 
+source data is irrelevant considering the model's vision resolution, however, all of the data samples were from **archaeological
+reports** which may somehow affect the drawing detection preferences due to the common form of objects being ceramic pieces,
 arrowheads, and rocks formerly drawn by hand and later illustrated with digital tools (examples can be found in
-[category_samples/DRAW](category_samples%2FDRAW) 📁)
+[small_data_samples/DRAW](small_data_samples%2FDRAW) 📁)
 
-![data_timeline.png](dataset_timeline.png)
+![data_timeline.png](supplementary/figures/dataset_timeline.png)
 
 Moreover,  the distribution of categories is shown on the figure below, where train, dev, and test subsets of all 5 cross-validation
-folds are combined together for better visualization. The timeline of the source documents is horizontally represented, 
+folds are combined together for better visualization. The timeline of the source documents is horizontally represented,
 while the vertical axis shows the relative proportions of pages per category 🪧️ for each year.
 
-![fold_subset_category_proportions.png](fold_subset_category_proportions.png)
+![fold_subset_category_proportions.png](supplementary/figures/fold_subset_category_proportions.png)
 
 ### Categories 🪧
 
@@ -234,7 +250,7 @@ while the vertical axis shows the relative proportions of pages per category �
 |  `TEXT_P` | **📄 - only printed text in paragraph or block form (non-tabular)**                                              |
 |  `TEXT_T` | **📄 - only machine-typed text in paragraph or block form (non-tabular)**                                        |
 
-The categories were chosen to sort the pages by the following criteria: 
+The categories were chosen to sort the pages by the following criteria:
 
 - **presence of graphical elements** (drawings 📈 OR photos 🌄)
 - **type of text** 📄 (handwritten ✏️️ OR printed OR typed OR mixed 📰)
@@ -243,7 +259,7 @@ The categories were chosen to sort the pages by the following criteria:
 > The reasons for such distinction are different processing pipelines for different types of pages, which would be
 > applied after the classification as mentioned [above](#model-description-).
 
-Examples of pages sorted by category 🪧 can be found in the [category_samples](category_samples) 📁 directory
+Examples of pages sorted by category 🪧 can be found in the [small_data_samples](small_data_samples) 📁 directory
 which is also available as a testing subset of the training data (can be used to run evaluation and prediction with a
 necessary `--inner` flag).
 
@@ -251,8 +267,8 @@ necessary `--inner` flag).
 
 ## How to install 🔧
 
-Step-by-step instructions on this program installation are provided here. The easiest way to obtain the model would 
-be to use the HF 😊 hub repository [^1] 🔗 that can be easily accessed via this project. 
+Step-by-step instructions on this program installation are provided here. The easiest way to obtain the model would
+be to use the HF 😊 hub repository [^1] 🔗 that can be easily accessed via this project.
 
 <details>
 
@@ -269,8 +285,8 @@ be to use the HF 😊 hub repository [^1] 🔗 that can be easily accessed via t
 
 > [!WARNING]
 > Make sure you have **Python version 3.10+** installed on your machine 💻 and check its
-> **hardware requirements** for correct program running provided above. 
-> Then create a separate virtual environment for this project 
+> **hardware requirements** for correct program running provided above.
+> Then create a separate virtual environment for this project
 
 <details>
 
@@ -287,7 +303,7 @@ Then change to the Vit and EffNet models or CLIP models branch (`clip` or `vit`)
     cd atrium-page-classification
     git checkout vit
 
-**OR** for updating the already cloned project with some changes, go to the folder containing (hidden) `.git` 
+**OR** for updating the already cloned project with some changes, go to the folder containing (hidden) `.git`
 subdirectory and run pulling which will merge upcoming files with your local changes:
 
     cd /local/folder/for/this/project/atrium-page-classification
@@ -301,10 +317,10 @@ And then for updating the project with the latest changes from the remote reposi
 Alternatively, if you are interested in a specific branch (`clip` or `vit`), you can update  it via:
 
     git fetch origin
-    git checkout vit        
+    git checkout vit
     git pull --ff-only origin vit
 
-Alternatively, if you do **NOT** care about local changes **OR** you want to get the latest project files, 
+Alternatively, if you do **NOT** care about local changes **OR** you want to get the latest project files,
 just remove those files (all `.py`, `.txt` and `README` files) and pull the latest version from the repository:
 
     cd /local/folder/for/this/project/atrium-page-classification
@@ -331,24 +347,24 @@ Overall, a force update to the remote repository branch (`clip` or `vit`) looks 
     git checkout vit
     git reset --hard origin/vit
 
-Next step would be a creation of the virtual environment. Follow the **Unix** / **Windows**-specific 
+Next step would be a creation of the virtual environment. Follow the **Unix** / **Windows**-specific
 instruction at the venv docs [^3] 👀🔗 if you don't know how to.
 
 After creating the venv folder, activate the environment via:
 
     source <your_venv_dir>/bin/activate
 
-and then inside your virtual environment, you should install Python libraries (takes time ⌛) 
+and then inside your virtual environment, you should install Python libraries (takes time ⌛)
 
 </details>
 
 > [!CAUTION]
-> Up to **1 GB of space for model** files and checkpoints is needed, and up to **7 GB 
+> Up to **1 GB of space for model** files and checkpoints is needed, and up to **7 GB
 > of space for the Python libraries** (Pytorch and its dependencies, etc)
 
 Installation of Python dependencies can be done via:
 
-    pip install -r requirements.txt
+    pip install -r setup/requirements.txt
 
 > [!NOTE]
 > The so-called **CUDA [^10] support** for Python's PyTorch library is supposed to be automatically installed
@@ -356,10 +372,18 @@ Installation of Python dependencies can be done via:
 > is checked for the first time, later it's also checked every time before the model initialization
 > (for training, evaluation or prediction run).
 
-After the dependencies installation is finished successfully, in the same virtual environment, you can
-run the Python program.  
+> [!IMPORTANT]
+> **Library compatibility — `transformers` major version.**
+> This project targets the **`transformers` 4.x** line. On **`transformers` 5.x**
+> model construction moves to the **`meta` device** inside `from_pretrained`,
+> and the **timm**-based architectures used here (RegNetY `v4.3`, EfficientNetV2
+> `v1.3`) run shape-deriving ops (`torch.unique`, `.item()`) *during* their
+> builder — these have no meta kernel and raise
 
-To test that everything works okay and see the flag 
+After the dependencies installation is finished successfully, in the same virtual environment, you can
+run the Python program.
+
+To test that everything works okay and see the flag
 descriptions call for `--help` ❓:
 
     python3 run.py -h
@@ -370,12 +394,12 @@ to **pull the model from the HF 😊 hub repository [^1] 🔗** via:
     python3 run.py --hf
 
 **OR** for specific model version (e.g. `main`, `v2.0`, `vX.2` or `vX.3`) use the `--revision` flag:
- 
+
     python3 run.py --hf -rev v2.0
 
-**OR** for specific base model version (e.g. `google/vit-large-patch16-384`) use the `--base` flag (only when the 
+**OR** for specific base model version (e.g. `google/vit-large-patch16-384`) use the `--base` flag (only when the
 trained model version demands such base model as described [above](#versions-)):
- 
+
     python3 run.py --hf -rev v5.2 -b google/vit-large-patch16-384
 
 > [!IMPORTANT]
@@ -384,20 +408,20 @@ trained model version demands such base model as described [above](#versions-)):
 > model files from the HF 😊 repo [^1] 🔗 (only for the **model version update**).
 
 You should see a message about loading the model from the hub and then saving it locally on
-your machine 🖥️. 
+your machine 🖥️.
 
-Only after you have obtained the trained model files (takes less time ⌛ than installing dependencies), 
+Only after you have obtained the trained model files (takes less time ⌛ than installing dependencies),
 you can play with any commands provided [below](#how-to-run-prediction--modes).
 
-After the model is downloaded, you should see a similar file structure: 
+After the model is downloaded, you should see a similar file structure:
 
 <details>
 
 <summary>Initial project tree 🌳 files structure 👀</summary>
-    
+
     /local/folder/for/this/project/atrium-page-classification
     ├── model
-        └── movel_<revision> 
+        └── model_<revision>
             ├── config.json
             ├── model.safetensors
             └── preprocessor_config.json
@@ -434,27 +458,43 @@ After the model is downloaded, you should see a similar file structure:
             ├── model_accuracies_zero_plot.png
             ├── date-time_model_<revision>_FOLD_<n>_DATASETS.txt
             └── ...
-    ├── category_samples
+    ├── setup
+        ├── config.txt
+        ├── para_config.txt
+        ├── requirements.txt
+        ├── requirements-test.txt
+        └── setup_api_service.sh
+    ├── small_data_samples
         ├── DRAW
             ├── CTX193200994-24.png
             └── ...
         ├── DRAW_L
         └── ...
-    ├── supplement_scripts
-        ├── dataset_timeline.py
-        ├── img2jpeg_v3.py
-        ├── logs_stats.py
-        ├── visualize.py
-        └── job_run.sh
+    ├── supplementary
+        └── scripts
+            ├── dataset_timeline.py
+            ├── img2jpeg_v3.py
+            ├── logs_stats.py
+            ├── visualize.py
+            └── job_run.sh
     ├── run.py
     ├── classifier.py
     ├── utils.py
-    ├── requirements.txt
-    ├── config.txt
     ├── README.md
     └── ...
 
 </details>
+
+> [!NOTE]
+> **Runtime Directories:** The folders `model/`, `result/`, and `checkpoint/` are git-ignored runtime directories.
+> They are automatically created when the pipeline runs. If you deploy using Docker, these directories are mounted
+> as volumes to persist data and downloaded models between container restarts.
+
+> [!TIP]
+> **API Service Deployment:** To run the FastAPI service securely, we use a Docker compose profile rather than a
+> separate build target. The service includes deployment hardening (strict payload size limits and PDF page caps).
+> Run `docker compose --profile api up --build` to start the classification service on port 8000.
+
 
 Some of the folders may be missing, like mentioned [later](#for-developers-) `model_output` which is automatically created
 only after launching the model.
@@ -468,11 +508,11 @@ There are two main ways to run the program:
 - **Single PNG file classification** 📄
 - **Directory with PNG files classification** 📁
 
-To begin with, open [config.txt](config.txt) ⚙ and change folder path in the `[INPUT]` section, then 
+To begin with, open [config.txt](setup/config.txt) ⚙ and change folder path in the `[INPUT]` section, then
 optionally change `top_N` and `batch` in the `[SETUP]` section.
 
 > [!NOTE]
->️ **Top-3** is enough to cover most of the images, setting **Top-5** will help with a small number 
+>️ **Top-3** is enough to cover most of the images, setting **Top-5** will help with a small number
 > of difficult to classify samples.
 
 The `batch` variable value depends on your machine 🖥️ memory size
@@ -512,8 +552,8 @@ the `batch` variable in the `[SETUP]` section.
 
 </details>
 
-Make sure the virtual environment with all the installed libraries is activated, you are in the project 
-directory with Python files and only then proceed. 
+Make sure the virtual environment with all the installed libraries is activated, you are in the project
+directory with Python files and only then proceed.
 
 <details>
 
@@ -531,8 +571,8 @@ directory with Python files and only then proceed.
 
 ### Page processing 📄
 
-The following prediction should be run using the `-f` or `--file` flag with the path argument. Optionally, 
-you can use the `-tn` or `--topn` flag with the number of guesses you want to get, and also the `-m` or 
+The following prediction should be run using the `-f` or `--file` flag with the path argument. Optionally,
+you can use the `-tn` or `--topn` flag with the number of guesses you want to get, and also the `-m` or
 `--model` flag with the path to the model folder argument. For the specific image file format collection from
 the input directory use `-ff` or `--file_format` flag with the format argument (default is `jpeg`).
 
@@ -546,15 +586,15 @@ Run the program from its starting point [run.py](run.py) 📎 with optional flag
 
 for exactly TOP-3 guesses with a console output.
 
-**OR** if you are sure about default variables set in the [config.txt](config.txt) ⚙:
+**OR** if you are sure about default variables set in the [config.txt](setup/config.txt) ⚙:
 
     python3 run.py -f '/full/path/to/file.png'
 
-to run a single PNG file classification - the output will be in the console. 
+to run a single PNG file classification - the output will be in the console.
 
     python3 run.py -f '/full/path/to/file.png' --best
 
-to run all the best models on a single PNG file - the output will be in the console. 
+to run all the best models on a single PNG file - the output will be in the console.
 
 </details>
 
@@ -563,13 +603,13 @@ to run all the best models on a single PNG file - the output will be in the cons
 
 ### Directory processing 📁
 
-The following prediction type does **NOT** require explicit directory path setting with the `-d` or `--directory`, 
-since its default value is set in the [config.txt](config.txt) ⚙ file and awakens when the `--dir` flag 
-is used. The same flags for the number of guesses and the model folder path as for the single-page 
-processing can be used. In addition, 2 directory-specific flags  `--inner` and `--raw` are available. 
+The following prediction type does **NOT** require explicit directory path setting with the `-d` or `--directory`,
+since its default value is set in the [config.txt](setup/config.txt) ⚙ file and awakens when the `--dir` flag
+is used. The same flags for the number of guesses and the model folder path as for the single-page
+processing can be used. In addition, 2 directory-specific flags  `--inner` and `--raw` are available.
 
 > [!CAUTION]
-> You must either explicitly set the `-d` flag's argument or use the `--dir` flag (calling for the preset in 
+> You must either explicitly set the `-d` flag's argument or use the `--dir` flag (calling for the preset in
 > `[INPUT]` section default value of the input directory) to process PNG files on the directory
 > level, otherwise, nothing will happen
 
@@ -584,49 +624,57 @@ not to mention the actual processing time.
 
 <summary>How to 👀</summary>
 
-    python3 run.py -tn 3 -d '/full/path/to/directory' -m '/full/path/to/model/folder'
-
-for exactly TOP-3 guesses in tabular format from all images found in the given directory.
-
-**OR** if you are really sure about default variables set in the [config.txt](config.txt) ⚙:
-
-    python3 run.py --dir 
-    
-    python3 run.py -rev v3.3 -b google/vit-base-patch16-384 --inner --dir
-
-    python3 run.py -m "./models/model_v43" --dir -ff png
-
-Also, to run all the best models (sequentially) on all PNG files in the given directory:
+Run all best models on a directory and get one averaged Top-N table:
 
     python3 run.py --dir --inner --best
 
+Memory-aware single-pass execution on a CUDA GPU (see [below](#memory-aware-best-engine-)):
+
+    python3 run.py --dir --inner --best --parallel
+
+Also keep each model's individual Top-N table alongside the combined output:
+
+    python3 run.py --dir --inner --best --save-intermediates
+
+Skip the in-engine averaging and only emit the wide per-model votes file
+(for manual re-averaging with [averaging.py](supplement_scripts%2Faveraging.py) 📎):
+
+    python3 run.py --dir --inner --best --no-average-best
+
+Single page across all best models:
+
+    python3 run.py -f '/full/path/to/file.png' --best
+
 </details>
 
-The classification results of PNG pages collected from the directory will be saved 💾 to related [results](result) 📁
-folders defined in `[OUTPUT]` section of [config.txt](config.txt) ⚙ file.
+> [!NOTE]
+> `--parallel` only changes *how* the models are scheduled on the GPU; the
+> output files are identical to a plain `--best` run, so a parallel run can be
+> diffed byte-for-byte against a sequential one.
 
 > [!TIP]
-> To additionally get raw class 🪧 probabilities from the model along with the TOP-N results, use
-> `--raw` flag when processing the directory (**NOT** available for single file processing)
- 
-> [!TIP]
-> To process all PNG files in the directory **AND its subdirectories** use the `--inner` flag
-> when processing the directory, or switch its default value to `True` in the `[SETUP]` section 
- 
+> `--best` honours the same `-tn`/`--topn` setting as normal runs. The averaged
+> table keeps `top_N` ranked classes per page; the per-model vote columns are
+> always Top-1.
+
 Naturally, processing of the large amount of PNG pages takes time ⌛ and progress of this process
 is recorded in the console via messages like `Processed <B×N> images` where `B`
-is batch size set in the `[SETUP]` section of the [config.txt](config.txt) ⚙ file, 
-and `N` is an iteration of the current dataloader processing loop. 
+is batch size set in the `[SETUP]` section of the [config.txt](setup/config.txt) ⚙ file,
+and `N` is an iteration of the current dataloader processing loop.
 
 Only after all images from the input directory are processed, the output table is
-saved 💾 in the `result/tables` folder. 
+saved 💾 in the `result/tables` folder.
+
+![use-case.png](supplementary/figures/use-case.png)
+
+Multi-page document inference processing diagram
 
 ----
 
 ## Results 📊
 
-There are accuracy performance measurements and plots of confusion matrices for the evaluation 
-dataset (10% of the provided in `[TRAIN]`'s folder data). Both graphic plots and tables with 
+There are accuracy performance measurements and plots of confusion matrices for the evaluation
+dataset (10% of the provided in `[TRAIN]`'s folder data). Both graphic plots and tables with
 results can be found in the [result](result) 📁 folder.
 
 | **Revision** | **Top-1** | **Top-3** |
@@ -757,17 +805,17 @@ results can be found in the [result](result) 📁 folder.
 
 
 > **Confusion matrices** provided above show the diagonal of matching gold and predicted categories 🪧
-> while their off-diagonal elements show inter-class errors. By those graphs you can judge 
-> **what type of mistakes to expect** from your model. 
+> while their off-diagonal elements show inter-class errors. By those graphs you can judge
+> **what type of mistakes to expect** from your model.
 
 By running tests on the evaluation dataset after training you can generate the following output files:
 
 - **date-time_model_TOP-N_EVAL.csv** - (by default) results of the evaluation dataset with TOP-N guesses
 - **date-time_model_conf_mat_TOP-N.png** - (by default) confusion matrix plot for the evaluation dataset also with TOP-N guesses
-- **date-time_model_EVAL_RAW.csv** - (by flag `--raw`) raw probabilities for all classes of the evaluation dataset 
+- **date-time_model_EVAL_RAW.csv** - (by flag `--raw`) raw probabilities for all classes of the evaluation dataset
 
 > [!NOTE]
-> Generated tables will be sorted by **FILE** and **PAGE** number columns in ascending order. 
+> Generated tables will be sorted by **FILE** and **PAGE** number columns in ascending order.
 
 Additionally, results of prediction inference run on the directory level without checked results are included.
 
@@ -866,19 +914,19 @@ Demo files  `v6.3`:
 
 - **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251020-1810_115_model_v63_TOP-1_EVAL.csv)📎
 
-Plus, the best model inference results of the small subset (`category_samples` 📁 folder) for all 6 versions [best_6_models_TOP-1.csv](result%2Ftables%2F20251020-1812_BEST_6_models_TOP-1.csv)📎
-and the best 5 versions [best_5_models_TOP-1.csv](result%2Ftables%2F20251021-2307_BEST_5_models_TOP-1.csv)📎 are provided for the demonstration.
+Plus, the best model inference results of the small subset (`small_data_samples` 📁 folder) for all 6 versions [best_6_models_TOP-1.csv](result%2Ftables%2F20251020-1812_BEST_6_models_TOP-1.csv)📎
+and the best 5 versions [best_5_models_TOP-1.csv](result%2Ftables%2F20260530-1234_BEST_5_models_TOP-1.csv)📎 are provided for the demonstration.
 
 With the following **columns** 📋:
 
 - **FILE** - name of the file
 - **PAGE** - number of the page
-- **CLASS-N** - label of the category 🪧, guess TOP-N 
+- **CLASS-N** - label of the category 🪧, guess TOP-N
 - **SCORE-N** - score of the category 🪧, guess TOP-N
 
 and optionally
- 
-- **TRUE** - actual label of the category 🪧 
+
+- **TRUE** - actual label of the category 🪧
 
 </details>
 
@@ -920,76 +968,108 @@ With the following **columns** 📋:
 
 - **FILE** - name of the file
 - **PAGE** - number of the page
-- **<CATEGORY_LABEL>** - separate columns for each of the defined classes 🪧 
-- **TRUE** - actual label of the category 🪧 
+- **<CATEGORY_LABEL>** - separate columns for each of the defined classes 🪧
+- **TRUE** - actual label of the category 🪧
 
 </details>
 
-The reason to use the `--raw` flag is the possible convenience of results review, 
+The reason to use the `--raw` flag is the possible convenience of results review,
 since the rows will be basically sorted by categories, and most ambiguous ones will
-have more small probabilities instead of zeros than the most obvious (for the model) 
+have more small probabilities instead of zeros than the most obvious (for the model)
 categories 🪧.
 
-Importantly, there is a script for splitting any result table into document-specific
-tables stored in a specified directory:
+**Result Extraction Tools:**
 
-    python3 per_doc_split.py -i '/full/path/to/result_table.csv' 
+* **Document Splitting:** Split any result table into document-specific CSVs using standard flags:
+```bash
+python3 supplementary/scripts/per_doc_split.py -i result_table.csv -o /path/to/output_dir
+```
+
+* **Performance Scoring:** Automatically compute accuracy scores across multiple saved model outputs in
+a directory using `supplement_scripts/result_analysis.sh -d result/tables/ --pattern "*_TOP-1_EVAL.csv"`.
 
 The splitting script [per_doc_split.py](supplement_scripts%2Fper_doc_split.py) 📎 is adjusted for the filename as a first column inout.
+
+<details>
+
+<summary>Best-models ensemble tables 👀</summary>
+
+**Wide per-model votes** — `{date-time}_BEST_5_models_TOP-1.csv`:
+
+- **FILE** — name of the file (document)
+- **PAGE** — number of the page
+- **CLASS-1-vM.3** — Top-1 class predicted by model `vM.3` (`M` = 1…5); one
+  column per model
+
+**Averaged result** — `{date-time}_BEST_5_models_AVG_TOP-{N}.csv` (same column
+set as the example `ARUP_averaged.csv`):
+
+- **FILE** — name of the file (document)
+- **PAGE** — number of the page
+- **VM.3** — Top-1 vote of model `vM.3` (`M` = 1…5), in canonical model order
+- **CLASS-K** — `K`-th class (`K` = 1…`N`) of the **probability-averaged** ensemble
+- **SCORE-K** — averaged probability for `CLASS-K`, in `[0, 1]`; empty when zero
+  (the paired `CLASS-K` is blanked too, so a class never appears with a blank score)
+
+</details>
+
 
 ### Results post-processing 📉
 
 > [!IMPORTANT]
-> **The best way to classify a collection of messy files** is to use several models - combine their predictions in a 
-> post-processing step and get results with higher accuracy. The 5 selected models provide different perspectives
-> on the data, and their ensemble can help to mitigate individual model errors. 
+> **The best way to classify a collection of messy files** is to combine the
+> predictions of several models. The 5 selected models give different
+> perspectives on the data, and their ensemble mitigates individual model
+> errors. With `--best` this ensembling now happens **inside the program**.
 
-You may often want to combine predictions from **different** base architectures (e.g., averaging `RegNetY` and `ViT` 
-outputs for the same inputs) without reloading the heavy models.
+When you run with `--best`, the program loads each of the 5 models, runs
+inference, and writes **two** files to `result/tables/`:
 
-For this purpose, use the `averaging.py` script ([averaging.py](supplement_scripts%2Faveraging.py) 📎). It takes multiple prediction CSV files, aggregates the scores for 
-every class per page, calculates the mean score, and generates a new sorted TOP-N ranking.
+| File                                        | Contents                                                                                                   |
+|---------------------------------------------|------------------------------------------------------------------------------------------------------------|
+| `{date-time}_BEST_5_models_TOP-1.csv`       | **Wide per-model votes** — one Top-1 column per model (`CLASS-1-v1.3` … `CLASS-1-v5.3`).                   |
+| `{date-time}_BEST_5_models_AVG_TOP-{N}.csv` | **Final averaged result** — per-model votes (`V1.3` … `V5.3`) plus the probability-averaged Top-N classes. |
 
-**Why use this?**
-* **Ensemble Learning:** Combining predictions from different models often smooths out errors and improves accuracy on ambiguous pages. 
-* **Flexibility:** You can merge a Top-1 result file with a Top-5 result file; the script dynamically handles different input shapes.
-* **Time and Resources:** Since the preferred method of large collection processing is calling inference of different base models, computational resources and time needed to predict Top-1 or Top-N is are the same, but the level of details in ambiguous cases is higher for N > 2 Top-N predictions
+The averaging is a **mean of the softmax probabilities** across models (not a
+plain majority vote), so confident models carry more weight than uncertain
+ones. A page on which all 5 models agree therefore scores `1.0`.
+
+> [!NOTE]
+> The wide `BEST_5_models_TOP-1.csv` is byte-compatible with
+> [averaging.py](supplement_scripts%2Faveraging.py) 📎, so the standalone script
+> remains available for **manual re-averaging**, for mixing in models outside
+> the default 5, or for recomputing with a different `top_N`. It is no longer a
+> required step — `--best` produces the averaged table directly.
+
+**When to reach for `averaging.py` instead of `--best`:**
+* You already have saved per-model CSVs and want to re-combine them without
+  re-running inference (`--best --save-intermediates` writes those per-model files).
+* You want to ensemble an arbitrary set of models / runs, not just the default 5.
 
 <details>
 
-<summary>How to run post-processing 👀</summary>
+<summary>Manual re-averaging with averaging.py 👀</summary>
 
-**Basic usage (Wildcards):**
-Process all CSVs in a folder and output a Top-3 summary:
+Combine saved per-model results into a Top-3 summary:
 
     python3 averaging.py --files "result/tables/*_TOP-3.csv" --top_n 3 --output ensemble_results.csv
 
-**Specific Models:**
-Combine specific model outputs (e.g., a ViT run and an EfficientNet run):
+Re-average the wide votes file directly (majority-vote fallback when no scores
+are present):
 
-    python3 averaging.py --files result/tables/model_v53.csv result/tables/model_v43.csv -n 1
+    python3 averaging.py --files result/tables/20260613-1002_BEST_5_models_TOP-1.csv -n 1
 
-**Arguments:**
-* `-f`, `--files`: List of input files or glob pattern (required).
-* `-n`, `--top_n`: Number of top predictions to keep in the final output (default: `3`).
-* `-o`, `--output`: Saved result filename (e.g., `averaged_res_sorted.csv`).
-
-With the following **columns** 📋:
-
-- **FILE** - name of the file (document)
-- **PAGE** - number of the page
-- **vM.3** - separate columns for each of the models where `M` is in range from `1` to `5`, contains Top-`1` class label predicted by a model
-- **CLASS-K** - where `K` is in range from 1 to `N` (`N` is 3 by default), contains a Top-`N` class label of averaged `M` models` class scores
-- **SCORE-K** - averaged of all Top-`N` predictions of all `M` models, score from 0 to 1, where 0 are replaced with `NULL`
+`--keep-zeros` retains null scores and `--no-normalize` disables the
+hyphen→underscore filename normalisation. See `python3 averaging.py --help`.
 
 </details>
 
-> [!NOTE]
-> The script expects input CSVs to follow the standard result format with `FILE`, `PAGE`, `CLASS-N`, and `SCORE-N` columns.
-
-Examples: [ARUB_averaged_SHORT.csv](result%2FARUB_averaged_SHORT.csv) & [ARUP_averaged_SHORT.csv](result%2FARUP_averaged_SHORT.csv) 📎
-each created from 5 collection results (from the best 5 models) with a Top-3 setting (only 1/1000th part of the collection results was
-shared in this repository).
+Examples shipped in the repo: the wide
+[best_5_models_TOP-1.csv](result%2Ftables%2F20260530-1234_BEST_5_models_TOP-1.csv) 📎
+and the averaged [ARUB_averaged_SHORT.csv](result%2FARUB_averaged_SHORT.csv) &
+[ARUP_averaged_SHORT.csv](result%2FARUP_averaged_SHORT.csv) 📎 (each derived from
+the best 5 models with a Top-3 setting; only ~1/1000 of the collection results
+is shared here for demonstration).
 
 ----
 
@@ -998,10 +1078,10 @@ shared in this repository).
 You can use this section as a guide for creating your own dataset of pages, which will be suitable for
 further model processing.
 
-There are useful multiplatform scripts in the [data_scripts](data_scripts) 📁 folder for the whole process of data preparation. 
+There are useful multiplatform scripts in the [data_scripts](data_scripts) 📁 folder for the whole process of data preparation.
 
 > [!NOTE]
-> The `.sh` scripts are adapted for **Unix** OS and `.bat` scripts are adapted for **Windows** OS, yet 
+> The `.sh` scripts are adapted for **Unix** OS and `.bat` scripts are adapted for **Windows** OS, yet
 > their functionality remains the same
 
 On **Windows** you must also install the following software before converting PDF documents to PNG images:
@@ -1029,34 +1109,32 @@ Firstly, copy the PDF-to-PNG converter script to the directory with PDF document
 
 </details>
 
-Now check the content and comments in [pdf2png.sh](data_scripts%2Funix%2Fpdf2png.sh) 📎 or [pdf2png.bat](data_scripts%2Fwindows%2Fpdf2png.bat) 📎 
-script, and run it. 
 
-> [!IMPORTANT]
-> You can optionally comment out the **removal of processed PDF files** from the script, yet it's **NOT** 
-> recommended in case you are going to launch the program several times from the same location. 
+> [!TIP]
+> All data preparation scripts now fully support command-line arguments. Use the `--help` (**Unix**) or
+> `/?` (**Windows**) flags to see all available options.
 
-<details>
-
-<summary>How to 👀</summary>
-
-**Windows**:
-
-    cd \full\path\to\your\folder\with\pdf\files
-    pdf2png.bat
+Run the converter script directly via CLI to specify your preferences. For example, you can set the source
+directory, output format, DPI, and whether to keep intermediate files:
 
 **Unix**:
 
-    cd /full/path/to/your/folder/with/pdf/files
-    pdf2png.sh
+```bash
+/path/to/pdf2png.sh --dir /folder/with/pdfs --format png --dpi 300
+```
 
-</details>
+**Windows**: *(Note: The batch version runs sequentially. For parallel processing on **Windows**, consider
+porting the logic to PowerShell)*
 
-After the program is done, you will have a directory full of document-specific subdirectories
-containing page-specific images with a similar structure:
+```cmd
+\path\to\pdf2png.bat /d \folder\with\pdfs /f png /r 300
+```
+
+Similarly, the `move_single` scripts can be executed using `--source` and `--target` (or `/s` and `/t` on **Windows**)
+flags to gather one-pagers without opening the code. Add `--dry-run` to safely preview the files that will be moved.
+
 
 <details>
-
 <summary>Unix folder tree 🌳 structure 👀</summary>
 
     /full/path/to/your/folder/with/pdf/files
@@ -1069,7 +1147,7 @@ containing page-specific images with a similar structure:
         ├── PDFFile2Name-02.png
         └── ...
     ├── PdfFile3Name
-        └── PdfFile3Name-1.png 
+        └── PdfFile3Name-1.png
     ├── PdfFile4Name
     └── ...
 
@@ -1077,7 +1155,7 @@ containing page-specific images with a similar structure:
 
 > [!NOTE]
 > The page numbers are padded with zeros (on the left) to match the length of the last page number in each PDF file,
-> this is done automatically by the pdftoppm command used on **Unix**. While ImageMagick's [^5] 🔗 convert command used 
+> this is done automatically by the pdftoppm command used on **Unix**. While ImageMagick's [^5] 🔗 convert command used
 > on **Windows** does **NOT** pad the page numbers.
 
 <details>
@@ -1094,17 +1172,17 @@ containing page-specific images with a similar structure:
         ├── PDFFile2Name-2.png
         └── ...
     ├── PdfFile3Name
-        └── PdfFile3Name-1.png 
+        └── PdfFile3Name-1.png
     ├── PdfFile4Name
     └── ...
 
 </details>
 
-Optionally you can use the [move_single.sh](data_scripts%2Funix%2Fmove_single.sh) 📎 or [move_single.bat](data_scripts%2Fwindows%2Fmove_single.bat) 📎 script to move 
-all PNG files from directories with a single PNG file inside to the common directory of one-pagers. 
+Optionally you can use the [move_single.sh](data_scripts%2Funix%2Fmove_single.sh) 📎 or [move_single.bat](data_scripts%2Fwindows%2Fmove_single.bat) 📎 script to move
+all PNG files from directories with a single PNG file inside to the common directory of one-pagers.
 
-By default, the scripts assume that the `onepagers` is the back-off directory for PDF document names without a 
-corresponding separate directory of PNG pages found in the PDF files directory (already converted to 
+By default, the scripts assume that the `onepagers` is the back-off directory for PDF document names without a
+corresponding separate directory of PNG pages found in the PDF files directory (already converted to
 subdirectories of pages).
 
 <details>
@@ -1118,19 +1196,19 @@ subdirectories of pages).
     move_single.bat
 
 **Unix**:
-    
+
     cp /local/folder/for/this//project/atrium-page-classification/data_scripts/move_single.sh /full/path/to/your/folder/with/pdf/files
-    cd /full/path/to/your/folder/with/pdf/files 
-    move_single.sh 
+    cd /full/path/to/your/folder/with/pdf/files
+    move_single.sh
 
 </details>
 
-The reason for such movement is simply convenience in the following annotation process [below](#png-pages-annotation-). 
+The reason for such movement is simply convenience in the following annotation process [below](#png-pages-annotation-).
 These changes are cared for in the next [sort.sh](data_scripts%2Funix%2Fsort.sh) 📎 and [sort.bat](data_scripts%2Fwindows%2Fsort.bat) 📎 scripts as well.
 
 ### PNG pages annotation 🔎
 
-The generated PNG images of document pages are used to form the annotated gold data. 
+The generated PNG images of document pages are used to form the annotated gold data.
 
 > [!NOTE]
 > It takes a lot of time ⌛ to collect at least several hundred examples per category.
@@ -1139,13 +1217,13 @@ Prepare a CSV table with exactly 3 columns:
 
 - **FILE** - name of the PDF document which was the source of this page
 - **PAGE** - number of the page (**NOT** padded with 0s)
-- **CLASS** - label of the category 🪧 
+- **CLASS** - label of the category 🪧
 
 > [!TIP]
-> Prepare equal-in-size categories 🪧 if possible, so that the model will not be biased towards the over-represented labels 🪧 
+> Prepare equal-in-size categories 🪧 if possible, so that the model will not be biased towards the over-represented labels 🪧
 
-For **Windows** users, it's **NOT** recommended to use MS Excel for writing CSV tables, the free 
-alternative may be Apache's OpenOffice [^9] 🔗. As for **Unix** users, the default LibreCalc should be enough to 
+For **Windows** users, it's **NOT** recommended to use MS Excel for writing CSV tables, the free
+alternative may be Apache's OpenOffice [^9] 🔗. As for **Unix** users, the default LibreCalc should be enough to
 correctly write a comma-separated CSV table.
 
 <details>
@@ -1160,33 +1238,34 @@ correctly write a comma-separated CSV table.
 
 </details>
 
-### PNG pages sorting for training 📬
+### PNG pages routing for training 📬
 
-Cluster the annotated data into separate folders using the [sort.sh](data_scripts%2Funix%2Fsort.sh) 📎 or [sort.bat](data_scripts%2Fwindows%2Fsort.bat) 📎 
+Cluster the annotated data into separate folders using the [sort.sh](data_scripts%2Funix%2Fsort.sh) 📎 or [sort.bat](data_scripts%2Fwindows%2Fsort.bat) 📎
 script to copy data from the source folder to the training folder where each category 🪧 has its own subdirectory.
 This division of PNG images will be used as gold data in training and evaluation.
 
+
+
 > [!WARNING]
-> It does **NOT** matter from which directory you launch the sorting script, but you must check the top of the script for 
-> (**1**) the path to the previously described **CSV table with annotations**, (**2**) the path to the previously described 
-> directory containing **document-specific subdirectories of page-specific PNG pages**, and (**3**) the path to the directory
-> where you want to store the **training data of label-specific directories with annotated page images**.
+> It does **NOT** matter from which directory you launch the sorting script. Simply provide the paths via
+> command-line flags: `-c` for the annotated CSV table, `-i` for the directory containing your converted
+> document pages, and `-o` for the target training folder.
 
-<details>
+**Unix**:
 
-<summary>How to 👀</summary>
+```bash
+sort.sh -c annotations.csv -i /path/to/pages -o /path/to/train_dir --move
+```
 
 **Windows**:
 
-    sort.bat
+```cmd
+sort.bat /c annotations.csv /i \path\to\pages /o \path\to\train_dir
+```
 
-**Unix**:
-    
-    sort.sh
+*Note: Use `--dry-run` to preview the distribution, or omit `--move` (**Unix**) to copy the files instead of moving them.*
 
-</details>
-
-After the program is done, you will have a directory full of label-specific subdirectories 
+After the program is done, you will have a directory full of label-specific subdirectories
 containing document-specific pages with a similar structure:
 
 <details>
@@ -1208,7 +1287,7 @@ containing document-specific pages with a similar structure:
 <details>
 
 <summary>Windows folder tree 🌳 structure 👀</summary>
-    
+
     \full\path\to\your\folder\with\train\pages
     ├── Label1
         ├── PdfFileAName-N.png
@@ -1222,23 +1301,34 @@ containing document-specific pages with a similar structure:
 </details>
 
 The sorting script can help you in moderating mislabeled samples before the training. Accurate data annotation
-directly affects the model performance. 
+directly affects the model performance.
 
-Before running the training, make sure to check the [config.txt](config.txt) ⚙️ file for the `[TRAIN]` section variables, where you should
+Before running the training, make sure to check the [config.txt](setup/config.txt) ⚙️ file for the `[TRAIN]` section variables, where you should
 set a path to the data folder. Make sure label directory names do **NOT** contain special characters like spaces, tabs or paragraph splits.
 
 > [!TIP]
-> In the [config.txt](config.txt) ⚙️ file tweak the parameter of `max_categ`
+> In the [config.txt](setup/config.txt) ⚙️ file tweak the parameter of `max_categ`
 > for a maximum number of samples per category 🪧, in case you have **over-represented labels** significantly dominating in size.
 > Set `max_categ` higher than the number of samples in the largest category 🪧 to use **all** data samples.
 
 From this point, you can start model training or evaluation process.
 
+### Dataset Maintenance 🧹
+
+Once your dataset is sorted, you might need to clean or prototype with it. The `supplement_scripts/` folder provides tools for this:
+
+* **Filtering:** If you manually delete mislabeled PNG images from your training folders, run
+`python3 supplement_scripts/filtering.py -i annotations.csv -d train_dir` to
+automatically remove the missing entries from your CSV.
+* **Downscaling:** To quickly prototype with lower-resolution images, use
+`python3 supplement_scripts/downscale.py -i train_dir -o small_train_dir --scale 50`. This shrinks the images
+while preserving the entire category-folder hierarchy.
+
 ----
 
 ## For developers 🪛
 
-You can use this project code as a base for your own image classification tasks. The detailed guide on 
+You can use this project code as a base for your own image classification tasks. The detailed guide on
 the key phases of the whole process (settings, training, evaluation) is provided here.
 
 <details>
@@ -1260,19 +1350,31 @@ the key phases of the whole process (settings, training, evaluation) is provided
 
 </details>
 
-Most of the changeable variables are in the [config.txt](config.txt) ⚙ file, specifically,
-in the `[TRAIN]`, `[HF]`, and `[SETUP]` sections. 
+**Command-Line Utility Scripts:**
+The analytical scripts in the [supplement_scripts](supplementary)📁 directory have been standardized for single-line execution
+without requiring internal path edits. Call any of them with `--help` for specific arguments:
 
-In the dev sections of the configuration ⚙ file, you will find many boolean variables that can be changed from the default `False` 
-state to `True`, yet it's recommended to awaken those variables solely through the specific 
+* [dataset_timeline.py](supplementary/scripts/dataset_timeline.py): Generates the chronological category distribution
+plot via `-i` (CSV input), `-o` (output plot), and `--regex` grouping flags.
+* [visualize.py](supplementary/scripts/visualize.py): Renders the model parameter vs. accuracy scatter plots
+instantly using `-i` and `-o` flags.
+* [logs_stats.py](supplementary/scripts/logs_stats.py): Safely parses binary TFRecord event logs to extract training
+metrics into a CSV. It now accepts external JSON mappings (`--gpu-map`, `--revision-map`) so you can track
+custom infrastructure nodes and architectures.
+
+Most of the changeable variables are in the [config.txt](setup/config.txt) ⚙ file, specifically,
+in the `[TRAIN]`, `[HF]`, and `[SETUP]` sections.
+
+In the dev sections of the configuration ⚙ file, you will find many boolean variables that can be changed from the default `False`
+state to `True`, yet it's recommended to awaken those variables solely through the specific
 **command line flags implemented for each of these boolean variables**.
 
-For more detailed training process adjustments refer to the related functions in [classifier.py](classifier.py) 📎 
+For more detailed training process adjustments refer to the related functions in [classifier.py](classifier.py) 📎
 file, where you will find some predefined values not used in the [run.py](run.py) 📎 file.
 
 > [!IMPORTANT]
-> For both training and evaluation, you must make sure that the training pages directory is set right in the 
-> [config.txt](config.txt) ⚙ and it contains category 🪧 subdirectories with images inside. 
+> For both training and evaluation, you must make sure that the training pages directory is set right in the
+> [config.txt](setup/config.txt) ⚙ and it contains category 🪧 subdirectories with images inside.
 > Names of the category 🪧 subdirectories are sorted in the alphabetic order and become actual
 > label names and replace the default categories 🪧 list
 
@@ -1301,23 +1403,23 @@ case, **above-average CPU memory capacity** is a must-have to avoid a total syst
 
 ### Training 💪
 
-To train the model run: 
+To train the model run:
 
     python3 run.py --train
 
-The training process has an automatic progress logging into console, and should take approximately 5-12h 
-depending on your machine's 🖥️ CPU / GPU memory size and prepared dataset size. 
+The training process has an automatic progress logging into console, and should take approximately 5-12h
+depending on your machine's 🖥️ CPU / GPU memory size and prepared dataset size.
 
 > [!TIP]
-> Run the training with **default hyperparameters** if you have at least ~10,000 and **less than 50,000 page samples** 
-> of the very similar to the initial source data - meaning, no further changes are required for fine-tuning model 
-> for the same task on an expanded (or new) dataset of document pages, even number of categories 🪧 does 
+> Run the training with **default hyperparameters** if you have at least ~10,000 and **less than 50,000 page samples**
+> of the very similar to the initial source data - meaning, no further changes are required for fine-tuning model
+> for the same task on an expanded (or new) dataset of document pages, even number of categories 🪧 does
 > **NOT** matter while it stays under **20**
 
 <details>
 
 <summary>Training hyperparameters 👀</summary>
- 
+
 * eval_strategy "epoch"
 * save_strategy "epoch"
 * learning_rate **5e-5**
@@ -1327,15 +1429,15 @@ depending on your machine's 🖥️ CPU / GPU memory size and prepared dataset s
 * warmup_ratio **0.1**
 * logging_steps **10**
 * load_best_model_at_end True
-* metric_for_best_model "accuracy" 
+* metric_for_best_model "accuracy"
 
 </details>
 
 Above are the default hyperparameters or TrainingArguments [^11] used in the training process that can be partially
-(only `epoch` and `log_step`) changed in the `[TRAIN]` section, plus `batch` in the `[SETUP]`section, 
-of the [config.txt](config.txt) ⚙ file.
+(only `epoch` and `log_step`) changed in the `[TRAIN]` section, plus `batch` in the `[SETUP]`section,
+of the [config.txt](setup/config.txt) ⚙ file.
 
-> You are free to play with the **learning rate** right in the training function arguments called in the [run.py](run.py) 📎 file, 
+> You are free to play with the **learning rate** right in the training function arguments called in the [run.py](run.py) 📎 file,
 > yet **warmup ratio and other hyperparameters** are accessible only through the [classifier.py](classifier.py) 📎 file.
 
 Playing with training hyperparameters is
@@ -1349,9 +1451,9 @@ number of epoch that has successfully ended before you noticed the evaluation lo
 During training image transformations [^12] are applied sequentially with a 50% chance.
 
 > [!NOTE]
-> No rotation, reshaping, or flipping was applied to the images, mainly color manipulations were used. The 
+> No rotation, reshaping, or flipping was applied to the images, mainly color manipulations were used. The
 > reason behind this are pages containing specific form types, general text orientation on the pages, and the default
-> reshape of the model input to the square 224x224 resolution images. 
+> reshape of the model input to the square 224x224 resolution images.
 
 <details>
 
@@ -1368,22 +1470,22 @@ During training image transformations [^12] are applied sequentially with a 50% 
 
 More about selecting the image transformation and the available ones you can read in the PyTorch torchvision docs [^12].
 
-After training is complete the model will be saved 💾 to its separate subdirectory in the `model` directory, by default, 
-the **naming of the model folder** corresponds to the `revision` variable in the `[HF]` section of 
-the [config.txt](config.txt) ⚙ file, which is shortened by removing any dots and saved like `model_<revision>`.
+After training is complete the model will be saved 💾 to its separate subdirectory in the `model` directory, by default,
+the **naming of the model folder** corresponds to the `revision` variable in the `[HF]` section of
+the [config.txt](setup/config.txt) ⚙ file, which is shortened by removing any dots and saved like `model_<revision>`.
 
 <details>
 
 <summary>Full project tree 🌳 files structure 👀</summary>
-    
+
     /local/folder/for/this/project/atrium-page-classification
     ├── model
-        ├── movel_<HFrevision1> 
-            ├── config.json
-            ├── model.safetensors
-            └── preprocessor_config.json
-        ├── movel_<HFrevision2>
-        └── ...
+    ├── model_<HFrevision1>
+        ├── config.json
+        ├── model.safetensors
+        └── preprocessor_config.json
+    ├── model_<HFrevision2>
+    └── ...
     ├── checkpoint
         ├── models--google--vit-base-patch16-224
             ├── blobs
@@ -1408,7 +1510,13 @@ the [config.txt](config.txt) ⚙ file, which is shortened by removing any dots a
     ├── result
         ├── plots
         └── tables
-    ├── category_samples
+    ├── setup
+        ├── config.txt
+        ├── para_config.txt
+        ├── requirements.txt
+        ├── requirements-test.txt
+        └── setup_api_service.sh
+    ├── small_data_samples
         ├── DRAW
         ├── DRAW_L
         └── ...
@@ -1419,25 +1527,25 @@ the [config.txt](config.txt) ⚙ file, which is shortened by removing any dots a
 
 </details>
 
-> [!IMPORTANT] 
-> The `movel_<revision>` folder naming is generated from the HF 😊 repo [^1] 🔗 `revision` value and does **NOT** 
+> [!IMPORTANT]
+> The `movel_<revision>` folder naming is generated from the HF 😊 repo [^1] 🔗 `revision` value and does **NOT**
 > affect the trained model naming, but the explicit flag `-m` or `--model` can be used to set the model path for a
 > time when the training is done and the model is saved and ready for evaluation or prediction inference. **Keep in mind
-> that the `revision` is shortened, by removing punctuation like dots, to get a sterilized model's version for its 
+> that the `revision` is shortened, by removing punctuation like dots, to get a sterilized model's version for its
 > folder naming.**
 
 In terms of the input data splitting, **this project is adapted to the filenames containing date stamps** which are leveraged
-in the filenames sorting, and then randomized step selection, of separate categories 🪧 for the final evaluation and the 
+in the filenames sorting, and then randomized step selection, of separate categories 🪧 for the final evaluation and the
 training-time-evaluation (so-called, dev) subsets - both of the same `test_ratio` size. This behaviour is specifically
-triggered when the `--folds` argument or `cross_runs` variable in the `[TRAIN]` section of the [config.txt](config.txt) ⚙ file 
-is set above 0, as well as when the `--train` flag is used for a single run of training, which applies the same 
+triggered when the `--folds` argument or `cross_runs` variable in the `[TRAIN]` section of the [config.txt](setup/config.txt) ⚙ file
+is set above 0, as well as when the `--train` flag is used for a single run of training, which applies the same
 splitting strategy of 80-10-10% for training, dev, and evaluation subsets respectively.
 
 > [!TIP]
 > The cross-validation takes more time and reselects the data subsets for each run based on a `seed` variable of the
-> `[SETUP]` section in the [config.txt](config.txt) ⚙ file which gets simply incremented by one for each fold (run) of the
-> cross-validation process. The listed data splits are recorded as `.txt` files in the `result/stats` directory 📁 for 
-> each fold of the overall model training run, as well as the fold's final test set predictions are saved in 
+> `[SETUP]` section in the [config.txt](setup/config.txt) ⚙ file which gets simply incremented by one for each fold (run) of the
+> cross-validation process. The listed data splits are recorded as `.txt` files in the `result/stats` directory 📁 for
+> each fold of the overall model training run, as well as the fold's final test set predictions are saved in
 > `result/tables` directory 📁. The trained models are saved as model_<revision><fold>.
 
 Moreover, the models trained in the cross-validation mode that have the same base model can be averaged and saved
@@ -1451,11 +1559,11 @@ in a new model saved as `model_<revision>a<#folds>` next to its parent models in
 ### Evaluation 🏆
 
 After the fine-tuned model is saved 💾, you can explicitly call for evaluation of the model to get a table of TOP-N classes for
-the semi-randomly composed subset (10% in size by default) of the training page folder. The class proportions are preserved, 
+the semi-randomly composed subset (10% in size by default) of the training page folder. The class proportions are preserved,
 and the data is uniformly spread across the time span of the provided dataset.
 
-To do this in the unchanged configuration ⚙, automatically create a 
-confusion matrix plot 📊 and additionally get raw class probabilities table run: 
+To do this in the unchanged configuration ⚙, automatically create a
+confusion matrix plot 📊 and additionally get raw class probabilities table run:
 
     python3 run.py --eval --raw
 
@@ -1467,37 +1575,154 @@ Finally, when your model is trained and you are happy with its performance tests
 in the [run.py](run.py) 📎 file for **HF 😊 hub model push**. This functionality has already been implemented and can be
 accessed through the `--hf` flag using the values set in the `[HF]` section for the `token` and `repo_name` variables.
 
-In this case, you must **rename the trained model folder** in respect to the `revision` value (dots in the naming are skipped, e.g. 
+In this case, you must **rename the trained model folder** in respect to the `revision` value (dots in the naming are skipped, e.g.
 revision `v1.9.22` turns to `model_v1922` model folder), and only then run repo push.
 
 > [!CAUTION]
 > Set your own `repo_name` to the empty one of yours on HF 😊 hub, then in the **Settings** of your HF 😊 account
-> find the **Access Tokens** section and generate a new token - copy and paste its value to the `token` variable. Before committing 
-> those [config.txt](config.txt) ⚙ file changes via git replace the full `token` value with its shortened version for security reasons.
+> find the **Access Tokens** section and generate a new token - copy and paste its value to the `token` variable. Before committing
+> those [config.txt](setup/config.txt) ⚙ file changes via git replace the full `token` value with its shortened version for security reasons.
 
-Alternatively, you can evaluate models on a separate dataset of pages, which should be stored in a directory 📁 and 
-provided in the `[EVAL]` section of the [config.txt](config.txt) ⚙ file. The directory structure should be the 
+Alternatively, you can evaluate models on a separate dataset of pages, which should be stored in a directory 📁 and
+provided in the `[EVAL]` section of the [config.txt](setup/config.txt) ⚙ file. The directory structure should be the
 same as for the training pages directory - the category 🪧 subdirectories are required.
+
+
+
+### Memory-aware `--best` engine 🧠 <a name="memory-aware-best-engine-"></a>
+
+The `--best` ensemble is implemented in
+[parallel_best.py](parallel_best.py) 📎. By default it runs **sequentially** —
+one model at a time, a full data pass each — which is the guaranteed-safe path
+and the behaviour you get with `--best` alone. The optional `--parallel` flag
+enables a **memory-aware grouped engine** on CUDA.
+
+> [!NOTE]
+> **What `--parallel` does and does not buy you (single GPU).** A single GPU
+> serialises kernels across co-resident models, so holding several models in
+> VRAM does **not** reduce GPU math time. The win is reorganising *5 passes over
+> the data* (one per model, decoding every page 5×) into **one pass** that loads
+> all models that fit and streams the inputs once — removing redundant
+> disk-decode and load/unload churn. The size of that win depends on the
+> I/O-vs-compute ratio and should be measured, not assumed. **The real speedup
+> is multi-GPU** (one model/group per device), planned as a follow-up.
+
+How the parallel engine schedules work:
+
+1. **Profile** — on first use it measures each model's peak VRAM over the first
+   2 batches and records it in `model/gpu_profile.json`.
+2. **Pack** — models are greedily grouped (first-fit-decreasing) so each group's
+   summed peak fits the **live free VRAM** at runtime (90% of free, minus a
+   512 MB margin). On a small GPU this naturally degrades to groups of 1
+   (≡ sequential, still safe).
+3. **Run** — each group is loaded together and the inputs are streamed once
+   through every resident model.
+4. **Guard** — after the first 2 batches, if live peak memory approaches
+   capacity the largest model is dropped from the group and deferred to the
+   sequential fallback.
+
+`--parallel` **forces the sequential path** (no behaviour change) whenever it is
+not safe: on CPU/MPS (no CUDA memory APIs), when the dataset is too small to
+profile, when the saved profile is stale and re-profiling fails, or when the
+overflow guard cannot keep a group within budget.
+
+<details>
+
+<summary>GPU profile registry & static model catalog 👀</summary>
+
+The engine separates **measured, machine-specific** facts from
+**intrinsic, hardware-independent** ones:
+
+* **`model/gpu_profile.json`** — *dynamic*. Records the GPU fingerprint
+  (`name`, `total_vram_bytes`, `torch` version), the `batch` it was measured
+  at, and each model's `peak_bytes`. It is treated as **stale** (and
+  re-measured) when the GPU, the torch version, or the batch size changes, or
+  when it does not cover every required model. `peak_bytes` is the **only**
+  input to packing.
+
+* **`MODEL_STATIC`** (in [parallel_best.py](parallel_best.py)) — *static and
+  committed*. Per-model `params_bytes` (fp32 weight size), `resolution`, and
+  `base_model`. These never depend on the GPU, torch version, or batch, so they
+  are not stored in the dynamic profile. They are used to (a) **sanity-check**
+  measured peaks (`peak_bytes` must exceed `params_bytes`), (b) **bootstrap**
+  packing with zero GPU before any profile exists, and (c) weight a future
+  multi-GPU split.
+
+Example record:
+
+```json
+{
+  "gpu":   { "name": "NVIDIA A30", "total_vram_bytes": 25229983744, "torch": "2.7.1+cu126" },
+  "batch": 16,
+  "models": {
+    "v4.3": { "base_model": "timm/regnety_160.swag_ft_in1k", "resolution": 384, "peak_bytes": 2098562560 },
+    "v5.3": { "base_model": "google/vit-large-patch16-384",  "resolution": 384, "peak_bytes": 2771266560 }
+  }
+}
+```
+
+On a free 24 GB card the 5 models (summed peak ≈ 7.9 GB) pack into a **single
+group**, i.e. one data pass over all models.
+
+</details>
+
+> [!CAUTION]
+> `params_bytes` is **not** a reliable peak proxy — the peak/params ratio across
+> the 5 models ranges from ~2.3× (ViT-large, weight-heavy) to ~6.5× (RegNetY at
+> 384 px, activation-heavy). The no-measurement fallback therefore over-estimates
+> from `params_bytes` (biasing toward isolating a model in its own group) so it
+> can never under-provision and OOM.
+
+<details>
+
+<summary>Open-choice flags for --best 👀</summary>
+
+| Flag                   | Effect                                                                                           |
+|------------------------|--------------------------------------------------------------------------------------------------|
+| `--parallel`           | Enable the memory-aware grouped engine (CUDA only; silently falls back to sequential otherwise). |
+| `--save-intermediates` | Also write each model's individual `{date-time}_{revision}_TOP-{N}.csv` before averaging.        |
+| `--no-average-best`    | Skip in-engine averaging; emit only the wide `BEST_5_models_TOP-1.csv` for manual processing.    |
+
+</details>
+
 
 ----
 
 ## Paradata logging
 
-The project features an automatic paradata logging system that records provenance, configuration, 
-and performance statistics for every pipeline run. This is handled by the unified `ParadataLogger` module, 
-which silently monitors your image processing tasks in the background.
+The project features an automatic paradata logging system that records provenance, configuration,
+and performance statistics for every pipeline run. This is handled by the unified `ParadataLogger`
+module ([atrium_paradata.py](atrium_paradata.py)📎), shared across all ATRIUM pipeline repositories and driven by a
+repository-specific [para-config.txt](setup/para_config.txt)📎.
 
 **Key Features:**
 
-* **Automatic Generation:** A JSON log file is automatically created and saved in the [paradata](paradata) 📁 
-directory at the end of each run.
-* **Comprehensive Metrics:** Logs include exact start and end times, total duration in seconds, processing speed (files per minute), 
-and counts of successfully generated files (like CSVs or PNGs) versus skipped files.
-* **Configuration Snapshot:** The log captures the specific runtime configuration ⚙️ used, preserving a snapshot 
-of variables like the active model revision, base model, batch size, and command-line flags used during that specific run.
-* **Licensing:** All generated paradata files are released under the CC BY-NC 4.0 license.
+* **Automatic Generation:** A JSON log file is created at the end of each run, named
+`YYMMDD-HHmmss_page-classification.json`. It is written to the run's **output directory** so that
+paradata travels with the data it describes; the in-repo [paradata](result%2Fparadata) 📁 directory holds only
+example logs for development and is not where production logs belong.
+* **Comprehensive Metrics:** Logs include exact start and end times, total duration in seconds,
+processing speed (files per minute), and counts of successfully generated files (CSVs, PNGs) versus
+skipped files.
+* **Configuration Snapshot:** The log captures the specific runtime configuration ⚙️ used, preserving
+a snapshot of variables like the active model revision, base model, batch size, and command-line
+flags used during that run.
+* **Tool version & runner:** Each log records the `tool_version` (from [para-config.txt](setup/para_config.txt)📎), the
+`repository` and `runner_ref`, and a `docker_image` field. The repository/runner values resolve
+dynamically from the `ATRIUM_RUNNER_REPO` / `ATRIUM_RUNNER_REF` / `ATRIUM_RUNNER_IMAGE` environment
+variables when running in a published container, so the reference points at the actual runner rather
+than a static fork URL. `docker_image` is an empty placeholder when run outside a container.
+* **Licensing:** The output license is **computed per run**, not fixed. The logger determines the
+effective license as the most restrictive license among the components (models, datasets, tools)
+actually used in that run, and records the supporting detail under `license_detail`. The model code
+and the fine-tuned classifiers are permissive (MIT) and DeepDoctection is Apache-2.0, so
+**inference and evaluation runs resolve to MIT**. **Training is different:** training your own model
+with this code over the shared LINDAT dataset [^17] pulls in that dataset's **CC BY-NC-SA 4.0** license, so
+`--train` runs resolve to **CC BY-NC-SA 4.0** (non-commercial, share-alike) — the trained weights and
+any derivatives inherit those terms.
 
-Example of the [category_samples](category_samples) 📁 directory processing paradata log: [260315-120442_page-classification.json](paradata%2F260315-120442_page-classification.json) 📎
+Example of the [small_data_samples](small_data_samples) 📁 directory processing paradata log:
+[260315-120442_page-classification.json](paradata%2F260315-120442_page-classification.json) 📎
 
 ----
 
@@ -1505,7 +1730,7 @@ Example of the [category_samples](category_samples) 📁 directory processing pa
 
 **For support write to:** lutsai.k@gmail.com responsible for this GitHub repository [^8] 🔗
 
-> Information about the authors of this project, including their names and ORCIDs, can 
+> Information about the authors of this project, including their names and ORCIDs, can
 > be found in the [CITATION.cff](CITATION.cff) 📎 file.
 
 ### Preprint 📖
@@ -1513,8 +1738,8 @@ Example of the [category_samples](category_samples) 📁 directory processing pa
 For the full research background, check out our paper on arXiv:
 **[Page image classification for content-specific data processing](https://arxiv.org/abs/2507.21114)**
 
-It covers everything from raw data exploration and dataset construction 🗂️, through benchmarking 
-of multiple image classification approaches (Random Forest, EfficientNetV2, RegNetY, DiT, ViT, 
+It covers everything from raw data exploration and dataset construction 🗂️, through benchmarking
+of multiple image classification approaches (Random Forest, EfficientNetV2, RegNetY, DiT, ViT,
 and CLIP), to system architecture and real-world results on historical collections from Prague ⛪
 and Brno 🏛️.
 
@@ -1523,9 +1748,9 @@ and Brno 🏛️.
 - **Developed by** UFAL [^7] 👥
 - **Funded by** ATRIUM [^4]  💰
 - **Shared by** ATRIUM [^4] & UFAL [^7] 🔗
-- **Model type:** 
-  - fine-tuned ViT with a 224x224 [^2] 🔗 or 384x384 [^13] [^14] 🔗 resolution size 
-  - fine-tuned RegNetY-16GF with a 224x224 resolution [^18] or EffNetV2 with a 384x384 [^19] 🔗 resolution size 
+- **Model type:**
+  - fine-tuned ViT with a 224x224 [^2] 🔗 or 384x384 [^13] [^14] 🔗 resolution size
+  - fine-tuned RegNetY-16GF with a 224x224 resolution [^18] or EffNetV2 with a 384x384 [^19] 🔗 resolution size
 
 **©️ 2025 UFAL & ATRIUM**
 
@@ -1547,7 +1772,7 @@ and Brno 🏛️.
 - ✍️ - manual action
 - 🏆 - performance measurement
 - 😊 - Hugging Face (HF)
-- 📧 - contacts 
+- 📧 - contacts
 - 👀 - click to see
 - ⚙️ - configuration/settings
 - 📎 - link to the internal file
@@ -1595,6 +1820,6 @@ and Brno 🏛️.
 [^14]: https://huggingface.co/google/vit-large-patch16-384
 [^15]: https://huggingface.co/timm/tf_efficientnetv2_s.in21k
 [^16]: https://huggingface.co/timm/tf_efficientnetv2_l.in21k_ft_in1k
-[^17]: http://hdl.handle.net/20.500.12800/1-5959
+[^17]: http://hdl.handle.net/20.500.12800/1-6184
 [^18]: https://huggingface.co/timm/regnety_160.swag_ft_in1k
 [^19]: https://huggingface.co/timm/tf_efficientnetv2_m.in21k_ft_in1k

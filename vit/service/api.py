@@ -1,185 +1,152 @@
+import io
+import logging
 import os
-import sys
-import shutil
-import tempfile
-import base64
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
+from contextlib import asynccontextmanager
+from pathlib import Path
+from typing import List
+
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from io import BytesIO
+from fastapi.staticfiles import StaticFiles
 from PIL import Image
-from pdf2image import convert_from_bytes
-import time
+from pydantic import BaseModel
 
-# FIX: guard relative import so the module works both when launched via
-#   `uvicorn service.api:app`  (package mode, relative import works)
-#   `python api.py`            (direct execution, needs absolute import)
+# [FIX]: Use a relative import to support pytest running from the repo root,
+# with a fallback for direct script execution.
 try:
-    from .inference import manager, AVAILABLE_VERSIONS, CATEGORIES
+    from .inference import manager
 except ImportError:
-    # Fallback for direct execution: add this file's directory to sys.path
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    from inference import manager, AVAILABLE_VERSIONS, CATEGORIES
+    from inference import manager
 
-app = FastAPI(title="Atrium Page Classification API")
+logger = logging.getLogger(__name__)
+
+MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB limit for safety
+MAX_PDF_PAGES = 50
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Warm up models on startup
+    logger.info("Warming up models...")
+    manager.warmup()
+    yield
+    # Cleanup resources on shutdown if necessary
+    logger.info("Shutting down API service...")
+
+
+app = FastAPI(
+    title="ATRIUM Page Classification API",
+    version="1.4.0-beta",
+    description="API for classifying historical document page images.",
+    lifespan=lifespan,
+)
+
+# CORS hardening
+ALLOWED_ORIGINS = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "*").split(",")]
+# A wildcard origin must not be combined with credentials (browsers reject it).
+if "*" in ALLOWED_ORIGINS and os.environ.get("ALLOW_CREDENTIALS", "true").lower() == "true":
+    ALLOWED_ORIGINS.remove("*")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=ALLOWED_ORIGINS != ["*"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-STATIC_DIR = os.path.join(BASE_DIR, "frontend")
-LINDAT_DIST_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../dist"))
-
-CATEGORY_DESCRIPTIONS = {
-    "TEXT": "📰 Mixed text (printed, handwritten, typed).",
-    "TEXT_T": "📄 Typed text (machine-typed paragraphs).",
-    "TEXT_P": "📄 Printed text (published paragraphs).",
-    "TEXT_HW": "✏️📄 Handwritten text (paragraphs).",
-    "LINE_T": "📏 Typed Table.",
-    "LINE_P": "📏 Printed Table.",
-    "LINE_HW": "✏️📏 Handwritten Table.",
-    "DRAW": "📈 Drawing (maps, paintings, schematics).",
-    "DRAW_L": "📈📏 Structured Drawing (drawings within a layout/legend).",
-    "PHOTO": "🌄 Photo (photographs/cutouts).",
-    "PHOTO_L": "🌄📏 Structured Photo (photos in a table layout)."
-}
-
-if os.path.exists(STATIC_DIR):
-    app.mount("/frontend", StaticFiles(directory=STATIC_DIR), name="frontend")
-
-if os.path.exists(LINDAT_DIST_DIR):
-    app.mount("/dist", StaticFiles(directory=LINDAT_DIST_DIR), name="lindat-dist")
+# Mount frontend
+frontend_dir = Path(__file__).parent / "frontend"
+if frontend_dir.exists():
+    app.mount("/frontend", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")
 
 
-@app.on_event("startup")
-async def startup_event():
-    """Pre-load the default model at startup to avoid a latency spike on the
-    first request.  Only v4.3 is warmed up by default; extend the list if
-    multi-model latency on startup is acceptable."""
-    manager.warmup(["v4.3"])
+class PredictionResult(BaseModel):
+    label: str
+    score: float
+
+
+class ImageResponse(BaseModel):
+    type: str
+    predictions: List[PredictionResult]
 
 
 @app.get("/")
-async def root():
-    index_path = os.path.join(STATIC_DIR, "index.html")
-    if os.path.exists(index_path):
-        with open(index_path, "r") as f:
-            return HTMLResponse(content=f.read())
-    return {"message": "API Running. Index not found."}
+def read_root():
+    return {"message": "Welcome to the ATRIUM Page Classification API. Use /info for available models."}
 
 
 @app.get("/info")
-async def info():
-    return {
-        "available_models": AVAILABLE_VERSIONS,
-        "device": manager.device,
-        "categories": CATEGORY_DESCRIPTIONS
-    }
+def get_info():
+    """Return available model versions and categories."""
+    # [FIX]: Removed the hardcoded fallback list.
+    # model_registry is the single source of truth.
+    from model_registry import CATEGORIES
+
+    model_info = {v: manager.get_model_details(v) for v in manager.available_versions}
+    model_info["all"] = manager.get_model_details("all")
+
+    return {"categories": CATEGORIES, "available_models": model_info}
 
 
-@app.post("/predict_image")
-async def predict_image(
-        file: UploadFile = File(...),
-        version: str = Form(...),
-        topn: int = Form(3)
-):
-    if file.content_type not in ["image/jpeg", "image/png", "image/jpg"]:
-        raise HTTPException(status_code=400, detail="Invalid file type. Only JPEG/PNG allowed.")
+@app.post("/predict_image", response_model=ImageResponse)
+async def predict_image(version: str = Form("all"), topn: int = Form(3), file: UploadFile = File(...)):
+    """Classify a single uploaded image."""
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
 
-    if topn < 1: topn = 1
+    content = await file.read()
+    if len(content) > MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=413, detail=f"File too large. Maximum size is {MAX_UPLOAD_BYTES // (1024 * 1024)}MB."
+        )
 
     try:
-        contents = await file.read()
-        image = Image.open(BytesIO(contents)).convert("RGB")
+        image = Image.open(io.BytesIO(content)).convert("RGB")
+        predictions = manager.predict(image, version=version, topn=topn)
+        if isinstance(predictions, dict) and "error" in predictions:
+            raise HTTPException(status_code=500, detail=predictions["error"])
 
-        results = manager.predict(image, version, topn)
-
-        if isinstance(results, dict) and "error" in results:
-            raise HTTPException(status_code=500, detail=results["error"])
-
-        for res in results:
-            res["description"] = CATEGORY_DESCRIPTIONS.get(res["label"], "")
-
-        return {
-            "type": "image",
-            "model_version": manager.get_model_details(version),
-            "predictions": results
-        }
+        return ImageResponse(type="image", predictions=predictions)
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error processing image: {str(e)}")
+        logger.error(f"Error processing image: {e}")
+        raise HTTPException(status_code=500, detail="Error processing image.")
 
 
 @app.post("/predict_document")
-async def predict_document(
-        file: UploadFile = File(...),
-        version: str = Form(...),
-        topn: int = Form(3)
-):
-    if file.content_type != "application/pdf":
-        raise HTTPException(status_code=400, detail="Invalid file type. Only PDF allowed.")
+async def predict_document(version: str = Form("all"), topn: int = Form(3), file: UploadFile = File(...)):
+    """Extracts pages from a PDF and classifies each page."""
+    if not file.content_type or file.content_type != "application/pdf":
+        raise HTTPException(status_code=400, detail="Invalid file type. Please upload a PDF.")
 
-    if topn < 1: topn = 1
+    content = await file.read()
+    if len(content) > MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=413, detail=f"File too large. Maximum size is {MAX_UPLOAD_BYTES // (1024 * 1024)}MB."
+        )
 
-    with tempfile.TemporaryDirectory() as temp_dir:
-        try:
-            contents = await file.read()
+    try:
+        import fitz  # PyMuPDF
 
-            # Convert PDF to images
-            try:
-                images = convert_from_bytes(contents)
-            except Exception as e:
-                raise HTTPException(status_code=400, detail=f"Failed to convert PDF (poppler installed?): {str(e)}")
+        pdf_document = fitz.open(stream=content, filetype="pdf")
 
-            if not images:
-                raise HTTPException(status_code=400, detail="PDF contains no readable pages.")
+        if len(pdf_document) > MAX_PDF_PAGES:
+            raise HTTPException(status_code=413, detail=f"PDF has too many pages. Limit is {MAX_PDF_PAGES}.")
 
-            # Save pages as images for batch processing
-            for i, img in enumerate(images):
-                img.save(os.path.join(temp_dir, f"page_{i:04d}.png"))
+        page_results = []
+        for page_num in range(len(pdf_document)):
+            page = pdf_document.load_page(page_num)
+            pix = page.get_pixmap()
+            img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
 
-            # Run Batch Inference
-            batch_predictions = manager.predict_directory(temp_dir, version, topn)
+            predictions = manager.predict(img, version=version, topn=topn)
+            page_results.append({"page": page_num + 1, "predictions": predictions})
 
-            formatted_pages = []
-            for i, preds in enumerate(batch_predictions):
-                # --- Generate Thumbnail ---
-                original_img = images[i]
-
-                # Resize for thumbnail (e.g., max height 300px to keep JSON light)
-                thumb = original_img.copy()
-                thumb.thumbnail((300, 300))
-
-                # Encode to Base64
-                buffered = BytesIO()
-                thumb.save(buffered, format="PNG")
-                img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-                # -------------------------
-
-                formatted_pages.append({
-                    "page": i + 1,
-                    "predictions": preds,
-                    "thumbnail": img_str
-                })
-
-            return {
-                "type": "document",
-                "filename": file.filename,
-                "model_version": manager.get_model_details(version),
-                "requested_topn": topn,
-                "pages": formatted_pages
-            }
-
-        except Exception as e:
-            # Log the full error for debugging
-            print(f"Error processing PDF: {e}")
-            raise HTTPException(status_code=500, detail=f"Document processing failed: {str(e)}")
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+        return {"type": "document", "pages": page_results}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error processing document: {e}")
+        raise HTTPException(status_code=500, detail="Error processing document.")

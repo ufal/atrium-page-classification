@@ -1,0 +1,36 @@
+services:
+  classify:
+    image: ghcr.io/ufal/atrium-page-classification:${ATRIUM_VERSION:-dev}
+    build:
+      context: .
+      args:
+        ATRIUM_RUNNER_IMAGE: ghcr.io/ufal/atrium-page-classification:${ATRIUM_VERSION:-dev}
+        ATRIUM_RUNNER_REPO: https://github.com/ufal/atrium-page-classification
+        ATRIUM_RUNNER_REF: ${ATRIUM_RUNNER_REF:-dev}
+    environment:
+      ATRIUM_RUNNER_IMAGE: ghcr.io/ufal/atrium-page-classification:${ATRIUM_VERSION:-dev}
+      ATRIUM_RUNNER_REPO: https://github.com/ufal/atrium-page-classification
+      ATRIUM_RUNNER_REF: ${ATRIUM_RUNNER_REF:-dev}
+      HF_HOME: /cache/huggingface
+      # HF_TOKEN: ${HF_TOKEN:-}        # only for gated models / push_to_hub
+    volumes:
+      - ./data:/data                   # inputs read from ./data/input
+      - ./data/output:/app/result      # results + paradata land here on the host
+      - page-model:/app/model          # downloaded ViT weights persist across runs
+      - hf-cache:/cache/huggingface    # HF hub cache (models never baked into the image)
+
+  # FastAPI service — opt-in:  docker compose --profile api up api
+  api:
+    extends:
+      service: classify
+    profiles: ["api"]
+    entrypoint: ["uvicorn", "service.api:app", "--host", "0.0.0.0", "--port", "8000"]
+    command: []
+    environment:
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+    ports:
+      - "8000:8000"
+
+volumes:
+  page-model:
+  hf-cache:
