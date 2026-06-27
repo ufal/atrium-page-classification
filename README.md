@@ -1598,6 +1598,18 @@ follows the rule `splitN ↔ foldN column ↔ seed = 420 + (N−1)`:
 > `--folds_csv` mode takes precedence over the random `--folds N` cross-validation loop. The folds CSV is
 > **not committed** — stage it locally and point the flag at it.
 
+The same `--folds_csv` flag works with `--eval`: the model is scored on **only the chosen fold's `test`
+pages**, selected at run time out of the global `[EVAL] FOLDER_PAGES` directory. This is what confirms a
+refinetuned model reaches the original accuracy on the *same held-out pages* (minus the removed ones):
+
+    python3 run.py --eval -rev v1.4 --folds_csv path/to/licensed_crossval_folds_CUT.csv
+    # evaluates ONLY the fold1 'test' pages found under [EVAL] FOLDER_PAGES
+
+> [!NOTE]
+> `--eval --folds_csv` is **single-model only** — the fold column is resolved from `-rev` (or an explicit
+> `--fold_column`). It is not combined with `--best`, because each best model was trained on a different
+> fold, so an ensemble has no single shared held-out test set.
+
 ### Evaluation 🏆
 
 After the fine-tuned model is saved 💾, you can explicitly call for evaluation of the model to get a table of TOP-N classes for

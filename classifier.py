@@ -647,8 +647,10 @@ def split_data_from_folds(
 
     for file, label in zip(files, labels):
         fold_value = png_to_fold.get(os.path.basename(file))
-        if fold_value is None:
-            # Not listed in the CSV (e.g. one of the removed pages) -> excluded from every subset.
+        # Excluded from every subset when the page is not listed in the CSV (e.g. a removed page)
+        # or has no assignment for this fold. NB: with pandas >= 3.0 a blank cell stays NA through
+        # astype(str) (it is NOT the literal "nan"), so guard with pd.isna, not a string check.
+        if fold_value is None or pd.isna(fold_value):
             unmatched += 1
             continue
 
@@ -661,7 +663,7 @@ def split_data_from_folds(
                 corrupted += 1
                 continue
 
-        fold_value = fold_value.strip().lower()
+        fold_value = str(fold_value).strip().lower()
         if fold_value == "train":
             train_files.append(file)
             train_labels.append(label)

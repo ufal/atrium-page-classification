@@ -20,6 +20,20 @@ from parallel_best import run_best_models  # [add] memory-aware best-models engi
 from utils import collect_images, confusion_plot, dataframe_results, directory_scraper
 from yolo_classifier import YOLOClassifier
 
+
+def resolve_fold_column(revision, explicit):
+    """Resolve which folds-CSV column to use: an explicit --fold_column wins, otherwise the
+    per-revision default from REVISION_BEST_FOLDS (issue #15). Raises if neither is available."""
+    fold_column = explicit or REVISION_BEST_FOLDS.get(revision)
+    if not fold_column:
+        raise ValueError(
+            f"No fold column available for revision '{revision}'. "
+            f"Pass --fold_column explicitly or add the revision to REVISION_BEST_FOLDS "
+            f"(known: {list(REVISION_BEST_FOLDS.keys())})."
+        )
+    return fold_column
+
+
 if __name__ == "__main__":
     # Initialize the parser
     config = configparser.ConfigParser()
@@ -312,6 +326,17 @@ if __name__ == "__main__":
         data_dir = config.get("EVAL", "FOLDER_PAGES")
         testfiles, testLabels, categories = collect_images(data_dir)
 
+        # Issue #15: restrict evaluation to the chosen fold's TEST subset selected out of the
+        # global EVAL directory, so a refinetuned model is scored on the same held-out pages
+        # (minus the removed ones) as the original. Single-model only (use -rev / --fold_column),
+        # not --best, since each best model uses a different fold.
+        if args.folds_csv:
+            fold_column = resolve_fold_column(args.revision, args.fold_column)
+            print(f"--- Selecting eval TEST subset from {data_dir} via {args.folds_csv} (column '{fold_column}') ---")
+            _, _, testfiles, _, _, testLabels = split_data_from_folds(
+                testfiles, testLabels, args.folds_csv, fold_column, safe_check=False
+            )
+
     # ── single classifier instantiation (YOLO or standard) ───────────────────
     if args.yolo:
         if not (args.train or args.eval):
@@ -367,14 +392,7 @@ if __name__ == "__main__":
 
         else:
             if args.folds_csv:
-                fold_column = args.fold_column or REVISION_BEST_FOLDS.get(args.revision)
-
-                if not fold_column:
-                    raise ValueError(
-                        f"No fold column available for revision '{args.revision}'. "
-                        f"Pass --fold_column explicitly or add the revision to REVISION_BEST_FOLDS "
-                        f"(known: {list(REVISION_BEST_FOLDS.keys())})."
-                    )
+                fold_column = resolve_fold_column(args.revision, args.fold_column)
 
                 print(f"--- Explicit-folds training from {args.folds_csv} (column '{fold_column}') ---")
 
