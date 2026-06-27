@@ -10,6 +10,10 @@ FOLDER_PAGES=./small_data_samples
 FOLDER_PAGES=./small_data_samples
 
 cross_runs = 0
+# Path to an explicit cross-validation folds CSV (issue #15). When set (or via --folds_csv),
+# the train/dev/test split is read from the file instead of being regenerated; pages absent
+# from the CSV are excluded. The CSV is staged by the maintainer and is NOT committed.
+folds_csv =
 test_size = 0.1
 log_step = 100
 epochs = 3

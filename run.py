@@ -11,11 +11,11 @@ import pandas as pd
 from sklearn.metrics import classification_report
 
 from atrium_paradata import ParadataLogger
-from classifier import ImageClassifier, average_model_weights, split_data_80_10_10
+from classifier import ImageClassifier, average_model_weights, split_data_80_10_10, split_data_from_folds
 from model_registry import CATEGORIES as def_categ
 
 # [NEW] Import from central model registry
-from model_registry import REVISION_BEST_MODELS, REVISION_TO_BASE_MODEL
+from model_registry import REVISION_BEST_FOLDS, REVISION_BEST_MODELS, REVISION_TO_BASE_MODEL
 from parallel_best import run_best_models  # [add] memory-aware best-models engine + averaging
 from utils import collect_images, confusion_plot, dataframe_results, directory_scraper
 from yolo_classifier import YOLOClassifier
@@ -45,6 +45,7 @@ if __name__ == "__main__":
     hf_version = config.get("HF", "revision")
 
     cross_runs = config.getint("TRAIN", "cross_runs")
+    config_folds_csv = config.get("TRAIN", "folds_csv", fallback="").strip()
 
     hf_token = os.environ.get("HF_TOKEN") or config.get("HF", "token", fallback="")
 
@@ -143,12 +144,7 @@ if __name__ == "__main__":
         action="store_true",
         help="Save the individual Top-N CSVs for each model during a --best run.",
     )
-    parser.add_argument(
-        "--folds",
-        type=int,
-        default=cross_runs,
-        help="Number of folds for cross-validation with 80/10/10 split. Default is 0 (no cross-validation).",
-    )
+
     parser.add_argument("--average", help="Averaging existing fold models", action="store_true")
     parser.add_argument(
         "-ap",
@@ -168,6 +164,28 @@ if __name__ == "__main__":
         type=str,
         default=config.get("YOLO", "yolo_base", fallback="yolov8s-cls.pt"),
         help="YOLO base weights identifier (short tag e.g. yv8s, an Ultralytics id e.g. yolov8s-cls.pt, or a local .pt path)",
+    )
+
+    parser.add_argument(
+        "--folds",
+        type=int,
+        default=cross_runs,
+        help="Number of folds for cross-validation with 80/10/10 split. Default is 0 (no cross-validation).",
+    )
+    parser.add_argument(
+        "--folds_csv",
+        type=str,
+        default=config_folds_csv or None,
+        help="Path to an explicit cross-validation folds CSV (columns PNG + foldN with train/dev/test cells). "
+        "When set, the train/dev/test split is read from this file (reproducing a model's original split, with "
+        "pages absent from the CSV excluded) instead of being regenerated. Takes precedence over --folds.",
+    )
+    parser.add_argument(
+        "--fold_column",
+        type=str,
+        default=None,
+        help="Fold column to read from --folds_csv (e.g. fold1). If omitted, it is auto-resolved per "
+        "revision from REVISION_BEST_FOLDS.",
     )
 
     args = parser.parse_args()
@@ -348,7 +366,91 @@ if __name__ == "__main__":
             )
 
         else:
-            if args.folds > 0:
+            if args.folds_csv:
+                fold_column = args.fold_column or REVISION_BEST_FOLDS.get(args.revision)
+
+                if not fold_column:
+                    raise ValueError(
+                        f"No fold column available for revision '{args.revision}'. "
+                        f"Pass --fold_column explicitly or add the revision to REVISION_BEST_FOLDS "
+                        f"(known: {list(REVISION_BEST_FOLDS.keys())})."
+                    )
+
+                print(f"--- Explicit-folds training from {args.folds_csv} (column '{fold_column}') ---")
+
+                (trainfiles, valfiles, testfiles, trainLabels, valLabels, testLabels) = split_data_from_folds(
+                    total_files, total_labels, args.folds_csv, fold_column
+                )
+                os.makedirs(f"{output_dir}/stats", exist_ok=True)
+
+                with open(
+                    f"{output_dir}/stats/{time_stamp}_{revision_model_name_local}_{fold_column}_DATASETS.txt", "w"
+                ) as f:
+                    f.write(f"Training set ({len(trainfiles)} images):\n")
+                    for file in trainfiles:
+                        f.write(f"{file}\n")
+                    f.write(f"\nValidation set ({len(valfiles)} images):\n")
+                    for file in valfiles:
+                        f.write(f"{file}\n")
+                    f.write(f"\nTest set ({len(testfiles)} images):\n")
+                    for file in testfiles:
+                        f.write(f"{file}\n")
+
+                train_loader = classifier.process_images(trainfiles, trainLabels, batch, True)
+                eval_loader = classifier.process_images(valfiles, valLabels, batch, False)
+                test_loader = classifier.process_images(testfiles, testLabels, batch, False)
+
+                print(
+                    f"Training on {len(trainfiles)}, validating on {len(valfiles)}, testing on {len(testfiles)} "
+                    f"(revision {args.revision}, base {args.base})."
+                )
+
+                classifier.train_model(
+                    train_loader,
+                    eval_loader,
+                    output_dir="./model_output",
+                    out_model=revision_model_name_local,
+                    num_epochs=epochs,
+                    learning_rate=learning_rate,
+                    logging_steps=log_step,
+                )
+
+                print(f"--- Evaluating on test set (column '{fold_column}') ---")
+                test_predictions, raw_prediction = classifier.infer_dataloader(test_loader, top_N, raw)
+                test_labels_indices = np.argmax(testLabels, axis=-1).tolist()
+                print("=" * 40)
+                print(
+                    f"TEST SET's correct percentage:\t{round(100 * sum([1 for true, pred in zip(test_labels_indices, test_predictions) if true == pred]) / len(test_labels_indices), 2)}%"
+                )
+                print("=" * 40)
+                print(
+                    classification_report(
+                        test_labels_indices,
+                        test_predictions,
+                        target_names=categories,
+                        labels=list(range(len(categories))),
+                        zero_division=0,
+                    )
+                )
+
+                rdf, raw_df = dataframe_results(testfiles, test_predictions, categories, top_N, raw_prediction)
+                rdf["TRUE"] = [categories[label] for label in test_labels_indices]
+                rdf.sort_values(["FILE", "PAGE"], ascending=[True, True], inplace=True)
+                rdf.to_csv(
+                    f"{output_dir}/tables/{time_stamp}_{len(test_labels_indices)}_{revision_model_name_local}_TEST.csv",
+                    index=False,
+                )
+
+                if raw:
+                    raw_df["TRUE"] = [categories[label] for label in test_labels_indices]
+                    raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
+                    raw_df.to_csv(
+                        f"{output_dir}/tables/{time_stamp}_{len(test_labels_indices)}_{revision_model_name_local}_TEST_RAW.csv",
+                        index=False,
+                    )
+                print(f"Test results for {revision_model_name_local} (column '{fold_column}') saved.")
+
+            elif args.folds > 0:
                 for i in range(args.folds):
                     print(f"--- Cross-Validation Fold {i + 1}/{args.folds} ---")
                     fold_seed = seed + i

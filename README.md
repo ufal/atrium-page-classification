@@ -38,6 +38,7 @@ preparation scripts for PDF to PNG conversion
     + [Dataset maitenance 🧹](#dataset-maintenance-)
   * [For developers 🪛](#for-developers-)
     * [Training 💪](#training-)
+    * [Retraining on explicit dataset folds 🔁](#retraining-on-explicit-dataset-folds-)
     * [Evaluation 🏆](#evaluation-)
   * [Paradata logging](#paradata-logging)
   * [Contacts 📧](#contacts-)
@@ -1555,6 +1556,47 @@ as a separate model for further evaluation or prediction inference. To do this, 
 
 where `model_<revision>` is the common part of the model folders' names, for example, `model_<revision>`. Which will result
 in a new model saved as `model_<revision>a<#folds>` next to its parent models in the models' directory 📁.
+
+
+### Retraining on explicit dataset folds 🔁
+
+When you need to **reproduce a model's original train/dev/test split** rather than regenerate it (for
+example, to refinetune the 5 best models on a slightly reduced dataset and confirm they still reach the
+original accuracy on the **same evaluation data**), use the `--folds_csv` flag. Instead of the stochastic
+80-10-10 selection, the split is read verbatim from a CSV that encodes the original folds explicitly.
+
+The CSV must contain a `PNG` column with the **exact on-disk image filename** (e.g. `CTX192700593-08.png`,
+already zero-padded) and one `foldN` column per split whose cells are `train` / `dev` / `test`. Run one
+command per model — the fold column is **auto-selected per revision**, so you only pass the CSV path:
+
+    python3 run.py --train -rev v1.4 --folds_csv path/to/licensed_crossval_folds_CUT.csv
+    python3 run.py --train -rev v2.4 --folds_csv path/to/licensed_crossval_folds_CUT.csv
+    python3 run.py --train -rev v3.4 --folds_csv path/to/licensed_crossval_folds_CUT.csv
+    python3 run.py --train -rev v4.4 --folds_csv path/to/licensed_crossval_folds_CUT.csv
+    python3 run.py --train -rev v5.4 --folds_csv path/to/licensed_crossval_folds_CUT.csv
+
+The per-revision mapping (single source of truth in [model_registry.py](model_registry.py) `REVISION_BEST_FOLDS`)
+follows the rule `splitN ↔ foldN column ↔ seed = 420 + (N−1)`:
+
+| Revision | Base model                               | Fold column |
+|----------|------------------------------------------|-------------|
+| `v1.4`   | `timm/tf_efficientnetv2_m.in21k_ft_in1k` | `fold1`     |
+| `v2.4`   | `google/vit-base-patch16-224`            | `fold5`     |
+| `v3.4`   | `google/vit-base-patch16-384`            | `fold2`     |
+| `v4.4`   | `timm/regnety_160.swag_ft_in1k`          | `fold1`     |
+| `v5.4`   | `google/vit-large-patch16-384`           | `fold2`     |
+
+> [!NOTE]
+> **Pages absent from the CSV are excluded** from every subset — this is how the removed pages (and any
+> non-listed image on disk) are dropped, so the retraining runs on the reduced dataset automatically. The
+> chosen split is recorded as a `..._<foldN>_DATASETS.txt` file in `result/stats` 📁 and the test-set
+> predictions as a `..._TEST.csv` in `result/tables` 📁, mirroring the cross-validation outputs.
+
+> [!TIP]
+> To read a different column than the per-revision default, pass `--fold_column foldN` explicitly. You can
+> also set a default path under `[TRAIN] folds_csv` in the [config.txt](setup/config.txt) ⚙ file. The
+> `--folds_csv` mode takes precedence over the random `--folds N` cross-validation loop. The folds CSV is
+> **not committed** — stage it locally and point the flag at it.
 
 ### Evaluation 🏆
 

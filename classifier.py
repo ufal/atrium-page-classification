@@ -6,6 +6,7 @@ from collections import OrderedDict, defaultdict
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import torch
 from PIL import Image, ImageEnhance, ImageFilter  # Added Image to imports
 from torch.utils.data import DataLoader, Dataset
@@ -597,6 +598,96 @@ class ImageDataset(Dataset):
         except Exception as e:
             print(image_path, e)
             return None
+
+
+def split_data_from_folds(
+    files: list, labels: list, fold_csv_path: str, fold_column: str, safe_check: bool = True
+) -> (list, list, list, list, list, list):
+    """
+    Splits the data into training, validation, and test sets using an explicit, pre-computed
+    cross-validation split read from a CSV file, instead of regenerating it stochastically
+    (cf. `split_data_80_10_10`). This reproduces the exact original split of a given model so a
+    refinetuned release can be confirmed against the same evaluation data.
+
+    The CSV is expected to carry a `PNG` column holding the exact on-disk image filename
+    (e.g. `CTX192700593-08.png`, already zero-padded — this handles padding that a `file`+`page`
+    pair would not) and one `foldN` column per split whose cells are `train` / `dev` / `test`.
+    On-disk files whose basename is absent from the CSV are dropped from every subset — this is
+    exactly how removed pages (and any non-listed image) are excluded from the run.
+
+    Args:
+        files: List of file paths
+        labels: List of corresponding (one-hot) labels
+        fold_csv_path: Path to the cross-validation folds CSV (staged by the user; not committed)
+        fold_column: Name of the fold column to read the split from (e.g. `fold1`)
+        safe_check: If True, checks for corrupted images and excludes them
+    Returns:
+        tuple: (train_files, val_files, test_files, train_labels, val_labels, test_labels)
+    """
+    if not os.path.isfile(fold_csv_path):
+        raise FileNotFoundError(f"Folds CSV not found: {fold_csv_path}")
+
+    folds_df = pd.read_csv(fold_csv_path)
+    if "PNG" not in folds_df.columns:
+        raise ValueError(f"Folds CSV {fold_csv_path} is missing the required 'PNG' column.")
+    if fold_column not in folds_df.columns:
+        raise ValueError(
+            f"Fold column '{fold_column}' not found in {fold_csv_path}. Available columns: {list(folds_df.columns)}"
+        )
+
+    # Map the exact on-disk filename -> fold value ("train" / "dev" / "test").
+    png_to_fold = dict(zip(folds_df["PNG"].astype(str), folds_df[fold_column].astype(str)))
+
+    if safe_check:
+        print(f"Checking {len(files)} files for corrupted images...")
+
+    train_files, val_files, test_files = [], [], []
+    train_labels, val_labels, test_labels = [], [], []
+    unmatched, corrupted, unknown = 0, 0, 0
+
+    for file, label in zip(files, labels):
+        fold_value = png_to_fold.get(os.path.basename(file))
+        if fold_value is None:
+            # Not listed in the CSV (e.g. one of the removed pages) -> excluded from every subset.
+            unmatched += 1
+            continue
+
+        if safe_check:
+            try:
+                # try to open that image and load the data
+                Image.open(file).load()
+            except Exception as e:
+                print(f"File {file} is corrupted: {e}")
+                corrupted += 1
+                continue
+
+        fold_value = fold_value.strip().lower()
+        if fold_value == "train":
+            train_files.append(file)
+            train_labels.append(label)
+        elif fold_value == "dev":
+            val_files.append(file)
+            val_labels.append(label)
+        elif fold_value == "test":
+            test_files.append(file)
+            test_labels.append(label)
+        else:
+            print(f"File {file} has unrecognized fold value '{fold_value}' in column '{fold_column}', skipping.")
+            unknown += 1
+
+    print(
+        f"Fold '{fold_column}' split -> train: {len(train_files)}, dev: {len(val_files)}, test: {len(test_files)} "
+        f"(of {len(files)} on-disk files; {unmatched} unmatched/excluded, {corrupted} corrupted, {unknown} unknown)"
+    )
+
+    return (
+        np.array(train_files),
+        np.array(val_files),
+        np.array(test_files),
+        np.array(train_labels),
+        np.array(val_labels),
+        np.array(test_labels),
+    )
 
 
 def split_data_80_10_10(
