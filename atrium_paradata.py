@@ -30,6 +30,7 @@ _REPO_URLS: Dict[str, str] = {
     "alto-postprocess": "https://github.com/ufal/atrium-alto-postprocess",
     "nlp-enrich": "https://github.com/ufal/atrium-nlp-enrich",
     "translator": "https://github.com/ufal/atrium-translator",
+    "llm-enrich": "https://github.com/ufal/atrium-llm-enrich",
 }
 
 _ENV_RUNNER_IMAGE = "ATRIUM_RUNNER_IMAGE"
