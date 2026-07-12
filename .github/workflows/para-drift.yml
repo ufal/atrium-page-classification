@@ -7,4 +7,4 @@ on:
 
 jobs:
   check-drift:
-    uses: ufal/atrium-project/.github/workflows/paradata-drift.reusable.yml@test
+    uses: ufal/atrium-project/.github/workflows/para-drift.reusable.yml@test
