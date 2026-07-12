@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="ATRIUM Page Classification API",
-    version="1.4.0-beta",
+    version="1.5.1-beta",
     description="API for classifying historical document page images.",
     lifespan=lifespan,
 )
