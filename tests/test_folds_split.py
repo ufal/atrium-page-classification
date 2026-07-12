@@ -22,8 +22,10 @@ import pandas as pd
 import pytest
 from PIL import Image
 
-from classifier import split_data_from_folds
-from model_registry import REVISION_BEST_FOLDS, REVISION_TO_BASE_MODEL
+pytest.importorskip("torch")
+
+from classifier import split_data_from_folds  # noqa: E402
+from model_registry import REVISION_BEST_FOLDS, REVISION_TO_BASE_MODEL  # noqa: E402
 
 
 # ── helpers ──────────────────────────────────────────────────────────────────

@@ -1,2 +1,15 @@
-pytest>=9.1.1
+# Test-only dependencies for the CPU fast lane — no ML models, no GPU libraries.
+# Install with:  pip install -r requirements-test.txt
+#
+# Modules needing torch (test_classifier, test_inference, test_parallel_best,
+# test_service_api, test_yolo_classifier, test_folds_split, test_run's deep
+# paths) guard themselves with pytest.importorskip and simply skip here; the
+# full suite runs in the GPU environment installed from setup/requirements.txt.
+pytest>=8.0
 pytest-cov>=7.1.0
+numpy
+pandas
+pillow
+matplotlib          # conftest.py forces the Agg backend; utils.py plots
+scikit-learn        # utils.py imports sklearn.metrics at module level
+tensorboard         # test_logs_stat.py (training-log statistics)

@@ -2,23 +2,19 @@ import argparse
 import configparser
 import math
 import os
-import sys
 import time
 from pathlib import Path
 
-import numpy as np
-import pandas as pd
-from sklearn.metrics import classification_report
-
 from atrium_paradata import ParadataLogger
-from classifier import ImageClassifier, average_model_weights, split_data_80_10_10, split_data_from_folds
 from model_registry import CATEGORIES as def_categ
 
 # [NEW] Import from central model registry
 from model_registry import REVISION_BEST_FOLDS, REVISION_BEST_MODELS, REVISION_TO_BASE_MODEL
-from parallel_best import run_best_models  # [add] memory-aware best-models engine + averaging
-from utils import collect_images, confusion_plot, dataframe_results, directory_scraper
-from yolo_classifier import YOLOClassifier
+
+# [Phase 1 / G1] Heavy third-party imports (numpy, pandas, sklearn, and the
+# torch chain via classifier/parallel_best/utils/yolo_classifier) are deferred
+# into main() so that `import run` stays cheap and dependency-free for CLI
+# validation and in-process unit tests.
 
 
 def resolve_fold_column(revision, explicit):
@@ -825,48 +821,30 @@ def resolve_fold_column(revision, explicit):
 #     finally:
 #         _paradata_logger.finalize(_total_inputs)
 
-if __name__ == "__main__":
-    # Initialize the parser
-    config = configparser.ConfigParser()
-    # Read the configuration file
-    config.read(os.path.join(os.path.dirname(__file__), "setup", "config.txt"))
+def build_parser(config):
+    """Construct the CLI argument parser.
 
-    revision_to_base_model = REVISION_TO_BASE_MODEL
+    [Phase 1 / C5] Extracted from the former __main__ block so tests can build
+    the parser in-process. Defaults derive from setup/config.txt values; the
+    same values are (re-)read in main() for the dispatch logic, keeping this
+    function free of side effects.
+    """
     revision_best_models = REVISION_BEST_MODELS
 
-    seed = config.getint("SETUP", "seed")
-    batch = config.getint("SETUP", "batch")  # depends on GPU/CPU capabilities
-    top_N = config.getint("SETUP", "top_N")  # top N predictions, 3 is enough, 11 for "raw" scores (most scores are 0)
-
-    config_base_model = config.get("SETUP", "base_model")  # do not change
+    top_N = config.getint("SETUP", "top_N")
+    config_base_model = config.get("SETUP", "base_model")
     config_format = config.get("SETUP", "files_format")
-
     raw = config.getboolean("SETUP", "raw")
     inner = config.getboolean("SETUP", "inner")
-
     Training = config.getboolean("TRAIN", "Training")
     Testing = config.getboolean("TRAIN", "Testing")
     HF = config.getboolean("HF", "use_hf")
     hf_version = config.get("HF", "revision")
-
     cross_runs = config.getint("TRAIN", "cross_runs")
     config_folds_csv = config.get("TRAIN", "folds_csv", fallback="").strip()
-
-    hf_token = os.environ.get("HF_TOKEN") or config.get("HF", "token", fallback="")
-
-    config_model_name_local = f"model_{hf_version.replace('.', '')}"
-    model_dir = config.get("OUTPUT", "FOLDER_MODELS")
-    config_model_path = f"{model_dir}/{config_model_name_local}"
-
-    config_input_dir = config.get("INPUT", "FOLDER_INPUT")
-    chunk_size = config.getint("INPUT", "chunk_size")  # number of IMAGES per chunk written at once
     config_chunking = config.getboolean("INPUT", "chunking")
-
-    cur = Path(__file__).resolve().parent  # directory with this script
-    output_dir = Path(config.get("OUTPUT", "FOLDER_RESULTS"))
-    cp_dir = Path(config.get("OUTPUT", "FOLDER_CPOINTS"))
-
-    time_stamp = time.strftime("%Y%m%d-%H%M")  # for results files
+    model_dir = config.get("OUTPUT", "FOLDER_MODELS")
+    config_model_path = f"{model_dir}/model_{hf_version.replace('.', '')}"
 
     parser = argparse.ArgumentParser(description="Page sorter based on ViT / YOLO-cls")
     parser.add_argument("-f", "--file", type=str, default=None, help="Single page image path")
@@ -993,10 +971,53 @@ if __name__ == "__main__":
         "revision from REVISION_BEST_FOLDS.",
     )
 
-    args = parser.parse_args()
+    return parser
+
+
+def main(argv=None):
+    """CLI entry point. Returns a process exit code (0 on success)."""
+    # Initialize the parser
+    config = configparser.ConfigParser()
+    # Read the configuration file
+    config.read(os.path.join(os.path.dirname(__file__), "setup", "config.txt"))
+
+    revision_to_base_model = REVISION_TO_BASE_MODEL
+    revision_best_models = REVISION_BEST_MODELS
+
+    seed = config.getint("SETUP", "seed")
+    batch = config.getint("SETUP", "batch")  # depends on GPU/CPU capabilities
+    top_N = config.getint("SETUP", "top_N")  # top N predictions, 3 is enough, 11 for "raw" scores (most scores are 0)
+
+    config_base_model = config.get("SETUP", "base_model")  # do not change
+
+
+    hf_version = config.get("HF", "revision")
+
+
+
+    config_model_name_local = f"model_{hf_version.replace('.', '')}"
+    model_dir = config.get("OUTPUT", "FOLDER_MODELS")
+    config_model_path = f"{model_dir}/{config_model_name_local}"
+
+    config_input_dir = config.get("INPUT", "FOLDER_INPUT")
+    chunk_size = config.getint("INPUT", "chunk_size")  # number of IMAGES per chunk written at once
+
+    cur = Path(__file__).resolve().parent  # directory with this script
+    output_dir = Path(config.get("OUTPUT", "FOLDER_RESULTS"))
+    cp_dir = Path(config.get("OUTPUT", "FOLDER_CPOINTS"))
+
+    time_stamp = time.strftime("%Y%m%d-%H%M")  # for results files
+
+    parser = build_parser(config)
+    args = parser.parse_args(argv)
+
+    # [Phase 1] Early CLI validation - fail fast before any heavy import,
+    # model download, or filesystem side effect.
+    if args.topn < 1 or args.topn > len(def_categ):
+        raise ValueError(f"Invalid --topn value {args.topn}: must be between 1 and {len(def_categ)}.")
 
     input_dir = Path(config_input_dir) if args.directory is None else Path(args.directory)
-    Training, top_N, raw, chunked_result_record = args.train, args.topn, args.raw, args.chunk
+    top_N, raw, chunked_result_record = args.topn, args.raw, args.chunk
     args.folds = 0 if not args.train else args.folds
     args.average = False if args.average_pattern is None else args.average
 
@@ -1022,7 +1043,7 @@ if __name__ == "__main__":
 
         revision_model_name_local = f"model_{args.revision.replace('.', '')}"
         args.model = f"{model_dir}/{revision_model_name_local}"
-        rev_code = key = next(key for key in revision_to_base_model.keys() if args.revision.startswith(key))
+        rev_code = next(key for key in revision_to_base_model.keys() if args.revision.startswith(key))
 
         if args.base != config_base_model:
             print(
@@ -1087,6 +1108,8 @@ if __name__ == "__main__":
         elif args.dir or args.directory is not None:
             if Path(input_dir).is_dir():
                 if args.inner:
+                    from utils import directory_scraper  # lazy: utils pulls matplotlib/sklearn
+
                     _test_images = directory_scraper(Path(input_dir), args.file_format)
                 else:
                     _test_images = [f for f in os.listdir(input_dir) if not f.startswith(".")]
@@ -1096,15 +1119,25 @@ if __name__ == "__main__":
                 f"No valid image files found to process in {input_dir if (args.dir or args.directory) else args.file}. Exiting."
             )
             _paradata_logger.finalize(0)
-            sys.exit(0)
+            return 0
     # ──────────────────────────────────────────────────────────────────────────
 
+
+    # [Phase 1 / G1] Heavy imports deferred to this point: everything above is
+    # argument validation and cheap filesystem prep, testable without ML deps.
+    import numpy as np
+    import pandas as pd
+    from sklearn.metrics import classification_report
+
+    from classifier import ImageClassifier, average_model_weights, split_data_80_10_10, split_data_from_folds
+    from parallel_best import run_best_models  # [add] memory-aware best-models engine + averaging
+    from utils import collect_images, confusion_plot, dataframe_results, directory_scraper
+    from yolo_classifier import YOLOClassifier
     # ── data loading (train / eval) ───────────────────────────────────────────
     if args.train or args.eval:
         epochs = config.getint("TRAIN", "epochs")
         max_categ = config.getint("TRAIN", "max_categ")
         log_step = config.getint("TRAIN", "log_step")
-        test_size = config.getfloat("TRAIN", "test_size")
         learning_rate = config.getfloat("TRAIN", "lr")
 
         data_dir = config.get("TRAIN", "FOLDER_PAGES")
@@ -1622,3 +1655,9 @@ if __name__ == "__main__":
 
     finally:
         _paradata_logger.finalize(_total_inputs)
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
