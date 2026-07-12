@@ -20,7 +20,12 @@ No GPU, no trained model, no network required.
 
 import struct
 
-from logs_stat import (
+import pytest
+
+pytest.importorskip("pandas")
+pytest.importorskip("tensorboard")
+
+from logs_stat import (  # noqa: E402
     _iter_tfrecords,
     extract_gpu_node,
     get_base_model_from_revision,

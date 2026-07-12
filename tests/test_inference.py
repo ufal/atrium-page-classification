@@ -3,7 +3,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from PIL import Image
 
-from service.inference import ModelManager
+pytest.importorskip("torch")
+
+from service.inference import ModelManager  # noqa: E402
 
 
 @pytest.fixture

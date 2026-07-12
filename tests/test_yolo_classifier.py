@@ -1,6 +1,9 @@
 import numpy as np
+import pytest
 
-from yolo_classifier import YOLOClassifier, build_yolo_dataset
+pytest.importorskip("torch")
+
+from yolo_classifier import YOLOClassifier, build_yolo_dataset  # noqa: E402
 
 
 def test_yolo_resolve_checkpoint():

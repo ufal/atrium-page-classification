@@ -2,6 +2,15 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
+# These tests shell out to run.py, which imports torch/sklearn/pandas at module
+# top — the child process crashes before argparse in a torch-free environment.
+# Skip until the planned run.py refactor (lazy heavy imports + in-process
+# main(argv)) makes a dependency-free CLI lane possible.
+pytest.importorskip("torch")
+pytest.importorskip("sklearn")
+
 RUN_SCRIPT = Path(__file__).parent.parent / "run.py"
 
 

@@ -1,3 +1,4 @@
+import configparser
 import io
 import logging
 import os
@@ -24,6 +25,19 @@ MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB limit for safety
 MAX_PDF_PAGES = 50
 
 
+def _read_tool_version() -> str:
+    """Read the tool version from setup/para_config.txt [tool] section.
+
+    Single source of truth — security.reusable.yml already validates this value
+    against CITATION.cff and the release tag, so the API version can never drift
+    from the released version again.
+    """
+    config = configparser.ConfigParser()
+    config.read(Path(__file__).resolve().parent.parent / "setup" / "para_config.txt", encoding="utf-8")
+    version = config.get("tool", "version", fallback="unknown")
+    return version[1:] if version.lower().startswith("v") else version
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Warm up models on startup
@@ -36,7 +50,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="ATRIUM Page Classification API",
-    version="1.5.1-beta",
+    version=_read_tool_version(),
     description="API for classifying historical document page images.",
     lifespan=lifespan,
 )
@@ -86,7 +100,7 @@ def get_info():
     model_info = {v: manager.get_model_details(v) for v in manager.available_versions}
     model_info["all"] = manager.get_model_details("all")
 
-    return {"categories": CATEGORIES, "available_models": model_info}
+    return {"version": app.version, "categories": CATEGORIES, "available_models": model_info}
 
 
 @app.post("/predict_image", response_model=ImageResponse)

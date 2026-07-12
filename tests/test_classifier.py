@@ -17,9 +17,10 @@ No GPU, no trained model, and no network access required.
 
 import numpy as np
 import pytest
-import torch
 
-from classifier import custom_collate, split_data_80_10_10
+torch = pytest.importorskip("torch")
+
+from classifier import custom_collate, split_data_80_10_10  # noqa: E402
 
 
 def test_custom_collate_filters_none():

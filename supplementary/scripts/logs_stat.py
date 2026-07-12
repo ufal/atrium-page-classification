@@ -21,9 +21,11 @@ import pandas as pd
 try:
     from tensorboard.backend.event_processing import event_accumulator
     from tensorboard.compat.proto import event_pb2
-except ImportError:
-    print("Error: tensorboard package not found.  Install with:  pip install tensorboard")
-    exit(1)
+except ImportError as exc:
+    # A module-level exit() raises SystemExit in any importer — pytest collection
+    # dies with INTERNALERROR. Raising ImportError keeps the same message for CLI
+    # users and lets tests skip cleanly via pytest.importorskip.
+    raise ImportError("tensorboard package not found.  Install with:  pip install tensorboard") from exc
 
 
 # NOTE: keys follow the TRAINING-TIME revision scheme (run.py:revision_to_base_model),

@@ -9,7 +9,9 @@ from PIL import Image
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from service.api import MAX_UPLOAD_BYTES, app
+pytest.importorskip("torch")
+
+from service.api import MAX_UPLOAD_BYTES, app  # noqa: E402
 
 client = TestClient(app)
 

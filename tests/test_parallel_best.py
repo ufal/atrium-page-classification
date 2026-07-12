@@ -23,9 +23,12 @@ helpers) needs only pandas.
 """
 
 import pandas as pd
+import pytest
+
+pytest.importorskip("torch")
 
 # parallel_best lives in the project root (on sys.path via conftest.py)
-from parallel_best import merge_best, pack_models, registry_is_fresh
+from parallel_best import merge_best, pack_models, registry_is_fresh  # noqa: E402
 
 
 # ════════════════════════════════════════════════════════════════════════════
