@@ -105,12 +105,18 @@ The script is idempotent and health-waits on `/info`. Port defaults to `8000`
 
 ## Client usage 🪶
 
+For batch work without the HTTP layer, the bundled inference-only `run.py` drives the
+same models directly (this is also what the Docker image's default command wraps):
+
 ```bash
-python3 scripts/atrium_classify.py page.png                            # ensemble, top-3
-python3 scripts/atrium_classify.py document.pdf --topn 5 --format csv  # PDF, per page
-python3 scripts/atrium_classify.py scans/*.png --version v4.3          # single model
-python3 scripts/atrium_classify.py --info                              # models & categories
+python3 run.py --hf -rev v4.3                 # download a model (no inference)
+python3 run.py -f page.png --hf               # single image, top-N to stdout
+python3 run.py -d scans/ --hf                 # directory → CSV in result/tables/
+python3 run.py -d scans/ --best --hf          # best-5 ensemble, averaged CSV
 ```
+
+Training, evaluation, and dataset tooling are intentionally **not** on this branch -
+see the [`test`](https://github.com/ufal/atrium-page-classification/tree/test) branch.
 
 Output columns: `FILE, PAGE, RANK, LABEL, SCORE`. The 11 categories 🪧 and their routing
 semantics are documented in [`SKILL.md`](SKILL.md#categories-).

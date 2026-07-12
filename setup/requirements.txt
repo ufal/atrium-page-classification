@@ -1,13 +1,11 @@
-evaluate>=0.4.6
-configparser>=7.2.0
-matplotlib>=3.11.0
 numpy>=2.4.0,<3.0
 pandas>=3.0.3
 Pillow>=12.3.0
-scikit-learn>=1.9.0
 torch==2.7.1
 torchvision==0.22.1
+# transformers 5.x constructs models on the `meta` device, which crashes the
+# timm builders for the RegNetY (v4.3) and EfficientNetV2 (v1.3) checkpoints
+# used by --best; the <5 pin is the meta-device fix and must stay consistent
+# across every requirements file (see Dockerfile note).
 transformers>=4.57.6,<5
 timm>=1.0.27
-tensorboard>=2.21.0
-ultralytics>=8.4.90
