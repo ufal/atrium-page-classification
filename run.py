@@ -821,6 +821,7 @@ def resolve_fold_column(revision, explicit):
 #     finally:
 #         _paradata_logger.finalize(_total_inputs)
 
+
 def build_parser(config):
     """Construct the CLI argument parser.
 
@@ -990,10 +991,7 @@ def main(argv=None):
 
     config_base_model = config.get("SETUP", "base_model")  # do not change
 
-
     hf_version = config.get("HF", "revision")
-
-
 
     config_model_name_local = f"model_{hf_version.replace('.', '')}"
     model_dir = config.get("OUTPUT", "FOLDER_MODELS")
@@ -1122,7 +1120,6 @@ def main(argv=None):
             return 0
     # ──────────────────────────────────────────────────────────────────────────
 
-
     # [Phase 1 / G1] Heavy imports deferred to this point: everything above is
     # argument validation and cheap filesystem prep, testable without ML deps.
     import numpy as np
@@ -1133,6 +1130,7 @@ def main(argv=None):
     from parallel_best import run_best_models  # [add] memory-aware best-models engine + averaging
     from utils import collect_images, confusion_plot, dataframe_results, directory_scraper
     from yolo_classifier import YOLOClassifier
+
     # ── data loading (train / eval) ───────────────────────────────────────────
     if args.train or args.eval:
         epochs = config.getint("TRAIN", "epochs")
