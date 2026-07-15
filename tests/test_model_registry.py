@@ -11,6 +11,12 @@ run in the CPU fast lane.
 first `startswith` match in dict-insertion order. Because the registry relies on
 that "first match wins" ordering, a data-only reordering can silently mis-route a
 revision to the wrong base model — exactly what these tests pin down.
+
+Current ordering facts (verified against live data):
+- the v*.4 retraining block precedes the generic single-dot prefixes → safe;
+- 'v3.' precedes 'v3.3' and 'v5.' precedes 'v5.3', but each pair maps to the
+  SAME base model, so the shadowing is currently harmless;
+- 'v4.' precedes 'v4.3' AND they map to DIFFERENT models — the one live bug.
 """
 
 import pytest
@@ -23,7 +29,6 @@ from model_registry import (
     REVISION_TO_BASE_MODEL,
 )
 
-EFFNETV2_L = "timm/tf_efficientnetv2_l.in21k_ft_in1k"
 REGNETY_160 = "timm/regnety_160.swag_ft_in1k"
 
 
@@ -82,18 +87,51 @@ def test_unknown_revision_raises():
         _resolve("v99.9-does-not-exist")
 
 
+# ── Shadowed '.3' keys: v3/v5 are harmless, v4 is the live bug ───────────────
+def test_v3_v5_shadowing_is_currently_harmless():
+    """'v3.' precedes 'v3.3' and 'v5.' precedes 'v5.3' (same wrong order as the
+    v4 pair), but each generic/specific pair maps to the SAME base model, so
+    resolution of e.g. 'v3.3.1' is unaffected. This pins that safety: if either
+    specific model is ever changed without also fixing the key ordering, this
+    test fails immediately instead of the bug shipping silently.
+    """
+    assert REVISION_TO_BASE_MODEL["v3."] == REVISION_TO_BASE_MODEL["v3.3"]
+    assert REVISION_TO_BASE_MODEL["v5."] == REVISION_TO_BASE_MODEL["v5.3"]
+
+
 # ── Known latent bug (issue #15 follow-up) ──────────────────────────────────
 @pytest.mark.xfail(
     strict=True,
     reason=(
-        "Generic 'v4.' is inserted before 'v4.3' in REVISION_TO_BASE_MODEL, so a "
-        "non-exact sub-revision like 'v4.3.1' matches 'v4.' first and resolves to "
-        "effnetv2_l instead of regnety_160. Reorder the generic '.3' block "
-        "(specific before generic, like the v*.4 block) to fix, then drop xfail."
+        "Generic 'v4.' is inserted before 'v4.3' in REVISION_TO_BASE_MODEL and they "
+        "map to different models, so a non-exact sub-revision like 'v4.3.1' matches "
+        "'v4.' first and resolves to effnetv2_l instead of regnety_160 (v4 is the "
+        "only divergent pair — see test_v3_v5_shadowing_is_currently_harmless). "
+        "Reorder specific-before-generic, like the v*.4 block, then drop this xfail."
     ),
 )
 def test_sub_revision_of_v4_3_resolves_to_specific_model():
     assert _resolve("v4.3.1") == REGNETY_160
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "Structural form of the same bug: no generic key may precede a specific key "
+        "it shadows while mapping to a different model. Currently violated only by "
+        "('v4.', 'v4.3'). Fixing the ordering flips this to XPASS — remove both "
+        "xfail markers together."
+    ),
+)
+def test_no_generic_key_shadows_a_divergent_specific_key():
+    keys = list(REVISION_TO_BASE_MODEL)
+    shadowed = []
+    for i, spec in enumerate(keys):
+        for gen in keys[:i]:
+            if spec != gen and spec.startswith(gen):
+                if REVISION_TO_BASE_MODEL[spec] != REVISION_TO_BASE_MODEL[gen]:
+                    shadowed.append((gen, spec))
+    assert shadowed == [], f"generic keys shadow divergent specific keys: {shadowed}"
 
 
 # ── Cross-table consistency ─────────────────────────────────────────────────
