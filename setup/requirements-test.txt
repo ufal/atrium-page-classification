@@ -5,7 +5,7 @@
 # test_service_api, test_yolo_classifier, test_folds_split, test_run's deep
 # paths) guard themselves with pytest.importorskip and simply skip here; the
 # full suite runs in the GPU environment installed from setup/requirements.txt.
-pytest>=8.0
+pytest>=9.1.1
 pytest-cov>=7.1.0
 numpy
 pandas
