@@ -217,7 +217,7 @@ for standard unit tests. Heavy tests that do require models or network access ar
 `slow` and are excluded from the default run.
 
 ```bash
-pip install -r requirements-test.txt  # pytest>=8.0 and pytest-cov only
+pip install -r setup/requirements-test.txt  # pytest>=8.0 and pytest-cov only
 ```
 
 ```bash
