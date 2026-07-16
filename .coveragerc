@@ -6,4 +6,6 @@ omit =
     *paradata.py
 
 [report]
+# Ratchet: set below the measured fast-lane baseline (2026-07-16, issue atrium-project#10)
+fail_under = 28
 show_missing = True
