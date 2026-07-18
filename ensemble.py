@@ -21,7 +21,9 @@ def average_rdfs(
 
     for rdf in all_rdfs.values():
         class_cols = [c for c in rdf.columns if str(c).startswith("CLASS-")]
-        indices = [int(c.split("-")[1]) for c in class_cols if c.split("-")[1].isdigit()]
+        indices = [
+            int(c.split("-")[1]) for c in class_cols if c.split("-")[1].isdigit()
+        ]
         if not indices:
             continue
 
@@ -34,9 +36,11 @@ def average_rdfs(
         df_subset = rdf[cols_to_keep].copy()
 
         if not any(c.startswith("SCORE-") for c in df_subset.columns):
-            melted = (df_subset.rename(columns={"CLASS-1": "CLASS"}).assign(SCORE=1.0).dropna(subset=["CLASS"]))[
-                ["FILE", "PAGE", "CLASS", "SCORE"]
-            ]
+            melted = (
+                df_subset.rename(columns={"CLASS-1": "CLASS"})
+                .assign(SCORE=1.0)
+                .dropna(subset=["CLASS"])
+            )[["FILE", "PAGE", "CLASS", "SCORE"]]
         else:
             melted = (
                 pd.wide_to_long(
@@ -51,12 +55,16 @@ def average_rdfs(
                 .dropna(subset=["CLASS"])
             )
 
-        melted = melted.groupby(["FILE", "PAGE", "CLASS"], as_index=False)["SCORE"].max()
+        melted = melted.groupby(["FILE", "PAGE", "CLASS"], as_index=False)[
+            "SCORE"
+        ].max()
         long_dfs.append(melted)
 
     if not long_dfs:
         empty_cols = (
-            ["FILE", "PAGE"] + [f"CLASS-{i}" for i in range(1, top_N + 1)] + [f"SCORE-{i}" for i in range(1, top_N + 1)]
+            ["FILE", "PAGE"]
+            + [f"CLASS-{i}" for i in range(1, top_N + 1)]
+            + [f"SCORE-{i}" for i in range(1, top_N + 1)]
         )
         return pd.DataFrame(columns=empty_cols)
 
@@ -65,7 +73,9 @@ def average_rdfs(
     grouped = combined.groupby(["FILE", "PAGE", "CLASS"])["SCORE"].sum().reset_index()
     grouped["AVG_SCORE"] = (grouped["SCORE"] / num_models).clip(upper=1.0)
 
-    grouped.sort_values(["FILE", "PAGE", "AVG_SCORE"], ascending=[True, True, False], inplace=True)
+    grouped.sort_values(
+        ["FILE", "PAGE", "AVG_SCORE"], ascending=[True, True, False], inplace=True
+    )
     grouped["rank"] = grouped.groupby(["FILE", "PAGE"]).cumcount() + 1
     top_n_df = grouped[grouped["rank"] <= top_N].copy()
 
@@ -90,14 +100,22 @@ def average_rdfs(
         if score_col in result.columns and class_col in result.columns:
             result.loc[result[score_col] == "", class_col] = ""
 
-    order = [r for r in revision_best_models if r in all_rdfs] if revision_best_models else list(all_rdfs.keys())
+    order = (
+        [r for r in revision_best_models if r in all_rdfs]
+        if revision_best_models
+        else list(all_rdfs.keys())
+    )
     vote_cols: List[str] = []
     for rev in order:
         rdf = all_rdfs[rev]
         if "CLASS-1" not in rdf.columns:
             continue
         col = _vote_col_name(rev)
-        vcol = rdf[["FILE", "PAGE", "CLASS-1"]].drop_duplicates(["FILE", "PAGE"]).rename(columns={"CLASS-1": col})
+        vcol = (
+            rdf[["FILE", "PAGE", "CLASS-1"]]
+            .drop_duplicates(["FILE", "PAGE"])
+            .rename(columns={"CLASS-1": col})
+        )
         result = result.merge(vcol, on=["FILE", "PAGE"], how="left")
         vote_cols.append(col)
 
@@ -124,6 +142,9 @@ def average_prediction_dicts(
         for item in preds:
             aggregated_scores[item["label"]] += item["score"]
 
-    final_results = [{"label": lbl, "score": min(s / num_models, 1.0)} for lbl, s in aggregated_scores.items()]
+    final_results = [
+        {"label": lbl, "score": min(s / num_models, 1.0)}
+        for lbl, s in aggregated_scores.items()
+    ]
     final_results.sort(key=lambda x: x["score"], reverse=True)
     return final_results[:top_n]

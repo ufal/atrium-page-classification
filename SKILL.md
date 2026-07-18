@@ -51,9 +51,9 @@ extraction for `LINE_*`).
 ### 1. Ensure the server is running
 
 ```bash
-bash scripts/serve.sh          # Docker CPU (or local uvicorn fallback)
-bash scripts/serve.sh --gpu    # Docker with GPU
-bash scripts/serve.sh --local  # force local uvicorn (no Docker)
+bash scripts/server.sh          # Docker CPU (or local uvicorn fallback)
+bash scripts/server.sh --gpu    # Docker with GPU
+bash scripts/server.sh --local  # force local uvicorn (no Docker)
 ```
 
 The script is idempotent: if `GET /info` already answers, it exits immediately. It waits

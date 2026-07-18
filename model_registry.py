@@ -70,9 +70,29 @@ REVISION_BEST_FOLDS = {
 
 # Hardware/torch/batch-independent model facts (fp32 weights, params only).
 MODEL_STATIC = {
-    "v1.3": {"base_model": "timm/tf_efficientnetv2_m.in21k_ft_in1k", "resolution": 384, "params_bytes": 211489788},
-    "v2.3": {"base_model": "google/vit-base-patch16-224", "resolution": 224, "params_bytes": 343228460},
-    "v3.3": {"base_model": "google/vit-base-patch16-384", "resolution": 384, "params_bytes": 344395820},
-    "v4.3": {"base_model": "timm/regnety_160.swag_ft_in1k", "resolution": 384, "params_bytes": 322393660},
-    "v5.3": {"base_model": "google/vit-large-patch16-384", "resolution": 384, "params_bytes": 1214808108},
+    "v1.3": {
+        "base_model": "timm/tf_efficientnetv2_m.in21k_ft_in1k",
+        "resolution": 384,
+        "params_bytes": 211489788,
+    },
+    "v2.3": {
+        "base_model": "google/vit-base-patch16-224",
+        "resolution": 224,
+        "params_bytes": 343228460,
+    },
+    "v3.3": {
+        "base_model": "google/vit-base-patch16-384",
+        "resolution": 384,
+        "params_bytes": 344395820,
+    },
+    "v4.3": {
+        "base_model": "timm/regnety_160.swag_ft_in1k",
+        "resolution": 384,
+        "params_bytes": 322393660,
+    },
+    "v5.3": {
+        "base_model": "google/vit-large-patch16-384",
+        "resolution": 384,
+        "params_bytes": 1214808108,
+    },
 }

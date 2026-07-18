@@ -54,7 +54,9 @@ class ImageDataset(Dataset):
 
         if ignored_paths is not None:
             # Filter out ignored paths
-            self.image_paths = [path for path in image_paths if path not in ignored_paths]
+            self.image_paths = [
+                path for path in image_paths if path not in ignored_paths
+            ]
 
     def __len__(self) -> int:
         return len(self.image_paths)
@@ -84,7 +86,9 @@ class ImageClassifier:
     # "./chekcpoint" to "./checkpoint", matching config.txt FOLDER_CPOINTS and
     # avoiding a stray misspelled cache directory (service/inference.py
     # constructs ImageClassifier without store_dir, so it relied on this default).
-    def __init__(self, checkpoint: str, num_labels: int, store_dir: str = "./checkpoint"):
+    def __init__(
+        self, checkpoint: str, num_labels: int, store_dir: str = "./checkpoint"
+    ):
         """
         Initialize the image classifier with the specified checkpoint.
         """
@@ -140,7 +144,9 @@ class ImageClassifier:
         if image.mode != "RGB":
             # Convert RGBA to RGB
             image_alpha = image.convert("RGBA")
-            new_image = Image.new("RGBA", image_alpha.size, "WHITE")  # Create a white rgba background
+            new_image = Image.new(
+                "RGBA", image_alpha.size, "WHITE"
+            )  # Create a white rgba background
             new_image.paste(image_alpha, (0, 0), image_alpha)
             image = new_image.convert("RGB")
         tensor = self.eval_transforms(image).unsqueeze(0).to(self.device)
@@ -170,20 +176,30 @@ class ImageClassifier:
             probabilities = torch.nn.functional.softmax(logits, dim=-1)
             top_n_probs, top_n_indices = torch.topk(probabilities, top_n, dim=-1)
             top_n_probs = top_n_probs / top_n_probs.sum()
-        return list(zip(top_n_indices.squeeze().tolist(), top_n_probs.squeeze().tolist()))
+        return list(
+            zip(top_n_indices.squeeze().tolist(), top_n_probs.squeeze().tolist())
+        )
 
-    def create_dataloader(self, image_paths: list, batch_size: int, ignored_paths: list = None) -> DataLoader:
+    def create_dataloader(
+        self, image_paths: list, batch_size: int, ignored_paths: list = None
+    ) -> DataLoader:
         """
         Turn an input list of image paths into a DataLoader without labels.
         """
-        dataset = ImageDataset(image_paths, transform=self.eval_transforms, ignored_paths=ignored_paths)
-        dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=custom_collate)
+        dataset = ImageDataset(
+            image_paths, transform=self.eval_transforms, ignored_paths=ignored_paths
+        )
+        dataloader = DataLoader(
+            dataset, batch_size=batch_size, shuffle=False, collate_fn=custom_collate
+        )
         print(
             f"Dataloader of directory dataset is ready:\t{len(image_paths)} images split into {len(dataloader)} batches of size {batch_size}"
         )
         return dataloader
 
-    def infer_dataloader(self, dataloader, top_n: int, raw: bool = False) -> (list, list):
+    def infer_dataloader(
+        self, dataloader, top_n: int, raw: bool = False
+    ) -> (list, list):
         """
         Perform inference on a DataLoader, optionally with top-N predictions.
         """
@@ -192,7 +208,9 @@ class ImageClassifier:
         raw_scores = []
 
         start_time = datetime.datetime.now()
-        print(f"\tProcessing of {len(dataloader)} batches started at\t{start_time.strftime('%Y-%m-%d %H:%M:%S')}")
+        print(
+            f"\tProcessing of {len(dataloader)} batches started at\t{start_time.strftime('%Y-%m-%d %H:%M:%S')}"
+        )
         with torch.no_grad():
             for ib, batch in enumerate(dataloader):
                 # Check if batch is None or the tuple (None, None) returned by custom_collate
@@ -207,17 +225,25 @@ class ImageClassifier:
                 probabilities = torch.nn.functional.softmax(logits, dim=-1)
                 raw_scores.extend(probabilities.tolist())
                 if top_n > 1:
-                    top_n_probs, top_n_indices = torch.topk(probabilities, top_n, dim=-1)
+                    top_n_probs, top_n_indices = torch.topk(
+                        probabilities, top_n, dim=-1
+                    )
                     for indices, probs in zip(top_n_indices, top_n_probs):
                         top_n_probs_normalized = probs / probs.sum()
-                        predictions.append(list(zip(indices.tolist(), top_n_probs_normalized.tolist())))
+                        predictions.append(
+                            list(zip(indices.tolist(), top_n_probs_normalized.tolist()))
+                        )
                 else:
                     predicted_class_idx = logits.argmax(-1).tolist()
                     predictions.extend(predicted_class_idx)
 
                 if ib % 50 == 0:
-                    elapsed_minutes = (datetime.datetime.now() - start_time).total_seconds() / 60
-                    print(f"{ib}-th batch\t\tProcessed {len(predictions)} images in\t{elapsed_minutes:.2f} min")
+                    elapsed_minutes = (
+                        datetime.datetime.now() - start_time
+                    ).total_seconds() / 60
+                    print(
+                        f"{ib}-th batch\t\tProcessed {len(predictions)} images in\t{elapsed_minutes:.2f} min"
+                    )
 
         end_time = datetime.datetime.now()
         total_minutes = (end_time - start_time).total_seconds() / 60
@@ -227,7 +253,9 @@ class ImageClassifier:
         # divided by len(predictions) unconditionally → ZeroDivisionError.
         n_pred = len(predictions)
         if n_pred == 0:
-            print("\tWARNING: no images were successfully processed (all batches skipped).")
+            print(
+                "\tWARNING: no images were successfully processed (all batches skipped)."
+            )
             return predictions, (None if not raw else raw_scores)
 
         avg_seconds_per_image = (end_time - start_time).total_seconds() / n_pred
@@ -235,7 +263,9 @@ class ImageClassifier:
         print(
             f"\tProcessing of {len(dataloader)} batches ({n_pred} images) finished at\t{end_time.strftime('%Y-%m-%d %H:%M:%S')}"
         )
-        print(f"\tTotal time: {total_minutes:.2f} min\n\tAverage time: {avg_seconds_per_image:.4f} sec/img")
+        print(
+            f"\tTotal time: {total_minutes:.2f} min\n\tAverage time: {avg_seconds_per_image:.4f} sec/img"
+        )
 
         raw_scores = None if not raw else raw_scores
         return predictions, raw_scores
@@ -256,7 +286,9 @@ class ImageClassifier:
         Load a fine-tuned model and processor from the specified directory.
         """
         self.processor = AutoImageProcessor.from_pretrained(load_directory)
-        self.model = AutoModelForImageClassification.from_pretrained(load_directory).to(self.device)
+        self.model = AutoModelForImageClassification.from_pretrained(load_directory).to(
+            self.device
+        )
         print(f"Model and processor loaded from {load_directory}")
 
     def load_from_hub(self, repo_id: str, revision: str = "main"):
@@ -267,7 +299,9 @@ class ImageClassifier:
             repo_id (str): The name of the repository on the Hugging Face Hub.
             revision (str, optional): The revision of the repository to load. Defaults to "main".
         """
-        print(f"Accessing the Hugging Face Hub repository {repo_id}, revision {revision}...")
+        print(
+            f"Accessing the Hugging Face Hub repository {repo_id}, revision {revision}..."
+        )
 
         model = AutoModelForImageClassification.from_pretrained(
             repo_id,

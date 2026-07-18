@@ -19,16 +19,24 @@ import pandas as pd
 
 
 # get list of all files in the folder and nested folders by file format
-def directory_scraper(folder_path: Path, file_format: str = "png", file_list: list = None) -> list[str]:
+def directory_scraper(
+    folder_path: Path, file_format: str = "png", file_list: list = None
+) -> list[str]:
     if file_list is None:
         file_list = []
     file_list += list(folder_path.rglob(f"*.{file_format}"))
-    print(f"[ {file_format.upper()} ] \tFrom directory {folder_path} collected {len(file_list)} {file_format} files")
+    print(
+        f"[ {file_format.upper()} ] \tFrom directory {folder_path} collected {len(file_list)} {file_format} files"
+    )
     return file_list
 
 
 def dataframe_results(
-    test_images: list, test_predictions: list, categories: list, top_N: int, raw_scores: list = None
+    test_images: list,
+    test_predictions: list,
+    categories: list,
+    top_N: int,
+    raw_scores: list = None,
 ) -> (pd.DataFrame, pd.DataFrame):
     results = []
     raws = []
@@ -56,15 +64,27 @@ def dataframe_results(
             page_num = 1  # Default value or handle error as needed
 
         # --- Logic below remains unchanged ---
-        labels = [categories[i[0]] for i in predict_scores] if top_N > 1 else [categories[predict_scores]]
-        scores = [round(i[1], 3) for i in predict_scores] if top_N > 1 else [round(predict_scores, 3)]
+        labels = (
+            [categories[i[0]] for i in predict_scores]
+            if top_N > 1
+            else [categories[predict_scores]]
+        )
+        scores = (
+            [round(i[1], 3) for i in predict_scores]
+            if top_N > 1
+            else [round(predict_scores, 3)]
+        )
 
         res = [document, page_num] + labels + scores
         results.append(res)
         if raw_scores is not None:
             raws.append([document, page_num])
 
-    col = ["FILE", "PAGE"] + [f"CLASS-{j + 1}" for j in range(top_N)] + [f"SCORE-{j + 1}" for j in range(top_N)]
+    col = (
+        ["FILE", "PAGE"]
+        + [f"CLASS-{j + 1}" for j in range(top_N)]
+        + [f"SCORE-{j + 1}" for j in range(top_N)]
+    )
     rdf = pd.DataFrame(results, columns=col)
 
     if top_N == 1:

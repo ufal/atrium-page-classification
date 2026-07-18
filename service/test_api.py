@@ -8,7 +8,9 @@ import requests
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Test the Atrium Page Classification API")
+    parser = argparse.ArgumentParser(
+        description="Test the Atrium Page Classification API"
+    )
     parser.add_argument("-f", required=True, help="Path to file (image or PDF)")
     parser.add_argument("-v", default="v4.3", help="Model version (e.g., v5.3, all)")
     parser.add_argument("--top", type=int, default=3, help="Top N predictions")
