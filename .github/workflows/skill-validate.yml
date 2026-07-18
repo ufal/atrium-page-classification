@@ -1,0 +1,16 @@
+# Agent-Skill branch validation (atrium-project#31, strategy §12.3).
+# Lives on the `agent-skill` branch of atrium-page-classification; calls the hub reusable workflow.
+name: Skill Branch Validation
+
+on:
+  push:
+    branches: [agent-skill]
+  pull_request:
+    branches: [agent-skill]
+
+jobs:
+  skill-validate:
+    uses: ufal/atrium-project/.github/workflows/skill-validate.reusable.yml@test
+    with:
+      client-script: scripts/atrium_classify.py
+      # skill-docs: "SKILL.md README.md service/README.md"   # (default)
