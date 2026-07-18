@@ -5,9 +5,9 @@
 # local uvicorn launch inside the repository's virtual environment.
 #
 # Usage:
-#   bash scripts/serve.sh            # Docker CPU, or local uvicorn fallback
-#   bash scripts/serve.sh --gpu      # Docker with GPU (docker-compose.gpu.yml)
-#   bash scripts/serve.sh --local    # skip Docker, run uvicorn directly
+#   bash scripts/server.sh            # Docker CPU, or local uvicorn fallback
+#   bash scripts/server.sh --gpu      # Docker with GPU (docker-compose.gpu.yml)
+#   bash scripts/server.sh --local    # skip Docker, run uvicorn directly
 #
 # Environment:
 #   ATRIUM_PC_PORT  - port to serve on (default: 8000)

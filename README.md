@@ -46,7 +46,7 @@ branch intentionally carries only what the skill needs.
 git clone -b agent-skill https://github.com/ufal/atrium-page-classification.git
 cd atrium-page-classification
 
-bash scripts/serve.sh                          # start the server (Docker or venv)
+bash scripts/server.sh                         # start the server (Docker or venv)
 python3 scripts/atrium_classify.py page.png    # classify a page
 ```
 
@@ -85,19 +85,19 @@ Clone the branch into your project and point `AGENTS.md` at it:
 ```
 Use the ATRIUM page classification skill from
 `atrium-page-classification/SKILL.md` for classifying historical document pages.
-Start the server with `bash atrium-page-classification/scripts/serve.sh`, then run
+Start the server with `bash atrium-page-classification/scripts/server.sh`, then run
 `python3 atrium-page-classification/scripts/atrium_classify.py [FILES...]`.
 ```
 
 ## Server setup 🖥️
 
-The server exposes three endpoints (see [`service/README.md`](service/README.md) for
-details): `GET /info`, `POST /predict_image`, `POST /predict_document`.
+The server exposes four endpoints (see [`service/README.md`](service/README.md) for
+details): `GET /info`, `GET /health`, `POST /predict_image`, `POST /predict_document`.
 
 ```bash
-bash scripts/serve.sh          # auto: Docker CPU if available, else local uvicorn
-bash scripts/serve.sh --gpu    # Docker with GPU (docker-compose.gpu.yml)
-bash scripts/serve.sh --local  # force local uvicorn via setup/setup_api_service.sh
+bash scripts/server.sh          # auto: Docker CPU if available, else local uvicorn
+bash scripts/server.sh --gpu    # Docker with GPU (docker-compose.gpu.yml)
+bash scripts/server.sh --local  # force local uvicorn via setup/setup_api_service.sh
 ```
 
 The script is idempotent and health-waits on `/info`. Port defaults to `8000`
@@ -131,6 +131,17 @@ export ATRIUM_PC_URL="https://<hosted-instance>/atrium-pc"
 
 A hosted LINDAT instance is planned; once available, the environment variable is the
 only change needed - the skill contract and client stay identical.
+
+## Maintenance notes 🔍
+
+Review checklist for every change / sync-merge into this branch (the ATRIUM skill
+anti-pattern checklist):
+
+- [ ] no doc references a script name that differs from the committed file;
+- [ ] no provenance/paradata claim unless the service imports it on this branch;
+- [ ] no reference to directories/files absent from this branch;
+- [ ] documented response fields match what `service/api.py` actually returns;
+- [ ] client smoke test re-run on `small_data_samples/` against a locally started server.
 
 ## Contacts 📧
 

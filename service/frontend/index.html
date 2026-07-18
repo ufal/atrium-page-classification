@@ -97,6 +97,20 @@
 
         <div id="loader">Processing request, please wait...</div>
         <div id="results"></div>
+
+        <hr style="margin: 2rem 0; border: none; border-top: 1px solid #ddd;">
+        <footer style="font-size: 0.9rem; color: #555;">
+            <h3>API usage 📡</h3>
+            <p>This page is a thin client over the REST API. The same call from the command line:</p>
+            <pre style="background: #f4f6f8; padding: 0.75rem; border-radius: 4px; overflow-x: auto;">curl -X POST "http://localhost:8000/predict_image" \
+  -F "file=@page.png" -F "version=all" -F "topn=3"</pre>
+            <p>
+                Interactive docs: <a href="/docs">/docs</a> (Swagger UI) ·
+                machine-readable schema: <a href="/openapi.json">/openapi.json</a> ·
+                full reference:
+                <a href="https://github.com/ufal/atrium-page-classification/blob/agent-skill/service/README.md">service/README.md</a>
+            </p>
+        </footer>
     </main>
 
     <script src="script.js"></script>

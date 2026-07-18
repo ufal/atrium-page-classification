@@ -40,9 +40,7 @@ RETRY_ATTEMPTS = 3
 RETRY_WAIT_S = 10
 
 
-def build_multipart(
-    fields: dict, file_field: str, file_path: Path
-) -> tuple[bytes, str]:
+def build_multipart(fields: dict, file_field: str, file_path: Path) -> tuple[bytes, str]:
     """Encode form fields and one file as multipart/form-data using only the stdlib."""
     boundary = uuid.uuid4().hex
     lines = []
@@ -54,9 +52,7 @@ def build_multipart(
 
     mime = mimetypes.guess_type(str(file_path))[0] or "application/octet-stream"
     lines.append(f"--{boundary}".encode())
-    lines.append(
-        f'Content-Disposition: form-data; name="{file_field}"; filename="{file_path.name}"'.encode()
-    )
+    lines.append(f'Content-Disposition: form-data; name="{file_field}"; filename="{file_path.name}"'.encode())
     lines.append(f"Content-Type: {mime}".encode())
     lines.append(b"")
     lines.append(file_path.read_bytes())
@@ -68,15 +64,11 @@ def build_multipart(
     return body, content_type
 
 
-def http_json(
-    url: str, data: bytes = None, content_type: str = None, timeout: int = 300
-) -> dict:
+def http_json(url: str, data: bytes = None, content_type: str = None, timeout: int = 300) -> dict:
     """POST (or GET when data is None) and decode a JSON response, with retry on 502/503/504."""
     last_error = None
     for attempt in range(1, RETRY_ATTEMPTS + 1):
-        request = urllib.request.Request(
-            url, data=data, method="POST" if data else "GET"
-        )
+        request = urllib.request.Request(url, data=data, method="POST" if data else "GET")
         if content_type:
             request.add_header("Content-Type", content_type)
         try:
@@ -100,10 +92,7 @@ def http_json(
                 file=sys.stderr,
             )
             sys.exit(2)
-    print(
-        f"Server error after {RETRY_ATTEMPTS} attempts - {last_error[1]}",
-        file=sys.stderr,
-    )
+    print(f"Server error after {RETRY_ATTEMPTS} attempts - {last_error[1]}", file=sys.stderr)
     sys.exit(last_error[0])
 
 
@@ -127,9 +116,7 @@ def classify_file(base_url: str, path: Path, version: str, topn: int) -> dict:
         )
         return {}
 
-    body, content_type = build_multipart(
-        {"version": version, "topn": topn}, file_field="file", file_path=path
-    )
+    body, content_type = build_multipart({"version": version, "topn": topn}, file_field="file", file_path=path)
     return http_json(f"{base_url}{endpoint}", data=body, content_type=content_type)
 
 
@@ -142,15 +129,7 @@ def result_rows(path: Path, result: dict) -> list[tuple]:
     elif result.get("type") == "document":
         for page in result.get("pages", []):
             for rank, prediction in enumerate(page.get("predictions", []), start=1):
-                rows.append(
-                    (
-                        path.name,
-                        page["page"],
-                        rank,
-                        prediction["label"],
-                        prediction["score"],
-                    )
-                )
+                rows.append((path.name, page["page"], rank, prediction["label"], prediction["score"]))
     return rows
 
 
@@ -161,47 +140,25 @@ def print_table(rows: list[tuple], as_csv: bool) -> None:
         for row in rows:
             print(f"{row[0]},{row[1]},{row[2]},{row[3]},{row[4]:.4f}")
     else:
-        print(
-            f"{header[0]:<40} {header[1]:>4} {header[2]:>4} {header[3]:<10} {header[4]:>7}"
-        )
+        print(f"{header[0]:<40} {header[1]:>4} {header[2]:>4} {header[3]:<10} {header[4]:>7}")
         for row in rows:
             print(f"{row[0]:<40} {row[1]:>4} {row[2]:>4} {row[3]:<10} {row[4]:>7.4f}")
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("files", nargs="*", help="PNG/JPEG image(s) and/or PDF document(s) to classify")
+    parser.add_argument(
+        "--base-url", default=DEFAULT_BASE_URL, help=f"API base URL (default: {DEFAULT_BASE_URL}, env: ATRIUM_PC_URL)"
     )
     parser.add_argument(
-        "files", nargs="*", help="PNG/JPEG image(s) and/or PDF document(s) to classify"
+        "--version", default="all", help="model version, e.g. v4.3, or 'all' for the best-5 ensemble (default)"
     )
+    parser.add_argument("--topn", type=int, default=3, help="number of top predictions per page (default: 3)")
     parser.add_argument(
-        "--base-url",
-        default=DEFAULT_BASE_URL,
-        help=f"API base URL (default: {DEFAULT_BASE_URL}, env: ATRIUM_PC_URL)",
+        "--format", choices=["table", "csv", "json"], default="table", help="output format (default: table)"
     )
-    parser.add_argument(
-        "--version",
-        default="all",
-        help="model version, e.g. v4.3, or 'all' for the best-5 ensemble (default)",
-    )
-    parser.add_argument(
-        "--topn",
-        type=int,
-        default=3,
-        help="number of top predictions per page (default: 3)",
-    )
-    parser.add_argument(
-        "--format",
-        choices=["table", "csv", "json"],
-        default="table",
-        help="output format (default: table)",
-    )
-    parser.add_argument(
-        "--info",
-        action="store_true",
-        help="print available models and categories, then exit",
-    )
+    parser.add_argument("--info", action="store_true", help="print available models and categories, then exit")
     args = parser.parse_args()
 
     base_url = args.base_url.rstrip("/")
@@ -216,9 +173,7 @@ def main() -> None:
     paths = [Path(f) for f in args.files]
     missing = [p for p in paths if not p.is_file()]
     if missing:
-        print(
-            f"File(s) not found: {', '.join(str(p) for p in missing)}", file=sys.stderr
-        )
+        print(f"File(s) not found: {', '.join(str(p) for p in missing)}", file=sys.stderr)
         sys.exit(1)
 
     raw_results = {}

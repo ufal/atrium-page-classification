@@ -37,10 +37,7 @@ def _read_tool_version() -> str:
     from the released version again.
     """
     config = configparser.ConfigParser()
-    config.read(
-        Path(__file__).resolve().parent.parent / "setup" / "para_config.txt",
-        encoding="utf-8",
-    )
+    config.read(Path(__file__).resolve().parent.parent / "setup" / "para_config.txt", encoding="utf-8")
     version = config.get("tool", "version", fallback="unknown")
     return version[1:] if version.lower().startswith("v") else version
 
@@ -65,10 +62,7 @@ app = FastAPI(
 # CORS hardening
 ALLOWED_ORIGINS = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "*").split(",")]
 # A wildcard origin must not be combined with credentials (browsers reject it).
-if (
-    "*" in ALLOWED_ORIGINS
-    and os.environ.get("ALLOW_CREDENTIALS", "true").lower() == "true"
-):
+if "*" in ALLOWED_ORIGINS and os.environ.get("ALLOW_CREDENTIALS", "true").lower() == "true":
     ALLOWED_ORIGINS.remove("*")
 
 app.add_middleware(
@@ -82,11 +76,7 @@ app.add_middleware(
 # Mount frontend
 frontend_dir = Path(__file__).parent / "frontend"
 if frontend_dir.exists():
-    app.mount(
-        "/frontend",
-        StaticFiles(directory=str(frontend_dir), html=True),
-        name="frontend",
-    )
+    app.mount("/frontend", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")
 
 
 class PredictionResult(BaseModel):
@@ -101,9 +91,7 @@ class ImageResponse(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {
-        "message": "Welcome to the ATRIUM Page Classification API. Use /info for available models."
-    }
+    return {"message": "Welcome to the ATRIUM Page Classification API. Use /info for available models."}
 
 
 @app.get("/info")
@@ -151,21 +139,15 @@ def get_health(deep: bool = False):
 
 
 @app.post("/predict_image", response_model=ImageResponse)
-async def predict_image(
-    version: str = Form("all"), topn: int = Form(3), file: UploadFile = File(...)
-):
+async def predict_image(version: str = Form("all"), topn: int = Form(3), file: UploadFile = File(...)):
     """Classify a single uploaded image."""
     if not file.content_type or not file.content_type.startswith("image/"):
-        raise HTTPException(
-            status_code=415,
-            detail="Unsupported media type. Please upload a PNG or JPEG image.",
-        )
+        raise HTTPException(status_code=415, detail="Unsupported media type. Please upload a PNG or JPEG image.")
 
     content = await file.read()
     if len(content) > MAX_UPLOAD_BYTES:
         raise HTTPException(
-            status_code=413,
-            detail=f"File too large. Maximum size is {MAX_UPLOAD_BYTES // (1024 * 1024)}MB.",
+            status_code=413, detail=f"File too large. Maximum size is {MAX_UPLOAD_BYTES // (1024 * 1024)}MB."
         )
 
     try:
@@ -183,20 +165,15 @@ async def predict_image(
 
 
 @app.post("/predict_document")
-async def predict_document(
-    version: str = Form("all"), topn: int = Form(3), file: UploadFile = File(...)
-):
+async def predict_document(version: str = Form("all"), topn: int = Form(3), file: UploadFile = File(...)):
     """Extracts pages from a PDF and classifies each page."""
     if not file.content_type or file.content_type != "application/pdf":
-        raise HTTPException(
-            status_code=415, detail="Unsupported media type. Please upload a PDF."
-        )
+        raise HTTPException(status_code=415, detail="Unsupported media type. Please upload a PDF.")
 
     content = await file.read()
     if len(content) > MAX_UPLOAD_BYTES:
         raise HTTPException(
-            status_code=413,
-            detail=f"File too large. Maximum size is {MAX_UPLOAD_BYTES // (1024 * 1024)}MB.",
+            status_code=413, detail=f"File too large. Maximum size is {MAX_UPLOAD_BYTES // (1024 * 1024)}MB."
         )
 
     try:
@@ -205,10 +182,7 @@ async def predict_document(
         pdf_document = fitz.open(stream=content, filetype="pdf")
 
         if len(pdf_document) > MAX_PDF_PAGES:
-            raise HTTPException(
-                status_code=413,
-                detail=f"PDF has too many pages. Limit is {MAX_PDF_PAGES}.",
-            )
+            raise HTTPException(status_code=413, detail=f"PDF has too many pages. Limit is {MAX_PDF_PAGES}.")
 
         page_results = []
         for page_num in range(len(pdf_document)):

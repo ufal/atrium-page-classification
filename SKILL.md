@@ -100,16 +100,17 @@ Output rows are `FILE, PAGE, RANK, LABEL, SCORE` (page is `1` for single images)
    - `table` (default): human-readable summary for the conversation.
    - `csv`: for saving results or feeding downstream tabular processing.
    - `json`: for programmatic consumption preserving the raw API response.
-6. **Server not reachable** (exit code 2): start it with `bash scripts/serve.sh` and
-   retry. If the start script fails, inspect `api_server.log` or
+6. **Full schemas**: for complete request/response schemas beyond this document, fetch
+   `GET /openapi.json` from the running server (Swagger UI at `/docs`).
+7. **Server not reachable** (exit code 2): start it with `bash scripts/server.sh` and
+   retry once. If the start script fails, inspect `api_server.log` or
    `docker compose logs` and report the cause; do not silently retry in a loop.
-7. **Server errors** (exit code 3): the client already retries HTTP 502/503/504 three
+8. **Server errors** (exit code 3): the client already retries HTTP 502/503/504 three
    times. A persistent 5xx usually means model warmup failure (missing weights, out of
-   memory) - check server logs and suggest `--version` with a single small model
-   (e.g. `v2.3`) as a lower-memory fallback.
-8. **Provenance**: Server-side inference is logged through the shared ATRIUM paradata
-   infrastructure (`atrium_paradata.py`), so classification runs remain traceable even
-   when invoked by an agent. Do not bypass the API by importing the model code directly.
+   memory) - check `GET /health?deep=true` and server logs, and suggest `--version`
+   with a single small model (e.g. `v2.3`) as a lower-memory fallback.
+9. **Stay on the API**: do not bypass the service by importing the model code directly -
+   the server is the supported, resource-managed entry point for classification runs.
 
 ## Acknowledgements & Citations 🙏
 
