@@ -49,7 +49,8 @@ class ModelManager:
         try:
             base = self._get_base_model_id(version)
             return f"{base} ({version})"
-        except Exception:
+        except ValueError as e:
+            logger.warning(f"Unknown model revision requested: {e}")
             return f"Unknown Base ({version})"
 
     def load_model(self, version: str):
@@ -76,7 +77,9 @@ class ModelManager:
                 clf.save_model(str(local_model_path))
             except Exception as e:
                 logger.error(f"Failed to download model {version} from Hugging Face: {e}")
-                raise RuntimeError(f"Model {version} not found locally and could not be downloaded: {e}")
+                raise RuntimeError(
+                    f"Model {version} not found locally and could not be downloaded: {e}"
+                ) from e
 
         self.models[version] = clf
         return clf
@@ -151,9 +154,9 @@ class ModelManager:
 
             return formatted_batch_results
 
-        except Exception as e:
-            logger.error(f"Batch inference error for {version}: {e}")
-            raise e
+        except Exception:
+            logger.exception(f"Batch inference error for {version}")
+            raise
 
     def _predict_averaged(self, image, topn):
         predictions_list = []
@@ -164,7 +167,8 @@ class ModelManager:
                 if isinstance(results, dict) and "error" in results:
                     continue
                 predictions_list.append(results)
-            except Exception:
+            except Exception as e:
+                logger.warning(f"Ensemble: model {v} failed, skipping: {e}")
                 continue
 
         if not predictions_list:
@@ -177,6 +181,7 @@ class ModelManager:
             predictions = clf.top_n_predictions(image, top_n=topn)
             return [{"label": CATEGORIES[i], "score": float(s)} for i, s in predictions]
         except Exception as e:
+            logger.error(f"Inference failed for model {version}: {e}")
             return {"error": str(e)}
 
 

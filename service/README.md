@@ -44,7 +44,7 @@ atrium-page-classification/
 │   ├── api.py               # FastAPI application entry point
 │   ├── inference.py         # Model loading and prediction logic
 │   ├── requirements.txt     # Python dependencies for the API
-│   ├── test_api.py          # Client script to test the API endpoints
+│   ├── api_client.py        # Client script to test the API endpoints
 │   ├── frontend/            # 🎨 Standalone frontend assets (LINDAT-independent)
 │   │   ├── index.html       # Standalone web interface
 │   │   └── script.js        # Standalone logic
@@ -196,7 +196,7 @@ Then, in each window, execute the respective commands:
 
 | **Server Console (Window 1)** | **Client Console (Window 2)** |
 |-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **1. Start the API:**<br><br>Run the FastAPI server from the service directory.<br><br>`python3 api.py`<br><br>You should see startup logs indicating the server is running on `http://0.0.0.0:8000`. | **2. Send a Request:**<br><br> Top-3 Classification of `image.png`:<br><br>`python3 test_api.py -f .../image.png -v v5.3 --top 3`<br><br> where `-f` and `-v` stand for **input file** and **model version**. |
+| **1. Start the API:**<br><br>Run the FastAPI server from the service directory.<br><br>`python3 api.py`<br><br>You should see startup logs indicating the server is running on `http://0.0.0.0:8000`. | **2. Send a Request:**<br><br> Top-3 Classification of `image.png`:<br><br>`python3 api_client.py -f .../image.png -v v5.3 --top 3`<br><br> where `-f` and `-v` stand for **input file** and **model version**. |
 
 ### Expected Output
 
