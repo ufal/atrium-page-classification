@@ -7,3 +7,5 @@ fastapi
 httpx
 python-multipart
 openapi-spec-validator
+matplotlib
+
