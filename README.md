@@ -68,11 +68,11 @@ of HF 😊 hub [^1] 🔗
 |  `v5.2` | `vit-large-patch16-384`          | 14270 | **5730**  | same data as `v2.2`, but the largest model base with higher resolution             |
 |  `v1.2` | `efficientnetv2_s.in21k`         | 14270 | **5730**  | same data as `v2.2`, but the smallest model base (CNN)                             |
 |  `v4.2` | `efficientnetv2_l.in21k_ft_in1k` | 14270 | **5730**  | same data as `v2.2`, CNN base model smaller than the largest, may be more accurate |
-|  `v2.3` | `vit-base-patch16-224`           | 38625 | **37328** | new data annotation phase data, more single-page documents used, transformer model |
-|  `v3.3` | `vit-base-patch16-384`           | 38625 | **37328** | same data as `v2.3`, but a bit larger model base with higher resolution            |
-|  `v5.3` | `vit-large-patch16-384`          | 38625 | **37328** | same data as `v2.3`, but the largest model base with higher resolution             |
-|  `v1.3` | `efficientnetv2_m.in21k_ft_in1k` | 38625 | **37328** | same data as `v2.3`, but the smallest model base (CNN)                             |
-|  `v4.3` | `regnety_160.swag_ft_in1k`       | 38625 | **37328** | same data as `v2.3`, CNN base model bigger than the smallest, may be more accurate |
+|  `v2.4` | `vit-base-patch16-224`           | 38307 | **37316** | only cc-by nc 4 licensed dats samples were kept in `vX.4` versions data            |
+|  `v3.4` | `vit-base-patch16-384`           | 38307 | **37316** | same data as `v2.4`, but a bit larger model base with higher resolution            |
+|  `v5.4` | `vit-large-patch16-384`          | 38307 | **37316** | same data as `v2.4`, but the largest model base with higher resolution             |
+|  `v1.4` | `efficientnetv2_m.in21k_ft_in1k` | 38307 | **37316** | same data as `v2.4`, but the smallest model base (CNN)                             |
+|  `v4.4` | `regnety_160.swag_ft_in1k`       | 38307 | **37316** | same data as `v2.4`, CNN base model bigger than the smallest, may be more accurate |
 
 <details>
 
