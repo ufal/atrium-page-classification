@@ -1,0 +1,11 @@
+# Fast-lane + API meta-contract test deps (issue #32).
+# matplotlib is required because tests/conftest.py forces the Agg backend at
+# collection time. The API contract test importorskips torch, so it skips (green)
+# in this light job and runs for real in the model-enabled suite.
+pytest>=9.1.1
+pytest-cov
+fastapi
+httpx
+python-multipart
+openapi-spec-validator
+matplotlib
