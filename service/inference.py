@@ -77,9 +77,7 @@ class ModelManager:
                 clf.save_model(str(local_model_path))
             except Exception as e:
                 logger.error(f"Failed to download model {version} from Hugging Face: {e}")
-                raise RuntimeError(
-                    f"Model {version} not found locally and could not be downloaded: {e}"
-                ) from e
+                raise RuntimeError(f"Model {version} not found locally and could not be downloaded: {e}") from e
 
         self.models[version] = clf
         return clf

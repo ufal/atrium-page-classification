@@ -11,9 +11,8 @@ import pytest
 
 pytest.importorskip("PIL")
 
-from PIL import Image  # noqa: E402
-
 from img2jpeg_v3 import convert_image_mode, get_image_files, process_single_image  # noqa: E402
+from PIL import Image  # noqa: E402
 
 
 def test_convert_rgba_flattens_to_rgb():
