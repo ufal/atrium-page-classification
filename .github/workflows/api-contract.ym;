@@ -1,0 +1,10 @@
+name: API Meta-Contract
+on:
+  push:
+    branches: [ test, master ]
+  pull_request:
+    branches: [ test ]
+
+jobs:
+  api-contract:
+    uses: ufal/atrium-project/.github/workflows/api-contract.reusable.yml@test

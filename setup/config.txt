@@ -57,5 +57,5 @@ repo_name = ufal/vit-historical-page
 #   setx HF_TOKEN hf_xxx     (Windows)
 token =
 use_hf = False
-revision = main
+revision = v4.3
 latest = v4.3

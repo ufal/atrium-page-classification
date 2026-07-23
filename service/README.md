@@ -95,7 +95,8 @@ The models classify pages into 11 distinct structural categories:
 | Method | Path                | Description                                                                                  |
 |:-------|:--------------------|:---------------------------------------------------------------------------------------------|
 | `GET`  | `/`                 | Serves the static `index.html` interface for manual testing.                                 |
-| `GET`  | `/info`             | Returns metadata about available models and the active computation device (`cpu` or `cuda`). |
+| `GET`  | `/info`             | Service identity + capabilities: `service`, `version`, `endpoints`, `limits`, plus available models and device. |
+| `GET`  | `/health`           | Liveness probe; `?deep=true` also checks at least one model version is loaded (503 on failure). |
 | `POST` | `/predict_image`    | Performs inference on an uploaded single image (JPG/PNG).                                    |
 | `POST` | `/predict_document` | Performs inference on an uploaded multipage PDF document.                                    |
 
