@@ -4,6 +4,7 @@ import math
 import os
 import time
 from pathlib import Path
+# from huggingface_hub import create_branch, delete_branch
 
 from atrium_paradata import ParadataLogger
 from model_registry import CATEGORIES as def_categ
@@ -1099,7 +1100,8 @@ def main(argv=None):
         os.makedirs(model_dir)
 
     # ── [FIX] EARLY EXIT FOR EMPTY INFERENCE INPUTS ───────────────────────────
-    if not args.train and not args.eval and not args.average:
+    # Change this line in main():
+    if not args.train and not args.eval and not args.average and not args.hf:
         _test_images = []
         if args.file is not None and Path(args.file).is_file():
             _test_images = [args.file]
@@ -1403,11 +1405,27 @@ def main(argv=None):
         if args.yolo:
             print("[YOLO] --hf is not supported for YOLO models. Skipping hub download.")
         else:
+            # ----------------------------------------------
+            # ----- UNCOMMENT for pushing to HF repo -------
+            # ----------------------------------------------
+            # print(f"Deleting {args.revision} branch")
+            # try:
+            #     delete_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision,
+            #                   token=config.get("HF", "token"))
+            # except Exception as e:
+            #     print(f"Branch {args.revision} not found or couldn't be deleted. Skipping deletion.")
+            #
+            # print(f"Creating fresh {args.revision} branch")
+            # create_branch(config.get("HF", "repo_name"), repo_type="model", branch=args.revision, exist_ok=True,
+            #               token=config.get("HF", "token"))
+
+            # loading from repo
             classifier.load_from_hub(config.get("HF", "repo_name"), args.revision)
             hf_model_name_local = f"model_{args.revision.replace('.', '')}"
             hf_model_path = f"{model_dir}/{hf_model_name_local}"
             classifier.save_model(hf_model_path)
             classifier.load_model(hf_model_path)
+
     else:
         if not args.average and not args.best:
             classifier.load_model(args.model)
