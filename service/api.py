@@ -1,13 +1,10 @@
-import configparser
 import io
 import logging
-import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import List
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from PIL import Image
 from pydantic import BaseModel
@@ -19,27 +16,19 @@ try:
 except ImportError:
     from inference import manager
 
+# Shared ATRIUM meta-contract helpers (§4). Byte-identical across every service,
+# enforced by para-drift.reusable.yml — same relative-vs-bare import dance.
+try:
+    from .atrium_service import add_cors, attach_health, build_info, read_tool_version, resolve_max_upload_mb
+except ImportError:
+    from atrium_service import add_cors, attach_health, build_info, read_tool_version, resolve_max_upload_mb
+
 logger = logging.getLogger(__name__)
 
-MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "10"))
-MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024
+# Canonical upload limit (§4.5): MAX_UPLOAD_MB, with a MAX_UPLOAD_BYTES fallback.
+MAX_UPLOAD_MB = resolve_max_upload_mb(10)
+MAX_UPLOAD_BYTES = int(MAX_UPLOAD_MB * 1024 * 1024)  # retained: imported by tests/clients
 MAX_PDF_PAGES = 50
-
-SERVICE_NAME = "atrium-page-classification"
-API_ENDPOINTS = ["/info", "/health", "/predict_image", "/predict_document"]
-
-
-def _read_tool_version() -> str:
-    """Read the tool version from setup/para_config.txt [tool] section.
-
-    Single source of truth — security.reusable.yml already validates this value
-    against CITATION.cff and the release tag, so the API version can never drift
-    from the released version again.
-    """
-    config = configparser.ConfigParser()
-    config.read(Path(__file__).resolve().parent.parent / "setup" / "para_config.txt", encoding="utf-8")
-    version = config.get("tool", "version", fallback="unknown")
-    return version[1:] if version.lower().startswith("v") else version
 
 
 @asynccontextmanager
@@ -54,24 +43,26 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="ATRIUM Page Classification API",
-    version=_read_tool_version(),
+    version=read_tool_version(Path(__file__).resolve().parent),
     description="API for classifying historical document page images.",
     lifespan=lifespan,
 )
 
-# CORS hardening
-ALLOWED_ORIGINS = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "*").split(",")]
-# A wildcard origin must not be combined with credentials (browsers reject it).
-if "*" in ALLOWED_ORIGINS and os.environ.get("ALLOW_CREDENTIALS", "true").lower() == "true":
-    ALLOWED_ORIGINS.remove("*")
+# CORS — standard §4.5 configuration (ALLOWED_ORIGINS CSV, default "*").
+add_cors(app, methods=["GET", "POST"])
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=ALLOWED_ORIGINS != ["*"],
-    allow_methods=["GET", "POST"],
-    allow_headers=["*"],
-)
+
+def _deep_health() -> str | None:
+    """Deep readiness (§4.1): at least one classification model version is loaded."""
+    try:
+        if not manager.available_versions:
+            return "no model versions available"
+    except Exception as exc:
+        return f"model manager not ready: {exc}"
+    return None
+
+
+attach_health(app, deep_check=_deep_health)
 
 # Mount frontend
 frontend_dir = Path(__file__).parent / "frontend"
@@ -96,7 +87,7 @@ def read_root():
 
 @app.get("/info")
 def get_info():
-    """Return service identity, capabilities, and limits (ATRIUM meta-contract)."""
+    """Return service identity, capabilities, and available model versions (§4.1)."""
     # [FIX]: Removed the hardcoded fallback list.
     # model_registry is the single source of truth.
     from model_registry import CATEGORIES
@@ -104,45 +95,20 @@ def get_info():
     model_info = {v: manager.get_model_details(v) for v in manager.available_versions}
     model_info["all"] = manager.get_model_details("all")
 
-    return {
-        "service": SERVICE_NAME,
-        "version": app.version,
-        "endpoints": API_ENDPOINTS,
-        "limits": {"max_upload_mb": MAX_UPLOAD_MB, "max_pdf_pages": MAX_PDF_PAGES},
-        "categories": CATEGORIES,
-        "available_models": model_info,
-    }
-
-
-@app.get("/health")
-def get_health(deep: bool = False):
-    """Liveness (shallow) / readiness (deep=true, models loaded) probe."""
-    if not deep:
-        return {"status": "ok"}
-
-    loaded = sorted(manager.models.keys())
-    if not loaded:
-        raise HTTPException(
-            status_code=503,
-            detail={
-                "status": "degraded",
-                "detail": "no model loaded yet (warmup pending or failed)",
-                "device": manager.device,
-            },
-        )
-    return {
-        "status": "ok",
-        "models_loaded": loaded,
-        "models_available": manager.available_versions,
-        "device": manager.device,
-    }
+    return build_info(
+        app,
+        service="atrium-page-classification",
+        limits={"max_upload_mb": MAX_UPLOAD_MB, "max_pdf_pages": MAX_PDF_PAGES},
+        categories=CATEGORIES,
+        available_models=model_info,
+    )
 
 
 @app.post("/predict_image", response_model=ImageResponse)
 async def predict_image(version: str = Form("all"), topn: int = Form(3), file: UploadFile = File(...)):
     """Classify a single uploaded image."""
     if not file.content_type or not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=415, detail="Unsupported media type. Please upload a PNG or JPEG image.")
+        raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
 
     content = await file.read()
     if len(content) > MAX_UPLOAD_BYTES:
@@ -168,7 +134,7 @@ async def predict_image(version: str = Form("all"), topn: int = Form(3), file: U
 async def predict_document(version: str = Form("all"), topn: int = Form(3), file: UploadFile = File(...)):
     """Extracts pages from a PDF and classifies each page."""
     if not file.content_type or file.content_type != "application/pdf":
-        raise HTTPException(status_code=415, detail="Unsupported media type. Please upload a PDF.")
+        raise HTTPException(status_code=400, detail="Invalid file type. Please upload a PDF.")
 
     content = await file.read()
     if len(content) > MAX_UPLOAD_BYTES:
