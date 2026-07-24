@@ -1,13 +1,9 @@
+# Fast-lane + API meta-contract test deps (issue #32).
+# Heavy model deps (torch/transformers) are intentionally omitted — the API
+# contract test importorskips them, running only where the full stack exists.
+pytest>=9.1.1
+pytest-cov
 fastapi
-uvicorn[standard]
+httpx
 python-multipart
-pillow
-numpy
-torch==2.7.1
-torchvision==0.22.1
-timm
-transformers<5
-pdf2image
-requests
-pymupdf
-httpx2
+openapi-spec-validator
