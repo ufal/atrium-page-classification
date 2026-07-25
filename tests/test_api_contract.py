@@ -7,6 +7,9 @@ missing service dependencies, so it is a clean no-op in the fast lane and a real
 
 import pytest
 
+# Tell pytest to skip this entire test file if 'inference' (or 'torch') is not installed
+pytest.importorskip("inference")
+
 pytest.importorskip("fastapi")
 from fastapi.testclient import TestClient  # noqa: E402
 
