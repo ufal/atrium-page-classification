@@ -15,6 +15,7 @@ PRIMARY_ENDPOINTS = ["/predict_image", "/predict_document"]
 
 try:
     from fastapi.testclient import TestClient
+
     app = __import__(APP_IMPORT, fromlist=["app"]).app
     client = TestClient(app)
     deps_present = True
@@ -26,8 +27,7 @@ except Exception:
 # Apply skip to ALL tests in this file if heavy dependencies are missing.
 # This allows Pytest to COLLECT the tests (avoiding Exit Code 5) but skip their execution.
 pytestmark = pytest.mark.skipif(
-    not deps_present,
-    reason="Missing heavy service dependencies (inference, etc.) -> skipping cleanly"
+    not deps_present, reason="Missing heavy service dependencies (inference, etc.) -> skipping cleanly"
 )
 
 
