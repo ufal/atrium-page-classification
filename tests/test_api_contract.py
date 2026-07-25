@@ -9,6 +9,7 @@ import pytest
 
 # Tell pytest to skip this entire test file if 'inference' (or 'torch') is not installed
 pytest.importorskip("inference")
+from service.api.app import app  # noqa: E402
 
 pytest.importorskip("fastapi")
 from fastapi.testclient import TestClient  # noqa: E402
