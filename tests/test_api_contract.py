@@ -1,18 +1,11 @@
 """tests/test_api_contract.py — ATRIUM API meta-contract conformance (strategy §4, issue #32).
 
 Hermetic contract test: asserts the ``/info`` envelope, ``/health``, the advertised endpoint
-set, and OpenAPI validity against the in-process app. ``importorskip``-guarded and tolerant of
-missing service dependencies, so it is a clean no-op in the fast lane and a real check in CI.
+set, and OpenAPI validity against the in-process app. Tolerant of missing service dependencies,
+so it is a clean no-op in the fast lane and a real check in CI.
 """
 
 import pytest
-
-# Tell pytest to skip this entire test file if 'inference' (or 'torch') is not installed
-pytest.importorskip("inference")
-from service.api.app import app  # noqa: E402
-
-pytest.importorskip("fastapi")
-from fastapi.testclient import TestClient  # noqa: E402
 
 # --- per-service contract parameters -----------------------------------------------------------
 SERVICE = "atrium-page-classification"
@@ -21,11 +14,21 @@ PRIMARY_ENDPOINTS = ["/predict_image", "/predict_document"]
 # -----------------------------------------------------------------------------------------------
 
 try:
+    from fastapi.testclient import TestClient
     app = __import__(APP_IMPORT, fromlist=["app"]).app
-except Exception as exc:  # missing heavy service deps → skip cleanly
-    pytest.skip(f"cannot import {APP_IMPORT}.app: {exc}", allow_module_level=True)
+    client = TestClient(app)
+    deps_present = True
+except Exception:
+    app = None
+    client = None
+    deps_present = False
 
-client = TestClient(app)
+# Apply skip to ALL tests in this file if heavy dependencies are missing.
+# This allows Pytest to COLLECT the tests (avoiding Exit Code 5) but skip their execution.
+pytestmark = pytest.mark.skipif(
+    not deps_present,
+    reason="Missing heavy service dependencies (inference, etc.) -> skipping cleanly"
+)
 
 
 def test_info_envelope_required_fields():
