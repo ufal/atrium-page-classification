@@ -285,36 +285,6 @@ class ImageClassifier:
             f"Training for {num_epochs} epochs on {len(train_dataloader)} train samples and evaluation on {len(eval_dataloader)} samples"
         )
 
-        # Define optimizer and scheduler
-        # For the optimizer, we typically pass model.parameters()
-        # optimizer = torch.optim.AdamW(self.model.parameters(), lr=learning_rate, weight_decay=0.0001)
-        # num_batches_train = len(train_dataloader)
-        # scheduler_poly = transformers.get_scheduler(
-        #     name="polynomial",
-        #     optimizer=optimizer,
-        #     num_warmup_steps=250,
-        #     num_training_steps=num_epochs * num_batches_train,
-        #     scheduler_specific_kwargs={
-        #         "power": 1.0,  # Polynomial decay power
-        #         "lr_end": 1e-10,  # Final learning rate at the end of training
-        #     },
-        # )
-        # scheduler_linear = transformers.get_scheduler(
-        #     name="linear",
-        #     optimizer=optimizer,
-        #     num_training_steps=num_epochs * num_batches_train,
-        #     num_warmup_steps=250,
-        # )
-        # scheduler_cosine = transformers.get_scheduler(
-        #     name="cosine",
-        #     optimizer=optimizer,
-        #     num_warmup_steps=250,
-        #     num_training_steps=num_epochs * num_batches_train,
-        #     scheduler_specific_kwargs={
-        #         "num_cycles": 0.5,  # Number of cosine cycles
-        #     }
-        # )
-
         # Generate log_dir dynamically, similar to clip_full.py
         current_file_name = os.path.basename(__file__)
         log_dir = "{}-{}-{}".format(
