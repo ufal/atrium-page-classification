@@ -7,6 +7,13 @@ Distinct from test_averaging.py, which covers the standalone
 supplementary/scripts/averaging.py CLI loader.
 """
 
+import sys
+from unittest.mock import MagicMock
+
+# Mock atrium_document before any project imports to prevent collection errors
+if "atrium_document" not in sys.modules:
+    sys.modules["atrium_document"] = MagicMock()
+
 import pandas as pd
 import pytest
 

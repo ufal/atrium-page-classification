@@ -88,16 +88,16 @@ class TestDirectoryScraper:
 # ════════════════════════════════════════════════════════════════════════════
 class TestDataframeResultsTop1:
     """When top_N=1, predictions are plain class indices (int).
-    SCORE-1 is dropped; a CATEGORY alias column is added instead."""
+    SCORE-1 is preserved; a CATEGORY alias column is added."""
 
     def test_required_columns_present(self):
         df, _ = dataframe_results(["doc-001.png"], [0], ALL_CATEGORIES, top_N=1)
-        for col in ("FILE", "PAGE", "CLASS-1", "CATEGORY"):
+        for col in ("FILE", "PAGE", "CLASS-1", "SCORE-1", "CATEGORY"):
             assert col in df.columns, f"expected column '{col}' not found"
 
-    def test_score_column_absent_for_top1(self):
+    def test_score_column_present_for_top1(self):
         df, _ = dataframe_results(["doc-001.png"], [0], ALL_CATEGORIES, top_N=1)
-        assert "SCORE-1" not in df.columns
+        assert "SCORE-1" in df.columns
 
     def test_category_alias_equals_class1(self):
         df, _ = dataframe_results(["doc-001.png"], [3], ALL_CATEGORIES, top_N=1)
@@ -121,7 +121,8 @@ class TestDataframeResultsTop1:
         assert df.iloc[0]["FILE"] == "report_2021"
 
     def test_page_number_fallback_when_no_suffix(self):
-        df, _ = dataframe_results(["coverpage.png"], [0], ALL_CATEGORIES, top_N=1)
+        with pytest.warns(UserWarning, match="Ambiguous filename without page suffix"):
+            df, _ = dataframe_results(["coverpage.png"], [0], ALL_CATEGORIES, top_N=1)
         assert df.iloc[0]["PAGE"] == 1
         assert df.iloc[0]["FILE"] == "coverpage"
 

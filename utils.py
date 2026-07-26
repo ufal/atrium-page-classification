@@ -1,6 +1,7 @@
 import os
 import re
 import time
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -29,11 +30,6 @@ def dataframe_results(
     raws = []
 
     # 2. Compile the regex pattern once for efficiency
-    # Pattern explanation:
-    # (.*)   -> Capture group 1: Everything up until the separator (greedy match)
-    # [-_]   -> Match a single hyphen OR underscore
-    # (\d+)  -> Capture group 2: One or more digits (the page number)
-    # $      -> End of the string
     pattern = re.compile(r"(.*)[-_](\d+)$")
 
     for image_file, predict_scores in zip(test_images, test_predictions):
@@ -47,10 +43,13 @@ def dataframe_results(
             page_num = int(match.group(2))
         else:
             # Fallback if file doesn't match the format (e.g., "cover_page.png")
+            warnings.warn(
+                f"Ambiguous filename without page suffix: '{image_name}'. Assigning full stem as FILE and '1' as PAGE.",
+                UserWarning,
+            )
             document = image_name
-            page_num = 1  # Default value or handle error as needed
+            page_num = 1
 
-        # --- Logic below remains unchanged ---
         labels = [categories[i[0]] for i in predict_scores] if top_N > 1 else [categories[predict_scores]]
         scores = [round(i[1], 3) for i in predict_scores] if top_N > 1 else [round(predict_scores, 3)]
 
@@ -67,7 +66,7 @@ def dataframe_results(
         # can always expect consistent column names regardless of top_N value.
         # A CATEGORY alias column is added for human-readable CSV output.
         rdf["CATEGORY"] = rdf["CLASS-1"]
-        rdf.drop(columns=["SCORE-1"], inplace=True)
+        # Do not drop SCORE-1 here to prevent losing the confidence metric needed for atrium_document JSON.
 
     rawdf = None
     if raw_scores is not None:

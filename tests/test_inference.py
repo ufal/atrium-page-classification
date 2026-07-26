@@ -1,7 +1,20 @@
+import sys
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
-from PIL import Image
+# Mock atrium_document before any project imports to prevent collection errors
+if "atrium_document" not in sys.modules:
+    sys.modules["atrium_document"] = MagicMock()
+
+# Ensure the service directory is accessible for local imports like `import inference`
+project_root = Path(__file__).parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+if str(project_root / "service") not in sys.path:
+    sys.path.insert(0, str(project_root / "service"))
+
+import pytest  # noqa: E402
+from PIL import Image  # noqa: E402
 
 pytest.importorskip("torch")
 

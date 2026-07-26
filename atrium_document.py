@@ -1,0 +1,588 @@
+"""
+atrium_document.py  –  Per-document aggregate record ("paradata pair") for ATRIUM pipelines.
+
+Sibling of `atrium_paradata.py`. Where paradata answers *how a run behaved*, this answers
+*what we know about one document*: its text, pages, entities and enrichment, gathered across
+the pipeline into one FAIR, versioned JSON.
+
+The tools are separate containers and never see each other's outputs, so the record is built
+by **accretion**: every tool takes the previous version of the JSON (if it is given one) and
+returns it with **only its own block** updated. Nothing else is touched.
+
+    doc.json ──► [tool A] ──► doc.json ──► [tool B] ──► doc.json ──► …
+                  writes A's block only     writes B's block only
+
+Contract (see docs/document_schema.md):
+  1. Optional baseline in, updated record out.
+  2. A tool writes its own block(s) only; every other block is passed through untouched.
+  3. No baseline given → the tool emits just its own part (standalone-safe).
+  4. Each block is stamped with the writing tool's program / run_id / paradata_ref.
+  5. Licenses accrete through `para_licenses.merge_effective_licenses` (most restrictive wins).
+  6. Unknown or newer blocks are preserved; a newer major schema is refused.
+
+Only ever reference **persistent** artifacts: the original input, or a previous step's stored
+output. Transient derivatives (page images/thumbnails, the annotated Markdown) belong in
+`regenerable` as a recipe, never as a stored path.
+"""
+
+from __future__ import annotations
+
+import copy
+import json
+import os
+import sys
+from datetime import datetime, timezone
+from typing import Any, Dict, Iterable, List, Optional
+
+try:
+    from para_licenses import merge_effective_licenses
+except ImportError:
+    merge_effective_licenses = None  # type: ignore
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Constants & Schema version
+# ──────────────────────────────────────────────────────────────────────────────
+
+SCHEMA_VERSION = "1.0"
+LICENSE_NAME = "CC BY-NC 4.0"
+LICENSE_URL = "https://creativecommons.org/licenses/by-nc/4.0/"
+
+RECORD_TYPE = "atrium-document"
+RECORD_TYPE_MERGED = "atrium-document-merged"
+
+#: Filename suffix for the record of one document.
+FILE_SUFFIX = ".document.json"
+
+#: Structural keys the module itself maintains — never a tool's "own block".
+RESERVED_KEYS = frozenset({"schema_version", "record_type", "doc_id", "source", "provenance", "assembled"})
+
+#: Which tool owns which top-level block. One owner per block; blocks shared between
+#: tools are split by FIELD instead (see BLOCK_FIELD_OWNERS) so nothing is co-mutated.
+BLOCK_OWNERS: Dict[str, str] = {
+    "pages": "alto-postprocess",
+    "content": "alto-postprocess",
+    "lines": "alto-postprocess",
+    "page_categories": "page-classification",
+    "translations": "translator",
+    "entities": "nlp-enrich",
+    "enrichment": "llm-enrich",
+}
+
+#: Field-level ownership inside list blocks that more than one tool contributes to.
+#: A tool may only write the fields listed for it (plus the block's key fields).
+BLOCK_FIELD_OWNERS: Dict[str, Dict[str, List[str]]] = {
+    "pages": {
+        "alto-postprocess": ["quality_score", "quality_band", "needs_ocr", "ocr", "canvas"],
+        "page-classification": ["category", "category_confidence"],
+        "nlp-enrich": ["teitok_surface"],
+    },
+    "lines": {
+        "alto-postprocess": ["categ", "quality_score", "lang", "text"],
+        "nlp-enrich": ["lemma", "upos", "feats", "teitok_ref", "bbox"],
+    },
+    "entities": {
+        "nlp-enrich": [
+            "surface",
+            "lemma",
+            "type_onto",
+            "type_cnec",
+            "type_teitok",
+            "char_span",
+            "bbox",
+            "teitok_ref",
+        ],
+        "translator": ["translation_en"],
+        "llm-enrich": ["pid"],
+    },
+}
+
+#: Natural key fields per list block, used to align records when merging by field.
+BLOCK_KEY_FIELDS: Dict[str, List[str]] = {
+    "pages": ["page"],
+    "lines": ["page", "line"],
+    "entities": ["page", "line", "char_span"],
+}
+
+
+def _utc_now_iso() -> str:
+    return datetime.now(tz=timezone.utc).isoformat()
+
+
+def _sanitise(obj: Any, _depth: int = 0) -> Any:
+    if _depth > 10:
+        return str(obj)
+    if isinstance(obj, dict):
+        return {str(k): _sanitise(v, _depth + 1) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_sanitise(v, _depth + 1) for v in obj]
+    if isinstance(obj, (str, int, float, bool)) or obj is None:
+        return obj
+    return str(obj)
+
+
+def _record_key(record: Dict[str, Any], key_fields: Iterable[str]) -> tuple:
+    return tuple(json.dumps(record.get(k), sort_keys=True, default=str) for k in key_fields)
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# The record
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+class DocumentRecord:
+    """
+    One document's aggregate record, opened by one tool for one contribution.
+
+    Typical use, alongside the tool's existing ParadataLogger::
+
+        with DocumentRecord.open(doc_id, "llm-enrich", baseline=args.document_json,
+                                 run_id=logger._run_id) as doc:
+            doc.set_block("enrichment", {"items": items})
+            doc.add_regenerable("markdown", {"from": teitok_path,
+                                             "converter": "xml_to_md@0.3.0",
+                                             "detail": "full"})
+        # → writes <out_dir>/<doc_id>.document.json
+    """
+
+    def __init__(
+        self,
+        doc_id: str,
+        program: str,
+        baseline: Optional[Dict[str, Any]] = None,
+        run_id: Optional[str] = None,
+        paradata_ref: Optional[str] = None,
+        out_dir: str = ".",
+        strict: bool = False,
+    ) -> None:
+        if not doc_id:
+            raise ValueError("doc_id is required — the record is keyed on it.")
+
+        self.doc_id = doc_id
+        self.program = program
+        self.run_id = run_id or datetime.now(tz=timezone.utc).strftime("%y%m%d-%H%M%S")
+        self.paradata_ref = paradata_ref or ""
+        self.out_dir = out_dir
+        self.strict = strict
+
+        # Rule 2/6: the baseline is deep-copied and never rewritten except where this tool writes.
+        self._data: Dict[str, Any] = copy.deepcopy(baseline) if baseline else {}
+        self._data.setdefault("schema_version", SCHEMA_VERSION)
+        self._data.setdefault("record_type", RECORD_TYPE)
+        self._data["doc_id"] = doc_id
+
+        self._had_baseline = bool(baseline)
+        self._touched: List[str] = []
+        self._license_blocks: List[Dict[str, Any]] = []
+        self._finalised = False
+
+    # ── constructors ────────────────────────────────────────────────────────
+
+    @classmethod
+    def open(
+        cls,
+        doc_id: str,
+        program: str,
+        baseline: Optional[str] = None,
+        **kwargs: Any,
+    ) -> "DocumentRecord":
+        """
+        Open a record for one tool's contribution.
+
+        `baseline` is a path to the previous version of the JSON, or None. A missing or empty
+        path is not an error (rule 3): the tool simply emits its own part.
+        """
+        data: Optional[Dict[str, Any]] = None
+        if baseline:
+            if os.path.exists(baseline):
+                data = load_document(baseline)
+            else:
+                print(
+                    f"[document] baseline {baseline} not found — emitting own part only",
+                    file=sys.stderr,
+                )
+        return cls(doc_id, program, baseline=data, **kwargs)
+
+    # ── writers ─────────────────────────────────────────────────────────────
+
+    def set_source(self, sha256: str = "", **fields: Any) -> "DocumentRecord":
+        """
+        Describe the ORIGINAL input. First writer wins — later tools must not overwrite it.
+
+        The durable key is `doc_id` + `sha256`; `filename`/`media_type`/`origin`/`page_count`/
+        `language` are metadata. Never a pipeline-local path to a derived artifact.
+        """
+        if self._data.get("source"):
+            return self
+        src = {k: v for k, v in fields.items() if v is not None}
+        if sha256:
+            src["sha256"] = sha256
+        self._data["source"] = _sanitise(src)
+        return self
+
+    def set_block(self, name: str, payload: Any) -> "DocumentRecord":
+        """Replace this tool's OWN block wholesale (rule 2)."""
+        self._assert_owner(name)
+        self._data[name] = _sanitise(payload)
+        self._stamp(name)
+        return self
+
+    def merge_block(
+        self,
+        name: str,
+        records: List[Dict[str, Any]],
+        key_fields: Optional[List[str]] = None,
+        own_fields: Optional[List[str]] = None,
+    ) -> "DocumentRecord":
+        """
+        Field-level merge into a list block shared by several tools.
+
+        Existing records are matched on `key_fields` and only `own_fields` are written, so a
+        co-contributor's fields on the same row survive untouched. New rows are appended.
+        """
+        if name in RESERVED_KEYS:
+            raise ValueError(f"{name!r} is maintained by the module, not a tool block.")
+
+        keys = key_fields or BLOCK_KEY_FIELDS.get(name)
+        if not keys:
+            raise ValueError(f"no key fields known for block {name!r} — pass key_fields=[...]")
+
+        allowed = own_fields or BLOCK_FIELD_OWNERS.get(name, {}).get(self.program)
+        if allowed is None:
+            self._complain(f"{self.program!r} has no declared field ownership in block {name!r}")
+            allowed = []
+
+        writable = set(allowed) | set(keys)
+        existing: List[Dict[str, Any]] = list(self._data.get(name) or [])
+        index = {_record_key(r, keys): r for r in existing}
+
+        for incoming in records:
+            k = _record_key(incoming, keys)
+            patch = {f: v for f, v in incoming.items() if f in writable}
+            target = index.get(k)
+            if target is None:
+                existing.append(_sanitise(patch))
+                index[k] = existing[-1]
+            else:
+                target.update(_sanitise(patch))
+
+        self._data[name] = existing
+        self._stamp(name)
+        return self
+
+    def add_derived_from(self, key: str, ref: str) -> "DocumentRecord":
+        """Record a PERSISTENT step output this contribution was derived from."""
+        block = self._data.setdefault("derived_from", {})
+        block[key] = str(ref)
+        self._stamp("derived_from")
+        return self
+
+    def add_regenerable(self, key: str, recipe: Dict[str, Any]) -> "DocumentRecord":
+        """
+        Record a DISPOSABLE derivation as a reproducible recipe, never a stored path.
+
+        e.g. add_regenerable("markdown", {"from": "TEITOK/x.teitok.xml",
+                                          "converter": "xml_to_md@0.3.0", "detail": "full"})
+        """
+        block = self._data.setdefault("regenerable", {})
+        block[key] = _sanitise(recipe)
+        self._stamp("regenerable")
+        return self
+
+    def add_license_detail(self, license_detail: Dict[str, Any]) -> "DocumentRecord":
+        """Contribute this tool's paradata `license_detail` to the accreting union (rule 5)."""
+        if license_detail:
+            self._license_blocks.append(license_detail)
+        return self
+
+    # ── internals ───────────────────────────────────────────────────────────
+
+    def _assert_owner(self, name: str) -> None:
+        if name in RESERVED_KEYS:
+            raise ValueError(f"{name!r} is maintained by the module, not a tool block.")
+        owner = BLOCK_OWNERS.get(name)
+        if owner and owner != self.program:
+            self._complain(f"block {name!r} is owned by {owner!r}, not {self.program!r}")
+
+    def _complain(self, message: str) -> None:
+        if self.strict:
+            raise ValueError(message)
+        print(f"[document] WARNING – {message}", file=sys.stderr)
+
+    def _stamp(self, block: str) -> None:
+        """Rule 4: per-block provenance — this is where granularity comes from."""
+        if block not in self._touched:
+            self._touched.append(block)
+        blocks = self._data.setdefault("assembled", {}).setdefault("blocks", {})
+        blocks[block] = {
+            "program": self.program,
+            "run_id": self.run_id,
+            "paradata_ref": self.paradata_ref,
+            "updated_at": _utc_now_iso(),
+        }
+
+    def _provenance(self) -> Dict[str, Any]:
+        prov: Dict[str, Any] = dict(self._data.get("provenance") or {})
+        prior = prov.get("license_detail")
+        blocks = ([prior] if prior else []) + self._license_blocks
+
+        if merge_effective_licenses is not None and blocks:
+            merged = merge_effective_licenses(blocks)
+            prov["license"] = merged.get("effective_license", LICENSE_NAME)
+            prov["license_url"] = merged.get("effective_license_url", LICENSE_URL)
+            prov["license_detail"] = merged
+        elif not prov.get("license"):
+            prov["license"] = LICENSE_NAME
+            prov["license_url"] = LICENSE_URL
+            prov["license_note"] = (
+                "License helper unavailable or no components recorded; defaulted conservatively to CC BY-NC 4.0."
+            )
+
+        contributors: List[Dict[str, str]] = list(prov.get("contributors") or [])
+        if self._touched and not any(
+            c.get("program") == self.program and c.get("run_id") == self.run_id for c in contributors
+        ):
+            contributors.append(
+                {
+                    "program": self.program,
+                    "run_id": self.run_id,
+                    "paradata_ref": self.paradata_ref,
+                    "blocks": ",".join(self._touched),
+                    "at": _utc_now_iso(),
+                }
+            )
+        prov["contributors"] = contributors
+        return prov
+
+    # ── output ──────────────────────────────────────────────────────────────
+
+    def to_dict(self) -> Dict[str, Any]:
+        """The record as it would be written — baseline passed through, own blocks applied."""
+        out = copy.deepcopy(self._data)
+        out["provenance"] = self._provenance()
+        assembled = out.setdefault("assembled", {})
+        assembled["had_baseline"] = self._had_baseline
+        assembled["note"] = "Blocks reflect CONTRIBUTED steps only; a block is absent until its tool has run."
+        # Stable, predictable key order for diff-friendly output.
+        order = [
+            "schema_version",
+            "record_type",
+            "doc_id",
+            "source",
+            "derived_from",
+            "regenerable",
+            "provenance",
+            "assembled",
+            "page_categories",
+            "pages",
+            "content",
+            "lines",
+            "entities",
+            "translations",
+            "enrichment",
+        ]
+        ordered = {k: out[k] for k in order if k in out}
+        for k in out:  # any unknown/newer block is preserved (rule 6)
+            if k not in ordered:
+                ordered[k] = out[k]
+        return ordered
+
+    def finalize(self, out_path: Optional[str] = None) -> str:
+        if self._finalised:
+            raise RuntimeError("finalize() has already been called.") from None
+        if not self._touched:
+            print(
+                f"[document] WARNING – {self.program} contributed no block to {self.doc_id}",
+                file=sys.stderr,
+            )
+
+        path = out_path or os.path.join(self.out_dir, f"{self.doc_id}{FILE_SUFFIX}")
+        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+        with open(path, "w", encoding="utf-8") as fh:
+            json.dump(self.to_dict(), fh, ensure_ascii=False, indent=2)
+
+        self._finalised = True
+        print(f"[document] Record written → {path}", flush=True)
+        return path
+
+    def __enter__(self) -> "DocumentRecord":
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
+        if exc_type is None and not self._finalised:
+            try:
+                self.finalize()
+            except Exception as e:  # pragma: no cover - defensive, mirrors paradata
+                print(f"[document] WARNING – could not write record: {e}", file=sys.stderr)
+        return False
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Reader & Migration
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+def migrate_document(record: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Apply schema migrations up to the current SCHEMA_VERSION.
+
+    `1.0` is the first published version, so there is nothing to migrate yet. When a breaking
+    bump lands, add `_migrate_1_0_to_2_0()` and branch here — the same sequential pattern
+    `atrium_paradata.migrate_paradata()` uses.
+    """
+    return record
+
+
+def load_document(path: str) -> Dict[str, Any]:
+    """Read a document record, migrating older schemas transparently (rule 6)."""
+    with open(path, "r", encoding="utf-8") as fh:
+        data = json.load(fh)
+
+    v = str(data.get("schema_version", SCHEMA_VERSION))
+    major = int(v.split(".")[0])
+    current_major = int(SCHEMA_VERSION.split(".")[0])
+
+    if major > current_major:
+        raise ValueError(f"Schema version {v} is newer than supported {SCHEMA_VERSION}. Please update tools.")
+    elif major < current_major:
+        data = migrate_document(data)
+
+    return data
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Merging Logic (only for parallel branches re-joining)
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+def merge_document_records(json_paths: List[str], out_path: str) -> str:
+    """
+    Fold several partial records for the SAME document into one.
+
+    The pipeline is linear, so the normal path needs no merge — each tool hands its output to
+    the next. This exists for fan-out/fan-in (e.g. two tools run in parallel on one document)
+    and resolves per block using `assembled.blocks[*].updated_at`: newest contribution wins.
+    """
+    if not json_paths:
+        raise ValueError("no record paths given")
+
+    merged: Dict[str, Any] = {}
+    stamps: Dict[str, Dict[str, Any]] = {}
+    license_blocks: List[Dict[str, Any]] = []
+    contributors: List[Dict[str, str]] = []
+    doc_ids: List[str] = []
+
+    for p in json_paths:
+        data = load_document(p)
+        doc_id = data.get("doc_id", "")
+        if doc_id and doc_id not in doc_ids:
+            doc_ids.append(doc_id)
+
+        blocks = (data.get("assembled") or {}).get("blocks") or {}
+        prov = data.get("provenance") or {}
+        if prov.get("license_detail"):
+            license_blocks.append(prov["license_detail"])
+        for c in prov.get("contributors") or []:
+            if c not in contributors:
+                contributors.append(c)
+
+        for key, value in data.items():
+            if key in ("assembled", "provenance"):
+                continue
+            incoming = blocks.get(key, {}).get("updated_at", "")
+            held = stamps.get(key, {}).get("updated_at", "")
+            if key not in merged or incoming >= held:
+                merged[key] = value
+                if key in blocks:
+                    stamps[key] = blocks[key]
+
+    if len(doc_ids) > 1:
+        raise ValueError(f"records belong to different documents: {doc_ids}")
+
+    if merge_effective_licenses is not None and license_blocks:
+        lic = merge_effective_licenses(license_blocks)
+    else:
+        lic = {
+            "effective_license": LICENSE_NAME,
+            "effective_license_url": LICENSE_URL,
+            "notes": "License helper unavailable; defaulted to CC BY-NC 4.0.",
+        }
+
+    merged["schema_version"] = SCHEMA_VERSION
+    merged["record_type"] = RECORD_TYPE_MERGED
+    merged["provenance"] = {
+        "license": lic["effective_license"],
+        "license_url": lic["effective_license_url"],
+        "license_detail": lic,
+        "contributors": contributors,
+    }
+    merged["assembled"] = {
+        "blocks": stamps,
+        "merged_from": len(json_paths),
+        "merged_at": _utc_now_iso(),
+        "note": "Blocks reflect CONTRIBUTED steps only; newest contribution per block wins.",
+    }
+
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    with open(out_path, "w", encoding="utf-8") as fh:
+        json.dump(merged, fh, ensure_ascii=False, indent=2)
+    print(f"[document] Merged record → {out_path}", flush=True)
+    return out_path
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# CLI (mirrors atrium_paradata.py's shim so shell stages can use it too)
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+def _cli() -> None:
+    import argparse
+
+    p = argparse.ArgumentParser(prog="python atrium_document.py")
+    sub = p.add_subparsers(dest="cmd", required=True)
+
+    st = sub.add_parser("set-block", help="write one block from a JSON file/stdin")
+    st.add_argument("--doc-id", required=True)
+    st.add_argument("--program", required=True)
+    st.add_argument("--block", required=True)
+    st.add_argument("--payload", required=True, help="path to a JSON file, or '-' for stdin")
+    st.add_argument("--baseline", default=None, help="previous version of the record")
+    st.add_argument("--out", default=None)
+    st.add_argument("--run-id", default=None)
+    st.add_argument("--paradata-ref", default="")
+    st.add_argument("--strict", action="store_true")
+
+    me = sub.add_parser("merge", help="fold parallel partial records for one document")
+    me.add_argument("--paths", nargs="+", required=True)
+    me.add_argument("--out", required=True)
+
+    mi = sub.add_parser("migrate", help="rewrite a record at the current schema version")
+    mi.add_argument("--path", required=True)
+
+    args = p.parse_args()
+
+    if args.cmd == "set-block":
+        raw = sys.stdin.read() if args.payload == "-" else open(args.payload, encoding="utf-8").read()
+        with DocumentRecord.open(
+            args.doc_id,
+            args.program,
+            baseline=args.baseline,
+            run_id=args.run_id,
+            paradata_ref=args.paradata_ref,
+            strict=args.strict,
+        ) as doc:
+            doc.set_block(args.block, json.loads(raw))
+            if args.out:
+                doc.finalize(args.out)
+
+    elif args.cmd == "merge":
+        merge_document_records(args.paths, args.out)
+
+    elif args.cmd == "migrate":
+        data = load_document(args.path)
+        with open(args.path, "w", encoding="utf-8") as fh:
+            json.dump(data, fh, ensure_ascii=False, indent=2)
+        print(f"[document] Migrated {args.path} to {SCHEMA_VERSION}", flush=True)
+
+
+if __name__ == "__main__":
+    _cli()

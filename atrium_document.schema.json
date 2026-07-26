@@ -1,0 +1,292 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ufal/atrium-project/docs/templates/shared/atrium_document.schema.json",
+  "title": "ATRIUM document record",
+  "description": "Per-document aggregate record built by accretion across the ATRIUM pipeline. Each tool writes only its own block and passes every other block through untouched. References are restricted to the original input and persistent step outputs; disposable derivations (Markdown, page images) appear in 'regenerable' as recipes, never as stored paths. Produced by atrium_document.py; sibling of the atrium_paradata.py provenance record.",
+  "type": "object",
+  "required": ["schema_version", "doc_id"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "description": "Record schema version. A newer MAJOR than the reading tool supports must be refused; an older one is migrated transparently.",
+      "examples": ["1.0"]
+    },
+    "record_type": {
+      "type": "string",
+      "enum": ["atrium-document", "atrium-document-merged"],
+      "description": "'atrium-document' for the normal linear accretion; '-merged' when parallel partial records were folded."
+    },
+    "doc_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable document identifier, carried unchanged by every tool.",
+      "examples": ["CTX000000001"]
+    },
+
+    "source": {
+      "type": "object",
+      "description": "The ORIGINAL input. First writer wins; later tools must not overwrite it. The durable key is doc_id + sha256 — originals are archive-managed, not pipeline-local, so no path is required.",
+      "additionalProperties": true,
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "filename": { "type": "string" },
+        "media_type": { "type": "string", "examples": ["application/alto+xml", "application/pdf"] },
+        "page_count": { "type": "integer", "minimum": 0 },
+        "language": { "type": "array", "items": { "type": "string" } },
+        "origin": {
+          "type": "string",
+          "description": "How the text was obtained.",
+          "examples": ["ABBYY-ALTO", "digital-born-pdf", "docx", "ocr:tesseract-ces", "ocr:pero", "vlm:glm-4v"]
+        }
+      }
+    },
+
+    "derived_from": {
+      "type": "object",
+      "description": "PERSISTENT step outputs this record was built from. Keys are stage-scoped; values are references to stored artifacts. Never a transient artifact.",
+      "additionalProperties": { "type": "string" },
+      "examples": [
+        {
+          "alto_categ": "DOC_LINE_CATEG/CTX000000001.csv",
+          "teitok": "TEITOK/CTX000000001.teitok.xml",
+          "enriched": "KW_PER_DOC_LLM/CTX000000001_enriched.json",
+          "paradata": "paradata/260724-101112_pipeline-run.json"
+        }
+      ]
+    },
+
+    "regenerable": {
+      "type": "object",
+      "description": "DISPOSABLE derivations recorded as reproducible recipes rather than stored paths — the annotated Markdown, and by the same rule any rendered page image.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["from"],
+        "additionalProperties": true,
+        "properties": {
+          "from": { "type": "string", "description": "Persistent artifact the derivation is regenerated from." },
+          "converter": { "type": "string", "examples": ["xml_to_md@0.3.0"] },
+          "detail": { "type": "string", "enum": ["full", "standard", "minimal"] }
+        }
+      }
+    },
+
+    "provenance": {
+      "type": "object",
+      "description": "Accreting license union plus the list of contributing tool runs. Mirrors the paradata license block; references paradata rather than duplicating it.",
+      "additionalProperties": true,
+      "properties": {
+        "license": { "type": "string", "examples": ["CC BY-NC-SA 4.0"] },
+        "license_url": { "type": "string" },
+        "license_detail": {
+          "type": "object",
+          "description": "Output of para_licenses.merge_effective_licenses over every contributing tool — most restrictive wins.",
+          "additionalProperties": true
+        },
+        "contributors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "program": { "type": "string" },
+              "run_id": { "type": "string" },
+              "paradata_ref": { "type": "string" },
+              "blocks": { "type": "string", "description": "Comma-separated blocks this run wrote." },
+              "at": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      }
+    },
+
+    "assembled": {
+      "type": "object",
+      "description": "Per-block provenance — the source of granularity. Re-running one tool rewrites exactly one entry here.",
+      "additionalProperties": true,
+      "properties": {
+        "blocks": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "program": { "type": "string" },
+              "run_id": { "type": "string" },
+              "paradata_ref": { "type": "string" },
+              "updated_at": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "had_baseline": {
+          "type": "boolean",
+          "description": "False when the tool ran without a previous record and emitted only its own part."
+        },
+        "note": { "type": "string" }
+      }
+    },
+
+    "page_categories": {
+      "description": "Owner: page-classification. Predicted category per page label.",
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "examples": [{ "1": "Text", "2": "Plate" }]
+    },
+
+    "pages": {
+      "description": "Owner: alto-postprocess (quality/canvas/OCR); page-classification may write category fields; nlp-enrich may write teitok_surface. Field-level ownership — never co-mutated.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["page"],
+        "additionalProperties": true,
+        "properties": {
+          "page": { "type": "string", "description": "Page label as a string, so 'iv' or 'A-1' survive." },
+          "page_index": { "type": "integer", "minimum": 1 },
+          "quality_score": { "type": "number", "minimum": 0, "maximum": 1 },
+          "quality_band": { "type": "string", "enum": ["Trash", "Noisy", "Clear"] },
+          "category": { "type": "string" },
+          "category_confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "needs_ocr": { "type": "boolean" },
+          "ocr": {
+            "type": ["object", "null"],
+            "additionalProperties": true,
+            "properties": {
+              "engine": { "type": "string" },
+              "lang": { "type": "string" }
+            }
+          },
+          "canvas": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "width": { "type": "number" },
+              "height": { "type": "number" },
+              "unit": { "type": "string", "examples": ["pt", "px"] }
+            }
+          },
+          "teitok_surface": {
+            "type": "string",
+            "description": "Logical TEITOK <surface> id — an identifier, never an image path."
+          }
+        }
+      }
+    },
+
+    "content": {
+      "description": "Owner: alto-postprocess. Reading-order text for search, or null when externalised by reference.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "text": { "type": ["string", "null"] },
+        "reading_order": { "type": "string", "examples": ["ltr-columns"] }
+      }
+    },
+
+    "lines": {
+      "description": "Owner: alto-postprocess (categ/quality/lang/text); nlp-enrich writes morphology and teitok_ref. Field-level ownership.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["page", "line"],
+        "additionalProperties": true,
+        "properties": {
+          "page": { "type": "string" },
+          "line": { "type": "integer", "minimum": 0 },
+          "text": { "type": "string" },
+          "categ": { "type": "string" },
+          "lang": { "type": "string" },
+          "quality_score": { "type": "number", "minimum": 0, "maximum": 1 },
+          "bbox": { "$ref": "#/$defs/bbox" },
+          "teitok_ref": { "type": "string" }
+        }
+      }
+    },
+
+    "entities": {
+      "description": "Owner: nlp-enrich; translator writes translation_en; llm-enrich writes pid. Carries all three tagsets so no mapping is lost.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "surface": { "type": "string" },
+          "lemma": { "type": "string" },
+          "type_onto": { "type": "string", "description": "OntoNotes v5 — the default configured NameTag tagset." },
+          "type_cnec": { "type": "string", "description": "CNEC 2.0 fine-grained code." },
+          "type_teitok": { "type": "string", "description": "Coarse TEITOK type (PER/ORG/LOC/MISC)." },
+          "page": { "type": "string" },
+          "line": { "type": "integer" },
+          "char_span": {
+            "type": "array",
+            "items": { "type": "integer", "minimum": 0 },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "bbox": { "$ref": "#/$defs/bbox" },
+          "teitok_ref": { "type": "string" },
+          "translation_en": { "type": "string" },
+          "pid": {
+            "type": "object",
+            "description": "FAIR ontology cross-references — the ARIADNE/GoTriple hook. Null until resolved.",
+            "additionalProperties": true,
+            "properties": {
+              "wikidata": { "type": ["string", "null"] },
+              "geonames": { "type": ["string", "null"] },
+              "aat": { "type": ["string", "null"] },
+              "amcr": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    },
+
+    "translations": {
+      "description": "Owner: translator. Language pair and the persistent translated artifact it produced.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "source_lang": { "type": "string" },
+        "target_lang": { "type": "string" },
+        "backend": { "type": "string", "examples": ["lindat", "ctranslate2", "llm"] }
+      }
+    },
+
+    "enrichment": {
+      "description": "Owner: llm-enrich. Superset of the LLM document schema, plus the explicit page citation.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "locator": { "type": "string", "description": "Short verbatim snippet copied from the document." },
+              "page": { "type": ["string", "null"], "description": "Page label from the nearest PAGE_BREAK / '## Page N' marker." },
+              "extracted_keywords_cs": { "type": "array", "items": { "type": "string" } },
+              "extracted_keywords_en": { "type": "array", "items": { "type": "string" } },
+              "teater_category": { "type": "string", "description": "Single most relevant TEATER/AMCR vocabulary category." },
+              "confidence_score": { "type": "number", "minimum": 0, "maximum": 1 },
+              "citation": { "type": "string", "examples": ["[Source: CTX000000001, Page 1]"] }
+            }
+          }
+        },
+        "summary": { "type": ["string", "null"] },
+        "topics": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+
+  "$defs": {
+    "bbox": {
+      "type": "array",
+      "description": "[x_min, y_min, x_max, y_max] in the coordinate space of the ALTO/TEITOK page.",
+      "items": { "type": "number" },
+      "minItems": 4,
+      "maxItems": 4
+    }
+  }
+}
