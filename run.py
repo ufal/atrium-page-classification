@@ -6,7 +6,7 @@ import re
 import time
 from pathlib import Path
 
-from atrium_document_adapter import write_classification_document_records
+from atrium_document_adapter import write_document_record, write_document_records_dir
 
 # from huggingface_hub import create_branch, delete_branch
 from atrium_paradata import ParadataLogger
@@ -736,10 +736,10 @@ def main(argv=None):
                         [{"FILE": doc_id, "PAGE": page_num, "CLASS-1": labels[0], "SCORE-1": scores[0]}]
                     )
 
-                    write_classification_document_records(
+                    write_document_record(
                         rdf=single_rdf,
-                        document_input_dir=args.document_json,
-                        document_output_dir=args.document_json_out,
+                        document_json=args.document_json,
+                        document_json_out=args.document_json_out,
                         classification_csv_ref=None,
                         paradata_logger=_paradata_logger,
                         strict=args.strict_document_json,
@@ -778,10 +778,10 @@ def main(argv=None):
                                     print(f"\t{row[cls_col]}:  {round(float(row[scr_col]) * 100, 2)}%")
 
                         if args.document_json_out:
-                            write_classification_document_records(
+                            write_document_record(
                                 rdf=avg_df,
-                                document_input_dir=args.document_json,
-                                document_output_dir=args.document_json_out,
+                                document_json=args.document_json,
+                                document_json_out=args.document_json_out,
                                 classification_csv_ref=avg_csv_path,
                                 paradata_logger=_paradata_logger,
                                 strict=args.strict_document_json,
@@ -816,10 +816,10 @@ def main(argv=None):
                     )
                     print(f"Results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
 
-                    write_classification_document_records(
+                    write_document_records_dir(
                         rdf=rdf,
-                        document_input_dir=args.document_json_dir,
-                        document_output_dir=args.document_json_out_dir,
+                        document_json_dir=args.document_json_dir,
+                        document_json_out_dir=args.document_json_out_dir,
                         classification_csv_ref=top_out_path,
                         paradata_logger=_paradata_logger,
                         strict=args.strict_document_json,
@@ -862,10 +862,10 @@ def main(argv=None):
                         write_header = not os.path.exists(top_out_path)
                         rdf_chunk.to_csv(top_out_path, sep=",", index=False, mode="a", header=write_header)
 
-                        write_classification_document_records(
+                        write_document_records_dir(
                             rdf=rdf_chunk,
-                            document_input_dir=args.document_json_dir,
-                            document_output_dir=args.document_json_out_dir,
+                            document_json_dir=args.document_json_dir,
+                            document_json_out_dir=args.document_json_out_dir,
                             classification_csv_ref=top_out_path,
                             paradata_logger=_paradata_logger,
                             strict=args.strict_document_json,
@@ -927,10 +927,10 @@ def main(argv=None):
                         print(f"Averaged results for TOP-{top_N} predictions → {avg_csv_path}")
                         avg_df = pd.read_csv(avg_csv_path)
 
-                        write_classification_document_records(
+                        write_document_records_dir(
                             rdf=avg_df,
-                            document_input_dir=args.document_json_dir,
-                            document_output_dir=args.document_json_out_dir,
+                            document_json_dir=args.document_json_dir,
+                            document_json_out_dir=args.document_json_out_dir,
                             classification_csv_ref=avg_csv_path,
                             paradata_logger=_paradata_logger,
                             strict=args.strict_document_json,
