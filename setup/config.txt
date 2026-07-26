@@ -59,3 +59,15 @@ token =
 use_hf = False
 revision = main
 latest = v4.3
+
+[DOCUMENT]
+# atrium_document ("paradata pair") integration — see atrium_document_adapter.py and the hub's
+# docs/document-schema.md. Single-document (-f/--file) runs use document_json/document_json_out
+# as FILE paths; batch (-d/--directory) runs use document_json_dir/document_json_out_dir as
+# DIRECTORIES, one <doc_id>.document.json per document. Left blank by default (opt-in): the
+# adapter is a no-op unless an out path/dir is set, on the CLI or here.
+document_json =
+document_json_out =
+document_json_dir =
+document_json_out_dir =
+strict = False

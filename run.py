@@ -49,6 +49,12 @@ def build_parser(config):
     hf_version = config.get("HF", "revision")
     cross_runs = config.getint("TRAIN", "cross_runs")
     config_folds_csv = config.get("TRAIN", "folds_csv", fallback="").strip()
+
+    config_document_json = config.get("DOCUMENT", "document_json", fallback="").strip()
+    config_document_json_out = config.get("DOCUMENT", "document_json_out", fallback="").strip()
+    config_document_json_dir = config.get("DOCUMENT", "document_json_dir", fallback="").strip()
+    config_document_json_out_dir = config.get("DOCUMENT", "document_json_out_dir", fallback="").strip()
+    config_strict_document_json = config.getboolean("DOCUMENT", "strict", fallback=False)
     config_chunking = config.getboolean("INPUT", "chunking")
     model_dir = config.get("OUTPUT", "FOLDER_MODELS")
     config_model_path = f"{model_dir}/model_{hf_version.replace('.', '')}"
@@ -178,13 +184,36 @@ def build_parser(config):
         "revision from REVISION_BEST_FOLDS.",
     )
 
-    # Document JSON Integration Arguments
-    parser.add_argument("--document-json", type=str, help="Baseline record for a single-document/single-file run.")
-    parser.add_argument("--document-json-out", type=str, help="Updated output record for a single-document run.")
-    parser.add_argument("--document-json-dir", type=str, help="Baseline directory for batch processing.")
-    parser.add_argument("--document-json-out-dir", type=str, help="Output directory for batch records.")
+    # Document JSON Integration Arguments — config-driven defaults, mirroring --folds_csv above.
     parser.add_argument(
-        "--strict-document-json", action="store_true", help="Turn ownership/schema warnings into errors."
+        "--document-json",
+        type=str,
+        default=config_document_json or None,
+        help="Baseline record for a single-document/single-file run.",
+    )
+    parser.add_argument(
+        "--document-json-out",
+        type=str,
+        default=config_document_json_out or None,
+        help="Updated output record for a single-document run.",
+    )
+    parser.add_argument(
+        "--document-json-dir",
+        type=str,
+        default=config_document_json_dir or None,
+        help="Baseline directory for batch processing.",
+    )
+    parser.add_argument(
+        "--document-json-out-dir",
+        type=str,
+        default=config_document_json_out_dir or None,
+        help="Output directory for batch records.",
+    )
+    parser.add_argument(
+        "--strict-document-json",
+        action=argparse.BooleanOptionalAction,
+        default=config_strict_document_json,
+        help="Turn ownership/schema warnings into errors (use --no-strict-document-json to disable).",
     )
 
     return parser
