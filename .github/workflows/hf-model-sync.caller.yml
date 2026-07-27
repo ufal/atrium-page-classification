@@ -18,7 +18,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt huggingface_hub
+        run: pip install -r setup/requirements.txt huggingface_hub
 
       - name: HF Model Download / Evaluation
         env:
