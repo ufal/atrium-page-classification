@@ -2,16 +2,26 @@ name: GPU Inference Tests
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 2 * * 0"   # weekly, Sunday 02:00 UTC
+  # Cron removed 2026-07-29 (#18 audit). "Queues silently" — noted below — meant a
+  # weekly job that never ran and never reported, i.e. GPU coverage advertised but
+  # not delivered. Manual dispatch stays so the suite is one click away the moment
+  # the runner is live.
+  #
+  # RESTORE when the runner is live:
+  #   schedule:
+  #     - cron: "0 2 * * 0"   # weekly, Sunday 02:00 UTC
 
 # ⚠️ INFRA-GATED — requires a self-hosted runner with NVIDIA GPU registered
 #    with labels [self-hosted, gpu] and NVIDIA Container Toolkit installed.
 #    Owner: @rharasim. Until the runner exists this workflow queues silently.
 
+permissions:
+  contents: read   # least privilege: these jobs only ever read the tree
+
 jobs:
   gpu-tests:
     runs-on: [self-hosted, gpu]
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v7
 

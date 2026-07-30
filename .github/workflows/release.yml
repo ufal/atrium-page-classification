@@ -19,6 +19,7 @@ jobs:
   version-guard:
     name: Verify tag == CITATION.cff == para_config.txt
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
       - name: Block release on version/tag mismatch
@@ -78,6 +79,7 @@ jobs:
     name: Package and Release
     needs: version-guard
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7   # <-- Bumped from v4 to v5
@@ -92,8 +94,71 @@ jobs:
           cp -r setup/ atrium-api-service/
           cp run.py classifier.py README.md atrium-api-service/
 
+          # First-party modules reached transitively from run.py / classifier.py /
+          # service/*.py. Omitting these shipped a bundle that raised ImportError on
+          # the first `import run` (issue #18). The "Verify bundle is self-contained"
+          # step below is the guard — if you add an import, it fails here, not for a
+          # user. atrium_document.schema.json rides along as atrium_document.py's
+          # companion contract file.
+          cp atrium_paradata.py \
+             atrium_document.py \
+             atrium_document_adapter.py \
+             atrium_document.schema.json \
+             para_licenses.py \
+             ensemble.py \
+             model_registry.py \
+             parallel_best.py \
+             utils.py \
+             yolo_classifier.py \
+             atrium-api-service/
+
           # Create zip while ignoring git artifacts and python cache
           zip -r service_page_classifier.zip atrium-api-service/ -x "*/__pycache__/*" "*/.DS_Store" "*/.git/*"
+
+      # Dependency-free closure check: walks every .py in the bundle, collects the
+      # first-party modules it imports (i.e. names matching a *.py at repo root),
+      # and asserts each one is present inside the bundle. Deliberately static —
+      # `import run` would pull in torch/ultralytics and need the full install.
+      - name: Verify bundle is self-contained
+        run: |
+          python - <<'PY'
+          import ast, os, sys
+
+          BUNDLE = "atrium-api-service"
+          first_party = {f[:-3] for f in os.listdir(".") if f.endswith(".py")}
+
+          def imported(path):
+              try:
+                  tree = ast.parse(open(path, encoding="utf-8").read())
+              except SyntaxError:
+                  return set()
+              names = set()
+              for node in ast.walk(tree):
+                  if isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+                      names.add(node.module.split(".")[0])
+                  elif isinstance(node, ast.Import):
+                      for alias in node.names:
+                          names.add(alias.name.split(".")[0])
+              return names
+
+          shipped, needed = set(), {}
+          for dirpath, _, files in os.walk(BUNDLE):
+              for fname in files:
+                  if not fname.endswith(".py"):
+                      continue
+                  shipped.add(fname[:-3])
+                  full = os.path.join(dirpath, fname)
+                  for mod in imported(full) & first_party:
+                      needed.setdefault(mod, []).append(os.path.relpath(full, BUNDLE))
+
+          missing = {m: v for m, v in needed.items() if m not in shipped}
+          for mod, users in sorted(missing.items()):
+              print(f"::error::{mod}.py is imported by {', '.join(sorted(set(users)))} but is not in the release bundle")
+          if missing:
+              print("::error::Release bundle is not self-contained — add the modules above to the cp list in release.yml")
+              sys.exit(1)
+          print(f"OK — bundle is self-contained ({len(shipped)} modules, {len(needed)} first-party imports resolved)")
+          PY
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3

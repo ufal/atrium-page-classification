@@ -1,9 +1,16 @@
 name: API Meta-Contract
 on:
   push:
-    branches: [ test, master ]
+    branches: [test, vit, clip, master]
   pull_request:
-    branches: [ test ]
+    branches: [test, vit, clip, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read   # least privilege: these jobs only ever read the tree
 
 jobs:
   api-contract:

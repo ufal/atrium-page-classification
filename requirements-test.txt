@@ -1,7 +1,12 @@
-pytest>=9.1.1
-pytest-cov
-fastapi
-httpx
-python-multipart
-openapi-spec-validator
-matplotlib
+# Indirection, not a duplicate. DO NOT DELETE — CI depends on this path existing.
+#
+# The hub's api-contract.reusable.yml installs the caller repo's test deps with:
+#     if [ -f requirements-test.txt ]; then pip install -r requirements-test.txt; fi
+# That hardcodes THIS root path, and the [ -f ] guard means a missing file installs
+# nothing *silently* and lets the job continue — which then fails two steps later
+# as "pytest: command not found" (exit 127), pointing nowhere near the real cause.
+#
+# This repo keeps its real dependency lists under setup/, so rather than holding a
+# second copy that can drift out of sync, the root path just forwards there.
+# Edit setup/requirements-test.txt, never this file.
+-r setup/requirements-test.txt
