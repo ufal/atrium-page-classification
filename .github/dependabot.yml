@@ -10,11 +10,35 @@ updates:
         patterns:
           - "*"
 
+  # This repo's real pins live under setup/ and service/. The single `directory: "/"`
+  # entry that used to be here saw only the root requirements-test.txt — which is a
+  # one-line `-r setup/requirements-test.txt` forwarding stub with nothing to bump —
+  # so the actual dependency surface went unmonitored (#18, 2026-07-29 audit).
+  # Split per manifest directory, mirroring atrium-alto-postprocess.
   - package-ecosystem: "pip"
-    directory: "/"
+    directory: "/setup"
     schedule:
       interval: "weekly"
     target-branch: "test"
+    groups:
+      setup-deps:
+        patterns:
+          - "*"
+    ignore:
+      - dependency-name: "torch"
+      - dependency-name: "torchvision"
+      - dependency-name: "transformers"
+        versions: [">= 5.0.0"]
+
+  - package-ecosystem: "pip"
+    directory: "/service"
+    schedule:
+      interval: "weekly"
+    target-branch: "test"
+    groups:
+      service-deps:
+        patterns:
+          - "*"
     ignore:
       - dependency-name: "torch"
       - dependency-name: "torchvision"
