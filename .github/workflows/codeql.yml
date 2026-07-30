@@ -1,12 +1,22 @@
+# atrium-page-classification — CodeQL static analysis
+#
+# Thin caller for ufal/atrium-project's codeql.reusable.yml (#18, T3). Was a
+# ~44-line standalone workflow; five near-identical copies differed only by an
+# arbitrary weekly cron.
+#
+# The schedule stays here because `on:` can only be declared by the caller.
+
 name: CodeQL
 
 on:
   push:
-    branches: [test, master]
+    branches: [test, vit, clip, master]
   pull_request:
-    branches: [test, master]
+    branches: [test, vit, clip, master]
   schedule:
-    - cron: "30 5 * * 1"   # weekly, catches advisories published since last push
+    # Weekly, catching advisories published since the last push. Staggered
+    # 15 min apart across the ecosystem rather than all firing at once.
+    - cron: "45 5 * * 1"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -14,25 +24,12 @@ concurrency:
 
 jobs:
   analyze:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
     permissions:
+      # REQUIRED — a reusable workflow's permissions are capped by this block.
+      # Omitting security-events makes GitHub reject this file at parse time
+      # (startup_failure, not a step failure), exactly as the Wave B change did
+      # to docker.yml in all five repos (#18).
       security-events: write
       actions: read
       contents: read
-    strategy:
-      matrix:
-        language: ["python"]
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
-        with:
-          languages: ${{ matrix.language }}
-          build-mode: none   # Python is interpreted — no build step needed
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
-        with:
-          category: "/language:${{ matrix.language }}"
+    uses: ufal/atrium-project/.github/workflows/codeql.reusable.yml@v1

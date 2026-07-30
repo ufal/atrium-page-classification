@@ -1,34 +1,25 @@
+# atrium-page-classification — pre-commit in CI
+#
+# Thin caller for ufal/atrium-project's pre-commit.reusable.yml (#18, T3).
+# BLOCKING: a failing hook fails the check. This repo's own
+# .pre-commit-config.yaml and ruff.toml still decide WHAT runs; the reusable
+# standardises how it is invoked and adds the hook-environment cache.
+
 name: pre-commit
 
 on:
-  pull_request:
-    branches: [test, master]
   push:
-    branches: [test, master]
+    branches: [test, vit, clip, master]
+  pull_request:
+    branches: [test, vit, clip, master]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
-  contents: read   # least privilege: these jobs only ever read the tree
+  contents: read
 
 jobs:
   pre-commit:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.11"
-          cache: "pip"
-
-      - name: Install pre-commit
-        run: pip install pre-commit
-
-      - name: Run pre-commit
-        # --show-diff-on-failure ensures that if ruff or shellcheck modifies a file
-        # or flags an error, the exact diff is printed to the GitHub Actions console.
-        run: pre-commit run --all-files --show-diff-on-failure
+    uses: ufal/atrium-project/.github/workflows/pre-commit.reusable.yml@v1
