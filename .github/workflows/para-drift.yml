@@ -14,4 +14,4 @@ permissions:
 
 jobs:
   check-drift:
-    uses: ufal/atrium-project/.github/workflows/para-drift.reusable.yml@test
+    uses: ufal/atrium-project/.github/workflows/para-drift.reusable.yml@v1
