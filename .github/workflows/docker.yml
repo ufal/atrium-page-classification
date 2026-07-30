@@ -17,8 +17,17 @@ concurrency:
 jobs:
   build:
     permissions:
+      # security-events:write is required because docker-tool.reusable.yml's
+      # build-and-push job uploads the post-publish Trivy SARIF. A reusable
+      # workflow's permissions are CAPPED BY THIS BLOCK, so omitting it makes
+      # GitHub reject the whole file at parse time with "requesting
+      # 'security-events: write', but is only allowed 'security-events: none'"
+      # — a startup_failure, not a step failure (#18). Same grant security.yml
+      # already makes for its own SARIF upload. Not an escalation: this job
+      # already holds packages: write.
       contents: read
       packages: write
+      security-events: write
     uses: ufal/atrium-project/.github/workflows/docker-tool.reusable.yml@test
     secrets:
       # Explicit instead of `secrets: inherit` — the reusable declares and
