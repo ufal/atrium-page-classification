@@ -126,7 +126,11 @@ jobs:
           PY
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v3
+        # SHA-pinned: this action holds `contents: write`. A moving tag can be
+        # force-pushed to malicious code -- exactly what happened to
+        # aquasecurity/trivy-action in 2026-03 (GHSA-69fq-xp46-6x23). Dependabot
+        # keeps the SHA and the trailing version comment in step (#18).
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228  # v3
         with:
           generate_release_notes: true
           files: |
