@@ -1,0 +1,33 @@
+# Workflow and caller policy lint (atrium-project#18, T7).
+#
+# Verifies THIS repo's workflows against the hub's reusables: that every file
+# parses, that write-scoped actions resolve to an immutable commit SHA whose
+# version comment is honest, that this repo's callers grant everything the hub
+# reusables they call actually request, and that no caller passes an input its
+# reusable does not declare.
+#
+# The permission check is the one worth having here. A reusable workflow's job
+# permissions are CAPPED by the calling job's grant, and requesting more is a
+# parse-time startup_failure — not a step failure, so no local YAML check finds
+# it. That is what took docker.yml down in all five tool repos simultaneously.
+# Until the hub gained a --hub-root option the check could not run outside the
+# hub at all, because the callee lives in another repository.
+
+name: Workflow Policy Lint
+
+on:
+  push:
+    branches: [test, vit, clip, master]
+  pull_request:
+    branches: [test, vit, clip, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read   # least privilege: this only ever reads trees
+
+jobs:
+  workflow-lint:
+    uses: ufal/atrium-project/.github/workflows/workflow-lint.reusable.yml@v1
