@@ -104,6 +104,46 @@ BLOCK_KEY_FIELDS: Dict[str, List[str]] = {
 }
 
 
+#: Multi-dot pipeline suffixes to strip before falling back to a plain
+#: ``split(".")[0]``. Longest/most-specific first, so ``.teitok.xml`` is
+#: recognised before the generic ``.xml`` would otherwise short-circuit it.
+#: Keep this list in sync across every tool that derives a doc_id from a
+#: filename — see canonical_doc_id().
+KNOWN_PIPELINE_SUFFIXES: List[str] = [
+    ".document.json",
+    ".categories.json",
+    ".teitok.xml",
+    ".alto.xml",
+    ".udpipe.conllu",
+    ".conllu",
+    ".xml",
+    ".json",
+    ".md",
+    ".csv",
+    ".txt",
+]
+
+
+def canonical_doc_id(path: str) -> str:
+    """
+    The one doc_id derivation every tool should use (issue #13 cross-cutting
+    finding: four different derivations — ``Path.stem``, ``name.split(".")[0]``,
+    a bespoke TEITOK/CoNLL-U stripper, a CSV column — silently forked the same
+    document into different records on any multi-dot filename).
+
+    Strips the longest matching known pipeline suffix from the basename; falls
+    back to everything before the first dot. ``CTX000000001.alto.xml`` and
+    ``CTX000000001.udpipe.conllu`` and ``CTX000000001.document.json`` all
+    resolve to ``CTX000000001``.
+    """
+    name = os.path.basename(str(path))
+    lower = name.lower()
+    for suffix in KNOWN_PIPELINE_SUFFIXES:
+        if lower.endswith(suffix):
+            return name[: -len(suffix)]
+    return name.split(".")[0]
+
+
 def _utc_now_iso() -> str:
     return datetime.now(tz=timezone.utc).isoformat()
 
@@ -136,7 +176,7 @@ class DocumentRecord:
     Typical use, alongside the tool's existing ParadataLogger::
 
         with DocumentRecord.open(doc_id, "llm-enrich", baseline=args.document_json,
-                                 run_id=logger._run_id) as doc:
+                                 run_id=logger.run_id) as doc:
             doc.set_block("enrichment", {"items": items})
             doc.add_regenerable("markdown", {"from": teitok_path,
                                              "converter": "xml_to_md@0.3.0",
@@ -269,6 +309,16 @@ class DocumentRecord:
         self._stamp(name)
         return self
 
+    def get_block(self, name: str, default: Any = None) -> Any:
+        """
+        Read-only access to any block of the record as it stands (baseline plus this
+        contribution's own writes so far) — a deep copy, so callers can inspect a
+        block (e.g. a co-owned block another tool wrote) without reaching into
+        ``_data`` directly or risking a caller mutating the record in place.
+        """
+        value = self._data.get(name, default)
+        return copy.deepcopy(value)
+
     def add_derived_from(self, key: str, ref: str) -> "DocumentRecord":
         """Record a PERSISTENT step output this contribution was derived from."""
         block = self._data.setdefault("derived_from", {})
@@ -299,6 +349,11 @@ class DocumentRecord:
     def _assert_owner(self, name: str) -> None:
         if name in RESERVED_KEYS:
             raise ValueError(f"{name!r} is maintained by the module, not a tool block.")
+        if name in BLOCK_FIELD_OWNERS:
+            self._complain(
+                f"block {name!r} is field-split across {sorted(BLOCK_FIELD_OWNERS[name])} — "
+                f"use merge_block(), not set_block(), or a co-contributor's fields will be lost"
+            )
         owner = BLOCK_OWNERS.get(name)
         if owner and owner != self.program:
             self._complain(f"block {name!r} is owned by {owner!r}, not {self.program!r}")
@@ -397,8 +452,12 @@ class DocumentRecord:
 
         path = out_path or os.path.join(self.out_dir, f"{self.doc_id}{FILE_SUFFIX}")
         os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
-        with open(path, "w", encoding="utf-8") as fh:
+        # Write-then-rename: a crash mid-write must never leave a corrupt record for
+        # the next tool's load_document() to trip over.
+        tmp_path = f"{path}.tmp"
+        with open(tmp_path, "w", encoding="utf-8") as fh:
             json.dump(self.to_dict(), fh, ensure_ascii=False, indent=2)
+        os.replace(tmp_path, path)
 
         self._finalised = True
         print(f"[document] Record written → {path}", flush=True)

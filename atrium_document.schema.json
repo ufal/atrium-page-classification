@@ -198,6 +198,9 @@
           "categ": { "type": "string" },
           "lang": { "type": "string" },
           "quality_score": { "type": "number", "minimum": 0, "maximum": 1 },
+          "lemma": { "type": "string", "description": "nlp-enrich: UD lemma of the line's dominant token/lead form." },
+          "upos": { "type": "string", "description": "nlp-enrich: UD universal POS tag." },
+          "feats": { "type": "string", "description": "nlp-enrich: UD morphological features string." },
           "bbox": { "$ref": "#/$defs/bbox" },
           "teitok_ref": { "type": "string" }
         }

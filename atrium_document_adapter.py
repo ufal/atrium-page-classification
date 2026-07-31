@@ -62,7 +62,7 @@ def _page_patches(group: pd.DataFrame) -> tuple[dict, list]:
 def _run_id_and_ref(paradata_logger: Any) -> tuple[Optional[str], str]:
     if paradata_logger is None:
         return None, ""
-    run_id = getattr(paradata_logger, "_run_id", None)
+    run_id = getattr(paradata_logger, "run_id", None)
     ref = f"paradata/{run_id}_{PROGRAM}.json" if run_id else ""
     return run_id, ref
 
