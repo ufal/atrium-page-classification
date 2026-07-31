@@ -1,7 +1,12 @@
-# Agent-Skill branch validation (atrium-project#31, strategy §12.3).
-# Lives on the `agent-skill` branch of atrium-page-classification; calls the hub reusable workflow.
-# `app-import`/`primary-endpoints` mirror this repo's tests/test_api_contract.py
-# on the default branch (issue #32), so both branches assert the same contract.
+# Caller example — Agent-Skill branch validation (atrium-project#31, strategy §12.3).
+# Place as .github/workflows/skill-validate.yml ON THE `agent-skill` BRANCH of a
+# service repo and set `client-script` to that repo's client (Appendix E table):
+#   atrium-page-classification → scripts/atrium_classify.py
+#   atrium-translator          → scripts/atrium_translate.py
+#   atrium-alto-postprocess    → scripts/atrium_postprocess.py
+#   atrium-nlp-enrich          → scripts/atrium_enrich.py
+#   atrium-llm-enrich          → scripts/atrium_keywords.py
+
 name: Skill Branch Validation
 
 on:
@@ -12,9 +17,7 @@ on:
 
 jobs:
   skill-validate:
-    uses: ufal/atrium-project/.github/workflows/skill-validate.reusable.yml@test
+    uses: ufal/atrium-project/.github/workflows/skill-validate.reusable.yml@v1
     with:
       client-script: scripts/atrium_classify.py
-      app-import: service.api
-      primary-endpoints: "/predict_image /predict_document"
       # skill-docs: "SKILL.md README.md service/README.md"   # (default)
