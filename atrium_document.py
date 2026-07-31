@@ -103,7 +103,6 @@ BLOCK_KEY_FIELDS: Dict[str, List[str]] = {
     "entities": ["page", "line", "char_span"],
 }
 
-
 #: Multi-dot pipeline suffixes to strip before falling back to a plain
 #: ``split(".")[0]``. Longest/most-specific first, so ``.teitok.xml`` is
 #: recognised before the generic ``.xml`` would otherwise short-circuit it.
@@ -124,19 +123,23 @@ KNOWN_PIPELINE_SUFFIXES: List[str] = [
 ]
 
 
-def canonical_doc_id(path: str) -> str:
+def canonical_doc_id(path_or_record: Any) -> str:
     """
     The one doc_id derivation every tool should use (issue #13 cross-cutting
     finding: four different derivations — ``Path.stem``, ``name.split(".")[0]``,
     a bespoke TEITOK/CoNLL-U stripper, a CSV column — silently forked the same
     document into different records on any multi-dot filename).
 
-    Strips the longest matching known pipeline suffix from the basename; falls
-    back to everything before the first dot. ``CTX000000001.alto.xml`` and
-    ``CTX000000001.udpipe.conllu`` and ``CTX000000001.document.json`` all
+    If passed a dict (the JSON record), it returns the authoritative doc_id.
+    If passed a path/string, it strips the longest matching known pipeline suffix
+    from the basename; falls back to everything before the first dot. ``CTX000000001.alto.xml``
+    and ``CTX000000001.udpipe.conllu`` and ``CTX000000001.document.json`` all
     resolve to ``CTX000000001``.
     """
-    name = os.path.basename(str(path))
+    if isinstance(path_or_record, dict):
+        return path_or_record.get("doc_id", path_or_record.get("id", ""))
+
+    name = os.path.basename(str(path_or_record))
     lower = name.lower()
     for suffix in KNOWN_PIPELINE_SUFFIXES:
         if lower.endswith(suffix):
