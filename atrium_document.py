@@ -128,6 +128,7 @@ def _owner_candidates(name: str) -> Tuple[str, ...]:
         return ()
     return (owners,) if isinstance(owners, str) else tuple(owners)
 
+
 #: Field-level ownership inside list blocks that more than one tool contributes to.
 #: A tool may only write the fields listed for it (plus the block's key fields).
 BLOCK_FIELD_OWNERS: Dict[str, Dict[str, List[str]]] = {
@@ -447,9 +448,7 @@ class DocumentRecord:
             )
         owners = _owner_candidates(name)
         if owners and self.program not in owners:
-            self._complain(
-                f"block {name!r} is owned by {' or '.join(owners)}, not {self.program!r}"
-            )
+            self._complain(f"block {name!r} is owned by {' or '.join(owners)}, not {self.program!r}")
         self._assert_origin_consistent(name)
 
     def _assert_origin_consistent(self, name: str) -> None:
