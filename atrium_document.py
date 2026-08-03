@@ -32,7 +32,7 @@ import json
 import os
 import sys
 from datetime import datetime, timezone
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 try:
     from para_licenses import merge_effective_licenses
@@ -58,30 +58,41 @@ RESERVED_KEYS = frozenset({"schema_version", "record_type", "doc_id", "source", 
 
 #: Which tool owns which top-level block. One owner per block; blocks shared between
 #: tools are split by FIELD instead (see BLOCK_FIELD_OWNERS) so nothing is co-mutated.
-#: OPEN QUESTION (Issue #18): pages/content/lines/tables assume alto-postprocess (the
-#: OCR/ALTO pipeline) always originates them. A digital-born PDF/DOCX converted
-#: directly by atrium-llm-enrich's api_util/digital_to_json.py never runs
-#: alto-postprocess at all, so there is currently no `program` identity
-#: authorized to set_block() these blocks for such a document — calling
-#: set_block() as anything other than "alto-postprocess" trips _assert_owner's
-#: _complain() (raises under strict=True). Needs a decision before Phase 2/3
-#: (the PDF/DOCX adapters) can actually emit a first-write atrium_document:
-#: either alto-postprocess gains a "no-op passthrough" mode for already-digital
-#: input so it's still the block owner of record, or BLOCK_OWNERS needs to
-#: accept an alternate owner for the digital-born case specifically. `tables`
-#: (below) inherits this exact gap unchanged: python-docx/Docling produce a
-#: grid from a DOCX/PDF table just as directly as alto-postprocess does from
-#: ALTO spatial blocks, so it is added here rather than opening a second,
-#: parallel ownership question.
+#:
+#: RESOLVED (Issue #18 §1a, 2026-08-03): a TUPLE value means the block has more than
+#: one possible ORIGINATOR and the choice is fixed per DOCUMENT, not per ecosystem.
+#: An ALTO/OCR document's positional plane (pages/content/lines/tables) comes from
+#: alto-postprocess; a digital-born PDF/DOCX's comes from digital-convert; and no
+#: document is ever both. Which one applies is decided by `source.origin` — already
+#: first-writer-wins in set_source() — via ORIGIN_ORIGINATORS below, and checked by
+#: _assert_origin_consistent().
+#:
+#: The two rejected alternatives, recorded so this is not relitigated:
+#:   1. Give alto-postprocess a "no-op passthrough" mode so it stays owner of record.
+#:      Rejected: it stamps assembled.blocks[<block>].program = "alto-postprocess"
+#:      and appends a provenance.contributors[] entry with a paradata_ref, for a run
+#:      that did nothing, in a record whose purpose is FAIR catalogue export. Rule 4
+#:      exists for attribution granularity; this would falsify it. It also puts the
+#:      alto container back on the digital-born critical path, which the whole
+#:      four-layer converter design exists to avoid.
+#:   2. Simply add a second name here with no further guard. Rejected: `content` and
+#:      `tables` are NOT field-split, so either originator could set_block() straight
+#:      over the other's. The mutual exclusivity that makes two originators safe would
+#:      be an unwritten assumption instead of a check.
+#:
+#: This table authorises WRITES only. The read-time answer to "who wrote this block in
+#: THIS record" is, as it always was, assembled.blocks[<block>].program. Any consumer
+#: hardcoding a program name off this table was already reading the wrong contract —
+#: see the ownership section of docs/document_schema.md.
 #:
 #: `forms` has no such conflict — it is always llm-enrich (VLM/LLM-driven field
-#: extraction), regardless of whether the document is scanned or digital-born,
-#: so it is a plain single-owner block from day one.
-BLOCK_OWNERS: Dict[str, str] = {
-    "pages": "alto-postprocess",
-    "content": "alto-postprocess",
-    "lines": "alto-postprocess",
-    "tables": "alto-postprocess",
+#: extraction), regardless of whether the document is scanned or digital-born, so it
+#: is a plain single-owner block from day one.
+BLOCK_OWNERS: Dict[str, Union[str, Tuple[str, ...]]] = {
+    "pages": ("alto-postprocess", "digital-convert"),
+    "content": ("alto-postprocess", "digital-convert"),
+    "lines": ("alto-postprocess", "digital-convert"),
+    "tables": ("alto-postprocess", "digital-convert"),
     "page_categories": "page-classification",
     "translations": "translator",
     "entities": "nlp-enrich",
@@ -89,23 +100,72 @@ BLOCK_OWNERS: Dict[str, str] = {
     "forms": "llm-enrich",
 }
 
+#: Which originator a document's `source.origin` authorises (Issue #18 §1a). Prefix
+#: match, so "ocr:pero"/"ocr:tesseract-ces" and "digital-born-pdf" both resolve without
+#: enumerating every engine. Order matters only in that the first matching prefix wins.
+#:
+#: Checked rather than assumed because the failure it catches is silent: a record
+#: carrying half an OCR positional plane and half a digital-born one means the routing
+#: that picks between them ran twice and disagreed, and nothing downstream would notice
+#: — the schema requires only page+line on a lines[] row, so a half-built plane
+#: validates clean.
+#:
+#: An origin not listed here is not an error: the check simply abstains, so a new
+#: origin string can land before this table is taught about it (rule 6's spirit).
+ORIGIN_ORIGINATORS: Tuple[Tuple[str, str], ...] = (
+    ("digital-born", "digital-convert"),
+    ("docx", "digital-convert"),
+    ("ABBYY-ALTO", "alto-postprocess"),
+    ("ocr:", "alto-postprocess"),
+    ("vlm:", "alto-postprocess"),
+)
+
+
+def _owner_candidates(name: str) -> Tuple[str, ...]:
+    """BLOCK_OWNERS[name] normalised to a tuple — one entry for single-owner blocks."""
+    owners = BLOCK_OWNERS.get(name)
+    if not owners:
+        return ()
+    return (owners,) if isinstance(owners, str) else tuple(owners)
+
 #: Field-level ownership inside list blocks that more than one tool contributes to.
 #: A tool may only write the fields listed for it (plus the block's key fields).
 BLOCK_FIELD_OWNERS: Dict[str, Dict[str, List[str]]] = {
     "pages": {
         "alto-postprocess": ["quality_score", "quality_band", "needs_ocr", "ocr", "canvas"],
+        # Issue #18: the digital-born originator fills the same positional ROLE as
+        # alto-postprocess (see BLOCK_OWNERS), so it needs substantially the same field
+        # set — minus `ocr` (no OCR engine ran; leaving it unowned is what keeps
+        # "was this OCR'd" answerable from the record) and plus `page_index`.
+        #
+        # `needs_ocr` IS granted, deliberately. Issue #10's research pass found
+        # digital-born PDFs with non-embedded WinAnsi Helvetica and no /ToUnicode decode
+        # to garbage across EVERY text parser (sondě -> sondI, hřeby -> hIeby) — a
+        # systematic, not random, failure. This converter is the only component
+        # positioned to detect it, and needs_ocr=True is how §3's "route per-page before
+        # deferring to OCR" is expressed in the record. The converter REPORTS; routing
+        # POLICY stays outside both tools.
+        "digital-convert": ["page_index", "canvas", "quality_score", "quality_band", "needs_ocr"],
         "page-classification": ["category", "category_confidence"],
         "nlp-enrich": ["teitok_surface"],
     },
     "lines": {
         "alto-postprocess": ["categ", "quality_score", "lang", "text"],
         "nlp-enrich": ["lemma", "upos", "feats", "teitok_ref", "bbox"],
-        # Issue #18: digital-born PDF/DOCX converter. See the program-identity
-        # note at BLOCK_OWNERS above `lines` — this entry only covers the
-        # group_id field-split; the block-level ownership question (who may
-        # set_block("lines", ...) to originate it for a digital-born doc that
-        # never goes through alto-postprocess) is still open.
-        "llm-enrich-digital": ["group_id"],
+        # Issue #18: the digital-born originator. This MUST include `text` — the
+        # earlier draft granted only ["group_id"], which merge_block() silently
+        # honours: text and bbox were filtered out with no warning, and the result
+        # still validated because lines[] only *requires* page+line. That is the
+        # exact class of failure the round-trip assertion in the converter's
+        # Layer D and tests/test_document_originators.py now pin.
+        #
+        # `bbox` is granted here as well as to nlp-enrich, deliberately: on the ALTO
+        # path nlp-enrich derives it while aligning to TEITOK; on the digital-born
+        # path there is no TEITOK to align to, and the PDF adapter's native
+        # coordinates are the only bbox the record will ever have. The two never meet
+        # on one document — enforced by _assert_origin_consistent(), not left to
+        # convention.
+        "digital-convert": ["text", "bbox", "group_id", "lang", "quality_score", "categ"],
     },
     "entities": {
         "nlp-enrich": [
@@ -320,6 +380,7 @@ class DocumentRecord:
         if allowed is None:
             self._complain(f"{self.program!r} has no declared field ownership in block {name!r}")
             allowed = []
+        self._assert_origin_consistent(name)  # Issue #18 §1a
 
         writable = set(allowed) | set(keys)
         existing: List[Dict[str, Any]] = list(self._data.get(name) or [])
@@ -384,9 +445,46 @@ class DocumentRecord:
                 f"block {name!r} is field-split across {sorted(BLOCK_FIELD_OWNERS[name])} — "
                 f"use merge_block(), not set_block(), or a co-contributor's fields will be lost"
             )
-        owner = BLOCK_OWNERS.get(name)
-        if owner and owner != self.program:
-            self._complain(f"block {name!r} is owned by {owner!r}, not {self.program!r}")
+        owners = _owner_candidates(name)
+        if owners and self.program not in owners:
+            self._complain(
+                f"block {name!r} is owned by {' or '.join(owners)}, not {self.program!r}"
+            )
+        self._assert_origin_consistent(name)
+
+    def _assert_origin_consistent(self, name: str) -> None:
+        """
+        Issue #18 §1a: for a block with several possible originators, the document's
+        `source.origin` decides which one may write it.
+
+        Self-guarding, so calling it unconditionally from both set_block() and
+        merge_block() is a no-op for every pre-#18 caller. It returns early for:
+          * single-owner blocks (len(owners) < 2);
+          * programs that are not originator candidates at all — nlp-enrich merging
+            morphology into lines[] is a field contribution, not an origination claim;
+          * records with no `source` yet (rule 3: standalone runs emit their own part);
+          * origins this table has not been taught (abstain rather than block).
+
+        Deliberately reads `source.origin` rather than assembled.blocks[name].program:
+        rule 4 says the stamp on a field-split block names the MOST RECENT writer, so
+        once nlp-enrich merges into lines[] the originator signal is gone. `source` is
+        immutable after first write and `origin` is the field already designed to record
+        how the text was obtained.
+        """
+        owners = _owner_candidates(name)
+        if len(owners) < 2 or self.program not in owners:
+            return
+        origin = (self._data.get("source") or {}).get("origin")
+        if not origin:
+            return
+        for prefix, originator in ORIGIN_ORIGINATORS:
+            if str(origin).startswith(prefix):
+                if originator != self.program:
+                    self._complain(
+                        f"block {name!r}: source.origin {origin!r} is originated by "
+                        f"{originator!r}, not {self.program!r}"
+                    )
+                return
 
     def _complain(self, message: str) -> None:
         if self.strict:

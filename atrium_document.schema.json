@@ -37,7 +37,7 @@
         "language": { "type": "array", "items": { "type": "string" } },
         "origin": {
           "type": "string",
-          "description": "How the text was obtained.",
+          "description": "How the text was obtained. Load-bearing since Issue #18: for the positional blocks (pages/content/lines/tables) this value selects which originator is authorised to write them — see ORIGIN_ORIGINATORS in atrium_document.py. First writer wins, so it is fixed for the life of the record.",
           "examples": ["ABBYY-ALTO", "digital-born-pdf", "docx", "ocr:tesseract-ces", "ocr:pero", "vlm:glm-4v"]
         }
       }
@@ -135,7 +135,7 @@
     },
 
     "pages": {
-      "description": "Owner: alto-postprocess (quality/canvas/OCR); page-classification may write category fields; nlp-enrich may write teitok_surface. Field-level ownership — never co-mutated.",
+      "description": "Originator: alto-postprocess (OCR/ALTO path) or digital-convert (digital-born PDF/DOCX path), selected per document by source.origin — never both. page-classification may write category fields; nlp-enrich may write teitok_surface. Field-level ownership — never co-mutated.",
       "type": "array",
       "items": {
         "type": "object",
@@ -148,7 +148,10 @@
           "quality_band": { "type": "string", "enum": ["Trash", "Noisy", "Clear"] },
           "category": { "type": "string" },
           "category_confidence": { "type": "number", "minimum": 0, "maximum": 1 },
-          "needs_ocr": { "type": "boolean" },
+          "needs_ocr": {
+            "type": "boolean",
+            "description": "Set by whichever tool originated this page. On the digital-born path it means the embedded text layer exists but does not decode to trustworthy text (Issue #10: non-embedded WinAnsi with no /ToUnicode yields systematic diacritic corruption), i.e. this page should be re-acquired by OCR despite not being a scan. The converter reports; routing policy lives outside it."
+          },
           "ocr": {
             "type": ["object", "null"],
             "additionalProperties": true,
@@ -175,7 +178,7 @@
     },
 
     "content": {
-      "description": "Owner: alto-postprocess. Reading-order text for search, or null when externalised by reference.",
+      "description": "Originator: alto-postprocess or digital-convert, selected per document by source.origin (Issue #18) — never both. Reading-order text for search, or null when externalised by reference.",
       "type": "object",
       "additionalProperties": true,
       "properties": {
@@ -185,7 +188,7 @@
     },
 
     "lines": {
-      "description": "Owner: alto-postprocess (categ/quality/lang/text); nlp-enrich writes morphology and teitok_ref; digital-born converters (Issue #18) write group_id. Field-level ownership.",
+      "description": "Originator: alto-postprocess (categ/quality/lang/text) or digital-convert (text/bbox/group_id/lang/quality_score/categ), selected per document by source.origin (Issue #18) — never both. nlp-enrich writes morphology and teitok_ref. Field-level ownership. NOTE for validators: only page+line are required, so a row stripped of its text by a field-ownership filter still validates here — the round-trip assertion belongs in the writing tool, not in this schema.",
       "type": "array",
       "items": {
         "type": "object",
@@ -201,18 +204,21 @@
           "lemma": { "type": "string", "description": "nlp-enrich: UD lemma of the line's dominant token/lead form." },
           "upos": { "type": "string", "description": "nlp-enrich: UD universal POS tag." },
           "feats": { "type": "string", "description": "nlp-enrich: UD morphological features string." },
-          "bbox": { "$ref": "#/$defs/bbox" },
+          "bbox": {
+            "$ref": "#/$defs/bbox",
+            "description": "On the ALTO path, derived by nlp-enrich while aligning to TEITOK. On the digital-born path, the PDF adapter's native coordinates — the only bbox such a record will ever have, since there is no TEITOK to align to. Two declared writers, mutually exclusive per document by source.origin."
+          },
           "teitok_ref": { "type": "string" },
           "group_id": {
             "type": ["string", "null"],
-            "description": "Issue #18: groups lines belonging to the same source-structural unit — a DOCX paragraph or table row, or a PDF text block from Docling/PyMuPDF. Lines sharing a group_id are contiguous and in the same reading order; null when the source has no such grouping (e.g. OCR/ALTO lines from alto-postprocess, which stays line-only). Not a schema block of its own — deliberately kept at line-granularity to avoid a second nesting level competing with 'lines' as the position-addressable unit the rest of the schema (bbox, entities' page/line keys) already keys off."
+            "description": "Issue #18: groups lines belonging to the same source-structural unit — a DOCX paragraph or table row, or a PDF text block from the structural extractor. Lines sharing a group_id are contiguous and in the same reading order; null when the source has no such grouping (e.g. OCR/ALTO lines from alto-postprocess, which stays line-only). Not a schema block of its own — deliberately kept at line-granularity to avoid a second nesting level competing with 'lines' as the position-addressable unit the rest of the schema (bbox, entities' page/line keys) already keys off. CONSUMER CONTRACT: a group boundary renders as a paragraph break. Markdown already encodes paragraphs natively as a blank line, so this needs no new layout_md cue — see api_util/xml_to_md.rows_to_layout_markdown()."
           }
         }
       }
     },
 
     "tables": {
-      "description": "Owner: alto-postprocess (ALTO spatial-block tables) or the digital-born converter (DOCX/PDF via python-docx/Docling) — same unresolved originator question as pages/content/lines (Issue #18), not a new one. Grid SHAPE only: cell text is never duplicated here, it lives once in lines[] and is linked back via group_id, so this stays the lossless structured twin of the disposable Markdown table in 'regenerable'.",
+      "description": "Originator: alto-postprocess (ALTO spatial-block tables) or digital-convert (DOCX/PDF structural extraction), selected per document by source.origin (Issue #18, resolved) — never both. Grid SHAPE only: cell text is never duplicated here, it lives once in lines[] and is linked back via group_id, so this stays the lossless structured twin of the disposable Markdown table in 'regenerable'.",
       "type": "array",
       "items": {
         "type": "object",
