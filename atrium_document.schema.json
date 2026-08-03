@@ -185,7 +185,7 @@
     },
 
     "lines": {
-      "description": "Owner: alto-postprocess (categ/quality/lang/text); nlp-enrich writes morphology and teitok_ref. Field-level ownership.",
+      "description": "Owner: alto-postprocess (categ/quality/lang/text); nlp-enrich writes morphology and teitok_ref; digital-born converters (Issue #18) write group_id. Field-level ownership.",
       "type": "array",
       "items": {
         "type": "object",
@@ -202,7 +202,48 @@
           "upos": { "type": "string", "description": "nlp-enrich: UD universal POS tag." },
           "feats": { "type": "string", "description": "nlp-enrich: UD morphological features string." },
           "bbox": { "$ref": "#/$defs/bbox" },
-          "teitok_ref": { "type": "string" }
+          "teitok_ref": { "type": "string" },
+          "group_id": {
+            "type": ["string", "null"],
+            "description": "Issue #18: groups lines belonging to the same source-structural unit — a DOCX paragraph or table row, or a PDF text block from Docling/PyMuPDF. Lines sharing a group_id are contiguous and in the same reading order; null when the source has no such grouping (e.g. OCR/ALTO lines from alto-postprocess, which stays line-only). Not a schema block of its own — deliberately kept at line-granularity to avoid a second nesting level competing with 'lines' as the position-addressable unit the rest of the schema (bbox, entities' page/line keys) already keys off."
+          }
+        }
+      }
+    },
+
+    "tables": {
+      "description": "Owner: alto-postprocess (ALTO spatial-block tables) or the digital-born converter (DOCX/PDF via python-docx/Docling) — same unresolved originator question as pages/content/lines (Issue #18), not a new one. Grid SHAPE only: cell text is never duplicated here, it lives once in lines[] and is linked back via group_id, so this stays the lossless structured twin of the disposable Markdown table in 'regenerable'.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["table_id", "page"],
+        "additionalProperties": true,
+        "properties": {
+          "table_id": { "type": "string" },
+          "page": { "type": "string" },
+          "caption": { "type": "string" },
+          "n_rows": { "type": "integer", "minimum": 1 },
+          "n_cols": { "type": "integer", "minimum": 1 },
+          "group_id": {
+            "type": ["string", "null"],
+            "description": "Back-reference to the lines[].group_id sharing this table's cell text — never a copy of the text itself."
+          },
+          "cells": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["row", "col"],
+              "additionalProperties": true,
+              "properties": {
+                "row": { "type": "integer", "minimum": 0 },
+                "col": { "type": "integer", "minimum": 0 },
+                "rowspan": { "type": "integer", "minimum": 1 },
+                "colspan": { "type": "integer", "minimum": 1 },
+                "is_header": { "type": "boolean" },
+                "bbox": { "$ref": "#/$defs/bbox" }
+              }
+            }
+          }
         }
       }
     },
@@ -279,6 +320,29 @@
         },
         "summary": { "type": ["string", "null"] },
         "topics": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "forms": {
+      "description": "Owner: llm-enrich. VLM/LLM-driven labeled fixed-field extraction (e.g. archival intake sheets: name/date/plot-number/signature). No deterministic ALTO/DOCX structural signal marks a region as a form field the way it does for tables, so this carries a confidence score per field and is always single-owner regardless of document origin.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["field_id", "label"],
+        "additionalProperties": true,
+        "properties": {
+          "field_id": { "type": "string" },
+          "label": { "type": "string" },
+          "value": { "type": ["string", "null"] },
+          "value_type": { "type": "string", "enum": ["text", "date", "number", "checkbox", "signature_present"] },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "page": { "type": "string" },
+          "bbox": { "$ref": "#/$defs/bbox" },
+          "entity_ref": {
+            "type": ["integer", "null"],
+            "description": "Index into entities[] when this field's value is itself a named entity."
+          }
+        }
       }
     }
   },

@@ -2,8 +2,8 @@
 atrium_document.py  –  Per-document aggregate record ("paradata pair") for ATRIUM pipelines.
 
 Sibling of `atrium_paradata.py`. Where paradata answers *how a run behaved*, this answers
-*what we know about one document*: its text, pages, entities and enrichment, gathered across
-the pipeline into one FAIR, versioned JSON.
+*what we know about one document*: its text, pages, tables, forms, entities and enrichment,
+gathered across the pipeline into one FAIR, versioned JSON.
 
 The tools are separate containers and never see each other's outputs, so the record is built
 by **accretion**: every tool takes the previous version of the JSON (if it is given one) and
@@ -58,14 +58,35 @@ RESERVED_KEYS = frozenset({"schema_version", "record_type", "doc_id", "source", 
 
 #: Which tool owns which top-level block. One owner per block; blocks shared between
 #: tools are split by FIELD instead (see BLOCK_FIELD_OWNERS) so nothing is co-mutated.
+#: OPEN QUESTION (Issue #18): pages/content/lines/tables assume alto-postprocess (the
+#: OCR/ALTO pipeline) always originates them. A digital-born PDF/DOCX converted
+#: directly by atrium-llm-enrich's api_util/digital_to_json.py never runs
+#: alto-postprocess at all, so there is currently no `program` identity
+#: authorized to set_block() these blocks for such a document — calling
+#: set_block() as anything other than "alto-postprocess" trips _assert_owner's
+#: _complain() (raises under strict=True). Needs a decision before Phase 2/3
+#: (the PDF/DOCX adapters) can actually emit a first-write atrium_document:
+#: either alto-postprocess gains a "no-op passthrough" mode for already-digital
+#: input so it's still the block owner of record, or BLOCK_OWNERS needs to
+#: accept an alternate owner for the digital-born case specifically. `tables`
+#: (below) inherits this exact gap unchanged: python-docx/Docling produce a
+#: grid from a DOCX/PDF table just as directly as alto-postprocess does from
+#: ALTO spatial blocks, so it is added here rather than opening a second,
+#: parallel ownership question.
+#:
+#: `forms` has no such conflict — it is always llm-enrich (VLM/LLM-driven field
+#: extraction), regardless of whether the document is scanned or digital-born,
+#: so it is a plain single-owner block from day one.
 BLOCK_OWNERS: Dict[str, str] = {
     "pages": "alto-postprocess",
     "content": "alto-postprocess",
     "lines": "alto-postprocess",
+    "tables": "alto-postprocess",
     "page_categories": "page-classification",
     "translations": "translator",
     "entities": "nlp-enrich",
     "enrichment": "llm-enrich",
+    "forms": "llm-enrich",
 }
 
 #: Field-level ownership inside list blocks that more than one tool contributes to.
@@ -79,6 +100,12 @@ BLOCK_FIELD_OWNERS: Dict[str, Dict[str, List[str]]] = {
     "lines": {
         "alto-postprocess": ["categ", "quality_score", "lang", "text"],
         "nlp-enrich": ["lemma", "upos", "feats", "teitok_ref", "bbox"],
+        # Issue #18: digital-born PDF/DOCX converter. See the program-identity
+        # note at BLOCK_OWNERS above `lines` — this entry only covers the
+        # group_id field-split; the block-level ownership question (who may
+        # set_block("lines", ...) to originate it for a digital-born doc that
+        # never goes through alto-postprocess) is still open.
+        "llm-enrich-digital": ["group_id"],
     },
     "entities": {
         "nlp-enrich": [
@@ -434,9 +461,11 @@ class DocumentRecord:
             "pages",
             "content",
             "lines",
+            "tables",
             "entities",
             "translations",
             "enrichment",
+            "forms",
         ]
         ordered = {k: out[k] for k in order if k in out}
         for k in out:  # any unknown/newer block is preserved (rule 6)
