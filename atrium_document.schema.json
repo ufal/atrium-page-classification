@@ -142,15 +142,28 @@
         "required": ["page"],
         "additionalProperties": true,
         "properties": {
-          "page": { "type": "string", "description": "Page label as a string, so 'iv' or 'A-1' survive." },
-          "page_index": { "type": "integer", "minimum": 1 },
+          "page": { "type": "string", "description": "Page label as a string, so 'iv' or 'A-1' survive. Consumers must NOT derive ordering from it — use page_index." },
+          "page_index": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "1-based physical position of this page in the document — the ordering key, and the only one that works when `page` is a roman numeral or an appendix label. Writable by both originators: an ALTO record needs it as much as a digital-born one, since roman-numeral front matter is common in both."
+          },
           "quality_score": { "type": "number", "minimum": 0, "maximum": 1 },
           "quality_band": { "type": "string", "enum": ["Trash", "Noisy", "Clear"] },
           "category": { "type": "string" },
           "category_confidence": { "type": "number", "minimum": 0, "maximum": 1 },
           "needs_ocr": {
             "type": "boolean",
-            "description": "Set by whichever tool originated this page. On the digital-born path it means the embedded text layer exists but does not decode to trustworthy text (Issue #10: non-embedded WinAnsi with no /ToUnicode yields systematic diacritic corruption), i.e. this page should be re-acquired by OCR despite not being a scan. The converter reports; routing policy lives outside it."
+            "description": "Set by whichever tool originated this page. On the digital-born path it means the embedded text layer exists but does not decode to trustworthy text (Issue #10: non-embedded WinAnsi with no /ToUnicode yields systematic diacritic corruption), i.e. this page should be re-acquired by OCR despite not being a scan. The converter reports; routing policy lives outside it. Because the two paths mean OPPOSITE things by it (no text layer vs. an untrustworthy one), always write needs_ocr_reason alongside. Setting this is also what authorises alto-postprocess to re-originate the positional plane of a digital-born record — see _assert_origin_consistent() in atrium_document.py.",
+            "examples": [true]
+          },
+          "needs_ocr_reason": {
+            "type": "string",
+            "description": "Why this page needs OCR, in words, because needs_ocr alone is ambiguous between the two paths and the Markdown renderer emits it as a layout cue the model reads. Without it, api_util/xml_to_md.rows_to_layout_markdown() fell back to 'no extractable text layer' — factually inverted for every digital-born page, which by definition HAS a text layer.",
+            "examples": [
+              "no extractable text layer",
+              "text layer decodes to corrupt diacritics (WinAnsi declared, no /ToUnicode)"
+            ]
           },
           "ocr": {
             "type": ["object", "null"],
@@ -162,11 +175,12 @@
           },
           "canvas": {
             "type": "object",
+            "description": "Page dimensions, and the unit every bbox on this page is expressed in. Write `unit` whenever any bbox is present — a digital-born PDF page is in points, an ALTO page is usually in pixels, and $defs/bbox has no other way to say which.",
             "additionalProperties": true,
             "properties": {
               "width": { "type": "number" },
               "height": { "type": "number" },
-              "unit": { "type": "string", "examples": ["pt", "px"] }
+              "unit": { "type": "string", "default": "px", "examples": ["pt", "px"] }
             }
           },
           "teitok_surface": {
@@ -195,10 +209,17 @@
         "required": ["page", "line"],
         "additionalProperties": true,
         "properties": {
-          "page": { "type": "string" },
+          "page": {
+            "type": "string",
+            "description": "Page LABEL, matching a pages[].page. A string for the same reason as there — 'iv' and 'A-1' must survive — so a writer must not pass an integer here: merge_block() keys rows on it, and a consumer sorting on int(page) needs pages[].page_index to order non-numeric labels."
+          },
           "line": { "type": "integer", "minimum": 0 },
           "text": { "type": "string" },
-          "categ": { "type": "string" },
+          "categ": {
+            "type": "string",
+            "description": "Line category. Open string, but two values are LOAD-BEARING and must be spelled exactly: 'Garbage' and 'Inverted' are what api_util/json_to_md.py's DROP_CATEGORIES filters out before the text reaches the model. A digital-born converter reporting undecodable text must emit one of those two rather than inventing a synonym — a typo here does not fail validation, it silently disables the filter.",
+            "examples": ["Text", "Heading", "Garbage", "Inverted"]
+          },
           "lang": { "type": "string" },
           "quality_score": { "type": "number", "minimum": 0, "maximum": 1 },
           "lemma": { "type": "string", "description": "nlp-enrich: UD lemma of the line's dominant token/lead form." },
@@ -211,7 +232,22 @@
           "teitok_ref": { "type": "string" },
           "group_id": {
             "type": ["string", "null"],
-            "description": "Issue #18: groups lines belonging to the same source-structural unit — a DOCX paragraph or table row, or a PDF text block from the structural extractor. Lines sharing a group_id are contiguous and in the same reading order; null when the source has no such grouping (e.g. OCR/ALTO lines from alto-postprocess, which stays line-only). Not a schema block of its own — deliberately kept at line-granularity to avoid a second nesting level competing with 'lines' as the position-addressable unit the rest of the schema (bbox, entities' page/line keys) already keys off. CONSUMER CONTRACT: a group boundary renders as a paragraph break. Markdown already encodes paragraphs natively as a blank line, so this needs no new layout_md cue — see api_util/xml_to_md.rows_to_layout_markdown()."
+            "description": "Issue #18: groups lines belonging to the same source-structural unit — a DOCX paragraph or table CELL, or a PDF text block from the structural extractor. Lines sharing a group_id are contiguous and in the same reading order; null when the source has no such grouping (e.g. OCR/ALTO lines from alto-postprocess, which stays line-only). Not a schema block of its own — deliberately kept at line-granularity to avoid a second nesting level competing with 'lines' as the position-addressable unit the rest of the schema (bbox, entities' page/line keys) already keys off. CONSUMER CONTRACT: a group boundary renders as a paragraph break. Markdown already encodes paragraphs natively as a blank line, so this needs no new layout_md cue — implemented in api_util/xml_to_md.rows_to_layout_markdown() (which emits the blank line) and api_util/json_to_md._rows_from_lines() (which carries the field through); pinned by tests/test_json_to_md.py. 'table CELL', not 'table row': a per-row value cannot address the cell a line belongs to, which is what tables[].cells[].group_id joins on."
+          },
+          "style": {
+            "type": "object",
+            "description": "Issue #18 §1 (the 'font row', decided as option (c) — semantic style only). Carries what a downstream reader can ACT on and deliberately drops typeface and point size: the LLM cannot use 'Helvetica 12pt', and heading-ness is already carried by categ. Absent on the ALTO path, where no style signal exists. Writer: digital-convert only.",
+            "additionalProperties": true,
+            "properties": {
+              "bold": { "type": "boolean" },
+              "italic": { "type": "boolean" },
+              "heading_level": {
+                "type": ["integer", "null"],
+                "minimum": 1,
+                "maximum": 6,
+                "description": "1-6 for a heading (DOCX outlineLvl + 1, or a PDF size/weight heuristic); null or absent for body text."
+              }
+            }
           }
         }
       }
@@ -232,7 +268,7 @@
           "n_cols": { "type": "integer", "minimum": 1 },
           "group_id": {
             "type": ["string", "null"],
-            "description": "Back-reference to the lines[].group_id sharing this table's cell text — never a copy of the text itself."
+            "description": "Namespace prefix shared by this table's cell group_ids (e.g. 't1' for cells 't1.r0c0', 't1.r0c1'), so a consumer can find a table's lines without scanning cells[]. NOT the join key — that is per-cell, on cells[].group_id: one scalar for a whole table cannot address which lines carry which cell, so the 'linked back via group_id' contract was unimplementable while this was the only reference."
           },
           "cells": {
             "type": "array",
@@ -246,7 +282,16 @@
                 "rowspan": { "type": "integer", "minimum": 1 },
                 "colspan": { "type": "integer", "minimum": 1 },
                 "is_header": { "type": "boolean" },
-                "bbox": { "$ref": "#/$defs/bbox" }
+                "bbox": { "$ref": "#/$defs/bbox" },
+                "group_id": {
+                  "type": ["string", "null"],
+                  "description": "THE join key: the lines[].group_id whose lines carry this cell's text. Never a copy of the text. Positional inference is not an alternative — rowspan/colspan mean lines-per-row is not n_cols, and a multi-line cell breaks any ordering assumption — so without this the grid cannot be reassembled from the record at all."
+                },
+                "lines": {
+                  "type": "array",
+                  "description": "Optional explicit line list for a cell whose text spans more than one group (rare). When present it wins over group_id.",
+                  "items": { "$ref": "#/$defs/line_ref" }
+                }
               }
             }
           }
@@ -346,7 +391,11 @@
           "bbox": { "$ref": "#/$defs/bbox" },
           "entity_ref": {
             "type": ["integer", "null"],
-            "description": "Index into entities[] when this field's value is itself a named entity."
+            "description": "DEPRECATED in favour of entity_key. A positional index into entities[], and therefore valid only within a single unmerged record: merge_document_records() resolves each top-level block independently by assembled.blocks[*].updated_at, so a `forms` block from one fan-out branch can end up beside an `entities` block from another and the index then addresses whatever happens to sit at that position — with the record still validating."
+          },
+          "entity_key": {
+            "oneOf": [{ "$ref": "#/$defs/entity_ref" }, { "type": "null" }],
+            "description": "The entities[] row this field's value is, addressed by the natural key BLOCK_KEY_FIELDS['entities'] merges on. Survives a fan-in merge; prefer this over entity_ref."
           }
         }
       }
@@ -356,10 +405,36 @@
   "$defs": {
     "bbox": {
       "type": "array",
-      "description": "[x_min, y_min, x_max, y_max] in the coordinate space of the ALTO/TEITOK page.",
+      "description": "[x_min, y_min, x_max, y_max] with the origin at the page TOP-LEFT and y increasing DOWNWARDS, in the unit named by that page's pages[].canvas.unit. This convention is normative and format-independent: it is what ALTO already uses, so the OCR path is unchanged, but it is NOT PDF user space, which puts the origin bottom-left. A digital-born PDF writer MUST convert before writing — with pdfplumber that means using 'top'/'bottom' (top-down, points) and never 'y0'/'y1' (bottom-up). Stated explicitly since Issue #18 gave this $def a second writer: the description used to say 'the coordinate space of the ALTO/TEITOK page', which a digital-born record does not have, leaving the y-axis direction and the unit undefined for exactly the writer whose selling point is exact coordinates.",
       "items": { "type": "number" },
       "minItems": 4,
       "maxItems": 4
+    },
+    "entity_ref": {
+      "type": "object",
+      "description": "A reference to one entities[] row by its natural key — BLOCK_KEY_FIELDS['entities'].",
+      "required": ["page", "line", "char_span"],
+      "additionalProperties": false,
+      "properties": {
+        "page": { "type": "string" },
+        "line": { "type": "integer" },
+        "char_span": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0 },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    },
+    "line_ref": {
+      "type": "object",
+      "description": "A reference to one lines[] row by its natural key — the same key BLOCK_KEY_FIELDS['lines'] merges on. Survives merge_document_records(), which an array index does not.",
+      "required": ["page", "line"],
+      "additionalProperties": false,
+      "properties": {
+        "page": { "type": "string" },
+        "line": { "type": "integer", "minimum": 0 }
+      }
     }
   }
 }
