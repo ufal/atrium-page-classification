@@ -69,9 +69,7 @@ RECORD_TYPE_MERGED = "atrium-document-merged"
 FILE_SUFFIX = ".document.json"
 
 #: Structural keys the module itself maintains — never a tool's "own block".
-RESERVED_KEYS = frozenset(
-    {"schema_version", "record_type", "doc_id", "source", "provenance", "assembled"}
-)
+RESERVED_KEYS = frozenset({"schema_version", "record_type", "doc_id", "source", "provenance", "assembled"})
 
 #: Which tool owns which top-level block. One owner per block; blocks shared between
 #: tools are split by FIELD instead (see BLOCK_FIELD_OWNERS) so nothing is co-mutated.
@@ -546,11 +544,7 @@ class DocumentRecord:
         if allowed is None:
             self._complain(f"{self.program!r} has no declared field ownership in block {name!r}")
             allowed = []
-        elif (
-            own_fields is not None
-            and self.program not in declared
-            and self.program not in _owner_candidates(name)
-        ):
+        elif own_fields is not None and self.program not in declared and self.program not in _owner_candidates(name):
             # own_fields is for a declared writer to NARROW or extend its own field set. It
             # must not confer writership: merge_block() never calls _assert_owner(), and
             # _assert_origin_consistent() abstains for non-candidates, so passing own_fields
@@ -614,11 +608,7 @@ class DocumentRecord:
         were filtered out. Empty when nothing was lost. Pass `name` for one block.
         """
         if name is not None:
-            return (
-                {name: list(self._dropped_fields.get(name, []))}
-                if name in self._dropped_fields
-                else {}
-            )
+            return {name: list(self._dropped_fields.get(name, []))} if name in self._dropped_fields else {}
         return {k: list(v) for k, v in self._dropped_fields.items()}
 
     def assert_fields_survived(
@@ -694,18 +684,14 @@ class DocumentRecord:
         # on one record to erase. `tables` is declared for both originators and nobody else,
         # so set_block() is the correct call for it; `pages`, `lines` and `entities` each
         # still have a genuine co-contributor and still warn exactly as before.
-        co_contributors = sorted(
-            set(BLOCK_FIELD_OWNERS.get(name, {})) - {self.program} - set(owners)
-        )
+        co_contributors = sorted(set(BLOCK_FIELD_OWNERS.get(name, {})) - {self.program} - set(owners))
         if co_contributors:
             self._complain(
                 f"block {name!r} is field-split with {co_contributors} — "
                 f"use merge_block(), not set_block(), or a co-contributor's fields will be lost"
             )
         if owners and self.program not in owners:
-            self._complain(
-                f"block {name!r} is owned by {' or '.join(owners)}, not {self.program!r}"
-            )
+            self._complain(f"block {name!r} is owned by {' or '.join(owners)}, not {self.program!r}")
         self._assert_origin_consistent(name)
 
     def _assert_origin_consistent(self, name: str) -> None:
@@ -783,8 +769,7 @@ class DocumentRecord:
             )
             return
         self._complain(
-            f"block {name!r}: source.origin {origin!r} is originated by "
-            f"{originator!r}, not {self.program!r}"
+            f"block {name!r}: source.origin {origin!r} is originated by {originator!r}, not {self.program!r}"
         )
 
     def _ocr_handoff_requested(self) -> bool:
@@ -846,8 +831,7 @@ class DocumentRecord:
 
         contributors: List[Dict[str, str]] = list(prov.get("contributors") or [])
         if self._touched and not any(
-            c.get("program") == self.program and c.get("run_id") == self.run_id
-            for c in contributors
+            c.get("program") == self.program and c.get("run_id") == self.run_id for c in contributors
         ):
             contributors.append(
                 {
@@ -873,9 +857,7 @@ class DocumentRecord:
         out["provenance"] = self._provenance()
         assembled = out.setdefault("assembled", {})
         assembled["had_baseline"] = self._had_baseline
-        assembled["note"] = (
-            "Blocks reflect CONTRIBUTED steps only; a block is absent until its tool has run."
-        )
+        assembled["note"] = "Blocks reflect CONTRIBUTED steps only; a block is absent until its tool has run."
         # Stable, predictable key order for diff-friendly output.
         order = [
             "schema_version",
@@ -1024,9 +1006,7 @@ def load_document(path: str) -> Dict[str, Any]:
     current_major = int(SCHEMA_VERSION.split(".")[0])
 
     if major > current_major:
-        raise ValueError(
-            f"Schema version {v} is newer than supported {SCHEMA_VERSION}. Please update tools."
-        )
+        raise ValueError(f"Schema version {v} is newer than supported {SCHEMA_VERSION}. Please update tools.")
     elif major < current_major:
         data = migrate_document(data)
 
@@ -1093,9 +1073,7 @@ def merge_document_records(json_paths: List[str], out_path: str) -> str:
             if key not in source:
                 source[key] = value
             elif source[key] != value:
-                source_conflicts.append(
-                    f"{key}: {source[key]!r} kept, {value!r} from {p} discarded"
-                )
+                source_conflicts.append(f"{key}: {source[key]!r} kept, {value!r} from {p} discarded")
 
         for key, bucket in accumulating.items():
             for sub, value in (data.get(key) or {}).items():
@@ -1206,9 +1184,7 @@ def _cli() -> None:
     args = p.parse_args()
 
     if args.cmd == "set-block":
-        raw = (
-            sys.stdin.read() if args.payload == "-" else open(args.payload, encoding="utf-8").read()
-        )
+        raw = sys.stdin.read() if args.payload == "-" else open(args.payload, encoding="utf-8").read()
         with DocumentRecord.open(
             args.doc_id,
             args.program,
