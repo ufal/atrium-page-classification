@@ -11,7 +11,7 @@ matplotlib>=3.11.1
 # images move to 3.12, or the bump is back next Monday. 2.4.6 is the newest release
 # with cp311 wheels; 2.4.0 is yanked, hence the floor. Nothing here needs 2.5 — the
 # highest transitive floor is pandas' `numpy>=1.26.0`.
-numpy>=2.4.1,<2.5
+numpy>=2.5.1,<2.6
 pandas>=3.0.5
 Pillow>=12.3.0
 scikit-learn>=1.9.0
@@ -20,4 +20,4 @@ torchvision==0.22.1
 transformers>=4.57.6,<5
 timm>=1.0.28
 tensorboard>=2.21.0
-ultralytics>=8.4.114
+ultralytics>=8.4.115
