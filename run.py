@@ -2,7 +2,6 @@ import argparse
 import configparser
 import math
 import os
-import re
 import time
 from pathlib import Path
 
@@ -370,7 +369,7 @@ def main(argv=None):
 
     from classifier import ImageClassifier, average_model_weights, split_data_80_10_10, split_data_from_folds
     from parallel_best import run_best_models  # memory-aware best-models engine + averaging
-    from utils import collect_images, confusion_plot, dataframe_results, directory_scraper
+    from utils import collect_images, confusion_plot, dataframe_results, directory_scraper, doc_id_and_page
     from yolo_classifier import YOLOClassifier
 
     # ── data loading (train / eval) ───────────────────────────────────────────
@@ -754,12 +753,16 @@ def main(argv=None):
                     print(f"\t{lab}:  {round(sc * 100, 2)}%")
 
                 if args.document_json_out:
-                    file_stem = Path(args.file).stem
-                    match = re.search(r"(.*)[-_](\d+)$", file_stem)
-                    if match:
-                        doc_id, page_num = match.group(1), match.group(2)
-                    else:
-                        doc_id, page_num = file_stem, "1"
+                    # (atrium-project#10, D3) This used to carry its own copy of the
+                    # page-suffix regex, so the -f single-image path and the -d batch path
+                    # (utils.dataframe_results) were two independent derivations of the
+                    # same identity — and the copy here never routed through
+                    # canonical_doc_id(), so a multi-dot image name resolved to a doc_id
+                    # no other stage in the pipeline writes to. One helper now, and the
+                    # int page normalises `_0007` to "7" so both CLI shapes produce the
+                    # SAME pages[] key for the same image (the batch path always did).
+                    doc_id, page = doc_id_and_page(args.file)
+                    page_num = str(page if page is not None else 1)
 
                     single_rdf = pd.DataFrame(
                         [{"FILE": doc_id, "PAGE": page_num, "CLASS-1": labels[0], "SCORE-1": scores[0]}]

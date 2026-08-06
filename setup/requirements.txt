@@ -1,5 +1,11 @@
 evaluate>=0.4.6
 configparser>=7.2.0
+# RUNTIME, not test-only: atrium_document_adapter._schema_error() calls
+# atrium_document.validate_document() on every document record this tool emits (Layer D,
+# atrium-project#10 D4). Undeclared, validate_document() raises its own fail-loud
+# RuntimeError, the adapter degrades to one stderr warning, and the gate silently stops
+# gating — which is the exact state D4 found the whole ecosystem in.
+jsonschema>=4.26.0
 matplotlib>=3.11.1
 # The <2.5 ceiling is LOAD-BEARING: numpy 2.5.0+ declares `Requires-Python >=3.12`
 # and every image and CI job here runs 3.11 (`FROM python:3.11-slim`). Raise the

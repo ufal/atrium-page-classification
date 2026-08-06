@@ -3,6 +3,7 @@ import re
 import time
 import warnings
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -10,8 +11,58 @@ from matplotlib import pyplot as plt
 from PIL import Image, ImageFile
 from sklearn.metrics import ConfusionMatrixDisplay, classification_report
 
+from atrium_document import canonical_doc_id
+
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 Image.MAX_IMAGE_PIXELS = 4221790634
+
+#: Trailing PAGE NUMBER on a per-page image filename: `CTX01_0007.png` → doc `CTX01`,
+#: page `0007`. Greedy on purpose (last separator wins), so `report_2021_003` is
+#: document `report_2021` page 3 and not document `report` page 2021.
+#:
+#: Compiled once, module-level, and used by BOTH entry points. It used to be two
+#: independent copies of the same expression — here and inline in `run.py`'s single-file
+#: branch — which is the same drift risk that produced the eleven hand-rolled doc_id
+#: derivations issue #13 was opened about (atrium-project#10, D3).
+_PAGE_SUFFIX_RE = re.compile(r"(.*)[-_](\d+)$")
+
+
+def doc_id_and_page(image_path) -> tuple[str, Optional[int]]:
+    """Split one per-page image filename into (doc_id, page number).
+
+    page-classification is the DOCUMENTED EXCEPTION to "call `canonical_doc_id()` and
+    nothing else" (atrium-project#10, D3): its inputs are per-page IMAGES, and the page
+    number is carried in the filename rather than in the content, so a doc_id derivation
+    here has to strip a page label that `canonical_doc_id()` knows nothing about —
+    `KNOWN_PIPELINE_SUFFIXES` deliberately lists no image extensions. So this COMPOSES
+    the two halves rather than replacing either:
+
+      1. drop the image extension (`.png`/`.jpg`/…), which only `Path.stem` can do here;
+      2. split the trailing page label off — the genuinely pc-specific half;
+      3. hand what remains to `canonical_doc_id()`, so a multi-dot document name resolves
+         to the SAME id every other tool in the pipeline computes for it.
+
+    Step 3 is the fix: `CTX01.scan_0007.png` used to yield doc_id `CTX01.scan`, while
+    alto-postprocess/nlp-enrich key the very same document off `CTX01.alto.xml` /
+    `CTX01.teitok.xml` → `CTX01`. A fork like that does not fail — it silently writes a
+    second record under a key no other stage ever reads, and this tool's `page_categories`
+    are then lost to the rest of the pipeline.
+
+    Steps 1–2 run BEFORE step 3, not after, and the order is load-bearing: fed the whole
+    filename, `canonical_doc_id()` finds no known suffix on a `.png`, falls through to its
+    `split(".")[0]` fallback and returns `CTX01` — page label and all — so a
+    canonical-first composition would collapse every page of a multi-dot document onto
+    page 1, i.e. trade a doc_id fork for a worse page collision. Splitting first keeps the
+    page and still lands on the canonical id.
+
+    Returns `page = None` when the name carries no page label; the caller decides what to
+    substitute (both call sites use page 1) and whether to warn.
+    """
+    stem = Path(image_path).stem
+    match = _PAGE_SUFFIX_RE.match(stem)
+    if match:
+        return canonical_doc_id(match.group(1)), int(match.group(2))
+    return canonical_doc_id(stem), None
 
 
 # get list of all files in the folder and nested folders by file format
@@ -29,25 +80,17 @@ def dataframe_results(
     results = []
     raws = []
 
-    # 2. Compile the regex pattern once for efficiency
-    pattern = re.compile(r"(.*)[-_](\d+)$")
-
     for image_file, predict_scores in zip(test_images, test_predictions):
-        image_name = Path(image_file).stem
+        # One shared derivation for both CLI shapes — see doc_id_and_page (D3).
+        document, page_num = doc_id_and_page(image_file)
 
-        # 3. Apply the regex match
-        match = pattern.match(image_name)
-
-        if match:
-            document = match.group(1)
-            page_num = int(match.group(2))
-        else:
+        if page_num is None:
             # Fallback if file doesn't match the format (e.g., "cover_page.png")
             warnings.warn(
-                f"Ambiguous filename without page suffix: '{image_name}'. Assigning full stem as FILE and '1' as PAGE.",
+                f"Ambiguous filename without page suffix: '{Path(image_file).stem}'. "
+                f"Assigning the canonical doc_id '{document}' as FILE and '1' as PAGE.",
                 UserWarning,
             )
-            document = image_name
             page_num = 1
 
         labels = [categories[i[0]] for i in predict_scores] if top_N > 1 else [categories[predict_scores]]

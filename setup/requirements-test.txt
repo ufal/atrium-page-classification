@@ -5,3 +5,19 @@ httpx
 python-multipart
 openapi-spec-validator
 matplotlib
+# pandas/scikit-learn are what utils.py imports at module level, so without them the fast
+# lane cannot even COLLECT tests/test_utils.py, test_atrium_document_adapter.py,
+# test_run.py, test_averaging.py, … (9 collection errors, exit 2). The Docker lane never
+# noticed because it also installs setup/requirements.txt; a clean venv built from this
+# file alone — the Tier 2 discipline issue atrium-project#10 mandates — was red before a
+# single test ran. Light wheels, no torch: the fast lane stays fast.
+pandas>=3.0.5
+scikit-learn>=1.9.0
+# Layer D (atrium-project#10, D4): the adapter's schema gate needs a real validator, and the
+# tests that assert its raise-vs-warn policy need the real one rather than the degraded
+# no-op path. Present transitively via openapi-spec-validator today, which is not a
+# declaration — that dependency could drop it in any release.
+jsonschema>=4.26.0
+# tests/test_service_runtime_deps.py parses docker-compose*.yml and .github/dependabot.yml to
+# check the deployment's entrypoints and the numpy guard (G2/G3). Also only transitive today.
+PyYAML>=6.0.3

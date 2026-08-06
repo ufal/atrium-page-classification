@@ -23,20 +23,80 @@ chunks of the same run: for doc_id's already written earlier in *this* run, the 
 back from the output dir (which already carries this run's own earlier pages) rather than from the
 original (pre-classification) input dir, so a later chunk cannot clobber an earlier chunk's pages
 for the same document.
+
+Both entry points funnel into _write_one(), which is therefore this repo's SINGLE Layer D
+chokepoint (atrium-project#10, D4/D8): the schema gate and the field-survival assertion live
+there once, rather than once per caller.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Any, Optional
 
 import pandas as pd
 
-from atrium_document import DocumentRecord
+from atrium_document import FILE_SUFFIX, SCHEMA_FILENAME, DocumentRecord, load_document, validate_document
 
 PROGRAM = "page-classification"
+
+#: This tool's field-level grant in the `pages` block — must stay a subset of
+#: BLOCK_FIELD_OWNERS["pages"]["page-classification"]. Named once, rather than repeated as a
+#: literal at the merge_block() call, because it is also what _page_patches() is allowed to
+#: emit: the D8 assertion below compares the two, and two copies of the same literal would
+#: make that comparison compare a list with itself.
+OWN_PAGE_FIELDS = ["category", "category_confidence"]
+
+#: `schema_error()` warns ONCE per process when the gate itself is unavailable, not once per
+#: document — a batch run over 400 pages must not bury the one line that matters under 400
+#: copies of it.
+_schema_gate_disabled_warned = False
+
+
+def schema_error(record: dict, what: str) -> Optional[str]:
+    """Validate one record against `atrium_document.schema.json`.
+
+    Returns None when it validates, or a one-line description of the schema error when it does
+    not. This is plan §2's **Layer D** — "no doc.json is emitted if validation fails" — adopted
+    here for atrium-project#10 (D4), which found `validate_document()` called from no production
+    path in any of the five repos: the gate `docs/document_schema.md` documents as normative was
+    protecting nothing at all.
+
+    Deliberately only answers *"is it valid"*. The POLICY — who raises and who merely warns —
+    lives at the two call sites in `_write_one()`, because it differs for an inherited baseline
+    and for this tool's own output.
+
+    A missing `jsonschema` (RuntimeError from `validate_document()`), a module vendored without
+    its schema (FileNotFoundError from `load_schema()`) or an unparseable schema (JSONDecodeError)
+    all mean the GATE is absent, not that the record is bad — a `jsonschema.ValidationError` is
+    none of those three, so nothing real is swallowed here. They degrade to ONE loud warning and
+    a pass, because a gate that silently no-ops is indistinguishable in the output from a gate
+    that passed, which is the precise failure mode D4 is about. `jsonschema` is declared in
+    setup/requirements.txt (the runtime install every image builds from) and in
+    setup/requirements-test.txt, so the degraded path should never be taken in a supported
+    deployment.
+    """
+    global _schema_gate_disabled_warned
+    try:
+        validate_document(record)
+    except (RuntimeError, FileNotFoundError, json.JSONDecodeError) as exc:
+        if not _schema_gate_disabled_warned:
+            print(
+                f"[document] WARNING - schema validation is DISABLED for {what} and every record after it: {exc}",
+                file=sys.stderr,
+            )
+            _schema_gate_disabled_warned = True
+        return None
+    except Exception as exc:
+        # jsonschema.ValidationError: `.message` is the human-readable half and `.json_path`
+        # points at the offending node. Both are absent on any other validator, hence getattr.
+        detail = getattr(exc, "message", None) or str(exc)
+        path = getattr(exc, "json_path", "") or ""
+        return f"{detail}{f' at {path}' if path else ''}"
+    return None
 
 
 def _page_patches(group: pd.DataFrame) -> tuple[dict, list]:
@@ -81,6 +141,25 @@ def _write_one(
     page_categories, page_patches = _page_patches(group)
     run_id, paradata_ref = _run_id_and_ref(paradata_logger)
 
+    # Layer D, first half (atrium-project#10, D4): judge the baseline as it ARRIVED, before
+    # DocumentRecord.open() re-reads it below, so the verdict is about the UPSTREAM tool's output
+    # and not about anything this run has since applied to it. An invalid baseline only warns:
+    # refusing to run because alto-postprocess wrote something the schema rejects would turn one
+    # bad record into a stalled pipeline, and rule 6 already commits to passing unknown content
+    # through. It also sets the severity of the second half — a schema error we inherited is not
+    # ours to fail on.
+    baseline_was_invalid = False
+    if baseline and os.path.exists(baseline):
+        baseline_error = schema_error(load_document(baseline), f"baseline {Path(baseline).name}")
+        if baseline_error:
+            baseline_was_invalid = True
+            print(
+                f"[document] WARNING - inherited baseline {Path(baseline).name} does not validate "
+                f"against {SCHEMA_FILENAME} ({baseline_error}) - continuing anyway (rule 6), and "
+                f"demoting this run's own output check to a warning",
+                file=sys.stderr,
+            )
+
     doc = DocumentRecord.open(
         doc_id,
         PROGRAM,
@@ -103,8 +182,22 @@ def _write_one(
         "pages",
         page_patches,
         key_fields=["page"],
-        own_fields=["category", "category_confidence"],
+        own_fields=OWN_PAGE_FIELDS,
     )
+    # Issue #18 §1b, adopted for atrium-project#10 (D8). merge_block() filters silently by
+    # design, and `jsonschema` cannot see the loss either — `pages[]` requires only `page`, so a
+    # row stripped of its `category` is a *valid* row. That is how one careless edit would
+    # produce records with page rows and no categories in them that still pass Layer D.
+    #
+    # No `fields=` argument on purpose: the default is "every field present on the incoming
+    # rows", i.e. whatever _page_patches() actually built. Passing OWN_PAGE_FIELDS here instead
+    # would compare the grant against itself and could never fail. As written, the moment
+    # _page_patches() starts emitting a field OWN_PAGE_FIELDS does not cover — the realistic
+    # regression, since the two live in different functions — this raises instead of dropping it.
+    # Let it raise: that is a code bug to catch at dev time, not data variance. Preferred over
+    # the global warn_dropped_fields=True, which the module's own docstring notes needs a
+    # call-site cleanup pass first.
+    doc.assert_fields_survived("pages", page_patches)
 
     if classification_csv_ref:
         doc.add_derived_from("classification", classification_csv_ref)
@@ -114,6 +207,28 @@ def _write_one(
         if license_block:
             doc.add_license_detail(license_block)
 
+    record = doc.to_dict()
+
+    # Layer D, second half (atrium-project#10, D4): never EMIT an invalid record. This runs
+    # BEFORE the write below, which is the whole point — raising here means nothing reaches disk
+    # and the next tool never loads a record this one knew was broken. The one exception is a
+    # baseline that was already invalid on arrival: the defect is then inherited rather than
+    # ours, and failing on it would contradict the warn-and-continue decision taken above.
+    own_error = schema_error(record, f"{doc_id}{FILE_SUFFIX}")
+    if own_error:
+        if baseline_was_invalid:
+            print(
+                f"[document] WARNING - {doc_id}{FILE_SUFFIX} does not validate against "
+                f"{SCHEMA_FILENAME} ({own_error}) - emitting it anyway because the baseline was "
+                f"already invalid; fix the upstream record first",
+                file=sys.stderr,
+            )
+        else:
+            raise RuntimeError(
+                f"page-classification's own document record for {doc_id} does not validate "
+                f"against {SCHEMA_FILENAME}: {own_error} - refusing to emit it (Layer D)"
+            )
+
     # Atomic write: build the record ourselves (doc.finalize() also works, but writes
     # in place — a crash mid-write would leave a corrupt record for the next tool to trip
     # over `load_document()` on).
@@ -121,7 +236,7 @@ def _write_one(
     os.makedirs(out_p.parent or ".", exist_ok=True)
     tmp_p = out_p.with_suffix(out_p.suffix + ".tmp")
     with open(tmp_p, "w", encoding="utf-8") as fh:
-        json.dump(doc.to_dict(), fh, ensure_ascii=False, indent=2)
+        json.dump(record, fh, ensure_ascii=False, indent=2)
     tmp_p.replace(out_p)
     return str(out_p)
 

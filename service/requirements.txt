@@ -1,9 +1,38 @@
-# Fast-lane + API meta-contract test deps (issue #32).
-# Heavy model deps (torch/transformers) are intentionally omitted — the API
-# contract test importorskips them, running only where the full stack exists.
-pytest>=9.1.1
-pytest-cov
-fastapi
-httpx
-python-multipart
-openapi-spec-validator
+# service/requirements.txt — RUNTIME manifest for the FastAPI service.
+#
+# This file used to hold six pytest/contract deps and no ASGI server at all
+# (atrium-project#10, G3). Nothing noticed for 12 days, because nothing runs the image it
+# builds: tests/test_service_api.py and tests/test_api_contract.py drive the app in-process
+# through TestClient — which needs no server — and the hub's docker-build-smoke job only
+# BUILDS the image. Meanwhile docker-compose.yml's `api` service entrypoint is
+# `uvicorn service.api:app` and setup/setup_api_service.sh tells the user the same, so
+# `docker compose --profile api up api` died at container start with "executable file not
+# found". tests/test_service_runtime_deps.py is the gate: it parses the compose file and
+# the setup script for the console entrypoints they invoke and asserts each one is declared
+# in an installed requirements file, so pruning this list reddens the fast lane instead of
+# only the deployment.
+#
+# Test deps are NOT duplicated here — they live in setup/requirements-test.txt (which the
+# root requirements-test.txt forwards to, and which the Docker image and CI both install).
+#
+# The model stack (torch/transformers/timm/pandas/…) is deliberately NOT pulled in with a
+# `-r ../setup/requirements.txt`: the Dockerfile flattens this file to /app/service-
+# requirements.txt (Dockerfile:41), so a relative include would resolve to a path that does
+# not exist in the image. Both are installed side by side there and by
+# setup/setup_api_service.sh, so keep this list additive and flat.
+fastapi>=0.121.0
+uvicorn[standard]>=0.40.0
+python-multipart>=0.0.20
+# api.py builds its response models with pydantic directly, so it is declared directly rather
+# than relied on as fastapi's transitive dependency.
+pydantic>=2.12.0
+# service/api.py: `Image.open(...)` on every /predict_image request.
+Pillow>=12.3.0
+# service/api.py's /predict_document does `import fitz` to rasterise PDF pages. It was
+# declared in NO requirements file in the repo, so that endpoint answered every real PDF
+# with its generic 500 handler — the same shape of defect as the missing uvicorn, surfaced by
+# the import-coverage half of tests/test_service_runtime_deps.py while fixing it.
+PyMuPDF>=1.26.0
+# service/api_client.py — the client script service/README.md tells the user to drive the API
+# with. Also undeclared, also surfaced by that test.
+requests>=2.32.0

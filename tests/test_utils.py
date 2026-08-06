@@ -6,6 +6,7 @@ Unit tests for utils.py – pure-Python utility functions.
 Scope
 -----
 * directory_scraper  – filesystem traversal
+* doc_id_and_page    – canonical doc_id + page split for a per-page image filename
 * dataframe_results  – prediction → DataFrame conversion (top-1 and top-N)
 * collect_images     – labelled dataset collection from a directory tree
 * confusion_plot     – accuracy reporting and PNG output
@@ -20,8 +21,10 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from atrium_document import canonical_doc_id
+
 # Project root is already on sys.path via conftest.py
-from utils import collect_images, confusion_plot, dataframe_results, directory_scraper
+from utils import collect_images, confusion_plot, dataframe_results, directory_scraper, doc_id_and_page
 
 # ── shared fixture data ──────────────────────────────────────────────────────
 ALL_CATEGORIES = [
@@ -81,6 +84,98 @@ class TestDirectoryScraper:
         r2 = directory_scraper(tmp_path, "png")
         assert len(r1) == 1
         assert len(r2) == 1
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# doc_id_and_page  (atrium-project#10, D3)
+# ════════════════════════════════════════════════════════════════════════════
+class TestDocIdAndPage:
+    """`doc_id_and_page()` composes `canonical_doc_id()` with this repo's page-suffix split.
+
+    page-classification is the documented exception to "call canonical_doc_id() and nothing
+    else": its inputs are per-page IMAGES, and KNOWN_PIPELINE_SUFFIXES lists no image
+    extension, so the hub function cannot do the page split. These tests pin the composition
+    — that a multi-dot image name now resolves to the SAME doc_id every other stage of the
+    pipeline computes for the same document, which is what D3 found broken, while the
+    page-split behaviour the repo depends on is unchanged.
+    """
+
+    @pytest.mark.parametrize(
+        "sibling_name",
+        [
+            "CTX01.alto.xml",  # alto-postprocess
+            "CTX01.teitok.xml",  # nlp-enrich / translator
+            "CTX01.udpipe.conllu",  # nlp-enrich (longest-suffix-first ordering)
+            "CTX01.document.json",  # the record itself
+        ],
+    )
+    def test_multi_dot_image_agrees_with_the_rest_of_the_pipeline(self, sibling_name):
+        """The bug D3 describes: `CTX01.scan_0007.png` used to yield doc_id `CTX01.scan`,
+        so this tool's page_categories were written under a key no other stage ever reads."""
+        doc_id, page = doc_id_and_page("CTX01.scan_0007.png")
+        assert doc_id == canonical_doc_id(sibling_name) == "CTX01"
+        assert page == 7
+
+    def test_doc_id_is_the_canonical_id_of_the_page_stripped_name(self):
+        """The whole composition, stated as one invariant: strip the page label (the only
+        thing pc adds), then hand the rest to `canonical_doc_id()` verbatim. Nothing about
+        the hub rule is reinterpreted here — `report.2021_003.png` resolves to `report`
+        because "everything before the first dot" is what the hub does with an unknown
+        suffix, and disagreeing with that is precisely the fork D3 is about."""
+        assert doc_id_and_page("report.2021_003.png")[0] == canonical_doc_id("report.2021")
+        assert doc_id_and_page("CTX01.scan_0007.png")[0] == canonical_doc_id("CTX01.scan")
+
+    def test_single_dot_names_are_untouched(self):
+        """The composition must not change what a correct derivation already produced."""
+        assert doc_id_and_page("CTX193200994-24.png") == ("CTX193200994", 24)
+        assert doc_id_and_page("report_012.tif") == ("report", 12)
+
+    def test_page_label_is_split_before_canonicalisation(self):
+        """Order is load-bearing. Canonical-first on `CTX01.scan_0007.png` returns `CTX01`
+        with the page label already swallowed, collapsing every page of a multi-dot document
+        onto page 1 — trading a doc_id fork for a worse page collision."""
+        pages = {doc_id_and_page(f"CTX01.scan_{n:04d}.png")[1] for n in (1, 7, 42)}
+        assert pages == {1, 7, 42}
+
+    def test_no_page_label_returns_none_for_the_caller_to_decide(self):
+        assert doc_id_and_page("coverpage.png") == ("coverpage", None)
+
+    def test_full_path_uses_the_basename_only(self):
+        assert doc_id_and_page("/data/input/sub dir/CTX01.scan_0007.png") == ("CTX01", 7)
+
+    def test_batch_path_derives_identity_through_the_same_helper(self):
+        """The -d batch path (dataframe_results) and the -f single-file path in run.py must
+        agree, since both write into the same `<doc_id>.document.json`. run.py normalises the
+        page to `str(page or 1)`; `dataframe_results` keeps the int, and the adapter
+        stringifies — so both land on the same pages[] key."""
+        df, _ = dataframe_results(["CTX01.scan_0007.png"], [0], ALL_CATEGORIES, top_N=1)
+        doc_id, page = doc_id_and_page("CTX01.scan_0007.png")
+        assert df.iloc[0]["FILE"] == doc_id
+        assert str(df.iloc[0]["PAGE"]) == str(page if page is not None else 1)
+
+    def test_page_suffix_regex_has_exactly_one_copy(self):
+        """D3's other half: run.py and utils.py each carried their OWN copy of this regex.
+        Two independent copies of one expression is the same drift risk that produced the
+        eleven hand-rolled doc_id derivations in the first place, so the de-duplication is
+        part of the fix and is worth pinning.
+
+        Scoped to the modules that derive a doc_id for the DOCUMENT RECORD.
+        `supplementary/scripts/filtering.py` has its own `parse_stem()` for dataset hygiene —
+        it never touches a document record, so it is deliberately out of scope here.
+        """
+        root = Path(__file__).parent.parent
+        record_modules = [root / "run.py", root / "utils.py", root / "atrium_document_adapter.py"]
+        record_modules += sorted((root / "service").glob("*.py"))
+
+        carriers = [p.name for p in record_modules if r"[-_](\d+)$" in p.read_text(encoding="utf-8")]
+        assert carriers == ["utils.py"], f"page-suffix regex duplicated in {carriers}"
+
+    def test_run_py_routes_the_single_file_path_through_the_helper(self):
+        """Companion to the above: proof the surviving copy is the one run.py uses. run.py
+        imports it inside main() (heavy imports are deferred there), so this reads the source
+        rather than the module namespace."""
+        source = (Path(__file__).parent.parent / "run.py").read_text(encoding="utf-8")
+        assert "doc_id_and_page" in source
 
 
 # ════════════════════════════════════════════════════════════════════════════
