@@ -1,6 +1,17 @@
 # Base Ruff configuration for ATRIUM tools
 line-length = 120
 
+# Apply exclude/extend-exclude even to paths passed EXPLICITLY on the command line.
+#
+# Without this the [format] exclude below is inert in the one place it has to work:
+# pre-commit invokes `ruff-format <changed files>`, i.e. explicit paths, and ruff's
+# exclusions otherwise apply only while walking directories. That is precisely how a
+# vendored canonical file gets re-wrapped on commit -- the exclusion is configured,
+# looks correct, and silently does nothing. Verified empirically: with the exclude but
+# without this flag, `ruff format --check` on the seven shared files still reported
+# "6 files would be reformatted"; with it, all seven are skipped. (issue #10)
+force-exclude = true
+
 extend-exclude = [
     "data_samples/",
     "result/",
@@ -12,3 +23,71 @@ extend-exclude = [
 [lint]
 select = ["E", "F", "W", "I"]
 ignore = ["E501"] # Defer strict line-length checks initially
+
+[lint.isort]
+# The hub-canonical shared modules are FIRST-PARTY wherever they are consumed, but
+# ruff cannot infer that uniformly: in a tool repo they sit at the repo root and are
+# detected automatically, while in the hub they live in docs/templates/shared/, which
+# is not an importable source root, so detection classified them as third-party.
+#
+# That divergence is not cosmetic. `test_document_originators.py` and
+# `test_para_licenses.py` are held BYTE-IDENTICAL across the hub and all five tool
+# repos by para-drift, and the two classifications demand mutually exclusive import
+# formatting: as third-party, isort wants `import pytest` and `from atrium_document
+# import ...` in one block; as first-party it wants a blank line between them. One
+# file cannot satisfy both -- so `ruff check --fix` in the hub produced a file that
+# failed `ruff check` in all five tool repos, and fixing it there broke the hub again.
+# An unwinnable loop for whoever re-vendors next.
+#
+# Declaring the classification explicitly makes it layout-independent, so the shared
+# files lint identically in both places. This lives in the SHARED template (not the
+# hub's own ruff.toml) for two reasons: ruff resolves the nearest config to each file,
+# and this one is nearest to docs/templates/shared/; and every tool repo copies this
+# template, so they inherit the same explicit classification instead of relying on
+# root-detection that happens to agree today. (issue #10, D9)
+known-first-party = [
+    "atrium_document",
+    "atrium_paradata",
+    "atrium_service",
+    "para_licenses",
+    "check_version",
+]
+
+[format]
+# THE VENDORED CANONICAL FILES ARE NOT THIS REPO'S TO FORMAT.
+#
+# `para-drift.reusable.yml` requires these eight files to be BYTE-IDENTICAL across the
+# hub and all five tool repos. But every tool repo runs `ruff-format` as a pre-commit
+# hook while the hub deliberately does not ("lint only; the hub is not auto-formatted"),
+# and `line-length` is not uniform across the ecosystem -- it is 120 here, in
+# page-classification, alto-postprocess and translator, but 100 in nlp-enrich and
+# llm-enrich. `ruff format` reflows to whatever the LOCAL line-length says, so a shared
+# file's byte content became a function of *which repo committed it last*.
+#
+# That is not hypothetical. `tests/test_document_originators.py` was vendored
+# byte-identically on 2026-08-05; committing it re-formatted it in the three 120-repos
+# and not in the two 100-repos, splitting one canonical file into two variants that
+# differ only in line wrapping, and turning `Paradata Canonical Drift` red in
+# page-classification, alto-postprocess and translator (pc run at fe14d24, 2026-08-06 --
+# green on every commit before it). The two forms are each a FIXED POINT of their own
+# config, so re-vendoring alone would not have held: the next commit in a repo with a
+# different line-length would split them again.
+#
+# Excluding them from FORMATTING (not from linting -- `ruff check` still applies, and
+# they are expected to stay clean) makes the invariant structural: the hub's copy is the
+# only formatting authority, exactly as para-drift already assumes. Both layouts are
+# listed so one block is correct everywhere -- the hub keeps these files under
+# docs/templates/shared/, tool repos at the paths shown. A path that does not exist in a
+# given repo is simply inert.
+#
+# If you add a file to the para-drift enforced set, add it here too. (issue #10)
+exclude = [
+    "atrium_document.py",
+    "atrium_paradata.py",
+    "para_licenses.py",
+    "check_version.py",
+    "service/atrium_service.py",
+    "tests/test_para_licenses.py",
+    "tests/test_document_originators.py",
+    "docs/templates/shared/*.py",
+]
