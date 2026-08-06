@@ -5,3 +5,8 @@
 __pycache__/
 *.pyc
 /venv/
+
+# Coverage data artifact written by `pytest --cov`; never source.
+# Swept into a commit by `git add -A` during atrium-project#10 Phase 6.
+.coverage
+.coverage.*
