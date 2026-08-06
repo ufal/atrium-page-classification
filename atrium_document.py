@@ -13,9 +13,11 @@ returns it with **only its own block** updated. Nothing else is touched.
                   writes A's block only     writes B's block only
 
 Contract (see docs/document_schema.md):
-  1. Optional baseline in, updated record out.
+  1. Optional baseline in, updated record out. `doc_id` travels WITH the baseline: the
+     originator derives it once with `canonical_doc_id()`, every stage after it inherits.
   2. A tool writes its own block(s) only; every other block is passed through untouched.
-  3. No baseline given → the tool emits just its own part (standalone-safe).
+  3. No baseline given → the tool emits just its own part (standalone-safe), and that is the
+     only case in which a later tool's own `canonical_doc_id()` decides the key.
   4. Each block is stamped with the writing tool's program / run_id / paradata_ref.
   5. Licenses accrete through `para_licenses.merge_effective_licenses` (most restrictive wins).
   6. Unknown or newer blocks are preserved; a newer major schema is refused.
@@ -415,7 +417,6 @@ class DocumentRecord:
         if not doc_id:
             raise ValueError("doc_id is required — the record is keyed on it.")
 
-        self.doc_id = doc_id
         self.program = program
         self.run_id = run_id or datetime.now(tz=timezone.utc).strftime("%y%m%d-%H%M%S")
         self.paradata_ref = paradata_ref or ""
@@ -433,7 +434,13 @@ class DocumentRecord:
         self._data: Dict[str, Any] = copy.deepcopy(baseline) if baseline else {}
         self._data.setdefault("schema_version", SCHEMA_VERSION)
         self._data.setdefault("record_type", RECORD_TYPE)
-        self._data["doc_id"] = doc_id
+
+        #: What the CALLER derived for the file it happens to be reading. Kept because a tool
+        #: names its OWN outputs after that file (`<derived>_log.csv`, `<derived>.document.json`)
+        #: even when the record it accretes onto is keyed differently — see below.
+        self.derived_doc_id = doc_id
+        self.doc_id = self._inherit_doc_id(doc_id)
+        self._data["doc_id"] = self.doc_id
 
         self._had_baseline = bool(baseline)
         self._touched: List[str] = []
@@ -444,6 +451,48 @@ class DocumentRecord:
         #: Origins already reported as unrecognised, so the note is emitted once each.
         self._origin_unmatched: List[str] = []
         self._finalised = False
+
+    def _inherit_doc_id(self, derived: str) -> str:
+        """The key this record is accreted under: the BASELINE's doc_id whenever there is one.
+
+        WHY THE BASELINE WINS (atrium-project#10, D1's second half). `__init__` used to do a
+        bare ``self._data["doc_id"] = doc_id`` — the caller's derivation overwrote the key the
+        deep-copied baseline had arrived with, without so much as comparing them. That is a
+        FORK: every block already in ``self._data`` was written under the baseline's id, so
+        re-stamping the record with a different one hands the next stage a document whose
+        contents belong to a document it has never heard of. The E2E gate is where it finally
+        surfaced (hub run 31076188660): stage 3 emitted ``CTX000000003-1`` into a chain whose
+        other four stages all said ``CTX000000003``.
+
+        The caller's value is a GUESS FROM A LOCAL FILENAME, and the pipeline routinely feeds a
+        stage something other than the original: the translator's real input is
+        ``PAGE_ALTO/<doc>/<doc>-1.alto.xml``, a page alto-postprocess split out, so
+        ``canonical_doc_id()`` correctly answers ``<doc>-1`` — correct for that FILE, wrong for
+        the RECORD. No filename heuristic can close that gap in general (a document may legally
+        be named ``sbn.2019-1``); the baseline can, because it carries the answer explicitly.
+        So the rule is not "derive it more cleverly" but "do not re-derive what you were told":
+        the originator names the document, every later stage inherits that name, and
+        ``canonical_doc_id()`` decides only for a run that has no baseline at all (rule 3).
+
+        The divergence is still worth saying out loud — it usually means a tool's own naming
+        disagrees with the pipeline's — but it is not an error and never fatal: the record that
+        comes out is the correct one, and raising here (even under ``strict``) would stall a
+        pipeline over an id this method has just repaired. Compare
+        ``merge_document_records()``, which DOES raise on differing doc_ids: there the ids
+        arrive from two independent records and disagreement means two documents, while here
+        there is one record and one of the two names for it is authoritative.
+        """
+        inherited = str(self._data.get("doc_id") or "")
+        if not inherited or inherited == derived:
+            return derived
+        self._note(
+            f"{self.program!r} derived doc_id {derived!r} from its own input, but the baseline it "
+            f"was handed is keyed {inherited!r} — keeping {inherited!r}, which is the key every "
+            f"block already in this record was written under. A derived input file (a page split "
+            f"out of a multi-page original, say) is the usual reason the two differ; a genuinely "
+            f"WRONG baseline is the other, and only the caller can tell those apart."
+        )
+        return inherited
 
     # ── constructors ────────────────────────────────────────────────────────
 
