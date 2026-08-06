@@ -20,19 +20,19 @@
 # requirements.txt (Dockerfile:41), so a relative include would resolve to a path that does
 # not exist in the image. Both are installed side by side there and by
 # setup/setup_api_service.sh, so keep this list additive and flat.
-fastapi>=0.121.0
-uvicorn[standard]>=0.40.0
-python-multipart>=0.0.20
+fastapi>=0.141.1
+uvicorn[standard]>=0.52.1
+python-multipart>=0.0.32
 # api.py builds its response models with pydantic directly, so it is declared directly rather
 # than relied on as fastapi's transitive dependency.
-pydantic>=2.12.0
+pydantic>=2.13.4
 # service/api.py: `Image.open(...)` on every /predict_image request.
 Pillow>=12.3.0
 # service/api.py's /predict_document does `import fitz` to rasterise PDF pages. It was
 # declared in NO requirements file in the repo, so that endpoint answered every real PDF
 # with its generic 500 handler — the same shape of defect as the missing uvicorn, surfaced by
 # the import-coverage half of tests/test_service_runtime_deps.py while fixing it.
-PyMuPDF>=1.26.0
+PyMuPDF>=1.28.0
 # service/api_client.py — the client script service/README.md tells the user to drive the API
 # with. Also undeclared, also surfaced by that test.
-requests>=2.32.0
+requests>=2.34.2
