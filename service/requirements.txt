@@ -32,7 +32,7 @@ Pillow>=12.3.0
 # declared in NO requirements file in the repo, so that endpoint answered every real PDF
 # with its generic 500 handler — the same shape of defect as the missing uvicorn, surfaced by
 # the import-coverage half of tests/test_service_runtime_deps.py while fixing it.
-PyMuPDF>=1.28.0
+PyMuPDF>=1.28.2
 # service/api_client.py — the client script service/README.md tells the user to drive the API
 # with. Also undeclared, also surfaced by that test.
 requests>=2.34.2
