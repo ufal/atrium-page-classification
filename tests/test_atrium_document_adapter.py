@@ -29,6 +29,10 @@ import json
 import pandas as pd
 import pytest
 
+import atrium_document_adapter as adapter
+from atrium_document import DocumentRecord, load_document, validate_document
+from atrium_document_adapter import write_document_record, write_document_records_dir
+
 
 def test_the_real_module_is_under_test():
     """The masks this file's docstring describes are gone; this is what keeps them gone.
@@ -45,10 +49,6 @@ def test_the_real_module_is_under_test():
         "restored it, so everything here passes vacuously"
     )
     assert atrium_document.DocumentRecord.__module__ == "atrium_document"
-
-import atrium_document_adapter as adapter
-from atrium_document import DocumentRecord, load_document, validate_document
-from atrium_document_adapter import write_document_record, write_document_records_dir
 
 
 def _rdf(rows):
