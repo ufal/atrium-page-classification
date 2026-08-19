@@ -9,13 +9,6 @@ dependencies at all — these tests replace the former subprocess smoke tests,
 which crashed in torch-free environments before argparse ever ran.
 """
 
-import sys
-from unittest.mock import MagicMock
-
-# Mock atrium_document before any project imports to prevent collection errors
-if "atrium_document" not in sys.modules:
-    sys.modules["atrium_document"] = MagicMock()
-
 import configparser
 from pathlib import Path
 

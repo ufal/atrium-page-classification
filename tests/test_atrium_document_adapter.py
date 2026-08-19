@@ -3,13 +3,23 @@ tests/test_atrium_document_adapter.py
 ======================================
 Real (non-mocked) unit tests for atrium_document_adapter.py.
 
-Every other test file in this repo that touches page-classification's modules mocks
-`atrium_document` out of sys.modules before import (test_run.py, test_ensamble.py,
-test_parallel_best.py, test_inference.py). That's the right call for *those* files, since
-they're testing unrelated logic — but it meant nothing ever exercised the adapter against
-the real atrium_document.DocumentRecord API, and the mismatch (importing a class that was
-never actually defined in atrium_document.py) shipped to `test` HEAD with a fully green
-suite. This file imports the real module on purpose.
+Four other test files in this repo used to mock `atrium_document` out of sys.modules
+before import (test_run.py, test_ensamble.py, test_parallel_best.py, test_inference.py).
+That masking is what let a mismatch — importing a class that was never actually defined in
+atrium_document.py — ship to `test` HEAD with a fully green suite, because nothing
+exercised the adapter against the real DocumentRecord API. This file imports the real
+module on purpose.
+
+The masks are gone as of issue atrium-project#10. They were vestigial: `atrium_document.py`
+is vendored at the repo root and conftest.py puts that root on sys.path, so the real module
+imports cleanly and the suite is byte-for-byte identical without them (362 passed, 12
+skipped, 2 xfailed either way). Worse, `sys.modules` is process-global and none of the four
+ever removed its stub, so whether THIS file tested the real module or a MagicMock — against
+which every assertion passes vacuously — was decided by pytest's alphabetical collection
+order. It happened to sort second, ahead of all four. A file named `test_a*.py`, a `-k`
+filter, or xdist would have silently flipped it.
+
+`test_the_real_module_is_under_test` below is the guard that keeps this true.
 
 No ML models, no network, no GPU required — pure DataFrame + JSON I/O.
 """
@@ -18,6 +28,23 @@ import json
 
 import pandas as pd
 import pytest
+
+
+def test_the_real_module_is_under_test():
+    """The masks this file's docstring describes are gone; this is what keeps them gone.
+
+    A MagicMock in sys.modules satisfies every assertion in this file without executing a
+    line of the adapter, so the failure mode is a green suite that tests nothing. Assert on
+    a real attribute rather than the module object: an import-time stub would still be a
+    module, but it would not carry DocumentRecord with a real __module__.
+    """
+    import atrium_document
+
+    assert type(atrium_document.DocumentRecord) is type, (
+        "atrium_document is stubbed — a test module masked it in sys.modules and never "
+        "restored it, so everything here passes vacuously"
+    )
+    assert atrium_document.DocumentRecord.__module__ == "atrium_document"
 
 import atrium_document_adapter as adapter
 from atrium_document import DocumentRecord, load_document, validate_document

@@ -10,7 +10,10 @@ on:
     - cron: '0 3 * * 1' # Weekly scan
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  # `github.event_name` keeps a push from cancelling the scheduled run: this group was
+  # keyed by ref alone, so both landed in ONE group and the push won -- and a cancelled
+  # nightly reports no failure rather than a result. (issue atrium-project#10)
   # never cancel a tag build - that is a publish in flight
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 

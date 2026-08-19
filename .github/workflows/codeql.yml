@@ -19,7 +19,10 @@ on:
     - cron: "45 5 * * 1"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  # `github.event_name` keeps a push from cancelling the scheduled run: this group was
+  # keyed by ref alone, so both landed in ONE group and the push won -- and a cancelled
+  # nightly reports no failure rather than a result. (issue atrium-project#10)
   cancel-in-progress: true
 
 jobs:

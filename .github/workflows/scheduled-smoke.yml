@@ -7,7 +7,9 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # A scheduled run is never redundant with a push run, and a cancelled one
+  # reports no failure rather than a result. (issue atrium-project#10)
+  cancel-in-progress: false
 
 env:
   APT_PACKAGES: "build-essential g++ libgl1 libglib2.0-0 poppler-utils"

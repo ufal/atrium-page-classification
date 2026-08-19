@@ -530,21 +530,23 @@ class DocumentRecord:
         The durable key is `doc_id` + `sha256`; `filename`/`media_type`/`origin`/`page_count`/
         `language` are metadata. Never a pipeline-local path to a derived artifact.
 
-        A second call is still a no-op, but a second call carrying a DIFFERENT value now
-        complains instead of discarding it in silence. Since Issue #18 §1a, `source.origin`
-        is what authorises the positional blocks, so two stages disagreeing about it is not
-        a cosmetic duplicate — it means the routing that picks between the OCR and the
-        digital-born plane ran twice and reached two answers. Re-asserting the same values
-        stays silent, which is the common harmless case.
+        A second call may FILL IN fields the first writer left unset; it may not change one
+        the first writer actually wrote. A second call carrying a DIFFERENT value for a field
+        already present complains instead of discarding it in silence. Since Issue #18 §1a,
+        `source.origin` is what authorises the positional blocks, so two stages disagreeing
+        about it is not a cosmetic duplicate — it means the routing that picks between the OCR
+        and the digital-born plane ran twice and reached two answers. Re-asserting the same
+        values stays silent, which is the common harmless case.
         """
         existing = self._data.get("source")
         incoming = {k: v for k, v in fields.items() if v is not None}
         if sha256:
             incoming["sha256"] = sha256
         if existing:
+            clean = _sanitise(incoming)
             conflicts = sorted(
                 f"{k}: {existing[k]!r} kept, {v!r} discarded"
-                for k, v in _sanitise(incoming).items()
+                for k, v in clean.items()
                 if k in existing and existing[k] != v
             )
             if conflicts:
@@ -552,6 +554,20 @@ class DocumentRecord:
                     "source is immutable after the first writer, but "
                     f"{self.program!r} passed conflicting values — {'; '.join(conflicts)}"
                 )
+            # Immutability protects the values that were WRITTEN, not the dict as a whole.
+            # A first writer that knew only sha256+filename has not thereby decided origin,
+            # and swallowing a later `origin=` made the entire call a silent no-op: nothing
+            # complained (no key collided), nothing was written, and the deferred §1a checks
+            # never resolved — reintroducing, through a different door, exactly the permanent
+            # abstention that _assert_origin_consistent()'s deferral exists to remove. So a
+            # key ABSENT from the first write is additive; a key present still belongs to the
+            # first writer. A call mixing the two is rejected WHOLE under strict — _complain()
+            # raises above, before the update — since a caller that got one field wrong has
+            # not earned the right to name another in the same breath. (issue atrium-project#10)
+            added = {k: v for k, v in clean.items() if k not in existing}
+            existing.update(added)
+            if "origin" in added:
+                self._resolve_deferred_origin_checks()
             return self
         self._data["source"] = _sanitise(incoming)
         self._resolve_deferred_origin_checks()

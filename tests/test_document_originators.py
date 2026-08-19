@@ -425,6 +425,74 @@ def test_source_conflict_is_reported_rather_than_discarded(tmp_path, mock_parada
     doc2.set_source(origin="digital-born-pdf")  # re-asserting the same value stays silent
 
 
+# ── a PARTIAL first source (issue atrium-project#10) ─────────────────────────
+#
+# Every deferral test above starts from NO `source` at all. The hole was the case in
+# between: a `source` that exists but has no `origin` yet — the shape produced by any
+# writer that hashes its input before it knows how the text was acquired. `set_source()`
+# returned early on a truthy `existing` and compared only keys already present, so a later
+# `set_source(origin=...)` collided with nothing, complained about nothing, wrote nothing,
+# and left the deferred §1a checks pending forever. Green tests, silent abstention.
+
+
+def test_a_partial_first_source_does_not_swallow_a_later_origin(tmp_path, mock_paradata):
+    """Immutability protects the values that were WRITTEN, not the dict as a whole."""
+    doc = _open(tmp_path, mock_paradata, DIGITAL, origin=None)
+    doc.set_source(sha256="abc123", filename="CTX000000001.docx")  # no origin yet
+    doc.set_source(origin="digital-born-docx")
+
+    source = doc.to_dict()["source"]
+    assert source["origin"] == "digital-born-docx"
+    assert source["sha256"] == "abc123"  # the first writer's keys are untouched
+    assert source["filename"] == "CTX000000001.docx"
+
+
+def test_a_partial_first_source_still_resolves_the_deferred_origin_check(tmp_path, mock_paradata):
+    """The consequence that made this more than a missing field.
+
+    With the origin silently dropped, `_resolve_deferred_origin_checks()` never ran, so a
+    block written before the origin was known stayed provisionally accepted for the life of
+    the record — §1a abstaining permanently in the exact case it exists to arbitrate.
+    """
+    doc = _open(tmp_path, mock_paradata, DIGITAL, origin=None)
+    doc.set_source(sha256="abc123", filename="CTX000000001.docx")
+    doc.merge_block("lines", [{"page": "1", "line": 0, "text": "digital text"}])
+    with pytest.raises(ValueError, match="originated by 'alto-postprocess'"):
+        doc.set_source(origin="ocr:pero")
+
+
+def test_a_partial_first_source_accepts_the_matching_late_origin(tmp_path, mock_paradata):
+    """The legitimate pairing must stay silent, or the fix would just move the false alarm."""
+    doc = _open(tmp_path, mock_paradata, DIGITAL, origin=None)
+    doc.set_source(sha256="abc123", filename="CTX000000001.docx")
+    doc.merge_block("lines", [{"page": "1", "line": 0, "text": "ok"}])
+    doc.set_source(origin="digital-born-docx")
+    assert doc.to_dict()["lines"][0]["text"] == "ok"
+
+
+def test_filling_absent_keys_does_not_reopen_the_ones_already_set(tmp_path, mock_paradata):
+    """Additive for absent keys must not weaken first-writer-wins for present ones.
+
+    A call mixing a conflicting key with a new one is rejected WHOLE under strict: a caller
+    that just got `sha256` wrong has not earned the right to name the origin in the same
+    breath. Non-strict keeps the first writer's value for the conflicting key, warns, and
+    still fills the absent one — the same split every other _complain() site makes.
+    """
+    doc = _open(tmp_path, mock_paradata, DIGITAL, origin=None)
+    doc.set_source(sha256="first", filename="CTX000000001.docx")
+    with pytest.raises(ValueError, match="source is immutable"):
+        doc.set_source(sha256="second", origin="digital-born-docx")
+    assert doc.to_dict()["source"]["sha256"] == "first"
+    assert "origin" not in doc.to_dict()["source"]  # the whole call was refused
+
+    lax = _open(tmp_path, mock_paradata, DIGITAL, origin=None, strict=False)
+    lax.set_source(sha256="first", filename="CTX000000001.docx")
+    lax.set_source(sha256="second", origin="digital-born-docx")
+    source = lax.to_dict()["source"]
+    assert source["sha256"] == "first"  # the conflicting key is still the first writer's
+    assert source["origin"] == "digital-born-docx"  # the absent one still landed
+
+
 # ── origin spelling ──────────────────────────────────────────────────────────
 
 
