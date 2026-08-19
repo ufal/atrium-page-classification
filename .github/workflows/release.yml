@@ -1,5 +1,12 @@
 name: Automated Release
 
+# Never cancel a release. The trigger is a tag push, so each run has its own ref and
+# overlap is only possible on a re-run of the same tag — where cancelling the first
+# could leave a half-published release behind.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 on:
   push:
     tags:
