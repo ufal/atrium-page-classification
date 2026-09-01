@@ -21,11 +21,11 @@
 # not exist in the image. Both are installed side by side there and by
 # setup/setup_api_service.sh, so keep this list additive and flat.
 fastapi>=0.141.1
-uvicorn[standard]>=0.52.1
+uvicorn[standard]>=0.52.4
 python-multipart>=0.0.32
 # api.py builds its response models with pydantic directly, so it is declared directly rather
 # than relied on as fastapi's transitive dependency.
-pydantic>=2.13.4
+pydantic>=2.13.5
 # service/api.py: `Image.open(...)` on every /predict_image request.
 Pillow>=12.3.0
 # service/api.py's /predict_document does `import fitz` to rasterise PDF pages. It was
