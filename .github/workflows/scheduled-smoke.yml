@@ -40,8 +40,24 @@ jobs:
       - name: Install APT packages
         run: sudo apt-get update && sudo apt-get install -y ${{ env.APT_PACKAGES }}
 
+      # Read the spec from the environment, never via ${{ }}. Expression substitution
+      # happens BEFORE the shell sees the script, so `${{ env.PRE_INSTALL_TORCH }}`
+      # wrote `pip install torch>=2.1,<3.0 …` into the script source — where `>=2.1,`
+      # and `<3.0` are redirections, not part of a version spec. The step died on a
+      # missing file named `3.0` having silently created one named `=2.1,`, before pip
+      # ran at all (ufal/atrium-alto-postprocess run 34008513286).
+      #
+      # A shell expansion would be enough on its own, since bash does not re-parse
+      # redirections out of an expanded value — that is why the hub's
+      # docker-tool.reusable.yml survives the same spec with a bare $TORCH_SPEC. The
+      # array is used here anyway because it states both requirements outright: the
+      # value must word-split (page-classification passes two packages) and each word
+      # must reach pip as a literal. Quoting "$PRE_INSTALL_TORCH" would satisfy only
+      # the second and break the first.
       - name: Pre-install PyTorch (CPU wheel)
-        run: pip install ${{ env.PRE_INSTALL_TORCH }} --index-url https://download.pytorch.org/whl/cpu
+        run: |
+          read -ra specs <<< "$PRE_INSTALL_TORCH"
+          pip install "${specs[@]}" --index-url https://download.pytorch.org/whl/cpu
 
       - name: Install dependencies
         run: |
