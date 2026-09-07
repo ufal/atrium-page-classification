@@ -24,12 +24,29 @@ services:
     extends:
       service: classify
     profiles: ["api"]
-    entrypoint: ["uvicorn", "service.api:app", "--host", "0.0.0.0", "--port", "8000"]
-    command: []
+    # issue #55: builds the Dockerfile's own `api` stage instead of overriding the batch
+    # image's entrypoint here. The old `entrypoint: ["uvicorn", ...]` line was the ONLY
+    # place this service's start command existed, so no runnable API image was ever
+    # published (nothing to `docker pull` for Kubernetes) and the Dockerfile's
+    # HEALTHCHECK/STOPSIGNAL could not apply to it. Publishing the stage also removes
+    # the duplicate copy of the uvicorn command line.
+    image: ghcr.io/ufal/atrium-page-classification:${ATRIUM_VERSION:-dev}-api
+    build:
+      context: .
+      target: api
+      args:
+        ATRIUM_RUNNER_IMAGE: ghcr.io/ufal/atrium-page-classification:${ATRIUM_VERSION:-dev}-api
+        ATRIUM_RUNNER_REPO: https://github.com/ufal/atrium-page-classification
+        ATRIUM_RUNNER_REF: ${ATRIUM_RUNNER_REF:-dev}
     environment:
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
     ports:
       - "8000:8000"
+    # HEALTHCHECK comes from the `api` stage — no override needed. stop_grace_period
+    # raised from Compose's 10s default: the stage allows uvicorn 20s to drain in-flight
+    # requests plus up to 25s in serve_lifecycle, so 10s would SIGKILL mid-drain. Matches
+    # atrium-project/docs/templates/k8s/atrium-service.deployment.yaml's budget.
+    stop_grace_period: 60s
 
 volumes:
   page-model:

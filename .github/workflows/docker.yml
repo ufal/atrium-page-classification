@@ -42,4 +42,9 @@ jobs:
       # Must track the -rev pin in the Dockerfile CMD (currently v4.3) and
       # PC_REVISION in the hub's e2e-pipeline-smoke.yml. Bump all three together.
       hf-cache-key: v4.3
-      build-targets: '["base"]'
+      build-targets: '["base", "api"]'
+      # issue #55: `api` is a new Dockerfile stage. Before it existed, this repo's
+      # FastAPI service was reachable only via a docker-compose entrypoint override on
+      # the batch image, so no runnable API image was published and there was nothing
+      # for ARÚP/ARÚB to deploy. Only `api` is probed — `base` is a batch CLI.
+      probe-targets: '["api"]'

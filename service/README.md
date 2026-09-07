@@ -92,13 +92,14 @@ The models classify pages into 11 distinct structural categories:
 
 ### Endpoints 🔗
 
-| Method | Path                | Description                                                                                  |
-|:-------|:--------------------|:---------------------------------------------------------------------------------------------|
-| `GET`  | `/`                 | Serves the static `index.html` interface for manual testing.                                 |
-| `GET`  | `/info`             | Service identity + capabilities: `service`, `version`, `endpoints`, `limits`, plus available models and device. |
-| `GET`  | `/health`           | Liveness probe; `?deep=true` also checks at least one model version is loaded (503 on failure). |
-| `POST` | `/predict_image`    | Performs inference on an uploaded single image (JPG/PNG).                                    |
-| `POST` | `/predict_document` | Performs inference on an uploaded multipage PDF document.                                    |
+| Method | Path                | Description                                                                                                                                                                 |
+|:-------|:--------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `GET`  | `/`                 | Serves the static `index.html` interface for manual testing.                                                                                                                |
+| `GET`  | `/info`             | Service identity + capabilities: `service`, `version`, `endpoints`, `limits`, plus available models and device.                                                             |
+| `GET`  | `/health`           | Liveness probe — 200 always, even mid-shutdown. `?deep=true` also checks at least one model version is loaded (503 on failure or while draining).                           |
+| `GET`  | `/ready`            | Readiness probe (issue #55) — 503 until model warmup finishes, 200 while serving, 503 the instant `SIGTERM` arrives. The Kubernetes `readinessProbe`/`startupProbe` target. |
+| `POST` | `/predict_image`    | Performs inference on an uploaded single image (JPG/PNG).                                                                                                                   |
+| `POST` | `/predict_document` | Performs inference on an uploaded multipage PDF document.                                                                                                                   |
 
 ### Request Example 💻
 
@@ -245,8 +246,8 @@ cd atrium-page-classification/service/
 Then, in each window, execute the respective commands:
 
 
-| **Server Console (Window 1)** | **Client Console (Window 2)** |
-|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Server Console (Window 1)**                                                                                                                                                                         | **Client Console (Window 2)**                                                                                                                                                                                   |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **1. Start the API:**<br><br>Run the FastAPI server from the service directory.<br><br>`python3 api.py`<br><br>You should see startup logs indicating the server is running on `http://0.0.0.0:8000`. | **2. Send a Request:**<br><br> Top-3 Classification of `image.png`:<br><br>`python3 api_client.py -f .../image.png -v v5.3 --top 3`<br><br> where `-f` and `-v` stand for **input file** and **model version**. |
 
 ### Expected Output
@@ -298,6 +299,34 @@ Or for `-v all` the best models ensemble (average of 5 class scores):
   ]
 }
 ```
+
+## Shutdown behavior 🛑
+
+Issue [#55](https://github.com/ufal/atrium-project/issues/55). The published `api` image
+(`ghcr.io/ufal/atrium-page-classification:<version>-api`, new in that issue — before it
+this service was only reachable via a compose entrypoint override, so no API image
+existed to deploy) declares `HEALTHCHECK` (shallow `GET /health`, via the vendored
+`service/healthcheck.py`) and `STOPSIGNAL SIGTERM`, and its `ENTRYPOINT` passes
+`--timeout-graceful-shutdown 20`.
+
+On `SIGTERM` the service flips `GET /ready` to **503** at once so an orchestrator stops
+routing to it, answers new `/predict_*` calls with 503 ("retry against a live replica"),
+and lets uvicorn finish in-flight classification before exiting. `GET /health`
+deliberately stays 200 throughout — a liveness probe failing mid-shutdown would get the
+container killed before the drain completed.
+
+Inference now runs in a worker thread (`asyncio.to_thread`) rather than inline on the
+event loop. That was a prerequisite, not a tidy-up: uvicorn's `SIGTERM` handler is an
+event-loop callback, so while a synchronous `manager.predict()` held the loop, the signal
+could not be processed at all and `--timeout-graceful-shutdown` had nothing to measure.
+
+⚠️ A `/predict_document` call classifies up to `MAX_PDF_PAGES` (50) pages sequentially and
+can legitimately outlive the 20s drain budget. Raise `--timeout-graceful-shutdown` and the
+deployment's grace period together for that workload — see `docs/k8s_deployment.md` in the
+hub.
+
+A clean shutdown exits **143** (128 + SIGTERM), not 0: uvicorn re-raises the captured
+signal on purpose so a supervisor sees the real cause. That is a normal stop, not a crash.
 
 ## Client Side Test 🎨
 

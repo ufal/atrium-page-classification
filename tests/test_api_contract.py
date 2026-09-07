@@ -1,6 +1,6 @@
 """tests/test_api_contract.py — ATRIUM API meta-contract conformance (strategy §4, issue #32).
 
-Hermetic contract test: asserts the ``/info`` envelope, ``/health``, the advertised endpoint
+Hermetic contract test: asserts the ``/info`` envelope, ``/health``, ``/ready`` (issue #55), the advertised endpoint
 set, and OpenAPI validity against the in-process app. Tolerant of missing service dependencies,
 so it is a clean no-op in the fast lane and a real check in CI.
 """
@@ -69,3 +69,95 @@ def test_openapi_document_is_spec_valid():
     """The runtime /openapi.json validates against the OpenAPI 3.x spec (§2.2)."""
     spec_validator = pytest.importorskip("openapi_spec_validator")
     spec_validator.validate(app.openapi())
+
+
+# --- §4.6 readiness + shutdown contract (issue #55) --------------------------------------------
+# The state-machine itself is unit-tested once, in the hub
+# (atrium-project/docs/templates/shared/test_atrium_service.py). What these assert is that THIS
+# repo actually wired it up: the route exists, it is advertised, and — the one that matters —
+# liveness does not start failing just because the service is draining.
+
+try:
+    _state = getattr(__import__(APP_IMPORT, fromlist=["app"]), "_state", None)
+except Exception:  # noqa: BLE001 - same missing-heavy-deps case this file already guards
+    # Repos guard the app import two different ways (module-level pytest.skip vs a
+    # `deps_present` flag + pytestmark.skipif). Under the second style this module keeps
+    # loading after a failed import, so this must not raise at import time; the skip
+    # marker already stops the tests below from running.
+    _state = None
+
+
+def test_ready_route_is_registered_and_advertised():
+    """§4.6: /ready exists, and /info advertises it like any other route."""
+    assert _state is not None, (
+        f"{APP_IMPORT} has no module-level `_state` — the service has not adopted "
+        "ServiceState/attach_health(state=...) (issue #55)"
+    )
+    response = client.get("/ready")
+    assert response.status_code in (200, 503)
+    assert response.json()["status"] in {"ready", "starting", "draining"}
+    assert "/ready" in client.get("/info").json()["endpoints"]
+
+
+def test_ready_reports_starting_before_warmup_and_ready_after():
+    """503 until the service's own lifespan marks it warm, 200 once it has.
+
+    `client` above is a bare TestClient, so the ASGI lifespan has NOT run and the service is
+    genuinely un-warm here — which is exactly the pre-warmup state a Kubernetes startupProbe
+    sees on a cold pod.
+    """
+    assert _state is not None
+    was_warm, was_draining = _state.warm, _state.draining
+    try:
+        _state.draining = False
+        _state.warm = False
+        assert client.get("/ready").status_code == 503
+        assert client.get("/ready").json()["status"] == "starting"
+
+        _state.warm = True
+        assert client.get("/ready").status_code == 200
+        assert client.get("/ready").json()["status"] == "ready"
+    finally:
+        _state.warm, _state.draining = was_warm, was_draining
+
+
+def test_liveness_stays_200_while_draining_but_readiness_does_not():
+    """The load-bearing distinction of issue #55.
+
+    If shallow /health went 503 on SIGTERM, an orchestrator's livenessProbe would SIGKILL the
+    container before its drain finished — the very failure the drain exists to prevent. Routing
+    traffic away from a draining pod is /ready's job.
+    """
+    assert _state is not None
+    was_warm, was_draining = _state.warm, _state.draining
+    try:
+        _state.warm = True
+        _state.draining = True
+
+        health = client.get("/health")
+        assert health.status_code == 200
+        assert health.json() == {"status": "ok"}
+
+        ready = client.get("/ready")
+        assert ready.status_code == 503
+        assert ready.json()["status"] == "draining"
+    finally:
+        _state.warm, _state.draining = was_warm, was_draining
+
+
+def test_deep_health_reports_draining_with_operator_fields():
+    """`?deep=true` had no coverage in any repo before issue #55."""
+    assert _state is not None
+    was_warm, was_draining = _state.warm, _state.draining
+    try:
+        _state.warm = True
+        _state.draining = True
+        response = client.get("/health?deep=true")
+        assert response.status_code == 503
+        body = response.json()
+        assert body["status"] == "degraded"
+        assert body["detail"] == "shutting down"
+        assert body["draining"] is True
+        assert "in_flight" in body
+    finally:
+        _state.warm, _state.draining = was_warm, was_draining

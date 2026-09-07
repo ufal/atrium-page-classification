@@ -1,3 +1,4 @@
+import asyncio
 import io
 import logging
 from contextlib import asynccontextmanager
@@ -27,9 +28,27 @@ except ImportError:
 # Shared ATRIUM meta-contract helpers (§4). Byte-identical across every service,
 # enforced by para-drift.reusable.yml — same relative-vs-bare import dance.
 try:
-    from .atrium_service import add_cors, attach_health, build_info, read_tool_version, resolve_max_upload_mb
+    from .atrium_service import (
+        ServiceState,
+        add_cors,
+        attach_health,
+        attach_inflight_middleware,
+        build_info,
+        read_tool_version,
+        resolve_max_upload_mb,
+        serve_lifecycle,
+    )
 except ImportError:
-    from atrium_service import add_cors, attach_health, build_info, read_tool_version, resolve_max_upload_mb
+    from atrium_service import (
+        ServiceState,
+        add_cors,
+        attach_health,
+        attach_inflight_middleware,
+        build_info,
+        read_tool_version,
+        resolve_max_upload_mb,
+        serve_lifecycle,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -39,12 +58,23 @@ MAX_UPLOAD_BYTES = int(MAX_UPLOAD_MB * 1024 * 1024)  # retained: imported by tes
 MAX_PDF_PAGES = 50
 
 
+#: Readiness/draining/in-flight state for the §4.6 disposability contract (issue #55).
+_state = ServiceState()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Warm up models on startup
+    # Warm up models on startup. Off the event loop: warmup loads several torch
+    # models, and doing that inline would block the loop through the whole startup
+    # (harmless before traffic, but it also delays the first /ready answer a
+    # startupProbe is waiting on).
     logger.info("Warming up models...")
-    manager.warmup()
-    yield
+    await asyncio.to_thread(manager.warmup)
+    _state.warm = True
+    # issue #55: composes with the warmup above rather than replacing it. Flips /ready
+    # to 503 on SIGTERM and waits for in-flight classification to finish before exit.
+    async with serve_lifecycle(_state):
+        yield
     # Cleanup resources on shutdown if necessary
     logger.info("Shutting down API service...")
 
@@ -55,6 +85,7 @@ app = FastAPI(
     description="API for classifying historical document page images.",
     lifespan=lifespan,
 )
+attach_inflight_middleware(app, _state)
 
 # CORS — standard §4.5 configuration (ALLOWED_ORIGINS CSV, default "*").
 add_cors(app, methods=["GET", "POST"])
@@ -70,7 +101,45 @@ def _deep_health() -> str | None:
     return None
 
 
-attach_health(app, deep_check=_deep_health)
+attach_health(app, deep_check=_deep_health, state=_state)
+
+
+def _classify_pdf_pages(content: bytes, version: str, topn: int) -> List[Dict[str, Any]]:
+    """Rasterise every page of a PDF and classify it — the blocking body of
+    ``POST /predict_document``, extracted so it runs in ONE worker thread (issue #55).
+
+    Raises ``HTTPException`` (413) for an over-long PDF exactly as the inline version
+    did; FastAPI handles it the same whether it is raised on the loop or in a thread.
+    """
+    import fitz  # PyMuPDF
+
+    pdf_document = fitz.open(stream=content, filetype="pdf")
+
+    if len(pdf_document) > MAX_PDF_PAGES:
+        raise HTTPException(status_code=413, detail=f"PDF has too many pages. Limit is {MAX_PDF_PAGES}.")
+
+    page_results: List[Dict[str, Any]] = []
+    for page_num in range(len(pdf_document)):
+        page = pdf_document.load_page(page_num)
+        pix = page.get_pixmap()
+        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+
+        predictions = manager.predict(img, version=version, topn=topn)
+        page_results.append({"page": page_num + 1, "predictions": predictions})
+    return page_results
+
+
+def _refuse_if_draining() -> None:
+    """Reject NEW work once a shutdown signal has arrived (issue #55).
+
+    /ready has already flipped to 503 by this point, but a request that was accepted
+    before the orchestrator noticed can still reach a handler — answering 503 here
+    keeps the set of requests the drain has to wait for bounded, and tells the client
+    to retry against a live replica instead of failing mid-inference.
+    """
+    if _state.draining:
+        raise HTTPException(status_code=503, detail="Service is shutting down; retry against a live replica.")
+
 
 # Mount frontend
 frontend_dir = Path(__file__).parent / "frontend"
@@ -187,6 +256,7 @@ async def predict_image(
     document_json_out: bool = Form(False, description=_DOCUMENT_JSON_OUT_DESC),
 ):
     """Classify a single uploaded image."""
+    _refuse_if_draining()
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
 
@@ -198,7 +268,11 @@ async def predict_image(
 
     try:
         image = Image.open(io.BytesIO(content)).convert("RGB")
-        predictions = manager.predict(image, version=version, topn=topn)
+        # Off the event loop (issue #55): manager.predict() is synchronous torch
+        # inference. Called inline in an `async def`, it blocks the ONLY event loop, so
+        # uvicorn's SIGTERM handler — an event-loop callback — could not run until the
+        # inference returned, which made --timeout-graceful-shutdown meaningless here.
+        predictions = await asyncio.to_thread(manager.predict, image, version=version, topn=topn)
         if isinstance(predictions, dict) and "error" in predictions:
             raise HTTPException(status_code=500, detail=predictions["error"])
 
@@ -232,6 +306,7 @@ async def predict_document(
     document_json_out: bool = Form(False, description=_DOCUMENT_JSON_OUT_DESC),
 ):
     """Extracts pages from a PDF and classifies each page."""
+    _refuse_if_draining()
     if not file.content_type or file.content_type != "application/pdf":
         raise HTTPException(status_code=400, detail="Invalid file type. Please upload a PDF.")
 
@@ -242,21 +317,11 @@ async def predict_document(
         )
 
     try:
-        import fitz  # PyMuPDF
-
-        pdf_document = fitz.open(stream=content, filetype="pdf")
-
-        if len(pdf_document) > MAX_PDF_PAGES:
-            raise HTTPException(status_code=413, detail=f"PDF has too many pages. Limit is {MAX_PDF_PAGES}.")
-
-        page_results = []
-        for page_num in range(len(pdf_document)):
-            page = pdf_document.load_page(page_num)
-            pix = page.get_pixmap()
-            img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-
-            predictions = manager.predict(img, version=version, topn=topn)
-            page_results.append({"page": page_num + 1, "predictions": predictions})
+        # One thread hop for the WHOLE loop, not one per page (issue #55): this is up to
+        # MAX_PDF_PAGES sequential torch inferences, and running it inline in an
+        # `async def` blocked the event loop — and therefore uvicorn's SIGTERM handler —
+        # for the entire duration. See _classify_pdf_pages below.
+        page_results = await asyncio.to_thread(_classify_pdf_pages, content, version, topn)
 
         # A PDF is a whole document: the page numbers are its own 1..N, so no filename
         # page-split here — just the canonical doc_id.

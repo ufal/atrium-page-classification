@@ -31,6 +31,7 @@ is still the belt to this braces and belongs in CI; see the plan's Phase 3.2 not
 
 import ast
 import configparser
+import json
 import re
 import shlex
 import sys
@@ -101,6 +102,39 @@ def _compose_entrypoints() -> dict:
     return found
 
 
+def _dockerfile_entrypoints() -> dict:
+    """{(stage, "entrypoint"): argv} for every ENTRYPOINT in the Dockerfile.
+
+    Added for issue #55: the `api` service's start command moved OUT of
+    docker-compose.yml (where it was an `entrypoint:` override on the batch image) and
+    INTO a real `api` Dockerfile stage, so that a runnable API image is actually
+    published and the stage's HEALTHCHECK/STOPSIGNAL apply to it. This parser keeps the
+    G3 guarantee pointed at wherever the command really lives — the whole point of
+    reading the deployment files instead of hardcoding "uvicorn".
+    """
+    found: dict = {}
+    stage = "base"
+    for raw in (REPO_ROOT / "Dockerfile").read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        match = re.match(r"^FROM\s+\S+\s+AS\s+(\S+)", line, re.IGNORECASE)
+        if match:
+            stage = match.group(1)
+            continue
+        if not line.upper().startswith("ENTRYPOINT"):
+            continue
+        payload = line[len("ENTRYPOINT") :].strip()
+        if payload.startswith("["):
+            try:
+                argv = json.loads(payload)
+            except ValueError:
+                continue
+        else:
+            argv = shlex.split(payload)
+        if argv:
+            found[(stage, "entrypoint")] = argv
+    return found
+
+
 def _service_imports() -> dict:
     """{module name: [files that import it]} for every import under service/."""
     imports: dict = {}
@@ -132,11 +166,12 @@ class TestDeploymentEntrypointsAreInstallable:
         """G3 itself. Reads the compose files rather than naming `uvicorn`, so switching to
         hypercorn/granian without declaring it fails here too."""
         declared = _declared_distributions()
-        entrypoints = _compose_entrypoints()
-        assert entrypoints, "no entrypoint/command found in any docker-compose*.yml — parser broke"
+        entrypoints = {("docker-compose", *where): argv for where, argv in _compose_entrypoints().items()}
+        entrypoints.update({("Dockerfile", *where): argv for where, argv in _dockerfile_entrypoints().items()})
+        assert entrypoints, "no entrypoint/command found in any docker-compose*.yml OR the Dockerfile — parser broke"
 
         missing = {
-            ":".join(where): argv[0]
+            ":".join(str(part) for part in where): argv[0]
             for where, argv in entrypoints.items()
             if argv[0] not in _NOT_PIP_PROVIDED and _normalise(argv[0]) not in declared
         }
@@ -146,17 +181,35 @@ class TestDeploymentEntrypointsAreInstallable:
             f"immediately with 'executable file not found'."
         )
 
-    def test_the_api_service_really_does_invoke_a_server(self):
-        """Guards the guard: if the `api` service ever loses its entrypoint, the assertion
-        above would pass by having nothing left to check."""
-        entrypoints = _compose_entrypoints()
-        api_entrypoints = [
-            argv for (_file, service, key), argv in entrypoints.items() if service == "api" and key == "entrypoint"
-        ]
-        assert api_entrypoints, "docker-compose.yml declares no entrypoint for the `api` service"
-        assert any(argv[0] not in _NOT_PIP_PROVIDED for argv in api_entrypoints), (
-            "the `api` service no longer starts a pip-installed server, so "
+    def test_the_api_stage_really_does_invoke_a_server(self):
+        """Guards the guard: if the `api` image ever loses its entrypoint, the assertion
+        above would pass by having nothing left to check.
+
+        Reads the Dockerfile's `api` stage, not docker-compose.yml: since issue #55 the
+        start command lives in the stage (so the image is publishable and its
+        HEALTHCHECK applies), and compose merely selects `target: api`.
+        """
+        api_argv = _dockerfile_entrypoints().get(("api", "entrypoint"))
+        assert api_argv, "the Dockerfile declares no ENTRYPOINT for the `api` stage"
+        assert api_argv[0] not in _NOT_PIP_PROVIDED, (
+            "the `api` stage no longer starts a pip-installed server, so "
             "test_compose_entrypoints_are_declared has nothing left to assert"
+        )
+
+    def test_the_api_stage_declares_a_healthcheck_and_stopsignal(self):
+        """issue #55: the two directives this issue exists to add. A HEALTHCHECK whose
+        probe file is missing from the image is invisible until something runs the
+        container, so also assert the script it names is actually in the repo."""
+        dockerfile = (REPO_ROOT / "Dockerfile").read_text(encoding="utf-8")
+        assert "HEALTHCHECK" in dockerfile, "the api stage declares no HEALTHCHECK"
+        assert "STOPSIGNAL SIGTERM" in dockerfile, "the api stage declares no STOPSIGNAL"
+        assert (REPO_ROOT / "service" / "healthcheck.py").exists(), (
+            "HEALTHCHECK names service/healthcheck.py but that file is not in the repo "
+            "(it is vendored from the hub by scripts/revendor_shared.sh)"
+        )
+        assert "--timeout-graceful-shutdown" in dockerfile, (
+            "the api stage's uvicorn entrypoint sets no --timeout-graceful-shutdown, so "
+            "SIGTERM gives in-flight requests no bounded drain window"
         )
 
     def test_setup_script_start_command_is_declared(self):

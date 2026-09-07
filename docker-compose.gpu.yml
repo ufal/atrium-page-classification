@@ -5,7 +5,7 @@
 #   docker build --build-arg TORCH_INDEX_URL=https://download.pytorch.org/whl/cu126 .
 # Usage: docker compose -f docker-compose.yml -f docker-compose.gpu.yml run --rm classify
 services:
-  classify: &gpu
+  classify:
     environment:
       NVIDIA_VISIBLE_DEVICES: all
     deploy:
@@ -15,4 +15,17 @@ services:
             - driver: nvidia
               count: all
               capabilities: ["gpu"]
-  api: *gpu
+  # issue #55: spelled out rather than `api: *gpu`. The alias made this service's whole
+  # overlay block identical to `classify`'s by construction, so anything api-specific
+  # (a probe tweak, a different grace period) could not be added here without first
+  # breaking the alias. The GPU request itself is unchanged.
+  api:
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: ["gpu"]
