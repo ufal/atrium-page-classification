@@ -90,9 +90,11 @@ def test_validate_labels_survives_anything(scheme, observed):
 def test_validate_labels_narrows_by_originator():
     """`lines[].categ`'s two originators emit disjoint sets, so 'is this label legal'
     and 'is this label legal FROM THIS TOOL' are different questions."""
-    assert av.validate_labels("line-category", ["Trash", "Clear"], originator="alto-postprocess", report=False) == []
+    alto = {"originator": "alto-postprocess", "report": False}
 
-    findings = av.validate_labels("line-category", ["Garbage"], originator="alto-postprocess", report=False)
+    assert av.validate_labels("line-category", ["Trash", "Clear"], **alto) == []
+
+    findings = av.validate_labels("line-category", ["Garbage"], **alto)
     assert len(findings) == 1
     assert "belongs to digital-convert" in findings[0].message
 

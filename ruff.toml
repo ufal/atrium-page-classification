@@ -90,5 +90,6 @@ exclude = [
     "service/atrium_service.py",
     "tests/test_para_licenses.py",
     "tests/test_document_originators.py",
+    "tests/test_atrium_vocab.py",
     "docs/templates/shared/*.py",
 ]
