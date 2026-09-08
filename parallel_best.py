@@ -9,7 +9,7 @@ from typing import Dict, Iterable, List, Optional, Tuple
 import pandas as pd
 import torch
 
-from ensemble import average_rdfs
+# from ensemble import average_rdfs
 
 # ---------------------------------------------------------------------------
 # GPU profile registry
@@ -18,6 +18,132 @@ _PROFILE_FILENAME = "gpu_profile.json"
 _PROFILING_BATCHES = 2
 _MEMORY_SAFETY_MARGIN = 0.90
 _HEADROOM_BYTES = 512 * 1024 * 1024
+
+
+def _vote_col_name(rev: str) -> str:
+    """Map a revision string to its ARUP-style vote column header."""
+    return (rev[0].upper() + rev[1:]) if rev else rev
+
+
+def average_rdfs(
+    all_rdfs: Dict[str, pd.DataFrame],
+    top_N: int,
+    revision_best_models: Optional[dict] = None,
+) -> pd.DataFrame:
+    """Average per-model softmax probabilities and re-rank to Top-N.
+    Used primarily by the parallel_best.py CLI engine.
+    """
+    long_dfs = []
+    num_models = len(all_rdfs)
+
+    for rdf in all_rdfs.values():
+        class_cols = [c for c in rdf.columns if str(c).startswith("CLASS-")]
+        indices = [int(c.split("-")[1]) for c in class_cols if c.split("-")[1].isdigit()]
+        if not indices:
+            continue
+
+        cols_to_keep = (
+            ["FILE", "PAGE"]
+            + [f"CLASS-{i}" for i in indices]
+            + [f"SCORE-{i}" for i in indices if f"SCORE-{i}" in rdf.columns]
+        )
+        cols_to_keep = [c for c in cols_to_keep if c in rdf.columns]
+        df_subset = rdf[cols_to_keep].copy()
+
+        if not any(c.startswith("SCORE-") for c in df_subset.columns):
+            melted = (df_subset.rename(columns={"CLASS-1": "CLASS"}).assign(SCORE=1.0).dropna(subset=["CLASS"]))[
+                ["FILE", "PAGE", "CLASS", "SCORE"]
+            ]
+        else:
+            melted = (
+                pd.wide_to_long(
+                    df_subset,
+                    stubnames=["CLASS", "SCORE"],
+                    i=["FILE", "PAGE"],
+                    j="rank",
+                    sep="-",
+                    suffix=r"\d+",
+                )
+                .reset_index()
+                .dropna(subset=["CLASS"])
+            )
+
+        melted = melted.groupby(["FILE", "PAGE", "CLASS"], as_index=False)["SCORE"].max()
+        long_dfs.append(melted)
+
+    if not long_dfs:
+        empty_cols = (
+            ["FILE", "PAGE"] + [f"CLASS-{i}" for i in range(1, top_N + 1)] + [f"SCORE-{i}" for i in range(1, top_N + 1)]
+        )
+        return pd.DataFrame(columns=empty_cols)
+
+    combined = pd.concat(long_dfs, ignore_index=True)
+
+    grouped = combined.groupby(["FILE", "PAGE", "CLASS"])["SCORE"].sum().reset_index()
+    grouped["AVG_SCORE"] = (grouped["SCORE"] / num_models).clip(upper=1.0)
+
+    grouped.sort_values(["FILE", "PAGE", "AVG_SCORE"], ascending=[True, True, False], inplace=True)
+    grouped["rank"] = grouped.groupby(["FILE", "PAGE"]).cumcount() + 1
+    top_n_df = grouped[grouped["rank"] <= top_N].copy()
+
+    pivot = top_n_df.pivot_table(
+        index=["FILE", "PAGE"],
+        columns="rank",
+        values=["CLASS", "AVG_SCORE"],
+        aggfunc="first",
+    )
+
+    flat = pd.DataFrame(index=pivot.index)
+    max_rank = int(top_n_df["rank"].max()) if not top_n_df.empty else 0
+    for r in range(1, max_rank + 1):
+        flat[f"CLASS-{r}"] = pivot.get(("CLASS", r), pd.NA)
+        flat[f"SCORE-{r}"] = pivot.get(("AVG_SCORE", r), pd.NA)
+
+    result = flat.reset_index()
+    result = result.replace({0: ""})
+
+    for i in range(2, top_N + 1):
+        score_col, class_col = f"SCORE-{i}", f"CLASS-{i}"
+        if score_col in result.columns and class_col in result.columns:
+            result.loc[result[score_col] == "", class_col] = ""
+
+    order = [r for r in revision_best_models if r in all_rdfs] if revision_best_models else list(all_rdfs.keys())
+    vote_cols: List[str] = []
+    for rev in order:
+        rdf = all_rdfs[rev]
+        if "CLASS-1" not in rdf.columns:
+            continue
+        col = _vote_col_name(rev)
+        vcol = rdf[["FILE", "PAGE", "CLASS-1"]].drop_duplicates(["FILE", "PAGE"]).rename(columns={"CLASS-1": col})
+        result = result.merge(vcol, on=["FILE", "PAGE"], how="left")
+        vote_cols.append(col)
+
+    avg_cols = [c for c in result.columns if c not in (["FILE", "PAGE"] + vote_cols)]
+    result = result[["FILE", "PAGE"] + vote_cols + avg_cols]
+    result.sort_values(["FILE", "PAGE"], ascending=[True, True], inplace=True)
+    return result
+
+
+def average_prediction_dicts(
+    predictions_list: List[List[Dict[str, float]]], categories: List[str], top_n: int
+) -> List[Dict[str, float]]:
+    """
+    Averages a list of prediction dictionaries.
+    Used primarily by the FastAPI service for rapid in-memory JSON generation.
+    """
+    if not predictions_list:
+        return []
+
+    num_models = len(predictions_list)
+    aggregated_scores = {cat: 0.0 for cat in categories}
+
+    for preds in predictions_list:
+        for item in preds:
+            aggregated_scores[item["label"]] += item["score"]
+
+    final_results = [{"label": lbl, "score": min(s / num_models, 1.0)} for lbl, s in aggregated_scores.items()]
+    final_results.sort(key=lambda x: x["score"], reverse=True)
+    return final_results[:top_n]
 
 
 def _profile_path(model_dir: str) -> Path:
@@ -115,12 +241,8 @@ def _load_profile(
     if gpu is None:
         return None
 
-    if not registry_is_fresh(
-        data, gpu["name"], gpu["total_vram_bytes"], batch, required_revs
-    ):
-        print(
-            "[parallel_best] Profile stale (hardware / batch / coverage) — will re-profile."
-        )
+    if not registry_is_fresh(data, gpu["name"], gpu["total_vram_bytes"], batch, required_revs):
+        print("[parallel_best] Profile stale (hardware / batch / coverage) — will re-profile.")
         return None
 
     return data["models"]
@@ -159,9 +281,7 @@ def _measure_model_peak(
     local_name = f"model_{rev.replace('.', '')}"
     local_path = Path(model_dir) / local_name
 
-    clf = ImageClassifier(
-        checkpoint=base_model, num_labels=len(categories), store_dir=str(cp_dir)
-    )
+    clf = ImageClassifier(checkpoint=base_model, num_labels=len(categories), store_dir=str(cp_dir))
     clf.load_model(str(local_path))
 
     probe = sample_images[: _PROFILING_BATCHES * batch]
@@ -199,9 +319,7 @@ def profile_best_models(
     if not force:
         models = _load_profile(model_dir, batch, required_revs)
         if models is not None:
-            print(
-                f"[parallel_best] Loaded cached GPU profile from {_profile_path(model_dir)}"
-            )
+            print(f"[parallel_best] Loaded cached GPU profile from {_profile_path(model_dir)}")
             return models
 
     print("[parallel_best] Profiling GPU memory for each best model …")
@@ -209,14 +327,10 @@ def profile_best_models(
     for rev, base_model in revision_best_models.items():
         print(f"  profiling {rev} ({base_model}) …")
         try:
-            peak = _measure_model_peak(
-                rev, base_model, model_dir, cp_dir, sample_images, batch, categories
-            )
+            peak = _measure_model_peak(rev, base_model, model_dir, cp_dir, sample_images, batch, categories)
             models_peak[rev] = {"base_model": base_model, "peak_bytes": peak}
             props = torch.cuda.get_device_properties(0)
-            print(
-                f"  {rev}: peak {peak / 1e9:.2f} GB / {props.total_memory / 1e9:.2f} GB total"
-            )
+            print(f"  {rev}: peak {peak / 1e9:.2f} GB / {props.total_memory / 1e9:.2f} GB total")
         except Exception as e:
             print(f"  [WARNING] Could not profile {rev}: {e}")
             models_peak[rev] = {"base_model": base_model, "peak_bytes": int(1e18)}
@@ -248,16 +362,11 @@ def _run_group(
         local_name = f"model_{rev.replace('.', '')}"
         local_path = Path(model_dir) / local_name
         print(f"  [group] loading {rev} ({base_model}) …")
-        clf = ImageClassifier(
-            checkpoint=base_model, num_labels=len(categories), store_dir=str(cp_dir)
-        )
+        clf = ImageClassifier(checkpoint=base_model, num_labels=len(categories), store_dir=str(cp_dir))
         clf.load_model(str(local_path))
         classifiers[rev] = clf
 
-    loaders = {
-        rev: clf.create_dataloader(test_images, batch)
-        for rev, clf in classifiers.items()
-    }
+    loaders = {rev: clf.create_dataloader(test_images, batch) for rev, clf in classifiers.items()}
 
     all_predictions: Dict[str, list] = {rev: [] for rev in group}
     all_raw_scores: Dict[str, list] = {rev: [] for rev in group}
@@ -270,9 +379,7 @@ def _run_group(
 
     loader_iters = {rev: iter(ld) for rev, ld in loaders.items()}
 
-    for batch_idx, batches in enumerate(
-        zip_longest(*[loader_iters[rev] for rev in classifiers])
-    ):
+    for batch_idx, batches in enumerate(zip_longest(*[loader_iters[rev] for rev in classifiers])):
         for rev, b in zip(list(classifiers.keys()), batches):
             if b is None or (isinstance(b, tuple) and b[0] is None):
                 continue
@@ -287,17 +394,11 @@ def _run_group(
                     topk_probs, topk_idx = torch.topk(probs, top_N, dim=-1)
                     for idxs, prs in zip(topk_idx, topk_probs):
                         prs_norm = prs / prs.sum()
-                        all_predictions[rev].append(
-                            list(zip(idxs.cpu().tolist(), prs_norm.cpu().tolist()))
-                        )
+                        all_predictions[rev].append(list(zip(idxs.cpu().tolist(), prs_norm.cpu().tolist())))
                 else:
                     all_predictions[rev].extend(probs.argmax(dim=-1).cpu().tolist())
 
-        if (
-            torch.cuda.is_available()
-            and not guard_done
-            and batch_idx >= _PROFILING_BATCHES - 1
-        ):
+        if torch.cuda.is_available() and not guard_done and batch_idx >= _PROFILING_BATCHES - 1:
             guard_done = True
             _, total = torch.cuda.mem_get_info(dev)
             live_peak = torch.cuda.max_memory_allocated(dev)
@@ -324,9 +425,7 @@ def _run_group(
         raws = all_raw_scores[rev]
         if not preds or rev in dropped:
             continue
-        rdf, _ = dataframe_results(
-            test_images, preds, categories, top_N=top_N, raw_scores=raws
-        )
+        rdf, _ = dataframe_results(test_images, preds, categories, top_N=top_N, raw_scores=raws)
         rdf.drop(columns=["CATEGORY"], inplace=True, errors="ignore")
         rdfs[rev] = rdf
 
@@ -360,17 +459,13 @@ def run_best_sequential(
         local_name = f"model_{rev.replace('.', '')}"
         local_path = Path(model_dir) / local_name
 
-        clf = ImageClassifier(
-            checkpoint=base_model, num_labels=len(categories), store_dir=str(cp_dir)
-        )
+        clf = ImageClassifier(checkpoint=base_model, num_labels=len(categories), store_dir=str(cp_dir))
         clf.load_model(str(local_path))
         loader = clf.create_dataloader(test_images, batch)
 
         preds, raw_scores = clf.infer_dataloader(loader, top_n=top_N, raw=True)
 
-        rdf, _ = dataframe_results(
-            test_images, preds, categories, top_N=top_N, raw_scores=raw_scores
-        )
+        rdf, _ = dataframe_results(test_images, preds, categories, top_N=top_N, raw_scores=raw_scores)
         rdf.drop(columns=["CATEGORY"], inplace=True, errors="ignore")
         all_rdfs[rev] = rdf
 
@@ -431,22 +526,16 @@ def run_best_models(
 
     use_parallel = parallel and torch.cuda.is_available()
     if use_parallel and len(test_images) < _PROFILING_BATCHES * batch:
-        print(
-            "[parallel_best] Dataset too small for profiling — falling back to sequential."
-        )
+        print("[parallel_best] Dataset too small for profiling — falling back to sequential.")
         use_parallel = False
 
     if use_parallel:
         try:
-            models_peak = profile_best_models(
-                revision_best_models, model_dir, cp_dir, test_images, batch, categories
-            )
+            models_peak = profile_best_models(revision_best_models, model_dir, cp_dir, test_images, batch, categories)
             if models_peak is None:
                 use_parallel = False
         except Exception as e:
-            print(
-                f"[parallel_best] Profiling failed ({e}) — falling back to sequential."
-            )
+            print(f"[parallel_best] Profiling failed ({e}) — falling back to sequential.")
             use_parallel = False
 
     if use_parallel:
@@ -455,13 +544,9 @@ def run_best_models(
         sizes = {rev: info["peak_bytes"] for rev, info in models_peak.items()}
         groups = pack_models(sizes, budget)
 
-        print(
-            f"[parallel_best] VRAM budget {budget / 1e9:.2f} GB → {len(groups)} group(s)"
-        )
+        print(f"[parallel_best] VRAM budget {budget / 1e9:.2f} GB → {len(groups)} group(s)")
         for i, g in enumerate(groups):
-            print(
-                f"  group {i + 1}: {g}  cumulative={sum(sizes[r] for r in g) / 1e9:.2f} GB"
-            )
+            print(f"  group {i + 1}: {g}  cumulative={sum(sizes[r] for r in g) / 1e9:.2f} GB")
 
         deferred: List[str] = []
         for g_idx, group in enumerate(groups):
@@ -484,20 +569,12 @@ def run_best_models(
                     for rdf in rdfs.values():
                         paradata_logger.log_success("csv", len(rdf.index))
             except Exception as e:
-                print(
-                    f"[parallel_best] Group {g_idx + 1} failed ({e}) — running sequentially."
-                )
+                print(f"[parallel_best] Group {g_idx + 1} failed ({e}) — running sequentially.")
                 deferred.extend(group)
 
         if deferred:
-            print(
-                f"\n[parallel_best] Running {len(deferred)} deferred model(s) sequentially …"
-            )
-            deferred_map = {
-                r: revision_best_models[r]
-                for r in deferred
-                if r in revision_best_models
-            }
+            print(f"\n[parallel_best] Running {len(deferred)} deferred model(s) sequentially …")
+            deferred_map = {r: revision_best_models[r] for r in deferred if r in revision_best_models}
             all_rdfs.update(
                 run_best_sequential(
                     test_images,
@@ -512,9 +589,7 @@ def run_best_models(
             )
     else:
         if parallel and not torch.cuda.is_available():
-            print(
-                "[parallel_best] --parallel requested but no CUDA — running sequentially."
-            )
+            print("[parallel_best] --parallel requested but no CUDA — running sequentially.")
         all_rdfs = run_best_sequential(
             test_images,
             categories,
@@ -527,9 +602,7 @@ def run_best_models(
         )
 
     top1_rdfs = {
-        rev: rdf[["FILE", "PAGE", "CLASS-1"]].copy()
-        for rev, rdf in all_rdfs.items()
-        if "CLASS-1" in rdf.columns
+        rev: rdf[["FILE", "PAGE", "CLASS-1"]].copy() for rev, rdf in all_rdfs.items() if "CLASS-1" in rdf.columns
     }
     wide_df = merge_best(revision_best_models, top1_rdfs)
     wide_df.sort_values(["FILE", "PAGE"], ascending=[True, True], inplace=True)
@@ -544,17 +617,13 @@ def run_best_models(
             print(f"[parallel_best] Saved intermediate model CSV → {path}")
 
     if not average_best:
-        print(
-            f"\n[parallel_best] Averaging bypassed (--no-average-best). Wide votes available at {wide_path}"
-        )
+        print(f"\n[parallel_best] Averaging bypassed (--no-average-best). Wide votes available at {wide_path}")
         return ""
 
     print(f"\n[parallel_best] Averaging {n_models} models → TOP-{top_N} result …")
     avg_df = average_rdfs(all_rdfs, top_N, revision_best_models)
 
-    avg_path = str(
-        out_tables / f"{time_stamp}_BEST_{n_models}_models_AVG_TOP-{top_N}.csv"
-    )
+    avg_path = str(out_tables / f"{time_stamp}_BEST_{n_models}_models_AVG_TOP-{top_N}.csv")
     avg_df.to_csv(avg_path, index=False)
     print(f"[parallel_best] Averaged result CSV → {avg_path}")
 

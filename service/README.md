@@ -92,13 +92,14 @@ The models classify pages into 11 distinct structural categories:
 
 ### Endpoints 🔗
 
-| Method | Path                | Description                                                                                  |
-|:-------|:--------------------|:---------------------------------------------------------------------------------------------|
-| `GET`  | `/`                 | Serves the static `index.html` interface for manual testing.                                 |
-| `GET`  | `/info`             | Service identity + capabilities: `service`, `version`, `endpoints`, `limits`, plus available models and device. |
-| `GET`  | `/health`           | Liveness probe; `?deep=true` also checks at least one model version is loaded (503 on failure). |
-| `POST` | `/predict_image`    | Performs inference on an uploaded single image (JPG/PNG).                                    |
-| `POST` | `/predict_document` | Performs inference on an uploaded multipage PDF document.                                    |
+| Method | Path                | Description                                                                                                                                                                 |
+|:-------|:--------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `GET`  | `/`                 | Serves the static `index.html` interface for manual testing.                                                                                                                |
+| `GET`  | `/info`             | Service identity + capabilities: `service`, `version`, `endpoints`, `limits`, plus available models and device.                                                             |
+| `GET`  | `/health`           | Liveness probe — 200 always, even mid-shutdown. `?deep=true` also checks at least one model version is loaded (503 on failure or while draining).                           |
+| `GET`  | `/ready`            | Readiness probe (issue #55) — 503 until model warmup finishes, 200 while serving, 503 the instant `SIGTERM` arrives. The Kubernetes `readinessProbe`/`startupProbe` target. |
+| `POST` | `/predict_image`    | Performs inference on an uploaded single image (JPG/PNG).                                                                                                                   |
+| `POST` | `/predict_document` | Performs inference on an uploaded multipage PDF document.                                                                                                                   |
 
 ### Request Example 💻
 
@@ -108,6 +109,11 @@ The models classify pages into 11 distinct structural categories:
 * `file`: The image file (JPEG or PNG).
 * `version`: The model version string (e.g., `v5.3`, `v1.3`) or `all`.
 * `topn`: (Optional) Number of top predictions to return (Default: 3).
+* `document_json`: (Optional) A baseline **ATRIUM Document JSON** record to accrete onto — the
+  service equivalent of the CLI's `--document-json`.
+* `document_json_out`: (Optional, boolean) Return a record even with no baseline uploaded — the
+  equivalent of `--document-json-out`. page-classification is stage 1 of the pipeline, so it
+  *originates* the record as often as it updates one.
 
 Request example using `curl`:
 
@@ -133,6 +139,42 @@ Example JSON response:
 }
 ```
 
+### ATRIUM Document JSON accretion 🧩
+
+Both `POST` endpoints implement accretion-contract rule 1 — *"services accept and return an
+optional `document_json` part"* — so a pipeline can thread one per-document record through the
+API exactly as it does through the CLI. This was missing entirely until
+[atrium-project#10](https://github.com/ufal/atrium-project/issues/10) (finding J2): the CLI
+implemented the contract in full while the deployed API surface implemented none of it.
+
+```bash
+# accrete onto an upstream record (alto-postprocess → page-classification)
+curl -X POST "http://localhost:8000/predict_image" \
+  -F "file=@CTX000000001_0007.png" \
+  -F "document_json=@CTX000000001.document.json" \
+  -F "version=v4.3"
+
+# or originate one (stage 1, no baseline to inherit)
+curl -X POST "http://localhost:8000/predict_image" \
+  -F "file=@CTX000000001_0007.png" \
+  -F "document_json_out=true"
+```
+
+The response then carries the updated record under `document_json`:
+
+* only this tool's own contributions are written — the whole `page_categories` block, plus
+  `pages[].category` and `pages[].category_confidence` at field level. Every other tool's block
+  (`lines`, `entities`, `translations`, …) passes through byte-for-byte;
+* the record's `doc_id` is derived with the same composition the CLI uses
+  (`utils.doc_id_and_page`, which strips the page label and then defers to the shared
+  `canonical_doc_id()`), so a service upload and a CLI run over the same file update the *same*
+  record instead of forking it;
+* a record page-classification builds that does not validate against
+  `atrium_document.schema.json` is never returned — the request fails with `500` instead
+  (Layer D). A **baseline** that does not validate is still accepted (rule 6: pass unknown
+  content through), and the response then also carries `document_json_schema_error` naming the
+  problem, so an automated caller can notice without reading the service log.
+
 
 ## Installation & Setup 🛠
 
@@ -155,8 +197,17 @@ chmod +x ./setup/setup_api_service.sh
 ./setup/setup_api_service.sh
 ```
 
-Key libraries include: fastapi, uvicorn, python-multipart, pillow, torch, timm, transformers. These
-libraries can be found in `service/requirements.txt` available for manual installation if needed.
+Key libraries include: fastapi, uvicorn, python-multipart, pillow, PyMuPDF, torch, timm,
+transformers. The serving half is in `service/requirements.txt` and the model stack in
+`setup/requirements.txt`; the setup script installs both, and so does the Docker image.
+
+> [!NOTE] `service/requirements.txt` had been pruned down to six pytest/contract packages —
+> **no `uvicorn` at all** — while this page and `docker-compose.yml` both still told you to run
+> it, so `docker compose --profile api up api` failed at container start
+> ([atrium-project#10](https://github.com/ufal/atrium-project/issues/10), finding G3). The
+> runtime set is restored, the contract test deps live in `setup/requirements-test.txt`, and
+> `tests/test_service_runtime_deps.py` now asserts that every entrypoint the compose files and
+> setup script invoke is actually declared somewhere the image installs from.
 
 > [!NOTE] The virtual environment name is stated in the setup script and can be changed to an existing
 > one if needed.
@@ -195,8 +246,8 @@ cd atrium-page-classification/service/
 Then, in each window, execute the respective commands:
 
 
-| **Server Console (Window 1)** | **Client Console (Window 2)** |
-|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Server Console (Window 1)**                                                                                                                                                                         | **Client Console (Window 2)**                                                                                                                                                                                   |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **1. Start the API:**<br><br>Run the FastAPI server from the service directory.<br><br>`python3 api.py`<br><br>You should see startup logs indicating the server is running on `http://0.0.0.0:8000`. | **2. Send a Request:**<br><br> Top-3 Classification of `image.png`:<br><br>`python3 api_client.py -f .../image.png -v v5.3 --top 3`<br><br> where `-f` and `-v` stand for **input file** and **model version**. |
 
 ### Expected Output
@@ -248,6 +299,34 @@ Or for `-v all` the best models ensemble (average of 5 class scores):
   ]
 }
 ```
+
+## Shutdown behavior 🛑
+
+Issue [#55](https://github.com/ufal/atrium-project/issues/55). The published `api` image
+(`ghcr.io/ufal/atrium-page-classification:<version>-api`, new in that issue — before it
+this service was only reachable via a compose entrypoint override, so no API image
+existed to deploy) declares `HEALTHCHECK` (shallow `GET /health`, via the vendored
+`service/healthcheck.py`) and `STOPSIGNAL SIGTERM`, and its `ENTRYPOINT` passes
+`--timeout-graceful-shutdown 20`.
+
+On `SIGTERM` the service flips `GET /ready` to **503** at once so an orchestrator stops
+routing to it, answers new `/predict_*` calls with 503 ("retry against a live replica"),
+and lets uvicorn finish in-flight classification before exiting. `GET /health`
+deliberately stays 200 throughout — a liveness probe failing mid-shutdown would get the
+container killed before the drain completed.
+
+Inference now runs in a worker thread (`asyncio.to_thread`) rather than inline on the
+event loop. That was a prerequisite, not a tidy-up: uvicorn's `SIGTERM` handler is an
+event-loop callback, so while a synchronous `manager.predict()` held the loop, the signal
+could not be processed at all and `--timeout-graceful-shutdown` had nothing to measure.
+
+⚠️ A `/predict_document` call classifies up to `MAX_PDF_PAGES` (50) pages sequentially and
+can legitimately outlive the 20s drain budget. Raise `--timeout-graceful-shutdown` and the
+deployment's grace period together for that workload — see `docs/k8s_deployment.md` in the
+hub.
+
+A clean shutdown exits **143** (128 + SIGTERM), not 0: uvicorn re-raises the captured
+signal on purpose so a supervisor sees the real cause. That is a normal stop, not a crash.
 
 ## Client Side Test 🎨
 

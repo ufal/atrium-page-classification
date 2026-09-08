@@ -24,6 +24,9 @@ thing the agent calls directly.
   (`ufal/vit-historical-page`) - roughly 0.2-1.2 GB per revision, 5 revisions for the
   ensemble. Warmup can take several minutes. Do **not** treat a slow first start as failure.
 - **Upload limits**: 10 MB per file, 50 pages per PDF (server-enforced).
+- **Readiness**: `GET /health` is liveness (stays 200 while draining); `GET /ready` is the
+  orchestrator-facing readiness probe — it flips to 503 while the server is warming up or
+  shutting down, so a load balancer stops routing new work without killing in-flight requests.
 
 ## Categories 🪧
 
@@ -79,6 +82,26 @@ python3 scripts/atrium_classify.py page.png --base-url https://example.org/atriu
 ```
 
 Output rows are `FILE, PAGE, RANK, LABEL, SCORE` (page is `1` for single images).
+
+### 3. ATRIUM Document JSON accretion (optional)
+
+Page-classification is stage 1 of the ATRIUM pipeline, so it can either originate a
+document record or accrete its `page_categories` block onto one already produced
+upstream (accretion contract, `docs/document_schema.md` in the hub repo):
+
+```bash
+# originate a fresh record for a document this tool sees first
+python3 scripts/atrium_classify.py page.png --document-json-out \
+    --document-json-out-file page.document.json
+
+# accrete onto an existing baseline (single file only)
+python3 scripts/atrium_classify.py page.png --document-json page.document.json \
+    --document-json-out-file page.document.json
+```
+
+Every other tool's block passes through unchanged. An invalid baseline is still
+accepted (rule 6) but the response then also carries `document_json_schema_error` — the
+client prints this as a warning rather than failing.
 
 ## Agent Guidelines 🤖
 

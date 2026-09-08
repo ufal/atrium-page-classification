@@ -13,6 +13,14 @@ Usage:
     python3 scripts/atrium_classify.py *.png --version v4.3 --format json
     python3 scripts/atrium_classify.py --info
 
+    # ATRIUM Document JSON accretion (docs/document_schema.md, issue #13):
+    # accrete this tool's page_categories block onto an existing baseline record
+    python3 scripts/atrium_classify.py page.png --document-json in.document.json \
+        --document-json-out-file out.document.json
+    # or originate a fresh record (page-classification is stage 1 of the pipeline)
+    python3 scripts/atrium_classify.py page.png --document-json-out \
+        --document-json-out-file out.document.json
+
 Exit codes:
     0 - success
     1 - client-side error (bad arguments, unreadable file)
@@ -30,6 +38,7 @@ import urllib.error
 import urllib.request
 import uuid
 from pathlib import Path
+from typing import Optional
 
 DEFAULT_BASE_URL = os.environ.get("ATRIUM_PC_URL", "http://localhost:8000")
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg"}
@@ -40,8 +49,12 @@ RETRY_ATTEMPTS = 3
 RETRY_WAIT_S = 10
 
 
-def build_multipart(fields: dict, file_field: str, file_path: Path) -> tuple[bytes, str]:
-    """Encode form fields and one file as multipart/form-data using only the stdlib."""
+def build_multipart(fields: dict, files: dict) -> tuple[bytes, str]:
+    """Encode form fields and one or more files as multipart/form-data using only the stdlib.
+
+    `files` maps the multipart field name to a `Path` to upload under that name (e.g.
+    `{"file": page.png, "document_json": baseline.json}` for the accretion contract).
+    """
     boundary = uuid.uuid4().hex
     lines = []
     for name, value in fields.items():
@@ -50,12 +63,15 @@ def build_multipart(fields: dict, file_field: str, file_path: Path) -> tuple[byt
         lines.append(b"")
         lines.append(str(value).encode())
 
-    mime = mimetypes.guess_type(str(file_path))[0] or "application/octet-stream"
-    lines.append(f"--{boundary}".encode())
-    lines.append(f'Content-Disposition: form-data; name="{file_field}"; filename="{file_path.name}"'.encode())
-    lines.append(f"Content-Type: {mime}".encode())
-    lines.append(b"")
-    lines.append(file_path.read_bytes())
+    for field_name, file_path in files.items():
+        mime = mimetypes.guess_type(str(file_path))[0] or "application/octet-stream"
+        lines.append(f"--{boundary}".encode())
+        lines.append(
+            f'Content-Disposition: form-data; name="{field_name}"; filename="{file_path.name}"'.encode()
+        )
+        lines.append(f"Content-Type: {mime}".encode())
+        lines.append(b"")
+        lines.append(file_path.read_bytes())
     lines.append(f"--{boundary}--".encode())
     lines.append(b"")
 
@@ -96,8 +112,21 @@ def http_json(url: str, data: bytes = None, content_type: str = None, timeout: i
     sys.exit(last_error[0])
 
 
-def classify_file(base_url: str, path: Path, version: str, topn: int) -> dict:
-    """Route a file to /predict_image or /predict_document based on its suffix."""
+def classify_file(
+    base_url: str,
+    path: Path,
+    version: str,
+    topn: int,
+    document_json: Optional[Path] = None,
+    document_json_out: bool = False,
+) -> dict:
+    """Route a file to /predict_image or /predict_document based on its suffix.
+
+    `document_json`/`document_json_out` opt into the ATRIUM Document JSON accretion
+    contract (docs/document_schema.md): upload an existing baseline to accrete onto, and/or
+    ask the service to emit a record even with no baseline (page-classification can
+    originate one, being stage 1 of the pipeline).
+    """
     suffix = path.suffix.lower()
     if suffix in IMAGE_SUFFIXES:
         endpoint = "/predict_image"
@@ -116,7 +145,14 @@ def classify_file(base_url: str, path: Path, version: str, topn: int) -> dict:
         )
         return {}
 
-    body, content_type = build_multipart({"version": version, "topn": topn}, file_field="file", file_path=path)
+    fields = {"version": version, "topn": topn}
+    if document_json_out:
+        fields["document_json_out"] = "true"
+    files = {"file": path}
+    if document_json is not None:
+        files["document_json"] = document_json
+
+    body, content_type = build_multipart(fields, files)
     return http_json(f"{base_url}{endpoint}", data=body, content_type=content_type)
 
 
@@ -159,6 +195,22 @@ def main() -> None:
         "--format", choices=["table", "csv", "json"], default="table", help="output format (default: table)"
     )
     parser.add_argument("--info", action="store_true", help="print available models and categories, then exit")
+    parser.add_argument(
+        "--document-json",
+        metavar="PATH",
+        help="baseline ATRIUM Document JSON to accrete this tool's page_categories block onto "
+        "(docs/document_schema.md); requires exactly one input file",
+    )
+    parser.add_argument(
+        "--document-json-out",
+        action="store_true",
+        help="ask the service to originate/return a document record even with no --document-json baseline",
+    )
+    parser.add_argument(
+        "--document-json-out-file",
+        metavar="PATH",
+        help="save the returned document_json record to PATH (default: only embedded in --format json output)",
+    )
     args = parser.parse_args()
 
     base_url = args.base_url.rstrip("/")
@@ -176,17 +228,48 @@ def main() -> None:
         print(f"File(s) not found: {', '.join(str(p) for p in missing)}", file=sys.stderr)
         sys.exit(1)
 
+    document_json_path = None
+    if args.document_json:
+        if len(paths) != 1:
+            parser.error("--document-json accretes onto a single document; pass exactly one input file")
+        document_json_path = Path(args.document_json)
+        if not document_json_path.is_file():
+            print(f"--document-json file not found: {document_json_path}", file=sys.stderr)
+            sys.exit(1)
+    if args.document_json_out_file and len(paths) != 1:
+        parser.error("--document-json-out-file writes one record; pass exactly one input file")
+
     raw_results = {}
     rows = []
+    document_record = None
     for path in paths:
-        result = classify_file(base_url, path, version=args.version, topn=args.topn)
+        result = classify_file(
+            base_url,
+            path,
+            version=args.version,
+            topn=args.topn,
+            document_json=document_json_path,
+            document_json_out=args.document_json_out,
+        )
         if result:
             raw_results[path.name] = result
             rows.extend(result_rows(path, result))
+            if result.get("document_json") is not None:
+                document_record = result["document_json"]
+            if result.get("document_json_schema_error"):
+                print(
+                    f"Warning: uploaded document_json baseline for {path.name} did not validate: "
+                    f"{result['document_json_schema_error']} (record still returned, per rule 6)",
+                    file=sys.stderr,
+                )
 
     if not rows:
         print("No results produced.", file=sys.stderr)
         sys.exit(1)
+
+    if args.document_json_out_file and document_record is not None:
+        Path(args.document_json_out_file).write_text(json.dumps(document_record, indent=2), encoding="utf-8")
+        print(f"Document JSON record written to {args.document_json_out_file}", file=sys.stderr)
 
     if args.format == "json":
         print(json.dumps(raw_results, indent=2))
