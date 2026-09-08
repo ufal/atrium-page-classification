@@ -83,6 +83,7 @@ known-first-party = [
 # If you add a file to the para-drift enforced set, add it here too. (issue #10)
 exclude = [
     "atrium_document.py",
+    "atrium_vocab.py",
     "atrium_paradata.py",
     "para_licenses.py",
     "check_version.py",
