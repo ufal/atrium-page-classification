@@ -205,9 +205,13 @@ transformers. The serving half is in `service/requirements.txt` and the model st
 > **no `uvicorn` at all** — while this page and `docker-compose.yml` both still told you to run
 > it, so `docker compose --profile api up api` failed at container start
 > ([atrium-project#10](https://github.com/ufal/atrium-project/issues/10), finding G3). The
-> runtime set is restored, the contract test deps live in `setup/requirements-test.txt`, and
-> `tests/test_service_runtime_deps.py` now asserts that every entrypoint the compose files and
-> setup script invoke is actually declared somewhere the image installs from.
+> runtime set is restored. On the default branch the contract-test dependencies were moved out
+> to a separate requirements file and a regression test now asserts that every entrypoint the
+> compose files and setup script invoke is declared somewhere the image installs from; neither
+> ships here, because this branch carries only what a *running* skill needs
+> ([agent_skill_strategy.md](https://github.com/ufal/atrium-project/blob/test/docs/agent_skill_strategy.md)
+> §5). What that guarantee protects — a `service/requirements.txt` that can actually start the
+> server — is what you are reading above.
 
 > [!NOTE] The virtual environment name is stated in the setup script and can be changed to an existing
 > one if needed.

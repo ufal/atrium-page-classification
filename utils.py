@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 import time
 import warnings
 from pathlib import Path
@@ -122,11 +123,82 @@ def dataframe_results(
     return rdf, rawdf
 
 
+def _advise_category_drift(categories: list, directory: str) -> None:
+    """Say on stderr when a filesystem-derived class list is not the declared 11 labels.
+
+    ADVISORY ONLY. It never raises, never alters `categories`, and abstains in silence
+    when no reference list can be imported. Reported in the house idiom of
+    `atrium_document.py::_note()` -- visible, but nothing stops.
+
+    WHAT IT MAKES VISIBLE. `collect_images()` derives its class list with
+    `sorted(os.listdir(directory))`, and `os.listdir()` returns FILES as well as
+    directories. The shipped `small_data_samples/` tree carries a `LICENSE` file, which
+    sorts to index 2, so the derived list is 12 entries long and every label from
+    `LINE_HW` onwards sits one index higher than `model_registry.CATEGORIES` puts it --
+    and the one-hot vectors are one column too wide. Two ways that lands:
+
+      * a stray NON-directory (today's `small_data_samples/LICENSE`) reaches the
+        `os.listdir()` below and raises `NotADirectoryError` -- loud, but saying nothing
+        about which entry is at fault, or that a class list is what broke;
+      * a stray DIRECTORY (an `.ipynb_checkpoints/`, an `unsorted/` holding pen), or a
+        category directory that is simply absent, shifts the indices and returns
+        perfectly cleanly. Nothing errors: the run trains or evaluates against a
+        silently permuted label space, and the confusion matrix names the wrong classes.
+
+    This check speaks before either of those, and names the entries responsible.
+
+    THE REAL FIX is to filter the derivation to directories,
+
+        categories = sorted(e for e in os.listdir(directory) if os.path.isdir(os.path.join(directory, e)))
+
+    which is deliberately NOT applied here: it changes what `collect_images()` returns
+    and would change any training or evaluation run that has been living with the
+    current derivation. Recommended as a separate, explicitly behaviour-changing
+    follow-up. Until someone takes it, this check reports the disagreement instead of
+    letting it pass unremarked.
+    """
+    try:
+        try:
+            # Hub-canonical registry first: `page-category` is the SKOS concept scheme
+            # these directory names are the notations of.
+            from atrium_vocab import labels_for
+
+            expected = list(labels_for("page-category"))
+        except ImportError:
+            from model_registry import CATEGORIES
+
+            expected = list(CATEGORIES)
+    except Exception:  # no reference list reachable -- a check that can break a run is worse than none
+        return
+
+    # Sets only: the reference list is sorted alphabetically and so is `categories`,
+    # but order is not what this check is about and comparing it would be noise.
+    not_a_category = sorted(set(categories) - set(expected))
+    absent = sorted(set(expected) - set(categories))
+    if not not_a_category and not absent:
+        return
+
+    print(
+        f"[utils] NOTE – collect_images({directory!r}): the {len(categories)} entries derived from the "
+        f"filesystem are not the {len(expected)} declared page categories -- "
+        f"present but not a category {not_a_category}; declared but absent {absent}. "
+        f"Class indices here are positional, so each disagreement shifts the labels after it out of step "
+        f"with model_registry.CATEGORIES (and a non-directory entry will additionally fail the "
+        f"os.listdir() below). Nothing has been changed; see _advise_category_drift.__doc__ for the "
+        f"(behaviour-changing) fix.",
+        file=sys.stderr,
+    )
+
+
 def collect_images(directory: str, ordered: bool = True) -> (list, list, list):
     print(f"Collecting images from {directory}...")
 
     categories = sorted(os.listdir(directory))
     print(f"Category input directories found: {categories}")
+
+    # Advisory only -- never raises, never touches `categories`, and the derivation above
+    # is deliberately left exactly as it was (changing it changes training behaviour).
+    _advise_category_drift(categories, directory)
 
     total_files, total_labels, total_classes = [], [], []
     for category_idx, category in enumerate(categories):

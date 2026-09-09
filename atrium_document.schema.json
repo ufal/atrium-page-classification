@@ -128,10 +128,11 @@
     },
 
     "page_categories": {
-      "description": "Owner: page-classification. Predicted category per page label.",
+      "description": "Owner: page-classification. Predicted category per page label. Values come from the `page-category` scheme in the hub-canonical atrium_vocab.py -- 11 concepts, `atrium_vocab.labels_for('page-category')` -- and each has a stable URI via `atrium_vocab.concept_uri('page-category', value)`. Deliberately NOT constrained by `enum`: page-classification derives its label list from the filesystem at runtime (utils.py collect_images), so an enum here would turn a naming slip into a hard pipeline failure instead of the advisory NOTE the registry raises. See docs/skos_strategy.md 4.",
       "type": "object",
       "additionalProperties": { "type": "string" },
-      "examples": [{ "1": "Text", "2": "Plate" }]
+      "x-atrium-scheme": "page-category",
+      "examples": [{ "1": "TEXT", "2": "DRAW" }]
     },
 
     "pages": {
@@ -217,8 +218,9 @@
           "text": { "type": "string" },
           "categ": {
             "type": "string",
-            "description": "Line category. Open string, but two values are LOAD-BEARING and must be spelled exactly: 'Garbage' and 'Inverted' are what api_util/json_to_md.py's DROP_CATEGORIES filters out before the text reaches the model. A digital-born converter reporting undecodable text must emit one of those two rather than inventing a synonym — a typo here does not fail validation, it silently disables the filter.",
-            "examples": ["Text", "Heading", "Garbage", "Inverted"]
+            "description": "Line category. Open string with TWO authorised originators emitting DISJOINT label sets: alto-postprocess emits Clear/Empty/Noisy/Non-text/Trash, digital-convert emits Garbage/Inverted. Both sets are declared in the hub-canonical atrium_vocab.py as the `line-category` scheme; `atrium_vocab.LINE_CATEGORY_ORIGINATORS` says which tool emits which. 'Garbage' and 'Inverted' are load-bearing for api_util/json_to_md.py's DROP_CATEGORIES -- but that filter covers ONLY those two, so it currently matches nothing on the OCR/ALTO path and a Trash line reaches the model exactly like a Clear one. That is defect V-1 in docs/skos_strategy.md 6, which carries the one-line fix; it is not a reason to re-spell a category on the way out. A re-spelling would not fail validation either -- it would only put a tool out of step with the registry, in silence.",
+            "x-atrium-scheme": "line-category",
+            "examples": ["Clear", "Noisy", "Trash", "Garbage", "Inverted"]
           },
           "lang": { "type": "string" },
           "quality_score": { "type": "number", "minimum": 0, "maximum": 1 },

@@ -1,11 +1,15 @@
-# Caller example — Agent-Skill branch validation (atrium-project#31, strategy §12.3).
-# Place as .github/workflows/skill-validate.yml ON THE `agent-skill` BRANCH of a
-# service repo and set `client-script` to that repo's client (Appendix E table):
-#   atrium-page-classification → scripts/atrium_classify.py
-#   atrium-translator          → scripts/atrium_translate.py
-#   atrium-alto-postprocess    → scripts/atrium_postprocess.py
-#   atrium-nlp-enrich          → scripts/atrium_enrich.py
-#   atrium-llm-enrich          → scripts/atrium_keywords.py
+# Agent-Skill branch validation (atrium-project#31, strategy §12.3).
+#
+# Generated from the hub template
+# `docs/templates/workflows/skill-validate.caller.example.yml` — keep it in step with
+# that file rather than editing this one free-hand.
+#
+# `app-import` and `primary-endpoints` are the SAME values this repo's default-branch
+# `tests/test_api_contract.py` uses (issue #32), so the skill branch and the default
+# branch assert one contract. Both were omitted here until 2026-09-09, and the defaults
+# that stood in for them were silently degrading the check: `app-import` fell back to
+# `service.api`, and `primary-endpoints` to the empty string, so step 4's primary
+# endpoint assertions never ran on any repo.
 
 name: Skill Branch Validation
 
@@ -15,9 +19,27 @@ on:
   pull_request:
     branches: [agent-skill]
 
+# Push + pull_request on the same branch means two runs of this workflow for one
+# push to an open PR. Cancel the superseded one — unlike the smoke lanes, nothing
+# here is destructive or long-running, so cancelling costs nothing.
+concurrency:
+  group: skill-validate-${{ github.ref }}
+  cancel-in-progress: true
+
+# Least privilege, stated rather than inherited (#18). The reusable's jobs only read
+# the repo and start a local service; nothing is published.
+permissions:
+  contents: read
+
 jobs:
   skill-validate:
+    # `@v1`, not `@test`: `test` is the pre-release channel. Every live caller in the
+    # ecosystem moved to `@v1` in the 2026-07-31 pin migration.
     uses: ufal/atrium-project/.github/workflows/skill-validate.reusable.yml@v1
     with:
       client-script: scripts/atrium_classify.py
+      app-import: service.api
+      primary-endpoints: "/predict_image /predict_document"
       # skill-docs: "SKILL.md README.md service/README.md"   # (default)
+      # service-requirements: service/requirements.txt        # (default)
+      # python-version: "3.11"                                # (default)

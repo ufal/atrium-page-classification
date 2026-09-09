@@ -30,6 +30,20 @@ services:
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
     ports:
       - "8000:8000"
+    # Issue #55 container contract. The skill branch's Dockerfile is single-stage —
+    # the API is this service's entrypoint override, not a build target — so the
+    # healthcheck and stop signal live here rather than in the Dockerfile, where they
+    # would also attach to the batch container that serves nothing. Mirrors the
+    # `api` stage on the default branch; `service/healthcheck.py` is the same
+    # hub-canonical probe, which had been shipping on this branch unreferenced.
+    stop_signal: SIGTERM
+    stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD", "python", "/app/service/healthcheck.py"]
+      interval: 30s
+      timeout: 5s
+      start_period: 180s
+      retries: 3
 
 volumes:
   page-model:

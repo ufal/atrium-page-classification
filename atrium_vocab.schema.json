@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ufal/atrium-project/docs/templates/shared/atrium_vocab.schema.json",
+  "title": "ATRIUM controlled-label registry (JSON-LD)",
+  "description": "Validator for the JSON-LD rendering of atrium_vocab.py -- the output of `python3 atrium_vocab.py --jsonld`. It is a STRUCTURAL gate, not a SKOS reasoner: it proves the document is well-formed JSON-LD with the node shapes this registry emits, that every concept carries a scheme and a prefLabel, and that only the four SKOS mapping properties ATRIUM has decided to use appear. Semantic integrity (mapping targets resolve, collection members are concepts, originator sets stay disjoint) is checked by `atrium_vocab.py --selftest`, which is the authority and runs in CI via para-drift.reusable.yml. Keep the two in step: this file describes the SHAPE, the selftest describes the MEANING.",
+  "type": "object",
+  "required": ["@context", "registry_version", "@graph"],
+  "additionalProperties": false,
+  "properties": {
+    "@context": {
+      "description": "Prefix map. `atrium` is the one swappable base URI (atrium_vocab.SKOS_BASE); every ATRIUM-authored node id is rooted in it. The external prefixes are referenced, never minted here.",
+      "type": "object",
+      "required": ["skos", "dct", "rdfs", "atrium"],
+      "additionalProperties": { "type": "string", "format": "uri" },
+      "properties": {
+        "skos": { "const": "http://www.w3.org/2004/02/skos/core#" },
+        "dct": { "const": "http://purl.org/dc/terms/" },
+        "rdfs": { "const": "http://www.w3.org/2000/01/rdf-schema#" },
+        "atrium": { "type": "string", "format": "uri" },
+        "aat": { "const": "http://vocab.getty.edu/aat/" },
+        "amcr": { "const": "https://api.aiscr.cz/id/" },
+        "teater": { "const": "https://teater.aiscr.cz/id/" }
+      }
+    },
+    "registry_version": {
+      "description": "atrium_vocab.REGISTRY_VERSION. Bumped when a concept is ADDED, REMOVED or RENAMED -- label-set membership is a contract other repos read. Editing a definition, note or mapping is additive and does not bump.",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "@graph": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/node" }
+    }
+  },
+  "$defs": {
+    "langString": {
+      "description": "An RDF language-tagged literal in JSON-LD expanded form.",
+      "type": "object",
+      "required": ["@language", "@value"],
+      "additionalProperties": false,
+      "properties": {
+        "@language": { "type": "string", "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]+)*$" },
+        "@value": { "type": "string", "minLength": 1 }
+      }
+    },
+    "langStringOrArray": {
+      "oneOf": [
+        { "$ref": "#/$defs/langString" },
+        { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/langString" } }
+      ]
+    },
+    "ref": {
+      "description": "A node reference.",
+      "type": "object",
+      "required": ["@id"],
+      "additionalProperties": false,
+      "properties": { "@id": { "type": "string", "format": "uri" } }
+    },
+    "refOrArray": {
+      "oneOf": [
+        { "$ref": "#/$defs/ref" },
+        { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/ref" } }
+      ]
+    },
+    "node": {
+      "description": "Any node in the graph. A node is either typed (Concept / ConceptScheme / Collection) or is a bare mapping subject -- an external concept, such as a TEATER branch, that ATRIUM asserts a mapping FROM without redescribing it. Redescribing someone else's concept is exactly what this registry refuses to do, so an untyped mapping-only node is correct and expected.",
+      "type": "object",
+      "required": ["@id"],
+      "properties": {
+        "@id": { "type": "string", "format": "uri" },
+        "@type": {
+          "enum": ["skos:Concept", "skos:ConceptScheme", "skos:Collection"]
+        },
+        "skos:inScheme": { "$ref": "#/$defs/ref" },
+        "skos:notation": { "type": "string", "minLength": 1 },
+        "skos:prefLabel": { "$ref": "#/$defs/langStringOrArray" },
+        "skos:definition": { "$ref": "#/$defs/langStringOrArray" },
+        "skos:member": { "$ref": "#/$defs/refOrArray" },
+        "skos:broadMatch": { "$ref": "#/$defs/refOrArray" },
+        "skos:closeMatch": { "$ref": "#/$defs/refOrArray" },
+        "skos:exactMatch": { "$ref": "#/$defs/refOrArray" },
+        "skos:relatedMatch": { "$ref": "#/$defs/refOrArray" },
+        "dct:title": { "$ref": "#/$defs/langString" },
+        "dct:description": { "$ref": "#/$defs/langString" },
+        "dct:source": { "$ref": "#/$defs/ref" },
+        "rdfs:comment": { "$ref": "#/$defs/langStringOrArray" }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "description": "A Concept must say which scheme it is in and carry a prefLabel. A concept with neither is unusable by any consumer and is almost always a table edited in one place and not the other.",
+          "if": { "properties": { "@type": { "const": "skos:Concept" } }, "required": ["@type"] },
+          "then": { "required": ["skos:inScheme", "skos:prefLabel", "skos:notation"] }
+        },
+        {
+          "description": "A ConceptScheme must be titled and described, and must name the code that is authoritative for it -- carried as rdfs:comment 'authority: <path>'. Without that pointer the registry becomes a second source of truth rather than a view onto the first.",
+          "if": { "properties": { "@type": { "const": "skos:ConceptScheme" } }, "required": ["@type"] },
+          "then": { "required": ["dct:title", "dct:description", "rdfs:comment"] }
+        },
+        {
+          "description": "A Collection groups without asserting hierarchy, so it needs a label and at least one member.",
+          "if": { "properties": { "@type": { "const": "skos:Collection" } }, "required": ["@type"] },
+          "then": { "required": ["skos:prefLabel"] }
+        },
+        {
+          "description": "An untyped node exists only to hang a mapping off an external concept, so it must carry at least one mapping property.",
+          "if": { "not": { "required": ["@type"] } },
+          "then": {
+            "anyOf": [
+              { "required": ["skos:broadMatch"] },
+              { "required": ["skos:closeMatch"] },
+              { "required": ["skos:exactMatch"] },
+              { "required": ["skos:relatedMatch"] }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
