@@ -61,6 +61,37 @@ def _baseline(tmp_path, name, payload):
     return path
 
 
+def _record(doc_id="CTX01", **blocks):
+    """A record carrying the schema's top-level envelope, plus whatever blocks are asked for.
+
+    Every hand-built record in this file goes through here so the envelope lives in one
+    place. It has already drifted once: atrium-project#54 froze the contract at 1.0 and
+    `required` grew from ``[schema_version, doc_id]`` to include ``record_type``,
+    ``provenance`` and ``assembled``, which silently invalidated every literal here.
+
+    ``source`` is not decoration. On top of ``required`` the schema has an anyOf: a record
+    must carry EITHER ``source`` — the originator's handshake, which ``set_source()`` writes
+    without stamping a block — OR an ``assembled.blocks`` naming at least one block it
+    actually holds. An empty ``assembled`` satisfies neither, so a fixture that stamps
+    nothing is legal only via ``source``. That is also what a real baseline looks like: it
+    reaches this tool from an originator that set it.
+
+    Fixtures that are MEANT to be rejected build on this too, and add their one deliberate
+    violation. Otherwise they would be rejected for a missing top-level key as well, and a
+    test about inherited defects would pass without ever exercising one — which is exactly
+    what happened here (see TestFixtureContract).
+    """
+    return {
+        "schema_version": "1.0",
+        "record_type": "atrium-document",
+        "doc_id": doc_id,
+        "provenance": {},
+        "assembled": {},
+        "source": {"origin": "ABBYY-ALTO"},
+        **blocks,
+    }
+
+
 class TestWriteDocumentRecord:
     """Single-document run: --document-json / --document-json-out are FILE paths."""
 
@@ -79,13 +110,7 @@ class TestWriteDocumentRecord:
     def test_baseline_fields_survive_alongside_own_fields(self, tmp_path):
         baseline_path = tmp_path / "CTX01.in.json"
         baseline_path.write_text(
-            json.dumps(
-                {
-                    "schema_version": "1.0",
-                    "doc_id": "CTX01",
-                    "pages": [{"page": "1", "quality_score": 0.9, "quality_band": "Clear"}],
-                }
-            )
+            json.dumps(_record(pages=[{"page": "1", "quality_score": 0.9, "quality_band": "Clear"}]))
         )
         rdf = _rdf([{"FILE": "CTX01", "PAGE": "1", "CLASS-1": "Text", "SCORE-1": 0.87}])
         out_path = tmp_path / "CTX01.out.json"
@@ -141,14 +166,12 @@ class TestWriteDocumentRecordsDir:
         in_dir.mkdir()
         (in_dir / "CTX01.document.json").write_text(
             json.dumps(
-                {
-                    "schema_version": "1.0",
-                    "doc_id": "CTX01",
-                    "pages": [
+                _record(
+                    pages=[
                         {"page": "1", "quality_band": "Clear"},
                         {"page": "2", "quality_band": "Noisy"},
-                    ],
-                }
+                    ]
+                )
             )
         )
 
@@ -233,12 +256,10 @@ class TestLayerDValidationGate:
         baseline = _baseline(
             tmp_path,
             "CTX01.in.json",
-            {
-                "schema_version": "1.0",
-                "doc_id": "CTX01",
-                "pages": [{"page": "1", "quality_band": "Clear"}],
-                "lines": [{"page": "1"}],  # missing the required `line`
-            },
+            _record(
+                pages=[{"page": "1", "quality_band": "Clear"}],
+                lines=[{"page": "1"}],  # missing the required `line` — the ONLY defect here
+            ),
         )
         rdf = _rdf([{"FILE": "CTX01", "PAGE": "1", "CLASS-1": "Text", "SCORE-1": 0.87}])
         out_path = tmp_path / "CTX01.out.json"
@@ -263,7 +284,8 @@ class TestLayerDValidationGate:
         baseline = _baseline(
             tmp_path,
             "CTX01.in.json",
-            {"schema_version": "1.0", "doc_id": "CTX01", "pages": [{"page": 1}]},
+            # `page` an int, not a string — the ONLY defect here.
+            _record(pages=[{"page": 1}]),
         )
         rdf = _rdf([{"FILE": "CTX01", "PAGE": "1", "CLASS-1": "Text", "SCORE-1": 0.87}])
         out_path = tmp_path / "CTX01.out.json"
@@ -282,7 +304,7 @@ class TestLayerDValidationGate:
         baseline = _baseline(
             tmp_path,
             "CTX01.in.json",
-            {"schema_version": "1.0", "doc_id": "CTX01", "pages": [{"page": "1", "quality_band": "Clear"}]},
+            _record(pages=[{"page": "1", "quality_band": "Clear"}]),
         )
         rdf = _rdf([{"FILE": "CTX01", "PAGE": "1", "CLASS-1": "Text", "SCORE-1": 1.5}])
         out_path = tmp_path / "CTX01.out.json"
@@ -372,11 +394,7 @@ class TestFieldSurvivalAssertion:
         baseline = _baseline(
             tmp_path,
             "CTX01.in.json",
-            {
-                "schema_version": "1.0",
-                "doc_id": "CTX01",
-                "pages": [{"page": "1", "quality_score": 0.9, "quality_band": "Clear"}],
-            },
+            _record(pages=[{"page": "1", "quality_score": 0.9, "quality_band": "Clear"}]),
         )
         rdf = _rdf([{"FILE": "CTX01", "PAGE": "1", "CLASS-1": "Text", "SCORE-1": 0.87}])
         out_path = tmp_path / "CTX01.out.json"
@@ -386,3 +404,58 @@ class TestFieldSurvivalAssertion:
         page = load_document(str(out_path))["pages"][0]
         for field in adapter.OWN_PAGE_FIELDS:
             assert field in page
+
+
+# ── the fixtures' own contract ───────────────────────────────────────────────
+
+
+def _schema_errors(record):
+    """Every schema error in `record`, as (json_path, message) pairs.
+
+    `validate_document()` raises on the FIRST problem, which is the right shape for a
+    gate and the wrong shape for asking "is this wrong for exactly one reason?".
+    """
+    import jsonschema
+
+    from atrium_document import load_schema
+
+    return [(err.json_path, err.message) for err in jsonschema.Draft202012Validator(load_schema()).iter_errors(record)]
+
+
+class TestFixtureContract:
+    """What the fixtures above claim about themselves, checked against the schema.
+
+    This file has two kinds of baseline and the difference decides which branch of the
+    adapter runs: a VALID one leaves the own-output check armed, while an invalid one
+    demotes it to a warning (D4's warn-not-refuse policy for inherited defects). So a
+    fixture that is accidentally invalid does not fail — it quietly moves the test to the
+    other branch.
+
+    That is not hypothetical. atrium-project#54 grew the top-level `required` set and
+    every baseline here became invalid at once. Only
+    `test_valid_baseline_does_not_demote_the_own_output_check` went red, because only it
+    asserts an outcome that differs between the branches; three other tests kept passing
+    while no longer exercising the path they document.
+    """
+
+    def test_the_helper_produces_a_valid_record(self):
+        assert _schema_errors(_record()) == []
+
+    def test_a_baseline_with_blocks_is_still_valid(self):
+        """The shape the happy-path tests actually use."""
+        record = _record(pages=[{"page": "1", "quality_score": 0.9, "quality_band": "Clear"}])
+        assert _schema_errors(record) == []
+
+    @pytest.mark.parametrize(
+        "record,expected_path",
+        [
+            (_record(pages=[{"page": 1}]), "$.pages[0].page"),
+            (
+                _record(pages=[{"page": "1", "quality_band": "Clear"}], lines=[{"page": "1"}]),
+                "$.lines[0]",
+            ),
+        ],
+        ids=["page-is-an-int", "line-row-missing-line"],
+    )
+    def test_intentionally_invalid_baselines_are_wrong_about_exactly_one_thing(self, record, expected_path):
+        assert [path for path, _ in _schema_errors(record)] == [expected_path]
