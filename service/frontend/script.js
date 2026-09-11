@@ -95,8 +95,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                // IMPORTANT: Adjust the base URL if your FastAPI runs on a different host/port
-                const baseUrl = window.location.origin.includes('localhost') ? 'http://localhost:8000' : '';
+                // Served BY the API (on any port, including a non-default $PORT): use the
+                // page's own origin, so the request follows PORT automatically. Served from
+                // a SEPARATE dev server (Live Server on 5500, a static host on 8080): fall
+                // back to the API's default port.
+                //
+                // This used to read `origin.includes('localhost') ? 'http://localhost:8000' : ''`,
+                // which sent EVERY localhost page to :8000 — so once $PORT became a real knob
+                // (atrium-project#58), serving the API on e.g. :9000 left this page POSTing to
+                // :8000 and failing. The sibling frontends already key off the dev-server ports;
+                // this brings it into line with them.
+                const devServerPorts = ['8080', '5500'];
+                const baseUrl = devServerPorts.includes(window.location.port)
+                    ? 'http://localhost:8000'
+                    : window.location.origin;
 
                 const response = await fetch(`${baseUrl}${endpoint}`, {
                     method: 'POST',

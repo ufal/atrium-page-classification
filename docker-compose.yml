@@ -40,8 +40,13 @@ services:
         ATRIUM_RUNNER_REF: ${ATRIUM_RUNNER_REF:-dev}
     environment:
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+      PORT: ${PORT:-8000}
     ports:
-      - "8000:8000"
+    # PORT is passed through so `PORT=9000 docker compose --profile api up` moves the
+    # listener, the published port and the container's own HEALTHCHECK together — the
+    # service reads it in service/api.py's __main__ block and service/healthcheck.py
+    # probes it. (atrium-project#58)
+      - "${PORT:-8000}:${PORT:-8000}"
     # HEALTHCHECK comes from the `api` stage — no override needed. stop_grace_period
     # raised from Compose's 10s default: the stage allows uvicorn 20s to drain in-flight
     # requests plus up to 25s in serve_lifecycle, so 10s would SIGKILL mid-drain. Matches

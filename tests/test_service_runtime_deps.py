@@ -153,6 +153,23 @@ def _service_imports() -> dict:
     return imports
 
 
+#: ASGI servers this ecosystem might plausibly launch. Used to check that a `-m` launch
+#: actually reaches a server, without hardcoding "uvicorn" as the only acceptable answer.
+_ASGI_SERVERS = {"uvicorn", "hypercorn", "granian", "daphne"}
+
+
+def _asgi_servers_imported_by(path: Path) -> set:
+    """ASGI servers imported anywhere in `path`, its ``__main__`` block included."""
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    found = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            found |= {alias.name.split(".")[0] for alias in node.names}
+        elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+            found.add(node.module.split(".")[0])
+    return found & _ASGI_SERVERS
+
+
 def _is_first_party(module: str) -> bool:
     """A module that ships in this repo, so no requirements entry can or should cover it."""
     for parent in (REPO_ROOT, REPO_ROOT / "service"):
@@ -191,9 +208,44 @@ class TestDeploymentEntrypointsAreInstallable:
         """
         api_argv = _dockerfile_entrypoints().get(("api", "entrypoint"))
         assert api_argv, "the Dockerfile declares no ENTRYPOINT for the `api` stage"
-        assert api_argv[0] not in _NOT_PIP_PROVIDED, (
-            "the `api` stage no longer starts a pip-installed server, so "
-            "test_compose_entrypoints_are_declared has nothing left to assert"
+
+        if api_argv[0] not in _NOT_PIP_PROVIDED:
+            # Console-script launch: the original claim applies verbatim.
+            assert _normalise(api_argv[0]) in _declared_distributions(), (
+                f"the `api` stage invokes {api_argv[0]!r}, which is declared in none of "
+                f"{[p.name for p in REQUIREMENTS_FILES]}"
+            )
+            return
+
+        # Interpreter launch. Since atrium-project#58 the stage runs the server through
+        # the interpreter (`python -m service.api`) rather than as a console script, so
+        # argv[0] is deliberately `python` and the old "argv[0] is not pip-provided"
+        # check would now pass while asserting nothing. The equivalent claim for a `-m`
+        # launch is that the MODULE resolves and that the ASGI server its __main__ block
+        # imports is declared — which is what the image actually needs to start.
+        assert len(api_argv) >= 3 and api_argv[1] == "-m", (
+            f"the `api` stage runs {api_argv[0]!r} without `-m`. A bare script launch "
+            f"sets sys.path[0] to the script's own directory with no package context, "
+            f"so service/api.py's relative imports raise ImportError before the app is "
+            f"built — the container then exits immediately (atrium-project#58)."
+        )
+        module = api_argv[2]
+        target = REPO_ROOT / Path(module.replace(".", "/") + ".py")
+        assert target.is_file(), (
+            f"the `api` stage runs `-m {module}`, but that resolves to no file in this "
+            f"repo, so the container exits at import with ModuleNotFoundError"
+        )
+        servers = _asgi_servers_imported_by(target)
+        assert servers, (
+            f"{target.relative_to(REPO_ROOT)} imports no ASGI server, so `-m {module}` "
+            f"starts nothing. Same class as G3: a documented start path that does not "
+            f"start anything."
+        )
+        undeclared = sorted(s for s in servers if _normalise(s) not in _declared_distributions())
+        assert not undeclared, (
+            f"{target.relative_to(REPO_ROOT)} imports {undeclared} to serve, but none of "
+            f"{[p.name for p in REQUIREMENTS_FILES]} declares it — the container will "
+            f"exit at import"
         )
 
     def test_the_api_stage_declares_a_healthcheck_and_stopsignal(self):
@@ -207,9 +259,15 @@ class TestDeploymentEntrypointsAreInstallable:
             "HEALTHCHECK names service/healthcheck.py but that file is not in the repo "
             "(it is vendored from the hub by scripts/revendor_shared.sh)"
         )
-        assert "--timeout-graceful-shutdown" in dockerfile, (
-            "the api stage's uvicorn entrypoint sets no --timeout-graceful-shutdown, so "
-            "SIGTERM gives in-flight requests no bounded drain window"
+        # Two spellings are accepted because atrium-project#58 moved this budget off the
+        # ENTRYPOINT line: it used to be the `--timeout-graceful-shutdown 20` flag, and is
+        # now `ENV GRACEFUL_SHUTDOWN_S`, read by service/api.py's __main__ block and passed
+        # to uvicorn as timeout_graceful_shutdown. What must not regress is that the budget
+        # is declared SOMEWHERE in the stage, not which of the two carries it.
+        assert "--timeout-graceful-shutdown" in dockerfile or "GRACEFUL_SHUTDOWN_S" in dockerfile, (
+            "the api stage bounds uvicorn's wait for in-flight requests nowhere — neither a "
+            "--timeout-graceful-shutdown flag on the ENTRYPOINT nor a GRACEFUL_SHUTDOWN_S in "
+            "its ENV — so SIGTERM gives them no bounded drain window (issue #55)"
         )
 
     def test_setup_script_start_command_is_declared(self):

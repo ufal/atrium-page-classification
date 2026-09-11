@@ -17,6 +17,7 @@ Text, Drawing, Table) using various fine-tuned on historical data [^17] deep lea
 - [API Usage 📡](#api-usage-)
 - [Installation & Setup 🛠](#installation--setup-)
 - [Quick API Test Launch 🚀](#quick-api-test-launch-)
+- [Configuration (environment) ⚙️](#configuration-environment-)
 - [Client Side Test 🎨](#client-side-test-)
 - [Contacts 📧](#contacts-)
 - [Acknowledgements 🙏](#acknowledgements-)
@@ -299,6 +300,34 @@ Or for `-v all` the best models ensemble (average of 5 class scores):
   ]
 }
 ```
+
+## Configuration (environment) ⚙️
+
+| Variable              | Default   | Meaning                                                                 |
+|-----------------------|-----------|-------------------------------------------------------------------------|
+| `PORT`                | `8000`    | port the service **binds**, and the one `service/healthcheck.py` probes |
+| `HOST`                | `0.0.0.0` | bind address. ⚠️ see the warning below                                  |
+| `GRACEFUL_SHUTDOWN_S` | `20`      | seconds uvicorn waits for in-flight requests before closing them        |
+| `RELOAD`              | `false`   | filesystem auto-reload — development only, never in a deployment        |
+| `LOG_LEVEL`           | `INFO`    | root logger level for the start path below                              |
+| `ALLOWED_ORIGINS`     | `*`       | CSV of CORS origins                                                     |
+| `MAX_UPLOAD_MB`       | `10`      | canonical upload limit                                                  |
+
+`PORT` and `HOST` are read by `service/api.py`'s `__main__` block, which is what the `api` image's `ENTRYPOINT` runs.
+
+Before issue #58 the `api` stage baked `--port 8000` into an exec-form `ENTRYPOINT` array —
+which runs no shell, so `$PORT` could not expand — while `service/healthcheck.py` read it.
+Setting `PORT` therefore moved the health *probe* and not the listener, and the container
+reported unhealthy forever.
+
+`RELOAD` works under the container entrypoint (`python -m service.api`). Under the
+`python3 api.py` start documented above it is a no-op with a uvicorn warning: that launch
+has no package context for an import string to resolve against, so the app object is passed
+directly.
+
+> ⚠️ `HOST=127.0.0.1` yields a container that reports **healthy** and serves nobody:
+> `service/healthcheck.py` always probes loopback by design and never reads `HOST`, so a
+> loopback bind passes every probe while being unreachable from outside the container.
 
 ## Shutdown behavior 🛑
 

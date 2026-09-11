@@ -101,16 +101,36 @@ CMD ["-d", "/data/input", "--hf", "-rev", "v4.3"]
 # ---------------------------------------------------------------------------
 FROM base AS api
 
+# EXPOSE tracks the DEFAULT port: it is image metadata and cannot read $PORT at
+# runtime. Set PORT to move the listener, and publish with `-p <port>:<port>` to
+# match. (issue #58)
 EXPOSE 8000
+
 # STOPSIGNAL is the default (SIGTERM) — declared explicitly so a future edit cannot
 # change it silently; service/api.py's lifespan chains to uvicorn's own handler for it
 # via serve_lifecycle (service/atrium_service.py).
 STOPSIGNAL SIGTERM
-# --timeout-graceful-shutdown bounds uvicorn's wait for in-flight requests. Note a
-# /predict_document call classifies up to MAX_PDF_PAGES pages sequentially, so a large
-# PDF can legitimately outlive this budget — raise it together with the deployment's
-# grace period for that workload (docs/k8s_deployment.md, "Known limits").
-ENTRYPOINT ["uvicorn", "service.api:app", "--host", "0.0.0.0", "--port", "8000", "--timeout-graceful-shutdown", "20"]
+
+# PORT and HOST are read by service/api.py's __main__ block; PORT is also the port
+# service/healthcheck.py probes, which is why setting it used to make the container
+# permanently unhealthy — the probe moved and the listener did not. Declared here so
+# `docker inspect` is self-documenting and so the probe still has a value if the code
+# default ever drifts. (issue #58)
+#
+# GRACEFUL_SHUTDOWN_S carries the `--timeout-graceful-shutdown 20` that used to sit on
+# the ENTRYPOINT line. It bounds uvicorn's wait for in-flight requests.
+# Note a /predict_document call classifies up to MAX_PDF_PAGES pages sequentially, so a
+# large PDF can legitimately outlive this budget — raise it together with the
+# deployment's grace period for that workload (docs/k8s_deployment.md, "Known limits").
+ENV PORT=8000 GRACEFUL_SHUTDOWN_S=20
+
+# `python -m service.api`, NOT `python service/api.py`: a script launch puts
+# sys.path[0] at /app/service with no package context, so the relative imports fall back to
+# their bare form and `model_registry` resolves only via service/inference.py's own
+# sys.path append — a chain this stage must not depend on. `-m` keeps sys.path[0] at /app — byte for byte the environment the old
+# `uvicorn service.api:app` entrypoint ran in, so every repo-root import still
+# resolves. (issue #58)
+ENTRYPOINT ["python", "-m", "service.api"]
 CMD []
 HEALTHCHECK --interval=30s --timeout=5s --start-period=180s --retries=3 \
     CMD ["python", "/app/service/healthcheck.py"]
