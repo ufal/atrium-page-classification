@@ -53,8 +53,26 @@ import ast
 from pathlib import Path
 from typing import List, Optional
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SERVICE_DIR = REPO_ROOT / "service"
+
+# Every OTHER canonical test under docs/templates/shared/ is self-contained —
+# test_para_licenses.py imports para_licenses.py from beside it, and so on. This
+# one is not: it inspects the CONSUMING repo's service/ tree, which is exactly
+# what the hub itself does not have. hub-self-check.yml runs `pytest .` with
+# working-directory: docs/templates/shared, where REPO_ROOT above resolves to
+# docs/templates/ — no service/ directory — so _service_py_files() below would
+# return [], and checks 1-2 would pass having examined NOTHING while checks 3-4
+# correctly fail on an empty set. An honest skip beats a vacuous pass. This
+# never fires in a tool repo, where service/ always exists.
+if not SERVICE_DIR.is_dir():
+    pytest.skip(
+        "no service/ directory here — this file inspects a TOOL REPO's service "
+        "layer, and the hub's docs/templates/shared/ is not one (issue #61)",
+        allow_module_level=True,
+    )
 
 #: Files whose stdout is their own output contract, not service logging (see
 #: check 2's docstring paragraph above). Matched by filename, not path, so this
