@@ -18,8 +18,12 @@ except ImportError:
     from ensemble import average_prediction_dicts
     from model_registry import CATEGORIES, REVISION_BEST_MODELS, REVISION_TO_BASE_MODEL
 
-# Setup logging
-logging.basicConfig(level=logging.INFO)
+# (12-factor XI) No basicConfig() here. This module is imported as a library by
+# api.py and by tests; configuring the ROOT logger at import time is a side effect
+# that silently overrides whatever the host application chose — and because
+# basicConfig() is a no-op once the root logger has handlers, the first import
+# wins over the real entrypoint. Emit to a named logger; let __main__ decide
+# handlers and level. (issue #61)
 logger = logging.getLogger(__name__)
 
 # --- CONFIGURATION ---
