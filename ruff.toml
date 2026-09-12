@@ -93,5 +93,6 @@ exclude = [
     "tests/test_atrium_vocab.py",
     "atrium_rocrate.py",
     "tests/test_atrium_rocrate.py",
+    "tests/test_logging_contract.py",
     "docs/templates/shared/*.py",
 ]

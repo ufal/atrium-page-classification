@@ -303,15 +303,15 @@ Or for `-v all` the best models ensemble (average of 5 class scores):
 
 ## Configuration (environment) ⚙️
 
-| Variable              | Default   | Meaning                                                                 |
-|-----------------------|-----------|-------------------------------------------------------------------------|
-| `PORT`                | `8000`    | port the service **binds**, and the one `service/healthcheck.py` probes |
-| `HOST`                | `0.0.0.0` | bind address. ⚠️ see the warning below                                  |
-| `GRACEFUL_SHUTDOWN_S` | `20`      | seconds uvicorn waits for in-flight requests before closing them        |
-| `RELOAD`              | `false`   | filesystem auto-reload — development only, never in a deployment        |
-| `LOG_LEVEL`           | `INFO`    | root logger level for the start path below                              |
-| `ALLOWED_ORIGINS`     | `*`       | CSV of CORS origins                                                     |
-| `MAX_UPLOAD_MB`       | `10`      | canonical upload limit                                                  |
+| Variable              | Default   | Meaning                                                                  |
+|-----------------------|-----------|--------------------------------------------------------------------------|
+| `PORT`                | `8000`    | port the service **binds**, and the one `service/healthcheck.py` probes  |
+| `HOST`                | `0.0.0.0` | bind address. ⚠️ see the warning below                                   |
+| `GRACEFUL_SHUTDOWN_S` | `20`      | seconds uvicorn waits for in-flight requests before closing them         |
+| `RELOAD`              | `false`   | filesystem auto-reload — development only, never in a deployment         |
+| `LOG_LEVEL`           | `INFO`    | root logger level for the `python -m service.api` start path (issue #61) |
+| `ALLOWED_ORIGINS`     | `*`       | CSV of CORS origins                                                      |
+| `MAX_UPLOAD_MB`       | `10`      | canonical upload limit                                                   |
 
 `PORT` and `HOST` are read by `service/api.py`'s `__main__` block, which is what the `api` image's `ENTRYPOINT` runs.
 
