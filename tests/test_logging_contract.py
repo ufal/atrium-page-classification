@@ -209,8 +209,7 @@ def test_entrypoint_reads_log_level():
     """
     entrypoint = _find_entrypoint()
     assert entrypoint is not None, (
-        "no service/*.py file has a __main__ block calling uvicorn.run(...); "
-        "cannot verify it reads LOG_LEVEL"
+        "no service/*.py file has a __main__ block calling uvicorn.run(...); cannot verify it reads LOG_LEVEL"
     )
     tree = _parse(entrypoint)
     main_if = _find_main_if(tree)

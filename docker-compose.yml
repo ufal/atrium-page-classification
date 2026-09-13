@@ -38,7 +38,21 @@ services:
         ATRIUM_RUNNER_IMAGE: ghcr.io/ufal/atrium-page-classification:${ATRIUM_VERSION:-dev}-api
         ATRIUM_RUNNER_REPO: https://github.com/ufal/atrium-page-classification
         ATRIUM_RUNNER_REF: ${ATRIUM_RUNNER_REF:-dev}
+    # env_file delivers every OTHER variable in .env.example into the container --
+    # LOG_LEVEL, GRACEFUL_SHUTDOWN_S, HOST, RELOAD, HEALTHCHECK_PATH and MAX_UPLOAD_MB
+    # were all documented but undeliverable under compose until atrium-project#60
+    # added this. `required: false` because .env is gitignored -- a fresh clone has
+    # none and compose must still start.
+    env_file:
+      - path: .env
+        required: false
     environment:
+      # ATRIUM_RUNNER_IMAGE is overridden here on purpose: the build arg above
+      # correctly tags this stage "...-api", but `extends: classify` (above)
+      # inherits classify's environment: block, whose ATRIUM_RUNNER_IMAGE has no
+      # such suffix -- so without this line, paradata recorded the BATCH image tag
+      # for requests served by the API image. (atrium-project#60)
+      ATRIUM_RUNNER_IMAGE: ghcr.io/ufal/atrium-page-classification:${ATRIUM_VERSION:-dev}-api
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
       PORT: ${PORT:-8000}
     ports:

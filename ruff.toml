@@ -88,11 +88,13 @@ exclude = [
     "para_licenses.py",
     "check_version.py",
     "service/atrium_service.py",
+    "service/healthcheck.py",
     "tests/test_para_licenses.py",
     "tests/test_document_originators.py",
     "tests/test_atrium_vocab.py",
     "atrium_rocrate.py",
     "tests/test_atrium_rocrate.py",
     "tests/test_logging_contract.py",
+    "tests/test_env_contract.py",
     "docs/templates/shared/*.py",
 ]

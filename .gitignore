@@ -10,3 +10,4 @@ __pycache__/
 # Swept into a commit by `git add -A` during atrium-project#10 Phase 6.
 .coverage
 .coverage.*
+.env

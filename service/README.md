@@ -311,7 +311,14 @@ Or for `-v all` the best models ensemble (average of 5 class scores):
 | `RELOAD`              | `false`   | filesystem auto-reload — development only, never in a deployment         |
 | `LOG_LEVEL`           | `INFO`    | root logger level for the `python -m service.api` start path (issue #61) |
 | `ALLOWED_ORIGINS`     | `*`       | CSV of CORS origins                                                      |
-| `MAX_UPLOAD_MB`       | `10`      | canonical upload limit                                                   |
+| `MAX_UPLOAD_MB`       | `10`      | canonical upload limit — no shared default across the five services      |
+
+This service reads nothing beyond the shared contract above: `service/inference.py`,
+`service/document_json.py` and `service/api_client.py` contain no environment reads.
+This table is the deployment-facing subset. The complete ledger — every variable this
+image reads — is [`.env.example`](../.env.example) at the repo root, whose layout is
+fixed by `docs/templates/env.example.template` in ufal/atrium-project. The
+cross-service operator reference is `docs/k8s_deployment.md` in that same repo.
 
 `PORT` and `HOST` are read by `service/api.py`'s `__main__` block, which is what the `api` image's `ENTRYPOINT` runs.
 
