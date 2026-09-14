@@ -219,6 +219,119 @@ def _indirect_env_reads(source: str) -> set[str]:
     return names
 
 
+def _prefix_composed_reads(tree: ast.AST, constants: dict) -> set[str]:
+    """Resolve `HELPER(SECTION_LITERAL, KEY_LITERAL, ...)` calls into concrete env
+    names, for a family of helpers defined IN THE SAME FILE that compose the name
+    as an f-string `f"{PREFIX}{param0}_{param1}"` from their own first two
+    positional parameters — directly, or by forwarding those same two params
+    (positionally, by name) to another such helper, to any depth.
+
+    Generic by construction, not keyed to any repo's actual function or section
+    names: alto-postprocess's `text_util.py` is the one case in the ecosystem today
+    (`ENV_PREFIX = "ATRIUM_"`; `_env_override(section, key)` builds the f-string
+    directly; `_get_float`/`_get_int`/`_get_str` forward to it; `_get_csv_set`
+    forwards to `_get_str`, one level further), reading 95 concrete
+    `ATRIUM_TEXT_UTILS_*` / `ATRIUM_CLASSIFY_*` names at import time via
+    `text_util.py:53`'s import into `service/text_inference.py` — invisible to
+    every other resolver in this file, since none of them is a string literal at
+    the call site of `os.getenv`/`environ.get` itself. Left unmatched, a "COMPLETE
+    ledger" .env.example header is false and nothing here could tell.
+
+    Bounded to 6 fixed-point passes (one per plausible indirection depth) so a
+    call cycle cannot spin this forever; any repo's helper chain deeper than that
+    is a code smell this file should not paper over silently.
+    """
+
+    def joinedstr_prefix(node: ast.expr, p0: str, p1: str) -> str | None:
+        if not isinstance(node, ast.JoinedStr) or len(node.values) != 4:
+            return None
+        v0, v1, v2, v3 = node.values
+        if not (isinstance(v0, ast.FormattedValue) and isinstance(v0.value, ast.Name)):
+            return None
+        prefix = constants.get(v0.value.id)
+        if prefix is None:
+            return None
+        if not (isinstance(v1, ast.FormattedValue) and isinstance(v1.value, ast.Name) and v1.value.id == p0):
+            return None
+        if not (isinstance(v2, ast.Constant) and v2.value == "_"):
+            return None
+        if not (isinstance(v3, ast.FormattedValue) and isinstance(v3.value, ast.Name) and v3.value.id == p1):
+            return None
+        return prefix
+
+    funcs = [n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)]
+    composers: dict[str, str] = {}
+    for _ in range(6):
+        changed = False
+        for fn in funcs:
+            if fn.name in composers:
+                continue
+            params = [a.arg for a in fn.args.args]
+            if len(params) < 2:
+                continue
+            p0, p1 = params[0], params[1]
+            prefix = None
+            for node in ast.walk(fn):
+                prefix = joinedstr_prefix(node, p0, p1)
+                if prefix is not None:
+                    break
+                if (
+                    isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Name)
+                    and node.func.id in composers
+                    and len(node.args) >= 2
+                    and isinstance(node.args[0], ast.Name)
+                    and node.args[0].id == p0
+                    and isinstance(node.args[1], ast.Name)
+                    and node.args[1].id == p1
+                ):
+                    prefix = composers[node.func.id]
+                    break
+            if prefix is not None:
+                composers[fn.name] = prefix
+                changed = True
+        if not changed:
+            break
+
+    names: set[str] = set()
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id in composers
+            and len(node.args) >= 2
+            and isinstance(node.args[0], ast.Constant)
+            and isinstance(node.args[0].value, str)
+            and isinstance(node.args[1], ast.Constant)
+            and isinstance(node.args[1].value, str)
+        ):
+            names.add(composers[node.func.id] + node.args[0].value + "_" + node.args[1].value)
+    return names
+
+
+def _prefix_reads(source: str) -> set[str]:
+    """Thin entry point for `_prefix_composed_reads`: parse `source` once, collect
+    its module-level string constants (the `ENV_PREFIX = "ATRIUM_"` shape), and
+    resolve. Returns the empty set for anything that is not this pattern —
+    checked once per file, so an unrelated file paying this cost is a parse and
+    a composer search that finds nothing, not an error.
+    """
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:  # pragma: no cover - every file here parses
+        return set()
+    constants = {
+        target.id: node.value.value
+        for node in tree.body
+        if isinstance(node, ast.Assign) and isinstance(node.value, ast.Constant) and isinstance(node.value.value, str)
+        for target in node.targets
+        if isinstance(target, ast.Name)
+    }
+    if not constants:
+        return set()
+    return _prefix_composed_reads(tree, constants)
+
+
 def _literal_default(node: ast.expr) -> str | None:
     """A single-hop literal default: a plain constant, or unresolvable (None)."""
     if isinstance(node, ast.Constant) and not isinstance(node.value, bool):
@@ -301,6 +414,7 @@ def _runtime_env_reads() -> dict[str, set[str]]:
         for group in _ENV_HELPER.findall(source):
             names.update(re.findall(r'["\']([A-Z_][A-Z0-9_]*)["\']', group))
         names |= _indirect_env_reads(source)
+        names |= _prefix_reads(source)
         for name in names - _NOT_OPERATOR_KNOBS:
             found.setdefault(name, set()).add(str(py.relative_to(REPO_ROOT)))
     return found
@@ -347,14 +461,34 @@ def _normalize(value: str) -> str:
         return value
 
 
+def _not_published_match(name: str, key: str) -> bool:
+    """A NOT_PUBLISHED key ending in `_*` matches any read name sharing that
+    prefix (the underscore before `*` is part of the match, so `"FOO_*"` matches
+    `FOO_BAR` but not `FOOBAR`) — for a systematic family too large to enumerate
+    one exact name at a time (atrium-project#60: alto-postprocess's 95
+    `ATRIUM_TEXT_UTILS_*` / `ATRIUM_CLASSIFY_*` algorithmic constants, resolved by
+    `_prefix_reads` above). Every other key matches by exact equality only, same
+    as before this existed — a plain name is not treated as a prefix of itself.
+    """
+    if key.endswith("_*"):
+        return name.startswith(key[:-1])
+    return name == key
+
+
 def test_env_example_documents_every_variable_the_code_reads():
     reads = _runtime_env_reads()
-    undocumented = sorted(set(reads) - _documented() - set(NOT_PUBLISHED))
+    documented = _documented()
+    undocumented = sorted(
+        name
+        for name in reads
+        if name not in documented and not any(_not_published_match(name, key) for key in NOT_PUBLISHED)
+    )
     detail = "\n".join(f"  {name}  (read in {', '.join(sorted(reads[name]))})" for name in undocumented)
     assert not undocumented, (
         "These variables are read by shipped code but are not in .env.example and not "
-        f"declared in tests/env_contract_data.py's NOT_PUBLISHED, so a partner can only "
-        f"discover them by reading the source:\n{detail}"
+        f"declared in tests/env_contract_data.py's NOT_PUBLISHED (exactly, or by a "
+        f"trailing `_*` prefix entry), so a partner can only discover them by reading "
+        f"the source:\n{detail}"
     )
 
 
@@ -370,22 +504,30 @@ def test_env_example_documents_nothing_imaginary():
 
 
 def test_declared_omissions_are_still_read():
-    """A NOT_PUBLISHED entry the code no longer reads is a stale exemption."""
+    """A NOT_PUBLISHED entry the code no longer reads is a stale exemption.
+
+    A `_*` prefix entry is stale the same way a plain name is: if NOTHING read
+    matches the prefix any more, the whole family is gone and the exemption is
+    free to widen silently over whatever replaces it.
+    """
     reads = set(_runtime_env_reads())
-    stale = sorted(set(NOT_PUBLISHED) - reads)
+    stale = sorted(key for key in NOT_PUBLISHED if not any(_not_published_match(name, key) for name in reads))
     assert not stale, (
         f"tests/env_contract_data.py's NOT_PUBLISHED declares these as deliberately "
-        f"withheld from .env.example, but nothing reads them any more — remove the "
-        f"exemption (it is now free to widen silently): {stale}"
+        f"withheld from .env.example, but nothing reads them (or, for a `_*` entry, "
+        f"nothing matching that prefix) any more — remove the exemption "
+        f"(it is now free to widen silently): {stale}"
     )
 
 
 def test_declared_omissions_are_not_also_published():
     """The exact shape of the LOG_LEVEL defect this issue found: withheld AND published."""
-    contradictions = sorted(set(NOT_PUBLISHED) & _documented())
+    documented = _documented()
+    contradictions = sorted(key for key in NOT_PUBLISHED if any(_not_published_match(name, key) for name in documented))
     assert not contradictions, (
-        ".env.example both DECLARES and PUBLISHES these variables — a file cannot say "
-        f"a name is withheld while also assigning it a value: {contradictions}"
+        ".env.example both DECLARES and PUBLISHES these — a file cannot say a name (or, "
+        f"for a `_*` entry, any name in that family) is withheld while also assigning it "
+        f"a value: {contradictions}"
     )
 
 

@@ -1,6 +1,13 @@
 # Base Ruff configuration for ATRIUM tools
 line-length = 120
 
+# target-version pins the syntax Ruff lints against to the version this repo
+# actually ships -- python:3.11-slim, matched by every CI lane (atrium-project#64).
+# The template this file is aligned with is a FLOOR, not a ceiling: alto-postprocess,
+# nlp-enrich, llm-enrich and translator already declare this as a superset; this repo
+# had not, which is how a future 3.12-only lane could drift unnoticed.
+target-version = "py311"
+
 # Apply exclude/extend-exclude even to paths passed EXPLICITLY on the command line.
 #
 # Without this the [format] exclude below is inert in the one place it has to work:
@@ -56,7 +63,7 @@ known-first-party = [
 [format]
 # THE VENDORED CANONICAL FILES ARE NOT THIS REPO'S TO FORMAT.
 #
-# `para-drift.reusable.yml` requires these eight files to be BYTE-IDENTICAL across the
+# `para-drift.reusable.yml` requires these 16 files to be BYTE-IDENTICAL across the
 # hub and all five tool repos. But every tool repo runs `ruff-format` as a pre-commit
 # hook while the hub deliberately does not ("lint only; the hub is not auto-formatted"),
 # and `line-length` is not uniform across the ecosystem -- it is 120 here, in
