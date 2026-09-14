@@ -157,9 +157,7 @@ def _indirect_env_reads(source: str) -> set[str]:
     constants = {
         target.id: node.value.value
         for node in tree.body
-        if isinstance(node, ast.Assign)
-        and isinstance(node.value, ast.Constant)
-        and isinstance(node.value.value, str)
+        if isinstance(node, ast.Assign) and isinstance(node.value, ast.Constant) and isinstance(node.value.value, str)
         for target in node.targets
         if isinstance(target, ast.Name)
     }
