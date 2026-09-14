@@ -180,7 +180,7 @@ The response then carries the updated record under `document_json`:
 ## Installation & Setup 🛠
 
 ### 1. Prerequisites
-* **Python 3.11** (matches `python:3.11-slim`, the image base, and the CI lane — atrium-project#64) 
+* **Python 3.11** (matches `python:3.11-slim`, the image base, and the CI lane — atrium-project#64)
 * **NodeJS** (For client-side development within LINDAT environment)
 * **Standard CPU** (Sufficient for **Client-side** development).
 * **CUDA-capable GPU** (Recommended for **Server-side** inference speed, though CPU is supported). [^10]
