@@ -137,7 +137,7 @@ jobs:
         # force-pushed to malicious code -- exactly what happened to
         # aquasecurity/trivy-action in 2026-03 (GHSA-69fq-xp46-6x23). Dependabot
         # keeps the SHA and the trailing version comment in step (#18).
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64  # v3
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64  # v3.0.3
         with:
           generate_release_notes: true
           files: |

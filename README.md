@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10+-blue.svg" title="Python Version"></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11-blue.svg" title="Python Version"></a>
   <a href="https://huggingface.co/ufal/vit-historical-page"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20HF-vit--historical--page-yellow.svg" title="Hugging Face Model"></a>
   <a href="http://hdl.handle.net/20.500.12800/1-6184"><img src="https://img.shields.io/badge/dataset-LINDAT-orange.svg" title="LINDAT Dataset"></a>
   <a href="https://opensource.org/license/mit/"><img src="https://img.shields.io/github/license/ufal/atrium-page-classification" title="MIT License"></a>
@@ -285,7 +285,7 @@ be to use the HF 😊 hub repository [^1] 🔗 that can be easily accessed via t
 </details>
 
 > [!WARNING]
-> Make sure you have **Python version 3.10+** installed on your machine 💻 and check its
+> Make sure you have **Python version 3.11** installed on your machine 💻 and check its
 > **hardware requirements** for correct program running provided above.
 > Then create a separate virtual environment for this project
 

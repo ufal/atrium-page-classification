@@ -3,9 +3,8 @@ line-length = 120
 
 # target-version pins the syntax Ruff lints against to the version this repo
 # actually ships -- python:3.11-slim, matched by every CI lane (atrium-project#64).
-# The template this file is aligned with is a FLOOR, not a ceiling: alto-postprocess,
-# nlp-enrich, llm-enrich and translator already declare this as a superset; this repo
-# had not, which is how a future 3.12-only lane could drift unnoticed.
+# docs/templates/ruff.toml now declares this itself; this repo had not, which is
+# how a 3.12-only lane could drift unnoticed once before (atrium-project#64).
 target-version = "py311"
 
 # Apply exclude/extend-exclude even to paths passed EXPLICITLY on the command line.
