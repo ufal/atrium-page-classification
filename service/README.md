@@ -65,11 +65,11 @@ base architectures, allowing users to balance speed vs. accuracy.
 
 | Version  | Base Architecture                   | Description                                     |
 |:---------|:------------------------------------|:------------------------------------------------|
-| **v4.3** | `regnety_160.swag_ft_in1k`          | Balanced option. Best performing "Small" model. |
-| **v2.3** | `vit-base-patch16-224`              | Standard Transformer baseline.                  |
-| **v3.3** | `vit-base-patch16-384`              | Higher resolution Transformer baseline.         |
-| **v5.3** | `vit-large-patch16-384`             | Most accurate, slowest inference.               |
-| **v1.3** | `tf_efficientnetv2_m.in21k_ft_in1k` | CNN-based, faster inference.                    |
+| **v4.4** | `regnety_160.swag_ft_in1k`          | Balanced option. Best performing "Small" model. |
+| **v2.4** | `vit-base-patch16-224`              | Standard Transformer baseline.                  |
+| **v3.4** | `vit-base-patch16-384`              | Higher resolution Transformer baseline.         |
+| **v5.4** | `vit-large-patch16-384`             | Most accurate, slowest inference.               |
+| **v1.4** | `tf_efficientnetv2_m.in21k_ft_in1k` | CNN-based, faster inference.                    |
 
 ## Categories 🪧
 
@@ -153,7 +153,7 @@ implemented the contract in full while the deployed API surface implemented none
 curl -X POST "http://localhost:8000/predict_image" \
   -F "file=@CTX000000001_0007.png" \
   -F "document_json=@CTX000000001.document.json" \
-  -F "version=v4.3"
+  -F "version=v4.4"
 
 # or originate one (stage 1, no baseline to inherit)
 curl -X POST "http://localhost:8000/predict_image" \
@@ -227,7 +227,7 @@ If you prefer the manual approach, you can download the weights to the `model/` 
 
 ```bash
 source venv/bin/activate
-python3 run.py --hf -rev vX.3
+python3 run.py --hf -rev vX.4
 ````
 where `X` is the model version (1, 2, 3, 4, or 5).
 

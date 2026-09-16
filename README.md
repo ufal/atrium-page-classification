@@ -56,8 +56,12 @@ Diagram of the inference methodology including the selected 5 best model version
 ## Versions 🏁
 
 There are currently several version of the model available for download, both of them have the same set of categories,
-but different data annotations. The latest `v4.3` is considered to be default and can be found in the `main` branch
-of HF 😊 hub [^1] 🔗
+but different data annotations. Since **v1.8.0-beta** the default ensemble is the **`vX.4`** generation — the same five
+base models as `vX.3`, retrained on the cc-by-nc-4.0-licensed subset only. It is what `--best` averages and what the
+service returns for `version=all`.
+
+> ⚠️ The `main` branch of the HF 😊 hub [^1] 🔗 still resolves to **`v4.3`**. Pull a `vX.4` revision explicitly
+> (`-rev v4.4`) until `main` is moved; `setup/config.txt`'s `[HF] latest` already points at `v4.4`.
 
 | Version | Base                             | Pages |   PDFs    | Description                                                                        |
 |--------:|----------------------------------|:-----:|:---------:|:-----------------------------------------------------------------------------------|

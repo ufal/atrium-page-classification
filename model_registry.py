@@ -148,40 +148,38 @@ REVISION_TO_BASE_MODEL = {
 
 # Best models subset for ensemble
 REVISION_BEST_MODELS = {
-    "v1.3": "timm/tf_efficientnetv2_m.in21k_ft_in1k",
-    "v2.3": "google/vit-base-patch16-224",
-    "v3.3": "google/vit-base-patch16-384",
-    "v4.3": "timm/regnety_160.swag_ft_in1k",
-    "v5.3": "google/vit-large-patch16-384",
+    "v1.4": "timm/tf_efficientnetv2_m.in21k_ft_in1k",
+    "v2.4": "google/vit-base-patch16-224",
+    "v3.4": "google/vit-base-patch16-384",
+    "v4.4": "timm/regnety_160.swag_ft_in1k",
+    "v5.4": "google/vit-large-patch16-384",
 }
-# NOTE (issue #15): the v*.4 models are retrained on the new dataset (N−318 pages). They share
-# the same base models as v*.3, so once they become the canonical ensemble default, swap the
-# keys above to "v1.4".."v5.4". Kept on v*.3 for now so `--best` stays unchanged.
+# The canonical ensemble, moved from v*.3 to v*.4 in v1.8.0-beta (issue #15). The five base
+# models are unchanged -- only the weights move, to the generation retrained on the
+# cc-by-nc-4.0-only subset (38,307 pages / 37,316 PDFs, against v*.3's 38,625 / 37,328).
+# `run.py --best`, `parallel_best.run_best_models` and the API's version="all" all read this
+# one dict, so this is the whole switch.
 #
-# DO NOT MAKE THAT SWAP YET -- the blocker is upstream, not here (measured 2026-09-16).
-# All five v*.4 revisions of ufal/vit-historical-page currently serve the SAME checkpoint:
-# config.json "architecture": "regnety_160", model.safetensors 322,925,148 bytes, on every
-# one of v1.4/v2.4/v3.4/v4.4/v5.4. Only v4.4 is what its name claims; the other four are
-# copies of it. The v*.3 control is correctly heterogeneous (v1.3 tf_efficientnetv2_m,
-# v2.3 ViT hidden_size 768 @224, v3.3 ViT 768 @384, v5.3 ViT 1024 @384), and a nonexistent
-# ref (v9.9) is rejected by the Hub, so the five v*.4 refs do exist -- they just do not hold
-# what REVISION_TO_BASE_MODEL declares for them.
+# WHY THE SWITCH WAITED, and what now stops it happening again. Between 2026-09-13 and
+# 2026-09-16 all five v*.4 revisions of ufal/vit-historical-page served the SAME checkpoint --
+# config.json "architecture": "regnety_160", model.safetensors 322,925,148 bytes, on every one
+# of v1.4/v2.4/v3.4/v4.4/v5.4. Only v4.4 was what its name claimed. Flipping these keys then
+# would have failed SILENTLY: `--best` would have averaged one model with itself five times,
+# returned well-formed Top-N predictions, and still reported "Ensemble (Average of 5 Models)".
+# Nothing would have raised; only the confidence profile would have changed.
 #
-# Why that is worth a paragraph rather than a one-line TODO: swapping the keys in this state
-# fails SILENTLY. `run.py --best` and the API's version="all" would average one model with
-# itself five times, return well-formed Top-N predictions, and still report "Ensemble
-# (Average of 5 Models)". Nothing raises; only the confidence profile changes.
+# Re-uploaded 2026-09-16 and re-verified against the Hub before this swap -- five distinct
+# architectures, five distinct checkpoint sizes:
+#     v1.4  tf_efficientnetv2_m                     212,764,964
+#     v2.4  ViT hidden_size 768 / image_size 224    343,251,660
+#     v3.4  ViT hidden_size 768 / image_size 384    344,419,020
+#     v4.4  regnety_160                             322,925,148
+#     v5.4  ViT hidden_size 1024 / image_size 384  1,214,854,652
 #
-# Sequence to unblock, in order:
-#   1. ./data_scripts/unix/hf_reupload_v4_revisions.sh --audit
-#   2. ./data_scripts/unix/hf_reupload_v4_revisions.sh --models-dir ./model --apply
-#   3. python -m pytest tests/test_best_ensemble_distinct.py -m slow -v     # must be GREEN
-#   4. only then swap the five keys above, and update setup/config.txt [HF] latest,
-#      README.md's "latest v4.3 is considered to be default", service/README.md's
-#      `run.py --hf -rev vX.3`, para_config.txt, and the agent-skill branch copy of this
-#      file (model_registry.py is para-drift-adjacent: it is compared byte-for-byte
-#      between the default and agent-skill branches by tools/skill_drift_check.py).
-# tests/test_best_ensemble_distinct.py is the standing guard for steps 1-3.
+# tests/test_best_ensemble_distinct.py is the standing guard. Its static half asserts this dict
+# declares five distinct base models; its `-m slow` half reads each revision's config.json from
+# the Hub and asserts the PUBLISHED architectures are distinct too -- which is the half that
+# would have caught the defect above, and the half to run before ever moving these keys again.
 
 # Explicit per-model fold columns for retraining on the pre-computed cross-validation split
 # (issue #15). Single source of truth: revision -> column in the folds CSV. Rule:
