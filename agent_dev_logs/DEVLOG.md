@@ -1,6 +1,6 @@
 # 📓 atrium-page-classification — agent_dev_logs/DEVLOG.md (timeline index)
-> _Historical page-image classification. 0 open issues (#15 and #26 both closed; nothing opened since). `test`==`vit` HEAD `60f58bc` (2026-09-06) · **v1.7.5-beta**._
-> _No `digests/`/`plans/`/`issues/` exports exist for this repo yet — unlike its siblings, this DEVLOG is the only `agent_dev_logs/` artifact. The 2026-08-02 → 09-06 entries below are reconstructed from `CONTRIBUTING.md`'s release-note table (source of truth for that window) and commit history, not from a digest._
+> _Historical page-image classification. 1 open issue (#48; #15 and #26 closed). `test` HEAD `cabe289` (2026-09-15) · **v1.7.5-beta**._
+> _Per-issue detail: `digests/48.digest.md` · `plans/48.plan.md` · `issues/2026-09-07.48.issue.open.md` (source of truth). This header previously claimed no such exports existed; they have since 2026-09-07. The 2026-08-02 → 09-06 entries below predate them and are reconstructed from `CONTRIBUTING.md`'s release-note table (source of truth for that window) and commit history, not from a digest._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
 ## 2026-06-25
