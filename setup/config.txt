@@ -58,7 +58,7 @@ repo_name = ufal/vit-historical-page
 token =
 use_hf = False
 revision = main
-latest = v4.3
+latest = v4.4
 
 [DOCUMENT]
 # atrium_document ("paradata pair") integration — see atrium_document_adapter.py and the hub's

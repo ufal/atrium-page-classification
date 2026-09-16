@@ -2,10 +2,44 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/ufal/atrium-project/docs/templates/shared/atrium_document.schema.json",
   "title": "ATRIUM document record",
-  "description": "Per-document aggregate record built by accretion across the ATRIUM pipeline. Each tool writes only its own block and passes every other block through untouched. References are restricted to the original input and persistent step outputs; disposable derivations (Markdown, page images) appear in 'regenerable' as recipes, never as stored paths. Produced by atrium_document.py; sibling of the atrium_paradata.py provenance record.",
+  "description": "Per-document aggregate record built by accretion across the ATRIUM pipeline. Each tool writes only its own block and passes every other block through untouched. References are restricted to the original input and persistent step outputs; disposable derivations (Markdown, page images) appear in 'regenerable' as recipes, never as stored paths. Produced by atrium_document.py; sibling of the atrium_paradata.py provenance record. FROZEN AT 1.0 (atrium-project#54): the top-level assertions below are a compatibility obligation, not a design surface. Three of them, in the order a reader should apply them -- (a) `required` names the five keys every record written through DocumentRecord.to_dict() carries unconditionally; (b) `anyOf` says a record must carry EVIDENCE THAT SOMETHING WAS WRITTEN INTO IT, either `source` (the originator's first-writer handshake, which deliberately does not stamp a block) or at least one entry in `assembled.blocks`; (c) `allOf` says every block named in `assembled.blocks` must actually be present at top level -- a stamp without a payload is an incoherent record, not a sparse one.",
   "type": "object",
-  "required": ["schema_version", "doc_id"],
+  "required": ["schema_version", "record_type", "doc_id", "provenance", "assembled"],
   "additionalProperties": true,
+
+  "anyOf": [
+    {
+      "$comment": "The originator's handshake. set_source() writes `source` and deliberately does NOT call _stamp(), so alto-postprocess/page_split.py -- stage 1 of the scanned pipeline -- legitimately emits a record with no `assembled.blocks` key at all. That record is the one case where 'contributed no block' is correct rather than a defect, and it is authorised HERE rather than by weakening the rule for everyone.",
+      "required": ["source"]
+    },
+    {
+      "$comment": "Everything else. A record with neither `source` nor a stamped block is what atrium-project#54 calls 'a stage that produces nothing' -- finalize() already prints WARNING - <program> contributed no block, and this promotes that warning to a validation failure. minProperties lives here rather than on assembled.blocks itself so that a fan-in merge of two source-only records, which legitimately carries blocks: {}, still validates through the branch above.",
+      "required": ["assembled"],
+      "properties": {
+        "assembled": {
+          "required": ["blocks"],
+          "properties": { "blocks": { "minProperties": 1 } }
+        }
+      }
+    }
+  ],
+
+  "allOf": [
+    {
+      "$comment": "Stamp/payload coherence. assembled.blocks[<name>] is written by _stamp(), which runs only from set_block()/merge_block()/add_derived_from()/add_regenerable() -- i.e. only where the payload is written in the same call. So a stamp naming a block the record does not carry cannot be produced by the module, and means the record was hand-built, truncated in transit, or field-filtered down to nothing. One if/then per stampable name: the nine content blocks plus the two accreting maps. A name this table has not been taught (a newer block, rule 6) simply has no clause and passes -- the same abstain-rather-than-refuse idiom ORIGIN_ORIGINATORS uses."
+    },
+    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["derived_from"] } } } } }, "then": { "required": ["derived_from"] } },
+    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["regenerable"] } } } } }, "then": { "required": ["regenerable"] } },
+    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["page_categories"] } } } } }, "then": { "required": ["page_categories"] } },
+    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["pages"] } } } } }, "then": { "required": ["pages"] } },
+    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["content"] } } } } }, "then": { "required": ["content"] } },
+    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["lines"] } } } } }, "then": { "required": ["lines"] } },
+    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["tables"] } } } } }, "then": { "required": ["tables"] } },
+    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["entities"] } } } } }, "then": { "required": ["entities"] } },
+    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["translations"] } } } } }, "then": { "required": ["translations"] } },
+    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["enrichment"] } } } } }, "then": { "required": ["enrichment"] } },
+    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["forms"] } } } } }, "then": { "required": ["forms"] } }
+  ],
   "properties": {
     "schema_version": {
       "type": "string",
@@ -108,6 +142,7 @@
       "properties": {
         "blocks": {
           "type": "object",
+          "description": "The stamp registry: one entry per block this record's contributing runs actually wrote, keyed by top-level block name. Written only by _stamp(). Two rules key off it and neither is expressible anywhere else -- the top-level `anyOf` (a record with no source needs at least one entry here) and the top-level `allOf` (every name here must have a payload at top level). Its absence is not an error: a record that carries only `source` has never been stamped. Consumers asking 'who wrote this block' read blocks[<name>].program, which names the MOST RECENT writer of a field-split block; the full picture is provenance.contributors[].",
           "additionalProperties": {
             "type": "object",
             "additionalProperties": true,

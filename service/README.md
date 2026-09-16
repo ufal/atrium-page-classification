@@ -17,6 +17,7 @@ Text, Drawing, Table) using various fine-tuned on historical data [^17] deep lea
 - [API Usage 📡](#api-usage-)
 - [Installation & Setup 🛠](#installation--setup-)
 - [Quick API Test Launch 🚀](#quick-api-test-launch-)
+- [Configuration (environment) ⚙️](#configuration-environment-)
 - [Client Side Test 🎨](#client-side-test-)
 - [Contacts 📧](#contacts-)
 - [Acknowledgements 🙏](#acknowledgements-)
@@ -45,12 +46,9 @@ atrium-page-classification/
 │   ├── inference.py         # Model loading and prediction logic
 │   ├── requirements.txt     # Python dependencies for the API
 │   ├── api_client.py        # Client script to test the API endpoints
-│   ├── frontend/            # 🎨 Standalone frontend assets (LINDAT-independent)
-│   │   ├── index.html       # Standalone web interface
-│   │   └── script.js        # Standalone logic
-│   └── frontend-lindat/     # 🎨 LINDAT-integrated frontend assets
-│       ├── index.html       # Web interface with LINDAT headers/footers
-│       └── script.js        # Logic handling LINDAT stylings
+│   └── frontend/            # 🎨 Standalone frontend assets (LINDAT-independent)
+│       ├── index.html       # Standalone web interface
+│       └── script.js        # Standalone logic
 ├── setup/                   # ⚙️ Project configuration & setup scripts
 │   └── setup_api_service.sh # Setup script for environment, dependencies, and models
 ├── run.py                   # Script to download models manually
@@ -64,11 +62,11 @@ base architectures, allowing users to balance speed vs. accuracy.
 
 | Version  | Base Architecture                   | Description                                     |
 |:---------|:------------------------------------|:------------------------------------------------|
-| **v4.3** | `regnety_160.swag_ft_in1k`          | Balanced option. Best performing "Small" model. |
-| **v2.3** | `vit-base-patch16-224`              | Standard Transformer baseline.                  |
-| **v3.3** | `vit-base-patch16-384`              | Higher resolution Transformer baseline.         |
-| **v5.3** | `vit-large-patch16-384`             | Most accurate, slowest inference.               |
-| **v1.3** | `tf_efficientnetv2_m.in21k_ft_in1k` | CNN-based, faster inference.                    |
+| **v4.4** | `regnety_160.swag_ft_in1k`          | Balanced option. Best performing "Small" model. |
+| **v2.4** | `vit-base-patch16-224`              | Standard Transformer baseline.                  |
+| **v3.4** | `vit-base-patch16-384`              | Higher resolution Transformer baseline.         |
+| **v5.4** | `vit-large-patch16-384`             | Most accurate, slowest inference.               |
+| **v1.4** | `tf_efficientnetv2_m.in21k_ft_in1k` | CNN-based, faster inference.                    |
 
 ## Categories 🪧
 
@@ -152,7 +150,7 @@ implemented the contract in full while the deployed API surface implemented none
 curl -X POST "http://localhost:8000/predict_image" \
   -F "file=@CTX000000001_0007.png" \
   -F "document_json=@CTX000000001.document.json" \
-  -F "version=v4.3"
+  -F "version=v4.4"
 
 # or originate one (stage 1, no baseline to inherit)
 curl -X POST "http://localhost:8000/predict_image" \
@@ -179,7 +177,7 @@ The response then carries the updated record under `document_json`:
 ## Installation & Setup 🛠
 
 ### 1. Prerequisites
-* **Python 3.10+**
+* **Python 3.11** (matches `python:3.11-slim`, the image base, and the CI lane — atrium-project#64)
 * **NodeJS** (For client-side development within LINDAT environment)
 * **Standard CPU** (Sufficient for **Client-side** development).
 * **CUDA-capable GPU** (Recommended for **Server-side** inference speed, though CPU is supported). [^10]
@@ -201,17 +199,13 @@ Key libraries include: fastapi, uvicorn, python-multipart, pillow, PyMuPDF, torc
 transformers. The serving half is in `service/requirements.txt` and the model stack in
 `setup/requirements.txt`; the setup script installs both, and so does the Docker image.
 
-> [!NOTE] `service/requirements.txt` had been pruned down to six pytest/contract packages —
-> **no `uvicorn` at all** — while this page and `docker-compose.yml` both still told you to run
-> it, so `docker compose --profile api up api` failed at container start
-> ([atrium-project#10](https://github.com/ufal/atrium-project/issues/10), finding G3). The
-> runtime set is restored. On the default branch the contract-test dependencies were moved out
-> to a separate requirements file and a regression test now asserts that every entrypoint the
-> compose files and setup script invoke is declared somewhere the image installs from; neither
-> ships here, because this branch carries only what a *running* skill needs
-> ([agent_skill_strategy.md](https://github.com/ufal/atrium-project/blob/test/docs/agent_skill_strategy.md)
-> §5). What that guarantee protects — a `service/requirements.txt` that can actually start the
-> server — is what you are reading above.
+> [!NOTE] `service/requirements.txt` is the RUNTIME set the API needs — fastapi, uvicorn and
+> the model stack — not a test set. It had once been pruned to six pytest/contract packages
+> with **no `uvicorn` at all**, while this page and `docker-compose.yml` both still told you to
+> run it, so `docker compose --profile api up api` failed at container start
+> ([atrium-project#10](https://github.com/ufal/atrium-project/issues/10), finding G3). If you
+> add an entrypoint to a compose file or to the setup script, declare its dependency somewhere
+> the image installs from, or the container fails the same way again.
 
 > [!NOTE] The virtual environment name is stated in the setup script and can be changed to an existing
 > one if needed.
@@ -230,7 +224,7 @@ If you prefer the manual approach, you can download the weights to the `model/` 
 
 ```bash
 source venv/bin/activate
-python3 run.py --hf -rev vX.3
+python3 run.py --hf -rev vX.4
 ````
 where `X` is the model version (1, 2, 3, 4, or 5).
 
@@ -304,6 +298,41 @@ Or for `-v all` the best models ensemble (average of 5 class scores):
 }
 ```
 
+## Configuration (environment) ⚙️
+
+| Variable              | Default   | Meaning                                                                  |
+|-----------------------|-----------|--------------------------------------------------------------------------|
+| `PORT`                | `8000`    | port the service **binds**, and the one `service/healthcheck.py` probes  |
+| `HOST`                | `0.0.0.0` | bind address. ⚠️ see the warning below                                   |
+| `GRACEFUL_SHUTDOWN_S` | `20`      | seconds uvicorn waits for in-flight requests before closing them         |
+| `RELOAD`              | `false`   | filesystem auto-reload — development only, never in a deployment         |
+| `LOG_LEVEL`           | `INFO`    | root logger level for the `python -m service.api` start path (issue #61) |
+| `ALLOWED_ORIGINS`     | `*`       | CSV of CORS origins                                                      |
+| `MAX_UPLOAD_MB`       | `10`      | canonical upload limit — no shared default across the five services      |
+
+This service reads nothing beyond the shared contract above: `service/inference.py`,
+`service/document_json.py` and `service/api_client.py` contain no environment reads.
+This table is the deployment-facing subset. The complete ledger — every variable this
+image reads — is [`.env.example`](../.env.example) at the repo root, whose layout is
+fixed by `docs/templates/env.example.template` in ufal/atrium-project. The
+cross-service operator reference is `docs/k8s_deployment.md` in that same repo.
+
+`PORT` and `HOST` are read by `service/api.py`'s `__main__` block, which is what the `api` image's `ENTRYPOINT` runs.
+
+Before issue #58 the `api` stage baked `--port 8000` into an exec-form `ENTRYPOINT` array —
+which runs no shell, so `$PORT` could not expand — while `service/healthcheck.py` read it.
+Setting `PORT` therefore moved the health *probe* and not the listener, and the container
+reported unhealthy forever.
+
+`RELOAD` works under the container entrypoint (`python -m service.api`). Under the
+`python3 api.py` start documented above it is a no-op with a uvicorn warning: that launch
+has no package context for an import string to resolve against, so the app object is passed
+directly.
+
+> ⚠️ `HOST=127.0.0.1` yields a container that reports **healthy** and serves nobody:
+> `service/healthcheck.py` always probes loopback by design and never reads `HOST`, so a
+> loopback bind passes every probe while being unreachable from outside the container.
+
 ## Shutdown behavior 🛑
 
 Issue [#55](https://github.com/ufal/atrium-project/issues/55). The published `api` image
@@ -334,34 +363,10 @@ signal on purpose so a supervisor sees the real cause. That is a normal stop, no
 
 ## Client Side Test 🎨
 
-This API service includes two versions of the frontend for immediate testing:
-1. `service/frontend/`: A lightweight, standalone vanilla JS frontend.
-2. `service/frontend-lindat/`: A LINDAT-integrated client developed for usage inside the LINDAT ecosystem [^5].
-
-For client-side development within LINDAT, open a **second console window** and follow these steps:
-
-1.  **Clone the repository** and place `atrium-page-classification` project files into the `lindat-common` directory:
-    ```bash
-    git clone [https://github.com/ufal/lindat-common.git](https://github.com/ufal/lindat-common.git)
-    cd lindat-common
-    cp -r ../atrium-page-classification .
-    ```
-
-2.  **Install NodeJS environment** (unless you already have one) and **Install dependencies for development:**
-    ```bash
-    curl -o- [https://raw.githubusercontent.com/creationix/nvm/v0.25.4/install.sh](https://raw.githubusercontent.com/creationix/nvm/v0.25.4/install.sh) | bash
-    nvm install stable
-    nvm use stable
-    npm install
-    ```
-
-3. **Run development server:**
-    ```bash
-    make run
-    ```
-
-For further details, please refer to the **LINDAT Common Development Guide**:
-[https://github.com/ufal/lindat-common/?tab=readme-ov-file#development](https://github.com/ufal/lindat-common/?tab=readme-ov-file#development).
+This API service ships one frontend for immediate testing: `service/frontend/`, a lightweight,
+standalone vanilla JS interface with no build step and no external dependencies. It is mounted
+at `/frontend` whenever the directory is present, so it is reachable at
+`http://localhost:${PORT:-8000}/frontend` as soon as the server is up.
 
 ### Running the Server 🚀
 
@@ -375,25 +380,6 @@ uvicorn service.api:app --reload
 ```
 
 The server will start at `http://0.0.0.0:8000` (access this to use the built-in standalone visual testing tool located in `service/frontend`).
-
-### Using the LINDAT client-side test interface
-
-Assuming your **second console** output ends like this:
-
-```commandline
-> lindat-common@3.5.0 start
-> webpack-dev-server -p --debug --quiet
-
-(node:2985155) Warning: `--localstorage-file` was provided without a valid path
-(Use `node --trace-warnings ...` to show where the warning was created)
-> Project is running at http://localhost:8080/
-> webpack output is served from /
-> Content not from webpack is served from /home.../lindat-common
-```
-
-Open the URL `http://localhost:8080` in your web browser to access the LINDAT client interface.
-
-Follow the file tree to the `atrium-page-classification/service/frontend-lindat` directory. The frontend interface will open and allow you to upload images and test the API.
 
 ## Contacts 📧
 
@@ -416,7 +402,6 @@ Follow the file tree to the `atrium-page-classification/service/frontend-lindat`
 [^2]: https://huggingface.co/google/vit-base-patch16-224
 [^3]: https://docs.python.org/3/library/venv.html
 [^4]: https://atrium-research.eu/
-[^5]: https://github.com/ufal/lindat-common
 [^6]: https://www.ghostscript.com/releases/gsdnld.html
 [^7]: https://ufal.mff.cuni.cz/home-page
 [^8]: https://github.com/ufal/atrium-page-classification

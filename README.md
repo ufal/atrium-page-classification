@@ -142,6 +142,22 @@ anti-pattern checklist):
 - [ ] no reference to directories/files absent from this branch;
 - [ ] documented response fields match what `service/api.py` actually returns;
 - [ ] client smoke test re-run on `small_data_samples/` against a locally started server.
+- [ ] **model-revision swaps land here too** — see below.
+
+### Model-revision swaps 🧮
+
+`model_registry.py` is vendored onto this branch, so an ensemble swap on the default
+branch is **not** live for agents until the same file lands here. `REVISION_BEST_MODELS`
+is the whole switch: `run.py --best`, `parallel_best.run_best_models` and the API's
+`version="all"` all read that one dict.
+
+Treat this branch as a required step of the swap, not a follow-up, and re-run the
+default branch's ensemble-distinctness guard **before** moving the keys — not after.
+Between 2026-09-13 and 2026-09-16 all five `v*.4` revisions of `ufal/vit-historical-page`
+served the same checkpoint, so flipping the keys then would have averaged one model with
+itself five times, returned well-formed Top-N predictions, and still reported
+"Ensemble (Average of 5 Models)". Nothing would have raised. The failure mode is silent,
+which is why the check belongs ahead of the edit.
 
 ## Contacts 📧
 
