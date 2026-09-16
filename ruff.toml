@@ -62,7 +62,7 @@ known-first-party = [
 [format]
 # THE VENDORED CANONICAL FILES ARE NOT THIS REPO'S TO FORMAT.
 #
-# `para-drift.reusable.yml` requires these 16 files to be BYTE-IDENTICAL across the
+# `para-drift.reusable.yml` requires these 17 files to be BYTE-IDENTICAL across the
 # hub and all five tool repos. But every tool repo runs `ruff-format` as a pre-commit
 # hook while the hub deliberately does not ("lint only; the hub is not auto-formatted"),
 # and `line-length` is not uniform across the ecosystem -- it is 120 here, in
@@ -100,6 +100,7 @@ exclude = [
     "tests/test_atrium_vocab.py",
     "atrium_rocrate.py",
     "tests/test_atrium_rocrate.py",
+    "tests/test_dockerfile_security_layer.py",
     "tests/test_logging_contract.py",
     "tests/test_env_contract.py",
     "docs/templates/shared/*.py",
