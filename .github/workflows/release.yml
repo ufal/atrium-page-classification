@@ -71,11 +71,21 @@ jobs:
           # the first `import run` (issue #18). The "Verify bundle is self-contained"
           # step below is the guard — if you add an import, it fails here, not for a
           # user. atrium_document.schema.json rides along as atrium_document.py's
-          # companion contract file.
+          # companion contract file, and atrium_vocab.schema.json as atrium_vocab.py's.
+          #
+          # atrium_vocab.py added for v1.8.0-beta: the SKOS registry (atrium-project#51)
+          # made it a dependency of two modules already in the bundle — model_registry.py
+          # (category_uri(), and the import-time CATEGORIES-vs-scheme advisory) and
+          # utils.py (_advise_category_drift()). Both import it inside try/except
+          # ImportError, so the bundle would not have crashed — it would have silently
+          # lost category URIs and the drift warning instead, which is worse. The guard
+          # below does not model guarded imports and flagged it; that is the right call.
           cp atrium_paradata.py \
              atrium_document.py \
              atrium_document_adapter.py \
              atrium_document.schema.json \
+             atrium_vocab.py \
+             atrium_vocab.schema.json \
              para_licenses.py \
              ensemble.py \
              model_registry.py \
