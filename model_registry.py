@@ -91,6 +91,32 @@ else:
             file=sys.stderr,
         )
 
+# TWO NUMBERING NAMESPACES LIVE IN THIS DICT. Reading it as one is the mistake.
+#
+#  (a) SWEEP numbering -- one number per candidate base model, as recorded in
+#      model_accuracies_new.csv and matched by the GENERIC single-dot prefixes below:
+#          v4.  = tf_efficientnetv2_L (csv v4.3.5, 98.62)   v6.  = regnety_120  (v6.3.5)
+#          v7.  = regnety_160         (csv v7.3.1, 99.16)   v8.  = regnety_640  (v8.3.5)
+#          v9./v10./v11. = the dit family              v12. = tf_efficientnetv2_M (v12.3.1)
+#
+#  (b) PUBLISHED numbering -- the five sweep WINNERS, re-published on the Hub under
+#      compact names v1.3..v5.3 (and v1.4..v5.4). Matched by the EXACT keys below:
+#          v1.3 = tf_efficientnetv2_m   (sweep v12.3.1)  <-- renumbered
+#          v2.3 = vit-base-patch16-224  (sweep v2.3.5)
+#          v3.3 = vit-base-patch16-384  (sweep v3.3.2)
+#          v4.3 = regnety_160           (sweep v7.3.1)   <-- renumbered
+#          v5.3 = vit-large-patch16-384 (sweep v5.3.2)
+#
+# The two namespaces COLLIDE on "v1.3" and "v4.3": in (a) those strings mean
+# efficientnetv2_S and efficientnetv2_L, in (b) efficientnetv2_m and regnety_160. The
+# published meaning wins, and it wins by EXACT-KEY-FIRST resolution, not by ordering
+# luck -- see _resolve in tests/test_model_registry.py and the ordering note below.
+#
+# So model_accuracies_new.csv is NOT stale and must not be "corrected" to match this
+# dict: it is a faithful record of namespace (a). The Hub model card records namespace
+# (b) and agrees with the exact keys here (regnety_160 = v4.3 = 99.17, "Best & Small").
+# Anyone reconciling the CSV against REVISION_BEST_MODELS is comparing two different
+# numbering schemes. (atrium-project#53)
 REVISION_TO_BASE_MODEL = {
     "v10.": "microsoft/dit-large-finetuned-rvlcdip",
     "v11.": "microsoft/dit-large",
@@ -131,6 +157,31 @@ REVISION_BEST_MODELS = {
 # NOTE (issue #15): the v*.4 models are retrained on the new dataset (N−318 pages). They share
 # the same base models as v*.3, so once they become the canonical ensemble default, swap the
 # keys above to "v1.4".."v5.4". Kept on v*.3 for now so `--best` stays unchanged.
+#
+# DO NOT MAKE THAT SWAP YET -- the blocker is upstream, not here (measured 2026-09-16).
+# All five v*.4 revisions of ufal/vit-historical-page currently serve the SAME checkpoint:
+# config.json "architecture": "regnety_160", model.safetensors 322,925,148 bytes, on every
+# one of v1.4/v2.4/v3.4/v4.4/v5.4. Only v4.4 is what its name claims; the other four are
+# copies of it. The v*.3 control is correctly heterogeneous (v1.3 tf_efficientnetv2_m,
+# v2.3 ViT hidden_size 768 @224, v3.3 ViT 768 @384, v5.3 ViT 1024 @384), and a nonexistent
+# ref (v9.9) is rejected by the Hub, so the five v*.4 refs do exist -- they just do not hold
+# what REVISION_TO_BASE_MODEL declares for them.
+#
+# Why that is worth a paragraph rather than a one-line TODO: swapping the keys in this state
+# fails SILENTLY. `run.py --best` and the API's version="all" would average one model with
+# itself five times, return well-formed Top-N predictions, and still report "Ensemble
+# (Average of 5 Models)". Nothing raises; only the confidence profile changes.
+#
+# Sequence to unblock, in order:
+#   1. ./data_scripts/unix/hf_reupload_v4_revisions.sh --audit
+#   2. ./data_scripts/unix/hf_reupload_v4_revisions.sh --models-dir ./model --apply
+#   3. python -m pytest tests/test_best_ensemble_distinct.py -m slow -v     # must be GREEN
+#   4. only then swap the five keys above, and update setup/config.txt [HF] latest,
+#      README.md's "latest v4.3 is considered to be default", service/README.md's
+#      `run.py --hf -rev vX.3`, para_config.txt, and the agent-skill branch copy of this
+#      file (model_registry.py is para-drift-adjacent: it is compared byte-for-byte
+#      between the default and agent-skill branches by tools/skill_drift_check.py).
+# tests/test_best_ensemble_distinct.py is the standing guard for steps 1-3.
 
 # Explicit per-model fold columns for retraining on the pre-computed cross-validation split
 # (issue #15). Single source of truth: revision -> column in the folds CSV. Rule:
@@ -150,4 +201,19 @@ MODEL_STATIC = {
     "v3.3": {"base_model": "google/vit-base-patch16-384", "resolution": 384, "params_bytes": 344395820},
     "v4.3": {"base_model": "timm/regnety_160.swag_ft_in1k", "resolution": 384, "params_bytes": 322393660},
     "v5.3": {"base_model": "google/vit-large-patch16-384", "resolution": 384, "params_bytes": 1214808108},
+    # ── v*.4, staged ahead of the ensemble swap (see the NOTE above) ──────────────────────
+    # parallel_best.profile_best_models reads these to group models by VRAM before running
+    # them; a revision with no row does not raise, it just loses its budgeting hint, which
+    # on a shared GPU surfaces as an OOM in someone else's job. Adding the rows now means
+    # the swap is a five-key edit rather than a five-key edit plus a silent regression.
+    #
+    # Values MIRROR the v*.3 row of the same base model, because that is what
+    # REVISION_TO_BASE_MODEL declares the v*.4 set to be. They deliberately do NOT describe
+    # what the Hub serves today (all five are regnety_160, 322,925,148 B) -- this table
+    # states the contract; tests/test_best_ensemble_distinct.py checks reality against it.
+    "v1.4": {"base_model": "timm/tf_efficientnetv2_m.in21k_ft_in1k", "resolution": 384, "params_bytes": 211489788},
+    "v2.4": {"base_model": "google/vit-base-patch16-224", "resolution": 224, "params_bytes": 343228460},
+    "v3.4": {"base_model": "google/vit-base-patch16-384", "resolution": 384, "params_bytes": 344395820},
+    "v4.4": {"base_model": "timm/regnety_160.swag_ft_in1k", "resolution": 384, "params_bytes": 322393660},
+    "v5.4": {"base_model": "google/vit-large-patch16-384", "resolution": 384, "params_bytes": 1214808108},
 }

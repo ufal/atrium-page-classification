@@ -11,7 +11,44 @@ ENV ATRIUM_RUNNER_IMAGE=${ATRIUM_RUNNER_IMAGE} \
     PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1 \
     HF_HOME=/cache/huggingface
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# ── Distro security patches, applied at build time ───────────────────────────
+# `python:3.11-slim` is a floating TAG, and nothing in this ecosystem bumps it:
+# no repo declares a `docker` dependabot ecosystem (docker_gha_roadmap.md, H6),
+# so the base layer is whatever Docker Hub last rebuilt. On 2026-09-13 that layer
+# carried perl-base 5.40.1-6 with three FIXABLE CRITICAL CVEs — CVE-2026-13221,
+# CVE-2026-42496 and CVE-2026-8376, all fixed in 5.40.1-6+deb13u1. The release
+# gate in atrium-project's docker-tool.reusable.yml ("Fail the release on fixable
+# CRITICAL vulnerabilities") blocks on exactly that class, and because the
+# promotion step is `if: success()`, a blocked release publishes by DIGEST ONLY —
+# the `:<version>` and `:latest` tags are never applied.
+#
+# It has already cost two releases: translator v1.0.0-beta (2026-09-13, both
+# targets) and nlp-enrich v0.20.2 (2026-09-15, run 34970419474, all three
+# targets). THIS repo had not been tagged since, which is the only reason it had
+# not happened here too — the gate is `if: startsWith(github.ref, 'refs/tags/')`,
+# so day-to-day `test` pushes never surface it. (atrium-project#53)
+#
+# `upgrade` rather than `install --only-upgrade perl-base`, deliberately. The gate
+# blocks on *fixable* CRITICALs — precisely those the distro already ships a patch
+# for — so the fix that matches the gate's own definition is "apply the distro's
+# available patches", not a package name that has to be edited by hand the next
+# time a different one is announced.
+#
+# CACHE INTERACTION, which is what makes this hold rather than run once: the build
+# uses `cache-from: type=gha`, so an apt layer high in the file would be served
+# from cache forever and silently stop patching. It sits HERE, immediately after
+# the ENV block that embeds ATRIUM_RUNNER_REF, because CI passes that as
+# `github.ref_name` — a value unique to each release tag. The ENV layer therefore
+# changes on every release, busting this layer with it, so every released image is
+# scanned against a freshly patched base while day-to-day `test` pushes still hit
+# the cache. Do not move this above the ENV block.
+#
+# One apt layer, not two: the upgrade and the install share a single `apt-get
+# update`, so the package lists are fetched once and removed once.
+# Guarded by tests/test_dockerfile_security_layer.py (atrium-project#53).
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && apt-get install -y --no-install-recommends \
         build-essential g++ libgl1 libglib2.0-0 poppler-utils ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
