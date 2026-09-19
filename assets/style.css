@@ -1,0 +1,145 @@
+/* ATRIUM gh-pages stub — self-contained card styles.
+   No webfont, no CDN, no script: the page must render with zero external
+   requests, because a landing card that waits on a network round-trip is a
+   landing card that sometimes shows nothing. System font stack only. */
+
+:root {
+  --bg:        #f6f7f9;
+  --card:      #ffffff;
+  --fg:        #1a1d21;
+  --muted:     #5b636e;
+  --line:      #dfe3e8;
+  --accent:    #6b3fa0;      /* ATRIUM violet, matched to the funded-by badge */
+  --accent-fg: #ffffff;
+  --chip-bg:   #eef0f4;
+  --chip-fg:   #40464f;
+  --shadow:    0 1px 2px rgba(16,20,26,.06), 0 8px 24px rgba(16,20,26,.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:      #0f1216;
+    --card:    #171b21;
+    --fg:      #e8eaed;
+    --muted:   #9aa3af;
+    --line:    #2a3038;
+    --accent:  #a880e0;
+    --accent-fg: #14171c;
+    --chip-bg: #222831;
+    --chip-fg: #c3cad4;
+    --shadow:  0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.45);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  padding: 2rem 1rem 3rem;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  display: flex;
+  justify-content: center;
+}
+
+.wrap { width: 100%; max-width: 44rem; }
+
+/* ---------- eyebrow ---------- */
+
+.eyebrow {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .8125rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 1rem;
+}
+.eyebrow a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--line); }
+.eyebrow a:hover { color: var(--fg); border-bottom-color: currentColor; }
+.eyebrow .sep { opacity: .5; }
+
+/* ---------- card ---------- */
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 2rem;
+  box-shadow: var(--shadow);
+}
+
+h1 { font-size: 1.6rem; line-height: 1.3; margin: 0 0 .35rem; letter-spacing: -.01em; }
+.sub { color: var(--muted); font-size: 1rem; margin: 0 0 1.25rem; }
+.tagline { margin: 0 0 1.5rem; }
+.role {
+  margin: 0 0 1.5rem; padding: .75rem 1rem;
+  border-left: 3px solid var(--accent);
+  background: var(--chip-bg); border-radius: 0 8px 8px 0;
+  font-size: .9375rem; color: var(--chip-fg);
+}
+
+/* ---------- chips (badge equivalents, rendered locally) ---------- */
+
+.chips { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0 0 1.75rem; padding: 0; list-style: none; }
+.chips li { margin: 0; }
+.chip {
+  display: inline-flex; align-items: stretch;
+  font-size: .75rem; line-height: 1.7; text-decoration: none;
+  border-radius: 5px; overflow: hidden; border: 1px solid var(--line);
+}
+.chip .k { background: var(--chip-bg); color: var(--chip-fg); padding: 0 .5rem; }
+.chip .v { background: var(--card); color: var(--fg); padding: 0 .5rem; font-weight: 600; }
+.chip:hover .v { color: var(--accent); }
+
+/* ---------- actions ---------- */
+
+.actions { display: flex; flex-wrap: wrap; gap: .625rem; margin: 0 0 1.75rem; }
+.btn {
+  display: inline-block; text-decoration: none; font-size: .9375rem; font-weight: 600;
+  padding: .625rem 1.125rem; border-radius: 8px; border: 1px solid var(--line);
+  color: var(--fg); background: var(--card);
+}
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn-primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.btn-primary:hover { filter: brightness(1.08); color: var(--accent-fg); }
+
+/* ---------- pipeline strip ---------- */
+
+.pipeline { border-top: 1px solid var(--line); padding-top: 1.25rem; }
+.pipeline h2 {
+  font-size: .75rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); margin: 0 0 .75rem; font-weight: 600;
+}
+.stages { display: flex; flex-wrap: wrap; gap: .3rem; padding: 0; margin: 0; list-style: none; }
+.stages li { display: flex; align-items: center; gap: .3rem; }
+.stages a, .stages span.here {
+  display: inline-block; font-size: .8125rem; text-decoration: none;
+  padding: .3rem .6rem; border-radius: 6px; border: 1px solid var(--line); color: var(--muted);
+}
+.stages a:hover { color: var(--accent); border-color: var(--accent); }
+.stages span.here { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.stages .arrow { color: var(--muted); opacity: .55; font-size: .75rem; }
+
+/* ---------- footer ---------- */
+
+footer {
+  margin-top: 1.5rem; padding-top: 1.25rem;
+  font-size: .8125rem; color: var(--muted);
+}
+footer a { color: var(--muted); }
+footer p { margin: .35rem 0; }
+
+/* ---------- 404 variant ---------- */
+
+.notfound-code {
+  font-size: .75rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--accent); font-weight: 700; margin: 0 0 .5rem;
+}
+
+@media (max-width: 30rem) {
+  body { padding: 1.25rem .75rem 2rem; }
+  .card { padding: 1.35rem; border-radius: 12px; }
+  h1 { font-size: 1.3rem; }
+  .actions .btn { flex: 1 1 auto; text-align: center; }
+}
