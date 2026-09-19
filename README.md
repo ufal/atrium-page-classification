@@ -11,13 +11,13 @@ card, published by GitHub Pages at <https://ufal.github.io/atrium-page-classific
 
 ## What is in here
 
-| Path | Purpose |
-|------|---------|
-| `index.html` | the landing card |
-| `404.html` | the same card, framed as a not-found page |
-| `assets/style.css` | self-contained styles; no webfont, no CDN, no script |
-| `.nojekyll` | tell Pages to serve these files as-is instead of running Jekyll |
-| `README.md` | this file |
+| Path               | Purpose                                                         |
+|--------------------|-----------------------------------------------------------------|
+| `index.html`       | the landing card                                                |
+| `404.html`         | the same card, framed as a not-found page                       |
+| `assets/style.css` | self-contained styles; no webfont, no CDN, no script            |
+| `.nojekyll`        | tell Pages to serve these files as-is instead of running Jekyll |
+| `README.md`        | this file                                                       |
 
 ## Maintaining it
 
@@ -34,5 +34,3 @@ half-drawn by a slow third-party image host.
 One-time, needs repository admin: **Settings &rarr; Pages &rarr; Build and deployment
 &rarr; Source: Deploy from a branch &rarr; Branch: `gh-pages` / `/ (root)`**.
 See `PAGES_SETUP.md` in the hub repository for the full note.
-
-_Generated 2026-09-18 for issue #57._
