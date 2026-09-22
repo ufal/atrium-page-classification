@@ -11,7 +11,7 @@ matplotlib
 # noticed because it also installs setup/requirements.txt; a clean venv built from this
 # file alone — the Tier 2 discipline issue atrium-project#10 mandates — was red before a
 # single test ran. Light wheels, no torch: the fast lane stays fast.
-pandas>=3.0.5
+pandas>=3.0.6
 scikit-learn>=1.9.1
 # Layer D (atrium-project#10, D4): the adapter's schema gate needs a real validator, and the
 # tests that assert its raise-vs-warn policy need the real one rather than the degraded
