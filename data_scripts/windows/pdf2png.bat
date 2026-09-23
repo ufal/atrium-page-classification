@@ -4,11 +4,11 @@ setlocal enabledelayedexpansion
 :: pdf2png.bat — Convert PDF files to page images using ImageMagick + Ghostscript.
 ::
 :: Converts every PDF in a directory to per-page image files.  Each PDF gets its
-:: own subdirectory of numbered images.
+:: own subdirectory of numbered images.  The PDFs are kept unless /delete is given.
 ::
-:: Note on parallelism: this script processes PDFs sequentially.  For parallel
-:: conversion on Windows, use the companion PowerShell script pdf2png.ps1 which
-:: leverages ForEach-Object -Parallel (requires PowerShell 7+).
+:: Note on parallelism: this script processes PDFs one at a time.  For parallel
+:: conversion, run data_scripts/unix/pdf2png.sh (one job per CPU core), for
+:: example under WSL.
 ::
 :: Usage:
 ::   pdf2png.bat [OPTIONS]
@@ -18,7 +18,10 @@ setlocal enabledelayedexpansion
 ::   /r DPI       Output resolution in DPI     (default: 300)
 ::   /d DIR       Directory with PDF files     (default: current directory)
 ::   /o DIR       Output root directory        (default: same as /d)
-::   /k           Keep original PDFs after conversion (default: delete on success)
+::   /delete      Delete each PDF once it has been converted successfully
+::                (default: keep the PDFs)
+::   /k           Keep the PDFs -- the default; still accepted so older command
+::                lines keep working
 ::   /?           Show this help message and exit
 ::
 :: Output structure:
@@ -27,14 +30,15 @@ setlocal enabledelayedexpansion
 :: Examples:
 ::   pdf2png.bat
 ::   pdf2png.bat /f jpg /r 200
-::   pdf2png.bat /d C:\data\pdfs /o C:\data\pages /k
+::   pdf2png.bat /d C:\data\pdfs /o C:\data\pages
+::   pdf2png.bat /d C:\data\pdfs /o C:\data\pages /delete
 
 :: ── Defaults ──────────────────────────────────────────────────────────────
 set "FORMAT=png"
 set "DPI=300"
 set "SOURCE_DIR=%CD%"
 set "OUTPUT_DIR="
-set "KEEP=false"
+set "KEEP=true"
 
 :: ── Argument parsing ───────────────────────────────────────────────────────
 :parse_args
@@ -44,6 +48,7 @@ if /i "%~1"=="/r" ( set "DPI=%~2"        & shift & shift & goto parse_args )
 if /i "%~1"=="/d" ( set "SOURCE_DIR=%~2" & shift & shift & goto parse_args )
 if /i "%~1"=="/o" ( set "OUTPUT_DIR=%~2" & shift & shift & goto parse_args )
 if /i "%~1"=="/k" ( set "KEEP=true"      & shift         & goto parse_args )
+if /i "%~1"=="/delete" ( set "KEEP=false" & shift          & goto parse_args )
 if /i "%~1"=="/?" goto show_help
 echo Unknown option: %~1
 goto show_help
@@ -57,7 +62,8 @@ echo   /f FORMAT    Output format: png or jpg  ^(default: png^)
 echo   /r DPI       Output resolution in DPI   ^(default: 300^)
 echo   /d DIR       Directory with PDF files   ^(default: current directory^)
 echo   /o DIR       Output root directory      ^(default: same as /d^)
-echo   /k           Keep original PDFs after conversion
+echo   /delete      Delete each PDF once converted ^(default: keep the PDFs^)
+echo   /k           Keep the PDFs ^(the default; accepted for older command lines^)
 echo   /?           Show this help message
 echo.
 echo Example:
@@ -70,7 +76,7 @@ exit /b 0
 :: Validate format
 if /i "%FORMAT%"=="png" ( set "MAGICK_FORMAT=png24" & set "EXT=png" & goto check_gs )
 if /i "%FORMAT%"=="jpg" ( set "MAGICK_FORMAT=jpeg"  & set "EXT=jpg" & goto check_gs )
-if /i "%FORMAT%"=="jpeg"( set "MAGICK_FORMAT=jpeg"  & set "EXT=jpg" & goto check_gs )
+if /i "%FORMAT%"=="jpeg" ( set "MAGICK_FORMAT=jpeg"  & set "EXT=jpg" & goto check_gs )
 echo Error: /f FORMAT must be 'png' or 'jpg' ^(got '%FORMAT%'^).
 exit /b 1
 
@@ -109,7 +115,7 @@ if not exist "%SOURCE_DIR%\" (
 echo Source dir : %SOURCE_DIR%
 echo Output dir : %OUTPUT_DIR%
 echo Format     : %EXT%  ^(DPI: %DPI%^)
-if "%KEEP%"=="true" (echo Keep PDFs  : yes) else (echo Keep PDFs  : no ^(delete on success^))
+if "%KEEP%"=="true" (echo Keep PDFs  : yes) else (echo Keep PDFs  : no ^(/delete: delete on success^))
 echo.
 
 :: ── Main conversion loop ──────────────────────────────────────────────────

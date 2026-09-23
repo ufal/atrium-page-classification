@@ -401,6 +401,8 @@ def main(argv=None):
         if not (args.train or args.eval):
             categories = def_categ
         print(f"[YOLO] Using YOLO-cls backend: {args.yolo_base}")
+        # Ultralytics (package and base weights) is AGPL-3.0; declared in para_config.txt.
+        _paradata_logger.log_component("ultralytics")
         classifier = YOLOClassifier(
             checkpoint=args.yolo_base,
             num_labels=len(categories),

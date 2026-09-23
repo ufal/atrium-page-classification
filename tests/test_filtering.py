@@ -5,15 +5,23 @@ Unit tests for supplementary/filtering.py.
 
 Scope
 -----
-* parse_stem      – naming-convention parsing (pure function, no I/O)
-* build_valid_set – valid-set construction from a training directory tree
+* parse_stem           – naming-convention parsing (pure function, no I/O)
+* build_valid_set      – valid-set construction from a training directory tree
+* resolve_label_column – CLASS / CLASS-1 / CATEGORY lookup and --class-column
+* filter_rows          – keep / relabel / remove against the tree (pure function)
+* the CLI              – an annotation CSV (FILE,PAGE,CLASS) end to end
 
 No GPU, no trained model, no network required.
 """
 
+import csv
+import subprocess
+import sys
 from pathlib import Path
 
-from filtering import build_valid_set, parse_stem
+from filtering import build_valid_set, filter_rows, parse_stem, resolve_label_column
+
+FILTERING_PY = Path(__file__).resolve().parent.parent / "supplementary" / "scripts" / "filtering.py"
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -172,3 +180,146 @@ class TestBuildValidSet:
         self._make_dir(tmp_path, {"TEXT": ["a-1.png"]})
         _, unmatched = build_valid_set(tmp_path)
         assert isinstance(unmatched, list)
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# resolve_label_column
+# ════════════════════════════════════════════════════════════════════════════
+class TestResolveLabelColumn:
+    """CLASS (annotation CSV) first, then CLASS-1 (classifier output), then CATEGORY."""
+
+    def test_annotation_csv_uses_class(self):
+        assert resolve_label_column(["FILE", "PAGE", "CLASS"]) == "CLASS"
+
+    def test_classifier_output_uses_class_1(self):
+        assert resolve_label_column(["FILE", "PAGE", "CLASS-1", "SCORE-1", "CATEGORY"]) == "CLASS-1"
+
+    def test_class_preferred_over_class_1(self):
+        assert resolve_label_column(["FILE", "PAGE", "CLASS-1", "CLASS"]) == "CLASS"
+
+    def test_category_is_the_last_resort(self):
+        assert resolve_label_column(["FILE", "PAGE", "CATEGORY"]) == "CATEGORY"
+
+    def test_match_is_case_insensitive_and_returns_the_csv_spelling(self):
+        assert resolve_label_column(["file", "page", "Class"]) == "Class"
+
+    def test_no_label_column_returns_none(self):
+        assert resolve_label_column(["FILE", "PAGE", "NOTE"]) is None
+
+    def test_override_wins(self):
+        assert resolve_label_column(["FILE", "PAGE", "CLASS", "TRUE"], override="TRUE") == "TRUE"
+
+    def test_override_absent_from_csv_returns_none(self):
+        assert resolve_label_column(["FILE", "PAGE", "CLASS"], override="NOPE") is None
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# filter_rows
+# ════════════════════════════════════════════════════════════════════════════
+class TestFilterRows:
+    """filter_rows(rows, valid, label_col) → (kept, relabelled, removed)."""
+
+    VALID = {
+        ("a", 1, "TEXT"),
+        ("b", 2, "DRAW"),  # annotated TEXT, moved to DRAW by a reviewer
+        ("c", 3, "TEXT"),  # annotated LINE_P, now in two other folders
+        ("c", 3, "PHOTO"),
+    }
+
+    @staticmethod
+    def _row(file, page, label, col="CLASS"):
+        return {"FILE": file, "PAGE": page, col: label}
+
+    def test_row_still_in_place_is_kept_unchanged(self):
+        row = self._row("a", "1", "TEXT")
+        kept, relabelled, removed = filter_rows([row], self.VALID, "CLASS")
+        assert kept == [row] and kept[0] is row
+        assert relabelled == [] and removed == []
+
+    def test_page_moved_to_one_other_folder_is_relabelled(self):
+        kept, relabelled, removed = filter_rows([self._row("b", "2", "TEXT")], self.VALID, "CLASS")
+        assert [r["CLASS"] for r in kept] == ["DRAW"]
+        assert [(old, new) for _, old, new in relabelled] == [("TEXT", "DRAW")]
+        assert removed == []
+
+    def test_zero_padded_page_matches(self):
+        kept, relabelled, _ = filter_rows([self._row("b", "02", "TEXT")], self.VALID, "CLASS")
+        assert kept[0]["CLASS"] == "DRAW"
+        assert kept[0]["PAGE"] == "02"  # the CSV's own spelling is written back untouched
+
+    def test_relabel_does_not_mutate_the_input_row(self):
+        row = self._row("b", "2", "TEXT")
+        filter_rows([row], self.VALID, "CLASS")
+        assert row["CLASS"] == "TEXT"
+
+    def test_page_in_two_other_folders_is_removed_as_ambiguous(self):
+        kept, relabelled, removed = filter_rows([self._row("c", "3", "LINE_P")], self.VALID, "CLASS")
+        assert kept == [] and relabelled == []
+        assert [reason for _, reason in removed] == ["ambiguous: PHOTO, TEXT"]
+
+    def test_page_listed_where_it_still_is_wins_over_other_copies(self):
+        """c-3 sits in TEXT and PHOTO; a row saying TEXT is simply correct."""
+        kept, relabelled, removed = filter_rows([self._row("c", "3", "TEXT")], self.VALID, "CLASS")
+        assert len(kept) == 1 and relabelled == [] and removed == []
+
+    def test_page_gone_from_the_tree_is_removed_as_missing(self):
+        kept, _, removed = filter_rows([self._row("d", "4", "TEXT")], self.VALID, "CLASS")
+        assert kept == []
+        assert [reason for _, reason in removed] == ["missing"]
+
+    def test_no_relabel_drops_a_moved_page(self):
+        kept, relabelled, removed = filter_rows([self._row("b", "2", "TEXT")], self.VALID, "CLASS", relabel=False)
+        assert kept == [] and relabelled == []
+        assert [reason for _, reason in removed] == ["missing"]
+
+    def test_non_integer_page_is_removed_not_raised(self):
+        kept, _, removed = filter_rows([self._row("a", "one", "TEXT")], self.VALID, "CLASS")
+        assert kept == []
+        assert [reason for _, reason in removed] == ["invalid page"]
+
+    def test_class_1_relabel_carries_the_category_alias_along(self):
+        row = {"FILE": "b", "PAGE": "2", "CLASS-1": "TEXT", "SCORE-1": "0.9", "CATEGORY": "TEXT"}
+        kept, _, _ = filter_rows([row], self.VALID, "CLASS-1", mirror_col="CATEGORY")
+        assert kept[0]["CLASS-1"] == "DRAW"
+        assert kept[0]["CATEGORY"] == "DRAW"
+        assert kept[0]["SCORE-1"] == "0.9"
+
+    def test_input_order_is_preserved(self):
+        rows = [self._row("b", "2", "TEXT"), self._row("d", "4", "TEXT"), self._row("a", "1", "TEXT")]
+        kept, _, _ = filter_rows(rows, self.VALID, "CLASS")
+        assert [r["FILE"] for r in kept] == ["b", "a"]
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# CLI — the README's annotation CSV, end to end
+# ════════════════════════════════════════════════════════════════════════════
+class TestCli:
+    @staticmethod
+    def _run(*args):
+        return subprocess.run([sys.executable, str(FILTERING_PY), *map(str, args)], capture_output=True, text=True)
+
+    def test_annotation_csv_is_accepted_and_relabelled(self, tmp_path):
+        """The README's FILE,PAGE,CLASS format used to exit asking for CLASS-1."""
+        for cls, name in (("TEXT", "a-001.png"), ("DRAW", "b-2.png")):
+            (tmp_path / "tree" / cls).mkdir(parents=True, exist_ok=True)
+            (tmp_path / "tree" / cls / name).touch()
+        csv_in = tmp_path / "ann.csv"
+        # A BOM, as a spreadsheet export writes it, must not hide the FILE column.
+        csv_in.write_text("\ufeffFILE,PAGE,CLASS,NOTE\na,1,TEXT,ok\nb,2,TEXT,moved\nd,4,TEXT,gone\n", encoding="utf-8")
+
+        result = self._run("-d", tmp_path / "tree", "-i", csv_in)
+        assert result.returncode == 0, result.stderr
+
+        with (tmp_path / "ann_filtered.csv").open(newline="", encoding="utf-8") as fh:
+            rows = list(csv.DictReader(fh))
+        assert [(r["FILE"], r["CLASS"], r["NOTE"]) for r in rows] == [("a", "TEXT", "ok"), ("b", "DRAW", "moved")]
+        assert "Relabelled:   1" in result.stdout
+        assert "Rows removed: 1" in result.stdout
+
+    def test_missing_label_column_exits_with_an_error(self, tmp_path):
+        (tmp_path / "tree").mkdir()
+        csv_in = tmp_path / "bad.csv"
+        csv_in.write_text("FILE,PAGE,NOTE\na,1,x\n", encoding="utf-8")
+        result = self._run("-d", tmp_path / "tree", "-i", csv_in)
+        assert result.returncode != 0
+        assert "missing required columns" in result.stderr

@@ -316,7 +316,11 @@ class _FakePixmap:
 
 
 class _FakePdfPage:
-    def get_pixmap(self):
+    #: Every `dpi=` the service asked for, across all fake pages.
+    dpi_requests: list = []
+
+    def get_pixmap(self, dpi=None):
+        _FakePdfPage.dpi_requests.append(dpi)
         return _FakePixmap()
 
 
@@ -345,6 +349,7 @@ def fake_fitz(monkeypatch):
     module = types.ModuleType("fitz")
     module.open = lambda stream=None, filetype=None: _FakePdf(3)
     monkeypatch.setitem(sys.modules, "fitz", module)
+    monkeypatch.setattr(_FakePdfPage, "dpi_requests", [])
     return module
 
 
@@ -389,6 +394,20 @@ class TestPredictDocumentDocumentJson:
         )
         assert response.status_code == 200
         assert set(response.json()) == {"type", "pages"}
+
+    def test_pages_are_rasterised_at_the_training_resolution(self, client, fake_fitz):
+        """PyMuPDF defaults to 72 dpi; the training pages were made by pdf2png.sh at 300. Every
+        page must be rendered at PDF_RENDER_DPI, and that constant must stay at 300."""
+        from service.api import PDF_RENDER_DPI
+
+        response = client.post(
+            "/predict_document",
+            data={"version": "v4.3", "topn": 3},
+            files={"file": ("CTX01.pdf", b"%PDF-1.4 fake", "application/pdf")},
+        )
+        assert response.status_code == 200
+        assert PDF_RENDER_DPI == 300
+        assert _FakePdfPage.dpi_requests == [300, 300, 300]
 
 
 class TestOpenApiAdvertisesTheContract:

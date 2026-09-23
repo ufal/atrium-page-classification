@@ -36,7 +36,7 @@ jobs:
         run: nvidia-smi
 
       - name: Install APT packages
-        run: sudo apt-get update && sudo apt-get install -y build-essential g++ libgl1 libglib2.0-0 poppler-utils
+        run: sudo apt-get update && sudo apt-get install -y build-essential g++ libgl1 libglib2.0-0
 
       - name: Install dependencies (CUDA torch)
         run: |

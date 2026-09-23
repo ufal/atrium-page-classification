@@ -49,7 +49,7 @@ ENV ATRIUM_RUNNER_IMAGE=${ATRIUM_RUNNER_IMAGE} \
 RUN apt-get update \
     && apt-get upgrade -y --no-install-recommends \
     && apt-get install -y --no-install-recommends \
-        build-essential g++ libgl1 libglib2.0-0 poppler-utils ca-certificates \
+        build-essential g++ libgl1 libglib2.0-0 ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -67,10 +67,11 @@ WORKDIR /app
 # already satisfied and does not pull a different wheel from PyPI.
 #
 # NOTE: `transformers<5` is intentionally NOT pinned here — it is pinned in
-# requirements.txt (and service/requirements.txt). transformers 5.x constructs
-# models on the `meta` device, which crashes the timm builders for the RegNetY
-# (v4.3) and EfficientNetV2 (v1.3) checkpoints used by --best; the <5 pin is the
-# meta-device fix and must stay consistent across every requirements file.
+# setup/requirements.txt only; service/requirements.txt deliberately carries no
+# model stack, and the image installs both. transformers 5.x constructs models on
+# the `meta` device, which crashes the timm builders for the RegNetY (v4.3) and
+# EfficientNetV2 (v1.3) checkpoints used by --best; the <5 pin is the meta-device
+# fix, so keep it in setup/requirements.txt.
 ARG TORCH_INDEX_URL="https://download.pytorch.org/whl/cpu"
 RUN pip install --index-url ${TORCH_INDEX_URL} torch==2.7.1 torchvision==0.22.1
 

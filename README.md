@@ -144,7 +144,7 @@ demonstrates best models overall (above the trendline) and the table shows all t
 
 ### Data 📜
 
-The dataset is provided under CC BY-NC-SA 4.0 license, and consists of **48,499** PNG images of pages from **37,328** archival documents.
+The dataset is provided under CC BY-NC 4.0 license, and consists of **48,499** PNG images of pages from **37,328** archival documents.
 The source image files and their annotation can be found in the LINDAT repository [^17] 🔗.
 
 The annotation provided includes 5 different
@@ -479,7 +479,7 @@ After the model is downloaded, you should see a similar file structure:
         └── scripts
             ├── dataset_timeline.py
             ├── img2jpeg_v3.py
-            ├── logs_stats.py
+            ├── logs_stat.py
             ├── visualize.py
             └── job_run.sh
     ├── run.py
@@ -642,7 +642,7 @@ Also keep each model's individual Top-N table alongside the combined output:
     python3 run.py --dir --inner --best --save-intermediates
 
 Skip the in-engine averaging and only emit the wide per-model votes file
-(for manual re-averaging with [averaging.py](supplement_scripts%2Faveraging.py) 📎):
+(for manual re-averaging with [averaging.py](supplementary%2Fscripts%2Faveraging.py) 📎):
 
     python3 run.py --dir --inner --best --no-average-best
 
@@ -991,9 +991,9 @@ python3 supplementary/scripts/per_doc_split.py -i result_table.csv -o /path/to/o
 ```
 
 * **Performance Scoring:** Automatically compute accuracy scores across multiple saved model outputs in
-a directory using `supplement_scripts/result_analysis.sh -d result/tables/ --pattern "*_TOP-1_EVAL.csv"`.
+a directory using `supplementary/scripts/result_analysis.sh result/tables/ --pattern "*_TOP-1_EVAL.csv"`.
 
-The splitting script [per_doc_split.py](supplement_scripts%2Fper_doc_split.py) 📎 is adjusted for the filename as a first column inout.
+The splitting script [per_doc_split.py](supplementary%2Fscripts%2Fper_doc_split.py) 📎 is adjusted for the filename as a first column inout.
 
 <details>
 
@@ -1041,7 +1041,7 @@ ones. A page on which all 5 models agree therefore scores `1.0`.
 
 > [!NOTE]
 > The wide `BEST_5_models_TOP-1.csv` is byte-compatible with
-> [averaging.py](supplement_scripts%2Faveraging.py) 📎, so the standalone script
+> [averaging.py](supplementary%2Fscripts%2Faveraging.py) 📎, so the standalone script
 > remains available for **manual re-averaging**, for mixing in models outside
 > the default 5, or for recomputing with a different `top_N`. It is no longer a
 > required step — `--best` produces the averaged table directly.
@@ -1106,11 +1106,11 @@ Firstly, copy the PDF-to-PNG converter script to the directory with PDF document
 
  **Windows**:
 
-    move \local\folder\for\this\project\data_scripts\pdf2png.bat \full\path\to\your\folder\with\pdf\files
+    move \local\folder\for\this\project\data_scripts\windows\pdf2png.bat \full\path\to\your\folder\with\pdf\files
 
 **Unix**:
 
-    cp /local/folder/for/this/project/data_scripts/pdf2png.sh /full/path/to/your/folder/with/pdf/files
+    cp /local/folder/for/this/project/data_scripts/unix/pdf2png.sh /full/path/to/your/folder/with/pdf/files
 
 </details>
 
@@ -1120,7 +1120,9 @@ Firstly, copy the PDF-to-PNG converter script to the directory with PDF document
 > `/?` (**Windows**) flags to see all available options.
 
 Run the converter script directly via CLI to specify your preferences. For example, you can set the source
-directory, output format, DPI, and whether to keep intermediate files:
+directory, output format and DPI. The source PDFs are **kept** by default; add `--delete` (**Unix**) or
+`/delete` (**Windows**) to remove each PDF once it has been converted successfully. On **Unix**, `.PDF`
+files are found as well as `.pdf`:
 
 **Unix**:
 
@@ -1128,8 +1130,8 @@ directory, output format, DPI, and whether to keep intermediate files:
 /path/to/pdf2png.sh --dir /folder/with/pdfs --format png --dpi 300
 ```
 
-**Windows**: *(Note: The batch version runs sequentially. For parallel processing on **Windows**, consider
-porting the logic to PowerShell)*
+**Windows**: *(Note: The batch version runs sequentially. For parallel processing on **Windows**, run the
+**Unix** script under WSL)*
 
 ```cmd
 \path\to\pdf2png.bat /d \folder\with\pdfs /f png /r 300
@@ -1196,13 +1198,13 @@ subdirectories of pages).
 
 **Windows**:
 
-    move \local\folder\for\this\project\atrium-page-classification\data_scripts\move_single.bat \full\path\to\your\folder\with\pdf\files
+    move \local\folder\for\this\project\atrium-page-classification\data_scripts\windows\move_single.bat \full\path\to\your\folder\with\pdf\files
     cd \full\path\to\your\folder\with\pdf\files
     move_single.bat
 
 **Unix**:
 
-    cp /local/folder/for/this//project/atrium-page-classification/data_scripts/move_single.sh /full/path/to/your/folder/with/pdf/files
+    cp /local/folder/for/this/project/atrium-page-classification/data_scripts/unix/move_single.sh /full/path/to/your/folder/with/pdf/files
     cd /full/path/to/your/folder/with/pdf/files
     move_single.sh
 
@@ -1218,11 +1220,14 @@ The generated PNG images of document pages are used to form the annotated gold d
 > [!NOTE]
 > It takes a lot of time ⌛ to collect at least several hundred examples per category.
 
-Prepare a CSV table with exactly 3 columns:
+Prepare a CSV table with a header row and at least these 3 columns:
 
 - **FILE** - name of the PDF document which was the source of this page
-- **PAGE** - number of the page (**NOT** padded with 0s)
+- **PAGE** - number of the page (plain, e.g. `8`; a zero-padded `08` is accepted too)
 - **CLASS** - label of the category 🪧
+
+Extra columns (a title, a DOI, notes) are ignored. `sort.sh` finds the three columns by their header names, in any
+order; `sort.bat` reads them by position, so on **Windows** keep FILE, PAGE, CLASS as the first three columns.
 
 > [!TIP]
 > Prepare equal-in-size categories 🪧 if possible, so that the model will not be biased towards the over-represented labels 🪧
@@ -1268,7 +1273,9 @@ sort.sh -c annotations.csv -i /path/to/pages -o /path/to/train_dir --move
 sort.bat /c annotations.csv /i \path\to\pages /o \path\to\train_dir
 ```
 
-*Note: Use `--dry-run` to preview the distribution, or omit `--move` (**Unix**) to copy the files instead of moving them.*
+*Note: Use `--dry-run` (**Unix**) or `/n` (**Windows**) to preview the distribution, or omit `--move` / `/move`
+to copy the files instead of moving them. A label folder is only created once a page has been found for it, and a
+row whose PAGE is not a number, or whose CLASS is empty or contains `/` or `\`, is reported and skipped.*
 
 After the program is done, you will have a directory full of label-specific subdirectories
 containing document-specific pages with a similar structure:
@@ -1320,13 +1327,16 @@ From this point, you can start model training or evaluation process.
 
 ### Dataset Maintenance 🧹
 
-Once your dataset is sorted, you might need to clean or prototype with it. The `supplement_scripts/` folder provides tools for this:
+Once your dataset is sorted, you might need to clean or prototype with it. The `supplementary/scripts/` folder provides tools for this:
 
-* **Filtering:** If you manually delete mislabeled PNG images from your training folders, run
-`python3 supplement_scripts/filtering.py -i annotations.csv -d train_dir` to
-automatically remove the missing entries from your CSV.
+* **Filtering:** If you manually move mislabeled PNG images between label folders, or delete them, run
+`python3 supplementary/scripts/filtering.py -i annotations.csv -d train_dir` to
+re-sync your CSV with the folders: a row whose page now sits in exactly one other label folder is **relabelled**
+to it, and a row whose page is gone (or sits in several other folders) is removed and reported. The result is
+written to `annotations_filtered.csv` next to the input (`-o` to choose another path; `--no-relabel` to only drop
+rows). The label column is `CLASS`, or `CLASS-1` for a classifier result table.
 * **Downscaling:** To quickly prototype with lower-resolution images, use
-`python3 supplement_scripts/downscale.py -i train_dir -o small_train_dir --scale 50`. This shrinks the images
+`python3 supplementary/scripts/downscale.py --src train_dir --dst small_train_dir --scale 50`. This shrinks the images
 while preserving the entire category-folder hierarchy.
 
 ----
@@ -1350,20 +1360,20 @@ the key phases of the whole process (settings, training, evaluation) is provided
 | `result_analysis.sh`  | Computes performance scores for saved model results                                                                               |
 | `dataset_timeline.py` | Creates a plot of categories distribution over time based on filenames                                                            |
 | `img2jpeg_v3.py`      | Transforms any images into jpeg format                                                                                            |
-| `logs_stats.py`       | Creates a table of stats for each tensorboard directory with event logs                                                           |
+| `logs_stat.py`        | Creates a table of stats for each tensorboard directory with event logs                                                           |
 | `visualize.py`        | Creates a plot of various model types comparison based on the input CSV like [model_accuracies_new.csv](model_accuracies_new.csv) |
 
 </details>
 
 **Command-Line Utility Scripts:**
-The analytical scripts in the [supplement_scripts](supplementary)📁 directory have been standardized for single-line execution
+The analytical scripts in the [supplementary/scripts](supplementary%2Fscripts)📁 directory have been standardized for single-line execution
 without requiring internal path edits. Call any of them with `--help` for specific arguments:
 
 * [dataset_timeline.py](supplementary/scripts/dataset_timeline.py): Generates the chronological category distribution
 plot via `-i` (CSV input), `-o` (output plot), and `--regex` grouping flags.
 * [visualize.py](supplementary/scripts/visualize.py): Renders the model parameter vs. accuracy scatter plots
 instantly using `-i` and `-o` flags.
-* [logs_stats.py](supplementary/scripts/logs_stats.py): Safely parses binary TFRecord event logs to extract training
+* [logs_stat.py](supplementary/scripts/logs_stat.py): Safely parses binary TFRecord event logs to extract training
 metrics into a CSV. It now accepts external JSON mappings (`--gpu-map`, `--revision-map`) so you can track
 custom infrastructure nodes and architectures.
 
@@ -1773,11 +1783,11 @@ than a static fork URL. `docker_image` is an empty placeholder when run outside 
 * **Licensing:** The output license is **computed per run**, not fixed. The logger determines the
 effective license as the most restrictive license among the components (models, datasets, tools)
 actually used in that run, and records the supporting detail under `license_detail`. The model code
-and the fine-tuned classifiers are permissive (MIT) and DeepDoctection is Apache-2.0, so
-**inference and evaluation runs resolve to MIT**. **Training is different:** training your own model
-with this code over the shared LINDAT dataset [^17] pulls in that dataset's **CC BY-NC-SA 4.0** license, so
-`--train` runs resolve to **CC BY-NC-SA 4.0** (non-commercial, share-alike) — the trained weights and
-any derivatives inherit those terms.
+and the fine-tuned classifiers are permissive (MIT), so **inference and evaluation runs resolve to MIT**.
+**Training is different:** training your own model with this code over the shared LINDAT dataset [^17] pulls
+in that dataset's **CC BY-NC 4.0** license, so `--train` runs resolve to **CC BY-NC 4.0** (non-commercial;
+not share-alike) — the trained weights and any derivatives inherit those terms. The optional `--yolo` backend
+uses Ultralytics, whose package and base weights are **AGPL-3.0**; a `--yolo` run records it as a component.
 
 Example of the [small_data_samples](small_data_samples) 📁 directory processing paradata log:
 [260315-120442_page-classification.json](paradata%2F260315-120442_page-classification.json) 📎

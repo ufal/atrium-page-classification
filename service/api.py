@@ -57,6 +57,12 @@ MAX_UPLOAD_MB = resolve_max_upload_mb(10)
 MAX_UPLOAD_BYTES = int(MAX_UPLOAD_MB * 1024 * 1024)  # retained: imported by tests/clients
 MAX_PDF_PAGES = 50
 
+#: Resolution PDF pages are rasterised at before classification. It matches
+#: `data_scripts/unix/pdf2png.sh`'s default (300 dpi), which is how the training pages
+#: were made: PyMuPDF's own default is 72 dpi, so without it the service classified
+#: pages at roughly a quarter of the linear resolution the models were trained on.
+PDF_RENDER_DPI = 300
+
 
 #: Readiness/draining/in-flight state for the §4.6 disposability contract (issue #55).
 _state = ServiceState()
@@ -121,7 +127,7 @@ def _classify_pdf_pages(content: bytes, version: str, topn: int) -> List[Dict[st
     page_results: List[Dict[str, Any]] = []
     for page_num in range(len(pdf_document)):
         page = pdf_document.load_page(page_num)
-        pix = page.get_pixmap()
+        pix = page.get_pixmap(dpi=PDF_RENDER_DPI)
         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
 
         predictions = manager.predict(img, version=version, topn=topn)

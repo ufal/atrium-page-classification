@@ -366,6 +366,39 @@ class TestCollectImages:
         _, labels, _ = collect_images(str(tmp_path))
         assert np.array_equal(labels[0], labels[1])
 
+    # ── only directories are categories (skos_strategy V-2 / F2) ─────────────
+    def test_root_level_file_is_not_a_category(self, tmp_path):
+        """A file beside the label folders (the shipped LICENSE) is ignored, not listed as a
+        category -- which used to end in NotADirectoryError on the per-category listing."""
+        self._make_dataset(tmp_path, {"A": ["a.png"], "B": ["b.png"]})
+        (tmp_path / "LICENSE").write_text("licence text")
+        (tmp_path / ".hidden_dir").mkdir()
+        files, labels, cats = collect_images(str(tmp_path))
+        assert cats == ["A", "B"]
+        assert len(files) == 2
+        assert all(len(lbl) == 2 for lbl in labels)
+
+    def test_stray_file_does_not_shift_class_indices(self, tmp_path):
+        """'B_FILE' sorts between A and C; as a category it would push C from index 1 to 2."""
+        self._make_dataset(tmp_path, {"A": ["a.png"], "C": ["c.png"]})
+        (tmp_path / "B_FILE").touch()
+        files, labels, cats = collect_images(str(tmp_path))
+        assert cats == ["A", "C"]
+        by_file = {Path(f).parent.name: lbl.tolist() for f, lbl in zip(files, labels)}
+        assert by_file == {"A": [1.0, 0.0], "C": [0.0, 1.0]}
+
+    def test_shipped_sample_tree_yields_the_declared_categories(self):
+        """small_data_samples/ carries a LICENSE file beside its eleven label folders; the
+        derived class list must be exactly model_registry.CATEGORIES, in training order."""
+        from model_registry import CATEGORIES
+
+        samples = Path(__file__).resolve().parent.parent / "small_data_samples"
+        assert (samples / "LICENSE").is_file()  # the stray file this test is about
+        files, labels, cats = collect_images(str(samples))
+        assert cats == list(CATEGORIES)
+        assert len(files) == len(labels) > 0
+        assert all(len(lbl) == len(CATEGORIES) for lbl in labels)
+
 
 # ════════════════════════════════════════════════════════════════════════════
 # confusion_plot

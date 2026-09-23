@@ -130,32 +130,19 @@ def _advise_category_drift(categories: list, directory: str) -> None:
     when no reference list can be imported. Reported in the house idiom of
     `atrium_document.py::_note()` -- visible, but nothing stops.
 
-    WHAT IT MAKES VISIBLE. `collect_images()` derives its class list with
-    `sorted(os.listdir(directory))`, and `os.listdir()` returns FILES as well as
-    directories. The shipped `small_data_samples/` tree carries a `LICENSE` file, which
-    sorts to index 2, so the derived list is 12 entries long and every label from
-    `LINE_HW` onwards sits one index higher than `model_registry.CATEGORIES` puts it --
-    and the one-hot vectors are one column too wide. Two ways that lands:
+    WHAT IT MAKES VISIBLE. `collect_images()` derives its class list from the
+    sub-directories of the dataset root, sorted. Files at that level are ignored --
+    the shipped `small_data_samples/` carries a `LICENSE` file beside its eleven label
+    folders -- and so are hidden entries. (Before that filter, `sorted(os.listdir())`
+    listed the `LICENSE` file as a twelfth category at index 2 and the per-category
+    `os.listdir()` then raised `NotADirectoryError`.)
 
-      * a stray NON-directory (today's `small_data_samples/LICENSE`) reaches the
-        `os.listdir()` below and raises `NotADirectoryError` -- loud, but saying nothing
-        about which entry is at fault, or that a class list is what broke;
-      * a stray DIRECTORY (an `.ipynb_checkpoints/`, an `unsorted/` holding pen), or a
-        category directory that is simply absent, shifts the indices and returns
-        perfectly cleanly. Nothing errors: the run trains or evaluates against a
-        silently permuted label space, and the confusion matrix names the wrong classes.
-
-    This check speaks before either of those, and names the entries responsible.
-
-    THE REAL FIX is to filter the derivation to directories,
-
-        categories = sorted(e for e in os.listdir(directory) if os.path.isdir(os.path.join(directory, e)))
-
-    which is deliberately NOT applied here: it changes what `collect_images()` returns
-    and would change any training or evaluation run that has been living with the
-    current derivation. Recommended as a separate, explicitly behaviour-changing
-    follow-up. Until someone takes it, this check reports the disagreement instead of
-    letting it pass unremarked.
+    What a directory filter cannot catch is a stray or missing DIRECTORY: an
+    `unsorted/` holding pen, a mistyped label folder, or a category directory that is
+    simply absent. Each of those shifts the indices and returns perfectly cleanly --
+    nothing errors, the run trains or evaluates against a silently permuted label
+    space, and the confusion matrix names the wrong classes. This check names the
+    entries responsible.
     """
     try:
         try:
@@ -183,9 +170,8 @@ def _advise_category_drift(categories: list, directory: str) -> None:
         f"filesystem are not the {len(expected)} declared page categories -- "
         f"present but not a category {not_a_category}; declared but absent {absent}. "
         f"Class indices here are positional, so each disagreement shifts the labels after it out of step "
-        f"with model_registry.CATEGORIES (and a non-directory entry will additionally fail the "
-        f"os.listdir() below). Nothing has been changed; see _advise_category_drift.__doc__ for the "
-        f"(behaviour-changing) fix.",
+        f"with model_registry.CATEGORIES. Nothing has been changed; rename, add or remove the directories "
+        f"listed above if that is not intended.",
         file=sys.stderr,
     )
 
@@ -193,11 +179,19 @@ def _advise_category_drift(categories: list, directory: str) -> None:
 def collect_images(directory: str, ordered: bool = True) -> (list, list, list):
     print(f"Collecting images from {directory}...")
 
-    categories = sorted(os.listdir(directory))
+    # One category per sub-directory. Files at this level (the `LICENSE` shipped in
+    # `small_data_samples/`) and hidden entries (`.ipynb_checkpoints/`, `.DS_Store`) are
+    # not categories: listing them would shift every class index after them, and a file
+    # would make the per-category os.listdir() below raise NotADirectoryError.
+    categories = sorted(
+        entry
+        for entry in os.listdir(directory)
+        if not entry.startswith(".") and os.path.isdir(os.path.join(directory, entry))
+    )
     print(f"Category input directories found: {categories}")
 
-    # Advisory only -- never raises, never touches `categories`, and the derivation above
-    # is deliberately left exactly as it was (changing it changes training behaviour).
+    # Advisory only -- never raises, never touches `categories`. Reports a stray or
+    # missing category DIRECTORY, which the filter above cannot tell from a real one.
     _advise_category_drift(categories, directory)
 
     total_files, total_labels, total_classes = [], [], []

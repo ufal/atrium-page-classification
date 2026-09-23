@@ -383,7 +383,7 @@ the training setup mapping adjusted for the HF 😊 hub revisions (which caused 
 <p>The table and figure above show accuracy and parameters comparison of different base models tested on the same data. The figure<br>
 demonstrates best models overall (above the trendline) and the table shows all the tested models with their best accuracy and precision scores.</p>
 <h3>Data 📜</h3>
-<p>The dataset is provided under CC BY-NC-SA 4.0 license, and consists of <strong>48,499</strong> PNG images of pages from <strong>37,328</strong> archival documents.<br>
+<p>The dataset is provided under CC BY-NC 4.0 license, and consists of <strong>48,499</strong> PNG images of pages from <strong>37,328</strong> archival documents.<br>
 The source image files and their annotation can be found in the LINDAT repository <sup><a href="#user-content-fn-17-eeb388ddda0890e07f950ef4a67e7d26" id="user-content-fnref-17-eeb388ddda0890e07f950ef4a67e7d26" data-footnote-ref="" aria-describedby="footnote-label">7</a></sup> 🔗.</p>
 <p>The annotation provided includes 5 different<br>
 dataset splits of <code class="notranslate">vX.3</code> model versions, and it's recommended to average all 5 trained model weights to get a more robust<br>
@@ -789,7 +789,7 @@ you can play with any commands provided <a href="#how-to-run-prediction--modes">
     └── scripts
         ├── dataset_timeline.py
         ├── img2jpeg_v3.py
-        ├── logs_stats.py
+        ├── logs_stat.py
         ├── visualize.py
         └── job_run.sh
 ├── run.py
@@ -952,7 +952,7 @@ not to mention the actual processing time.</p>
 <pre class="notranslate"><code class="notranslate">python3 run.py --dir --inner --best --save-intermediates
 </code></pre>
 <p>Skip the in-engine averaging and only emit the wide per-model votes file<br>
-(for manual re-averaging with <a href="supplement_scripts%2Faveraging.py">averaging.py</a> 📎):</p>
+(for manual re-averaging with <a href="supplementary%2Fscripts%2Faveraging.py">averaging.py</a> 📎):</p>
 <pre class="notranslate"><code class="notranslate">python3 run.py --dir --inner --best --no-average-best
 </code></pre>
 <p>Single page across all best models:</p>
@@ -1330,9 +1330,9 @@ categories 🪧.</p>
 <div class="highlight highlight-source-shell"><pre class="notranslate">python3 supplementary/scripts/per_doc_split.py -i result_table.csv -o /path/to/output_dir</pre></div>
 <ul>
 <li><strong>Performance Scoring:</strong> Automatically compute accuracy scores across multiple saved model outputs in<br>
-a directory using <code class="notranslate">supplement_scripts/result_analysis.sh -d result/tables/ --pattern "*_TOP-1_EVAL.csv"</code>.</li>
+a directory using <code class="notranslate">supplementary/scripts/result_analysis.sh result/tables/ --pattern "*_TOP-1_EVAL.csv"</code>.</li>
 </ul>
-<p>The splitting script <a href="supplement_scripts%2Fper_doc_split.py">per_doc_split.py</a> 📎 is adjusted for the filename as a first column inout.</p>
+<p>The splitting script <a href="supplementary%2Fscripts%2Fper_doc_split.py">per_doc_split.py</a> 📎 is adjusted for the filename as a first column inout.</p>
 <details>
 <summary>Best-models ensemble tables 👀</summary>
 <p><strong>Wide per-model votes</strong> — <code class="notranslate">{date-time}_BEST_5_models_TOP-1.csv</code>:</p>
@@ -1383,7 +1383,7 @@ inference, and writes <strong>two</strong> files to <code class="notranslate">re
 plain majority vote), so confident models carry more weight than uncertain<br>
 ones. A page on which all 5 models agree therefore scores <code class="notranslate">1.0</code>.</p>
 <div class="markdown-alert markdown-alert-note"><p class="markdown-alert-title"><svg data-component="Octicon" class="octicon octicon-info mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p><p>The wide <code class="notranslate">BEST_5_models_TOP-1.csv</code> is byte-compatible with<br>
-<a href="supplement_scripts%2Faveraging.py">averaging.py</a> 📎, so the standalone script<br>
+<a href="supplementary%2Fscripts%2Faveraging.py">averaging.py</a> 📎, so the standalone script<br>
 remains available for <strong>manual re-averaging</strong>, for mixing in models outside<br>
 the default 5, or for recomputing with a different <code class="notranslate">top_N</code>. It is no longer a<br>
 required step — <code class="notranslate">--best</code> produces the averaged table directly.</p>
@@ -1432,21 +1432,23 @@ describe the procedure of converting PDF documents to PNG images suitable for tr
 <details>
 <summary>How to 👀</summary>
 <p><strong>Windows</strong>:</p>
-<pre class="notranslate"><code class="notranslate">move \local\folder\for\this\project\data_scripts\pdf2png.bat \full\path\to\your\folder\with\pdf\files
+<pre class="notranslate"><code class="notranslate">move \local\folder\for\this\project\data_scripts\windows\pdf2png.bat \full\path\to\your\folder\with\pdf\files
 </code></pre>
 <p><strong>Unix</strong>:</p>
-<pre class="notranslate"><code class="notranslate">cp /local/folder/for/this/project/data_scripts/pdf2png.sh /full/path/to/your/folder/with/pdf/files
+<pre class="notranslate"><code class="notranslate">cp /local/folder/for/this/project/data_scripts/unix/pdf2png.sh /full/path/to/your/folder/with/pdf/files
 </code></pre>
 </details>
 <div class="markdown-alert markdown-alert-tip"><p class="markdown-alert-title"><svg data-component="Octicon" class="octicon octicon-light-bulb mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>Tip</p><p>All data preparation scripts now fully support command-line arguments. Use the <code class="notranslate">--help</code> (<strong>Unix</strong>) or<br>
 <code class="notranslate">/?</code> (<strong>Windows</strong>) flags to see all available options.</p>
 </div>
 <p>Run the converter script directly via CLI to specify your preferences. For example, you can set the source<br>
-directory, output format, DPI, and whether to keep intermediate files:</p>
+directory, output format and DPI. The source PDFs are <strong>kept</strong> by default; add <code class="notranslate">--delete</code> (<strong>Unix</strong>) or<br>
+<code class="notranslate">/delete</code> (<strong>Windows</strong>) to remove each PDF once it has been converted successfully. On <strong>Unix</strong>, <code class="notranslate">.PDF</code><br>
+files are found as well as <code class="notranslate">.pdf</code>:</p>
 <p><strong>Unix</strong>:</p>
 <div class="highlight highlight-source-shell"><pre class="notranslate">/path/to/pdf2png.sh --dir /folder/with/pdfs --format png --dpi 300</pre></div>
-<p><strong>Windows</strong>: <em>(Note: The batch version runs sequentially. For parallel processing on <strong>Windows</strong>, consider<br>
-porting the logic to PowerShell)</em></p>
+<p><strong>Windows</strong>: <em>(Note: The batch version runs sequentially. For parallel processing on <strong>Windows</strong>, run the<br>
+<strong>Unix</strong> script under WSL)</em></p>
 <div class="highlight highlight-source-batchfile"><pre class="notranslate">\path\to\pdf2png.bat /d \folder\with\pdfs /f png /r <span class="pl-c1">300</span></pre></div>
 <p>Similarly, the <code class="notranslate">move_single</code> scripts can be executed using <code class="notranslate">--source</code> and <code class="notranslate">--target</code> (or <code class="notranslate">/s</code> and <code class="notranslate">/t</code> on <strong>Windows</strong>)<br>
 flags to gather one-pagers without opening the code. Add <code class="notranslate">--dry-run</code> to safely preview the files that will be moved.</p>
@@ -1496,12 +1498,12 @@ subdirectories of pages).</p>
 <details>
 <summary>How to 👀</summary>
 <p><strong>Windows</strong>:</p>
-<pre class="notranslate"><code class="notranslate">move \local\folder\for\this\project\atrium-page-classification\data_scripts\move_single.bat \full\path\to\your\folder\with\pdf\files
+<pre class="notranslate"><code class="notranslate">move \local\folder\for\this\project\atrium-page-classification\data_scripts\windows\move_single.bat \full\path\to\your\folder\with\pdf\files
 cd \full\path\to\your\folder\with\pdf\files
 move_single.bat
 </code></pre>
 <p><strong>Unix</strong>:</p>
-<pre class="notranslate"><code class="notranslate">cp /local/folder/for/this//project/atrium-page-classification/data_scripts/move_single.sh /full/path/to/your/folder/with/pdf/files
+<pre class="notranslate"><code class="notranslate">cp /local/folder/for/this/project/atrium-page-classification/data_scripts/unix/move_single.sh /full/path/to/your/folder/with/pdf/files
 cd /full/path/to/your/folder/with/pdf/files
 move_single.sh
 </code></pre>
@@ -1512,12 +1514,14 @@ These changes are cared for in the next <a href="data_scripts%2Funix%2Fsort.sh">
 <p>The generated PNG images of document pages are used to form the annotated gold data.</p>
 <div class="markdown-alert markdown-alert-note"><p class="markdown-alert-title"><svg data-component="Octicon" class="octicon octicon-info mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p><p>It takes a lot of time ⌛ to collect at least several hundred examples per category.</p>
 </div>
-<p>Prepare a CSV table with exactly 3 columns:</p>
+<p>Prepare a CSV table with a header row and at least these 3 columns:</p>
 <ul>
 <li><strong>FILE</strong> - name of the PDF document which was the source of this page</li>
-<li><strong>PAGE</strong> - number of the page (<strong>NOT</strong> padded with 0s)</li>
+<li><strong>PAGE</strong> - number of the page (plain, e.g. <code class="notranslate">8</code>; a zero-padded <code class="notranslate">08</code> is accepted too)</li>
 <li><strong>CLASS</strong> - label of the category 🪧</li>
 </ul>
+<p>Extra columns (a title, a DOI, notes) are ignored. <code class="notranslate">sort.sh</code> finds the three columns by their header names, in any<br>
+order; <code class="notranslate">sort.bat</code> reads them by position, so on <strong>Windows</strong> keep FILE, PAGE, CLASS as the first three columns.</p>
 <div class="markdown-alert markdown-alert-tip"><p class="markdown-alert-title"><svg data-component="Octicon" class="octicon octicon-light-bulb mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>Tip</p><p>Prepare equal-in-size categories 🪧 if possible, so that the model will not be biased towards the over-represented labels 🪧</p>
 </div>
 <p>For <strong>Windows</strong> users, it's <strong>NOT</strong> recommended to use MS Excel for writing CSV tables, the free<br>
@@ -1544,7 +1548,9 @@ document pages, and <code class="notranslate">-o</code> for the target training 
 <div class="highlight highlight-source-shell"><pre class="notranslate">sort.sh -c annotations.csv -i /path/to/pages -o /path/to/train_dir --move</pre></div>
 <p><strong>Windows</strong>:</p>
 <div class="highlight highlight-source-batchfile"><pre class="notranslate">sort.bat /c annotations.csv /i \path\to\pages /o \path\to\train_dir</pre></div>
-<p><em>Note: Use <code class="notranslate">--dry-run</code> to preview the distribution, or omit <code class="notranslate">--move</code> (<strong>Unix</strong>) to copy the files instead of moving them.</em></p>
+<p><em>Note: Use <code class="notranslate">--dry-run</code> (<strong>Unix</strong>) or <code class="notranslate">/n</code> (<strong>Windows</strong>) to preview the distribution, or omit <code class="notranslate">--move</code> / <code class="notranslate">/move</code><br>
+to copy the files instead of moving them. A label folder is only created once a page has been found for it, and a<br>
+row whose PAGE is not a number, or whose CLASS is empty or contains <code class="notranslate">/</code> or <code class="notranslate">\</code>, is reported and skipped.</em></p>
 <p>After the program is done, you will have a directory full of label-specific subdirectories<br>
 containing document-specific pages with a similar structure:</p>
 <details>
@@ -1583,13 +1589,16 @@ Set <code class="notranslate">max_categ</code> higher than the number of samples
 </div>
 <p>From this point, you can start model training or evaluation process.</p>
 <h3>Dataset Maintenance 🧹</h3>
-<p>Once your dataset is sorted, you might need to clean or prototype with it. The <code class="notranslate">supplement_scripts/</code> folder provides tools for this:</p>
+<p>Once your dataset is sorted, you might need to clean or prototype with it. The <code class="notranslate">supplementary/scripts/</code> folder provides tools for this:</p>
 <ul>
-<li><strong>Filtering:</strong> If you manually delete mislabeled PNG images from your training folders, run<br>
-<code class="notranslate">python3 supplement_scripts/filtering.py -i annotations.csv -d train_dir</code> to<br>
-automatically remove the missing entries from your CSV.</li>
+<li><strong>Filtering:</strong> If you manually move mislabeled PNG images between label folders, or delete them, run<br>
+<code class="notranslate">python3 supplementary/scripts/filtering.py -i annotations.csv -d train_dir</code> to<br>
+re-sync your CSV with the folders: a row whose page now sits in exactly one other label folder is <strong>relabelled</strong><br>
+to it, and a row whose page is gone (or sits in several other folders) is removed and reported. The result is<br>
+written to <code class="notranslate">annotations_filtered.csv</code> next to the input (<code class="notranslate">-o</code> to choose another path; <code class="notranslate">--no-relabel</code> to only drop<br>
+rows). The label column is <code class="notranslate">CLASS</code>, or <code class="notranslate">CLASS-1</code> for a classifier result table.</li>
 <li><strong>Downscaling:</strong> To quickly prototype with lower-resolution images, use<br>
-<code class="notranslate">python3 supplement_scripts/downscale.py -i train_dir -o small_train_dir --scale 50</code>. This shrinks the images<br>
+<code class="notranslate">python3 supplementary/scripts/downscale.py --src train_dir --dst small_train_dir --scale 50</code>. This shrinks the images<br>
 while preserving the entire category-folder hierarchy.</li>
 </ul>
 <hr>
@@ -1639,7 +1648,7 @@ the key phases of the whole process (settings, training, evaluation) is provided
 <td>Transforms any images into jpeg format</td>
 </tr>
 <tr>
-<td><code class="notranslate">logs_stats.py</code></td>
+<td><code class="notranslate">logs_stat.py</code></td>
 <td>Creates a table of stats for each tensorboard directory with event logs</td>
 </tr>
 <tr>
@@ -1650,14 +1659,14 @@ the key phases of the whole process (settings, training, evaluation) is provided
 </table></markdown-accessiblity-table>
 </details>
 <p><strong>Command-Line Utility Scripts:</strong><br>
-The analytical scripts in the <a href="supplementary">supplement_scripts</a>📁 directory have been standardized for single-line execution<br>
+The analytical scripts in the <a href="supplementary%2Fscripts">supplementary/scripts</a>📁 directory have been standardized for single-line execution<br>
 without requiring internal path edits. Call any of them with <code class="notranslate">--help</code> for specific arguments:</p>
 <ul>
 <li><a href="supplementary/scripts/dataset_timeline.py">dataset_timeline.py</a>: Generates the chronological category distribution<br>
 plot via <code class="notranslate">-i</code> (CSV input), <code class="notranslate">-o</code> (output plot), and <code class="notranslate">--regex</code> grouping flags.</li>
 <li><a href="supplementary/scripts/visualize.py">visualize.py</a>: Renders the model parameter vs. accuracy scatter plots<br>
 instantly using <code class="notranslate">-i</code> and <code class="notranslate">-o</code> flags.</li>
-<li><a href="supplementary/scripts/logs_stats.py">logs_stats.py</a>: Safely parses binary TFRecord event logs to extract training<br>
+<li><a href="supplementary/scripts/logs_stat.py">logs_stat.py</a>: Safely parses binary TFRecord event logs to extract training<br>
 metrics into a CSV. It now accepts external JSON mappings (<code class="notranslate">--gpu-map</code>, <code class="notranslate">--revision-map</code>) so you can track<br>
 custom infrastructure nodes and architectures.</li>
 </ul>
@@ -2067,11 +2076,11 @@ than a static fork URL. <code class="notranslate">docker_image</code> is an empt
 <li><strong>Licensing:</strong> The output license is <strong>computed per run</strong>, not fixed. The logger determines the<br>
 effective license as the most restrictive license among the components (models, datasets, tools)<br>
 actually used in that run, and records the supporting detail under <code class="notranslate">license_detail</code>. The model code<br>
-and the fine-tuned classifiers are permissive (MIT) and DeepDoctection is Apache-2.0, so<br>
-<strong>inference and evaluation runs resolve to MIT</strong>. <strong>Training is different:</strong> training your own model<br>
-with this code over the shared LINDAT dataset <sup><a href="#user-content-fn-17-eeb388ddda0890e07f950ef4a67e7d26" id="user-content-fnref-17-2-eeb388ddda0890e07f950ef4a67e7d26" data-footnote-ref="" aria-describedby="footnote-label">7</a></sup> pulls in that dataset's <strong>CC BY-NC-SA 4.0</strong> license, so<br>
-<code class="notranslate">--train</code> runs resolve to <strong>CC BY-NC-SA 4.0</strong> (non-commercial, share-alike) — the trained weights and<br>
-any derivatives inherit those terms.</li>
+and the fine-tuned classifiers are permissive (MIT), so <strong>inference and evaluation runs resolve to MIT</strong>.<br>
+<strong>Training is different:</strong> training your own model with this code over the shared LINDAT dataset <sup><a href="#user-content-fn-17-eeb388ddda0890e07f950ef4a67e7d26" id="user-content-fnref-17-2-eeb388ddda0890e07f950ef4a67e7d26" data-footnote-ref="" aria-describedby="footnote-label">7</a></sup> pulls<br>
+in that dataset's <strong>CC BY-NC 4.0</strong> license, so <code class="notranslate">--train</code> runs resolve to <strong>CC BY-NC 4.0</strong> (non-commercial;<br>
+not share-alike) — the trained weights and any derivatives inherit those terms. The optional <code class="notranslate">--yolo</code> backend<br>
+uses Ultralytics, whose package and base weights are <strong>AGPL-3.0</strong>; a <code class="notranslate">--yolo</code> run records it as a component.</li>
 </ul>
 <p>Example of the <a href="small_data_samples">small_data_samples</a> 📁 directory processing paradata log:<br>
 <a href="paradata%2F260315-120442_page-classification.json">260315-120442_page-classification.json</a> 📎</p>
