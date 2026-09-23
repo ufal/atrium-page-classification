@@ -15,6 +15,8 @@ Design notes
   para_licenses.py enforced by the para-drift workflow.
 """
 
+import pytest
+
 from para_licenses import (
     LICENSE_RANK,
     LICENSE_URL,
@@ -96,6 +98,39 @@ class TestNormaliseLicense:
         assert normalise_license("BSD-3-Clause") == "BSD-3-Clause"
         assert normalise_license("BSD-3-Clause") in LICENSE_RANK
 
+    @pytest.mark.parametrize(
+        "spdx, canonical",
+        [
+            ("CC0-1.0", "CC0"),
+            ("CC-BY-4.0", "CC BY 4.0"),
+            ("CC-BY-SA-4.0", "CC BY-SA 4.0"),
+            ("CC-BY-NC-4.0", "CC BY-NC 4.0"),
+            ("CC-BY-NC-SA-4.0", "CC BY-NC-SA 4.0"),
+            ("MIT", "MIT"),
+            ("Apache-2.0", "Apache-2.0"),
+            ("BSD-3-Clause", "BSD-3-Clause"),
+            ("MPL-2.0", "MPL 2.0"),
+            ("LGPL-3.0", "LGPL-3.0"),
+            ("LGPL-3.0-only", "LGPL-3.0"),
+            ("LGPL-3.0-or-later", "LGPL-3.0"),
+            ("GPL-3.0-only", "GPL-3.0"),
+            ("GPL-3.0-or-later", "GPL-3.0"),
+            ("AGPL-3.0-only", "AGPL-3.0"),
+            ("AGPL-3.0-or-later", "AGPL-3.0"),
+        ],
+    )
+    def test_spdx_identifiers_resolve(self, spdx, canonical):
+        """SPDX ids are what model cards and package metadata actually carry;
+        each must land on a ranked key, not fall through as "unknown"."""
+        assert normalise_license(spdx) == canonical
+        assert normalise_license(spdx.lower()) == canonical
+        assert canonical in LICENSE_RANK
+
+    def test_every_canonical_key_resolves_in_any_case(self):
+        for key in LICENSE_RANK:
+            assert normalise_license(key.lower()) == key
+            assert normalise_license(key.upper()) == key
+
 
 # ════════════════════════════════════════════════════════════════════════════
 # resolve_effective_license
@@ -170,6 +205,27 @@ class TestResolveEffectiveLicense:
         assert result["unknown_licenses"] == ["Mystery-1.0"]
         assert "WARNING" in result["notes"]
         assert "blob" in result["determined_by"]
+        # "maximally restrictive" in its terms too, not only in its rank
+        assert result["is_non_commercial"] is True
+        assert result["is_share_alike"] is True
+        assert result["effective_license_url"] == ""
+        assert "NON-COMMERCIAL" in result["notes"] and "SHARE-ALIKE" in result["notes"]
+
+    def test_undeclared_component_placeholder_is_not_permissive(self):
+        """atrium_paradata logs a component missing from para_config.txt as
+        "UNKNOWN". That used to resolve with both flags false — read by a
+        consumer as a permissive license."""
+        result = resolve_effective_license([("nllb", "UNKNOWN"), ("ctranslate2", "MIT")])
+        assert result["effective_license"] == "UNKNOWN"
+        assert result["is_non_commercial"] is True
+        assert result["is_share_alike"] is True
+
+    def test_spdx_spelling_is_ranked_not_unknown(self):
+        result = resolve_effective_license([("data", "CC-BY-SA-4.0"), ("lib", "bsd-3-clause")])
+        assert result["unknown_licenses"] == []
+        assert result["effective_license"] == "CC BY-SA 4.0"
+        assert result["is_share_alike"] is True
+        assert result["is_non_commercial"] is False
 
     def test_unknown_does_not_displace_known_max_seen_first(self):
         """A known max-rank license seen first keeps the title; the unknown

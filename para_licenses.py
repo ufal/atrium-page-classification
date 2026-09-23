@@ -73,16 +73,26 @@ _ALIASES: Dict[str, str] = {
     "gpl-3.0": "GPL-3.0",
     "gpl 3.0": "GPL-3.0",
     "gpl-3.0 license": "GPL-3.0",
+    "gpl-3.0-only": "GPL-3.0",
+    "gpl-3.0-or-later": "GPL-3.0",
+    "lgpl-3.0": "LGPL-3.0",
+    "lgpl-3.0-only": "LGPL-3.0",
+    "lgpl-3.0-or-later": "LGPL-3.0",
     "agpl-3.0": "AGPL-3.0",
     "agpl 3.0": "AGPL-3.0",
     "agpl-3.0 license": "AGPL-3.0",
     "agplv3": "AGPL-3.0",
+    "agpl-3.0-only": "AGPL-3.0",
+    "agpl-3.0-or-later": "AGPL-3.0",
     "gnu affero general public license v3.0": "AGPL-3.0",
+    "bsd-3-clause": "BSD-3-Clause",
     "cc0": "CC0",
+    "cc0-1.0": "CC0",
     "public domain": "Public Domain",
     "cc by 4.0": "CC BY 4.0",
     "cc-by-4.0": "CC BY 4.0",
     "cc by-sa 4.0": "CC BY-SA 4.0",
+    "cc-by-sa-4.0": "CC BY-SA 4.0",
     "cc by-nc 4.0": "CC BY-NC 4.0",
     "cc-by-nc-4.0": "CC BY-NC 4.0",
     "attribution-noncommercial 4.0 international": "CC BY-NC 4.0",
@@ -95,12 +105,20 @@ _ALIASES: Dict[str, str] = {
 }
 
 
+# Case-insensitive fallback onto the canonical keys themselves, so a catalogued
+# license in any casing ("mit", "Cc By 4.0", "bsd-3-clause") resolves without an
+# alias row per spelling. _ALIASES wins: it holds the spellings that are more than
+# a case change (SPDX ids, long names).
+_CANONICAL: Dict[str, str] = {k.lower(): k for k in LICENSE_RANK}
+
+
 def normalise_license(name: str) -> str:
     """Map a free-text license string to a canonical key. Unknown -> as-is."""
     if not name:
         return ""
     key = name.strip()
-    return _ALIASES.get(key.lower(), key)
+    low = key.lower()
+    return _ALIASES.get(low) or _CANONICAL.get(low) or key
 
 
 def resolve_effective_license(
@@ -138,19 +156,30 @@ def resolve_effective_license(
         c["name"] for c in catalogue if (LICENSE_RANK.get(str(c["license"]), max(LICENSE_RANK.values())) == best_rank)
     ]
 
-    is_nc = best_license in _NON_COMMERCIAL
-    is_sa = best_license in _SHARE_ALIKE
+    # An unrecognised effective license is "treated as maximally restrictive" in
+    # rank, so it is in its terms too: both flags set, never both false. A consumer
+    # that reads only the flags must not take an unknown license (atrium_paradata
+    # logs an undeclared component as "UNKNOWN") for a permissive one. No URL can
+    # be claimed for it, so effective_license_url stays "".
+    effective_unknown = best_license not in LICENSE_RANK
+    is_nc = effective_unknown or best_license in _NON_COMMERCIAL
+    is_sa = effective_unknown or best_license in _SHARE_ALIKE
 
     parts: List[str] = []
     parts.append(
         f"Effective output license is {best_license}, the most restrictive among {len(catalogue)} component(s) used."
     )
-    if is_nc:
+    if effective_unknown:
+        parts.append(
+            f"{best_license or 'The empty license string'} is not a recognised license, so the output is treated "
+            "as NON-COMMERCIAL and SHARE-ALIKE until its terms are catalogued; no license URL can be given."
+        )
+    elif is_nc:
         parts.append(
             "Outputs are NON-COMMERCIAL: downstream commercial use is not "
             "permitted while this component is in the pipeline."
         )
-    if is_sa:
+    if is_sa and not effective_unknown:
         parts.append("SHARE-ALIKE applies: derivatives must be licensed under the same terms.")
     if unknown:
         parts.append(
