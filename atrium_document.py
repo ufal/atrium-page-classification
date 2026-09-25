@@ -296,6 +296,13 @@ BLOCK_KEY_FIELDS: Dict[str, List[str]] = {
 #: recognised before the generic ``.xml`` would otherwise short-circuit it.
 #: Keep this list in sync across every tool that derives a doc_id from a
 #: filename — see canonical_doc_id().
+#:
+#: The single-dot input formats after ``.txt`` are those alto-postprocess's
+#: ``--method text-lines`` reads (its text_formats.READERS; atrium-alto-postprocess#31).
+#: Without them a dotted name such as ``scan.2019.pdf`` fell back to the first dot
+#: (``scan``), so ``report.v1.docx`` and ``report.v2.docx`` were one document to every
+#: tool. Compression wrappers (``.gz``, ``.bz2``, ``.xz``) are deliberately NOT here:
+#: ``x.txt.gz`` would become ``x.txt``; the first-dot fallback already answers ``x``.
 KNOWN_PIPELINE_SUFFIXES: List[str] = [
     ".document.json",
     ".categories.json",
@@ -308,6 +315,38 @@ KNOWN_PIPELINE_SUFFIXES: List[str] = [
     ".md",
     ".csv",
     ".txt",
+    ".pdf",
+    ".docx",
+    ".docm",
+    ".dotx",
+    ".odt",
+    ".ods",
+    ".odp",
+    ".xlsx",
+    ".xlsm",
+    ".pptx",
+    ".pptm",
+    ".epub",
+    ".rtf",
+    ".html",
+    ".htm",
+    ".xhtml",
+    ".hocr",
+    ".tei",
+    ".jsonl",
+    ".ndjson",
+    ".tsv",
+    ".tab",
+    ".markdown",
+    ".mdown",
+    ".text",
+    ".log",
+    ".srt",
+    ".vtt",
+    ".eml",
+    ".mbox",
+    ".mbx",
+    ".zip",
 ]
 
 

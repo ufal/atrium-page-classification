@@ -102,8 +102,13 @@ class TestDocIdDerivation:
 
     def test_pdf_upload_keeps_the_pdf_pages_and_does_not_split_the_filename(self):
         """A PDF's pages are its own 1..N, so a trailing number in the FILENAME is part of the
-        document's name, not a page label."""
-        assert doc_id_for_document("CTX01.scan.pdf") == "CTX01"
+        document's name, not a page label.
+
+        `.pdf` is a KNOWN_PIPELINE_SUFFIXES entry since atrium-alto-postprocess#31 (the text-lines
+        inputs), so a dotted PDF name keeps its inner dots — `CTX01.scan.pdf` is `CTX01.scan`, as
+        every other tool keys it — where the first-dot fallback used to answer `CTX01`."""
+        assert doc_id_for_document("CTX01.scan.pdf") == "CTX01.scan"
+        assert doc_id_for_document("CTX01.pdf") == "CTX01"
         assert doc_id_for_document("survey_2021.pdf") == "survey_2021"
 
     def test_missing_filename_degrades_instead_of_raising(self):
@@ -367,7 +372,8 @@ class TestPredictDocumentDocumentJson:
         assert len(body["pages"]) == 3
 
         record = body["document_json"]
-        assert record["doc_id"] == "CTX01"  # no filename page-split for a whole PDF
+        # no filename page-split for a whole PDF; `.pdf` is a known suffix, so the inner dot stays
+        assert record["doc_id"] == "CTX01.scan"
         assert record["page_categories"] == {"1": "TEXT", "2": "TEXT", "3": "TEXT"}
         assert [p["page"] for p in record["pages"]] == ["1", "2", "3"]
 

@@ -101,6 +101,16 @@ the `@v1` reusable-workflow repin, and GHA concurrency/timeout hardening — plu
 numpy/Python-3.12 pin mismatch). Recommend this repo gain a `digests/`/`plans/` pair the next time a substantive
 issue opens, matching its four siblings.
 
+## 2026-09-25 — doc ids of dotted PDF names (atrium-alto-postprocess#31)
+
+* The hub's `KNOWN_PIPELINE_SUFFIXES` gains `.pdf` and the other text-lines input suffixes. `doc_id_for_document()`
+  (`service/document_json.py`) is `canonical_doc_id()` alone, so `CTX01.scan.pdf` is now `CTX01.scan` (it was `CTX01`
+  by the first-dot fallback). Decided with K4TEL; the two tests in `tests/test_service_document_json.py` that pinned the
+  old answer now pin the new one and must land together with the re-vendored `atrium_document.py`. Image names are
+  unchanged (`doc_id_and_page()` strips the image extension and the page label first; no image suffix is listed).
+* With the new `atrium_document.py`: `tests/test_service_document_json.py` has exactly the 9 environment failures it has
+  without it (no scikit-learn/torch here), and nothing else in the suite moves. Not pushed: files delivered in chat.
+
 ---
 _Timeline index refreshed 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
 state via the GitHub API (zero open), and the confirmed `@v1` reusable-workflow pin. Nothing removed from the issues
