@@ -85,6 +85,14 @@ class TestNormaliseLicense:
         long_nc_sa = "Attribution-NonCommercial-ShareAlike 4.0 International"
         assert normalise_license(long_nc_sa) == "CC BY-NC-SA 4.0"
 
+    def test_cdla_permissive_long_names(self):
+        """Model cards spell the data licence out; both dash styles land on the SPDX key."""
+        assert normalise_license("CDLA Permissive 2.0") == "CDLA-Permissive-2.0"
+        long_ascii = "Community Data License Agreement - Permissive - Version 2.0"
+        assert normalise_license(long_ascii) == "CDLA-Permissive-2.0"
+        long_typo = "Community Data License Agreement \u2013 Permissive \u2013 Version 2.0"
+        assert normalise_license(long_typo) == "CDLA-Permissive-2.0"
+
     def test_glm_variants(self):
         assert normalise_license("glm4") == "glm-4"
         assert normalise_license("GLM-4 License") == "glm-4"
@@ -109,6 +117,7 @@ class TestNormaliseLicense:
             ("MIT", "MIT"),
             ("Apache-2.0", "Apache-2.0"),
             ("BSD-3-Clause", "BSD-3-Clause"),
+            ("CDLA-Permissive-2.0", "CDLA-Permissive-2.0"),
             ("MPL-2.0", "MPL 2.0"),
             ("LGPL-3.0", "LGPL-3.0"),
             ("LGPL-3.0-only", "LGPL-3.0"),
@@ -198,6 +207,18 @@ class TestResolveEffectiveLicense:
         assert result["effective_license"] == "AGPL-3.0"
         licenses = {c["license"] for c in result["components"]}
         assert licenses == {"AGPL-3.0", "MIT"}
+
+    def test_cdla_permissive_model_weights_stay_permissive(self):
+        """(llm-enrich #18) Docling's TableFormer weights are CDLA-Permissive-2.0,
+        which places no terms on Results: a run using them next to MIT code
+        resolves permissive, with nothing reported as unknown."""
+        result = resolve_effective_license([("pdfplumber", "MIT"), ("docling-tableformer", "CDLA-Permissive-2.0")])
+        assert result["unknown_licenses"] == []
+        assert result["effective_license"] == "MIT"
+        assert set(result["determined_by"]) == {"pdfplumber", "docling-tableformer"}
+        assert result["is_non_commercial"] is False
+        assert result["is_share_alike"] is False
+        assert LICENSE_RANK["CDLA-Permissive-2.0"] == LICENSE_RANK["MIT"]
 
     def test_unknown_license_treated_as_maximally_restrictive(self):
         result = resolve_effective_license([("blob", "Mystery-1.0"), ("code", "MIT")])

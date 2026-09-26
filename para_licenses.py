@@ -31,6 +31,11 @@ LICENSE_RANK: Dict[str, int] = {
     "MIT": 1,
     "Apache-2.0": 1,
     "BSD-3-Clause": 1,
+    # Community Data License Agreement – Permissive 2.0: the licence of model
+    # weights and datasets (e.g. Docling's TableFormer). It places no terms on
+    # "Results" (the output of a computation over the Data) — sharing the Data
+    # itself only needs the licence text alongside — so it ranks with MIT.
+    "CDLA-Permissive-2.0": 1,
     "MPL 2.0": 2,
     "LGPL-3.0": 3,
     "GPL-3.0": 4,
@@ -48,6 +53,7 @@ LICENSE_URL: Dict[str, str] = {
     "MIT": "https://opensource.org/license/mit/",
     "Apache-2.0": "https://www.apache.org/licenses/LICENSE-2.0",
     "BSD-3-Clause": "https://opensource.org/license/bsd-3-clause/",
+    "CDLA-Permissive-2.0": "https://cdla.dev/permissive-2-0/",
     "MPL 2.0": "https://www.mozilla.org/en-US/MPL/2.0/",
     "LGPL-3.0": "https://www.gnu.org/licenses/lgpl-3.0.html",
     "GPL-3.0": "https://www.gnu.org/licenses/gpl-3.0.html",
@@ -86,6 +92,10 @@ _ALIASES: Dict[str, str] = {
     "agpl-3.0-or-later": "AGPL-3.0",
     "gnu affero general public license v3.0": "AGPL-3.0",
     "bsd-3-clause": "BSD-3-Clause",
+    "cdla permissive 2.0": "CDLA-Permissive-2.0",
+    "cdla-permissive 2.0": "CDLA-Permissive-2.0",
+    "community data license agreement - permissive - version 2.0": "CDLA-Permissive-2.0",
+    "community data license agreement – permissive – version 2.0": "CDLA-Permissive-2.0",
     "cc0": "CC0",
     "cc0-1.0": "CC0",
     "public domain": "Public Domain",

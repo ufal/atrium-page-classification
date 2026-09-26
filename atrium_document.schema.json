@@ -273,7 +273,7 @@
           },
           "style": {
             "type": "object",
-            "description": "Issue #18 §1 (the 'font row', decided as option (c) — semantic style only). Carries what a downstream reader can ACT on and deliberately drops typeface and point size: the LLM cannot use 'Helvetica 12pt', and heading-ness is already carried by categ. Absent on the ALTO path, where no style signal exists. Writer: digital-convert only.",
+            "description": "Issue #18 §1 (the 'font row', decided as option (c) — semantic style only). Carries what a downstream reader can ACT on and deliberately drops typeface and point size: the LLM cannot use 'Helvetica 12pt', while 'this is a level-2 heading' or 'this is the running header' it can. Absent on the ALTO path, where no style signal exists. Writer: digital-convert only.",
             "additionalProperties": true,
             "properties": {
               "bold": { "type": "boolean" },
@@ -283,6 +283,11 @@
                 "minimum": 1,
                 "maximum": 6,
                 "description": "1-6 for a heading (DOCX outlineLvl + 1, or a PDF size/weight heuristic); null or absent for body text."
+              },
+              "region": {
+                "type": "string",
+                "enum": ["page_header", "page_footer", "footnote"],
+                "description": "llm-enrich #18 (declared 2026-09-25): where on its page a line that is NOT body text sits — the running header, the running footer (both: DOCX header/footer parts, PDF lines repeating in the page margins, or the Docling engine's layout labels), or a footnote/endnote (DOCX notes parts, or Docling's footnote label). Absent means body text, which is every line on the ALTO path. CONSUMER CONTRACT: api_util/json_to_md.py renders a page as header, body, footnotes, footer — the header and footer inside the HEADER_START/FOOTER_START cues, footnotes as `[^n]:` definitions — and digital-convert keeps header and footer lines out of content.text. A plain enum, not a SKOS scheme: nothing outside the digital-born path emits it."
               }
             }
           }
