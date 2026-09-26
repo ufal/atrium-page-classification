@@ -100,7 +100,9 @@ def snapshot_path(freeze: Dict[str, str]) -> str:
 def load_snapshot(freeze: Dict[str, str]) -> Dict[str, Any]:
     path = snapshot_path(freeze)
     if not os.path.exists(path):
-        pytest.fail(f"{freeze['snapshot']} not found beside atrium_document.py -- re-vendor (scripts/revendor_shared.sh)")
+        pytest.fail(
+            f"{freeze['snapshot']} not found beside atrium_document.py -- re-vendor (scripts/revendor_shared.sh)"
+        )
     with open(path, encoding="utf-8") as fh:
         return json.load(fh)
 
