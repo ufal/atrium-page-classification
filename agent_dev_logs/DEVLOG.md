@@ -1,6 +1,6 @@
 # 📓 atrium-page-classification — agent_dev_logs/DEVLOG.md (timeline index)
-> _Historical page-image classification. 1 open issue (#48; #15 and #26 closed). `test` HEAD `cabe289` (2026-09-15) · **v1.7.5-beta**._
-> _Per-issue detail: `digests/48.digest.md` · `plans/48.plan.md` · `issues/2026-09-07.48.issue.open.md` (source of truth). This header previously claimed no such exports existed; they have since 2026-09-07. The 2026-08-02 → 09-06 entries below predate them and are reconstructed from `CONTRIBUTING.md`'s release-note table (source of truth for that window) and commit history, not from a digest._
+> _Historical page-image classification. No open issue here (#48 closed 2026-09-17; #15 and #26 closed). Its pilot work is tracked in hub issues (atrium-project #6, #53, #67). `test` HEAD `2e27073` (2026-09-26) · **v1.8.0-beta** (2026-09-16)._
+> _Per-issue detail: `digests/48.digest.md` · `plans/48.plan.md` (the issue closed 2026-09-17 and its export was removed; the pair is to be removed too). This header previously claimed no such exports existed; they have since 2026-09-07. The 2026-08-02 → 09-06 entries below predate them and are reconstructed from `CONTRIBUTING.md`'s release-note table (source of truth for that window) and commit history, not from a digest._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
 ## 2026-06-25
@@ -111,7 +111,27 @@ issue opens, matching its four siblings.
 * With the new `atrium_document.py`: `tests/test_service_document_json.py` has exactly the 9 environment failures it has
   without it (no scikit-learn/torch here), and nothing else in the suite moves. Not pushed: files delivered in chat.
 
+## 2026-09-26 — AMČR baseline (atrium-project#67): this repository's pilot items, tracked in the hub
+
+* **What arrived:** [atrium-project#67](https://github.com/ufal/atrium-project/issues/67) (motyc, AMČR) — no issue of
+  this repository is in the baseline (#48 closed 09-17), but four of its requests land here. All are tracked in hub
+  pairs; nothing is changed in code by this entry.
+  * **Licences (hub #6, motyc 16:08):** `/predict_document` rasterises PDFs with PyMuPDF (`import fitz`,
+    `service/api.py:120`; `PyMuPDF>=1.28.2` in `service/requirements.txt`, installed in `base`), which is AGPL-3.0 and
+    not declared in `setup/para_config.txt [components]`. Recommended: swap to `pypdfium2` (render at
+    `PDF_RENDER_DPI / 72`), with a regression run over the PDF samples; the fallback is to declare it.
+  * **Limits (hub #53, motyc 16:03):** `MAX_PDF_PAGES = 50` (`service/api.py:58`) and `PDF_RENDER_DPI = 300` (`:64`)
+    become environment settings; `/info` reports both (today it shows `max_upload_mb` and `max_pdf_pages`).
+  * **Seeded record, paradata (hub #67 R1, R2):** the service already accepts a `document_json` part and writes to an
+    explicit path (correct when the seed's `doc_id` differs from the file name; a regression test is planned); it has no
+    `ParadataLogger`, so the plan is to add one and return the `CreateAction`.
+  * **Record-only (hub #67 R3):** build `page_categories` from an existing predictions table
+    (`atrium_document_adapter.py` has the logic, not the entry point).
+* **Also 2026-09-26:** the `doc-schema-v1` freeze files and the re-vendored freeze test (blob `7c35fbf1`, `2e27073`).
+* **Pair to remove:** `48.*` (issue closed 2026-09-17).
+* Not pushed: files delivered in chat.
+
 ---
-_Timeline index refreshed 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
+_Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
 state via the GitHub API (zero open), and the confirmed `@v1` reusable-workflow pin. Nothing removed from the issues
 themselves (per hub #29); this file is a derived reading aid in `agent_dev_logs/`._
