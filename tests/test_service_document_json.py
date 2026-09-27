@@ -71,6 +71,9 @@ except ImportError:  # pragma: no cover - environment-dependent
 # as a Layer D warning instead of what it is testing.
 SHA256 = "9" * 64
 
+#: (atrium-project#68) An AMČR seed is keyed by the AMČR file id, never by the upload's name.
+SEED = "C-202000543A-DT-27"
+
 
 def _upstream_baseline(doc_id="CTX01"):
     """A record as alto-postprocess/nlp-enrich would hand it over: blocks pc does not own."""
@@ -262,6 +265,27 @@ class TestPredictImageDocumentJson:
         assert record["pages"][0]["category"] == "TEXT"
         assert body["document_json_schema_error"] is None
 
+    def test_a_seed_keyed_unlike_the_upload_comes_back_with_our_block(self, client):
+        """(atrium-project#68) The record keeps the seed's doc_id and carries this tool's block.
+        alto-postprocess and llm-enrich returned the untouched seed here; this service writes to
+        an explicit path, and the test keeps it that way."""
+        baseline = _upstream_baseline(SEED)
+        response = client.post(
+            "/predict_image",
+            data={"version": "v4.3", "topn": 3},
+            files={
+                "file": ("scan_0001.png", _png_bytes(), "image/png"),
+                "document_json": ("seed.document.json", json.dumps(baseline).encode("utf-8"), "application/json"),
+            },
+        )
+        assert response.status_code == 200
+        record = response.json()["document_json"]
+        assert record["doc_id"] == SEED
+        assert record["page_categories"] == {"1": "TEXT"}
+        assert record["pages"][0]["category"] == "TEXT"
+        assert record["pages"][0]["quality_score"] == 0.9  # the seed's own field on the same row
+        assert record["lines"] == baseline["lines"]
+
     def test_document_json_out_alone_originates_a_record(self, client):
         response = client.post(
             "/predict_image",
@@ -376,6 +400,23 @@ class TestPredictDocumentDocumentJson:
         assert record["doc_id"] == "CTX01.scan"
         assert record["page_categories"] == {"1": "TEXT", "2": "TEXT", "3": "TEXT"}
         assert [p["page"] for p in record["pages"]] == ["1", "2", "3"]
+
+    def test_a_seed_keyed_unlike_the_upload_comes_back_with_our_block(self, client, fake_fitz):
+        """(atrium-project#68) The PDF endpoint, same guarantee as the image one."""
+        baseline = _upstream_baseline(SEED)
+        response = client.post(
+            "/predict_document",
+            data={"version": "v4.3", "topn": 3},
+            files={
+                "file": ("scan.pdf", b"%PDF-1.4 fake", "application/pdf"),
+                "document_json": ("seed.document.json", json.dumps(baseline).encode("utf-8"), "application/json"),
+            },
+        )
+        assert response.status_code == 200
+        record = response.json()["document_json"]
+        assert record["doc_id"] == SEED
+        assert record["page_categories"] == {"1": "TEXT", "2": "TEXT", "3": "TEXT"}
+        assert record["lines"] == baseline["lines"]
 
     def test_upstream_blocks_survive_a_pdf_run(self, client, fake_fitz):
         baseline = _upstream_baseline()
