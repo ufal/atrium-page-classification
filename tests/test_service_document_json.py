@@ -344,9 +344,15 @@ class _FakePixmap:
     samples = b"\xff" * (4 * 4 * 3)
 
 
+class _FakeRect:
+    #: An A4 page in PDF points (1/72 inch), as PyMuPDF's `page.rect` reports it.
+    width, height = 595.0, 842.0
+
+
 class _FakePdfPage:
     #: Every `dpi=` the service asked for, across all fake pages.
     dpi_requests: list = []
+    rect = _FakeRect()
 
     def get_pixmap(self, dpi=None):
         _FakePdfPage.dpi_requests.append(dpi)
@@ -366,6 +372,10 @@ class _FakePdf:
         return _FakePdfPage()
 
 
+#: How many pages the fake PDF has (a test may monkeypatch it).
+fake_fitz_pages = 3
+
+
 @pytest.fixture
 def fake_fitz(monkeypatch):
     """Stub PyMuPDF the same way service.inference is stubbed above.
@@ -376,7 +386,7 @@ def fake_fitz(monkeypatch):
     test here; the per-page record is.
     """
     module = types.ModuleType("fitz")
-    module.open = lambda stream=None, filetype=None: _FakePdf(3)
+    module.open = lambda stream=None, filetype=None: _FakePdf(sys.modules[__name__].fake_fitz_pages)
     monkeypatch.setitem(sys.modules, "fitz", module)
     monkeypatch.setattr(_FakePdfPage, "dpi_requests", [])
     return module
@@ -440,12 +450,14 @@ class TestPredictDocumentDocumentJson:
             files={"file": ("CTX01.pdf", b"%PDF-1.4 fake", "application/pdf")},
         )
         assert response.status_code == 200
-        assert set(response.json()) == {"type", "pages"}
+        # limits_applied (atrium-project#53) is in every response; document_json is not.
+        assert set(response.json()) == {"type", "pages", "limits_applied"}
 
     def test_pages_are_rasterised_at_the_training_resolution(self, client, fake_fitz):
         """PyMuPDF defaults to 72 dpi; the training pages were made by pdf2png.sh at 300. Every
-        page must be rendered at PDF_RENDER_DPI, and that constant must stay at 300."""
-        from service.api import PDF_RENDER_DPI
+        page must be rendered at PDF_RENDER_DPI, and its DEFAULT must stay at 300 — it is an
+        environment setting since atrium-project#53, so a deployment may choose otherwise."""
+        from tool_limits import PDF_RENDER_DPI
 
         response = client.post(
             "/predict_document",
@@ -453,8 +465,33 @@ class TestPredictDocumentDocumentJson:
             files={"file": ("CTX01.pdf", b"%PDF-1.4 fake", "application/pdf")},
         )
         assert response.status_code == 200
-        assert PDF_RENDER_DPI == 300
+        assert PDF_RENDER_DPI.default == 300
         assert _FakePdfPage.dpi_requests == [300, 300, 300]
+
+    def test_a_page_without_rect_is_checked_on_its_rendered_size(self, client, monkeypatch):
+        """A page object without ``rect`` (a stand-in; every PyMuPDF page has one) is sized
+        from its pixmap instead, still before the pixels are decoded."""
+
+        class _BarePage:
+            def get_pixmap(self, dpi=None):
+                return _FakePixmap()
+
+        class _BarePdf:
+            def __len__(self):
+                return 1
+
+            def load_page(self, index):
+                return _BarePage()
+
+        module = types.ModuleType("fitz")
+        module.open = lambda stream=None, filetype=None: _BarePdf()
+        monkeypatch.setitem(sys.modules, "fitz", module)
+        files = {"file": ("CTX01.pdf", b"%PDF-1.4 fake", "application/pdf")}
+        ok = client.post("/predict_document", data={"version": "v4.3", "topn": 3}, files=files)
+        assert ok.status_code == 200, ok.text
+        monkeypatch.setenv("MAX_IMAGE_PIXELS", "15")  # the fake pixmap is 4 x 4 = 16 px
+        over = client.post("/predict_document", data={"version": "v4.3", "topn": 3}, files=files)
+        assert over.status_code == 413 and over.json()["reason"] == "limit_exceeded"
 
 
 class TestOpenApiAdvertisesTheContract:
@@ -470,3 +507,115 @@ class TestOpenApiAdvertisesTheContract:
         properties = app.openapi()["components"]["schemas"][schema_ref]["properties"]
         assert "document_json" in properties
         assert "document_json_out" in properties
+
+
+class TestLimits:
+    """atrium-project#53 (factor III): every limit is a setting, reported in /info, and an input
+    over one is refused with the harmonised error — never cut quietly."""
+
+    def test_info_reports_every_limit_with_the_variable_that_sets_it(self, client):
+        info = client.get("/info").json()
+        assert info["limits"] == {
+            "max_upload_mb": 10.0,
+            "max_pdf_pages": 50,
+            "pdf_render_dpi": 300,
+            "max_image_pixels": 178956970,
+        }
+        assert {k: m["env"] for k, m in info["limits_meta"].items()} == {
+            "max_upload_mb": "MAX_UPLOAD_MB",
+            "max_pdf_pages": "MAX_PDF_PAGES",
+            "pdf_render_dpi": "PDF_RENDER_DPI",
+            "max_image_pixels": "MAX_IMAGE_PIXELS",
+        }
+
+    def test_a_pdf_over_max_pdf_pages_is_refused(self, client, fake_fitz, monkeypatch):
+        monkeypatch.setenv("MAX_PDF_PAGES", "2")
+        response = client.post(
+            "/predict_document",
+            data={"version": "v4.3", "topn": 3},
+            files={"file": ("CTX01.pdf", b"%PDF-1.4 fake", "application/pdf")},
+        )
+        assert response.status_code == 413
+        body = response.json()
+        assert body["reason"] == "limit_exceeded"
+        assert body["detail"] == "PDF has too many pages: 3. Limit is 2 (MAX_PDF_PAGES)."
+        assert body["limit"] == {
+            "key": "max_pdf_pages",
+            "env": "MAX_PDF_PAGES",
+            "value": 2,
+            "observed": 3,
+            "unit": "pages",
+        }
+        assert _FakePdfPage.dpi_requests == [], "refused before any page was rendered"
+
+    def test_a_page_too_large_to_render_is_refused_before_rendering(self, client, fake_fitz, monkeypatch):
+        monkeypatch.setenv("MAX_IMAGE_PIXELS", "1000000")  # A4 at 300 dpi is ~8.7 Mpx
+        response = client.post(
+            "/predict_document",
+            data={"version": "v4.3", "topn": 3},
+            files={"file": ("CTX01.pdf", b"%PDF-1.4 fake", "application/pdf")},
+        )
+        assert response.status_code == 413
+        assert response.json()["limit"]["key"] == "max_image_pixels"
+        assert response.json()["detail"].startswith("Page 1 at 300 dpi is 2479 x 3508")
+        assert _FakePdfPage.dpi_requests == []
+
+    def test_pdf_render_dpi_is_a_setting(self, client, fake_fitz, monkeypatch):
+        monkeypatch.setenv("PDF_RENDER_DPI", "150")
+        response = client.post(
+            "/predict_document",
+            data={"version": "v4.3", "topn": 3},
+            files={"file": ("CTX01.pdf", b"%PDF-1.4 fake", "application/pdf")},
+        )
+        assert response.status_code == 200
+        assert _FakePdfPage.dpi_requests == [150, 150, 150]
+        assert client.get("/info").json()["limits_meta"]["pdf_render_dpi"]["source"] == "env"
+
+    def test_an_image_over_max_image_pixels_is_refused_before_decoding(self, client, monkeypatch):
+        monkeypatch.setenv("MAX_IMAGE_PIXELS", "63")  # the test PNG is 8 x 8 = 64 px
+        response = client.post(
+            "/predict_image",
+            data={"version": "v4.3", "topn": 3},
+            files={"file": ("CTX01_0001.png", _png_bytes(), "image/png")},
+        )
+        assert response.status_code == 413
+        body = response.json()
+        assert body["reason"] == "limit_exceeded" and body["limit"]["observed"] == 64
+
+    def test_an_oversized_document_json_part_is_refused(self, client, monkeypatch):
+        monkeypatch.setenv("MAX_UPLOAD_MB", "0.001")
+        response = client.post(
+            "/predict_image",
+            data={"version": "v4.3", "topn": 3},
+            files={
+                "file": ("CTX01_0001.png", _png_bytes(), "image/png"),
+                "document_json": ("b.json", b"{" + b" " * 4096 + b"}", "application/json"),
+            },
+        )
+        assert response.status_code == 413
+        assert response.json()["detail"] == "document_json too large: over 0.001 MB (MAX_UPLOAD_MB)."
+
+    @pytest.mark.parametrize("topn", [0, 12])
+    def test_topn_out_of_range_is_a_validation_error_not_a_silent_cap(self, client, topn):
+        response = client.post(
+            "/predict_image",
+            data={"version": "all", "topn": topn},
+            files={"file": ("CTX01_0001.png", _png_bytes(), "image/png")},
+        )
+        assert response.status_code == 422
+        assert response.json()["reason"] is None and "topn" in response.json()["detail"]
+
+    def test_every_response_carries_limits_applied(self, client):
+        response = client.post(
+            "/predict_image",
+            data={"version": "v4.3", "topn": 3},
+            files={"file": ("CTX01_0001.png", _png_bytes(), "image/png")},
+        )
+        assert response.status_code == 200 and response.json()["limits_applied"] == []
+
+    def test_a_malformed_limit_fails_at_declaration(self, monkeypatch):
+        import atrium_limits
+
+        monkeypatch.setenv("MAX_PDF_PAGES", "fifty")
+        with pytest.raises(atrium_limits.LimitConfigError, match="MAX_PDF_PAGES"):
+            atrium_limits.limit("MAX_PDF_PAGES", 50, unit="pages")

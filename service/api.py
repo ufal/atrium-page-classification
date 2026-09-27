@@ -54,8 +54,9 @@ except ImportError:
 
 # Every limit this service has, declared once (atrium-project#53, factor III). The repo
 # root is on sys.path by now: service/inference.py, imported above, puts it there.
+import tool_limits  # noqa: E402
 from atrium_limits import LimitExceeded  # noqa: E402
-from tool_limits import LIMITS, MAX_IMAGE_PIXELS, MAX_PDF_PAGES, MAX_UPLOAD, PDF_RENDER_DPI  # noqa: E402
+from tool_limits import LIMITS, MAX_IMAGE_PIXELS, MAX_PDF_PAGES, MAX_UPLOAD  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +72,11 @@ MAX_UPLOAD_BYTES = int(MAX_UPLOAD_MB * 1024 * 1024)
 # 4.22 G px when it is first imported, which happens lazily on the first /predict_image,
 # so the first request of a process ran with Pillow's default and every later one did not.
 Image.MAX_IMAGE_PIXELS = None
+
+#: The PDF rendering resolution's value at import, kept for the callers and tests that read
+#: it (it was a constant here). A setting since atrium-project#53: requests read
+#: tool_limits.PDF_RENDER_DPI, so it is reported in /info and can be changed.
+PDF_RENDER_DPI = tool_limits.PDF_RENDER_DPI.get()
 
 #: `topn` bounds: at most one label per category. Out of range is a request-validation 422,
 #: not a silent cap (version="all" used to return all categories for any larger value) or a
@@ -145,9 +151,11 @@ def _classify_pdf_pages(content: bytes, version: str, topn: int) -> List[Dict[st
 
     Raises ``atrium_limits.LimitExceeded`` (413) for a PDF over MAX_PDF_PAGES, and for a
     page that would render over MAX_IMAGE_PIXELS at PDF_RENDER_DPI — the size is computed
-    from the page's own dimensions before it is rendered, so a small file declaring a huge
-    page cannot make the service rasterise gigabytes. Raised in the worker thread, it
-    reaches the error handler the same as on the loop.
+    from the page's own dimensions (``page.rect``, which every PyMuPDF page has) before it
+    is rendered, so a small file declaring a huge page cannot make the service rasterise
+    gigabytes. A page object without ``rect`` (a stand-in) is checked on its rendered size
+    instead, still before the pixels are decoded. Raised in the worker thread, it reaches
+    the error handler the same as on the loop.
     """
     import fitz  # PyMuPDF
 
@@ -159,14 +167,18 @@ def _classify_pdf_pages(content: bytes, version: str, topn: int) -> List[Dict[st
         detail=f"PDF has too many pages: {page_count}. Limit is {MAX_PDF_PAGES.get()} (MAX_PDF_PAGES).",
     )
 
-    dpi = PDF_RENDER_DPI.get()
+    dpi = tool_limits.PDF_RENDER_DPI.get()
     page_results: List[Dict[str, Any]] = []
     for page_num in range(page_count):
         page = pdf_document.load_page(page_num)
-        # page.rect is in PDF points (1/72 inch): the pixel size at `dpi`, known before rendering.
-        width, height = int(page.rect.width * dpi / 72), int(page.rect.height * dpi / 72)
-        _check_image_pixels(width, height, f"Page {page_num + 1} at {dpi} dpi")
+        what = f"Page {page_num + 1} at {dpi} dpi"
+        rect = getattr(page, "rect", None)
+        if rect is not None:
+            # page.rect is in PDF points (1/72 inch): the pixel size at `dpi`, known before rendering.
+            _check_image_pixels(int(rect.width * dpi / 72), int(rect.height * dpi / 72), what)
         pix = page.get_pixmap(dpi=dpi)
+        if rect is None:
+            _check_image_pixels(pix.width, pix.height, what)
         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
 
         predictions = manager.predict(img, version=version, topn=topn)
