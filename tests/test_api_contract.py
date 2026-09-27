@@ -19,7 +19,10 @@ try:
     app = __import__(APP_IMPORT, fromlist=["app"]).app
     client = TestClient(app)
     deps_present = True
-except Exception:
+except ImportError:
+    # Only a missing dependency skips (atrium-project#53). This used to be `except Exception`,
+    # which turned ANY import-time failure into a green skip — including a malformed limit
+    # (atrium_limits.LimitConfigError), which must fail loudly.
     app = None
     client = None
     deps_present = False
@@ -41,6 +44,23 @@ def test_info_envelope_required_fields():
     assert isinstance(data["endpoints"], list) and data["endpoints"]
     assert isinstance(data["limits"], dict)
     assert "max_upload_mb" in data["limits"]
+
+
+def test_info_reports_every_declared_limit():
+    """atrium-project#53: /info `limits` is tool_limits.LIMITS, value for value, and
+    `limits_meta` names the variable that sets each one. tests/test_limits_contract.py checks
+    the declaration against .env.example and the README."""
+    from tool_limits import LIMITS
+
+    data = client.get("/info").json()
+    assert data["limits"] == LIMITS.values()
+    assert data["limits_meta"] == LIMITS.meta()
+
+
+def test_errors_have_the_harmonised_body():
+    """§4.4 (atrium-project#32 item 2): every error is {status, reason, detail}."""
+    body = client.get("/no-such-route").json()
+    assert body == {"status": 404, "reason": None, "detail": "Not Found"}
 
 
 def test_info_endpoints_match_real_routes():

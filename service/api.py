@@ -31,37 +31,53 @@ try:
     from .atrium_service import (
         ServiceState,
         add_cors,
+        attach_error_handlers,
         attach_health,
         attach_inflight_middleware,
         build_info,
         read_tool_version,
-        resolve_max_upload_mb,
+        read_upload_bounded,
         serve_lifecycle,
     )
 except ImportError:
     from atrium_service import (
         ServiceState,
         add_cors,
+        attach_error_handlers,
         attach_health,
         attach_inflight_middleware,
         build_info,
         read_tool_version,
-        resolve_max_upload_mb,
+        read_upload_bounded,
         serve_lifecycle,
     )
 
+# Every limit this service has, declared once (atrium-project#53, factor III). The repo
+# root is on sys.path by now: service/inference.py, imported above, puts it there.
+from atrium_limits import LimitExceeded  # noqa: E402
+from tool_limits import LIMITS, MAX_IMAGE_PIXELS, MAX_PDF_PAGES, MAX_UPLOAD, PDF_RENDER_DPI  # noqa: E402
+
 logger = logging.getLogger(__name__)
 
-# Canonical upload limit (§4.5): MAX_UPLOAD_MB, with a MAX_UPLOAD_BYTES fallback.
-MAX_UPLOAD_MB = resolve_max_upload_mb(10)
-MAX_UPLOAD_BYTES = int(MAX_UPLOAD_MB * 1024 * 1024)  # retained: imported by tests/clients
-MAX_PDF_PAGES = 50
+# Import-time snapshots, kept because tests and clients import them. The service itself
+# reads each limit per request from tool_limits (atrium_limits reads the environment on
+# every call), so these are what the limits WERE when the module was imported.
+MAX_UPLOAD_MB = MAX_UPLOAD.get()
+MAX_UPLOAD_BYTES = int(MAX_UPLOAD_MB * 1024 * 1024)
 
-#: Resolution PDF pages are rasterised at before classification. It matches
-#: `data_scripts/unix/pdf2png.sh`'s default (300 dpi), which is how the training pages
-#: were made: PyMuPDF's own default is 72 dpi, so without it the service classified
-#: pages at roughly a quarter of the linear resolution the models were trained on.
-PDF_RENDER_DPI = 300
+# The service checks the pixel count itself, against MAX_IMAGE_PIXELS, before anything is
+# decoded (_check_image_pixels). Pillow's own process-wide guard is switched off here
+# because it made the effective limit depend on request history: utils.py raises it to
+# 4.22 G px when it is first imported, which happens lazily on the first /predict_image,
+# so the first request of a process ran with Pillow's default and every later one did not.
+Image.MAX_IMAGE_PIXELS = None
+
+#: `topn` bounds: at most one label per category. Out of range is a request-validation 422,
+#: not a silent cap (version="all" used to return all categories for any larger value) or a
+#: torch error surfacing as a 500 (a single version). model_registry is torch-free.
+from model_registry import CATEGORIES as _CATEGORIES  # noqa: E402
+
+_TOPN_MAX = len(_CATEGORIES)
 
 
 #: Readiness/draining/in-flight state for the §4.6 disposability contract (issue #55).
@@ -92,6 +108,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 attach_inflight_middleware(app, _state)
+# §4.4 error body {status, reason, detail} for every error (atrium-project#32 item 2, #53).
+attach_error_handlers(app)
 
 # CORS — standard §4.5 configuration (ALLOWED_ORIGINS CSV, default "*").
 add_cors(app, methods=["GET", "POST"])
@@ -110,24 +128,45 @@ def _deep_health() -> str | None:
 attach_health(app, deep_check=_deep_health, state=_state)
 
 
+def _check_image_pixels(width: int, height: int, what: str) -> None:
+    """Refuse an image over MAX_IMAGE_PIXELS (413 ``limit_exceeded``) before decoding it."""
+    MAX_IMAGE_PIXELS.check(
+        width * height,
+        detail=(
+            f"{what} is {width} x {height} = {width * height} pixels; the limit is "
+            f"{MAX_IMAGE_PIXELS.get()} (MAX_IMAGE_PIXELS)."
+        ),
+    )
+
+
 def _classify_pdf_pages(content: bytes, version: str, topn: int) -> List[Dict[str, Any]]:
     """Rasterise every page of a PDF and classify it — the blocking body of
     ``POST /predict_document``, extracted so it runs in ONE worker thread (issue #55).
 
-    Raises ``HTTPException`` (413) for an over-long PDF exactly as the inline version
-    did; FastAPI handles it the same whether it is raised on the loop or in a thread.
+    Raises ``atrium_limits.LimitExceeded`` (413) for a PDF over MAX_PDF_PAGES, and for a
+    page that would render over MAX_IMAGE_PIXELS at PDF_RENDER_DPI — the size is computed
+    from the page's own dimensions before it is rendered, so a small file declaring a huge
+    page cannot make the service rasterise gigabytes. Raised in the worker thread, it
+    reaches the error handler the same as on the loop.
     """
     import fitz  # PyMuPDF
 
     pdf_document = fitz.open(stream=content, filetype="pdf")
 
-    if len(pdf_document) > MAX_PDF_PAGES:
-        raise HTTPException(status_code=413, detail=f"PDF has too many pages. Limit is {MAX_PDF_PAGES}.")
+    page_count = len(pdf_document)
+    MAX_PDF_PAGES.check(
+        page_count,
+        detail=f"PDF has too many pages: {page_count}. Limit is {MAX_PDF_PAGES.get()} (MAX_PDF_PAGES).",
+    )
 
+    dpi = PDF_RENDER_DPI.get()
     page_results: List[Dict[str, Any]] = []
-    for page_num in range(len(pdf_document)):
+    for page_num in range(page_count):
         page = pdf_document.load_page(page_num)
-        pix = page.get_pixmap(dpi=PDF_RENDER_DPI)
+        # page.rect is in PDF points (1/72 inch): the pixel size at `dpi`, known before rendering.
+        width, height = int(page.rect.width * dpi / 72), int(page.rect.height * dpi / 72)
+        _check_image_pixels(width, height, f"Page {page_num + 1} at {dpi} dpi")
+        pix = page.get_pixmap(dpi=dpi)
         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
 
         predictions = manager.predict(img, version=version, topn=topn)
@@ -161,6 +200,11 @@ class PredictionResult(BaseModel):
 class ImageResponse(BaseModel):
     type: str
     predictions: List[PredictionResult]
+    #: The limits that shaped this result without refusing it (atrium-project#53,
+    #: docs/paradata_schema.md `limits_applied`). None of this service's limits does that
+    #: today — each one refuses — so it is `[]`; it is declared so the field is present in
+    #: every service's response, and so `response_model` does not filter it out.
+    limits_applied: List[Dict[str, Any]] = []
     #: The updated ATRIUM Document JSON, present only when the caller opted into the
     #: accretion flow (uploaded a `document_json` baseline, or asked for `document_json_out`).
     #: `response_model` filters unknown keys, so these have to be declared here or the record
@@ -209,7 +253,9 @@ async def _document_json_part(
         # `or None`: some clients send the multipart field with an empty body rather than
         # omitting it. That means "no baseline", not "a baseline that is zero bytes long" —
         # taken literally it reaches load_document() and dies on a JSONDecodeError.
-        baseline_bytes = await document_json.read() or None
+        # Bounded like the main upload (atrium-project#53): it used to be read whole, with
+        # no limit at all.
+        baseline_bytes = await read_upload_bounded(document_json, MAX_UPLOAD.get(), "document_json") or None
 
     try:
         return build_document_record(doc_id, pages, baseline_bytes)
@@ -247,7 +293,7 @@ def get_info():
     return build_info(
         app,
         service="atrium-page-classification",
-        limits={"max_upload_mb": MAX_UPLOAD_MB, "max_pdf_pages": MAX_PDF_PAGES},
+        limits=LIMITS,
         categories=CATEGORIES,
         available_models=model_info,
     )
@@ -256,7 +302,7 @@ def get_info():
 @app.post("/predict_image", response_model=ImageResponse)
 async def predict_image(
     version: str = Form("all"),
-    topn: int = Form(3),
+    topn: int = Form(3, ge=1, le=_TOPN_MAX),
     file: UploadFile = File(...),
     document_json: UploadFile = File(None, description=_DOCUMENT_JSON_DESC),
     document_json_out: bool = Form(False, description=_DOCUMENT_JSON_OUT_DESC),
@@ -266,14 +312,12 @@ async def predict_image(
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
 
-    content = await file.read()
-    if len(content) > MAX_UPLOAD_BYTES:
-        raise HTTPException(
-            status_code=413, detail=f"File too large. Maximum size is {MAX_UPLOAD_BYTES // (1024 * 1024)}MB."
-        )
+    content = await read_upload_bounded(file, MAX_UPLOAD.get(), "File")
 
     try:
-        image = Image.open(io.BytesIO(content)).convert("RGB")
+        image = Image.open(io.BytesIO(content))  # reads the header only
+        _check_image_pixels(image.width, image.height, "The image")
+        image = image.convert("RGB")
         # Off the event loop (issue #55): manager.predict() is synchronous torch
         # inference. Called inline in an `async def`, it blocks the ONLY event loop, so
         # uvicorn's SIGTERM handler — an event-loop callback — could not run until the
@@ -293,10 +337,11 @@ async def predict_image(
         return ImageResponse(
             type="image",
             predictions=predictions,
+            limits_applied=[],
             document_json=record,
             document_json_schema_error=schema_err,
         )
-    except HTTPException:
+    except (HTTPException, LimitExceeded):
         raise
     except Exception as e:
         logger.error(f"Error processing image: {e}")
@@ -306,7 +351,7 @@ async def predict_image(
 @app.post("/predict_document")
 async def predict_document(
     version: str = Form("all"),
-    topn: int = Form(3),
+    topn: int = Form(3, ge=1, le=_TOPN_MAX),
     file: UploadFile = File(...),
     document_json: UploadFile = File(None, description=_DOCUMENT_JSON_DESC),
     document_json_out: bool = Form(False, description=_DOCUMENT_JSON_OUT_DESC),
@@ -316,11 +361,7 @@ async def predict_document(
     if not file.content_type or file.content_type != "application/pdf":
         raise HTTPException(status_code=400, detail="Invalid file type. Please upload a PDF.")
 
-    content = await file.read()
-    if len(content) > MAX_UPLOAD_BYTES:
-        raise HTTPException(
-            status_code=413, detail=f"File too large. Maximum size is {MAX_UPLOAD_BYTES // (1024 * 1024)}MB."
-        )
+    content = await read_upload_bounded(file, MAX_UPLOAD.get(), "File")
 
     try:
         # One thread hop for the WHOLE loop, not one per page (issue #55): this is up to
@@ -338,13 +379,14 @@ async def predict_document(
             [(str(r["page"]), r["predictions"]) for r in page_results],
         )
 
-        response: Dict[str, Any] = {"type": "document", "pages": page_results}
+        # limits_applied: see ImageResponse — present in every response, [] here today.
+        response: Dict[str, Any] = {"type": "document", "pages": page_results, "limits_applied": []}
         if record is not None:
             response["document_json"] = record
         if schema_err:
             response["document_json_schema_error"] = schema_err
         return response
-    except HTTPException:
+    except (HTTPException, LimitExceeded):
         raise
     except Exception as e:
         logger.error(f"Error processing document: {e}")

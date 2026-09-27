@@ -34,10 +34,13 @@ resolved with a single hop against a literal in the source; where they cannot (a
 computed from another config file, a class instance's default parameter with no
 `ast.Constant` in sight), this file makes no claim rather than guessing.
 
-THE SHARED-CORE FLOOR (test_the_shared_core_is_in_the_scan). Three modules are
-para-drift byte-identical across all five repos: atrium_paradata.py,
-service/atrium_service.py and service/healthcheck.py. Scanning only those plus the
-entrypoint's __main__ block yields the SAME thirteen names in every repo. That set is
+THE SHARED-CORE FLOOR (test_the_shared_core_is_in_the_scan). Four modules are
+para-drift byte-identical across all five repos and read the environment:
+atrium_paradata.py, service/atrium_service.py, service/healthcheck.py and
+atrium_limits.py (atrium-project#53; it reads a variable only through its caller's
+literal `limit("NAME", ...)`, and names none of its own except the upload limit's two,
+which atrium_service.py reads too). Scanning only those plus the entrypoint's __main__
+block yields the SAME thirteen names in every repo. That set is
 asserted literally, byte-identically, in every vendored copy of this file — it is the
 check that catches a broken scanner (a bad _SKIP_DIRS entry, a regex that stopped
 matching, a repo that lost service/) rather than a genuinely clean repo, because a
@@ -105,7 +108,12 @@ _SHARED_CORE = {
 }
 
 _ENV_READ = re.compile(r'(?:os\.)?(?:environ\.get|getenv|environ\[)\(?\s*["\']([A-Z_][A-Z0-9_]*)["\']')
-_ENV_HELPER = re.compile(r'_env_(?:float|int|str)\(\s*((?:["\'][A-Z_][A-Z0-9_]*["\']\s*,?\s*)+)')
+# `_env_int("NAME", ...)`-style repo helpers, and atrium_limits.py's `limit("NAME", ...)` /
+# `resolve_limit("NAME", ...)` (atrium-project#53): the variable is the literal first
+# argument. `(?<![\w])` keeps `rate_limit(` and `_limit(` out; `.limit(` is still matched.
+_ENV_HELPER = re.compile(
+    r'(?:_env_(?:float|int|str)|(?<![\w])(?:resolve_)?limit)\(\s*((?:["\'][A-Z_][A-Z0-9_]*["\']\s*,?\s*)+)'
+)
 _SKIP_DIRS = {"tests", "eval", "data_samples", "agent_dev_logs", ".git"}
 
 # Directory NAMES with no repo-specific meaning, wherever they sit under the repo
@@ -385,7 +393,21 @@ def _code_defaults(source: str) -> dict[str, str]:
                     resolved = _literal_default(node.args[1])
                     if resolved is not None:
                         defaults.setdefault(name, resolved)
-        elif attr == "resolve_max_upload_mb" and node.args:
+        elif attr in {"limit", "resolve_limit"} and node.args:
+            # atrium_limits.limit("NAME", <default>, ...): the default is the second
+            # positional argument (positional-only in atrium_limits, but a `default=`
+            # keyword is read too). A default computed from a config file or a backend
+            # is not a literal and stays unresolved -- env template Rule 3 applies.
+            name_arg = node.args[0]
+            if isinstance(name_arg, ast.Constant) and isinstance(name_arg.value, str):
+                default_node = node.args[1] if len(node.args) >= 2 else None
+                if default_node is None:
+                    default_node = next((kw.value for kw in node.keywords if kw.arg == "default"), None)
+                if default_node is not None:
+                    resolved = _literal_default(default_node)
+                    if resolved is not None:
+                        defaults.setdefault(name_arg.value, resolved)
+        elif attr in {"resolve_max_upload_mb", "upload_limit"} and node.args:
             resolved = _literal_default(node.args[0])
             if resolved is not None:
                 defaults["MAX_UPLOAD_MB"] = str(float(resolved))

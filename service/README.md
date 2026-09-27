@@ -18,6 +18,8 @@ Text, Drawing, Table) using various fine-tuned on historical data [^17] deep lea
 - [Installation & Setup 🛠](#installation--setup-)
 - [Quick API Test Launch 🚀](#quick-api-test-launch-)
 - [Configuration (environment) ⚙️](#configuration-environment-)
+- [Limits 📏](#limits)
+- [Errors 🚨](#errors)
 - [Client Side Test 🎨](#client-side-test-)
 - [Contacts 📧](#contacts-)
 - [Acknowledgements 🙏](#acknowledgements-)
@@ -96,7 +98,7 @@ The models classify pages into 11 distinct structural categories:
 | Method | Path                | Description                                                                                                                                                                 |
 |:-------|:--------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `GET`  | `/`                 | Serves the static `index.html` interface for manual testing.                                                                                                                |
-| `GET`  | `/info`             | Service identity + capabilities: `service`, `version`, `endpoints`, `limits`, plus available models and device.                                                             |
+| `GET`  | `/info`             | Service identity + capabilities: `service`, `version`, `endpoints`, `limits` (every [limit](#limits), current value), `limits_meta` (the variable that sets each), plus available models. |
 | `GET`  | `/health`           | Liveness probe — 200 always, even mid-shutdown. `?deep=true` also checks at least one model version is loaded (503 on failure or while draining).                           |
 | `GET`  | `/ready`            | Readiness probe (issue #55) — 503 until model warmup finishes, 200 while serving, 503 the instant `SIGTERM` arrives. The Kubernetes `readinessProbe`/`startupProbe` target. |
 | `POST` | `/predict_image`    | Performs inference on an uploaded single image (JPG/PNG).                                                                                                                   |
@@ -109,7 +111,8 @@ The models classify pages into 11 distinct structural categories:
 **Parameters (Form Data):**
 * `file`: The image file (JPEG or PNG).
 * `version`: The model version string (e.g., `v5.3`, `v1.3`) or `all`.
-* `topn`: (Optional) Number of top predictions to return (Default: 3).
+* `topn`: (Optional) Number of top predictions to return, 1–11 (one per category; Default: 3).
+  Outside that range the request is refused with 422.
 * `document_json`: (Optional) A baseline **ATRIUM Document JSON** record to accrete onto — the
   service equivalent of the CLI's `--document-json`.
 * `document_json_out`: (Optional, boolean) Return a record even with no baseline uploaded — the
@@ -313,8 +316,9 @@ Or for `-v all` the best models ensemble (average of 5 class scores):
 | `ALLOWED_ORIGINS`     | `*`       | CSV of CORS origins                                                      |
 | `MAX_UPLOAD_MB`       | `10`      | canonical upload limit — no shared default across the five services      |
 
-This service reads nothing beyond the shared contract above: `service/inference.py`,
-`service/document_json.py` and `service/api_client.py` contain no environment reads.
+Beyond the shared contract above, this service reads only its [limits](#limits), declared in
+`tool_limits.py`: `service/inference.py`, `service/document_json.py` and
+`service/api_client.py` contain no environment reads.
 This table is the deployment-facing subset. The complete ledger — every variable this
 image reads — is [`.env.example`](../.env.example) at the repo root, whose layout is
 fixed by `docs/templates/env.example.template` in ufal/atrium-project. The
@@ -336,6 +340,47 @@ directly.
 > `service/healthcheck.py` always probes loopback by design and never reads `HOST`, so a
 > loopback bind passes every probe while being unreachable from outside the container.
 
+## Limits
+
+Every limit this service has (atrium-project#53). Each is an environment setting, declared once
+in [`tool_limits.py`](../tool_limits.py), reported with its current value in `GET /info`
+`limits` — and with the variable that sets it in `limits_meta`. A malformed value stops the
+service at startup, naming the variable. Over a limit the service **refuses** the input with
+`reason: "limit_exceeded"` (see [Errors](#errors)); none of this service's limits cuts an
+input, so every response's `limits_applied` is `[]`. `tests/test_limits_contract.py` checks
+this table against `tool_limits.py` and `.env.example`.
+
+| Key (`/info`)      | Variable           | Default   | Unit  | Over the limit                                                                          |
+|--------------------|--------------------|-----------|-------|-----------------------------------------------------------------------------------------|
+| `max_upload_mb`    | `MAX_UPLOAD_MB`    | 10        | MB    | 413 `limit_exceeded` — per part: the file, and the `document_json` baseline             |
+| `max_pdf_pages`    | `MAX_PDF_PAGES`    | 50        | pages | 413 `limit_exceeded`, before any page is rendered                                       |
+| `pdf_render_dpi`   | `PDF_RENDER_DPI`   | 300       | dpi   | — (the resolution PDF pages are rendered at; 300 is how the training pages were made)   |
+| `max_image_pixels` | `MAX_IMAGE_PIXELS` | 178956970 | px    | 413 `limit_exceeded`: an image, or a PDF page at `PDF_RENDER_DPI`, sized before decoding |
+
+Platform limits (not settings): Starlette's multipart defaults (1000 files, 1000 fields, 1 MiB
+per non-file field).
+
+## Errors
+
+Every error has one JSON body (hub `docs/agent_skill_strategy.md` §4.4):
+`{"status": <int>, "reason": <code or null>, "detail": "<text>"}`, plus `limit`
+(`key`, `env`, `value`, `observed`, `unit`) when `reason` is `limit_exceeded`, and `errors`
+for request-validation problems.
+
+| Code | `reason`         | When                                                                                      |
+|------|------------------|-------------------------------------------------------------------------------------------|
+| 400  | `null`           | the file is not an image (`/predict_image`) or not a PDF (`/predict_document`)             |
+| 413  | `limit_exceeded` | over `MAX_UPLOAD_MB`, `MAX_PDF_PAGES` or `MAX_IMAGE_PIXELS`                                |
+| 422  | `null`           | request validation (e.g. `topn` outside 1–11), or an unusable `document_json` baseline     |
+| 500  | `null`           | processing failure, or a record rejected by its own schema                                 |
+| 503  | `null`           | the replica is shutting down — retry against a live one                                    |
+
+```json
+{"status": 413, "reason": "limit_exceeded",
+ "detail": "PDF has too many pages: 73. Limit is 50 (MAX_PDF_PAGES).",
+ "limit": {"key": "max_pdf_pages", "env": "MAX_PDF_PAGES", "value": 50, "observed": 73, "unit": "pages"}}
+```
+
 ## Shutdown behavior 🛑
 
 Issue [#55](https://github.com/ufal/atrium-project/issues/55). The published `api` image
@@ -356,7 +401,7 @@ event loop. That was a prerequisite, not a tidy-up: uvicorn's `SIGTERM` handler 
 event-loop callback, so while a synchronous `manager.predict()` held the loop, the signal
 could not be processed at all and `--timeout-graceful-shutdown` had nothing to measure.
 
-⚠️ A `/predict_document` call classifies up to `MAX_PDF_PAGES` (50) pages sequentially and
+⚠️ A `/predict_document` call classifies up to `MAX_PDF_PAGES` (default 50) pages sequentially and
 can legitimately outlive the 20s drain budget. Raise `--timeout-graceful-shutdown` and the
 deployment's grace period together for that workload — see `docs/k8s_deployment.md` in the
 hub.

@@ -81,6 +81,8 @@ jobs:
           # lost category URIs and the drift warning instead, which is worse. The guard
           # below does not model guarded imports and flagged it; that is the right call.
           cp atrium_paradata.py \
+             atrium_limits.py \
+             tool_limits.py \
              atrium_document.py \
              atrium_document_adapter.py \
              atrium_document.schema.json \

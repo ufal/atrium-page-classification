@@ -1,5 +1,14 @@
 """
 atrium_paradata.py  –  Unified provenance/paradata logger for ATRIUM pipelines.
+
+``limits_applied`` (atrium-project#53, factor III) is the optional 2.0 field listing
+every limit that shaped the run's result without refusing it — a sampled language
+window, a trimmed prompt, a split page — as ``{limit, value, effect, count, detail}``
+(``effect`` ∈ ``atrium_limits.EFFECTS``). ``finalize()`` always writes it (``[]`` when
+nothing applied); both merge functions carry it, each note tagged with its stage's
+``program``. Adding it needs no schema bump (``docs/paradata_schema.md``). This module
+does not import ``atrium_limits``: it accepts that module's ``LimitNotes`` or plain
+dicts, so a bundle that copies only this file keeps working.
 """
 
 from __future__ import annotations
@@ -32,6 +41,10 @@ _REPO_URLS: Dict[str, str] = {
     "translator": "https://github.com/ufal/atrium-translator",
     "llm-enrich": "https://github.com/ufal/atrium-llm-enrich",
 }
+
+#: The published ``limits_applied`` effects. The same tuple as ``atrium_limits.EFFECTS``
+#: (``tests/test_atrium_limits.py`` asserts it), copied so this module needs no import.
+_LIMIT_EFFECTS = ("sampled", "split", "trimmed", "skipped", "stopped")
 
 _ENV_RUNNER_IMAGE = "ATRIUM_RUNNER_IMAGE"
 _ENV_RUNNER_REPO = "ATRIUM_RUNNER_REPO"
@@ -102,6 +115,7 @@ class ParadataLogger:
                 self._components_used[comp["name"]] = comp["license"]
 
         self._skipped: List[Dict[str, str]] = []
+        self._limits_applied: List[Dict[str, Any]] = []
         self._input_total: int = 0
         self._finalised: bool = False
 
@@ -115,6 +129,28 @@ class ParadataLogger:
                 "timestamp": datetime.now(tz=timezone.utc).isoformat(),
             }
         )
+
+    def note_limit(self, limit: str, value: Any, effect: str, count: int = 1, detail: str = "") -> None:
+        """Record that ``limit`` (its ``/info`` key) shaped the result (``limits_applied``).
+
+        Notes for the same limit and effect are merged: counts add up, the first
+        non-empty detail is kept.
+        """
+        if effect not in _LIMIT_EFFECTS:
+            raise ValueError(f"note_limit(): effect must be one of {_LIMIT_EFFECTS}, not {effect!r}")
+        _merge_limit_notes(
+            self._limits_applied,
+            [{"limit": limit, "value": value, "effect": effect, "count": count, "detail": detail}],
+        )
+
+    def note_limits(self, notes: Any) -> None:
+        """Add every note of an ``atrium_limits.LimitNotes`` (or an iterable of note dicts)."""
+        _merge_limit_notes(self._limits_applied, _notes_as_dicts(notes))
+
+    @property
+    def limits_applied(self) -> List[Dict[str, Any]]:
+        """The notes recorded so far, as dicts (a copy)."""
+        return [dict(n) for n in self._limits_applied]
 
     def get_license_block(self) -> dict:
         """
@@ -225,6 +261,7 @@ class ParadataLogger:
                 "performance_per_minute": perf_per_min,
             },
             "skipped_files_detail": self._skipped,
+            "limits_applied": self.limits_applied,
         }
 
         out_path = os.path.join(self.paradata_dir, f"{self._run_id}_{self.program}.json")
@@ -255,6 +292,7 @@ class ParadataLogger:
             "output_counts": self._output_counts,
             "components_used": self._components_used,
             "skipped": self._skipped,
+            "limits_applied": self._limits_applied,
             "docs_processed": self._docs_processed,
             "start_iso": self._start_dt.isoformat(),
             "run_id": self._run_id,
@@ -271,6 +309,7 @@ class ParadataLogger:
         inst._output_counts = d["output_counts"]
         inst._components_used = d.get("components_used", {})
         inst._skipped = d["skipped"]
+        inst._limits_applied = list(d.get("limits_applied", []) or [])
         inst._docs_processed = d.get("docs_processed", 0)
         inst._run_id = d["run_id"]
         inst._start_dt = datetime.fromisoformat(d["start_iso"])
@@ -327,10 +366,12 @@ def load_paradata(path: str) -> Dict[str, Any]:
 def merge_paradata_files(json_paths: List[str], input_file: str, out_path: str) -> str:
     steps: List[Dict[str, Any]] = []
     license_blocks: List[Dict[str, Any]] = []
+    limits_applied: List[Dict[str, Any]] = []
     total_duration = 0.0
 
     for p in json_paths:
         data = load_paradata(p)
+        limits_applied.extend(_tag_notes(data))
         steps.append(
             {
                 "program": data.get("program"),
@@ -366,6 +407,7 @@ def merge_paradata_files(json_paths: List[str], input_file: str, out_path: str) 
         "license": merged_lic["effective_license"],
         "license_url": merged_lic["effective_license_url"],
         "license_detail": merged_lic,
+        "limits_applied": limits_applied,
         "merged_at": datetime.now(tz=timezone.utc).isoformat(),
     }
 
@@ -391,6 +433,7 @@ def merge_run_paradata(
     total_processed = 0
     total_skipped = 0
     all_skips: List[Dict[str, Any]] = []
+    limits_applied: List[Dict[str, Any]] = []
     repo = ""
     tool_version = ""
     earliest: Optional[str] = None
@@ -421,6 +464,7 @@ def merge_run_paradata(
         total_processed = int(stats.get("successfully_processed") or 0)
         total_skipped += int(stats.get("skipped_files") or 0)
         all_skips.extend(data.get("skipped_files_detail", []) or [])
+        limits_applied.extend(_tag_notes(data))
 
         st = data.get("start_time")
         en = data.get("end_time")
@@ -487,6 +531,7 @@ def merge_run_paradata(
             "skipped_files": total_skipped,
         },
         "skipped_files_detail": all_skips,
+        "limits_applied": limits_applied,
         "skipped_stages": skipped_stages or [],
         "license_note": (
             "Effective license/intermediate_formats reflect EXECUTED stages only; skipped: " + ", ".join(skipped_stages)
@@ -501,6 +546,48 @@ def merge_run_paradata(
         json.dump(payload, fh, ensure_ascii=False, indent=2)
     print(f"[paradata] Merged pipeline-run log → {out_path}", flush=True)
     return out_path
+
+
+def _notes_as_dicts(notes: Any) -> List[Dict[str, Any]]:
+    if notes is None:
+        return []
+    as_list = getattr(notes, "as_list", None)
+    if callable(as_list):
+        return list(as_list())
+    out: List[Dict[str, Any]] = []
+    for n in notes:
+        to_dict = getattr(n, "to_dict", None)
+        out.append(dict(to_dict()) if callable(to_dict) else dict(n))
+    return out
+
+
+def _merge_limit_notes(into: List[Dict[str, Any]], notes: List[Dict[str, Any]]) -> None:
+    for note in notes:
+        count = int(note.get("count", 1) or 0)
+        if count <= 0 or note.get("effect") not in _LIMIT_EFFECTS:
+            continue
+        for existing in into:
+            if existing.get("limit") == note.get("limit") and existing.get("effect") == note.get("effect"):
+                existing["count"] = int(existing.get("count", 0)) + count
+                if not existing.get("detail") and note.get("detail"):
+                    existing["detail"] = str(note["detail"])
+                break
+        else:
+            into.append(
+                {
+                    "limit": str(note.get("limit", "")),
+                    "value": _sanitise(note.get("value")),
+                    "effect": str(note.get("effect", "")),
+                    "count": count,
+                    "detail": str(note.get("detail", "") or ""),
+                }
+            )
+
+
+def _tag_notes(data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """A record's ``limits_applied``, each note tagged with the record's ``program``."""
+    program = data.get("program")
+    return [{"program": note.get("program", program), **note} for note in (data.get("limits_applied") or [])]
 
 
 def _sanitise(obj: Any, _depth: int = 0) -> Any:
@@ -543,6 +630,14 @@ def _cli() -> None:
     co.add_argument("--state", required=True)
     co.add_argument("--name", required=True)
     co.add_argument("--license", default=None)
+
+    nl = sub.add_parser("note-limit")
+    nl.add_argument("--state", required=True)
+    nl.add_argument("--limit", required=True)
+    nl.add_argument("--value", default=None)
+    nl.add_argument("--effect", required=True)
+    nl.add_argument("--count", type=int, default=1)
+    nl.add_argument("--detail", default="")
 
     fi = sub.add_parser("finish")
     fi.add_argument("--state", required=True)
@@ -587,7 +682,7 @@ def _cli() -> None:
         print(f"[paradata] Migrated {args.path} to {SCHEMA_VERSION}", flush=True)
         return
 
-    elif args.cmd in ("skip", "success", "component", "finish"):
+    elif args.cmd in ("skip", "success", "component", "note-limit", "finish"):
         with open(args.state, "r", encoding="utf-8") as fh:
             state_dict = json.load(fh)
         logger = ParadataLogger._from_state_dict(state_dict)
@@ -600,6 +695,8 @@ def _cli() -> None:
                 logger.log_component(name)
         elif args.cmd == "component":
             logger.log_component(args.name, args.license)
+        elif args.cmd == "note-limit":
+            logger.note_limit(args.limit, _cli_number(args.value), args.effect, args.count, args.detail)
         elif args.cmd == "finish":
             logger.finalize(input_total=getattr(args, "input_total", None))
             os.remove(args.state)
@@ -607,6 +704,16 @@ def _cli() -> None:
 
         with open(args.state, "w", encoding="utf-8") as fh:
             json.dump(logger._to_state_dict(), fh, ensure_ascii=False)
+
+
+def _cli_number(raw: Optional[str]) -> Any:
+    if raw is None:
+        return None
+    try:
+        number = float(raw)
+    except ValueError:
+        return raw
+    return int(number) if number.is_integer() else number
 
 
 if __name__ == "__main__":
