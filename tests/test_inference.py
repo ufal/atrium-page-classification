@@ -29,12 +29,14 @@ def dummy_image():
 
 
 def test_get_base_model_id(manager):
-    """Test registry dictionary lookups and error handling."""
-    with patch("service.inference.REVISION_TO_BASE_MODEL", {"v4.3": "vit-base-test"}):
+    """Test base-model resolution and error handling."""
+    with patch(
+        "service.inference.resolve_base_model",
+        side_effect={"v4.3": "vit-base-test"}.get,
+    ):
         assert manager._get_base_model_id("v4.3") == "vit-base-test"
-
-    with pytest.raises(ValueError, match="Base model not found"):
-        manager._get_base_model_id("unknown_version")
+        with pytest.raises(ValueError, match="Base model not found"):
+            manager._get_base_model_id("unknown_version")
 
 
 def test_get_model_details(manager):
