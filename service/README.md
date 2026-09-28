@@ -20,6 +20,7 @@ Text, Drawing, Table) using various fine-tuned on historical data [^17] deep lea
 - [Configuration (environment) ⚙️](#configuration-environment-)
 - [Limits 📏](#limits)
 - [Errors 🚨](#errors)
+- [OpenAPI (the typed contract) 📜](#openapi-the-typed-contract)
 - [Client Side Test 🎨](#client-side-test-)
 - [Contacts 📧](#contacts-)
 - [Acknowledgements 🙏](#acknowledgements-)
@@ -95,26 +96,32 @@ The models classify pages into 11 distinct structural categories:
 
 ### Endpoints 🔗
 
-| Method | Path                | Description                                                                                                                                                                 |
-|:-------|:--------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `GET`  | `/`                 | Serves the static `index.html` interface for manual testing.                                                                                                                |
+| Method | Path                | Description                                                                                                                                                                               |
+|:-------|:--------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `GET`  | `/`                 | Serves the static `index.html` interface for manual testing.                                                                                                                              |
 | `GET`  | `/info`             | Service identity + capabilities: `service`, `version`, `endpoints`, `limits` (every [limit](#limits), current value), `limits_meta` (the variable that sets each), plus available models. |
-| `GET`  | `/health`           | Liveness probe — 200 always, even mid-shutdown. `?deep=true` also checks at least one model version is loaded (503 on failure or while draining).                           |
-| `GET`  | `/ready`            | Readiness probe (issue #55) — 503 until model warmup finishes, 200 while serving, 503 the instant `SIGTERM` arrives. The Kubernetes `readinessProbe`/`startupProbe` target. |
-| `POST` | `/predict_image`    | Performs inference on an uploaded single image (JPG/PNG).                                                                                                                   |
-| `POST` | `/predict_document` | Performs inference on an uploaded multipage PDF document.                                                                                                                   |
+| `GET`  | `/health`           | Liveness probe — 200 always, even mid-shutdown. `?deep=true` also checks at least one model version is loaded (503 on failure or while draining).                                         |
+| `GET`  | `/ready`            | Readiness probe (issue #55) — 503 until model warmup finishes, 200 while serving, 503 the instant `SIGTERM` arrives. The Kubernetes `readinessProbe`/`startupProbe` target.               |
+| `POST` | `/predict_image`    | Performs inference on an uploaded single image (JPG/PNG).                                                                                                                                 |
+| `POST` | `/predict_document` | Performs inference on an uploaded multipage PDF document.                                                                                                                                 |
 
 ### Request Example 💻
 
 **Endpoint:** `/predict_image`
 
 **Parameters (Form Data):**
-* `file`: The image file (JPEG or PNG).
-* `version`: The model version string (e.g., `v5.3`, `v1.3`) or `all`.
+* `file`: The image file (JPEG or PNG); any other media type is refused with `415`
+  `unsupported_media_type`, and bytes that are not a readable image with `422`.
+* `version`: `all` (the ensemble, the default) or a model revision (e.g. `v4.4`; `/info`
+  `available_models` lists the published ones). A value no revision matches is refused with `422`
+  before any model runs (atrium-project#32 round 2; it was a `500` from the model loader).
 * `topn`: (Optional) Number of top predictions to return, 1–11 (one per category; Default: 3).
   Outside that range the request is refused with 422.
 * `document_json`: (Optional) A baseline **ATRIUM Document JSON** record to accrete onto — the
-  service equivalent of the CLI's `--document-json`.
+  service equivalent of the CLI's `--document-json` — or an AMČR seed (`doc_id`, `source`). One
+  that cannot be opened (not UTF-8 JSON, not an object, a newer `schema_version` major) is refused
+  with `422` `invalid_record` before any model runs. An empty part means "no baseline" but still
+  asks for a record, which this stage-1 tool then originates.
 * `document_json_out`: (Optional, boolean) Return a record even with no baseline uploaded — the
   equivalent of `--document-json-out`. page-classification is stage 1 of the pipeline, so it
   *originates* the record as often as it updates one.
@@ -128,20 +135,29 @@ curl -X POST "http://localhost:8000/predict_image" \
   -F "topn=1"
 ```
 
-Example JSON response:
+Example JSON response (every field is always present; `ImageResponse` in [`openapi.json`](openapi.json)):
 ```json
 {
   "type": "image",
-  "model_version": "google/vit-base-patch16-224 (v2.3)",
-  "requested_topn": 1,
   "predictions": [
     {
       "label": "TEXT",
       "score": 0.975
     }
-  ]
+  ],
+  "limits_applied": [],
+  "document_json": null,
+  "document_json_schema_error": null,
+  "paradata": null
 }
 ```
+
+`/predict_document` answers `{"type": "document", "pages": [{"page": 1, "predictions": [...]}, ...],
+"limits_applied": []}` (`DocumentResponse`), with `document_json` (and `document_json_schema_error`)
+only when a record was asked for. A PDF that does not open is refused with `422`; a page the model
+could not classify fails the request with `500` naming the page (it used to come back inside a `200`
+as that page's `{"error": ...}`). `paradata` is reserved for the run's provenance
+(atrium-project#67 R2) and not returned yet.
 
 ### ATRIUM Document JSON accretion 🧩
 
@@ -367,19 +383,45 @@ Every error has one JSON body (hub `docs/agent_skill_strategy.md` §4.4):
 (`key`, `env`, `value`, `observed`, `unit`) when `reason` is `limit_exceeded`, and `errors`
 for request-validation problems.
 
-| Code | `reason`         | When                                                                                      |
-|------|------------------|-------------------------------------------------------------------------------------------|
-| 400  | `null`           | the file is not an image (`/predict_image`) or not a PDF (`/predict_document`)             |
-| 413  | `limit_exceeded` | over `MAX_UPLOAD_MB`, `MAX_PDF_PAGES` or `MAX_IMAGE_PIXELS`                                |
-| 422  | `null`           | request validation (e.g. `topn` outside 1–11), or an unusable `document_json` baseline     |
-| 500  | `null`           | processing failure, or a record rejected by its own schema                                 |
-| 503  | `null`           | the replica is shutting down — retry against a live one                                    |
+| Code | `reason`                 | When                                                                                                                                                                             |
+|------|--------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 413  | `limit_exceeded`         | over `MAX_UPLOAD_MB`, `MAX_PDF_PAGES` or `MAX_IMAGE_PIXELS`                                                                                                                      |
+| 415  | `unsupported_media_type` | the file is not an image (`/predict_image`, `accepted: ["image/*"]`) or not a PDF (`/predict_document`, `accepted: ["application/pdf"]`); a 400 before atrium-project#32 round 2 |
+| 422  | `invalid_record`         | the `document_json` baseline cannot be opened (not UTF-8 JSON, not an object, a newer `schema_version` major)                                                                    |
+| 422  | `null`                   | request validation (e.g. `topn` outside 1–11), an unknown `version`, or an image or PDF that cannot be read                                                                      |
+| 500  | `null`                   | processing failure (a page the model could not classify included), or a record rejected by its own schema                                                                        |
+| 503  | `null`                   | the replica is shutting down — retry against a live one                                                                                                                          |
 
 ```json
 {"status": 413, "reason": "limit_exceeded",
  "detail": "PDF has too many pages: 73. Limit is 50 (MAX_PDF_PAGES).",
  "limit": {"key": "max_pdf_pages", "env": "MAX_PDF_PAGES", "value": 50, "observed": 73, "unit": "pages"}}
 ```
+
+## OpenAPI (the typed contract)
+
+The service's OpenAPI document is committed as [`service/openapi.json`](openapi.json) and
+attached to every release as `openapi.json` with its `openapi.json.sha256` (atrium-project#32
+round 2). It is what a client is generated from: every request and response field is typed,
+every error response is the `ErrorBody` above, the registered `reason` codes are listed in
+`x-atrium-reason-codes`, and a returned record is typed by the vendored record schema
+(`AtriumDocument`). `GET /info` reports `openapi_sha256`, the digest of the spec the running
+image serves — equal to the release's `openapi.json.sha256` for an image built from that tag.
+
+- **After an API change**, regenerate and commit it — torch is not needed, the model manager is
+  stubbed as the tests stub it: `python atrium_openapi.py export --app service.api:app --out
+  service/openapi.json --prepare tests.openapi_contract_data:prepare`.
+  `tests/test_openapi_contract.py` fails while it is stale.
+- **Compatibility.** Each release compares its spec with the previous release's
+  (`release.yml`, `atrium_openapi.py compare` with oasdiff): a breaking change fails the
+  release unless the major version went up (for 0.x, that means 1.0), and a removed reason
+  code always fails. New fields, endpoints and reason codes are additive.
+- **fastapi and pydantic are pinned** exactly (`service/requirements.txt`,
+  `setup/requirements-test.txt`): the spec is generated by them. Bump both by hand and regenerate.
+- **Tests.** `tests/test_api_contract.py` now runs in the fast lane too (the same stub): it drives
+  both endpoints and holds every response — 200s and refusals — to the published schema.
+- **The release bundle** ships `atrium_openapi.py` (the service imports it to finish and digest the
+  spec) and `service/openapi.json`.
 
 ## Shutdown behavior 🛑
 

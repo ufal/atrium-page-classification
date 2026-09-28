@@ -57,12 +57,13 @@ known-first-party = [
     "atrium_service",
     "para_licenses",
     "check_version",
+    "atrium_openapi",
 ]
 
 [format]
 # THE VENDORED CANONICAL FILES ARE NOT THIS REPO'S TO FORMAT.
 #
-# `para-drift.reusable.yml` requires these 22 files to be BYTE-IDENTICAL across the
+# `para-drift.reusable.yml` requires these 24 files to be BYTE-IDENTICAL across the
 # hub and all five tool repos. But every tool repo runs `ruff-format` as a pre-commit
 # hook while the hub deliberately does not ("lint only; the hub is not auto-formatted"),
 # and `line-length` is not uniform across the ecosystem -- it is 120 here, in
@@ -107,5 +108,7 @@ exclude = [
     "atrium_limits.py",
     "tests/test_atrium_limits.py",
     "tests/test_limits_contract.py",
+    "atrium_openapi.py",
+    "tests/test_openapi_contract.py",
     "docs/templates/shared/*.py",
 ]

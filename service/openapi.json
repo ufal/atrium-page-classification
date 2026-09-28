@@ -1,0 +1,2340 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ATRIUM Page Classification API",
+    "description": "API for classifying historical document page images.",
+    "version": "1.8.0-beta",
+    "x-atrium-service": "atrium-page-classification"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health",
+        "parameters": [
+          {
+            "name": "deep",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Deep"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alive; with `?deep=true`, the backends answer too.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unusable or invalid input: request validation (`errors`), a bad parameter, a record that cannot be opened (`reason: invalid_record`), or a parameter or per-input budget over its limit (`reason: limit_exceeded`). Do not retry unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing failed. Report it; do not retry blindly.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "`degraded`: the deep check failed, or the replica drains.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ready": {
+      "get": {
+        "summary": "Ready",
+        "operationId": "ready",
+        "responses": {
+          "200": {
+            "description": "`ready`: route new work here.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadyBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing failed. Report it; do not retry blindly.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "`starting` or `draining`: route new work elsewhere.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadyBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Read Root",
+        "operationId": "read_root",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "500": {
+            "description": "Processing failed. Report it; do not retry blindly.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/info": {
+      "get": {
+        "summary": "Get Info",
+        "description": "Return service identity, capabilities, and available model versions (§4.1).",
+        "operationId": "get_info",
+        "responses": {
+          "200": {
+            "description": "Identity, limits, capabilities.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PcInfo"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing failed. Report it; do not retry blindly.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/predict_image": {
+      "post": {
+        "summary": "Predict Image",
+        "description": "Classify a single uploaded image.",
+        "operationId": "predict_image",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_predict_image"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The categories, and the record when one was asked for.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImageResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unusable or invalid input: request validation (`errors`), a bad parameter, a record that cannot be opened (`reason: invalid_record`), or a parameter or per-input budget over its limit (`reason: limit_exceeded`). Do not retry unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing failed. Report it; do not retry blindly.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request content is over a limit (`reason: limit_exceeded`). Split the input or raise the limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported media type (`reason: unsupported_media_type`, with `accepted`). Do not retry unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Not ready, warming up or draining. Retry three times with backoff.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/predict_document": {
+      "post": {
+        "summary": "Predict Document",
+        "description": "Extracts pages from a PDF and classifies each page.",
+        "operationId": "predict_document",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_predict_document"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The categories of every page, and the record when one was asked for.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unusable or invalid input: request validation (`errors`), a bad parameter, a record that cannot be opened (`reason: invalid_record`), or a parameter or per-input budget over its limit (`reason: limit_exceeded`). Do not retry unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing failed. Report it; do not retry blindly.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request content is over a limit (`reason: limit_exceeded`). Split the input or raise the limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported media type (`reason: unsupported_media_type`, with `accepted`). Do not retry unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Not ready, warming up or draining. Retry three times with backoff.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AtriumDocument": {
+        "title": "ATRIUM document record",
+        "description": "Per-document aggregate record built by accretion across the ATRIUM pipeline. Each tool writes only its own block and passes every other block through untouched. References are restricted to the original input and persistent step outputs; disposable derivations (Markdown, page images) appear in 'regenerable' as recipes, never as stored paths. Produced by atrium_document.py; sibling of the atrium_paradata.py provenance record. FROZEN AT 1.0 (atrium-project#54): the top-level assertions below are a compatibility obligation, not a design surface. Three of them, in the order a reader should apply them -- (a) `required` names the five keys every record written through DocumentRecord.to_dict() carries unconditionally; (b) `anyOf` says a record must carry EVIDENCE THAT SOMETHING WAS WRITTEN INTO IT, either `source` (the originator's first-writer handshake, which deliberately does not stamp a block) or at least one entry in `assembled.blocks`; (c) `allOf` says every block named in `assembled.blocks` must actually be present at top level -- a stamp without a payload is an incoherent record, not a sparse one.",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "record_type",
+          "doc_id",
+          "provenance",
+          "assembled"
+        ],
+        "additionalProperties": true,
+        "anyOf": [
+          {
+            "$comment": "The originator's handshake. set_source() writes `source` and deliberately does NOT call _stamp(), so alto-postprocess/page_split.py -- stage 1 of the scanned pipeline -- legitimately emits a record with no `assembled.blocks` key at all. That record is the one case where 'contributed no block' is correct rather than a defect, and it is authorised HERE rather than by weakening the rule for everyone.",
+            "required": [
+              "source"
+            ]
+          },
+          {
+            "$comment": "Everything else. A record with neither `source` nor a stamped block is what atrium-project#54 calls 'a stage that produces nothing' -- finalize() already prints WARNING - <program> contributed no block, and this promotes that warning to a validation failure. minProperties lives here rather than on assembled.blocks itself so that a fan-in merge of two source-only records, which legitimately carries blocks: {}, still validates through the branch above.",
+            "required": [
+              "assembled"
+            ],
+            "properties": {
+              "assembled": {
+                "required": [
+                  "blocks"
+                ],
+                "properties": {
+                  "blocks": {
+                    "minProperties": 1
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "allOf": [
+          {
+            "$comment": "Stamp/payload coherence. assembled.blocks[<name>] is written by _stamp(), which runs only from set_block()/merge_block()/add_derived_from()/add_regenerable() -- i.e. only where the payload is written in the same call. So a stamp naming a block the record does not carry cannot be produced by the module, and means the record was hand-built, truncated in transit, or field-filtered down to nothing. One if/then per stampable name: the nine content blocks plus the two accreting maps. A name this table has not been taught (a newer block, rule 6) simply has no clause and passes -- the same abstain-rather-than-refuse idiom ORIGIN_ORIGINATORS uses."
+          },
+          {
+            "if": {
+              "required": [
+                "assembled"
+              ],
+              "properties": {
+                "assembled": {
+                  "required": [
+                    "blocks"
+                  ],
+                  "properties": {
+                    "blocks": {
+                      "required": [
+                        "derived_from"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "derived_from"
+              ]
+            }
+          },
+          {
+            "if": {
+              "required": [
+                "assembled"
+              ],
+              "properties": {
+                "assembled": {
+                  "required": [
+                    "blocks"
+                  ],
+                  "properties": {
+                    "blocks": {
+                      "required": [
+                        "regenerable"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "regenerable"
+              ]
+            }
+          },
+          {
+            "if": {
+              "required": [
+                "assembled"
+              ],
+              "properties": {
+                "assembled": {
+                  "required": [
+                    "blocks"
+                  ],
+                  "properties": {
+                    "blocks": {
+                      "required": [
+                        "page_categories"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "page_categories"
+              ]
+            }
+          },
+          {
+            "if": {
+              "required": [
+                "assembled"
+              ],
+              "properties": {
+                "assembled": {
+                  "required": [
+                    "blocks"
+                  ],
+                  "properties": {
+                    "blocks": {
+                      "required": [
+                        "pages"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "pages"
+              ]
+            }
+          },
+          {
+            "if": {
+              "required": [
+                "assembled"
+              ],
+              "properties": {
+                "assembled": {
+                  "required": [
+                    "blocks"
+                  ],
+                  "properties": {
+                    "blocks": {
+                      "required": [
+                        "content"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "content"
+              ]
+            }
+          },
+          {
+            "if": {
+              "required": [
+                "assembled"
+              ],
+              "properties": {
+                "assembled": {
+                  "required": [
+                    "blocks"
+                  ],
+                  "properties": {
+                    "blocks": {
+                      "required": [
+                        "lines"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "lines"
+              ]
+            }
+          },
+          {
+            "if": {
+              "required": [
+                "assembled"
+              ],
+              "properties": {
+                "assembled": {
+                  "required": [
+                    "blocks"
+                  ],
+                  "properties": {
+                    "blocks": {
+                      "required": [
+                        "tables"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "tables"
+              ]
+            }
+          },
+          {
+            "if": {
+              "required": [
+                "assembled"
+              ],
+              "properties": {
+                "assembled": {
+                  "required": [
+                    "blocks"
+                  ],
+                  "properties": {
+                    "blocks": {
+                      "required": [
+                        "entities"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "entities"
+              ]
+            }
+          },
+          {
+            "if": {
+              "required": [
+                "assembled"
+              ],
+              "properties": {
+                "assembled": {
+                  "required": [
+                    "blocks"
+                  ],
+                  "properties": {
+                    "blocks": {
+                      "required": [
+                        "translations"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "translations"
+              ]
+            }
+          },
+          {
+            "if": {
+              "required": [
+                "assembled"
+              ],
+              "properties": {
+                "assembled": {
+                  "required": [
+                    "blocks"
+                  ],
+                  "properties": {
+                    "blocks": {
+                      "required": [
+                        "enrichment"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "enrichment"
+              ]
+            }
+          },
+          {
+            "if": {
+              "required": [
+                "assembled"
+              ],
+              "properties": {
+                "assembled": {
+                  "required": [
+                    "blocks"
+                  ],
+                  "properties": {
+                    "blocks": {
+                      "required": [
+                        "forms"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "forms"
+              ]
+            }
+          }
+        ],
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "pattern": "^[0-9]+\\.[0-9]+$",
+            "description": "Record schema version. A newer MAJOR than the reading tool supports must be refused; an older one is migrated transparently.",
+            "examples": [
+              "1.0"
+            ]
+          },
+          "record_type": {
+            "type": "string",
+            "enum": [
+              "atrium-document",
+              "atrium-document-merged"
+            ],
+            "description": "'atrium-document' for the normal linear accretion; '-merged' when parallel partial records were folded."
+          },
+          "doc_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Stable document identifier, carried unchanged by every tool.",
+            "examples": [
+              "CTX000000001"
+            ]
+          },
+          "source": {
+            "type": "object",
+            "description": "The ORIGINAL input. First writer wins; later tools must not overwrite it. The durable key is doc_id + sha256 — originals are archive-managed, not pipeline-local, so no path is required.",
+            "additionalProperties": true,
+            "properties": {
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "filename": {
+                "type": "string"
+              },
+              "media_type": {
+                "type": "string",
+                "examples": [
+                  "application/alto+xml",
+                  "application/pdf"
+                ]
+              },
+              "page_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "language": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "origin": {
+                "type": "string",
+                "description": "How the text was obtained. Load-bearing since Issue #18: for the positional blocks (pages/content/lines/tables) this value selects which originator is authorised to write them — see ORIGIN_ORIGINATORS in atrium_document.py. First writer wins, so it is fixed for the life of the record.",
+                "examples": [
+                  "ABBYY-ALTO",
+                  "digital-born-pdf",
+                  "docx",
+                  "ocr:tesseract-ces",
+                  "ocr:pero",
+                  "vlm:glm-4v"
+                ]
+              }
+            }
+          },
+          "derived_from": {
+            "type": "object",
+            "description": "PERSISTENT step outputs this record was built from. Keys are stage-scoped; values are references to stored artifacts. Never a transient artifact.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "examples": [
+              {
+                "alto_categ": "DOC_LINE_CATEG/CTX000000001.csv",
+                "teitok": "TEITOK/CTX000000001.teitok.xml",
+                "enriched": "KW_PER_DOC_LLM/CTX000000001_enriched.json",
+                "paradata": "paradata/260724-101112_pipeline-run.json"
+              }
+            ]
+          },
+          "regenerable": {
+            "type": "object",
+            "description": "DISPOSABLE derivations recorded as reproducible recipes rather than stored paths — the annotated Markdown, and by the same rule any rendered page image.",
+            "additionalProperties": {
+              "type": "object",
+              "required": [
+                "from"
+              ],
+              "additionalProperties": true,
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "description": "Persistent artifact the derivation is regenerated from."
+                },
+                "converter": {
+                  "type": "string",
+                  "examples": [
+                    "xml_to_md@0.3.0"
+                  ]
+                },
+                "detail": {
+                  "type": "string",
+                  "enum": [
+                    "full",
+                    "standard",
+                    "minimal"
+                  ]
+                }
+              }
+            }
+          },
+          "provenance": {
+            "type": "object",
+            "description": "Accreting license union plus the list of contributing tool runs. Mirrors the paradata license block; references paradata rather than duplicating it.",
+            "additionalProperties": true,
+            "properties": {
+              "license": {
+                "type": "string",
+                "examples": [
+                  "CC BY-NC-SA 4.0"
+                ]
+              },
+              "license_url": {
+                "type": "string"
+              },
+              "license_detail": {
+                "type": "object",
+                "description": "Output of para_licenses.merge_effective_licenses over every contributing tool — most restrictive wins.",
+                "additionalProperties": true
+              },
+              "contributors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "program": {
+                      "type": "string"
+                    },
+                    "run_id": {
+                      "type": "string"
+                    },
+                    "paradata_ref": {
+                      "type": "string"
+                    },
+                    "blocks": {
+                      "type": "string",
+                      "description": "Comma-separated blocks this run wrote."
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "assembled": {
+            "type": "object",
+            "description": "Per-block provenance — the source of granularity. Re-running one tool rewrites exactly one entry here.",
+            "additionalProperties": true,
+            "properties": {
+              "blocks": {
+                "type": "object",
+                "description": "The stamp registry: one entry per block this record's contributing runs actually wrote, keyed by top-level block name. Written only by _stamp(). Two rules key off it and neither is expressible anywhere else -- the top-level `anyOf` (a record with no source needs at least one entry here) and the top-level `allOf` (every name here must have a payload at top level). Its absence is not an error: a record that carries only `source` has never been stamped. Consumers asking 'who wrote this block' read blocks[<name>].program, which names the MOST RECENT writer of a field-split block; the full picture is provenance.contributors[].",
+                "additionalProperties": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "program": {
+                      "type": "string"
+                    },
+                    "run_id": {
+                      "type": "string"
+                    },
+                    "paradata_ref": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              },
+              "had_baseline": {
+                "type": "boolean",
+                "description": "False when the tool ran without a previous record and emitted only its own part."
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          },
+          "page_categories": {
+            "description": "Owner: page-classification. Predicted category per page label. Values come from the `page-category` scheme in the hub-canonical atrium_vocab.py -- 11 concepts, `atrium_vocab.labels_for('page-category')` -- and each has a stable URI via `atrium_vocab.concept_uri('page-category', value)`. Deliberately NOT constrained by `enum`: page-classification derives its label list from the filesystem at runtime (utils.py collect_images), so an enum here would turn a naming slip into a hard pipeline failure instead of the advisory NOTE the registry raises. See docs/skos_strategy.md 4.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "x-atrium-scheme": "page-category",
+            "examples": [
+              {
+                "1": "TEXT",
+                "2": "DRAW"
+              }
+            ]
+          },
+          "pages": {
+            "description": "Originator: alto-postprocess (OCR/ALTO path) or digital-convert (digital-born PDF/DOCX path), selected per document by source.origin — never both. page-classification may write category fields; nlp-enrich may write teitok_surface. Field-level ownership — never co-mutated.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "page"
+              ],
+              "additionalProperties": true,
+              "properties": {
+                "page": {
+                  "type": "string",
+                  "description": "Page label as a string, so 'iv' or 'A-1' survive. Consumers must NOT derive ordering from it — use page_index."
+                },
+                "page_index": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "1-based physical position of this page in the document — the ordering key, and the only one that works when `page` is a roman numeral or an appendix label. Writable by both originators: an ALTO record needs it as much as a digital-born one, since roman-numeral front matter is common in both."
+                },
+                "quality_score": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "quality_band": {
+                  "type": "string",
+                  "enum": [
+                    "Trash",
+                    "Noisy",
+                    "Clear"
+                  ]
+                },
+                "category": {
+                  "type": "string"
+                },
+                "category_confidence": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "needs_ocr": {
+                  "type": "boolean",
+                  "description": "Set by whichever tool originated this page. On the digital-born path it means the embedded text layer exists but does not decode to trustworthy text (Issue #10: non-embedded WinAnsi with no /ToUnicode yields systematic diacritic corruption), i.e. this page should be re-acquired by OCR despite not being a scan. The converter reports; routing policy lives outside it. Because the two paths mean OPPOSITE things by it (no text layer vs. an untrustworthy one), always write needs_ocr_reason alongside. Setting this is also what authorises alto-postprocess to re-originate the positional plane of a digital-born record — see _assert_origin_consistent() in atrium_document.py.",
+                  "examples": [
+                    true
+                  ]
+                },
+                "needs_ocr_reason": {
+                  "type": "string",
+                  "description": "Why this page needs OCR, in words, because needs_ocr alone is ambiguous between the two paths and the Markdown renderer emits it as a layout cue the model reads. Without it, api_util/xml_to_md.rows_to_layout_markdown() fell back to 'no extractable text layer' — factually inverted for every digital-born page, which by definition HAS a text layer.",
+                  "examples": [
+                    "no extractable text layer",
+                    "text layer decodes to corrupt diacritics (WinAnsi declared, no /ToUnicode)"
+                  ]
+                },
+                "ocr": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "additionalProperties": true,
+                  "properties": {
+                    "engine": {
+                      "type": "string"
+                    },
+                    "lang": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "canvas": {
+                  "type": "object",
+                  "description": "Page dimensions, and the unit every bbox on this page is expressed in. Write `unit` whenever any bbox is present — a digital-born PDF page is in points, an ALTO page is usually in pixels, and $defs/bbox has no other way to say which.",
+                  "additionalProperties": true,
+                  "properties": {
+                    "width": {
+                      "type": "number"
+                    },
+                    "height": {
+                      "type": "number"
+                    },
+                    "unit": {
+                      "type": "string",
+                      "default": "px",
+                      "examples": [
+                        "pt",
+                        "px"
+                      ]
+                    }
+                  }
+                },
+                "teitok_surface": {
+                  "type": "string",
+                  "description": "Logical TEITOK <surface> id — an identifier, never an image path."
+                }
+              }
+            }
+          },
+          "content": {
+            "description": "Originator: alto-postprocess or digital-convert, selected per document by source.origin (Issue #18) — never both. Reading-order text for search, or null when externalised by reference.",
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "text": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "reading_order": {
+                "type": "string",
+                "examples": [
+                  "ltr-columns"
+                ]
+              }
+            }
+          },
+          "lines": {
+            "description": "Originator: alto-postprocess (categ/quality/lang/text) or digital-convert (text/bbox/group_id/lang/quality_score/categ), selected per document by source.origin (Issue #18) — never both. nlp-enrich writes morphology and teitok_ref. Field-level ownership. NOTE for validators: only page+line are required, so a row stripped of its text by a field-ownership filter still validates here — the round-trip assertion belongs in the writing tool, not in this schema.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "page",
+                "line"
+              ],
+              "additionalProperties": true,
+              "properties": {
+                "page": {
+                  "type": "string",
+                  "description": "Page LABEL, matching a pages[].page. A string for the same reason as there — 'iv' and 'A-1' must survive — so a writer must not pass an integer here: merge_block() keys rows on it, and a consumer sorting on int(page) needs pages[].page_index to order non-numeric labels."
+                },
+                "line": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "text": {
+                  "type": "string"
+                },
+                "categ": {
+                  "type": "string",
+                  "description": "Line category. Open string with TWO authorised originators emitting DISJOINT label sets: alto-postprocess emits Clear/Empty/Noisy/Non-text/Trash, digital-convert emits Garbage/Inverted. Both sets are declared in the hub-canonical atrium_vocab.py as the `line-category` scheme; `atrium_vocab.LINE_CATEGORY_ORIGINATORS` says which tool emits which. 'Garbage', 'Inverted' and 'Trash' are load-bearing for api_util/json_to_md.py's DROP_CATEGORIES, which filters on atrium_vocab.UNTRUSTWORTHY_LINE_CATEGORIES (defect V-1 in docs/skos_strategy.md 6, fixed 2026-09-25: it covered only the first two, so a Trash line reached the model exactly like a Clear one). A re-spelled category passes that filter unnoticed, so do not re-spell one on the way out. A re-spelling would not fail validation either -- it would only put a tool out of step with the registry, in silence.",
+                  "x-atrium-scheme": "line-category",
+                  "examples": [
+                    "Clear",
+                    "Noisy",
+                    "Trash",
+                    "Garbage",
+                    "Inverted"
+                  ]
+                },
+                "lang": {
+                  "type": "string"
+                },
+                "quality_score": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "lemma": {
+                  "type": "string",
+                  "description": "nlp-enrich: UD lemma of the line's dominant token/lead form."
+                },
+                "upos": {
+                  "type": "string",
+                  "description": "nlp-enrich: UD universal POS tag."
+                },
+                "feats": {
+                  "type": "string",
+                  "description": "nlp-enrich: UD morphological features string."
+                },
+                "bbox": {
+                  "$ref": "#/components/schemas/AtriumDocument_bbox",
+                  "description": "On the ALTO path, derived by nlp-enrich while aligning to TEITOK. On the digital-born path, the PDF adapter's native coordinates — the only bbox such a record will ever have, since there is no TEITOK to align to. Two declared writers, mutually exclusive per document by source.origin."
+                },
+                "teitok_ref": {
+                  "type": "string"
+                },
+                "group_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Issue #18: groups lines belonging to the same source-structural unit — a DOCX paragraph or table CELL, or a PDF text block from the structural extractor. Lines sharing a group_id are contiguous and in the same reading order; null when the source has no such grouping (e.g. OCR/ALTO lines from alto-postprocess, which stays line-only). Not a schema block of its own — deliberately kept at line-granularity to avoid a second nesting level competing with 'lines' as the position-addressable unit the rest of the schema (bbox, entities' page/line keys) already keys off. CONSUMER CONTRACT: a group boundary renders as a paragraph break. Markdown already encodes paragraphs natively as a blank line, so this needs no new layout_md cue — implemented in api_util/xml_to_md.rows_to_layout_markdown() (which emits the blank line) and api_util/json_to_md._rows_from_lines() (which carries the field through); pinned by tests/test_json_to_md.py. 'table CELL', not 'table row': a per-row value cannot address the cell a line belongs to, which is what tables[].cells[].group_id joins on."
+                },
+                "style": {
+                  "type": "object",
+                  "description": "Issue #18 §1 (the 'font row', decided as option (c) — semantic style only). Carries what a downstream reader can ACT on and deliberately drops typeface and point size: the LLM cannot use 'Helvetica 12pt', while 'this is a level-2 heading' or 'this is the running header' it can. Absent on the ALTO path, where no style signal exists. Writer: digital-convert only.",
+                  "additionalProperties": true,
+                  "properties": {
+                    "bold": {
+                      "type": "boolean"
+                    },
+                    "italic": {
+                      "type": "boolean"
+                    },
+                    "heading_level": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 1,
+                      "maximum": 6,
+                      "description": "1-6 for a heading (DOCX outlineLvl + 1, or a PDF size/weight heuristic); null or absent for body text."
+                    },
+                    "region": {
+                      "type": "string",
+                      "enum": [
+                        "page_header",
+                        "page_footer",
+                        "footnote"
+                      ],
+                      "description": "llm-enrich #18 (declared 2026-09-25): where on its page a line that is NOT body text sits — the running header, the running footer (both: DOCX header/footer parts, PDF lines repeating in the page margins, or the Docling engine's layout labels), or a footnote/endnote (DOCX notes parts, or Docling's footnote label). Absent means body text, which is every line on the ALTO path. CONSUMER CONTRACT: api_util/json_to_md.py renders a page as header, body, footnotes, footer — the header and footer inside the HEADER_START/FOOTER_START cues, footnotes as `[^n]:` definitions — and digital-convert keeps header and footer lines out of content.text. A plain enum, not a SKOS scheme: nothing outside the digital-born path emits it."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tables": {
+            "description": "Originator: alto-postprocess (ALTO spatial-block tables) or digital-convert (DOCX/PDF structural extraction), selected per document by source.origin (Issue #18, resolved) — never both. Grid SHAPE only: cell text is never duplicated here, it lives once in lines[] and is linked back via group_id, so this stays the lossless structured twin of the disposable Markdown table in 'regenerable'.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "table_id",
+                "page"
+              ],
+              "additionalProperties": true,
+              "properties": {
+                "table_id": {
+                  "type": "string"
+                },
+                "page": {
+                  "type": "string"
+                },
+                "caption": {
+                  "type": "string"
+                },
+                "n_rows": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "n_cols": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "group_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Namespace prefix shared by this table's cell group_ids (e.g. 't1' for cells 't1.r0c0', 't1.r0c1'), so a consumer can find a table's lines without scanning cells[]. NOT the join key — that is per-cell, on cells[].group_id: one scalar for a whole table cannot address which lines carry which cell, so the 'linked back via group_id' contract was unimplementable while this was the only reference."
+                },
+                "cells": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "row",
+                      "col"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "row": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "col": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "rowspan": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "colspan": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "is_header": {
+                        "type": "boolean"
+                      },
+                      "bbox": {
+                        "$ref": "#/components/schemas/AtriumDocument_bbox"
+                      },
+                      "group_id": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "THE join key: the lines[].group_id whose lines carry this cell's text. Never a copy of the text. Positional inference is not an alternative — rowspan/colspan mean lines-per-row is not n_cols, and a multi-line cell breaks any ordering assumption — so without this the grid cannot be reassembled from the record at all."
+                      },
+                      "lines": {
+                        "type": "array",
+                        "description": "Optional explicit line list for a cell whose text spans more than one group (rare). When present it wins over group_id.",
+                        "items": {
+                          "$ref": "#/components/schemas/AtriumDocument_line_ref"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "entities": {
+            "description": "Owner: nlp-enrich; translator writes translation_en; llm-enrich writes pid. Carries all three tagsets so no mapping is lost.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "surface": {
+                  "type": "string"
+                },
+                "lemma": {
+                  "type": "string"
+                },
+                "type_onto": {
+                  "type": "string",
+                  "description": "OntoNotes v5 — the default configured NameTag tagset."
+                },
+                "type_cnec": {
+                  "type": "string",
+                  "description": "CNEC 2.0 fine-grained code."
+                },
+                "type_teitok": {
+                  "type": "string",
+                  "description": "Coarse TEITOK type (PER/ORG/LOC/MISC)."
+                },
+                "page": {
+                  "type": "string"
+                },
+                "line": {
+                  "type": "integer"
+                },
+                "char_span": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "bbox": {
+                  "$ref": "#/components/schemas/AtriumDocument_bbox"
+                },
+                "teitok_ref": {
+                  "type": "string"
+                },
+                "translation_en": {
+                  "type": "string"
+                },
+                "pid": {
+                  "type": "object",
+                  "description": "FAIR ontology cross-references — the ARIADNE/GoTriple hook. Null until resolved.",
+                  "additionalProperties": true,
+                  "properties": {
+                    "wikidata": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "geonames": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "aat": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "amcr": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "translations": {
+            "description": "Owner: translator. Language pair and the persistent translated artifact it produced.",
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "source_lang": {
+                "type": "string"
+              },
+              "target_lang": {
+                "type": "string"
+              },
+              "backend": {
+                "type": "string",
+                "examples": [
+                  "lindat",
+                  "ctranslate2",
+                  "llm"
+                ]
+              }
+            }
+          },
+          "enrichment": {
+            "description": "Owner: llm-enrich. Superset of the LLM document schema, plus the explicit page citation.",
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "locator": {
+                      "type": "string",
+                      "description": "Short verbatim snippet copied from the document."
+                    },
+                    "page": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Page label from the nearest PAGE_BREAK / '## Page N' marker."
+                    },
+                    "extracted_keywords_cs": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "extracted_keywords_en": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "teater_category": {
+                      "type": "string",
+                      "description": "Single most relevant TEATER/AMCR vocabulary category."
+                    },
+                    "confidence_score": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "citation": {
+                      "type": "string",
+                      "examples": [
+                        "[Source: CTX000000001, Page 1]"
+                      ]
+                    }
+                  }
+                }
+              },
+              "summary": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "topics": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "forms": {
+            "description": "Owner: llm-enrich. VLM/LLM-driven labeled fixed-field extraction (e.g. archival intake sheets: name/date/plot-number/signature). No deterministic ALTO/DOCX structural signal marks a region as a form field the way it does for tables, so this carries a confidence score per field and is always single-owner regardless of document origin.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "field_id",
+                "label"
+              ],
+              "additionalProperties": true,
+              "properties": {
+                "field_id": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "value_type": {
+                  "type": "string",
+                  "enum": [
+                    "text",
+                    "date",
+                    "number",
+                    "checkbox",
+                    "signature_present"
+                  ]
+                },
+                "confidence": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "page": {
+                  "type": "string"
+                },
+                "bbox": {
+                  "$ref": "#/components/schemas/AtriumDocument_bbox"
+                },
+                "entity_ref": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "DEPRECATED in favour of entity_key. A positional index into entities[], and therefore valid only within a single unmerged record: merge_document_records() resolves each top-level block independently by assembled.blocks[*].updated_at, so a `forms` block from one fan-out branch can end up beside an `entities` block from another and the index then addresses whatever happens to sit at that position — with the record still validating."
+                },
+                "entity_key": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/AtriumDocument_entity_ref"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "The entities[] row this field's value is, addressed by the natural key BLOCK_KEY_FIELDS['entities'] merges on. Survives a fan-in merge; prefer this over entity_ref."
+                }
+              }
+            }
+          }
+        }
+      },
+      "Body_predict_document": {
+        "properties": {
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "`all` (the default): the ensemble of the published revisions, averaged; or one model revision, e.g. `v4.3` (`/info` `available_models`). A value no revision matches is refused (422).",
+            "default": "all"
+          },
+          "topn": {
+            "type": "integer",
+            "maximum": 11.0,
+            "minimum": 1.0,
+            "title": "Topn",
+            "description": "How many categories to return per page, best first.",
+            "default": 3
+          },
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "The PDF (`application/pdf`)."
+          },
+          "document_json": {
+            "type": "string",
+            "contentMediaType": "application/json",
+            "title": "Document Json",
+            "description": "Optional baseline ATRIUM Document JSON (accretion model, docs/document_schema.md / issue #13). When given, the response's `document_json` carries the record back with only page-classification's `page_categories` block and `pages[].category` / `pages[].category_confidence` fields updated — every other tool's block passes through untouched. A baseline that does not validate against atrium_document.schema.json is still accepted (rule 6), but the response then also carries `document_json_schema_error`; one that cannot be opened is refused (422 `invalid_record`). An empty part counts as none."
+          },
+          "document_json_out": {
+            "type": "boolean",
+            "title": "Document Json Out",
+            "description": "Return a document record even with no baseline uploaded. page-classification is stage 1 of the pipeline, so it ORIGINATES the record (the E2E smoke passes it `--document-json-out` alone); without this flag the service could accrete onto someone else's record but never start one. Mirrors the CLI's `--document-json-out`.",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_predict_document"
+      },
+      "Body_predict_image": {
+        "properties": {
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "`all` (the default): the ensemble of the published revisions, averaged; or one model revision, e.g. `v4.3` (`/info` `available_models`). A value no revision matches is refused (422).",
+            "default": "all"
+          },
+          "topn": {
+            "type": "integer",
+            "maximum": 11.0,
+            "minimum": 1.0,
+            "title": "Topn",
+            "description": "How many categories to return, best first.",
+            "default": 3
+          },
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "The page image (any `image/*` type Pillow reads)."
+          },
+          "document_json": {
+            "type": "string",
+            "contentMediaType": "application/json",
+            "title": "Document Json",
+            "description": "Optional baseline ATRIUM Document JSON (accretion model, docs/document_schema.md / issue #13). When given, the response's `document_json` carries the record back with only page-classification's `page_categories` block and `pages[].category` / `pages[].category_confidence` fields updated — every other tool's block passes through untouched. A baseline that does not validate against atrium_document.schema.json is still accepted (rule 6), but the response then also carries `document_json_schema_error`; one that cannot be opened is refused (422 `invalid_record`). An empty part counts as none."
+          },
+          "document_json_out": {
+            "type": "boolean",
+            "title": "Document Json Out",
+            "description": "Return a document record even with no baseline uploaded. page-classification is stage 1 of the pipeline, so it ORIGINATES the record (the E2E smoke passes it `--document-json-out` alone); without this flag the service could accrete onto someone else's record but never start one. Mirrors the CLI's `--document-json-out`.",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_predict_image"
+      },
+      "CreateAction": {
+        "properties": {
+          "@id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "@Id",
+            "description": "The action's identifier (`#run-...` / `urn:uuid:...`)."
+          },
+          "@type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "@Type",
+            "description": "`CreateAction`."
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "A human-readable name of the run."
+          },
+          "instrument": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instrument",
+            "description": "The tool: a `SoftwareApplication` with `version`, and the container image it ran as."
+          },
+          "object": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Object",
+            "description": "The inputs: the uploaded file(s) and the record sent with them."
+          },
+          "result": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result",
+            "description": "The outputs: the output file(s) and the record."
+          },
+          "agent": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent",
+            "description": "Who ran it (`ATRIUM_RUN_AGENT`)."
+          },
+          "startTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starttime",
+            "description": "When the run started (ISO 8601)."
+          },
+          "endTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endtime",
+            "description": "When the run ended (ISO 8601)."
+          },
+          "actionStatus": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actionstatus",
+            "description": "`CompletedActionStatus` or `FailedActionStatus`."
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error",
+            "description": "Why the run failed, with `FailedActionStatus`."
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "title": "CreateAction",
+        "description": "The RO-Crate `CreateAction` of this call: its provenance (atrium-project#67 R2).\n\nIt names the tool as its `instrument` (with `version` and the container image), the inputs as\n`object`, the outputs as `result`, the `agent`, `startTime`/`endTime` and `actionStatus`; the paradata\nfields of the run are properties of the action. Null until a service returns it. nlp-enrich returns\nits pipeline-run paradata record here today, which carries those properties without the action's\nown members."
+      },
+      "DocumentResponse": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "`document`."
+          },
+          "pages": {
+            "items": {
+              "$ref": "#/components/schemas/PagePredictions"
+            },
+            "type": "array",
+            "title": "Pages",
+            "description": "One entry per page, in page order."
+          },
+          "limits_applied": {
+            "items": {
+              "$ref": "#/components/schemas/LimitNote"
+            },
+            "type": "array",
+            "title": "Limits Applied",
+            "description": "Every limit that shaped the result without refusing it; `[]` today (each limit refuses)."
+          },
+          "document_json": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AtriumDocument"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only with a `document_json` baseline or `document_json_out=true`: the record with page-classification's `page_categories` block and `pages[]` fields updated for every page."
+          },
+          "document_json_schema_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Json Schema Error",
+            "description": "Only when the sent baseline did not validate (the record is returned anyway): the error."
+          },
+          "paradata": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CreateAction"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The run's provenance (atrium-project#67 R2). Not returned yet: always absent."
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "type",
+          "pages",
+          "limits_applied"
+        ],
+        "title": "DocumentResponse",
+        "description": "`/predict_document`: the categories of every page of a PDF, and its record when one was asked for."
+      },
+      "ErrorBody": {
+        "properties": {
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "description": "The HTTP status, as an integer."
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason",
+            "description": "A registered reason code, listed with its statuses in the spec's `x-atrium-reason-codes`, or null when no code is registered for the cause. An open string: a release may add a code, but never renames or removes one."
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "description": "A human-readable message."
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LimitRef"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only with `limit_exceeded`: the limit and the input's size."
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors",
+            "description": "The request-validation problems, or a structured detail."
+          },
+          "accepted": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accepted",
+            "description": "Only with `unsupported_media_type`: the file extensions or media types the endpoint reads."
+          },
+          "cause": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cause",
+            "description": "A finer, unregistered cause (for example a reader's code). Informational; it may change."
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "status",
+          "reason",
+          "detail"
+        ],
+        "title": "ErrorBody",
+        "description": "The body of every error a service returns (§4.4)."
+      },
+      "HealthBody": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "`ok`, or `degraded` (HTTP 503) when the deep check fails or the replica drains."
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail",
+            "description": "Why the deep check failed."
+          },
+          "in_flight": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "In Flight",
+            "description": "Deep check only: requests being served."
+          },
+          "draining": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draining",
+            "description": "Deep check only: the replica is shutting down."
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "HealthBody",
+        "description": "`GET /health`: liveness, and with `?deep=true` a check of the backends."
+      },
+      "ImageResponse": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "`image`."
+          },
+          "predictions": {
+            "items": {
+              "$ref": "#/components/schemas/PredictionResult"
+            },
+            "type": "array",
+            "title": "Predictions",
+            "description": "The `topn` best categories, best first."
+          },
+          "limits_applied": {
+            "items": {
+              "$ref": "#/components/schemas/LimitNote"
+            },
+            "type": "array",
+            "title": "Limits Applied",
+            "description": "Every limit that shaped the result without refusing it; `[]` today (each limit refuses)."
+          },
+          "document_json": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AtriumDocument"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "With a `document_json` baseline or `document_json_out=true`: the record with page-classification's `page_categories` block and `pages[].category` / `pages[].category_confidence` updated; else null."
+          },
+          "document_json_schema_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Json Schema Error",
+            "description": "Only when the sent baseline did not validate (the record is returned anyway): the error; else null."
+          },
+          "paradata": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CreateAction"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The run's provenance (atrium-project#67 R2). Not returned yet: always null."
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "predictions",
+          "limits_applied",
+          "document_json",
+          "document_json_schema_error",
+          "paradata"
+        ],
+        "title": "ImageResponse",
+        "description": "`/predict_image`: the categories of one page image, and its record when one was asked for."
+      },
+      "LimitMeta": {
+        "properties": {
+          "env": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Env",
+            "description": "The environment variable that sets it; null for a derived limit."
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit",
+            "description": "The unit of its value."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Where the current value came from: `env`, `config`, `default` or `derived`."
+          },
+          "default": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default",
+            "description": "The built-in default (not for a derived limit)."
+          },
+          "derived_from": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Derived From",
+            "description": "For a derived limit: the settings it is computed from."
+          },
+          "zero_means_unlimited": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zero Means Unlimited",
+            "description": "True when 0 switches the limit off."
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "env",
+          "unit",
+          "source"
+        ],
+        "title": "LimitMeta",
+        "description": "Where one limit comes from (`/info` `limits_meta`)."
+      },
+      "LimitNote": {
+        "properties": {
+          "limit": {
+            "type": "string",
+            "title": "Limit",
+            "description": "The `/info` `limits` key."
+          },
+          "value": {
+            "title": "Value",
+            "description": "The limit's value when it applied."
+          },
+          "effect": {
+            "type": "string",
+            "title": "Effect",
+            "description": "What it did: `sampled`, `split`, `trimmed`, `skipped` or `stopped`."
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count",
+            "description": "How many times it applied."
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "description": "A human-readable note."
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "limit",
+          "value",
+          "effect",
+          "count",
+          "detail"
+        ],
+        "title": "LimitNote",
+        "description": "One limit that shaped a result without refusing it (`limits_applied`, §4.5)."
+      },
+      "LimitRef": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key",
+            "description": "The `/info` `limits` key of the limit."
+          },
+          "env": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Env",
+            "description": "The environment variable that sets it; null for a derived limit."
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value",
+            "description": "The limit's effective value."
+          },
+          "observed": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observed",
+            "description": "What the input measured; null when it is not known exactly."
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit",
+            "description": "The unit of `value` and `observed`."
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "key",
+          "env",
+          "value",
+          "observed",
+          "unit"
+        ],
+        "title": "LimitRef",
+        "description": "Which limit a `limit_exceeded` refusal is about, and by how much."
+      },
+      "PagePredictions": {
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "description": "The page, 1-based."
+          },
+          "predictions": {
+            "items": {
+              "$ref": "#/components/schemas/PredictionResult"
+            },
+            "type": "array",
+            "title": "Predictions",
+            "description": "The `topn` best categories, best first."
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "page",
+          "predictions"
+        ],
+        "title": "PagePredictions",
+        "description": "The categories of one PDF page."
+      },
+      "PcInfo": {
+        "properties": {
+          "service": {
+            "type": "string",
+            "title": "Service",
+            "description": "The tool id, which is the repository name."
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "The tool version (`para_config.txt`), as in the release tag without the `v`."
+          },
+          "endpoints": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Endpoints",
+            "description": "The callable API paths."
+          },
+          "limits": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Limits",
+            "description": "Every limit of the service: `{key: effective value}`."
+          },
+          "limits_meta": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/LimitMeta"
+            },
+            "type": "object",
+            "title": "Limits Meta",
+            "description": "For each limit: the variable that sets it, its unit, default, source."
+          },
+          "openapi_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Openapi Sha256",
+            "description": "sha256 of this process's OpenAPI document in canonical form, equal to the `openapi.json.sha256` asset of the release the image was built from."
+          },
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Categories",
+            "description": "The page categories a prediction can name."
+          },
+          "available_models": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Available Models",
+            "description": "The published model revisions and `all` (the ensemble), each with its base model."
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "service",
+          "version",
+          "endpoints",
+          "limits",
+          "limits_meta",
+          "openapi_sha256",
+          "categories",
+          "available_models"
+        ],
+        "title": "PcInfo",
+        "description": "`/info` of atrium-page-classification."
+      },
+      "PredictionResult": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "description": "A page category (`/info` `categories`), e.g. `TEXT`, `DRAW`, `PHOTO_L`."
+          },
+          "score": {
+            "type": "number",
+            "title": "Score",
+            "description": "Its score, from 0 to 1; the ensemble's is the mean of the models'."
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "score"
+        ],
+        "title": "PredictionResult",
+        "description": "One category and its score."
+      },
+      "ReadyBody": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "`ready`; or `starting` or `draining`, both with HTTP 503."
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "ReadyBody",
+        "description": "`GET /ready`: readiness for new work."
+      },
+      "AtriumDocument_bbox": {
+        "type": "array",
+        "description": "[x_min, y_min, x_max, y_max] with the origin at the page TOP-LEFT and y increasing DOWNWARDS, in the unit named by that page's pages[].canvas.unit. This convention is normative and format-independent: it is what ALTO already uses, so the OCR path is unchanged, but it is NOT PDF user space, which puts the origin bottom-left. A digital-born PDF writer MUST convert before writing — with pdfplumber that means using 'top'/'bottom' (top-down, points) and never 'y0'/'y1' (bottom-up). Stated explicitly since Issue #18 gave this $def a second writer: the description used to say 'the coordinate space of the ALTO/TEITOK page', which a digital-born record does not have, leaving the y-axis direction and the unit undefined for exactly the writer whose selling point is exact coordinates.",
+        "items": {
+          "type": "number"
+        },
+        "minItems": 4,
+        "maxItems": 4
+      },
+      "AtriumDocument_entity_ref": {
+        "type": "object",
+        "description": "A reference to one entities[] row by its natural key — BLOCK_KEY_FIELDS['entities'].",
+        "required": [
+          "page",
+          "line",
+          "char_span"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "page": {
+            "type": "string"
+          },
+          "line": {
+            "type": "integer"
+          },
+          "char_span": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "minItems": 2,
+            "maxItems": 2
+          }
+        }
+      },
+      "AtriumDocument_line_ref": {
+        "type": "object",
+        "description": "A reference to one lines[] row by its natural key — the same key BLOCK_KEY_FIELDS['lines'] merges on. Survives merge_document_records(), which an array index does not.",
+        "required": [
+          "page",
+          "line"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "page": {
+            "type": "string"
+          },
+          "line": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  },
+  "x-atrium-reason-codes": {
+    "limit_exceeded": {
+      "description": "The input is over one of the service's limits. The body's `limit` member names it (`key`, the environment variable `env` that sets it, `value`, `observed`, `unit`). HTTP 413 when the request content is too large, 422 when a parameter or a per-input processing budget is exceeded, 504 when a time limit that depends on an upstream service expired. Split the input, or raise the limit.",
+      "statuses": [
+        413,
+        422,
+        504
+      ]
+    },
+    "busy": {
+      "description": "Every processing slot or queue place is taken (HTTP 429). Retry after the `Retry-After` header's number of seconds.",
+      "statuses": [
+        429
+      ]
+    },
+    "unsupported_media_type": {
+      "description": "The upload is not a type this endpoint reads (HTTP 415). `detail` says what was sent; the body's `accepted` member lists the file extensions or media types the endpoint accepts, and `cause` may name a finer, unregistered reason. Convert the input or send it to the tool that reads it; do not retry it unchanged.",
+      "statuses": [
+        415
+      ]
+    },
+    "invalid_record": {
+      "description": "The document record sent with the request cannot be opened (HTTP 422): it is not UTF-8 JSON, not a JSON object, or its `schema_version` has a newer major than this tool reads. A record that opens but does not validate against the schema is accepted and reported in `document_json_schema_error` instead. Fix the record; do not retry it unchanged.",
+      "statuses": [
+        422
+      ]
+    },
+    "ocr_text_layer": {
+      "description": "The PDF's text layer is an earlier OCR run's invisible text over page images, so the document is not born-digital (HTTP 422). Route it to OCR: that text layer is not trusted.",
+      "statuses": [
+        422
+      ]
+    }
+  },
+  "x-atrium-record-schema": {
+    "schema_version": "1.0",
+    "sha256": "6874cd5120b6d6f7fa84d860bf33615668b148145eac9b883b7ca432744bb1ad"
+  }
+}

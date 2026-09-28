@@ -20,12 +20,18 @@
 # requirements.txt (Dockerfile:41), so a relative include would resolve to a path that does
 # not exist in the image. Both are installed side by side there and by
 # setup/setup_api_service.sh, so keep this list additive and flat.
-fastapi>=0.141.1
+# fastapi and pydantic are pinned EXACTLY (atrium-project#32 round 2): the committed
+# service/openapi.json — the spec every release attaches, and AMČR generates its clients
+# from — is a function of both, and tests/test_openapi_contract.py fails when the installed
+# versions differ from these pins. Bump them together by hand, in setup/requirements-test.txt
+# too, and regenerate the spec in the same commit (python atrium_openapi.py export --app
+# service.api:app --prepare tests.openapi_contract_data:prepare); dependabot ignores both.
+fastapi==0.141.1
 uvicorn[standard]>=0.53.0
 python-multipart>=0.0.32
 # api.py builds its response models with pydantic directly, so it is declared directly rather
 # than relied on as fastapi's transitive dependency.
-pydantic>=2.13.5
+pydantic==2.13.5
 # service/api.py: `Image.open(...)` on every /predict_image request.
 Pillow>=12.3.0
 # service/api.py's /predict_document does `import fitz` to rasterise PDF pages. It was

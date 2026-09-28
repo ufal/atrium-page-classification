@@ -12,11 +12,11 @@ sys.path.append(str(Path(__file__).parent.parent))
 try:
     from classifier import ImageClassifier
     from ensemble import average_prediction_dicts
-    from model_registry import CATEGORIES, REVISION_BEST_MODELS, REVISION_TO_BASE_MODEL
+    from model_registry import CATEGORIES, REVISION_BEST_MODELS, resolve_base_model
 except ImportError:
     from classifier import ImageClassifier
     from ensemble import average_prediction_dicts
-    from model_registry import CATEGORIES, REVISION_BEST_MODELS, REVISION_TO_BASE_MODEL
+    from model_registry import CATEGORIES, REVISION_BEST_MODELS, resolve_base_model
 
 # (12-factor XI) No basicConfig() here. This module is imported as a library by
 # api.py and by tests; configuring the ROOT logger at import time is a side effect
@@ -40,12 +40,12 @@ class ModelManager:
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
     def _get_base_model_id(self, version: str) -> str:
-        if version in REVISION_TO_BASE_MODEL:
-            return REVISION_TO_BASE_MODEL[version]
-        for key, base_model in REVISION_TO_BASE_MODEL.items():
-            if version.startswith(key):
-                return base_model
-        raise ValueError(f"Base model not found for version: {version}")
+        # One resolution rule, shared with service/api.py's up-front `version` check
+        # (model_registry.resolve_base_model; atrium-project#32 round 2).
+        base_model = resolve_base_model(version)
+        if base_model is None:
+            raise ValueError(f"Base model not found for version: {version}")
+        return base_model
 
     def get_model_details(self, version: str) -> str:
         if version == "all":

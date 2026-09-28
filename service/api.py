@@ -1,3 +1,20 @@
+"""
+service/api.py — FastAPI service for ATRIUM page classification.
+
+The typed contract (atrium-project#32 round 2). Every route declares its response model
+and its error statuses, so the committed ``service/openapi.json`` — attached to every
+release, and what the AMČR pipeline generates its clients from — types every field.
+``/predict_image`` keeps its ``response_model``; ``/predict_document`` and ``/info``
+DOCUMENT theirs (``response_model=None``), and ``tests/test_api_contract.py`` validates real
+responses against the published schema. Refusals carry registered reasons: a wrong media
+type is 415 ``unsupported_media_type``, a record that cannot be opened is 422
+``invalid_record``. Regenerate the spec after an API change (the model manager is stubbed,
+as ``tests/openapi_contract_data.py`` does, so torch is not needed)::
+
+    python atrium_openapi.py export --app service.api:app --out service/openapi.json \
+        --prepare tests.openapi_contract_data:prepare
+"""
+
 import asyncio
 import io
 import logging
@@ -7,8 +24,8 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.staticfiles import StaticFiles
-from PIL import Image
-from pydantic import BaseModel
+from PIL import Image, UnidentifiedImageError
+from pydantic import BaseModel, ConfigDict, Field
 
 # [FIX]: Use a relative import to support pytest running from the repo root,
 # with a fallback for direct script execution.
@@ -29,24 +46,42 @@ except ImportError:
 # enforced by para-drift.reusable.yml — same relative-vs-bare import dance.
 try:
     from .atrium_service import (
+        AtriumDocument,
+        AtriumHTTPError,
+        CreateAction,
+        InfoBase,
+        LimitNote,
         ServiceState,
         add_cors,
         attach_error_handlers,
         attach_health,
         attach_inflight_middleware,
+        attach_openapi_contract,
         build_info,
+        error_responses,
+        operation_id,
+        parse_record_part,
         read_tool_version,
         read_upload_bounded,
         serve_lifecycle,
     )
 except ImportError:
     from atrium_service import (
+        AtriumDocument,
+        AtriumHTTPError,
+        CreateAction,
+        InfoBase,
+        LimitNote,
         ServiceState,
         add_cors,
         attach_error_handlers,
         attach_health,
         attach_inflight_middleware,
+        attach_openapi_contract,
         build_info,
+        error_responses,
+        operation_id,
+        parse_record_part,
         read_tool_version,
         read_upload_bounded,
         serve_lifecycle,
@@ -59,6 +94,9 @@ from atrium_limits import LimitExceeded  # noqa: E402
 from tool_limits import LIMITS, MAX_IMAGE_PIXELS, MAX_PDF_PAGES, MAX_UPLOAD  # noqa: E402
 
 logger = logging.getLogger(__name__)
+
+#: The tool id (/info `service`, the spec's `x-atrium-service`): the repository name.
+SERVICE = "atrium-page-classification"
 
 # Import-time snapshots, kept because tests and clients import them. The service itself
 # reads each limit per request from tool_limits (atrium_limits reads the environment on
@@ -82,6 +120,7 @@ PDF_RENDER_DPI = tool_limits.PDF_RENDER_DPI.get()
 #: not a silent cap (version="all" used to return all categories for any larger value) or a
 #: torch error surfacing as a 500 (a single version). model_registry is torch-free.
 from model_registry import CATEGORIES as _CATEGORIES  # noqa: E402
+from model_registry import resolve_base_model  # noqa: E402
 
 _TOPN_MAX = len(_CATEGORIES)
 
@@ -112,10 +151,18 @@ app = FastAPI(
     version=read_tool_version(Path(__file__).resolve().parent),
     description="API for classifying historical document page images.",
     lifespan=lifespan,
+    # The typed contract (atrium-project#32 round 2): every route documents the §4.4 error
+    # body for 422 and 500 (and FastAPI's own 422 body, which is not what is sent, goes);
+    # operationIds are the handler names; the spec never depends on a root_path.
+    responses=error_responses(422, 500),
+    generate_unique_id_function=operation_id,
+    root_path_in_servers=False,
 )
 attach_inflight_middleware(app, _state)
 # §4.4 error body {status, reason, detail} for every error (atrium-project#32 item 2, #53).
 attach_error_handlers(app)
+# The published spec: reason registry, record schema, service id (atrium-project#32 item 3).
+attach_openapi_contract(app, SERVICE)
 
 # CORS — standard §4.5 configuration (ALLOWED_ORIGINS CSV, default "*").
 add_cors(app, methods=["GET", "POST"])
@@ -145,6 +192,56 @@ def _check_image_pixels(width: int, height: int, what: str) -> None:
     )
 
 
+def _check_version(version: str) -> None:
+    """Refuse a `version` no model revision matches (422), before anything is read or run.
+
+    `all` is the ensemble; any other value must resolve to a base model by the rule the model
+    manager loads by (model_registry.resolve_base_model). Such a value used to reach the loader
+    and come back as a 500 "Error processing image." with the classifier to blame
+    (atrium-project#32 round 2). A revision that resolves but whose weights cannot be loaded is
+    still the manager's failure, a 500.
+    """
+    if version != "all" and resolve_base_model(version) is None:
+        known = ", ".join(["all", *manager.available_versions])
+        raise HTTPException(
+            status_code=422, detail=f"Unknown model version {version!r}; the published ones are {known}."
+        )
+
+
+def _open_image(content: bytes) -> Image.Image:
+    """Open the uploaded image (its header only), or refuse it: 422 for bytes that are not a
+    readable image (atrium-project#32 round 2; the blanket 500 before)."""
+    try:
+        return Image.open(io.BytesIO(content))
+    except (UnidentifiedImageError, OSError, SyntaxError) as exc:
+        raise HTTPException(status_code=422, detail=f"The upload is not a readable image: {exc}") from exc
+
+
+def _decode_image(image: Image.Image) -> Image.Image:
+    """Decode the pixels as RGB, or refuse a damaged or truncated image with a 422."""
+    try:
+        return image.convert("RGB")
+    except (OSError, SyntaxError) as exc:
+        raise HTTPException(status_code=422, detail=f"The upload is not a readable image: {exc}") from exc
+
+
+def _open_pdf(content: bytes):
+    """Open the uploaded PDF, or refuse it with a 422 when it cannot be read.
+
+    The one place the PDF engine opens a document, so the engine swap of atrium-project#6 D
+    (PyMuPDF, AGPL-3.0, → pypdfium2, whose `PdfiumError` is the same case) changes the open and
+    its error in one function. PyMuPDF raises `FileDataError` / `EmptyFileError`, both
+    RuntimeErrors, for bytes that are not a PDF or a damaged one: the caller's input, not our
+    failure — the blanket 500 "Error processing document." before atrium-project#32 round 2.
+    """
+    import fitz  # PyMuPDF
+
+    try:
+        return fitz.open(stream=content, filetype="pdf")
+    except RuntimeError as exc:
+        raise HTTPException(status_code=422, detail=f"The upload is not a readable PDF: {exc}") from exc
+
+
 def _classify_pdf_pages(content: bytes, version: str, topn: int) -> List[Dict[str, Any]]:
     """Rasterise every page of a PDF and classify it — the blocking body of
     ``POST /predict_document``, extracted so it runs in ONE worker thread (issue #55).
@@ -156,10 +253,12 @@ def _classify_pdf_pages(content: bytes, version: str, topn: int) -> List[Dict[st
     gigabytes. A page object without ``rect`` (a stand-in) is checked on its rendered size
     instead, still before the pixels are decoded. Raised in the worker thread, it reaches
     the error handler the same as on the loop.
-    """
-    import fitz  # PyMuPDF
 
-    pdf_document = fitz.open(stream=content, filetype="pdf")
+    A page the model could not classify fails the request with a 500 naming the page
+    (atrium-project#32 round 2): its `{"error": ...}` used to be returned in place of the
+    page's predictions, inside a 200.
+    """
+    pdf_document = _open_pdf(content)
 
     page_count = len(pdf_document)
     MAX_PDF_PAGES.check(
@@ -182,6 +281,8 @@ def _classify_pdf_pages(content: bytes, version: str, topn: int) -> List[Dict[st
         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
 
         predictions = manager.predict(img, version=version, topn=topn)
+        if isinstance(predictions, dict) and "error" in predictions:
+            raise HTTPException(status_code=500, detail=f"Page {page_num + 1}: {predictions['error']}")
         page_results.append({"page": page_num + 1, "predictions": predictions})
     return page_results
 
@@ -204,28 +305,103 @@ if frontend_dir.exists():
     app.mount("/frontend", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")
 
 
+# ── the typed contract (atrium-project#32 round 2) ──────────────────────────────────────────
+# `/predict_image` returns an ImageResponse through `response_model`, so every field below is
+# sent, null or not: those without a default are required (nullable where null). The other two
+# models DOCUMENT their responses (`response_model=None`): a field the handler always sends has
+# no default, one it sends only sometimes defaults to None. Descriptions are published in
+# service/openapi.json, so they are written for the client. Labels are open strings: a new
+# category must never break a client generated from an older spec.
+
+
 class PredictionResult(BaseModel):
-    label: str
-    score: float
+    """One category and its score."""
+
+    label: str = Field(description="A page category (`/info` `categories`), e.g. `TEXT`, `DRAW`, `PHOTO_L`.")
+    score: float = Field(description="Its score, from 0 to 1; the ensemble's is the mean of the models'.")
 
 
 class ImageResponse(BaseModel):
-    type: str
-    predictions: List[PredictionResult]
+    """`/predict_image`: the categories of one page image, and its record when one was asked for."""
+
+    type: str = Field(description="`image`.")
+    predictions: List[PredictionResult] = Field(description="The `topn` best categories, best first.")
     #: The limits that shaped this result without refusing it (atrium-project#53,
     #: docs/paradata_schema.md `limits_applied`). None of this service's limits does that
     #: today — each one refuses — so it is `[]`; it is declared so the field is present in
     #: every service's response, and so `response_model` does not filter it out.
-    limits_applied: List[Dict[str, Any]] = []
+    limits_applied: List[LimitNote] = Field(
+        description="Every limit that shaped the result without refusing it; `[]` today (each limit refuses)."
+    )
     #: The updated ATRIUM Document JSON, present only when the caller opted into the
     #: accretion flow (uploaded a `document_json` baseline, or asked for `document_json_out`).
     #: `response_model` filters unknown keys, so these have to be declared here or the record
     #: is silently dropped on the way out — which is J2 all over again, one layer down.
-    document_json: Optional[Dict[str, Any]] = None
+    document_json: Optional[AtriumDocument] = Field(
+        description=(
+            "With a `document_json` baseline or `document_json_out=true`: the record with page-classification's "
+            "`page_categories` block and `pages[].category` / `pages[].category_confidence` updated; else null."
+        )
+    )
     #: Non-None only in Layer D's inherited-defect case: the uploaded baseline did not
     #: validate, so the record was emitted with a warning rather than refused. A field an
     #: automated caller can test, instead of a line it would have to grep the service log for.
-    document_json_schema_error: Optional[str] = None
+    document_json_schema_error: Optional[str] = Field(
+        description="Only when the sent baseline did not validate (the record is returned anyway): the error; else null."
+    )
+    paradata: Optional[CreateAction] = Field(
+        description="The run's provenance (atrium-project#67 R2). Not returned yet: always null."
+    )
+
+
+class PagePredictions(BaseModel):
+    """The categories of one PDF page."""
+
+    model_config = ConfigDict(extra="allow")
+
+    page: int = Field(description="The page, 1-based.")
+    predictions: List[PredictionResult] = Field(description="The `topn` best categories, best first.")
+
+
+class DocumentResponse(BaseModel):
+    """`/predict_document`: the categories of every page of a PDF, and its record when one was asked for."""
+
+    model_config = ConfigDict(extra="allow")
+
+    type: str = Field(description="`document`.")
+    pages: List[PagePredictions] = Field(description="One entry per page, in page order.")
+    limits_applied: List[LimitNote] = Field(
+        description="Every limit that shaped the result without refusing it; `[]` today (each limit refuses)."
+    )
+    document_json: Optional[AtriumDocument] = Field(
+        None,
+        description=(
+            "Only with a `document_json` baseline or `document_json_out=true`: the record with "
+            "page-classification's `page_categories` block and `pages[]` fields updated for every page."
+        ),
+    )
+    document_json_schema_error: Optional[str] = Field(
+        None, description="Only when the sent baseline did not validate (the record is returned anyway): the error."
+    )
+    paradata: Optional[CreateAction] = Field(
+        None, description="The run's provenance (atrium-project#67 R2). Not returned yet: always absent."
+    )
+
+
+class PcInfo(InfoBase):
+    """`/info` of atrium-page-classification."""
+
+    categories: List[str] = Field(description="The page categories a prediction can name.")
+    available_models: Dict[str, str] = Field(
+        description="The published model revisions and `all` (the ensemble), each with its base model."
+    )
+
+
+#: What the `version` field of both endpoints means.
+_VERSION_DESC = (
+    "`all` (the default): the ensemble of the published revisions, averaged; or one model revision, "
+    "e.g. `v4.3` (`/info` `available_models`). A value no revision matches is refused (422)."
+)
 
 
 # Shared description strings — both endpoints advertise the identical contract, and OpenAPI is
@@ -236,7 +412,8 @@ _DOCUMENT_JSON_DESC = (
     "page-classification's `page_categories` block and `pages[].category` / "
     "`pages[].category_confidence` fields updated — every other tool's block passes through "
     "untouched. A baseline that does not validate against atrium_document.schema.json is still "
-    "accepted (rule 6), but the response then also carries `document_json_schema_error`."
+    "accepted (rule 6), but the response then also carries `document_json_schema_error`; one that "
+    "cannot be opened is refused (422 `invalid_record`). An empty part counts as none."
 )
 _DOCUMENT_JSON_OUT_DESC = (
     "Return a document record even with no baseline uploaded. page-classification is stage 1 "
@@ -246,37 +423,49 @@ _DOCUMENT_JSON_OUT_DESC = (
 )
 
 
+async def _read_record_part(document_json: Optional[UploadFile]) -> Optional[bytes]:
+    """The baseline part's bytes, read and opened BEFORE any model runs, or None.
+
+    `None` for an absent part and for an empty one: some clients send the multipart field
+    with an empty body rather than omitting it. That means "no baseline", not "a baseline
+    that is zero bytes long" — taken literally it reaches load_document() and dies on a
+    JSONDecodeError. Bounded like the main upload (atrium-project#53): it used to be read
+    whole, with no limit at all. A part that cannot be opened (not UTF-8 JSON, not an
+    object, a newer `schema_version` major) is refused here, 422 `invalid_record`
+    (atrium-project#32 round 2) — it used to be found only after the classification.
+    """
+    if document_json is None:
+        return None
+    raw = await read_upload_bounded(document_json, MAX_UPLOAD.get(), "document_json")
+    return raw if parse_record_part(raw, "document_json") is not None else None
+
+
 async def _document_json_part(
-    document_json: Optional[UploadFile],
-    document_json_out: bool,
+    wants_record: bool,
+    baseline_bytes: Optional[bytes],
     doc_id: str,
     pages: Sequence[Tuple[str, Any]],
 ) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
     """Run this tool's blocks through the CLI's own accretion path, or do nothing.
 
     Opt-in, like translator's and llm-enrich's services: a caller that sends neither part gets
-    the exact response shape it got before, so this is additive on the wire.
+    the exact response shape it got before, so this is additive on the wire. `wants_record` is
+    `document_json_out`, or a `document_json` part sent at all — an empty one included, which
+    originates the record as it always did; `baseline_bytes` is what :func:`_read_record_part`
+    returned for it.
     """
-    if document_json is None and not document_json_out:
+    if not wants_record:
         return None, None
-
-    baseline_bytes = None
-    if document_json is not None:
-        # `or None`: some clients send the multipart field with an empty body rather than
-        # omitting it. That means "no baseline", not "a baseline that is zero bytes long" —
-        # taken literally it reaches load_document() and dies on a JSONDecodeError.
-        # Bounded like the main upload (atrium-project#53): it used to be read whole, with
-        # no limit at all.
-        baseline_bytes = await read_upload_bounded(document_json, MAX_UPLOAD.get(), "document_json") or None
 
     try:
         return build_document_record(doc_id, pages, baseline_bytes)
     except ValueError as exc:
-        # Unparseable JSON (JSONDecodeError is a ValueError) or a schema_version newer than this
-        # tool understands. Both are the CALLER's payload, so §4.4 says 422, not 500 — and
-        # certainly not the endpoint's blanket "Error processing image.", which would send
-        # somebody debugging their upload to look at the classifier.
-        raise HTTPException(status_code=422, detail=f"Unusable document_json baseline: {exc}") from exc
+        # A baseline the adapter cannot migrate. _read_record_part already refused one that is
+        # not JSON or has a newer schema_version major; this is the adapter's own refusal of
+        # the rest. Both are the CALLER's payload, so §4.4 says 422, not 500 — and certainly
+        # not the endpoint's blanket "Error processing image.", which would send somebody
+        # debugging their upload to look at the classifier.
+        raise AtriumHTTPError(422, f"Unusable document_json baseline: {exc}", reason="invalid_record") from exc
     except RuntimeError as exc:
         # The adapter's Layer D refusal (D4). Mapped here rather than left to the endpoint's
         # blanket "Error processing image." 500, which would say nothing about why. It stays a
@@ -292,7 +481,11 @@ def read_root():
     return {"message": "Welcome to the ATRIUM Page Classification API. Use /info for available models."}
 
 
-@app.get("/info")
+@app.get(
+    "/info",
+    response_model=None,
+    responses={200: {"model": PcInfo, "description": "Identity, limits, capabilities."}},
+)
 def get_info():
     """Return service identity, capabilities, and available model versions (§4.1)."""
     # [FIX]: Removed the hardcoded fallback list.
@@ -304,32 +497,47 @@ def get_info():
 
     return build_info(
         app,
-        service="atrium-page-classification",
+        service=SERVICE,
         limits=LIMITS,
         categories=CATEGORIES,
         available_models=model_info,
     )
 
 
-@app.post("/predict_image", response_model=ImageResponse)
+@app.post(
+    "/predict_image",
+    response_model=ImageResponse,
+    responses={
+        200: {"description": "The categories, and the record when one was asked for."},
+        **error_responses(413, 415, 503),
+    },
+)
 async def predict_image(
-    version: str = Form("all"),
-    topn: int = Form(3, ge=1, le=_TOPN_MAX),
-    file: UploadFile = File(...),
-    document_json: UploadFile = File(None, description=_DOCUMENT_JSON_DESC),
+    version: str = Form("all", description=_VERSION_DESC),
+    topn: int = Form(3, ge=1, le=_TOPN_MAX, description="How many categories to return, best first."),
+    file: UploadFile = File(..., description="The page image (any `image/*` type Pillow reads)."),
+    document_json: UploadFile = File(
+        None, description=_DOCUMENT_JSON_DESC, json_schema_extra={"contentMediaType": "application/json"}
+    ),
     document_json_out: bool = Form(False, description=_DOCUMENT_JSON_OUT_DESC),
 ):
     """Classify a single uploaded image."""
     _refuse_if_draining()
     if not file.content_type or not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
+        # §4.4: a media type this endpoint does not read is 415 `unsupported_media_type` (a
+        # 400 before atrium-project#32 round 2), with the accepted type in the body.
+        raise AtriumHTTPError(
+            415, "Invalid file type. Please upload an image.", reason="unsupported_media_type", accepted=["image/*"]
+        )
+    _check_version(version)
 
     content = await read_upload_bounded(file, MAX_UPLOAD.get(), "File")
+    baseline_bytes = await _read_record_part(document_json)
 
     try:
-        image = Image.open(io.BytesIO(content))  # reads the header only
+        image = _open_image(content)  # reads the header only
         _check_image_pixels(image.width, image.height, "The image")
-        image = image.convert("RGB")
+        image = _decode_image(image)
         # Off the event loop (issue #55): manager.predict() is synchronous torch
         # inference. Called inline in an `async def`, it blocks the ONLY event loop, so
         # uvicorn's SIGTERM handler — an event-loop callback — could not run until the
@@ -343,7 +551,7 @@ async def predict_image(
         # -f path uses, or the service would fork the record it is supposed to accrete onto.
         doc_id, page_key = doc_id_for_image(file.filename)
         record, schema_err = await _document_json_part(
-            document_json, document_json_out, doc_id, [(page_key, predictions)]
+            document_json_out or document_json is not None, baseline_bytes, doc_id, [(page_key, predictions)]
         )
 
         return ImageResponse(
@@ -352,6 +560,7 @@ async def predict_image(
             limits_applied=[],
             document_json=record,
             document_json_schema_error=schema_err,
+            paradata=None,
         )
     except (HTTPException, LimitExceeded):
         raise
@@ -360,20 +569,40 @@ async def predict_image(
         raise HTTPException(status_code=500, detail="Error processing image.")
 
 
-@app.post("/predict_document")
+@app.post(
+    "/predict_document",
+    response_model=None,
+    responses={
+        200: {
+            "model": DocumentResponse,
+            "description": "The categories of every page, and the record when one was asked for.",
+        },
+        **error_responses(413, 415, 503),
+    },
+)
 async def predict_document(
-    version: str = Form("all"),
-    topn: int = Form(3, ge=1, le=_TOPN_MAX),
-    file: UploadFile = File(...),
-    document_json: UploadFile = File(None, description=_DOCUMENT_JSON_DESC),
+    version: str = Form("all", description=_VERSION_DESC),
+    topn: int = Form(3, ge=1, le=_TOPN_MAX, description="How many categories to return per page, best first."),
+    file: UploadFile = File(..., description="The PDF (`application/pdf`)."),
+    document_json: UploadFile = File(
+        None, description=_DOCUMENT_JSON_DESC, json_schema_extra={"contentMediaType": "application/json"}
+    ),
     document_json_out: bool = Form(False, description=_DOCUMENT_JSON_OUT_DESC),
 ):
     """Extracts pages from a PDF and classifies each page."""
     _refuse_if_draining()
     if not file.content_type or file.content_type != "application/pdf":
-        raise HTTPException(status_code=400, detail="Invalid file type. Please upload a PDF.")
+        # §4.4: 415 `unsupported_media_type` (a 400 before atrium-project#32 round 2).
+        raise AtriumHTTPError(
+            415,
+            "Invalid file type. Please upload a PDF.",
+            reason="unsupported_media_type",
+            accepted=["application/pdf"],
+        )
+    _check_version(version)
 
     content = await read_upload_bounded(file, MAX_UPLOAD.get(), "File")
+    baseline_bytes = await _read_record_part(document_json)
 
     try:
         # One thread hop for the WHOLE loop, not one per page (issue #55): this is up to
@@ -385,8 +614,8 @@ async def predict_document(
         # A PDF is a whole document: the page numbers are its own 1..N, so no filename
         # page-split here — just the canonical doc_id.
         record, schema_err = await _document_json_part(
-            document_json,
-            document_json_out,
+            document_json_out or document_json is not None,
+            baseline_bytes,
             doc_id_for_document(file.filename),
             [(str(r["page"]), r["predictions"]) for r in page_results],
         )

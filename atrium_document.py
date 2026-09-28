@@ -1101,8 +1101,14 @@ def validate_document(record: Dict[str, Any]) -> None:
 
 
 def load_document(path: str) -> Dict[str, Any]:
-    """Read a document record, migrating older schemas transparently (rule 6)."""
-    with open(path, "r", encoding="utf-8") as fh:
+    """Read a document record, migrating older schemas transparently (rule 6).
+
+    ``utf-8-sig`` reads a record with or without a UTF-8 byte-order mark (a seed saved by a
+    Windows editor has one). The services' ``atrium_service.parse_record_part`` accepts one,
+    so the file a service writes from that part must load here (atrium-project#32 round 2);
+    it used to fail with "Unexpected UTF-8 BOM".
+    """
+    with open(path, "r", encoding="utf-8-sig") as fh:
         data = json.load(fh)
 
     v = str(data.get("schema_version", SCHEMA_VERSION))

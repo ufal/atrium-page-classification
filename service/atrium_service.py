@@ -27,9 +27,24 @@ service reports an identical shape and agents/clients can rely on it:
   disposability contract (issue #55): readiness that flips on ``SIGTERM``, and a drain that
   waits for in-flight requests and explicitly tracked background work before the process
   exits, so a rolling restart does not kill work already in progress.
+* The typed contract (§4.8; atrium-project#32 round 2, items 1 and 3): the pydantic models
+  every service's responses are declared with (``ErrorBody``, ``InfoBase``, ``LimitNote``,
+  ``HealthBody``, ``ReadyBody``, ``CreateAction``, ``AtriumDocument``); ``error_responses``
+  and ``operation_id``, which every ``FastAPI(...)`` passes so each route documents the
+  error body and keeps a stable operationId; ``attach_openapi_contract``, which finishes the
+  generated spec (the reason-code registry, the record schema, the service id); and
+  ``openapi_digest``, the sha256 ``/info`` reports so a deployed image can be checked
+  against the ``openapi.json`` attached to its release. The spec is committed as
+  ``service/openapi.json`` and released by the stdlib-only ``atrium_openapi.py`` at the repo
+  root, which this module imports lazily, like ``atrium_limits``.
+* ``parse_record_part`` — opens the document record a request carries and refuses one that
+  cannot be opened with ``reason: "invalid_record"``; a record that opens but fails the
+  schema is left to the tool, which reports it as ``document_json_schema_error``.
 
-The module deliberately imports only FastAPI/Starlette and the standard library (already a
-dependency of every service) so it stays inside the no-model fast lane.
+The module deliberately imports only FastAPI/Starlette, pydantic (FastAPI's own model layer,
+declared and pinned in every ``service/requirements.txt``, because the committed spec is a
+function of both versions) and the standard library, so it stays inside the no-model fast
+lane.
 """
 
 from __future__ import annotations
@@ -37,17 +52,19 @@ from __future__ import annotations
 import asyncio
 import configparser
 import contextlib
+import json
 import os
 import signal
 import threading
 import time
 from http import HTTPStatus
 from pathlib import Path
-from typing import Any, Awaitable, Callable, Dict, Iterable, List, Mapping, Optional, Set
+from typing import Any, Awaitable, Callable, Dict, Iterable, List, Mapping, Optional, Set, Tuple
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 # Paths FastAPI mounts for documentation/schema — callable, but not part of the
 # domain API surface advertised by /info.
@@ -123,6 +140,10 @@ def build_info(
     key is added: for each limit, the environment variable that sets it, its unit,
     default and where the current value came from (``env``/``config``/``default``/
     ``derived``), so a caller knows which setting to change.
+
+    ``openapi_sha256`` (atrium-project#32 item 3) is :func:`openapi_digest` of the spec this
+    process serves, so a client can check a running image against the ``openapi.json`` and
+    ``openapi.json.sha256`` attached to the release it trusts without comparing the documents.
     """
     meta: Optional[Dict[str, Any]] = None
     if limits is None:
@@ -140,6 +161,7 @@ def build_info(
     }
     if meta is not None:
         info["limits_meta"] = meta
+    info["openapi_sha256"] = openapi_digest(app)
     info.update(capabilities)
     return info
 
@@ -150,6 +172,16 @@ def build_info(
 
 #: The registered ``reason`` codes. A published code is never renamed or removed; a new
 #: cause gets a new code. ``null`` means no code is registered for the cause yet.
+#:
+#: The registry is published in every service's spec as ``x-atrium-reason-codes`` (see
+#: :func:`attach_openapi_contract`), and ``atrium_openapi.py compare`` fails a release whose
+#: spec drops a code the previous release had. ``reason`` itself stays an open string in the
+#: spec, not an enum, so adding a code never breaks a client generated from an older spec.
+#: The first three codes below the original two were registered by atrium-project#32 round 2:
+#: ``unsupported_media_type`` (the media-type refusals of all five services),
+#: ``invalid_record`` (the record a request carries, the #67 R1 seed included) and
+#: ``ocr_text_layer`` (the born-digital refusal the AMČR route step sends to OCR,
+#: atrium-llm-enrich#10 W6; raised by ``api-digital``).
 REASON_CODES: Dict[str, str] = {
     "limit_exceeded": (
         "The input is over one of the service's limits. The body's `limit` member names it "
@@ -162,7 +194,44 @@ REASON_CODES: Dict[str, str] = {
         "Every processing slot or queue place is taken (HTTP 429). Retry after the "
         "`Retry-After` header's number of seconds."
     ),
+    "unsupported_media_type": (
+        "The upload is not a type this endpoint reads (HTTP 415). `detail` says what was sent; "
+        "the body's `accepted` member lists the file extensions or media types the endpoint "
+        "accepts, and `cause` may name a finer, unregistered reason. Convert the input or send "
+        "it to the tool that reads it; do not retry it unchanged."
+    ),
+    "invalid_record": (
+        "The document record sent with the request cannot be opened (HTTP 422): it is not UTF-8 "
+        "JSON, not a JSON object, or its `schema_version` has a newer major than this tool reads. "
+        "A record that opens but does not validate against the schema is accepted and reported "
+        "in `document_json_schema_error` instead. Fix the record; do not retry it unchanged."
+    ),
+    "ocr_text_layer": (
+        "The PDF's text layer is an earlier OCR run's invisible text over page images, so the "
+        "document is not born-digital (HTTP 422). Route it to OCR: that text layer is not trusted."
+    ),
 }
+
+#: The HTTP statuses each registered code may be sent with (§4.4). ``error_body`` and
+#: :class:`AtriumHTTPError` refuse any other pairing, so a client can rely on the pair.
+#: ``limit_exceeded``'s statuses are ``atrium_limits.LIMIT_STATUSES`` (the hub's
+#: tests/test_atrium_service.py holds the two equal).
+REASON_STATUSES: Dict[str, Tuple[int, ...]] = {
+    "limit_exceeded": (413, 422, 504),
+    "busy": (429,),
+    "unsupported_media_type": (415,),
+    "invalid_record": (422,),
+    "ocr_text_layer": (422,),
+}
+
+
+def _check_reason(where: str, status: int, reason: Optional[str]) -> None:
+    if reason is None:
+        return
+    if reason not in REASON_CODES:
+        raise ValueError(f"{where}: {reason!r} is not a registered reason code {sorted(REASON_CODES)}")
+    if int(status) not in REASON_STATUSES[reason]:
+        raise ValueError(f"{where}: {reason!r} is sent with HTTP {REASON_STATUSES[reason]}, not {status}")
 
 
 def error_body(status: int, detail: str, reason: Optional[str] = None, **extra: Any) -> Dict[str, Any]:
@@ -171,10 +240,10 @@ def error_body(status: int, detail: str, reason: Optional[str] = None, **extra: 
     ``status`` is the HTTP status as an integer. It appears only on error bodies: the
     string ``status`` of ``/health``, ``/ready`` and a job resource is a different field
     of a different response. ``detail`` is always a human-readable string (existing
-    clients read it); structured data goes into extra members (``limit``, ``errors``).
+    clients read it); structured data goes into extra members (``limit``, ``errors``,
+    ``accepted``, ``cause``). A ``reason`` must be registered, and registered for ``status``.
     """
-    if reason is not None and reason not in REASON_CODES:
-        raise ValueError(f"error_body(): {reason!r} is not a registered reason code {sorted(REASON_CODES)}")
+    _check_reason("error_body()", status, reason)
     body: Dict[str, Any] = {"status": int(status), "reason": reason, "detail": str(detail)}
     body.update(extra)
     return body
@@ -192,8 +261,7 @@ class AtriumHTTPError(HTTPException):
         headers: Optional[Dict[str, str]] = None,
         **extra: Any,
     ) -> None:
-        if reason is not None and reason not in REASON_CODES:
-            raise ValueError(f"AtriumHTTPError: {reason!r} is not a registered reason code")
+        _check_reason("AtriumHTTPError", status_code, reason)
         super().__init__(status_code=status_code, detail=detail, headers=headers)
         self.reason = reason
         self.extra = extra
@@ -244,9 +312,7 @@ def attach_error_handlers(app: FastAPI) -> None:
     # It is taken from FastAPI's class rather than imported from `starlette`, which no
     # service declares as a dependency of its own (page-classification's
     # tests/test_service_runtime_deps.py fails a service module that imports it).
-    StarletteHTTPException = next(
-        cls for cls in HTTPException.__mro__[1:] if cls.__name__ == "HTTPException"
-    )
+    StarletteHTTPException = next(cls for cls in HTTPException.__mro__[1:] if cls.__name__ == "HTTPException")
 
     @app.exception_handler(StarletteHTTPException)
     async def _http_error(request, exc):  # noqa: ANN001, ANN202
@@ -334,6 +400,363 @@ async def check_body_size(request: Any, max_mb: float, label: str = "Request bod
             env="MAX_UPLOAD_MB",
             detail=f"{label} too large: over {max_mb:g} MB (MAX_UPLOAD_MB).",
         )
+
+
+def parse_record_part(raw: Any, label: str = "document_json") -> Optional[Dict[str, Any]]:
+    """Open the document record a request carries, or refuse it with ``invalid_record``.
+
+    ``raw`` is the part's bytes (or text), an already decoded JSON value from a JSON body,
+    or ``None``. An absent or empty part returns ``None``: an HTML form sends an empty file
+    part when nothing was chosen, and nlp-enrich already treated one as absent.
+
+    Refused, HTTP 422 ``reason: "invalid_record"`` (§4.4), are only a record that cannot be
+    opened at all: not UTF-8 JSON, not a JSON object, or a ``schema_version`` whose major is
+    newer than this module's ``atrium_document.SCHEMA_VERSION``. A record that opens but
+    does not validate against the schema is returned as it is: every tool accepts such a
+    baseline and reports the problem as ``document_json_schema_error``, and a #67 R1 seed
+    (``doc_id`` and ``source`` only) must stay valid input.
+    """
+    if raw is None:
+        return None
+    if isinstance(raw, (bytes, bytearray)):
+        try:
+            raw = bytes(raw).decode("utf-8-sig")
+        except UnicodeDecodeError as exc:
+            raise AtriumHTTPError(422, f"The {label} part is not UTF-8 text.", reason="invalid_record") from exc
+    if isinstance(raw, str):
+        raw = raw[1:] if raw.startswith("\ufeff") else raw
+        if not raw.strip():
+            return None
+        try:
+            record = json.loads(raw)
+        except ValueError as exc:
+            raise AtriumHTTPError(
+                422,
+                f"The {label} part is not valid JSON: {exc}.",
+                reason="invalid_record",
+                errors=[{"msg": str(exc)}],
+            ) from exc
+    else:
+        record = raw
+    if not isinstance(record, dict):
+        raise AtriumHTTPError(
+            422,
+            f"The {label} part is a JSON {type(record).__name__}, not an object.",
+            reason="invalid_record",
+        )
+    version = record.get("schema_version")
+    if version is not None:
+        import atrium_document  # lazily: see the module docstring
+
+        supported = int(str(atrium_document.SCHEMA_VERSION).split(".")[0])
+        try:
+            major = int(str(version).split(".")[0])
+        except ValueError:
+            raise AtriumHTTPError(
+                422,
+                f"The {label} part has schema_version {version!r}, which is not a version.",
+                reason="invalid_record",
+            ) from None
+        if major > supported:
+            raise AtriumHTTPError(
+                422,
+                f"The {label} part has schema_version {version}; this tool reads up to {supported}.x.",
+                reason="invalid_record",
+            )
+    return record
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# The typed contract (§4.8; atrium-project#32 round 2, items 1 and 3)
+# ──────────────────────────────────────────────────────────────────────────────
+#
+# These models DOCUMENT the responses; they do not filter them. Every route declares
+# `response_model=None, responses={200: {"model": ...}}`, so the bytes a service sends are
+# exactly what its handler builds, and the per-repo contract tests validate real responses
+# against the PUBLISHED schema (atrium_openapi.validate_response). Their docstrings and
+# field descriptions are published in every spec, so they are written for the client.
+#
+# Rules, from the 2026-09-28 design review (agent_dev_logs/plans/32.plan.md):
+#   * a field the handler always emits has NO default, so it is required (nullable where it
+#     can be null): oasdiff rates removing a required response property as a breaking change,
+#     an optional one only after atrium_openapi.py raises that rule;
+#   * no enums in responses: a value is an open string whose known values are in its
+#     description, so a new value never breaks a client generated from an older spec;
+#   * every model allows extra members, so a later additive field is not a breaking change.
+
+
+class LimitRef(BaseModel):
+    """Which limit a `limit_exceeded` refusal is about, and by how much."""
+
+    model_config = ConfigDict(extra="allow")
+
+    key: str = Field(description="The `/info` `limits` key of the limit.")
+    env: Optional[str] = Field(description="The environment variable that sets it; null for a derived limit.")
+    value: Optional[float] = Field(description="The limit's effective value.")
+    observed: Optional[float] = Field(description="What the input measured; null when it is not known exactly.")
+    unit: str = Field(description="The unit of `value` and `observed`.")
+
+
+class ErrorBody(BaseModel):
+    """The body of every error a service returns (§4.4)."""
+
+    model_config = ConfigDict(extra="allow")
+
+    status: int = Field(description="The HTTP status, as an integer.")
+    reason: Optional[str] = Field(
+        description=(
+            "A registered reason code, listed with its statuses in the spec's `x-atrium-reason-codes`, or null "
+            "when no code is registered for the cause. An open string: a release may add a code, but never "
+            "renames or removes one."
+        )
+    )
+    detail: str = Field(description="A human-readable message.")
+    limit: Optional[LimitRef] = Field(None, description="Only with `limit_exceeded`: the limit and the input's size.")
+    errors: Optional[List[Any]] = Field(None, description="The request-validation problems, or a structured detail.")
+    accepted: Optional[List[str]] = Field(
+        None, description="Only with `unsupported_media_type`: the file extensions or media types the endpoint reads."
+    )
+    cause: Optional[str] = Field(
+        None, description="A finer, unregistered cause (for example a reader's code). Informational; it may change."
+    )
+
+
+class LimitNote(BaseModel):
+    """One limit that shaped a result without refusing it (`limits_applied`, §4.5)."""
+
+    model_config = ConfigDict(extra="allow")
+
+    limit: str = Field(description="The `/info` `limits` key.")
+    value: Any = Field(description="The limit's value when it applied.")
+    effect: str = Field(description="What it did: `sampled`, `split`, `trimmed`, `skipped` or `stopped`.")
+    count: int = Field(description="How many times it applied.")
+    detail: str = Field(description="A human-readable note.")
+
+
+class LimitMeta(BaseModel):
+    """Where one limit comes from (`/info` `limits_meta`)."""
+
+    model_config = ConfigDict(extra="allow")
+
+    env: Optional[str] = Field(description="The environment variable that sets it; null for a derived limit.")
+    unit: Optional[str] = Field(description="The unit of its value.")
+    source: str = Field(description="Where the current value came from: `env`, `config`, `default` or `derived`.")
+    default: Optional[float] = Field(None, description="The built-in default (not for a derived limit).")
+    derived_from: Optional[List[str]] = Field(
+        None, description="For a derived limit: the settings it is computed from."
+    )
+    zero_means_unlimited: Optional[bool] = Field(None, description="True when 0 switches the limit off.")
+
+
+class InfoBase(BaseModel):
+    """The `/info` envelope every service returns (§4.1); each service adds its own capabilities."""
+
+    model_config = ConfigDict(extra="allow")
+
+    service: str = Field(description="The tool id, which is the repository name.")
+    version: str = Field(description="The tool version (`para_config.txt`), as in the release tag without the `v`.")
+    endpoints: List[str] = Field(description="The callable API paths.")
+    limits: Dict[str, Optional[float]] = Field(description="Every limit of the service: `{key: effective value}`.")
+    limits_meta: Dict[str, LimitMeta] = Field(
+        description="For each limit: the variable that sets it, its unit, default, source."
+    )
+    openapi_sha256: Optional[str] = Field(
+        description=(
+            "sha256 of this process's OpenAPI document in canonical form, equal to the `openapi.json.sha256` "
+            "asset of the release the image was built from."
+        )
+    )
+
+
+class HealthBody(BaseModel):
+    """`GET /health`: liveness, and with `?deep=true` a check of the backends."""
+
+    model_config = ConfigDict(extra="allow")
+
+    status: str = Field(description="`ok`, or `degraded` (HTTP 503) when the deep check fails or the replica drains.")
+    detail: Optional[str] = Field(None, description="Why the deep check failed.")
+    in_flight: Optional[int] = Field(None, description="Deep check only: requests being served.")
+    draining: Optional[bool] = Field(None, description="Deep check only: the replica is shutting down.")
+
+
+class ReadyBody(BaseModel):
+    """`GET /ready`: readiness for new work."""
+
+    model_config = ConfigDict(extra="allow")
+
+    status: str = Field(description="`ready`; or `starting` or `draining`, both with HTTP 503.")
+
+
+class CreateAction(BaseModel):
+    """The RO-Crate `CreateAction` of this call: its provenance (atrium-project#67 R2).
+
+    It names the tool as its `instrument` (with `version` and the container image), the inputs as
+    `object`, the outputs as `result`, the `agent`, `startTime`/`endTime` and `actionStatus`; the paradata
+    fields of the run are properties of the action. Null until a service returns it. nlp-enrich returns
+    its pipeline-run paradata record here today, which carries those properties without the action's
+    own members.
+    """
+
+    model_config = ConfigDict(extra="allow")
+
+    id: Optional[str] = Field(None, alias="@id", description="The action's identifier (`#run-...` / `urn:uuid:...`).")
+    type: Optional[str] = Field(None, alias="@type", description="`CreateAction`.")
+    name: Optional[str] = Field(None, description="A human-readable name of the run.")
+    instrument: Optional[Dict[str, Any]] = Field(
+        None, description="The tool: a `SoftwareApplication` with `version`, and the container image it ran as."
+    )
+    object_: Optional[List[Dict[str, Any]]] = Field(
+        None, alias="object", description="The inputs: the uploaded file(s) and the record sent with them."
+    )
+    result: Optional[List[Dict[str, Any]]] = Field(None, description="The outputs: the output file(s) and the record.")
+    agent: Optional[Dict[str, Any]] = Field(None, description="Who ran it (`ATRIUM_RUN_AGENT`).")
+    startTime: Optional[str] = Field(None, description="When the run started (ISO 8601).")
+    endTime: Optional[str] = Field(None, description="When the run ended (ISO 8601).")
+    actionStatus: Optional[str] = Field(None, description="`CompletedActionStatus` or `FailedActionStatus`.")
+    error: Optional[str] = Field(None, description="Why the run failed, with `FailedActionStatus`.")
+
+
+class AtriumDocument(RootModel[Dict[str, Any]]):
+    """An ATRIUM document record (`atrium_document.schema.json`)."""
+
+    model_config = ConfigDict(json_schema_extra={"x-atrium-record": True})
+
+
+#: The component the record schema is published under, and the prefix of its hoisted `$defs`.
+RECORD_COMPONENT = "AtriumDocument"
+
+#: What each error status means to a client (§4.4); the descriptions of :func:`error_responses`.
+_ERROR_DESCRIPTIONS: Dict[int, str] = {
+    404: "Not found.",
+    409: "The resource is not in a state that allows this request.",
+    413: "The request content is over a limit (`reason: limit_exceeded`). Split the input or raise the limit.",
+    415: "Unsupported media type (`reason: unsupported_media_type`, with `accepted`). Do not retry unchanged.",
+    422: (
+        "Unusable or invalid input: request validation (`errors`), a bad parameter, a record that cannot be "
+        "opened (`reason: invalid_record`), or a parameter or per-input budget over its limit "
+        "(`reason: limit_exceeded`). Do not retry unchanged."
+    ),
+    429: "Busy (`reason: busy`): every processing slot or queue place is taken. Retry after `Retry-After` seconds.",
+    500: "Processing failed. Report it; do not retry blindly.",
+    501: "This deployment cannot read the input: a reader's optional dependency is not installed.",
+    502: "An upstream service failed. Retry three times with backoff.",
+    503: "Not ready, warming up or draining. Retry three times with backoff.",
+    504: "A time limit that depends on an upstream service expired (`reason: limit_exceeded`). Retry with backoff.",
+}
+
+
+def error_responses(*statuses: int) -> Dict[int, Dict[str, Any]]:
+    """The OpenAPI `responses` entries of the given error statuses, each with :class:`ErrorBody`.
+
+    Every service passes ``FastAPI(responses=error_responses(422, 500))``, which puts the
+    error body on every route and, because a 422 is declared, stops FastAPI documenting its
+    own ``HTTPValidationError`` (which is not the body the services send). Each route adds
+    the statuses it can refuse with. A 429 also documents its ``Retry-After`` header.
+
+    The dicts are built fresh on every call: FastAPI copies ``responses`` shallowly, so a
+    shared nested dict would be mutated across routes.
+    """
+    out: Dict[int, Dict[str, Any]] = {}
+    for status in statuses:
+        entry: Dict[str, Any] = {
+            "model": ErrorBody,
+            "description": _ERROR_DESCRIPTIONS.get(int(status), _status_phrase(int(status))),
+        }
+        if int(status) == 429:
+            entry["headers"] = {
+                "Retry-After": {"description": "Seconds to wait before retrying.", "schema": {"type": "integer"}}
+            }
+        out[int(status)] = entry
+    return out
+
+
+def operation_id(route: Any) -> str:
+    """``generate_unique_id_function`` for every service: the operationId is the route's function name.
+
+    Generated clients name their methods after the operationId, so it must not depend on the
+    path or the method (FastAPI's default, e.g. ``predict_image_predict_image_post``). A
+    renamed handler is a renamed client method: ``atrium_openapi.py compare`` treats a removed
+    operationId as a breaking change.
+    """
+    return route.name
+
+
+def attach_openapi_contract(app: FastAPI, service: str) -> None:
+    """Finish the OpenAPI document ``app`` generates, the one committed as ``service/openapi.json``.
+
+    Wraps ``app.openapi`` once; the result is cached by FastAPI as usual. On top of what
+    FastAPI generates it:
+
+    * adds ``info.x-atrium-service`` (the tool id) and ``x-atrium-reason-codes``
+      (``{code: {description, statuses}}``, the registry of :data:`REASON_CODES`);
+    * replaces the ``AtriumDocument`` component with the vendored
+      ``atrium_document.schema.json`` (its ``$defs`` hoisted as ``AtriumDocument_<name>``,
+      ``$schema`` and ``$id`` dropped), and records ``x-atrium-record-schema``
+      (``schema_version`` and the sha256 of the schema), which ``atrium_openapi.py compare``
+      checks instead of diffing the record schema that the schema freeze already guards;
+    * drops the app-wide 422 from operations that take no parameters and no body.
+    """
+    original = app.openapi
+
+    def openapi() -> Dict[str, Any]:
+        if app.openapi_schema is None:
+            _finish_openapi(original(), service)
+        return app.openapi_schema
+
+    app.openapi = openapi  # type: ignore[method-assign]
+
+
+def _finish_openapi(spec: Dict[str, Any], service: str) -> None:
+    spec.setdefault("info", {})["x-atrium-service"] = service
+    spec["x-atrium-reason-codes"] = {
+        code: {"description": REASON_CODES[code], "statuses": list(REASON_STATUSES[code])} for code in REASON_CODES
+    }
+    schemas = spec.get("components", {}).get("schemas", {})
+    if RECORD_COMPONENT in schemas:
+        import atrium_document  # lazily: see the module docstring
+        import atrium_openapi  # lazily: see the module docstring
+
+        record = atrium_document.load_schema()
+        spec["x-atrium-record-schema"] = {
+            "schema_version": atrium_document.SCHEMA_VERSION,
+            "sha256": atrium_openapi.digest(record),
+        }
+        body, hoisted = _hoist_record_schema(record)
+        schemas[RECORD_COMPONENT] = body
+        schemas.update(hoisted)
+    for operations in spec.get("paths", {}).values():
+        for operation in operations.values():
+            if isinstance(operation, dict) and not operation.get("parameters") and "requestBody" not in operation:
+                operation.get("responses", {}).pop("422", None)
+
+
+def _hoist_record_schema(record: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    body = {key: value for key, value in record.items() if key not in ("$schema", "$id", "$defs")}
+    defs = record.get("$defs", {})
+    names = {f"#/$defs/{name}": f"#/components/schemas/{RECORD_COMPONENT}_{name}" for name in defs}
+
+    def rewrite(node: Any) -> Any:
+        if isinstance(node, dict):
+            return {k: (names.get(v, v) if k == "$ref" and isinstance(v, str) else rewrite(v)) for k, v in node.items()}
+        if isinstance(node, list):
+            return [rewrite(item) for item in node]
+        return node
+
+    return rewrite(body), {f"{RECORD_COMPONENT}_{name}": rewrite(schema) for name, schema in defs.items()}
+
+
+def openapi_digest(app: FastAPI) -> Optional[str]:
+    """The sha256 of ``app``'s OpenAPI document in canonical form (``atrium_openapi.digest``).
+
+    ``None`` if the document cannot be built: ``/info`` must answer regardless, and the
+    per-repo contract test fails on the ``None`` instead.
+    """
+    try:
+        import atrium_openapi  # lazily: see the module docstring
+
+        return atrium_openapi.digest(app.openapi())
+    except Exception:  # /info must never fail because the spec cannot be built
+        return None
 
 
 class ServiceState:
@@ -444,9 +867,19 @@ def attach_health(
 
     ``deep_check`` must never raise; if it does, the failure is reported as degraded
     rather than surfacing a 500.
+
+    Both routes declare their bodies (:class:`HealthBody`, :class:`ReadyBody`) for 200 and
+    503 in the spec (atrium-project#32 round 2); what they send is unchanged.
     """
 
-    @app.get("/health")
+    @app.get(
+        "/health",
+        response_model=None,
+        responses={
+            200: {"model": HealthBody, "description": "Alive; with `?deep=true`, the backends answer too."},
+            503: {"model": HealthBody, "description": "`degraded`: the deep check failed, or the replica drains."},
+        },
+    )
     def health(deep: bool = False) -> JSONResponse:
         if not deep:
             return JSONResponse({"status": "ok"}, status_code=200)
@@ -470,7 +903,14 @@ def attach_health(
 
     if state is not None:
 
-        @app.get("/ready")
+        @app.get(
+            "/ready",
+            response_model=None,
+            responses={
+                200: {"model": ReadyBody, "description": "`ready`: route new work here."},
+                503: {"model": ReadyBody, "description": "`starting` or `draining`: route new work elsewhere."},
+            },
+        )
         def ready() -> JSONResponse:
             if state.draining:
                 return JSONResponse({"status": "draining"}, status_code=503)
@@ -598,7 +1038,9 @@ def _strict_mb(raw: str, name: str, divisor: float) -> float:
     if not (value >= 0 and value != float("inf")):
         import atrium_limits  # lazily: see the module docstring
 
-        raise atrium_limits.LimitConfigError(f"The environment variable {name} is {raw.strip()!r}; it must be a non-negative number.")
+        raise atrium_limits.LimitConfigError(
+            f"The environment variable {name} is {raw.strip()!r}; it must be a non-negative number."
+        )
     return value / divisor
 
 

@@ -1,5 +1,18 @@
 name: Automated Release
 
+# On a v* tag: package the standalone API service bundle and publish a GitHub Release.
+#
+# Since atrium-project#32 round 2 each release also carries the service's OpenAPI document:
+# `openapi.json` (service/openapi.json, stamped with the release version) and
+# `openapi.json.sha256` — the spec the AMČR pipeline generates its clients from, and the
+# digest a running image reports as /info `openapi_sha256`. The release job first checks
+# that the committed spec is what this tag's code generates, then compares it with the
+# previous release: a breaking change fails the release unless the major version went up.
+#
+# `workflow_dispatch` is the dry run (atrium-project#40: an immutable release uses up its
+# tag, so the gate is proven BEFORE tagging): every check runs against the dispatched ref
+# and the latest release, the bundle is built and verified, and nothing is published.
+
 # Never cancel a release. The trigger is a tag push, so each run has its own ref and
 # overlap is only possible on a re-run of the same tag — where cancelling the first
 # could leave a half-published release behind.
@@ -11,6 +24,8 @@ on:
   push:
     tags:
       - 'v*' # Trigger on version tags
+  # The dry run (see the header): no release is created.
+  workflow_dispatch:
 
 permissions:
   contents: write # Needed to create a GitHub Release
@@ -40,12 +55,19 @@ jobs:
         # depend on a cross-repo `uses:` resolving at tag-push time.
         env:
           TAG_REF: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
         run: |
-          python check_version.py \
-            --citation CITATION.cff \
-            --para-config setup/para_config.txt \
-            --tag "$TAG_REF" \
-            --require-tag
+          # A dry run (workflow_dispatch on a branch) has no tag to compare; it still checks
+          # that CITATION.cff and setup/para_config.txt agree.
+          if [ "$REF_TYPE" = "tag" ]; then
+            python check_version.py \
+              --citation CITATION.cff \
+              --para-config setup/para_config.txt \
+              --tag "$TAG_REF" \
+              --require-tag
+          else
+            python check_version.py --citation CITATION.cff --para-config setup/para_config.txt
+          fi
 
   release:
     name: Package and Release
@@ -80,7 +102,13 @@ jobs:
           # ImportError, so the bundle would not have crashed — it would have silently
           # lost category URIs and the drift warning instead, which is worse. The guard
           # below does not model guarded imports and flagged it; that is the right call.
-          cp atrium_paradata.py \
+          #
+          # atrium_openapi.py: service/atrium_service.py imports it (lazily) to finish and
+          # digest the OpenAPI document -- /openapi.json and /info `openapi_sha256` need it
+          # (atrium-project#32 round 2); the closure check below finds that import too.
+          # service/openapi.json rides along with service/, unstamped.
+          cp atrium_openapi.py \
+             atrium_paradata.py \
              atrium_limits.py \
              tool_limits.py \
              atrium_document.py \
@@ -144,13 +172,66 @@ jobs:
           print(f"OK — bundle is self-contained ({len(shipped)} modules, {len(needed)} first-party imports resolved)")
           PY
 
+      # ── The OpenAPI document (atrium-project#32 item 3) ─────────────────────────
+      # Everything below runs the VENDORED atrium_openapi.py (stdlib only, held byte-identical
+      # to the hub by para-drift): like check_version.py above, a release gate must not depend
+      # on a cross-repo `uses:` resolving at tag-push time (hub docs/docker_gha_roadmap.md §3.3).
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Check the committed spec is what this commit generates
+        # The asset below IS service/openapi.json, so it must be current. This workflow cannot
+        # see this commit's api-contract or Docker smoke runs, so it checks for itself, with the
+        # pinned light test lane (fastapi and pydantic exactly as the image has them). torch is
+        # not in that lane: --prepare stands the model manager in for it, as the contract tests
+        # do; the spec does not depend on the manager. An import error fails here: a release
+        # gate does not skip.
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-test.txt
+          python atrium_openapi.py check --app service.api:app --spec service/openapi.json \
+            --prepare tests.openapi_contract_data:prepare
+
+      - name: Install oasdiff
+        # Pinned to the version atrium_openapi.py's rules were measured against. `go install`
+        # verifies the module against sum.golang.org; GOTOOLCHAIN=auto fetches the Go version
+        # oasdiff's go.mod asks for.
+        env:
+          OASDIFF_VERSION: v1.32.1
+        run: |
+          GOTOOLCHAIN=auto go install "github.com/oasdiff/oasdiff@${OASDIFF_VERSION}"
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Stamp the spec and compare it with the previous release
+        # stamp: dist/openapi.json (info.version = the release version) + dist/openapi.json.sha256.
+        # baseline: the highest release below this tag that carries openapi.json (none → the
+        # bootstrap, which passes; an API error fails). compare: a removed reason code always
+        # fails; any other breaking change fails unless the major version went up.
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_REF: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+        run: |
+          python atrium_openapi.py stamp --spec service/openapi.json --para-config setup/para_config.txt --out-dir dist
+          printf '%s' "$GH_TOKEN" | python atrium_openapi.py baseline --repo "$GITHUB_REPOSITORY" \
+            ${TAG_REF:+--tag "$TAG_REF"} --out "$RUNNER_TEMP/previous.openapi.json" --token-stdin
+          python atrium_openapi.py compare --base "$RUNNER_TEMP/previous.openapi.json" --rev dist/openapi.json \
+            --para-config setup/para_config.txt --require-oasdiff --summary "$GITHUB_STEP_SUMMARY"
+
       - name: Create GitHub Release
+        if: github.ref_type == 'tag'
         # SHA-pinned: this action holds `contents: write`. A moving tag can be
         # force-pushed to malicious code -- exactly what happened to
         # aquasecurity/trivy-action in 2026-03 (GHSA-69fq-xp46-6x23). Dependabot
         # keeps the SHA and the trailing version comment in step (#18).
+        #
+        # The spec is attached in this same step, when the release is created: an immutable
+        # release (atrium-project#40) refuses assets added after it is published.
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64  # v3.0.3
         with:
           generate_release_notes: true
           files: |
             service_page_classifier.zip
+            dist/openapi.json
+            dist/openapi.json.sha256

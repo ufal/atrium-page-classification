@@ -181,6 +181,23 @@ REVISION_BEST_MODELS = {
 # the Hub and asserts the PUBLISHED architectures are distinct too -- which is the half that
 # would have caught the defect above, and the half to run before ever moving these keys again.
 
+
+def resolve_base_model(revision: str) -> str | None:
+    """The base model of a model revision, or `None` when no entry of REVISION_TO_BASE_MODEL matches.
+
+    Exact key first, then the first key the revision starts with -- the resolution the notes
+    above describe, and the one ModelManager._get_base_model_id applies before loading a model.
+    Torch-free, so service/api.py can refuse an unknown `version` with a 422 before any model
+    runs (atrium-project#32 round 2); it used to reach the model loader and come back a 500.
+    """
+    if revision in REVISION_TO_BASE_MODEL:
+        return REVISION_TO_BASE_MODEL[revision]
+    for key, base_model in REVISION_TO_BASE_MODEL.items():
+        if revision.startswith(key):
+            return base_model
+    return None
+
+
 # Explicit per-model fold columns for retraining on the pre-computed cross-validation split
 # (issue #15). Single source of truth: revision -> column in the folds CSV. Rule:
 # splitN ↔ foldN column ↔ seed = 420 + (N−1).

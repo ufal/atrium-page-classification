@@ -42,6 +42,23 @@ def _resolve(revision: str) -> str:
     raise ValueError(f"Base model not found for version: {revision}")
 
 
+@pytest.mark.parametrize(
+    "revision",
+    [*REVISION_TO_BASE_MODEL, *REVISION_BEST_MODELS, "v4.40", "v10.2.1", "v12.3.1", "all", "v9.9", "", "x4.3"],
+)
+def test_the_shared_resolver_is_the_replicated_rule(revision):
+    """(atrium-project#32 round 2) service/api.py refuses an unknown `version` with a 422 through
+    model_registry.resolve_base_model, and ModelManager._get_base_model_id now delegates to it:
+    it must answer exactly what the rule above answers, and None where the rule raises."""
+    from model_registry import resolve_base_model
+
+    try:
+        expected = _resolve(revision)
+    except ValueError:
+        expected = None
+    assert resolve_base_model(revision) == expected
+
+
 # ── Exact-key resolution ────────────────────────────────────────────────────
 @pytest.mark.parametrize(
     "revision, expected",

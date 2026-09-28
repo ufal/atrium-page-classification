@@ -1,6 +1,8 @@
 pytest>=9.1.1
 pytest-cov
-fastapi
+# pinned exactly, with pydantic: see service/requirements.txt (atrium-project#32 round 2)
+fastapi==0.141.1
+pydantic==2.13.5
 httpx
 python-multipart
 openapi-spec-validator

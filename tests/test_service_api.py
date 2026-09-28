@@ -32,8 +32,10 @@ def test_predict_image_bad_type():
         data={"version": "v1.3", "topn": 3},
         files={"file": ("test.txt", b"fake image data", "text/plain")},
     )
-    assert response.status_code == 400
+    # §4.4: 415 `unsupported_media_type` (a 400 before atrium-project#32 round 2)
+    assert response.status_code == 415
     assert "Invalid file type" in response.json()["detail"]
+    assert response.json()["reason"] == "unsupported_media_type"
 
 
 def test_predict_image_size_limit():
@@ -51,8 +53,10 @@ def test_predict_document_bad_type():
         data={"version": "v1.3", "topn": 3},
         files={"file": ("test.txt", b"fake pdf data", "text/plain")},
     )
-    assert response.status_code == 400
+    # §4.4: 415 `unsupported_media_type` (a 400 before atrium-project#32 round 2)
+    assert response.status_code == 415
     assert "Invalid file type" in response.json()["detail"]
+    assert response.json()["reason"] == "unsupported_media_type"
 
 
 def test_predict_document_size_limit():

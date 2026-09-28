@@ -45,6 +45,13 @@ updates:
       # future editor who lifts one without the other gets the bump back next Monday.
       - dependency-name: "numpy"
         versions: [">= 2.5.0"]
+      # Pinned exactly here (requirements-test.txt) and in service/requirements.txt: the
+      # committed service/openapi.json is a function of both (atrium-project#32 round 2). Bump
+      # them together by hand and regenerate the spec in the same commit (python
+      # atrium_openapi.py export --app service.api:app --prepare tests.openapi_contract_data:prepare),
+      # so the release's breaking-change check sees what the upgrade changes.
+      - dependency-name: "fastapi"
+      - dependency-name: "pydantic"
 
   - package-ecosystem: "pip"
     directory: "/service"
@@ -66,3 +73,6 @@ updates:
       # inherits the constraint instead of rediscovering it the hard way.
       - dependency-name: "numpy"
         versions: [">= 2.5.0"]
+      # Pinned exactly: see the /setup entry above (atrium-project#32 round 2).
+      - dependency-name: "fastapi"
+      - dependency-name: "pydantic"
