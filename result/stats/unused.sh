@@ -33,8 +33,10 @@ extract_training_files() {
     [[ "$get_s" -eq 0 ]] && stop_patterns+=("^Test set")
 
     # Build awk regexes
-    local start_regex=$(IFS='|'; echo "${start_patterns[*]}")
-    local stop_regex=$(IFS='|'; echo "${stop_patterns[*]}")
+    local start_regex
+    start_regex=$(IFS='|'; echo "${start_patterns[*]}")
+    local stop_regex
+    stop_regex=$(IFS='|'; echo "${stop_patterns[*]}")
 
     # If no start patterns, print nothing
     if [[ -z "$start_regex" ]]; then
@@ -61,7 +63,8 @@ extract_training_files() {
 # E.g., /path/to/CTX192000019-7.png -> CTX192000019,7
 extract_doc_page() {
     local filepath="$1"
-    local filename=$(basename "$filepath")
+    local filename
+    filename=$(basename "$filepath")
     # Extract CTX ID and page number from filename like CTX192000019-7.png
     if [[ $filename =~ (CTX[0-9]+)-([0-9]+)\.png ]]; then
         echo "${BASH_REMATCH[1]},${BASH_REMATCH[2]}"
@@ -123,7 +126,8 @@ main() {
     [[ $GET_TRAIN -eq 1 ]] && sets_desc_parts+=("Training")
     [[ $GET_VALID -eq 1 ]] && sets_desc_parts+=("Validation")
     [[ $GET_TEST -eq 1 ]] && sets_desc_parts+=("Test")
-    local sets_desc=$(IFS=', '; echo "${sets_desc_parts[*]}")
+    local sets_desc
+    sets_desc=$(IFS=', '; echo "${sets_desc_parts[*]}")
 
     echo -e "${CYAN}═══════════════════════════════════════════════════════════════${NC}"
     echo -e "${GREEN}Finding CSV entries not used in any ${sets_desc} set(s)${NC}"
@@ -137,7 +141,8 @@ main() {
     echo ""
 
     # Create temporary directory
-    local tmpdir=$(mktemp -d)
+    local tmpdir
+    tmpdir=$(mktemp -d)
     local training_files="$tmpdir/training_files.txt"
     local training_doc_pages="$tmpdir/training_doc_pages.txt"
     local input_doc_pages="$tmpdir/input_doc_pages.txt"
@@ -149,7 +154,8 @@ main() {
         extract_training_files "$file" "$GET_TRAIN" "$GET_VALID" "$GET_TEST"
     done | sort -u > "$training_files"
 
-    local total_training=$(wc -l < "$training_files")
+    local total_training
+    total_training=$(wc -l < "$training_files")
     echo -e "  Found ${YELLOW}${total_training}${NC} unique files in specified set(s)\n"
 
     # Convert training files to document,page format
@@ -158,21 +164,24 @@ main() {
         extract_doc_page "$filepath"
     done < "$training_files" | grep -v '^$' | sort -u > "$training_doc_pages"
 
-    local total_training_docs=$(wc -l < "$training_doc_pages")
+    local total_training_docs
+    total_training_docs=$(wc -l < "$training_doc_pages")
     echo -e "  Extracted ${YELLOW}${total_training_docs}${NC} unique document-page combinations\n"
 
     # Read input CSV (skip header) and extract file,page combinations
     echo -e "${BLUE}Step 3: Processing input CSV...${NC}"
     tail -n +2 "$input_csv" | awk -F',' '{print $1","$2}' | sort -u > "$input_doc_pages"
 
-    local total_input=$(wc -l < "$input_doc_pages")
+    local total_input
+    total_input=$(wc -l < "$input_doc_pages")
     echo -e "  Found ${YELLOW}${total_input}${NC} unique document-page combinations in input CSV\n"
 
     # Find document-page combinations not in training sets
     echo -e "${BLUE}Step 4: Finding unused entries...${NC}"
     comm -23 "$input_doc_pages" "$training_doc_pages" > "$unused_doc_pages"
 
-    local total_unused=$(wc -l < "$unused_doc_pages")
+    local total_unused
+    total_unused=$(wc -l < "$unused_doc_pages")
     echo -e "  Found ${YELLOW}${total_unused}${NC} entries not used in any specified set(s)\n"
 
     # Statistics
@@ -185,13 +194,15 @@ main() {
     echo -e "  Entries NOT in specified set(s): ${YELLOW}${total_unused}${NC}"
 
     if [[ $total_input -gt 0 ]]; then
-        local pct_unused=$(awk "BEGIN {printf \"%.2f\", ($total_unused/$total_input)*100}")
+        local pct_unused
+        pct_unused=$(awk "BEGIN {printf \"%.2f\", ($total_unused/$total_input)*100}")
         echo -e "  Percentage unused:                 ${YELLOW}${pct_unused}%${NC}"
     fi
     echo ""
 
     # Generate output CSV
-    local output_file="unused_entries_$(date +%Y%m%d-%H%M%S).csv"
+    local output_file
+    output_file="unused_entries_$(date +%Y%m%d-%H%M%S).csv"
 
     if [[ $total_unused -gt 0 ]]; then
         echo -e "${BLUE}Step 5: Generating output CSV...${NC}"
@@ -200,9 +211,6 @@ main() {
         echo "file,page,category" > "$output_file"
 
         # Filter input CSV to only include unused entries
-        # Read header from input
-        local header=$(head -n 1 "$input_csv")
-
         # For each unused doc-page, find matching rows in input CSV
         while IFS=',' read -r doc page; do
             # Match rows where first column is $doc and second column is $page
@@ -210,7 +218,8 @@ main() {
                 'NR>1 && $1==doc && $2==page {print}' "$input_csv"
         done < "$unused_doc_pages" >> "$output_file"
 
-        local output_rows=$(tail -n +2 "$output_file" | wc -l)
+        local output_rows
+        output_rows=$(tail -n +2 "$output_file" | wc -l)
         echo -e "  Written ${YELLOW}${output_rows}${NC} rows to output CSV\n"
 
         # Category breakdown

@@ -41,12 +41,14 @@ import yaml
 
 REPO_ROOT = Path(__file__).parent.parent
 
-#: Every requirements file the Docker image installs (Dockerfile:40-42) and
-#: setup/setup_api_service.sh installs. The union is what "declared" means: it does not matter
-#: WHICH of them carries a dep, only that something the image builds from does.
+#: Every requirements file the Docker image installs (the `base` stage's `pip install`). The
+#: union is what "declared" means: it does not matter WHICH of them carries a dep, only that
+#: something the image builds from does. setup/requirements-test.txt is deliberately NOT
+#: here: since atrium-project#69 (roadmap H4) the image does not install it, so a runtime
+#: dependency declared only there would be missing from the image -- exactly what this
+#: file exists to catch.
 REQUIREMENTS_FILES = [
     REPO_ROOT / "setup" / "requirements.txt",
-    REPO_ROOT / "setup" / "requirements-test.txt",
     REPO_ROOT / "service" / "requirements.txt",
 ]
 

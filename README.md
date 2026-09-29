@@ -496,9 +496,16 @@ After the model is downloaded, you should see a similar file structure:
 > as volumes to persist data and downloaded models between container restarts.
 
 > [!TIP]
-> **API Service Deployment:** To run the FastAPI service securely, we use a Docker compose profile rather than a
-> separate build target. The service includes deployment hardening (strict payload size limits and PDF page caps).
-> Run `docker compose --profile api up --build` to start the classification service on port 8000.
+> **API Service Deployment:** The FastAPI service is the Dockerfile's `api` stage, published as
+> `ghcr.io/ufal/atrium-page-classification-api:<version>` (the release without its leading `v`), and started
+> through a Docker compose profile. The service includes deployment hardening (strict payload size limits and PDF
+> page caps). Run `docker compose --profile api up --build` to start the classification service on port 8000.
+
+> [!NOTE]
+> **Docker on Linux: run as yourself.** `./data` and `./data/output` are part of the clone and belong to you, while
+> the image runs as uid 10001 by default. Compose runs the services as `user: "${ATRIUM_UID:-10001}:0"`, so put your
+> uid in `.env` once — `echo "ATRIUM_UID=$(id -u)" >> .env` — and the container writes the results as you. With
+> `docker run`, pass `--user "$(id -u):0"`. Docker Desktop (macOS, Windows) needs neither. (atrium-project#69)
 
 
 Some of the folders may be missing, like mentioned [later](#for-developers-) `model_output` which is automatically created

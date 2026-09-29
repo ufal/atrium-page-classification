@@ -20,13 +20,15 @@ repos:
         args: ["--fix"]
       - id: ruff-format   # formatting
 
-  # The repo ships 8 shell scripts (setup/setup_api_service.sh,
-  # supplementary/scripts/job_run.sh, data_scripts/unix/*.sh, etc.)
-  # Run shellcheck in check-only mode; scope to data_scripts/ and setup/.
+  # The repo ships 8 shell scripts: data_scripts/unix/*.sh (3), setup/setup_api_service.sh,
+  # supplementary/scripts/*.sh (2) and result/stats/*.sh (2). All eight are in scope.
+  # result/ was missing from this regex until atrium-project#69 (roadmap D4), so its two
+  # scripts had never been checked; their 33 findings (mostly SC2155) were fixed with it.
+  # Run shellcheck in check-only mode.
   # Relax SC1091 (sourced file not found at hook run time).
   - repo: https://github.com/koalaman/shellcheck-precommit
     rev: v0.11.0
     hooks:
       - id: shellcheck
         args: ["-e", "SC1091", "-e", "SC2148"]
-        files: ^(data_scripts|setup|supplementary/scripts)/.*\.sh$
+        files: ^(data_scripts|setup|supplementary/scripts|result/stats)/.*\.sh$

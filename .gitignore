@@ -10,4 +10,13 @@ __pycache__/
 # Swept into a commit by `git add -A` during atrium-project#10 Phase 6.
 .coverage
 .coverage.*
+
+# ./data is the compose bind mount, and ./data/output the results mount (/app/result).
+# Both directories are committed (their .gitkeep files) so a clone owns them; everything a
+# run writes into them stays untracked. (atrium-project#69, roadmap B6)
+/data/*
+!/data/.gitkeep
+!/data/output/
+/data/output/*
+!/data/output/.gitkeep
 .env

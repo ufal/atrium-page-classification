@@ -75,9 +75,14 @@ WORKDIR /app
 ARG TORCH_INDEX_URL="https://download.pytorch.org/whl/cpu"
 RUN pip install --index-url ${TORCH_INDEX_URL} torch==2.7.1 torchvision==0.22.1
 
-COPY setup/requirements.txt setup/requirements-test.txt ./
+# Runtime requirements only (atrium-project#69, roadmap H4). setup/requirements-test.txt
+# (pytest, pytest-cov, httpx, openapi-spec-validator, PyYAML) used to be installed here too:
+# nothing the ENTRYPOINTs reach imports a package only it carries, so it only added to the
+# image and to the Trivy surface the release gate scans. The tests run on the CI runner,
+# never in the image. fastapi/pydantic keep their exact pins in service/requirements.txt.
+COPY setup/requirements.txt ./
 COPY service/requirements.txt ./service-requirements.txt
-RUN pip install -r requirements.txt -r service-requirements.txt -r requirements-test.txt
+RUN pip install -r requirements.txt -r service-requirements.txt
 
 COPY . .
 
@@ -109,9 +114,17 @@ RUN printf '%s\n' \
     'os.execv(sys.executable, [sys.executable, "/app/run.py", *sys.argv[1:]])' \
     > /app/entrypoint.py
 
+# Non-root runtime user. Owned atrium:0 and group-writable (`g=u`): the arbitrary-UID
+# convention (OpenShift's), atrium-project#69 / roadmap B6. docker-compose.yml runs this
+# image as `user: "${ATRIUM_UID:-10001}:0"`, so on Linux the container can run as the uid
+# that owns the ./data bind mounts, and a uid with no passwd entry still reaches /app,
+# /cache, /data and $HOME through group 0. HOME is explicit because without a passwd entry
+# it would be `/`. The default runtime -- uid 10001 as the owner -- is unchanged.
 RUN useradd --create-home --uid 10001 atrium \
     && mkdir -p /cache/huggingface /data /app/model /app/result \
-    && chown -R atrium:atrium /app /cache /data
+    && chown -R atrium:0 /app /cache /data /home/atrium \
+    && chmod -R g=u /app /cache /data /home/atrium
+ENV HOME=/home/atrium
 USER atrium
 
 # Default: single-model directory inference (v4.3).  Args pass straight through

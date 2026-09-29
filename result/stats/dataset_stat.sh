@@ -26,23 +26,26 @@ extract_stats() {
     echo -e "${CYAN}═══════════════════════════════════════════════════════════════${NC}\n"
 
     # Extract fold number from filename
-    local fold=$(echo "$input_file" | grep -oP 'FOLD_\K[0-9]+' || echo "Unknown")
+    local fold
+    fold=$(echo "$input_file" | grep -oP 'FOLD_\K[0-9]+' || echo "Unknown")
     echo -e "${BLUE}Fold Number:${NC} $fold"
     echo ""
 
     # Temporary files for processing
-    local tmpdir=$(mktemp -d)
+    local tmpdir
+    tmpdir=$(mktemp -d)
     local train_file="$tmpdir/train.txt"
     local val_file="$tmpdir/val.txt"
     local test_file="$tmpdir/test.txt"
 
     # Split file into sections
-    awk '/^Training set/ {flag="train"; next}
+    awk -v train_out="$train_file" -v val_out="$val_file" -v test_out="$test_file" \
+        '/^Training set/ {flag="train"; next}
          /^Validation set/ {flag="val"; next}
          /^Test set/ {flag="test"; next}
-         flag=="train" && /\.png$/ {print > "'$train_file'"}
-         flag=="val" && /\.png$/ {print > "'$val_file'"}
-         flag=="test" && /\.png$/ {print > "'$test_file'"}' "$input_file"
+         flag=="train" && /\.png$/ {print > train_out}
+         flag=="val" && /\.png$/ {print > val_out}
+         flag=="test" && /\.png$/ {print > test_out}' "$input_file"
 
     # Process each set
     for set_name in "Training" "Validation" "Test"; do
@@ -61,11 +64,13 @@ extract_stats() {
         echo -e "${GREEN}━━━ ${set_name} Set ━━━${NC}"
 
         # Total files
-        local total_files=$(wc -l < "$set_file")
+        local total_files
+        total_files=$(wc -l < "$set_file")
         echo -e "  Total files: ${YELLOW}$total_files${NC}"
 
         # Extract unique documents (CTX... before the dash)
-        local unique_docs=$(grep -oP 'CTX[0-9]+-' "$set_file" | sed 's/-$//' | sort -u | wc -l)
+        local unique_docs
+        unique_docs=$(grep -oP 'CTX[0-9]+-' "$set_file" | sed 's/-$//' | sort -u | wc -l)
         echo -e "  Unique documents: ${YELLOW}$unique_docs${NC}"
 
         # Files per category (parent directory)
@@ -75,10 +80,11 @@ extract_stats() {
 
         # Unique documents per category
         echo -e "  ${BLUE}Unique documents per category:${NC}"
-        for category in $(awk -F'/' '{print $(NF-1)}' "$set_file" | sort -u); do
-            local cat_docs=$(grep "/$category/" "$set_file" | grep -oP 'CTX[0-9]+-' | sed 's/-$//' | sort -u | wc -l)
+        while IFS= read -r category; do
+            local cat_docs
+            cat_docs=$(grep "/$category/" "$set_file" | grep -oP 'CTX[0-9]+-' | sed 's/-$//' | sort -u | wc -l)
             printf "    %-15s %s\n" "$category:" "$cat_docs"
-        done
+        done < <(awk -F'/' '{print $(NF-1)}' "$set_file" | sort -u)
 
         echo ""
     done
@@ -86,10 +92,12 @@ extract_stats() {
     # Overall statistics
     echo -e "${GREEN}━━━ Overall Statistics ━━━${NC}"
 
-    local total_all=$(cat "$train_file" "$val_file" "$test_file" 2>/dev/null | wc -l)
+    local total_all
+    total_all=$(cat "$train_file" "$val_file" "$test_file" 2>/dev/null | wc -l)
     echo -e "  Total files (all sets): ${YELLOW}$total_all${NC}"
 
-    local unique_docs_all=$(cat "$train_file" "$val_file" "$test_file" 2>/dev/null | \
+    local unique_docs_all
+    unique_docs_all=$(cat "$train_file" "$val_file" "$test_file" 2>/dev/null | \
         grep -oP 'CTX[0-9]+-' | sed 's/-$//' | sort -u | wc -l)
     echo -e "  Unique documents (all sets): ${YELLOW}$unique_docs_all${NC}"
 
@@ -99,25 +107,32 @@ extract_stats() {
         awk '{printf "    %-15s %s\n", $2":", $1}'
 
     echo -e "  ${BLUE}Unique documents per category (all sets):${NC}"
-    for category in $(cat "$train_file" "$val_file" "$test_file" 2>/dev/null | \
-        awk -F'/' '{print $(NF-1)}' | sort -u); do
-        local cat_docs=$(cat "$train_file" "$val_file" "$test_file" 2>/dev/null | \
+    while IFS= read -r category; do
+        local cat_docs
+        cat_docs=$(cat "$train_file" "$val_file" "$test_file" 2>/dev/null | \
             grep "/$category/" | grep -oP 'CTX[0-9]+-' | sed 's/-$//' | sort -u | wc -l)
         printf "    %-15s %s\n" "$category:" "$cat_docs"
-    done
+    done < <(cat "$train_file" "$val_file" "$test_file" 2>/dev/null | \
+        awk -F'/' '{print $(NF-1)}' | sort -u)
 
     # Distribution analysis
     echo ""
     echo -e "${GREEN}━━━ Distribution Analysis ━━━${NC}"
 
-    local train_total=$(wc -l < "$train_file" 2>/dev/null || echo 0)
-    local val_total=$(wc -l < "$val_file" 2>/dev/null || echo 0)
-    local test_total=$(wc -l < "$test_file" 2>/dev/null || echo 0)
+    local train_total
+    train_total=$(wc -l < "$train_file" 2>/dev/null || echo 0)
+    local val_total
+    val_total=$(wc -l < "$val_file" 2>/dev/null || echo 0)
+    local test_total
+    test_total=$(wc -l < "$test_file" 2>/dev/null || echo 0)
 
     if [[ $total_all -gt 0 ]]; then
-        local train_pct=$(awk "BEGIN {printf \"%.2f\", ($train_total/$total_all)*100}")
-        local val_pct=$(awk "BEGIN {printf \"%.2f\", ($val_total/$total_all)*100}")
-        local test_pct=$(awk "BEGIN {printf \"%.2f\", ($test_total/$total_all)*100}")
+        local train_pct
+        train_pct=$(awk "BEGIN {printf \"%.2f\", ($train_total/$total_all)*100}")
+        local val_pct
+        val_pct=$(awk "BEGIN {printf \"%.2f\", ($val_total/$total_all)*100}")
+        local test_pct
+        test_pct=$(awk "BEGIN {printf \"%.2f\", ($test_total/$total_all)*100}")
 
         echo -e "  Training:   ${train_pct}%"
         echo -e "  Validation: ${val_pct}%"
@@ -136,7 +151,7 @@ main() {
 
     # If no arguments, find all matching files
     if [[ ${#files[@]} -eq 0 ]]; then
-        mapfile -t files < <(ls *_FOLD_*_DATASETS.txt 2>/dev/null)
+        mapfile -t files < <(ls -- *_FOLD_*_DATASETS.txt 2>/dev/null)
 
         if [[ ${#files[@]} -eq 0 ]]; then
             echo -e "${RED}No dataset files found matching pattern: *_FOLD_*_DATASETS.txt${NC}"
