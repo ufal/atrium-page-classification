@@ -12,8 +12,10 @@ matches that release (motyc, atrium-project#32, 2026-09-27). So each tool:
 
 * commits its spec as ``service/openapi.json`` — ``export`` writes it and ``check`` fails when the
   code no longer produces it (``info.version`` aside: it is stamped at release time);
-* attaches it to every release — ``stamp`` writes ``openapi.json`` with the release version and
-  ``openapi.json.sha256``, the same digest ``/info`` reports as ``openapi_sha256``;
+* attaches it to every release — ``stamp`` writes ``openapi.json`` with the release version, in
+  the canonical form of :func:`canonical_bytes`, and ``openapi.json.sha256``, a ``sha256sum`` line
+  for it. One value throughout: ``sha256sum -c openapi.json.sha256`` verifies the asset, GitHub
+  shows the same digest for it, and ``/info`` reports it as ``openapi_sha256``;
 * compares it with the previous release before publishing — ``baseline`` fetches the previous
   release's ``openapi.json`` and ``compare`` fails on a breaking change unless the major version
   went up (0.x included: a 0.x tool needs 1.0 to break), and always on a removed reason code.
@@ -98,7 +100,11 @@ def canonical_bytes(document: Any) -> bytes:
 
 
 def digest(document: Any) -> str:
-    """sha256 (hex) of :func:`canonical_bytes` — ``/info`` ``openapi_sha256`` and the ``.sha256`` asset."""
+    """sha256 (hex) of :func:`canonical_bytes` — ``/info`` ``openapi_sha256`` and the ``.sha256`` asset.
+
+    The release asset is written in that form (``stamp``), so this is also the plain sha256 of its
+    bytes. Written with :func:`dumps` instead, the asset would not match its own ``.sha256`` line.
+    """
     return hashlib.sha256(canonical_bytes(document)).hexdigest()
 
 
@@ -510,7 +516,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     p.add_argument("--prepare")
     p.add_argument("--root", default=".")
 
-    p = sub.add_parser("stamp", help="write the release assets openapi.json and openapi.json.sha256")
+    p = sub.add_parser("stamp", help="write the release assets openapi.json (canonical form) and openapi.json.sha256")
     p.add_argument("--spec", default=SPEC_PATH)
     p.add_argument("--para-config", required=True)
     p.add_argument("--out-dir", required=True)
@@ -562,7 +568,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             asset = stamp(load(args.spec), read_version(args.para_config))
             out = Path(args.out_dir)
             out.mkdir(parents=True, exist_ok=True)
-            (out / args.asset).write_text(dumps(asset), encoding="utf-8")
+            # The canonical form, not dumps(): the asset's sha256 is then the digest /info reports.
+            (out / args.asset).write_bytes(canonical_bytes(asset))
             (out / f"{args.asset}.sha256").write_text(f"{digest(asset)}  {args.asset}\n", encoding="utf-8")
             print(f"wrote {out / args.asset} (version {asset['info']['version']}, sha256 {digest(asset)})")
             return 0
