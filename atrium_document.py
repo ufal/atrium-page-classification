@@ -272,6 +272,8 @@ BLOCK_FIELD_OWNERS: Dict[str, Dict[str, List[str]]] = {
             "bbox",
             "teitok_ref",
         ],
+        # Reserved and unwritten (atrium-project#70): entities[] exists only after the
+        # translator has run. The grant stays -- re-attributing a field is breaking.
         "translator": ["translation_en"],
         "llm-enrich": ["pid"],
     },

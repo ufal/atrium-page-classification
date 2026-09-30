@@ -759,7 +759,8 @@
                     "full",
                     "standard",
                     "minimal"
-                  ]
+                  ],
+                  "description": "Cue profile of the rendered Markdown (llm-enrich json_to_md/xml_to_md): full = every layout cue; standard = one box per block, no page margins; minimal = page skeleton and structure only. See docs/document_schema.md, Detail profiles (atrium-project#70)."
                 }
               }
             }
@@ -1169,7 +1170,7 @@
             }
           },
           "entities": {
-            "description": "Owner: nlp-enrich; translator writes translation_en; llm-enrich writes pid. Carries all three tagsets so no mapping is lost.",
+            "description": "Owner: nlp-enrich; llm-enrich writes pid. `translation_en` is RESERVED: declared for the translator, written by no tool (atrium-project#70). Carries all three tagsets so no mapping is lost.",
             "type": "array",
             "items": {
               "type": "object",
@@ -1215,7 +1216,8 @@
                   "type": "string"
                 },
                 "translation_en": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "RESERVED, written by no tool. Declared for the translator, which runs before nlp-enrich creates entities[]; English is produced only for free-text metadata in the AMČR pilot (atrium-project#70)."
                 },
                 "pid": {
                   "type": "object",
@@ -2335,6 +2337,6 @@
   },
   "x-atrium-record-schema": {
     "schema_version": "1.0",
-    "sha256": "6874cd5120b6d6f7fa84d860bf33615668b148145eac9b883b7ca432744bb1ad"
+    "sha256": "08d45f422dd82a9ada180631c71dcb60fad72b812f5b98081c45728c830947cf"
   }
 }

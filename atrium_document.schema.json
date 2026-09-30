@@ -101,7 +101,7 @@
         "properties": {
           "from": { "type": "string", "description": "Persistent artifact the derivation is regenerated from." },
           "converter": { "type": "string", "examples": ["xml_to_md@0.3.0"] },
-          "detail": { "type": "string", "enum": ["full", "standard", "minimal"] }
+          "detail": { "type": "string", "enum": ["full", "standard", "minimal"], "description": "Cue profile of the rendered Markdown (llm-enrich json_to_md/xml_to_md): full = every layout cue; standard = one box per block, no page margins; minimal = page skeleton and structure only. See docs/document_schema.md, Detail profiles (atrium-project#70)." }
         }
       }
     },
@@ -342,7 +342,7 @@
     },
 
     "entities": {
-      "description": "Owner: nlp-enrich; translator writes translation_en; llm-enrich writes pid. Carries all three tagsets so no mapping is lost.",
+      "description": "Owner: nlp-enrich; llm-enrich writes pid. `translation_en` is RESERVED: declared for the translator, written by no tool (atrium-project#70). Carries all three tagsets so no mapping is lost.",
       "type": "array",
       "items": {
         "type": "object",
@@ -363,7 +363,7 @@
           },
           "bbox": { "$ref": "#/$defs/bbox" },
           "teitok_ref": { "type": "string" },
-          "translation_en": { "type": "string" },
+          "translation_en": { "type": "string", "description": "RESERVED, written by no tool. Declared for the translator, which runs before nlp-enrich creates entities[]; English is produced only for free-text metadata in the AMČR pilot (atrium-project#70)." },
           "pid": {
             "type": "object",
             "description": "FAIR ontology cross-references — the ARIADNE/GoTriple hook. Null until resolved.",

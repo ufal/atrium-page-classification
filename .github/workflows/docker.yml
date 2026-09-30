@@ -39,8 +39,9 @@ jobs:
       pre-install-torch: torch==2.7.1 torchvision==0.22.1
       requirements: setup/requirements.txt setup/requirements-test.txt service/requirements.txt
       hf-model-cache: true
-      # Must track the -rev pin in the Dockerfile CMD (currently v4.3) and
-      # PC_REVISION in the hub's e2e-pipeline-smoke.yml. Bump all three together.
+      # Must track the -rev pin in the Dockerfile CMD (currently v4.3); bump the two
+      # together. (The hub's e2e-pipeline-smoke.yml keys its own HF cache by image
+      # tag; the PC_REVISION it once shared with this key no longer exists.)
       hf-cache-key: v4.3
       build-targets: '["base", "api"]'
       # issue #55: `api` is a new Dockerfile stage. Before it existed, this repo's
