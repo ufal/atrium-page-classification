@@ -178,7 +178,7 @@
     },
 
     "pages": {
-      "description": "Originator: alto-postprocess (OCR/ALTO path) or digital-convert (digital-born PDF/DOCX path), selected per document by source.origin — never both. page-classification may write category fields; nlp-enrich may write teitok_surface. Field-level ownership — never co-mutated.",
+      "description": "Originator: ocr-postprocess (named alto-postprocess before 2026-10-01) (OCR/ALTO path) or digital-convert (digital-born PDF/DOCX path), selected per document by source.origin — never both. page-classification may write category fields; nlp-enrich may write teitok_surface. Field-level ownership — never co-mutated.",
       "type": "array",
       "items": {
         "type": "object",
@@ -235,7 +235,7 @@
     },
 
     "content": {
-      "description": "Originator: alto-postprocess or digital-convert, selected per document by source.origin (Issue #18) — never both. Reading-order text for search, or null when externalised by reference.",
+      "description": "Originator: ocr-postprocess (named alto-postprocess before 2026-10-01) or digital-convert, selected per document by source.origin (Issue #18) — never both. Reading-order text for search, or null when externalised by reference.",
       "type": "object",
       "additionalProperties": true,
       "properties": {
@@ -245,7 +245,7 @@
     },
 
     "lines": {
-      "description": "Originator: alto-postprocess (categ/quality/lang/text) or digital-convert (text/bbox/group_id/lang/quality_score/categ), selected per document by source.origin (Issue #18) — never both. nlp-enrich writes morphology and teitok_ref. Field-level ownership. NOTE for validators: only page+line are required, so a row stripped of its text by a field-ownership filter still validates here — the round-trip assertion belongs in the writing tool, not in this schema.",
+      "description": "Originator: ocr-postprocess (named alto-postprocess before 2026-10-01) (categ/quality/lang/text) or digital-convert (text/bbox/group_id/lang/quality_score/categ), selected per document by source.origin (Issue #18) — never both. nlp-enrich writes morphology and teitok_ref. Field-level ownership. NOTE for validators: only page+line are required, so a row stripped of its text by a field-ownership filter still validates here — the round-trip assertion belongs in the writing tool, not in this schema.",
       "type": "array",
       "items": {
         "type": "object",
@@ -260,7 +260,7 @@
           "text": { "type": "string" },
           "categ": {
             "type": "string",
-            "description": "Line category. Open string with TWO authorised originators emitting DISJOINT label sets: alto-postprocess emits Clear/Empty/Noisy/Non-text/Trash, digital-convert emits Garbage/Inverted. Both sets are declared in the hub-canonical atrium_vocab.py as the `line-category` scheme; `atrium_vocab.LINE_CATEGORY_ORIGINATORS` says which tool emits which. 'Garbage', 'Inverted' and 'Trash' are load-bearing for api_util/json_to_md.py's DROP_CATEGORIES, which filters on atrium_vocab.UNTRUSTWORTHY_LINE_CATEGORIES (defect V-1 in docs/skos_strategy.md 6, fixed 2026-09-25: it covered only the first two, so a Trash line reached the model exactly like a Clear one). A re-spelled category passes that filter unnoticed, so do not re-spell one on the way out. A re-spelling would not fail validation either -- it would only put a tool out of step with the registry, in silence.",
+            "description": "Line category. Open string with TWO authorised originators emitting DISJOINT label sets: ocr-postprocess (formerly alto-postprocess) emits Clear/Empty/Noisy/Non-text/Trash, digital-convert emits Garbage/Inverted. Both sets are declared in the hub-canonical atrium_vocab.py as the `line-category` scheme; `atrium_vocab.LINE_CATEGORY_ORIGINATORS` says which tool emits which. 'Garbage', 'Inverted' and 'Trash' are load-bearing for api_util/json_to_md.py's DROP_CATEGORIES, which filters on atrium_vocab.UNTRUSTWORTHY_LINE_CATEGORIES (defect V-1 in docs/skos_strategy.md 6, fixed 2026-09-25: it covered only the first two, so a Trash line reached the model exactly like a Clear one). A re-spelled category passes that filter unnoticed, so do not re-spell one on the way out. A re-spelling would not fail validation either -- it would only put a tool out of step with the registry, in silence.",
             "x-atrium-scheme": "line-category",
             "examples": ["Clear", "Noisy", "Trash", "Garbage", "Inverted"]
           },
@@ -303,7 +303,7 @@
     },
 
     "tables": {
-      "description": "Originator: alto-postprocess (ALTO spatial-block tables) or digital-convert (DOCX/PDF structural extraction), selected per document by source.origin (Issue #18, resolved) — never both. Grid SHAPE only: cell text is never duplicated here, it lives once in lines[] and is linked back via group_id, so this stays the lossless structured twin of the disposable Markdown table in 'regenerable'.",
+      "description": "Originator: ocr-postprocess (named alto-postprocess before 2026-10-01) (ALTO spatial-block tables) or digital-convert (DOCX/PDF structural extraction), selected per document by source.origin (Issue #18, resolved) — never both. Grid SHAPE only: cell text is never duplicated here, it lives once in lines[] and is linked back via group_id, so this stays the lossless structured twin of the disposable Markdown table in 'regenerable'.",
       "type": "array",
       "items": {
         "type": "object",
@@ -349,7 +349,7 @@
     },
 
     "entities": {
-      "description": "Owner: nlp-enrich; llm-enrich writes pid. `translation_en` is RESERVED: declared for the translator, written by no tool (atrium-project#70). Carries all three tagsets so no mapping is lost.",
+      "description": "Owner: nlp-enrich; keyword-extract (llm-enrich before 2026-10-01) writes pid. `translation_en` is RESERVED: declared for the translator, written by no tool (atrium-project#70). Carries all three tagsets so no mapping is lost.",
       "type": "array",
       "items": {
         "type": "object",
@@ -398,7 +398,7 @@
     },
 
     "enrichment": {
-      "description": "Owner: llm-enrich. Superset of the LLM document schema, plus the explicit page citation.",
+      "description": "Owner: keyword-extract (llm-enrich before 2026-10-01). Superset of the LLM document schema, plus the explicit page citation.",
       "type": "object",
       "additionalProperties": true,
       "properties": {
@@ -424,7 +424,7 @@
     },
 
     "forms": {
-      "description": "Owner: llm-enrich. VLM/LLM-driven labeled fixed-field extraction (e.g. archival intake sheets: name/date/plot-number/signature). No deterministic ALTO/DOCX structural signal marks a region as a form field the way it does for tables, so this carries a confidence score per field and is always single-owner regardless of document origin.",
+      "description": "Owner: keyword-extract (llm-enrich before 2026-10-01). VLM/LLM-driven labeled fixed-field extraction (e.g. archival intake sheets: name/date/plot-number/signature). No deterministic ALTO/DOCX structural signal marks a region as a form field the way it does for tables, so this carries a confidence score per field and is always single-owner regardless of document origin.",
       "type": "array",
       "items": {
         "type": "object",

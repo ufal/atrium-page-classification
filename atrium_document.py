@@ -100,6 +100,34 @@ RUN_UUID_PATTERN = re.compile(r"^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0
 #: Structural keys the module itself maintains — never a tool's "own block".
 RESERVED_KEYS = frozenset({"schema_version", "record_type", "doc_id", "source", "provenance", "assembled"})
 
+#: Repository moves of 2026-10-01 (atrium-project#72, atrium-alto-postprocess#56,
+#: atrium-keyword-extract#1): a program id keeps working after its repository is succeeded.
+#: `alto-postprocess` became `ocr-postprocess` (a rename) and the LLM keyword stage of
+#: `llm-enrich` became `keyword-extract`. The successor is added BESIDE its predecessor as
+#: an allowed writer (see `_add_successors()` below) and every comparison goes through
+#: `canonical_program()`; an existing stamp in `assembled.blocks` or `provenance` is never
+#: rewritten, so a record written before the move still loads, merges and passes the origin
+#: check, and nothing already written is re-attributed (an additive change). `digital-convert`,
+#: `nlp-enrich`, `page-classification` and `translator` are roles, not repository names, and
+#: do not change.
+PROGRAM_SUCCESSORS: Dict[str, str] = {
+    "alto-postprocess": "ocr-postprocess",
+    "llm-enrich": "keyword-extract",
+}
+
+
+def canonical_program(name: Optional[str]) -> Optional[str]:
+    """The current program id for `name`: a predecessor maps to its successor, anything else to itself."""
+    if not name:
+        return name
+    return PROGRAM_SUCCESSORS.get(name, name)
+
+
+def same_program(a: Optional[str], b: Optional[str]) -> bool:
+    """True when two program ids name the same writer, ignoring a repository succession."""
+    return canonical_program(a) == canonical_program(b)
+
+
 #: Which tool owns which top-level block. One owner per block; blocks shared between
 #: tools are split by FIELD instead (see BLOCK_FIELD_OWNERS) so nothing is co-mutated.
 #:
@@ -154,6 +182,10 @@ BLOCK_OWNERS: Dict[str, Union[str, Tuple[str, ...]]] = {
 #: — the schema requires only page+line on a lines[] row, so a half-built plane
 #: validates clean.
 #:
+#: Since the repository moves of 2026-10-01 the originator is named by its CURRENT program id
+#: (`ocr-postprocess`); a record stamped by its predecessor `alto-postprocess` is the same
+#: writer (PROGRAM_SUCCESSORS), and every comparison goes through `same_program()`.
+#:
 #: An origin not listed here is not an error: the check simply abstains, so a new
 #: origin string can land before this table is taught about it (rule 6's spirit).
 #: Matching is CASE-INSENSITIVE, and the bare `pdf` spelling is listed alongside `docx`.
@@ -166,9 +198,9 @@ ORIGIN_ORIGINATORS: Tuple[Tuple[str, str], ...] = (
     ("digital-born", "digital-convert"),
     ("docx", "digital-convert"),
     ("pdf", "digital-convert"),
-    ("ABBYY-ALTO", "alto-postprocess"),
-    ("ocr:", "alto-postprocess"),
-    ("vlm:", "alto-postprocess"),
+    ("ABBYY-ALTO", "ocr-postprocess"),
+    ("ocr:", "ocr-postprocess"),
+    ("vlm:", "ocr-postprocess"),
 )
 
 
@@ -196,6 +228,21 @@ def _owner_candidates(name: str) -> Tuple[str, ...]:
     if not owners:
         return ()
     return (owners,) if isinstance(owners, str) else tuple(owners)
+
+
+def _originator_candidates(name: str) -> Tuple[str, ...]:
+    """The DISTINCT writers of a block once a predecessor and its successor count as one.
+
+    `_owner_candidates` lists both names (both may write); a block is a multi-originator block
+    only when it has two different writers after that, e.g. `pages` (ocr-postprocess or
+    digital-convert) but not `enrichment` (llm-enrich and its successor keyword-extract).
+    """
+    seen: List[str] = []
+    for n in _owner_candidates(name):
+        c = canonical_program(n)
+        if c not in seen:
+            seen.append(c)
+    return tuple(seen)
 
 
 #: Field-level ownership inside list blocks that more than one tool contributes to.
@@ -305,6 +352,26 @@ BLOCK_FIELD_OWNERS: Dict[str, Dict[str, List[str]]] = {
         "llm-enrich": ["pid"],
     },
 }
+
+def _add_successors() -> None:
+    """Grant every successor in PROGRAM_SUCCESSORS what its predecessor holds, beside it.
+
+    Done once, after the tables above, so the successor never drifts from the predecessor and
+    the tables stay readable. Stamps already written are never touched (see PROGRAM_SUCCESSORS).
+    """
+    for block, owners in list(BLOCK_OWNERS.items()):
+        names = (owners,) if isinstance(owners, str) else tuple(owners)
+        extra = tuple(PROGRAM_SUCCESSORS[n] for n in names if n in PROGRAM_SUCCESSORS and PROGRAM_SUCCESSORS[n] not in names)
+        if extra:
+            BLOCK_OWNERS[block] = names + extra
+    for fields in BLOCK_FIELD_OWNERS.values():
+        for old, new in PROGRAM_SUCCESSORS.items():
+            if old in fields and new not in fields:
+                fields[new] = list(fields[old])
+
+
+_add_successors()
+
 
 #: Natural key fields per list block, used to align records when merging by field.
 #:
@@ -897,7 +964,7 @@ class DocumentRecord:
         how the text was obtained.
         """
         owners = _owner_candidates(name)
-        if len(owners) < 2 or self.program not in owners:
+        if len(_originator_candidates(name)) < 2 or self.program not in owners:
             return
         origin = (self._data.get("source") or {}).get("origin")
         if not origin:
@@ -915,9 +982,9 @@ class DocumentRecord:
                     f"{name!r}. Teach ORIGIN_ORIGINATORS this origin to have it enforced."
                 )
             return
-        if originator == self.program:
+        if same_program(originator, self.program):
             return
-        if self.program == "alto-postprocess" and self._ocr_handoff_requested():
+        if canonical_program(self.program) == "ocr-postprocess" and self._ocr_handoff_requested():
             # The documented digital-born -> OCR hand-off, not a mixed plane by accident.
             # digital-convert is granted pages[].needs_ocr precisely so it can say "this
             # page's embedded text layer does not decode; re-acquire it by OCR" (Issue #10's
@@ -1363,10 +1430,10 @@ def merge_document_records(json_paths: List[str], out_path: str) -> str:
     authorised = resolve_originator(source.get("origin"))
     if authorised:
         for block, stamp in stamps.items():
-            if len(_owner_candidates(block)) < 2:
+            if len(_originator_candidates(block)) < 2:
                 continue
             wrote = stamp.get("program")
-            if wrote and wrote in _owner_candidates(block) and wrote != authorised:
+            if wrote and wrote in _owner_candidates(block) and not same_program(wrote, authorised):
                 raise ValueError(
                     f"merged record mixes positional originators: block {block!r} was written "
                     f"by {wrote!r} but source.origin {source['origin']!r} authorises "

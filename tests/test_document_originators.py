@@ -65,15 +65,19 @@ from atrium_document import (
     BLOCK_KEY_FIELDS,
     BLOCK_OWNERS,
     ORIGIN_ORIGINATORS,
+    PROGRAM_SUCCESSORS,
     DocumentRecord,
+    canonical_program,
     merge_document_records,
     resolve_originator,
+    same_program,
     validate_document,
 )
 from atrium_paradata import ParadataLogger
 
 DIGITAL = "digital-convert"
 ALTO = "alto-postprocess"
+OCR = "ocr-postprocess"  # ALTO's successor after the repository rename of 2026-10-01
 
 
 @pytest.fixture
@@ -116,9 +120,13 @@ def _open(tmp_path, mock_paradata, program, origin=None, baseline=None, strict=T
 def test_positional_blocks_declare_two_originators():
     """The positional plane has two possible originators; everything else has one."""
     for block in ("pages", "content", "lines", "tables"):
-        assert BLOCK_OWNERS[block] == (ALTO, DIGITAL), block
-    for block in ("page_categories", "translations", "entities", "enrichment", "forms"):
+        # the successor sits BESIDE its predecessor (PROGRAM_SUCCESSORS), never instead of it
+        assert BLOCK_OWNERS[block] == (ALTO, DIGITAL, OCR), block
+        assert {canonical_program(o) for o in BLOCK_OWNERS[block]} == {OCR, DIGITAL}, block
+    for block in ("page_categories", "translations", "entities"):
         assert isinstance(BLOCK_OWNERS[block], str), block
+    for block in ("enrichment", "forms"):  # llm-enrich, with keyword-extract beside it
+        assert BLOCK_OWNERS[block] == ("llm-enrich", "keyword-extract"), block
 
 
 def test_digital_convert_grant_includes_text_and_bbox():
@@ -143,10 +151,10 @@ def test_no_program_named_llm_enrich_digital_survives():
 
 def test_every_originator_is_reachable_from_some_origin():
     """A candidate in BLOCK_OWNERS with no ORIGIN_ORIGINATORS prefix could never write."""
-    reachable = {originator for _prefix, originator in ORIGIN_ORIGINATORS}
+    reachable = {canonical_program(originator) for _prefix, originator in ORIGIN_ORIGINATORS}
     for block, owners in BLOCK_OWNERS.items():
-        if isinstance(owners, tuple):
-            assert set(owners) <= reachable, block
+        if isinstance(owners, tuple) and len({canonical_program(o) for o in owners}) > 1:
+            assert {canonical_program(o) for o in owners} <= reachable, block
 
 
 # ── set_block: content (not field-split, so the owner check is the whole story) ──
@@ -178,7 +186,7 @@ def test_alto_postprocess_still_owns_content_on_the_ocr_path(tmp_path, mock_para
 def test_origin_mismatch_is_refused(tmp_path, mock_paradata):
     """A digital converter must not claim the positional plane of an OCR'd document."""
     doc = _open(tmp_path, mock_paradata, DIGITAL, origin="ocr:pero")
-    with pytest.raises(ValueError, match="originated by 'alto-postprocess'"):
+    with pytest.raises(ValueError, match="originated by 'ocr-postprocess'"):
         doc.set_block("content", {"text": "wrong originator"})
 
 
@@ -290,7 +298,7 @@ def test_merge_block_enforces_origin_too(tmp_path, mock_paradata):
     """merge_block() never called _assert_owner(), so pages/lines skipped the check
     entirely — the half of §1a that the original write-up missed."""
     doc = _open(tmp_path, mock_paradata, DIGITAL, origin="ABBYY-ALTO")
-    with pytest.raises(ValueError, match="originated by 'alto-postprocess'"):
+    with pytest.raises(ValueError, match="originated by 'ocr-postprocess'"):
         doc.merge_block("lines", [{"page": "1", "line": 0, "text": "x"}])
 
 
@@ -374,7 +382,7 @@ def test_non_strict_warns_instead_of_raising(tmp_path, mock_paradata, capsys):
     doc.set_block("content", {"text": "written anyway"})
     err = capsys.readouterr().err
     assert "WARNING" in err
-    assert "originated by 'alto-postprocess'" in err
+    assert "originated by 'ocr-postprocess'" in err
     assert doc.get_block("content")["text"] == "written anyway"
 
 
@@ -392,7 +400,7 @@ def test_origin_check_is_deferred_not_skipped_when_source_comes_last(tmp_path, m
     """
     doc = _open(tmp_path, mock_paradata, DIGITAL, origin=None)
     doc.merge_block("lines", [{"page": "1", "line": 0, "text": "digital text"}])
-    with pytest.raises(ValueError, match="originated by 'alto-postprocess'"):
+    with pytest.raises(ValueError, match="originated by 'ocr-postprocess'"):
         doc.set_source(origin="ocr:pero")
 
 
@@ -401,7 +409,7 @@ def test_deferred_check_also_fires_at_write_time(tmp_path, mock_paradata):
     doc = _open(tmp_path, mock_paradata, DIGITAL, origin=None)
     doc.set_block("content", {"text": "digital body"})
     doc._data["source"] = {"origin": "ABBYY-ALTO"}  # e.g. a merge or a hand-edited baseline
-    with pytest.raises(ValueError, match="originated by 'alto-postprocess'"):
+    with pytest.raises(ValueError, match="originated by 'ocr-postprocess'"):
         doc.to_dict()
 
 
@@ -457,7 +465,7 @@ def test_a_partial_first_source_still_resolves_the_deferred_origin_check(tmp_pat
     doc = _open(tmp_path, mock_paradata, DIGITAL, origin=None)
     doc.set_source(sha256="abc123", filename="CTX000000001.docx")
     doc.merge_block("lines", [{"page": "1", "line": 0, "text": "digital text"}])
-    with pytest.raises(ValueError, match="originated by 'alto-postprocess'"):
+    with pytest.raises(ValueError, match="originated by 'ocr-postprocess'"):
         doc.set_source(origin="ocr:pero")
 
 
@@ -505,11 +513,11 @@ def test_filling_absent_keys_does_not_reopen_the_ones_already_set(tmp_path, mock
         ("pdf", DIGITAL),  # the symmetric bare spelling; had no entry at all
         ("DOCX", DIGITAL),  # matching used to be case-sensitive
         ("Digital-Born-PDF", DIGITAL),
-        ("ABBYY-ALTO", ALTO),
-        ("abbyy-alto", ALTO),
-        ("ocr:pero", ALTO),
-        ("OCR:tesseract-ces", ALTO),
-        ("vlm:glm-4v", ALTO),
+        ("ABBYY-ALTO", OCR),
+        ("abbyy-alto", OCR),
+        ("ocr:pero", OCR),
+        ("OCR:tesseract-ces", OCR),
+        ("vlm:glm-4v", OCR),
         ("some-future-acquisition", None),  # abstain, per rule 6's spirit
         (None, None),
         ("", None),
@@ -832,3 +840,97 @@ def test_schema_is_locatable_next_to_the_module():
 
     assert schema_path() is not None and schema_path().endswith(SCHEMA_FILENAME)
     assert load_schema()["title"] == "ATRIUM document record"
+
+
+# ── repository successors (atrium-project#72: alto -> ocr-postprocess, llm-enrich -> keyword-extract) ──
+
+
+def test_successor_map_is_additive_and_never_chains():
+    assert PROGRAM_SUCCESSORS == {ALTO: OCR, "llm-enrich": "keyword-extract"}
+    assert not set(PROGRAM_SUCCESSORS) & set(PROGRAM_SUCCESSORS.values()), "no chains: one hop only"
+    assert canonical_program(ALTO) == OCR and canonical_program(OCR) == OCR
+    assert canonical_program(DIGITAL) == DIGITAL and canonical_program(None) is None
+    assert same_program(ALTO, OCR) and not same_program(ALTO, DIGITAL)
+
+
+def test_a_successor_holds_exactly_its_predecessors_field_grants():
+    for block, fields in BLOCK_FIELD_OWNERS.items():
+        for old, new in PROGRAM_SUCCESSORS.items():
+            if old in fields:
+                assert fields[new] == fields[old], (block, new)
+
+
+def test_ocr_postprocess_originates_the_ocr_plane_and_is_stamped_under_its_own_name(tmp_path, mock_paradata):
+    out = tmp_path / "ocr.document.json"
+    with _open(tmp_path, mock_paradata, OCR, origin="ocr:tesseract-ces") as doc:
+        doc.set_block("content", {"text": "OCR'd body text."})
+        doc.merge_block("lines", [{"page": "1", "line": 1, "text": "x", "categ": "Clear"}])
+        doc.finalize(str(out))
+    record = json.loads(out.read_text(encoding="utf-8"))
+    assert record["assembled"]["blocks"]["content"]["program"] == OCR
+    assert record["lines"][0]["categ"] == "Clear", "the successor keeps the predecessor's field grants"
+
+
+def test_ocr_postprocess_is_refused_on_a_digital_born_document(tmp_path, mock_paradata):
+    doc = _open(tmp_path, mock_paradata, OCR, origin="digital-born-pdf")
+    with pytest.raises(ValueError, match="originated by 'digital-convert'"):
+        doc.set_block("content", {"text": "wrong originator"})
+
+
+def test_digital_convert_is_refused_on_an_ocr_document_whichever_name_the_originator_has(tmp_path, mock_paradata):
+    doc = _open(tmp_path, mock_paradata, DIGITAL, origin="ocr:pero")
+    with pytest.raises(ValueError, match="not 'digital-convert'"):
+        doc.set_block("content", {"text": "wrong originator"})
+
+
+def test_the_ocr_hand_off_is_honoured_for_the_successor(tmp_path, mock_paradata):
+    """digital-convert flags a page needs_ocr; ocr-postprocess may then re-originate it."""
+    with _open(tmp_path, mock_paradata, DIGITAL, origin="digital-born-pdf") as doc:
+        doc.merge_block("pages", [{"page": "1", "needs_ocr": True}])
+        doc.finalize(str(tmp_path / "stage1.document.json"))
+    baseline = json.loads((tmp_path / "stage1.document.json").read_text(encoding="utf-8"))
+    with _open(tmp_path, mock_paradata, OCR, baseline=baseline) as doc:
+        doc.merge_block("lines", [{"page": "1", "line": 1, "text": "re-OCR'd", "categ": "Clear"}])
+
+
+def test_a_record_written_before_the_move_still_merges_with_one_written_after(tmp_path, mock_paradata):
+    """Old stamps are kept, not rewritten; the fan-in check compares through canonical names."""
+    paths = []
+    for name, program in (("old", ALTO), ("new", OCR)):
+        out = tmp_path / f"{name}.document.json"
+        with _open(tmp_path, mock_paradata, program, origin="ocr:pero") as doc:
+            doc.merge_block("lines", [{"page": "1", "line": 1, "text": name}])
+            doc.finalize(str(out))
+        paths.append(str(out))
+    old = json.loads((tmp_path / "old.document.json").read_text(encoding="utf-8"))
+    assert old["assembled"]["blocks"]["lines"]["program"] == ALTO, "an existing stamp is never re-attributed"
+    merged = json.loads(open(merge_document_records(paths, str(tmp_path / "merged.json")), encoding="utf-8").read())
+    assert merged["assembled"]["blocks"]["lines"]["program"] in (ALTO, OCR)
+
+
+def test_the_merge_still_refuses_a_mixed_plane_across_successor_names(tmp_path, mock_paradata):
+    a = tmp_path / "ocr.document.json"
+    b = tmp_path / "dig.document.json"
+    with _open(tmp_path, mock_paradata, OCR, origin="ocr:pero") as doc:
+        doc.merge_block("lines", [{"page": "1", "line": 1, "text": "a"}])
+        doc.finalize(str(a))
+    with _open(tmp_path, mock_paradata, DIGITAL, origin="digital-born-pdf") as doc:
+        doc.set_block("content", {"text": "b"})
+        doc.finalize(str(b))
+    # Put the digital side's stamp on a plane block of an OCR document, as a record produced
+    # outside the contract would carry it.
+    data = json.loads(b.read_text(encoding="utf-8"))
+    data["lines"] = [{"page": "1", "line": 2, "text": "b"}]
+    data.setdefault("assembled", {}).setdefault("blocks", {})["lines"] = {
+        "program": DIGITAL, "run_id": "r", "paradata_ref": "p", "updated_at": "2999-01-01T00:00:00Z"}
+    data["source"] = {"origin": "ocr:pero", "filename": "CTX000000001.pdf"}
+    b.write_text(json.dumps(data), encoding="utf-8")
+    with pytest.raises(ValueError, match="mixes positional originators"):
+        merge_document_records([str(a), str(b)], str(tmp_path / "m.json"))
+
+
+def test_enrichment_is_not_a_multi_originator_block_after_the_succession(tmp_path, mock_paradata):
+    """llm-enrich + keyword-extract are one writer: the origin check must not engage for them."""
+    with _open(tmp_path, mock_paradata, "keyword-extract", origin="ocr:pero") as doc:
+        doc.set_block("enrichment", {"items": []})
+        doc.finalize(str(tmp_path / "kw.document.json"))

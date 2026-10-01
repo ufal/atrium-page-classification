@@ -353,3 +353,17 @@ class TestCli:
         with pytest.raises(SystemExit) as excinfo:
             rc._cli([])
         assert excinfo.value.code == 2
+
+
+def test_every_current_program_has_its_own_repository_and_predecessors_keep_theirs():
+    """Repository moves of 2026-10-01: a crate names the repository that really produced a run."""
+    expect = {
+        "ocr-postprocess": "atrium-ocr-postprocess",
+        "keyword-extract": "atrium-keyword-extract",
+        "digital-convert": "atrium-digital-convert",
+        "alto-postprocess": "atrium-alto-postprocess",  # predecessors: records written before the move
+        "llm-enrich": "atrium-llm-enrich",
+    }
+    for program, slug in expect.items():
+        assert rc.REPO_URLS[program] == f"https://github.com/ufal/{slug}", program
+        assert rc._repository(program + "-api", {}) == f"https://github.com/ufal/{slug}", program

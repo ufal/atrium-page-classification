@@ -133,17 +133,23 @@ AUTHORS: Tuple[Dict[str, str], ...] = (
     {"orcid": "https://orcid.org/0000-0001-5718-9447", "name": "Dana Křivánková"},
 )
 
-#: program -> repository, mirroring atrium_paradata._REPO_URLS. `digital-convert` is a ROLE
-#: that lives in atrium-llm-enrich (see the BLOCK_OWNERS note in atrium_document.py), so it
-#: maps to that repo rather than one of its own. A service's logger names its program
+#: program -> repository, mirroring atrium_paradata._REPO_URLS. Since the repository moves of
+#: 2026-10-01 every current program has its own repository: `ocr-postprocess` (a rename of
+#: atrium-alto-postprocess), `keyword-extract` (the keyword stage of atrium-nlp-enrich and
+#: atrium-llm-enrich) and `digital-convert` (atrium-llm-enrich's converter). The predecessors
+#: stay in the table, pointing at their archived repositories, because a record written before
+#: the move still names them in `assembled.blocks` and in `provenance.contributors`; the crate
+#: then links the release that really produced it. A service's logger names its program
 #: `<program>-api`; `_repository()` strips that suffix before looking it up here.
 REPO_URLS: Dict[str, str] = {
+    "ocr-postprocess": "https://github.com/ufal/atrium-ocr-postprocess",
     "alto-postprocess": "https://github.com/ufal/atrium-alto-postprocess",
     "page-classification": "https://github.com/ufal/atrium-page-classification",
     "translator": "https://github.com/ufal/atrium-translator",
     "nlp-enrich": "https://github.com/ufal/atrium-nlp-enrich",
+    "keyword-extract": "https://github.com/ufal/atrium-keyword-extract",
     "llm-enrich": "https://github.com/ufal/atrium-llm-enrich",
-    "digital-convert": "https://github.com/ufal/atrium-llm-enrich",
+    "digital-convert": "https://github.com/ufal/atrium-digital-convert",
 }
 
 #: Where each controlled term in the record lives in the atrium_vocab registry: the record

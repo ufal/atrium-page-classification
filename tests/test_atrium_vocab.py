@@ -99,6 +99,17 @@ def test_validate_labels_narrows_by_originator():
     assert "belongs to digital-convert" in findings[0].message
 
 
+def test_a_successor_program_emits_what_its_predecessor_emitted():
+    """ocr-postprocess is alto-postprocess renamed (2026-10-01): same labels, no second row in
+    LINE_CATEGORY_ORIGINATORS (that would make every label 'emitted by two tools')."""
+    ocr = {"originator": "ocr-postprocess", "report": False}
+
+    assert "ocr-postprocess" not in av.LINE_CATEGORY_ORIGINATORS
+    assert av.validate_labels("line-category", ["Trash", "Clear"], **ocr) == []
+    findings = av.validate_labels("line-category", ["Garbage"], **ocr)
+    assert len(findings) == 1 and "belongs to digital-convert" in findings[0].message
+
+
 # ── the label sets other repos depend on ─────────────────────────────────────
 
 

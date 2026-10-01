@@ -46,12 +46,17 @@ SCHEMA_VERSION = "2.0"
 LICENSE_NAME = "CC BY-NC 4.0"
 LICENSE_URL = "https://creativecommons.org/licenses/by-nc/4.0/"
 
+# Current programs first; the predecessors (alto-postprocess, llm-enrich) stay for records written
+# before the repository moves of 2026-10-01 -- see atrium_document.PROGRAM_SUCCESSORS.
 _REPO_URLS: Dict[str, str] = {
     "page-classification": "https://github.com/ufal/atrium-page-classification",
+    "ocr-postprocess": "https://github.com/ufal/atrium-ocr-postprocess",
     "alto-postprocess": "https://github.com/ufal/atrium-alto-postprocess",
     "nlp-enrich": "https://github.com/ufal/atrium-nlp-enrich",
+    "keyword-extract": "https://github.com/ufal/atrium-keyword-extract",
     "translator": "https://github.com/ufal/atrium-translator",
     "llm-enrich": "https://github.com/ufal/atrium-llm-enrich",
+    "digital-convert": "https://github.com/ufal/atrium-digital-convert",
 }
 
 #: The published ``limits_applied`` effects. The same tuple as ``atrium_limits.EFFECTS``

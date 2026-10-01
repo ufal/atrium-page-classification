@@ -331,6 +331,11 @@ LINE_CATEGORY_ORIGINATORS: Dict[str, Tuple[str, ...]] = {
     "digital-convert": ("Garbage", "Inverted"),
 }
 
+#: A program id succeeded by a repository move (atrium_document.PROGRAM_SUCCESSORS) emits what
+#: its predecessor emitted. Kept as an alias, not a second row of LINE_CATEGORY_ORIGINATORS,
+#: so no label is "emitted by two tools" and a concept's `originator` stays single.
+_ORIGINATOR_ALIASES: Dict[str, str] = {"ocr-postprocess": "alto-postprocess"}
+
 #: The union both consumers must understand.
 LINE_CATEGORIES: Tuple[str, ...] = tuple(
     sorted({v for values in LINE_CATEGORY_ORIGINATORS.values() for v in values})
@@ -692,7 +697,7 @@ def validate_labels(
         permitted = set()
 
     if originator is not None and scheme == "line-category":
-        allowed = set(LINE_CATEGORY_ORIGINATORS.get(originator, ()))
+        allowed = set(LINE_CATEGORY_ORIGINATORS.get(_ORIGINATOR_ALIASES.get(originator, originator), ()))
         if not allowed:
             findings.append(
                 Finding((scheme, "", f"unknown originator {originator!r}; not narrowing"))
