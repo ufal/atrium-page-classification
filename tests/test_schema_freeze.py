@@ -57,6 +57,9 @@ FREEZES: Dict[int, Dict[str, str]] = {
     },
 }
 
+#: The `run_uuid` pattern, shared by its two registered pointers: `urn:uuid:` and a lower-case UUID.
+_RUN_UUID_PATTERN = "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+
 #: Every structural change to the schema since the freeze of the current MAJOR, keyed by the JSON
 #: pointer it lives under. `schema` is the node at that pointer NOW, annotations left out -- so the
 #: register reads as the post-freeze contract, and a later edit under a registered pointer (a
@@ -69,6 +72,24 @@ POST_FREEZE_CHANGES: Dict[str, Dict[str, Any]] = {
         "schema": {"type": "string", "enum": ["page_header", "page_footer", "footnote"]},
         "issue": "ufal/atrium-llm-enrich#18",
         "changelog": "2026-09-25",
+    },
+    "/properties/source/properties/sha512": {
+        "kind": "added: optional, the archive's digest of the original (the AMČR seed)",
+        "schema": {"type": "string", "pattern": "^[a-f0-9]{128}$"},
+        "issue": "ufal/atrium-project#71",
+        "changelog": "2026-10-01",
+    },
+    "/properties/provenance/properties/contributors/items/properties/run_uuid": {
+        "kind": "added: optional, the run's stable id (its CreateAction @id)",
+        "schema": {"type": "string", "pattern": _RUN_UUID_PATTERN},
+        "issue": "ufal/atrium-project#71",
+        "changelog": "2026-10-01",
+    },
+    "/properties/assembled/properties/blocks/additionalProperties/properties/run_uuid": {
+        "kind": "added: optional, the writing run's stable id",
+        "schema": {"type": "string", "pattern": _RUN_UUID_PATTERN},
+        "issue": "ufal/atrium-project#71",
+        "changelog": "2026-10-01",
     },
 }
 

@@ -9,6 +9,17 @@ nothing applied); both merge functions carry it, each note tagged with its stage
 ``program``. Adding it needs no schema bump (``docs/paradata_schema.md``). This module
 does not import ``atrium_limits``: it accepts that module's ``LimitNotes`` or plain
 dicts, so a bundle that copies only this file keeps working.
+
+``run_uuid`` and ``run_agent`` (atrium-project#71) are optional 2.0 fields too, so they need no
+bump either. ``run_uuid`` (``urn:uuid:`` + a random UUID, minted when the run starts) is the run's
+stable id: ``run_id`` has one-second resolution and two parallel workers can share one. It is the
+``@id`` of the run's RO-Crate ``CreateAction`` (``atrium_rocrate.create_action``) and is stamped
+into the document record by ``DocumentRecord(run_uuid=...)``. ``run_agent`` is
+``ATRIUM_RUN_AGENT``: the IRI of the organisation that operates the deployment, ``""`` when unset.
+
+A service creates its logger with ``paradata_dir=None``: nothing is written to the container's
+filesystem (the record goes back in the response), ``record`` holds the finalized payload, and
+``paradata_ref`` is the ``run_uuid`` instead of a path.
 """
 
 from __future__ import annotations
@@ -17,6 +28,7 @@ import configparser
 import json
 import os
 import sys
+import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
@@ -49,6 +61,12 @@ _LIMIT_EFFECTS = ("sampled", "split", "trimmed", "skipped", "stopped")
 _ENV_RUNNER_IMAGE = "ATRIUM_RUNNER_IMAGE"
 _ENV_RUNNER_REPO = "ATRIUM_RUNNER_REPO"
 _ENV_RUNNER_REF = "ATRIUM_RUNNER_REF"
+_ENV_RUN_AGENT = "ATRIUM_RUN_AGENT"
+
+
+def _new_run_uuid() -> str:
+    """A run's stable id: ``urn:uuid:`` and a random (version 4) UUID, lower case."""
+    return uuid.uuid4().urn
 
 
 def _load_para_config(start_dir: str = ".") -> Dict[str, Any]:
@@ -87,7 +105,7 @@ class ParadataLogger:
         self,
         program: str,
         config: Dict[str, Any],
-        paradata_dir: str = "paradata",
+        paradata_dir: Optional[str] = "paradata",
         output_types: Optional[List[str]] = None,
         version: Optional[str] = None,
         docker_image: Optional[str] = None,
@@ -97,6 +115,8 @@ class ParadataLogger:
         self.paradata_dir = paradata_dir
         self._start_dt = datetime.now(tz=timezone.utc)
         self._run_id = self._start_dt.strftime("%y%m%d-%H%M%S")
+        self._run_uuid = _new_run_uuid()
+        self._record: Optional[Dict[str, Any]] = None
 
         self._para_cfg = _load_para_config(config_dir)
         self.version = version or self._para_cfg.get("version") or "unknown"
@@ -119,7 +139,8 @@ class ParadataLogger:
         self._input_total: int = 0
         self._finalised: bool = False
 
-        os.makedirs(paradata_dir, exist_ok=True)
+        if paradata_dir:
+            os.makedirs(paradata_dir, exist_ok=True)
 
     def log_skip(self, filepath: str, reason: str) -> None:
         self._skipped.append(
@@ -167,6 +188,24 @@ class ParadataLogger:
         """
         return self._run_id
 
+    @property
+    def run_uuid(self) -> str:
+        """This run's stable id, ``urn:uuid:...`` (atrium-project#71): unique where ``run_id`` is not."""
+        return self._run_uuid
+
+    @property
+    def paradata_ref(self) -> str:
+        """What a document record's stamp should point at: the file ``finalize()`` writes, or,
+        for a logger that writes none (``paradata_dir=None``), the ``run_uuid``."""
+        if not self.paradata_dir:
+            return self._run_uuid
+        return os.path.join(self.paradata_dir, f"{self._run_id}_{self.program}.json")
+
+    @property
+    def record(self) -> Optional[Dict[str, Any]]:
+        """The paradata record ``finalize()`` built, or None before it ran."""
+        return self._record
+
     def log_success(self, output_type: str, count: int = 1) -> None:
         self._output_counts[output_type] = self._output_counts.get(output_type, 0) + count
 
@@ -209,7 +248,8 @@ class ParadataLogger:
         processed_total: Optional[int] = None,
     ) -> str:
         """
-        Write the paradata JSON.
+        Build the paradata record and write it to ``paradata_dir``; return the path written.
+        With ``paradata_dir=None`` nothing is written and ``""`` is returned: read ``record``.
         Precedence for processed_docs: processed_total (arg) -> _docs_processed -> max(output_counts).
         """
         if self._finalised:
@@ -246,6 +286,8 @@ class ParadataLogger:
             "docker_image": self.docker_image,
             "python_version": sys.version,
             "run_id": self._run_id,
+            "run_uuid": self._run_uuid,
+            "run_agent": os.environ.get(_ENV_RUN_AGENT, "").strip(),
             "license": lic["effective_license"],
             "license_url": lic["effective_license_url"],
             "license_detail": lic,
@@ -264,11 +306,13 @@ class ParadataLogger:
             "limits_applied": self.limits_applied,
         }
 
-        out_path = os.path.join(self.paradata_dir, f"{self._run_id}_{self.program}.json")
+        self._record = payload
+        self._finalised = True
+        if not self.paradata_dir:
+            return ""
+        out_path = self.paradata_ref
         with open(out_path, "w", encoding="utf-8") as fh:
             json.dump(payload, fh, ensure_ascii=False, indent=2)
-
-        self._finalised = True
         print(f"[paradata] Log written → {out_path}", flush=True)
         return out_path
 
@@ -296,8 +340,17 @@ class ParadataLogger:
             "docs_processed": self._docs_processed,
             "start_iso": self._start_dt.isoformat(),
             "run_id": self._run_id,
+            "run_uuid": self._run_uuid,
             "para_cfg": self._para_cfg,
         }
+
+    @classmethod
+    def from_state_file(cls, path: str) -> "ParadataLogger":
+        """The run a CLI ``start`` state file holds, for a step of a shell-driven stage that needs
+        it mid-run: its ``run_id``, ``run_uuid``, ``paradata_ref`` and the licence block so far
+        (atrium-project#71). Reading writes nothing back."""
+        with open(path, "r", encoding="utf-8") as fh:
+            return cls._from_state_dict(json.load(fh))
 
     @classmethod
     def _from_state_dict(cls, d: Dict[str, Any]) -> "ParadataLogger":
@@ -312,6 +365,9 @@ class ParadataLogger:
         inst._limits_applied = list(d.get("limits_applied", []) or [])
         inst._docs_processed = d.get("docs_processed", 0)
         inst._run_id = d["run_id"]
+        # A state file written before run_uuid existed gets one now: the run is still one run.
+        inst._run_uuid = d.get("run_uuid") or _new_run_uuid()
+        inst._record = None
         inst._start_dt = datetime.fromisoformat(d["start_iso"])
         inst._para_cfg = d.get("para_cfg", {"components": []})
         inst.docker_image = d.get("docker_image", "")
@@ -379,6 +435,7 @@ def merge_paradata_files(json_paths: List[str], input_file: str, out_path: str) 
                 "repository": data.get("repository"),
                 "docker_image": data.get("docker_image"),
                 "run_id": data.get("run_id"),
+                "run_uuid": data.get("run_uuid", ""),
                 "duration_seconds": data.get("duration_seconds"),
                 "license": data.get("license"),
                 "config": data.get("config"),
@@ -400,6 +457,7 @@ def merge_paradata_files(json_paths: List[str], input_file: str, out_path: str) 
     payload = {
         "schema_version": SCHEMA_VERSION,
         "record_type": "single-file-merged",
+        "run_uuid": _new_run_uuid(),
         "input_file": input_file,
         "pipeline_steps": steps,
         "step_count": len(steps),
@@ -436,6 +494,7 @@ def merge_run_paradata(
     limits_applied: List[Dict[str, Any]] = []
     repo = ""
     tool_version = ""
+    docker_image = ""
     earliest: Optional[str] = None
     latest: Optional[str] = None
     first_stage = True
@@ -445,6 +504,7 @@ def merge_run_paradata(
 
         repo = repo or data.get("repository", "")
         tool_version = tool_version or data.get("tool_version", "")
+        docker_image = docker_image or data.get("docker_image", "")
 
         cfg = data.get("config", {}) or {}
         stats = data.get("statistics", {}) or {}
@@ -480,10 +540,16 @@ def merge_run_paradata(
                 "script": cfg.get("script"),
                 "method": cfg.get("method"),
                 "run_id": data.get("run_id"),
+                "run_uuid": data.get("run_uuid", ""),
+                "repository": data.get("repository"),
+                "tool_version": data.get("tool_version"),
+                "docker_image": data.get("docker_image"),
                 "input_dir": cfg.get("input_dir"),
                 "input_csv": cfg.get("input_csv"),
                 "output_dir": cfg.get("output_dir") or cfg.get("output_csv") or cfg.get("output_manifest"),
                 "output_formats": out_counts,
+                "start_time": st or "",
+                "end_time": en or "",
                 "duration_seconds": data.get("duration_seconds"),
                 "license": data.get("license"),
                 "input_files_total": stats.get("input_files_total"),
@@ -511,10 +577,13 @@ def merge_run_paradata(
         "method": method or "",
         "repository": repo,
         "tool_version": tool_version,
+        "docker_image": docker_image,
         "runner_ref": os.environ.get(_ENV_RUNNER_REF, ""),
         "request_id": os.environ.get("ATRIUM_REQUEST_ID", ""),
         "python_version": sys.version,
         "run_id": datetime.now(tz=timezone.utc).strftime("%y%m%d-%H%M%S"),
+        "run_uuid": _new_run_uuid(),
+        "run_agent": os.environ.get(_ENV_RUN_AGENT, "").strip(),
         "stage_count": len(stages),
         "pipeline_stages": stages,
         "intermediate_formats": formats,
@@ -683,9 +752,7 @@ def _cli() -> None:
         return
 
     elif args.cmd in ("skip", "success", "component", "note-limit", "finish"):
-        with open(args.state, "r", encoding="utf-8") as fh:
-            state_dict = json.load(fh)
-        logger = ParadataLogger._from_state_dict(state_dict)
+        logger = ParadataLogger.from_state_file(args.state)
 
         if args.cmd == "skip":
             logger.log_skip(args.file, args.reason)

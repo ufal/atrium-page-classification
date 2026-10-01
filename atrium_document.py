@@ -22,6 +22,13 @@ Contract (see docs/document_schema.md):
   5. Licenses accrete through `para_licenses.merge_effective_licenses` (most restrictive wins).
   6. Unknown or newer blocks are preserved; a newer major schema is refused.
 
+A record may start as an AMČR **seed** (atrium-project#71): `doc_id`, and a `source` with the
+archive's `sha512`, file name and media type, nothing else. A seed is valid INPUT, checked by
+`validate_seed()` (and by `validate_baseline()`, which every tool's inherited-baseline gate calls);
+a record a tool EMITS is always checked against the full schema. The seed's identity is kept as
+it is: `doc_id` is inherited, `source` is first-writer-wins, and the reading tool adds `sha256`
+and `origin`.
+
 Only ever reference **persistent** artifacts: the original input, or a previous step's stored
 output. Transient derivatives (page images/thumbnails, the annotated Markdown) belong in
 `regenerable` as a recipe, never as a stored path.
@@ -47,6 +54,7 @@ from __future__ import annotations
 import copy
 import json
 import os
+import re
 import sys
 from datetime import datetime, timezone
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
@@ -69,6 +77,25 @@ RECORD_TYPE_MERGED = "atrium-document-merged"
 
 #: Filename suffix for the record of one document.
 FILE_SUFFIX = ".document.json"
+
+#: The keys an AMČR seed may carry (atrium-project#71): the record's identity and nothing a tool
+#: writes. `is_seed()` is "carries no other key"; `seed_schema()` says what each must hold.
+SEED_KEYS: Tuple[str, ...] = ("schema_version", "record_type", "doc_id", "source")
+
+#: What a seed's `source` must state: the archive's digest of the original, its file name and its
+#: media type. `origin` is deliberately NOT among them and is refused in a seed: it decides which
+#: tool writes the positional plane, so it belongs to the tool that reads the source.
+SEED_SOURCE_REQUIRED: Tuple[str, ...] = ("sha512", "filename", "media_type")
+
+#: `source` fields that DESCRIBE the original rather than identify or authorise it. A tool reading
+#: a derived or uploaded file sees another name (`x.alto.xml`, a temporary upload) than the
+#: archive's, so disagreeing about them is expected: the first writer's value is kept with a NOTE,
+#: never a WARNING or a strict refusal.
+SOURCE_DESCRIPTIVE_FIELDS = frozenset({"filename", "media_type"})
+
+#: A run's stable identifier as `atrium_paradata` mints it: `urn:uuid:` and a lower-case UUID.
+#: The same pattern as `run_uuid` in atrium_document.schema.json.
+RUN_UUID_PATTERN = re.compile(r"^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
 
 #: Structural keys the module itself maintains — never a tool's "own block".
 RESERVED_KEYS = frozenset({"schema_version", "record_type", "doc_id", "source", "provenance", "assembled"})
@@ -436,7 +463,8 @@ class DocumentRecord:
     Typical use, alongside the tool's existing ParadataLogger::
 
         with DocumentRecord.open(doc_id, "llm-enrich", baseline=args.document_json,
-                                 run_id=logger.run_id) as doc:
+                                 run_id=logger.run_id, run_uuid=logger.run_uuid,
+                                 paradata_ref=logger.paradata_ref) as doc:
             doc.set_block("enrichment", {"items": items})
             doc.add_regenerable("markdown", {"from": teitok_path,
                                              "converter": "xml_to_md@0.3.0",
@@ -454,12 +482,21 @@ class DocumentRecord:
         out_dir: str = ".",
         strict: bool = False,
         warn_dropped_fields: bool = False,
+        run_uuid: Optional[str] = None,
     ) -> None:
         if not doc_id:
             raise ValueError("doc_id is required — the record is keyed on it.")
+        if run_uuid and not RUN_UUID_PATTERN.match(run_uuid):
+            # Refused here rather than by the schema at the end: a malformed id would otherwise
+            # surface as a Layer D failure of a record that is fine in every other respect.
+            raise ValueError(f"run_uuid {run_uuid!r} is not 'urn:uuid:' and a lower-case UUID.")
 
         self.program = program
         self.run_id = run_id or datetime.now(tz=timezone.utc).strftime("%y%m%d-%H%M%S")
+        #: The run's stable id (atrium_paradata `run_uuid`, atrium-project#71): stamped with every
+        #: block and contributor entry, and the `@id` of the run's RO-Crate CreateAction. `run_id`
+        #: has one-second resolution, so parallel runs can share one; this cannot.
+        self.run_uuid = run_uuid or ""
         self.paradata_ref = paradata_ref or ""
         self.out_dir = out_dir
         self.strict = strict
@@ -578,6 +615,17 @@ class DocumentRecord:
         about it is not a cosmetic duplicate — it means the routing that picks between the OCR
         and the digital-born plane ran twice and reached two answers. Re-asserting the same
         values stays silent, which is the common harmless case.
+
+        `filename` and `media_type` (SOURCE_DESCRIPTIVE_FIELDS) are the exception: a different
+        value is a NOTE, never a WARNING, and never refused under `strict`. An AMČR seed names the
+        archive's file (atrium-project#71), and the tool that reads it sees the OCR output, a page
+        split out of it or a temporary upload — so on the seeded path they differ on nearly every
+        call, and reporting that as a fault (or, for a strict writer, refusing the seed) was wrong.
+
+        For the same reason a `sha256` is not added to a source that carries the archive's
+        `sha512`: it is the digest of whatever the reader read, which may be such a derivative,
+        and one `source` must not name two files by digest. The archive's digest stays the only
+        one, and the dropped value is reported in a NOTE.
         """
         existing = self._data.get("source")
         incoming = {k: v for k, v in fields.items() if v is not None}
@@ -585,15 +633,25 @@ class DocumentRecord:
             incoming["sha256"] = sha256
         if existing:
             clean = _sanitise(incoming)
-            conflicts = sorted(
-                f"{k}: {existing[k]!r} kept, {v!r} discarded"
-                for k, v in clean.items()
-                if k in existing and existing[k] != v
-            )
+            differing = sorted(k for k, v in clean.items() if k in existing and existing[k] != v)
+            conflicts = [
+                f"{k}: {existing[k]!r} kept, {clean[k]!r} discarded"
+                for k in differing
+                if k not in SOURCE_DESCRIPTIVE_FIELDS
+            ]
             if conflicts:
                 self._complain(
                     "source is immutable after the first writer, but "
                     f"{self.program!r} passed conflicting values — {'; '.join(conflicts)}"
+                )
+            described = [k for k in differing if k in SOURCE_DESCRIPTIVE_FIELDS]
+            if described:
+                self._note(
+                    f"{self.program!r} read the original as "
+                    + ", ".join(f"{k} {clean[k]!r}" for k in described)
+                    + "; the record keeps the first writer's "
+                    + ", ".join(f"{k} {existing[k]!r}" for k in described)
+                    + " (source is first-writer-wins; a seed names the archive's file)."
                 )
             # Immutability protects the values that were WRITTEN, not the dict as a whole.
             # A first writer that knew only sha256+filename has not thereby decided origin,
@@ -606,6 +664,12 @@ class DocumentRecord:
             # raises above, before the update — since a caller that got one field wrong has
             # not earned the right to name another in the same breath. (issue atrium-project#10)
             added = {k: v for k, v in clean.items() if k not in existing}
+            if existing.get("sha512") and "sha256" in added:
+                self._note(
+                    f"{self.program!r} read a file with sha256 {added.pop('sha256')!r}; the record keeps "
+                    "the archive's sha512 as the source's only digest (what a tool reads may be a "
+                    "derivative of the original)."
+                )
             existing.update(added)
             if "origin" in added:
                 self._resolve_deferred_origin_checks()
@@ -911,12 +975,12 @@ class DocumentRecord:
         if block not in self._touched:
             self._touched.append(block)
         blocks = self._data.setdefault("assembled", {}).setdefault("blocks", {})
-        blocks[block] = {
-            "program": self.program,
-            "run_id": self.run_id,
-            "paradata_ref": self.paradata_ref,
-            "updated_at": _utc_now_iso(),
-        }
+        stamp = {"program": self.program, "run_id": self.run_id}
+        if self.run_uuid:
+            stamp["run_uuid"] = self.run_uuid
+        stamp["paradata_ref"] = self.paradata_ref
+        stamp["updated_at"] = _utc_now_iso()
+        blocks[block] = stamp
 
     def _provenance(self) -> Dict[str, Any]:
         prov: Dict[str, Any] = dict(self._data.get("provenance") or {})
@@ -939,15 +1003,13 @@ class DocumentRecord:
         if self._touched and not any(
             c.get("program") == self.program and c.get("run_id") == self.run_id for c in contributors
         ):
-            contributors.append(
-                {
-                    "program": self.program,
-                    "run_id": self.run_id,
-                    "paradata_ref": self.paradata_ref,
-                    "blocks": ",".join(self._touched),
-                    "at": _utc_now_iso(),
-                }
-            )
+            entry = {"program": self.program, "run_id": self.run_id}
+            if self.run_uuid:
+                entry["run_uuid"] = self.run_uuid
+            entry["paradata_ref"] = self.paradata_ref
+            entry["blocks"] = ",".join(self._touched)
+            entry["at"] = _utc_now_iso()
+            contributors.append(entry)
         prov["contributors"] = contributors
         return prov
 
@@ -1100,6 +1162,84 @@ def validate_document(record: Dict[str, Any]) -> None:
             "(requirements-test.txt / requirements_digital.txt) rather than skipping the gate."
         ) from exc
     jsonschema.validate(record, load_schema())
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# The AMČR seed (atrium-project#71)
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+def is_seed(record: Any) -> bool:
+    """True when `record` carries nothing beyond the seed's keys (`SEED_KEYS`).
+
+    That is the record before any tool has written to it: no `provenance`, no `assembled`, no
+    block. Whether it is a GOOD seed is `validate_seed()`'s question, not this one's.
+    """
+    return isinstance(record, dict) and bool(record) and set(record) <= set(SEED_KEYS)
+
+
+def seed_schema() -> Dict[str, Any]:
+    """The JSON Schema of an AMČR seed, built from the record schema so the two cannot drift.
+
+    A seed is `doc_id` and a `source` stating the archive's `sha512`, the file name and the media
+    type (`SEED_SOURCE_REQUIRED`), optionally `schema_version` and `record_type`, and nothing
+    else. Each property is the record schema's own subschema; the seed only adds what it
+    requires, refuses `source.origin` (left to the tool that reads the source) and closes the
+    top level. `python atrium_document.py seed-schema` prints it for a caller with no Python.
+    """
+    full = load_schema()
+    props = full["properties"]
+    source = copy.deepcopy(props["source"])
+    source["required"] = list(SEED_SOURCE_REQUIRED)
+    source["not"] = {"required": ["origin"]}
+    record_type = copy.deepcopy(props["record_type"])
+    record_type["enum"] = [RECORD_TYPE]
+    return {
+        "$schema": full.get("$schema", "https://json-schema.org/draft/2020-12/schema"),
+        "title": "ATRIUM document seed",
+        "description": (
+            "The record an archive writes before the first ATRIUM stage (atrium-project#71): the "
+            "document's id and the original's digest, file name and media type. Valid input to "
+            "every tool; a record a tool emits is validated against the full record schema. "
+            f"Derived from atrium_document.schema.json at schema_version {SCHEMA_VERSION}."
+        ),
+        "type": "object",
+        "required": ["doc_id", "source"],
+        "additionalProperties": False,
+        "properties": {
+            "schema_version": copy.deepcopy(props["schema_version"]),
+            "record_type": record_type,
+            "doc_id": copy.deepcopy(props["doc_id"]),
+            "source": source,
+        },
+    }
+
+
+def validate_seed(record: Dict[str, Any]) -> None:
+    """Validate an AMČR seed against `seed_schema()`. Raises on failure, like `validate_document()`."""
+    try:
+        import jsonschema
+    except ImportError as exc:  # pragma: no cover - depends on the install
+        raise RuntimeError(
+            "jsonschema is not installed, so the seed cannot be validated. Install it rather "
+            "than skipping the gate."
+        ) from exc
+    jsonschema.validate(record, seed_schema())
+
+
+def validate_baseline(record: Dict[str, Any]) -> None:
+    """Validate a record a tool was HANDED: a seed against the seed profile, anything else in full.
+
+    The inherited-baseline half of every tool's Layer D gate calls this instead of
+    `validate_document()`. A seed lacks `provenance` and `assembled`, so the full schema refused
+    it, and each tool then demoted its OWN output check to a warning as if it had inherited a
+    defect — on exactly the path the AMČR pilot uses. A record a tool emits is still checked
+    with `validate_document()`.
+    """
+    if is_seed(record):
+        validate_seed(record)
+    else:
+        validate_document(record)
 
 
 def load_document(path: str) -> Dict[str, Any]:
@@ -1283,6 +1423,7 @@ def _cli() -> None:
     st.add_argument("--baseline", default=None, help="previous version of the record")
     st.add_argument("--out", default=None)
     st.add_argument("--run-id", default=None)
+    st.add_argument("--run-uuid", default=None, help="the run's urn:uuid (atrium_paradata run_uuid)")
     st.add_argument("--paradata-ref", default="")
     st.add_argument("--strict", action="store_true")
 
@@ -1293,6 +1434,8 @@ def _cli() -> None:
     mi = sub.add_parser("migrate", help="rewrite a record at the current schema version")
     mi.add_argument("--path", required=True)
 
+    sub.add_parser("seed-schema", help="print the JSON Schema of an AMČR seed (atrium-project#71)")
+
     args = p.parse_args()
 
     if args.cmd == "set-block":
@@ -1302,6 +1445,7 @@ def _cli() -> None:
             args.program,
             baseline=args.baseline,
             run_id=args.run_id,
+            run_uuid=args.run_uuid,
             paradata_ref=args.paradata_ref,
             strict=args.strict,
         ) as doc:
@@ -1317,6 +1461,9 @@ def _cli() -> None:
         with open(args.path, "w", encoding="utf-8") as fh:
             json.dump(data, fh, ensure_ascii=False, indent=2)
         print(f"[document] Migrated {args.path} to {SCHEMA_VERSION}", flush=True)
+
+    elif args.cmd == "seed-schema":
+        print(json.dumps(seed_schema(), ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

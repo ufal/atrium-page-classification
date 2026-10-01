@@ -40,7 +40,7 @@ atrium_paradata.py, service/atrium_service.py, service/healthcheck.py and
 atrium_limits.py (atrium-project#53; it reads a variable only through its caller's
 literal `limit("NAME", ...)`, and names none of its own except the upload limit's two,
 which atrium_service.py reads too). Scanning only those plus the entrypoint's __main__
-block yields the SAME thirteen names in every repo. That set is
+block yields the SAME fourteen names in every repo. That set is
 asserted literally, byte-identically, in every vendored copy of this file — it is the
 check that catches a broken scanner (a bad _SKIP_DIRS entry, a regex that stopped
 matching, a repo that lost service/) rather than a genuinely clean repo, because a
@@ -96,6 +96,7 @@ _SHARED_CORE = {
     "ATRIUM_RUNNER_REPO",
     "ATRIUM_RUNNER_REF",
     "ATRIUM_REQUEST_ID",
+    "ATRIUM_RUN_AGENT",
     "ALLOWED_ORIGINS",
     "MAX_UPLOAD_MB",
     "MAX_UPLOAD_BYTES",

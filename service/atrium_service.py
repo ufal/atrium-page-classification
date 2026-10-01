@@ -64,7 +64,7 @@ from typing import Any, Awaitable, Callable, Dict, Iterable, List, Mapping, Opti
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, ConfigDict, Field, RootModel
+from pydantic import BaseModel, ConfigDict, Field, RootModel, model_serializer
 
 # Paths FastAPI mounts for documentation/schema — callable, but not part of the
 # domain API surface advertised by /info.
@@ -588,32 +588,76 @@ class ReadyBody(BaseModel):
 
 
 class CreateAction(BaseModel):
-    """The RO-Crate `CreateAction` of this call: its provenance (atrium-project#67 R2).
+    """The RO-Crate `CreateAction` of this call: its provenance (atrium-project#71 R2).
 
-    It names the tool as its `instrument` (with `version` and the container image), the inputs as
-    `object`, the outputs as `result`, the `agent`, `startTime`/`endTime` and `actionStatus`; the paradata
-    fields of the run are properties of the action. Null until a service returns it. nlp-enrich returns
-    its pipeline-run paradata record here today, which carries those properties without the action's
-    own members.
+    One Process Run Crate 0.5 action per call, as nested JSON-LD, built by
+    `atrium_rocrate.create_action()`; the same document an archive stores as the run's paradata
+    file. It names the tool as its `instrument` (with `version`, its release page as `@id` and its
+    authors as `creator`), the image as `containerImage`, the inputs as `object`, what the call
+    wrote as `result`, the `agent`, `startTime`/`endTime` and `actionStatus`, and the run's whole
+    paradata record as `paradataRecord`. Every service returns it with a successful response; its
+    `@id` is the `run_uuid` the call stamped into the record it returned.
     """
 
     model_config = ConfigDict(extra="allow")
 
-    id: Optional[str] = Field(None, alias="@id", description="The action's identifier (`#run-...` / `urn:uuid:...`).")
+    context: Optional[Any] = Field(
+        None, alias="@context", description="The JSON-LD context: RO-Crate 1.2, plus the terms ATRIUM adds."
+    )
+    id: Optional[str] = Field(
+        None,
+        alias="@id",
+        description="The run's `urn:uuid:...`, equal to `run_uuid` in the blocks the call stamped into the record.",
+    )
     type: Optional[str] = Field(None, alias="@type", description="`CreateAction`.")
     name: Optional[str] = Field(None, description="A human-readable name of the run.")
+    description: Optional[str] = Field(None, description="What the action describes.")
     instrument: Optional[Dict[str, Any]] = Field(
-        None, description="The tool: a `SoftwareApplication` with `version`, and the container image it ran as."
+        None,
+        description=(
+            "The tool: a `SoftwareApplication` with `version`, its release page as `@id`, its repository as "
+            "`url` and its authors as `creator`."
+        ),
+    )
+    containerImage: Optional[Dict[str, Any]] = Field(
+        None,
+        description="The image the service ran as (`ATRIUM_RUNNER_IMAGE`): `registry`, `name`, `tag`.",
     )
     object_: Optional[List[Dict[str, Any]]] = Field(
-        None, alias="object", description="The inputs: the uploaded file(s) and the record sent with them."
+        None,
+        alias="object",
+        description=(
+            "The inputs: the uploaded file (`@id` `ni:///sha-256;...`, with `sha256` and `contentSize`) and "
+            "`#record`, the record sent with it."
+        ),
     )
-    result: Optional[List[Dict[str, Any]]] = Field(None, description="The outputs: the output file(s) and the record.")
-    agent: Optional[Dict[str, Any]] = Field(None, description="Who ran it (`ATRIUM_RUN_AGENT`).")
-    startTime: Optional[str] = Field(None, description="When the run started (ISO 8601).")
-    endTime: Optional[str] = Field(None, description="When the run ended (ISO 8601).")
-    actionStatus: Optional[str] = Field(None, description="`CompletedActionStatus` or `FailedActionStatus`.")
+    result: Optional[List[Dict[str, Any]]] = Field(
+        None, description="The outputs: the record blocks the call wrote (`#block-<name>`) and any output file."
+    )
+    agent: Optional[Dict[str, Any]] = Field(
+        None, description="The organisation operating the service (`ATRIUM_RUN_AGENT`); absent when it is not set."
+    )
+    startTime: Optional[str] = Field(None, description="When the run started: `YYYY-MM-DDTHH:MM:SS+00:00`.")
+    endTime: Optional[str] = Field(None, description="When the run ended: `YYYY-MM-DDTHH:MM:SS+00:00`.")
+    actionStatus: Optional[str] = Field(
+        None,
+        description="`http://schema.org/CompletedActionStatus` or `http://schema.org/FailedActionStatus`.",
+    )
     error: Optional[str] = Field(None, description="Why the run failed, with `FailedActionStatus`.")
+    paradataRecord: Optional[Dict[str, Any]] = Field(
+        None, description="The run's atrium_paradata record (schema 2.0), as the tool wrote it."
+    )
+
+    # No return annotation on purpose: the published schema stays the fields above.
+    @model_serializer(mode="wrap")
+    def _omit_absent_members(self, handler):  # noqa: ANN001, ANN202
+        """A JSON-LD action states what it knows: a member it lacks is absent, never `null`.
+
+        A route with a `response_model` (page-classification's `/predict_image`) would otherwise
+        send every unset member as `null`, an archive would store them, and `agent: null` reads
+        like a claim.
+        """
+        return {key: value for key, value in handler(self).items() if value is not None}
 
 
 class AtriumDocument(RootModel[Dict[str, Any]]):

@@ -55,16 +55,21 @@
     "doc_id": {
       "type": "string",
       "minLength": 1,
-      "description": "Stable document identifier, carried unchanged by every tool.",
+      "description": "Stable document identifier, carried unchanged by every tool. In the AMČR pilot it is the AMČR file id, written by the seed before the first stage (atrium-project#71); a tool keeps the baseline's value and never re-derives it from a file name.",
       "examples": ["CTX000000001"]
     },
 
     "source": {
       "type": "object",
-      "description": "The ORIGINAL input. First writer wins; later tools must not overwrite it. The durable key is doc_id + sha256 — originals are archive-managed, not pipeline-local, so no path is required.",
+      "description": "The ORIGINAL input. First writer wins; later tools must not overwrite it. The durable key is doc_id + sha256 (or sha512) — originals are archive-managed, not pipeline-local, so no path is required. In the AMČR pilot the seed writes it first: sha512, filename and media_type come from the archive and are never changed; the tool that reads the source adds origin, and no sha256 joins the archive's sha512 (atrium-project#71, docs/document_schema.md, The AMČR seed).",
       "additionalProperties": true,
       "properties": {
         "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "sha512": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{128}$",
+          "description": "SHA-512 of the original's bytes as the archive computed it (AMČR: the Fedora digest), lower-case hex. Written by the seed and carried unchanged by every tool (atrium-project#71)."
+        },
         "filename": { "type": "string" },
         "media_type": { "type": "string", "examples": ["application/alto+xml", "application/pdf"] },
         "page_count": { "type": "integer", "minimum": 0 },
@@ -126,6 +131,7 @@
             "properties": {
               "program": { "type": "string" },
               "run_id": { "type": "string" },
+              "run_uuid": { "type": "string", "pattern": "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", "description": "The run's stable identifier (atrium_paradata run_uuid): the @id of its RO-Crate CreateAction. Absent on records written before atrium-project#71." },
               "paradata_ref": { "type": "string" },
               "blocks": { "type": "string", "description": "Comma-separated blocks this run wrote." },
               "at": { "type": "string", "format": "date-time" }
@@ -149,6 +155,7 @@
             "properties": {
               "program": { "type": "string" },
               "run_id": { "type": "string" },
+              "run_uuid": { "type": "string", "pattern": "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", "description": "The writing run's stable identifier, as in provenance.contributors[].run_uuid." },
               "paradata_ref": { "type": "string" },
               "updated_at": { "type": "string", "format": "date-time" }
             }
