@@ -18,6 +18,7 @@ real. The thin HTTP layer keeps its skip, at the end of the file.
 No ML models, no network, no GPU.
 """
 
+import io
 import json
 import sys
 import types
@@ -339,28 +340,39 @@ class TestPredictImageDocumentJson:
         assert body["document_json"] is None
 
 
-class _FakePixmap:
-    width, height = 4, 4
-    samples = b"\xff" * (4 * 4 * 3)
+class _FakeBitmap:
+    """What `page.render()` returns: `to_pil()` and `close()`."""
 
+    def to_pil(self):
+        from PIL import Image
 
-class _FakeRect:
-    #: An A4 page in PDF points (1/72 inch), as PyMuPDF's `page.rect` reports it.
-    width, height = 595.0, 842.0
+        return Image.new("RGB", (4, 4), color="white")
+
+    def close(self):
+        _FakePdfPage.events.append("bitmap.close")
 
 
 class _FakePdfPage:
-    #: Every `dpi=` the service asked for, across all fake pages.
-    dpi_requests: list = []
-    rect = _FakeRect()
+    #: Every `scale=` the service rendered at, across all fake pages.
+    scale_requests: list = []
+    #: Every page, bitmap and document closed, in order — PDFium memory the service must free.
+    events: list = []
+    #: An A4 page in PDF points (1/72 inch), as PDFium's `get_size()` reports it.
+    size = (595.0, 842.0)
 
-    def get_pixmap(self, dpi=None):
-        _FakePdfPage.dpi_requests.append(dpi)
-        return _FakePixmap()
+    def get_size(self):
+        return self.size
+
+    def render(self, scale=None):
+        _FakePdfPage.scale_requests.append(scale)
+        return _FakeBitmap()
+
+    def close(self):
+        _FakePdfPage.events.append("page.close")
 
 
 class _FakePdf:
-    """Minimum surface predict_document uses: len(), load_page()."""
+    """The surface predict_document uses: len(), [index], init_forms(), close()."""
 
     def __init__(self, page_count):
         self._page_count = page_count
@@ -368,32 +380,42 @@ class _FakePdf:
     def __len__(self):
         return self._page_count
 
-    def load_page(self, index):
+    def __getitem__(self, index):
         return _FakePdfPage()
+
+    def init_forms(self):
+        pass
+
+    def close(self):
+        _FakePdfPage.events.append("pdf.close")
 
 
 #: How many pages the fake PDF has (a test may monkeypatch it).
-fake_fitz_pages = 3
+fake_pdf_pages = 3
 
 
 @pytest.fixture
-def fake_fitz(monkeypatch):
-    """Stub PyMuPDF the same way service.inference is stubbed above.
+def fake_pdfium(monkeypatch):
+    """Stub pypdfium2 the same way service.inference is stubbed above.
 
-    PyMuPDF is a real runtime dependency (it was the OTHER undeclared one this round found —
-    see service/requirements.txt), but it is a ~20 MB wheel and the fast lane should not carry
-    it to check the accretion wiring of `/predict_document`. Rasterising is not what is under
-    test here; the per-page record is.
+    Rasterising is not what is under test here; the per-page record, the limits and the use
+    of the engine (scale, closing, the lock) are. TestRealPdfium drives the real engine.
     """
-    module = types.ModuleType("fitz")
-    module.open = lambda stream=None, filetype=None: _FakePdf(sys.modules[__name__].fake_fitz_pages)
-    monkeypatch.setitem(sys.modules, "fitz", module)
-    monkeypatch.setattr(_FakePdfPage, "dpi_requests", [])
+    module = types.ModuleType("pypdfium2")
+
+    class PdfiumError(RuntimeError):
+        pass
+
+    module.PdfiumError = PdfiumError
+    module.PdfDocument = lambda content: _FakePdf(sys.modules[__name__].fake_pdf_pages)
+    monkeypatch.setitem(sys.modules, "pypdfium2", module)
+    monkeypatch.setattr(_FakePdfPage, "scale_requests", [])
+    monkeypatch.setattr(_FakePdfPage, "events", [])
     return module
 
 
 class TestPredictDocumentDocumentJson:
-    def test_every_pdf_page_lands_in_the_record(self, client, fake_fitz):
+    def test_every_pdf_page_lands_in_the_record(self, client, fake_pdfium):
         """alto's J1 wrote a hardcoded single-page block whatever the document held. Assert the
         page count follows the PDF, and that our fields land on each page."""
         response = client.post(
@@ -411,7 +433,7 @@ class TestPredictDocumentDocumentJson:
         assert record["page_categories"] == {"1": "TEXT", "2": "TEXT", "3": "TEXT"}
         assert [p["page"] for p in record["pages"]] == ["1", "2", "3"]
 
-    def test_a_seed_keyed_unlike_the_upload_comes_back_with_our_block(self, client, fake_fitz):
+    def test_a_seed_keyed_unlike_the_upload_comes_back_with_our_block(self, client, fake_pdfium):
         """(atrium-project#68) The PDF endpoint, same guarantee as the image one."""
         baseline = _upstream_baseline(SEED)
         response = client.post(
@@ -428,7 +450,7 @@ class TestPredictDocumentDocumentJson:
         assert record["page_categories"] == {"1": "TEXT", "2": "TEXT", "3": "TEXT"}
         assert record["lines"] == baseline["lines"]
 
-    def test_upstream_blocks_survive_a_pdf_run(self, client, fake_fitz):
+    def test_upstream_blocks_survive_a_pdf_run(self, client, fake_pdfium):
         baseline = _upstream_baseline()
         response = client.post(
             "/predict_document",
@@ -443,7 +465,7 @@ class TestPredictDocumentDocumentJson:
         assert record["lines"] == baseline["lines"]
         assert record["source"] == baseline["source"]
 
-    def test_absent_part_leaves_the_old_response_shape(self, client, fake_fitz):
+    def test_absent_part_leaves_the_old_response_shape(self, client, fake_pdfium):
         response = client.post(
             "/predict_document",
             data={"version": "v4.3", "topn": 3},
@@ -453,10 +475,11 @@ class TestPredictDocumentDocumentJson:
         # limits_applied (atrium-project#53) is in every response; document_json is not.
         assert set(response.json()) == {"type", "pages", "limits_applied"}
 
-    def test_pages_are_rasterised_at_the_training_resolution(self, client, fake_fitz):
-        """PyMuPDF defaults to 72 dpi; the training pages were made by pdf2png.sh at 300. Every
-        page must be rendered at PDF_RENDER_DPI, and its DEFAULT must stay at 300 — it is an
-        environment setting since atrium-project#53, so a deployment may choose otherwise."""
+    def test_pages_are_rasterised_at_the_training_resolution(self, client, fake_pdfium):
+        """PDFium renders at 72 dpi at scale 1; the training pages were made by pdf2png.sh at
+        300. Every page must be rendered at PDF_RENDER_DPI (scale = dpi / 72), and its DEFAULT
+        must stay at 300 — it is an environment setting since atrium-project#53, so a
+        deployment may choose otherwise."""
         from tool_limits import PDF_RENDER_DPI
 
         response = client.post(
@@ -466,32 +489,156 @@ class TestPredictDocumentDocumentJson:
         )
         assert response.status_code == 200
         assert PDF_RENDER_DPI.default == 300
-        assert _FakePdfPage.dpi_requests == [300, 300, 300]
+        assert _FakePdfPage.scale_requests == [300 / 72] * 3
 
-    def test_a_page_without_rect_is_checked_on_its_rendered_size(self, client, monkeypatch):
-        """A page object without ``rect`` (a stand-in; every PyMuPDF page has one) is sized
-        from its pixmap instead, still before the pixels are decoded."""
+    def test_every_bitmap_page_and_the_document_are_closed(self, client, fake_pdfium):
+        """PDFium's memory is not Python's: a page, a bitmap or a document left open is held
+        until the garbage collector finds it, in a service that renders gigapixels a day."""
+        response = client.post(
+            "/predict_document",
+            data={"version": "v4.3", "topn": 3},
+            files={"file": ("CTX01.pdf", b"%PDF-1.4 fake", "application/pdf")},
+        )
+        assert response.status_code == 200
+        assert _FakePdfPage.events == ["bitmap.close", "page.close"] * 3 + ["pdf.close"]
 
-        class _BarePage:
-            def get_pixmap(self, dpi=None):
-                return _FakePixmap()
+    def test_a_refused_page_still_closes_the_page_and_the_document(self, client, fake_pdfium, monkeypatch):
+        monkeypatch.setenv("MAX_IMAGE_PIXELS", "1000")
+        response = client.post(
+            "/predict_document",
+            data={"version": "v4.3", "topn": 3},
+            files={"file": ("CTX01.pdf", b"%PDF-1.4 fake", "application/pdf")},
+        )
+        assert response.status_code == 413
+        assert _FakePdfPage.scale_requests == [], "refused before rendering"
+        assert _FakePdfPage.events == ["page.close", "pdf.close"]
 
-        class _BarePdf:
-            def __len__(self):
-                return 1
+    def test_pdfium_is_never_entered_from_two_threads_at_once(self, client, fake_pdfium, monkeypatch):
+        """PDFium is not thread-safe, and /predict_document renders in a worker thread (issue
+        #55): without `_PDFIUM_LOCK`, two requests render at the same time. Four documents of
+        three pages each, rendered from four threads, must never overlap inside the engine."""
+        import threading
+        import time
 
-            def load_page(self, index):
-                return _BarePage()
+        from service import api
 
-        module = types.ModuleType("fitz")
-        module.open = lambda stream=None, filetype=None: _BarePdf()
-        monkeypatch.setitem(sys.modules, "fitz", module)
-        files = {"file": ("CTX01.pdf", b"%PDF-1.4 fake", "application/pdf")}
-        ok = client.post("/predict_document", data={"version": "v4.3", "topn": 3}, files=files)
-        assert ok.status_code == 200, ok.text
-        monkeypatch.setenv("MAX_IMAGE_PIXELS", "15")  # the fake pixmap is 4 x 4 = 16 px
-        over = client.post("/predict_document", data={"version": "v4.3", "topn": 3}, files=files)
-        assert over.status_code == 413 and over.json()["reason"] == "limit_exceeded"
+        guard, inside, depths = threading.Lock(), [0], []
+        original = _FakePdfPage.render
+
+        def slow_render(page, scale=None):
+            with guard:
+                inside[0] += 1
+                depths.append(inside[0])
+            time.sleep(0.01)
+            with guard:
+                inside[0] -= 1
+            return original(page, scale=scale)
+
+        monkeypatch.setattr(_FakePdfPage, "render", slow_render)
+        threads = [threading.Thread(target=api._classify_pdf_pages, args=(b"%PDF", "v4.3", 1)) for _ in range(4)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+        assert len(depths) == 12, "every page of every document was rendered"
+        assert max(depths) == 1, f"PDFium was entered by {max(depths)} threads at once"
+
+
+class TestRealPdfium:
+    """The real engine, end to end (pypdfium2 is in setup/requirements-test.txt): a PDF made
+    here goes through PDFium and reaches the model as the page image the classifier expects —
+    RGB, at PDF_RENDER_DPI, with its colours where they were (PDFium renders BGR; a channel
+    swap would hand the model a different page)."""
+
+    #: (R, G, B) per page: asymmetric, so a red/blue swap cannot pass.
+    COLOURS = [(200, 120, 40), (40, 160, 220)]
+
+    def _pdf(self, size=(612, 792)) -> bytes:
+        from PIL import Image
+
+        pages = [Image.new("RGB", size, color=colour) for colour in self.COLOURS]
+        buf = io.BytesIO()
+        # resolution=72: one pixel per PDF point, so the page is `size` points.
+        pages[0].save(buf, format="PDF", resolution=72, save_all=True, append_images=pages[1:])
+        return buf.getvalue()
+
+    def _client(self, monkeypatch, seen):
+        from fastapi.testclient import TestClient
+
+        from service import api
+
+        class Recording(_MockManager):
+            def predict(self, image, version, topn):
+                seen.append(image)
+                return PREDS
+
+        monkeypatch.setattr(api, "manager", Recording())
+        return TestClient(api.app)
+
+    def test_pages_reach_the_model_as_rgb_images_at_the_render_dpi(self, monkeypatch):
+        pytest.importorskip("pypdfium2")
+        seen = []
+        client = self._client(monkeypatch, seen)
+        monkeypatch.setenv("PDF_RENDER_DPI", "144")  # scale 2.0: exact in floating point
+        response = client.post(
+            "/predict_document",
+            data={"version": "v4.3", "topn": 3, "document_json_out": "true"},
+            files={"file": ("CTX01.pdf", self._pdf(), "application/pdf")},
+        )
+        assert response.status_code == 200, response.text
+        assert [page["page"] for page in response.json()["pages"]] == [1, 2]
+        assert response.json()["document_json"]["page_categories"] == {"1": "TEXT", "2": "TEXT"}
+        assert [(image.mode, image.size) for image in seen] == [("RGB", (1224, 1584))] * 2
+        for image, colour in zip(seen, self.COLOURS, strict=True):
+            centre = image.getpixel((612, 792))
+            assert all(abs(a - b) <= 4 for a, b in zip(centre, colour, strict=True)), (centre, colour)
+
+    def test_bytes_that_are_not_a_pdf_are_422_with_pdfiums_reason(self, monkeypatch):
+        pytest.importorskip("pypdfium2")
+        client = self._client(monkeypatch, [])
+        response = client.post(
+            "/predict_document",
+            data={"version": "v4.3", "topn": 3},
+            files={"file": ("d.pdf", b"not a pdf", "application/pdf")},
+        )
+        assert response.status_code == 422
+        assert response.json()["detail"].startswith("The upload is not a readable PDF: Failed to load document")
+
+    def test_the_size_checked_before_rendering_is_the_size_rendered(self):
+        """MAX_IMAGE_PIXELS is checked on `pixel_size()` before PDFium renders, so it must be the
+        size PDFium then produces — including its rounding. A 522 x 737 px scan stored at 300 dpi
+        is 125.28 x 176.88 pt, held by PDFium as 32-bit floats (176.8800048828125 pt), which is
+        737.00002 px at 300 dpi: PDFium rounds it up to 738, and so must the check."""
+        pytest.importorskip("pypdfium2")
+        from PIL import Image
+
+        from service.pdf_render import open_document, pixel_size, render_page, render_scale
+
+        buf = io.BytesIO()
+        Image.new("RGB", (522, 737), color=(250, 250, 245)).save(buf, format="PDF", resolution=300)
+        pdf = open_document(buf.getvalue())
+        try:
+            predicted = pixel_size(pdf[0], render_scale(300))
+            image = render_page(pdf, 0, render_scale(300))
+        finally:
+            pdf.close()
+        assert image.mode == "RGB"
+        assert image.size == predicted == (522, 738)
+
+    def test_a_page_over_max_image_pixels_is_refused_from_its_declared_size(self, monkeypatch):
+        """A 612 x 792 pt page at 300 dpi is 2550 x 3300 = 8.4 Mpx: refused at 8 Mpx, before
+        PDFium renders a pixel of it."""
+        pytest.importorskip("pypdfium2")
+        seen = []
+        client = self._client(monkeypatch, seen)
+        monkeypatch.setenv("MAX_IMAGE_PIXELS", "8000000")
+        response = client.post(
+            "/predict_document",
+            data={"version": "v4.3", "topn": 3},
+            files={"file": ("CTX01.pdf", self._pdf(), "application/pdf")},
+        )
+        assert response.status_code == 413 and response.json()["limit"]["key"] == "max_image_pixels"
+        assert seen == []
 
 
 class TestOpenApiAdvertisesTheContract:
@@ -528,7 +675,7 @@ class TestLimits:
             "max_image_pixels": "MAX_IMAGE_PIXELS",
         }
 
-    def test_a_pdf_over_max_pdf_pages_is_refused(self, client, fake_fitz, monkeypatch):
+    def test_a_pdf_over_max_pdf_pages_is_refused(self, client, fake_pdfium, monkeypatch):
         monkeypatch.setenv("MAX_PDF_PAGES", "2")
         response = client.post(
             "/predict_document",
@@ -546,9 +693,10 @@ class TestLimits:
             "observed": 3,
             "unit": "pages",
         }
-        assert _FakePdfPage.dpi_requests == [], "refused before any page was rendered"
+        assert _FakePdfPage.scale_requests == [], "refused before any page was rendered"
+        assert _FakePdfPage.events == ["pdf.close"]
 
-    def test_a_page_too_large_to_render_is_refused_before_rendering(self, client, fake_fitz, monkeypatch):
+    def test_a_page_too_large_to_render_is_refused_before_rendering(self, client, fake_pdfium, monkeypatch):
         monkeypatch.setenv("MAX_IMAGE_PIXELS", "1000000")  # A4 at 300 dpi is ~8.7 Mpx
         response = client.post(
             "/predict_document",
@@ -557,10 +705,11 @@ class TestLimits:
         )
         assert response.status_code == 413
         assert response.json()["limit"]["key"] == "max_image_pixels"
-        assert response.json()["detail"].startswith("Page 1 at 300 dpi is 2479 x 3508")
-        assert _FakePdfPage.dpi_requests == []
+        # PDFium's own rounding (ceil of points x scale): 595 x 842 pt at 300 dpi.
+        assert response.json()["detail"].startswith("Page 1 at 300 dpi is 2480 x 3509")
+        assert _FakePdfPage.scale_requests == []
 
-    def test_pdf_render_dpi_is_a_setting(self, client, fake_fitz, monkeypatch):
+    def test_pdf_render_dpi_is_a_setting(self, client, fake_pdfium, monkeypatch):
         monkeypatch.setenv("PDF_RENDER_DPI", "150")
         response = client.post(
             "/predict_document",
@@ -568,7 +717,7 @@ class TestLimits:
             files={"file": ("CTX01.pdf", b"%PDF-1.4 fake", "application/pdf")},
         )
         assert response.status_code == 200
-        assert _FakePdfPage.dpi_requests == [150, 150, 150]
+        assert _FakePdfPage.scale_requests == [150 / 72] * 3
         assert client.get("/info").json()["limits_meta"]["pdf_render_dpi"]["source"] == "env"
 
     def test_an_image_over_max_image_pixels_is_refused_before_decoding(self, client, monkeypatch):

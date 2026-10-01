@@ -1,0 +1,31 @@
+{
+  "_comment": [
+    "The production image of this repository and what it is made of (atrium-project#72 A.3).",
+    "Checked on every push by the hub's workflow-lint.reusable.yml (tools/ci/image_closure.py):",
+    "every first-party file the entrypoint can execute must be listed here or be a hub-canonical",
+    "shared component (docs/templates/shared/MANIFEST.json); a listed file it no longer reaches",
+    "fails too. Run it locally with: python ../atrium-project/tools/ci/image_closure.py",
+    "--repo-root . --worktree",
+    "The pilot pins `-api`; `base` (ghcr.io/ufal/atrium-page-classification) is the batch CLI",
+    "of the same stage (run.py), published, never pinned. The PDF engine is pypdfium2",
+    "(service/pdf_render.py) since #72 D.1."
+  ],
+  "image": "ghcr.io/ufal/atrium-page-classification-api",
+  "target": "api",
+  "entrypoint": "service/api.py",
+  "stage": "page categories: POST /predict_image, POST /predict_document",
+  "core": [
+    "service/api.py",
+    "service/document_json.py",
+    "service/inference.py",
+    "service/pdf_render.py",
+    "atrium_document_adapter.py",
+    "classifier.py",
+    "ensemble.py",
+    "model_registry.py",
+    "tool_limits.py",
+    "utils.py"
+  ],
+  "vendored": {},
+  "moving": {}
+}

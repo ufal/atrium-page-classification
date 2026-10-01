@@ -1795,6 +1795,9 @@ and the fine-tuned classifiers are permissive (MIT), so **inference and evaluati
 in that dataset's **CC BY-NC 4.0** license, so `--train` runs resolve to **CC BY-NC 4.0** (non-commercial;
 not share-alike) — the trained weights and any derivatives inherit those terms. The optional `--yolo` backend
 uses Ultralytics, whose package and base weights are **AGPL-3.0**; a `--yolo` run records it as a component.
+The API's `/predict_document` renders PDF pages with **pypdfium2** (Apache-2.0 or BSD-3-Clause, declared
+`conditional` in `setup/para_config.txt`); it replaced PyMuPDF, an AGPL-3.0 library that was installed in
+both images and declared nowhere ([atrium-project#72](https://github.com/ufal/atrium-project/issues/72)).
 
 Example of the [small_data_samples](small_data_samples) 📁 directory processing paradata log:
 [260315-120442_page-classification.json](paradata%2F260315-120442_page-classification.json) 📎

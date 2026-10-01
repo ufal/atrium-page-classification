@@ -49,3 +49,7 @@ jobs:
       # the batch image, so no runnable API image was published and there was nothing
       # for ARÚP/ARÚB to deploy. Only `api` is probed — `base` is a batch CLI.
       probe-targets: '["api"]'
+      # atrium-project#72: `api` is this stage's production image, the one AMČR pins; its
+      # first-party files are declared in .github/production-image.json and checked by
+      # workflow-lint. `base` is the batch CLI (run.py): published, never pinned. The probe
+      # also fails an image with PyMuPDF installed (AGPL; the reusable's forbidden-distributions).

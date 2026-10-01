@@ -131,6 +131,24 @@ issue opens, matching its four siblings.
 * **Pair to remove:** `48.*` (issue closed 2026-09-17).
 * Not pushed: files delivered in chat.
 
+## 2026-09-30 — atrium-project#72 round 1: PyMuPDF → pypdfium2, the production image declared
+* **PDF engine** — `service/pdf_render.py` renders with pypdfium2 (Apache-2.0/BSD-3-Clause) at `PDF_RENDER_DPI / 72`,
+  under a process lock (PDFium is not thread-safe); `service/api.py` opens, counts and renders under it and classifies
+  outside it; a PDF PDFium cannot open is a 422. `MAX_IMAGE_PIXELS` is checked on PDFium's own pixel size
+  (`pixel_size`: it rounds up from a 32-bit page size, so a 595.2 pt page at 300 dpi is 2481 px). PyMuPDF (AGPL-3.0,
+  installed and declared nowhere) left `service/requirements.txt`; pypdfium2 declared `conditional` in
+  `setup/para_config.txt`.
+* **Decision record** — `data_scripts/pdf_rasteriser_comparison.md`: why not PyMuPDF, pdftoppm or Ghostscript (the
+  renderer's licence becomes every PDF record's), and the pixel comparison against pdftoppm (the training renderer)
+  over twelve geometries, made with `data_scripts/compare_pdf_rasterisers.py` (`--canvas`, `--scan-dpi`, `--labels`).
+  The label run on AMČR samples is the user's; its table is empty until then.
+* **Production image** — `.github/production-image.json` (the `api` target's first-party files), checked by the hub's
+  `tools/ci/image_closure.py` in workflow-lint; `docker.yml` names `api` as the production target. Revendored
+  `atrium_openapi.py`, `service/atrium_service.py`, `tests/test_openapi_contract.py` (declared-rename rule).
+* Tests: fake-PDFium fixtures for the contract and document tests, real-PDFium tests (size checked = size rendered,
+  thread safety, closes), `tests/test_compare_pdf_rasterisers.py`. Fast suite 645 passed, 7 skipped.
+* Tag draft: `v1.10.0-beta`. **Not pushed: files delivered in chat.**
+
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
 state via the GitHub API (zero open), and the confirmed `@v1` reusable-workflow pin. Nothing removed from the issues

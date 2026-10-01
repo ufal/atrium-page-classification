@@ -159,6 +159,15 @@ could not classify fails the request with `500` naming the page (it used to come
 as that page's `{"error": ...}`). `paradata` is reserved for the run's provenance
 (atrium-project#67 R2) and not returned yet.
 
+**PDF rendering.** Pages are rendered with **pypdfium2** (PDFium; Apache-2.0 or BSD-3-Clause,
+declared in `setup/para_config.txt`) at `PDF_RENDER_DPI` (scale `dpi / 72`), as RGB, one page at a
+time. It replaced PyMuPDF (AGPL-3.0, declared nowhere) in
+[atrium-project#72](https://github.com/ufal/atrium-project/issues/72) (D.1); what changes between
+the two engines is measured in
+[`data_scripts/pdf_rasteriser_comparison.md`](../data_scripts/pdf_rasteriser_comparison.md). PDFium is
+not thread-safe, so the service holds one process-wide lock while it opens and renders; the model
+runs outside the lock, and concurrent requests queue only for the rendering.
+
 ### ATRIUM Document JSON accretion 🧩
 
 Both `POST` endpoints implement accretion-contract rule 1 — *"services accept and return an
@@ -217,7 +226,7 @@ chmod +x ./setup/setup_api_service.sh
 ./setup/setup_api_service.sh
 ```
 
-Key libraries include: fastapi, uvicorn, python-multipart, pillow, PyMuPDF, torch, timm,
+Key libraries include: fastapi, uvicorn, python-multipart, pillow, pypdfium2, torch, timm,
 transformers. The serving half is in `service/requirements.txt` and the model stack in
 `setup/requirements.txt`; the setup script installs both, and so does the Docker image.
 

@@ -24,7 +24,8 @@ MAX_PDF_PAGES = limit("MAX_PDF_PAGES", 50, unit="pages", minimum=1)
 
 #: Resolution PDF pages are rasterised at before classification. 300 matches
 #: ``data_scripts/unix/pdf2png.sh``'s default, which is how the training pages were made;
-#: PyMuPDF's own default is 72 dpi. Changing it changes what the models see.
+#: PDFium (pypdfium2) renders at 72 dpi at scale 1, so the service renders at scale
+#: ``PDF_RENDER_DPI / 72``. Changing it changes what the models see.
 PDF_RENDER_DPI = limit("PDF_RENDER_DPI", 300, unit="dpi", minimum=1)
 
 #: Largest image, in pixels (width × height), the service will decode: an uploaded image,

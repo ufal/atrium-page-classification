@@ -34,6 +34,15 @@ try:
 except ImportError:
     from inference import manager
 
+# The PDF engine (atrium-project#72 D.1): pypdfium2, called only through this torch-free module,
+# which data_scripts/compare_pdf_rasterisers.py renders with too.
+try:
+    from .pdf_render import LOCK as _PDFIUM_LOCK
+    from .pdf_render import open_document, render_page, render_scale
+except ImportError:
+    from pdf_render import LOCK as _PDFIUM_LOCK
+    from pdf_render import open_document, render_page, render_scale
+
 # Accretion contract rule 1 — optional `document_json` part in, updated record out
 # (atrium-project#10, J2). Kept in its own torch-free module so the accretion is testable in
 # the fast lane; see service/document_json.py's docstring for why that matters here.
@@ -226,19 +235,18 @@ def _decode_image(image: Image.Image) -> Image.Image:
 
 
 def _open_pdf(content: bytes):
-    """Open the uploaded PDF, or refuse it with a 422 when it cannot be read.
+    """Open the uploaded PDF, or refuse it with a 422 when it cannot be read. Hold ``_PDFIUM_LOCK``.
 
-    The one place the PDF engine opens a document, so the engine swap of atrium-project#6 D
-    (PyMuPDF, AGPL-3.0, → pypdfium2, whose `PdfiumError` is the same case) changes the open and
-    its error in one function. PyMuPDF raises `FileDataError` / `EmptyFileError`, both
-    RuntimeErrors, for bytes that are not a PDF or a damaged one: the caller's input, not our
-    failure — the blanket 500 "Error processing document." before atrium-project#32 round 2.
+    ``PdfiumError`` (a RuntimeError) for bytes that are not a PDF, a damaged one or a locked
+    one is the caller's input, not our failure — the blanket 500 "Error processing document."
+    before atrium-project#32 round 2. The engine is pypdfium2 since atrium-project#72 D.1
+    (``service/pdf_render.py``); PyMuPDF (AGPL-3.0, declared nowhere) did this before.
     """
-    import fitz  # PyMuPDF
+    import pypdfium2 as pdfium
 
     try:
-        return fitz.open(stream=content, filetype="pdf")
-    except RuntimeError as exc:
+        return open_document(content)
+    except pdfium.PdfiumError as exc:
         raise HTTPException(status_code=422, detail=f"The upload is not a readable PDF: {exc}") from exc
 
 
@@ -248,43 +256,44 @@ def _classify_pdf_pages(content: bytes, version: str, topn: int) -> List[Dict[st
 
     Raises ``atrium_limits.LimitExceeded`` (413) for a PDF over MAX_PDF_PAGES, and for a
     page that would render over MAX_IMAGE_PIXELS at PDF_RENDER_DPI — the size is computed
-    from the page's own dimensions (``page.rect``, which every PyMuPDF page has) before it
-    is rendered, so a small file declaring a huge page cannot make the service rasterise
-    gigabytes. A page object without ``rect`` (a stand-in) is checked on its rendered size
-    instead, still before the pixels are decoded. Raised in the worker thread, it reaches
+    from the page's own dimensions before it is rendered, so a small file declaring a huge
+    page cannot make the service rasterise gigabytes. Raised in the worker thread, it reaches
     the error handler the same as on the loop.
+
+    PDFium is not thread-safe, so every call into it holds ``_PDFIUM_LOCK``
+    (``service/pdf_render.py``): pages are rendered one at a time under the lock and
+    classified outside it, so a long model run never holds PDFium from another request.
 
     A page the model could not classify fails the request with a 500 naming the page
     (atrium-project#32 round 2): its `{"error": ...}` used to be returned in place of the
     page's predictions, inside a 200.
     """
-    pdf_document = _open_pdf(content)
+    with _PDFIUM_LOCK:
+        pdf_document = _open_pdf(content)
+    try:
+        with _PDFIUM_LOCK:
+            page_count = len(pdf_document)
+        MAX_PDF_PAGES.check(
+            page_count,
+            detail=f"PDF has too many pages: {page_count}. Limit is {MAX_PDF_PAGES.get()} (MAX_PDF_PAGES).",
+        )
 
-    page_count = len(pdf_document)
-    MAX_PDF_PAGES.check(
-        page_count,
-        detail=f"PDF has too many pages: {page_count}. Limit is {MAX_PDF_PAGES.get()} (MAX_PDF_PAGES).",
-    )
+        dpi = tool_limits.PDF_RENDER_DPI.get()
+        scale = render_scale(dpi)
+        page_results: List[Dict[str, Any]] = []
+        for page_num in range(page_count):
+            what = f"Page {page_num + 1} at {dpi} dpi"
+            with _PDFIUM_LOCK:
+                img = render_page(pdf_document, page_num, scale, lambda w, h: _check_image_pixels(w, h, what))
 
-    dpi = tool_limits.PDF_RENDER_DPI.get()
-    page_results: List[Dict[str, Any]] = []
-    for page_num in range(page_count):
-        page = pdf_document.load_page(page_num)
-        what = f"Page {page_num + 1} at {dpi} dpi"
-        rect = getattr(page, "rect", None)
-        if rect is not None:
-            # page.rect is in PDF points (1/72 inch): the pixel size at `dpi`, known before rendering.
-            _check_image_pixels(int(rect.width * dpi / 72), int(rect.height * dpi / 72), what)
-        pix = page.get_pixmap(dpi=dpi)
-        if rect is None:
-            _check_image_pixels(pix.width, pix.height, what)
-        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-
-        predictions = manager.predict(img, version=version, topn=topn)
-        if isinstance(predictions, dict) and "error" in predictions:
-            raise HTTPException(status_code=500, detail=f"Page {page_num + 1}: {predictions['error']}")
-        page_results.append({"page": page_num + 1, "predictions": predictions})
-    return page_results
+            predictions = manager.predict(img, version=version, topn=topn)
+            if isinstance(predictions, dict) and "error" in predictions:
+                raise HTTPException(status_code=500, detail=f"Page {page_num + 1}: {predictions['error']}")
+            page_results.append({"page": page_num + 1, "predictions": predictions})
+        return page_results
+    finally:
+        with _PDFIUM_LOCK:
+            pdf_document.close()
 
 
 def _refuse_if_draining() -> None:

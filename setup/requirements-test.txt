@@ -23,3 +23,7 @@ jsonschema>=4.26.0
 # tests/test_service_runtime_deps.py parses docker-compose*.yml and .github/dependabot.yml to
 # check the deployment's entrypoints and the numpy guard (G2/G3). Also only transitive today.
 PyYAML>=6.0.3
+# The PDF engine of /predict_document (service/requirements.txt, same range): a ~3 MB wheel,
+# so tests/test_service_document_json.py's TestRealPdfium drives the real engine in the fast
+# lane instead of only a stand-in (atrium-project#72 D.1).
+pypdfium2>=5.13.0,<6.0

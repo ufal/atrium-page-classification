@@ -44,3 +44,30 @@ def test_every_logged_component_is_declared():
     logged = set(re.findall(r'log_component\(\s*"([^"]+)"', run_py))
     assert logged, "expected run.py to log at least one component"
     assert logged <= set(_components())
+
+
+def test_the_pdf_engine_is_declared_as_a_conditional_permissive_component():
+    """atrium-project#72 D.1: /predict_document renders PDFs with pypdfium2, so it is a component
+    of every record made from a PDF; PyMuPDF (AGPL-3.0) rendered them before, declared nowhere."""
+    comp = _components()["pypdfium2"]
+    assert comp["license"] == "Apache-2.0"
+    assert comp["loaded"] == "conditional"
+    assert "pymupdf" not in {name.lower() for name in _components()}
+
+
+def test_no_requirements_file_installs_pymupdf():
+    """The #6 D / #72 D.1 *done when*: the service no longer installs the undeclared AGPL engine.
+    Every requirements file in the repository counts, since the images install two of them and
+    the lanes the rest."""
+    import re
+
+    offenders = []
+    for path in sorted(SETUP_DIR.parent.rglob("requirements*.txt")):
+        if {".git", ".venv", "venv", "env", "site-packages"} & set(path.parts):
+            continue  # clones and virtual environments are not this repository's declarations
+        for number, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            line = raw.split("#", 1)[0].strip()
+            name = re.split(r"[<>=!~;\[ ]", line, maxsplit=1)[0].lower().replace("_", "-")
+            if name in {"pymupdf", "fitz", "pymupdfb", "pymupdf-layout"}:
+                offenders.append(f"{path.relative_to(SETUP_DIR.parent)}:{number}")
+    assert not offenders, f"PyMuPDF (AGPL-3.0) is installed again: {offenders}"

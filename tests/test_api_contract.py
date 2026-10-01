@@ -193,7 +193,7 @@ def test_deep_health_reports_draining_with_operator_fields():
 # --- the typed contract (atrium-project#32 round 2) --------------------------------------------
 # tests/test_openapi_contract.py (canonical, vendored) checks the committed spec itself. What
 # these add is the part only this repo can do: drive both endpoints (with a counting model
-# manager and, for PDFs, a stand-in PyMuPDF, as tests/test_service_document_json.py does) and
+# manager and, for PDFs, a stand-in pypdfium2, as tests/test_service_document_json.py does) and
 # hold every response — 200s and refusals alike — to the schema the PUBLISHED spec declares.
 
 import io  # noqa: E402
@@ -243,29 +243,52 @@ def _png():
     return buf.getvalue()
 
 
-class _Pixmap:
-    width, height, samples = 4, 4, b"\xff" * 48
+class _Bitmap:
+    def to_pil(self):
+        from PIL import Image
+
+        return Image.new("RGB", (4, 4), color="white")
+
+    def close(self):
+        pass
 
 
 class _Page:
-    def get_pixmap(self, dpi=None):
-        return _Pixmap()
+    def get_size(self):
+        return (4.0, 4.0)
+
+    def render(self, scale=None):
+        return _Bitmap()
+
+    def close(self):
+        pass
 
 
 class _Pdf:
     def __len__(self):
         return 2
 
-    def load_page(self, index):
+    def __getitem__(self, index):
         return _Page()
+
+    def init_forms(self):
+        pass
+
+    def close(self):
+        pass
 
 
 @pytest.fixture
-def fitz(monkeypatch):
-    """A stand-in PyMuPDF: two pages, or `open` raising what PyMuPDF raises for a bad PDF."""
-    module = types.ModuleType("fitz")
-    module.open = lambda stream=None, filetype=None: _Pdf()
-    monkeypatch.setitem(sys.modules, "fitz", module)
+def pdfium(monkeypatch):
+    """A stand-in pypdfium2: two pages, or `PdfDocument` raising what PDFium raises for a bad PDF."""
+    module = types.ModuleType("pypdfium2")
+
+    class PdfiumError(RuntimeError):
+        pass
+
+    module.PdfiumError = PdfiumError
+    module.PdfDocument = lambda content: _Pdf()
+    monkeypatch.setitem(sys.modules, "pypdfium2", module)
     return module
 
 
@@ -303,7 +326,7 @@ def test_an_empty_record_part_still_originates_the_record(manager):
     assert body["document_json"]["assembled"]["had_baseline"] is False
 
 
-def test_a_document_response_conforms(manager, fitz):
+def test_a_document_response_conforms(manager, pdfium):
     response = client.post(
         "/predict_document",
         data={"document_json_out": "true"},
@@ -354,17 +377,17 @@ def test_an_unreadable_image_is_422_not_500(manager):
     assert body["detail"].startswith("The upload is not a readable image") and manager.calls == 0
 
 
-def test_an_unreadable_pdf_is_422_not_500(manager, fitz):
-    def refuse(stream=None, filetype=None):
-        raise RuntimeError("Failed to open stream")  # PyMuPDF's FileDataError is a RuntimeError
+def test_an_unreadable_pdf_is_422_not_500(manager, pdfium):
+    def refuse(content):
+        raise pdfium.PdfiumError("Failed to load document (PDFium: Data format error).")
 
-    fitz.open = refuse
+    pdfium.PdfDocument = refuse
     response = client.post("/predict_document", files={"file": ("d.pdf", b"not a pdf", "application/pdf")})
     body = _conforms(422, response, "/predict_document")
-    assert body["detail"] == "The upload is not a readable PDF: Failed to open stream"
+    assert body["detail"] == "The upload is not a readable PDF: Failed to load document (PDFium: Data format error)."
 
 
-def test_a_page_the_model_could_not_classify_is_a_500_not_a_200(manager, fitz):
+def test_a_page_the_model_could_not_classify_is_a_500_not_a_200(manager, pdfium):
     """Its `{"error": ...}` used to stand in for the page's predictions inside a 200."""
     manager.answer = {"error": "All models failed."}
     body = _conforms(

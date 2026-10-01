@@ -20,6 +20,13 @@ matches that release (motyc, atrium-project#32, 2026-09-27). So each tool:
   release's ``openapi.json`` and ``compare`` fails on a breaking change unless the major version
   went up (0.x included: a 0.x tool needs 1.0 to break), and always on a removed reason code.
 
+A renamed service (atrium-project#72, the ocr-postprocess move of atrium-alto-postprocess#56)
+declares its old id: ``info.x-atrium-service-previous`` (written by ``atrium_service``'s
+``attach_openapi_contract(app, service, previous=...)``). ``compare`` accepts a changed
+``info.x-atrium-service`` only when that declaration equals the baseline's id; an undeclared
+change, or one declaring another id, stays fatal whatever the version. Nothing else about the
+comparison changes: the renamed release is still held to every other rule.
+
 Subcommands (run from the repo root)::
 
     python atrium_openapi.py export   --app service.api:app [--out service/openapi.json] [--prepare MOD:FUNC]
@@ -73,6 +80,10 @@ ASSET = "openapi.json"
 
 #: The component the record schema is published under (``atrium_service.RECORD_COMPONENT``).
 RECORD_COMPONENT = "AtriumDocument"
+
+#: ``info`` keys of the service id and of a declared rename (``atrium_service`` writes both).
+SERVICE_KEY = "x-atrium-service"
+PREVIOUS_SERVICE_KEY = "x-atrium-service-previous"
 
 #: The oasdiff release ``compare`` is verified against; CI installs exactly this one.
 OASDIFF_VERSION = "v1.32.1"
@@ -400,10 +411,11 @@ def compare(
 ) -> Tuple[int, List[str]]:
     """``(exit code, report lines)``: 0 compatible, 1 a finding that fails the build.
 
-    Always fatal: a changed service id; a removed reason code, or a status removed from one
-    (published codes are never renamed or removed, §4.4). Fatal unless the major version
-    went up: every breaking change oasdiff (or the built-in rules) reports, a removed
-    operationId, and a record-schema major change.
+    Always fatal: a changed service id the new spec does not declare as a rename (its
+    ``info.x-atrium-service-previous`` equal to the baseline's id, atrium-project#72); a
+    removed reason code, or a status removed from one (published codes are never renamed or
+    removed, §4.4). Fatal unless the major version went up: every breaking change oasdiff (or
+    the built-in rules) reports, a removed operationId, and a record-schema major change.
     """
     lines: List[str] = []
     if base is None:
@@ -414,10 +426,25 @@ def compare(
     fatal: List[str] = []
     breaking: List[str] = []
 
-    old_service = base.get("info", {}).get("x-atrium-service")
-    new_service = rev.get("info", {}).get("x-atrium-service")
+    old_service = base.get("info", {}).get(SERVICE_KEY)
+    new_service = rev.get("info", {}).get(SERVICE_KEY)
+    declared = rev.get("info", {}).get(PREVIOUS_SERVICE_KEY)
     if old_service and old_service != new_service:
-        fatal.append(f"`info.x-atrium-service` changed: {old_service!r} → {new_service!r}")
+        if declared == old_service:
+            lines.append(
+                f"Declared rename: `info.{SERVICE_KEY}` {old_service!r} → {new_service!r} "
+                f"(`info.{PREVIOUS_SERVICE_KEY}`); every other rule still applies."
+            )
+        elif declared:
+            fatal.append(
+                f"`info.{SERVICE_KEY}` changed: {old_service!r} → {new_service!r}, but "
+                f"`info.{PREVIOUS_SERVICE_KEY}` declares {declared!r}, not the baseline's id"
+            )
+        else:
+            fatal.append(
+                f"`info.{SERVICE_KEY}` changed: {old_service!r} → {new_service!r} (a rename must declare "
+                f"`info.{PREVIOUS_SERVICE_KEY}: {old_service!r}`: attach_openapi_contract(..., previous=...))"
+            )
 
     old_codes = base.get("x-atrium-reason-codes") or {}
     new_codes = rev.get("x-atrium-reason-codes") or {}
@@ -649,6 +676,15 @@ def _selftest() -> int:
         0,
         [f"No baseline: no earlier release carries `{ASSET}`. This release is the bootstrap."],
     )
+
+    moved = stamp(base, "1.3.0")
+    moved["info"][SERVICE_KEY] = "atrium-renamed"
+    assert compare(base, moved, "2.0.0")[0] == 1, "an undeclared rename fails even with a major bump"
+    moved["info"][PREVIOUS_SERVICE_KEY] = "atrium-other"
+    assert compare(base, moved, "2.0.0")[0] == 1, "a rename declaring another id fails"
+    moved["info"][PREVIOUS_SERVICE_KEY] = "atrium-test"
+    code, lines = compare(base, moved, "1.3.0")
+    assert code == 0 and any("Declared rename" in line for line in lines), lines
 
     nullable = normalise(
         {"anyOf": [{"$ref": "#/x"}, {"type": "null"}], "components": {"schemas": {"AtriumDocument": {}}}}

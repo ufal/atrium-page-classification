@@ -8,3 +8,8 @@ repository_fallback = https://github.com/ufal/atrium-page-classification
 vit_models     = MIT              ; always      ; fine-tuned ViT/EffNet/RegNetY/CLIP classifiers
 lindat_dataset = CC BY-NC 4.0     ; conditional ; LINDAT training dataset (48k+ pages)
 ultralytics    = AGPL-3.0         ; conditional ; YOLO-cls backend and base weights (--yolo)
+# (atrium-project#72 D.1) The PDF engine of the service's /predict_document, which replaced the
+# undeclared PyMuPDF (AGPL-3.0). pypdfium2 is dual-licensed Apache-2.0 OR BSD-3-Clause (PDFium:
+# BSD-3-Clause); recorded as Apache-2.0 because para_licenses does not parse SPDX `OR`
+# expressions (either choice is permissive), as atrium-alto-postprocess records it.
+pypdfium2      = Apache-2.0       ; conditional ; PDFium page rendering for PDF uploads (service /predict_document)

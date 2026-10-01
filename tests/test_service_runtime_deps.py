@@ -23,7 +23,7 @@ a dependency-only assertion that runs in the fast lane, in seconds, with no Dock
 2. every third-party module anything under `service/` imports is declared too. That half found
    `fitz`/PyMuPDF (used by `/predict_document`, declared nowhere) and `requests` (used by the
    client script the README documents) while G3 was being fixed — the same defect, one import
-   further in.
+   further in. (PyMuPDF has since been replaced by pypdfium2, atrium-project#72 D.1.)
 
 A real container smoke test (`docker run` the api target, wait for the port, curl `/health`)
 is still the belt to this braces and belongs in CI; see the plan's Phase 3.2 note.
@@ -58,11 +58,10 @@ _NOT_PIP_PROVIDED = {"sh", "bash", "python", "python3", "exec", "echo", "cd", "s
 
 #: Import name → distribution name, for the handful where they differ. Deliberately tiny and
 #: explicit rather than derived from the installed environment: the point is to check the
-#: DECLARATIONS, which must hold even for a dep that is not installed in this venv (PyMuPDF is
-#: exactly that case in the fast lane).
+#: DECLARATIONS, which must hold even for a dep that is not installed in this venv (PyMuPDF was
+#: exactly that case in the fast lane, before pypdfium2 replaced it).
 _IMPORT_TO_DISTRIBUTION = {
     "PIL": "pillow",
-    "fitz": "pymupdf",
     "sklearn": "scikit-learn",
     "yaml": "pyyaml",
     "cv2": "opencv-python",
@@ -70,7 +69,8 @@ _IMPORT_TO_DISTRIBUTION = {
 
 
 def _normalise(name: str) -> str:
-    """PEP 503 name normalisation, so `PyMuPDF`, `pymupdf` and `py_mupdf` compare equal."""
+    """PEP 503 name normalisation, so `PyYAML` equals `pyyaml` and `python_multipart` equals
+    `python-multipart`."""
     return re.sub(r"[-_.]+", "-", name).strip().lower()
 
 
@@ -291,7 +291,7 @@ class TestDeploymentEntrypointsAreInstallable:
 class TestServiceImportsAreDeclared:
     def test_every_third_party_service_import_is_declared(self):
         """The generalisation of G3: a serving dependency that is imported but undeclared is
-        the same bug whether it is the server itself or PyMuPDF."""
+        the same bug whether it is the server itself or the PDF engine."""
         declared = _declared_distributions()
         undeclared = {}
         for module, files in _service_imports().items():
@@ -310,7 +310,7 @@ class TestServiceImportsAreDeclared:
         assertion above vacuously true."""
         imports = _service_imports()
         assert "fastapi" in imports
-        assert "fitz" in imports, "the /predict_document PDF path disappeared, or the scan did"
+        assert "pypdfium2" in imports, "the /predict_document PDF path disappeared, or the scan did"
 
 
 class TestVersionPinsStayConsistent:

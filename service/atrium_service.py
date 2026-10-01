@@ -681,7 +681,7 @@ def operation_id(route: Any) -> str:
     return route.name
 
 
-def attach_openapi_contract(app: FastAPI, service: str) -> None:
+def attach_openapi_contract(app: FastAPI, service: str, previous: Optional[str] = None) -> None:
     """Finish the OpenAPI document ``app`` generates, the one committed as ``service/openapi.json``.
 
     Wraps ``app.openapi`` once; the result is cached by FastAPI as usual. On top of what
@@ -689,6 +689,11 @@ def attach_openapi_contract(app: FastAPI, service: str) -> None:
 
     * adds ``info.x-atrium-service`` (the tool id) and ``x-atrium-reason-codes``
       (``{code: {description, statuses}}``, the registry of :data:`REASON_CODES`);
+    * with ``previous`` (a renamed service, atrium-project#72: the id its last release
+      published), adds ``info.x-atrium-service-previous``. ``atrium_openapi.py compare`` accepts
+      the changed id only when this declaration equals the baseline's; keep it for as long as
+      the committed spec should document the rename (it is harmless once the baseline carries
+      the new id);
     * replaces the ``AtriumDocument`` component with the vendored
       ``atrium_document.schema.json`` (its ``$defs`` hoisted as ``AtriumDocument_<name>``,
       ``$schema`` and ``$id`` dropped), and records ``x-atrium-record-schema``
@@ -700,14 +705,17 @@ def attach_openapi_contract(app: FastAPI, service: str) -> None:
 
     def openapi() -> Dict[str, Any]:
         if app.openapi_schema is None:
-            _finish_openapi(original(), service)
+            _finish_openapi(original(), service, previous)
         return app.openapi_schema
 
     app.openapi = openapi  # type: ignore[method-assign]
 
 
-def _finish_openapi(spec: Dict[str, Any], service: str) -> None:
-    spec.setdefault("info", {})["x-atrium-service"] = service
+def _finish_openapi(spec: Dict[str, Any], service: str, previous: Optional[str] = None) -> None:
+    info = spec.setdefault("info", {})
+    info["x-atrium-service"] = service
+    if previous:
+        info["x-atrium-service-previous"] = previous
     spec["x-atrium-reason-codes"] = {
         code: {"description": REASON_CODES[code], "statuses": list(REASON_STATUSES[code])} for code in REASON_CODES
     }

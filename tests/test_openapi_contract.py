@@ -227,6 +227,9 @@ def test_the_reason_registry_is_published(entry):
     for code, entry_ in published.items():
         assert entry_["statuses"] == list(REASON_STATUSES[code]), code
     assert spec["info"].get("x-atrium-service") == entry["service"]
+    # A renamed service declares the id its last release published (atrium-project#72); the
+    # entry names it as `service_previous`, and nothing else may carry the key.
+    assert spec["info"].get("x-atrium-service-previous") == entry.get("service_previous")
 
 
 @pytest.mark.parametrize("entry", SERVICES, ids=IDS)
