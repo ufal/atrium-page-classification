@@ -17,13 +17,26 @@ calls, already the ecosystem's reference implementation of the set_block/merge_b
 the exact field grant and (since D4/D8) the Layer D schema gate and the field-survival
 assertion. A second copy of that logic in the service is exactly how alto's `/process`
 endpoint ended up writing junk (J1).
+
+Two more helpers serve `/predict_document` when a caller sends a record that already has
+pages (atrium-digital-convert#2's `/describe`):
+
+* `parse_page_selection()` / `expand_page_selection()` — the optional `pages` form field
+  ("1,3,5-7", 1-based physical pages): only those pages are rendered and classified.
+* `baseline_page_labels()` / `record_page_keys()` — a PDF's pages are numbered 1..N by
+  position, but a born-digital record names them by their PDF page labels (`i`, `ii`, `1`, …)
+  and carries the position in `pages[].page_index`. Writing categories under "1", "2", … into
+  such a record would attach them to the wrong page rows (or invent new ones), so the page
+  keys are mapped through `page_index` to the record's own labels first.
 """
 
 from __future__ import annotations
 
+import json
+import re
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
 
 def doc_id_for_image(filename: Optional[str]) -> Tuple[str, str]:
@@ -52,6 +65,95 @@ def doc_id_for_document(filename: Optional[str]) -> str:
     from atrium_document import canonical_doc_id
 
     return canonical_doc_id(filename or "upload.pdf") or "upload"
+
+
+_SELECTION_PART = re.compile(r"^(\d+)(?:\s*-\s*(\d+))?$")
+
+
+def parse_page_selection(spec: Optional[str]) -> Optional[List[Tuple[int, int]]]:
+    """The `pages` form field as inclusive 1-based ranges, or None for every page.
+
+    "1,3,5-7" -> [(1, 1), (3, 3), (5, 7)]. Blank (or absent) means every page. Raises
+    `ValueError` on anything else: a part that is not `N` or `N-M`, a page below 1, a range
+    whose end is before its start. The ranges are not expanded here, so "1-99999999" costs
+    nothing before the PDF's page count is known (`expand_page_selection`).
+    """
+    if spec is None or not spec.strip():
+        return None
+    ranges: List[Tuple[int, int]] = []
+    for part in spec.split(","):
+        part = part.strip()
+        match = _SELECTION_PART.match(part)
+        if not match:
+            raise ValueError(f"{part!r} is not a page number or a range like 5-7")
+        start = int(match.group(1))
+        end = int(match.group(2)) if match.group(2) else start
+        if start < 1:
+            raise ValueError(f"pages are numbered from 1, not {start}")
+        if end < start:
+            raise ValueError(f"the range {part!r} ends before it starts")
+        ranges.append((start, end))
+    return ranges
+
+
+def expand_page_selection(ranges: Optional[Sequence[Tuple[int, int]]], page_count: int) -> List[int]:
+    """The physical page numbers to classify, sorted and unique.
+
+    Every page (1..page_count) when `ranges` is None. Raises `ValueError` when a range
+    reaches past the document's last page: a caller asking for page 12 of a 10-page PDF has
+    the wrong PDF, which a silently shorter answer would hide.
+    """
+    if ranges is None:
+        return list(range(1, page_count + 1))
+    beyond = [end for _, end in ranges if end > page_count]
+    if beyond:
+        raise ValueError(f"page {max(beyond)} was asked for, but the PDF has {page_count} page(s)")
+    return sorted({n for start, end in ranges for n in range(start, end + 1)})
+
+
+def baseline_page_labels(baseline_bytes: Optional[bytes]) -> Dict[int, str]:
+    """{page_index: page label} for the baseline's page rows that carry both, else {}.
+
+    Read leniently: the part was already opened by the service (`parse_record_part`), and a
+    record with no pages, or pages without `page_index` (an ALTO record keyed "1".."N"), simply
+    has nothing to map.
+    """
+    if not baseline_bytes:
+        return {}
+    try:
+        record = json.loads(baseline_bytes.decode("utf-8-sig"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return {}
+    pages = record.get("pages") if isinstance(record, dict) else None
+    labels: Dict[int, str] = {}
+    for row in pages if isinstance(pages, list) else []:
+        if not isinstance(row, dict):
+            continue
+        index, label = row.get("page_index"), row.get("page")
+        if isinstance(index, int) and not isinstance(index, bool) and index >= 1 and label not in (None, ""):
+            labels.setdefault(index, str(label))
+    return labels
+
+
+def record_page_keys(page_numbers: Sequence[int], labels: Mapping[int, str]) -> Dict[int, Optional[str]]:
+    """The record key each classified physical page is written under.
+
+    * the baseline's label when its row carries this `page_index`;
+    * else `str(n)`, as before — unless that string is ANOTHER page's label in the baseline
+      (page "3" of a record whose third page is labelled "1" and whose fifth is "3"): then
+      None, and the page is left out of the record rather than written onto the wrong row.
+      Its prediction is still in the response.
+    """
+    taken = set(labels.values())
+    keys: Dict[int, Optional[str]] = {}
+    for n in page_numbers:
+        if n in labels:
+            keys[n] = labels[n]
+        elif str(n) in taken:
+            keys[n] = None
+        else:
+            keys[n] = str(n)
+    return keys
 
 
 def _top_rows(doc_id: str, pages: Sequence[Tuple[str, Any]]) -> List[Dict[str, Any]]:

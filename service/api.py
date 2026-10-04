@@ -47,9 +47,25 @@ except ImportError:
 # (atrium-project#10, J2). Kept in its own torch-free module so the accretion is testable in
 # the fast lane; see service/document_json.py's docstring for why that matters here.
 try:
-    from .document_json import build_document_record, doc_id_for_document, doc_id_for_image
+    from .document_json import (
+        baseline_page_labels,
+        build_document_record,
+        doc_id_for_document,
+        doc_id_for_image,
+        expand_page_selection,
+        parse_page_selection,
+        record_page_keys,
+    )
 except ImportError:
-    from document_json import build_document_record, doc_id_for_document, doc_id_for_image
+    from document_json import (
+        baseline_page_labels,
+        build_document_record,
+        doc_id_for_document,
+        doc_id_for_image,
+        expand_page_selection,
+        parse_page_selection,
+        record_page_keys,
+    )
 
 # Shared ATRIUM meta-contract helpers (§4). Byte-identical across every service,
 # enforced by para-drift.reusable.yml — same relative-vs-bare import dance.
@@ -250,11 +266,17 @@ def _open_pdf(content: bytes):
         raise HTTPException(status_code=422, detail=f"The upload is not a readable PDF: {exc}") from exc
 
 
-def _classify_pdf_pages(content: bytes, version: str, topn: int) -> List[Dict[str, Any]]:
-    """Rasterise every page of a PDF and classify it — the blocking body of
+def _classify_pdf_pages(
+    content: bytes, version: str, topn: int, selection: Optional[List[Tuple[int, int]]] = None
+) -> List[Dict[str, Any]]:
+    """Rasterise the pages of a PDF and classify them — the blocking body of
     ``POST /predict_document``, extracted so it runs in ONE worker thread (issue #55).
 
-    Raises ``atrium_limits.LimitExceeded`` (413) for a PDF over MAX_PDF_PAGES, and for a
+    Every page, or only those `selection` names (the `pages` field, already parsed; a page past
+    the end is a 422, checked here because only here is the page count known).
+
+    Raises ``atrium_limits.LimitExceeded`` (413) when more pages would be classified than
+    MAX_PDF_PAGES — the whole PDF, or the selection — and for a
     page that would render over MAX_IMAGE_PIXELS at PDF_RENDER_DPI — the size is computed
     from the page's own dimensions before it is rendered, so a small file declaring a huge
     page cannot make the service rasterise gigabytes. Raised in the worker thread, it reaches
@@ -273,23 +295,31 @@ def _classify_pdf_pages(content: bytes, version: str, topn: int) -> List[Dict[st
     try:
         with _PDFIUM_LOCK:
             page_count = len(pdf_document)
-        MAX_PDF_PAGES.check(
-            page_count,
-            detail=f"PDF has too many pages: {page_count}. Limit is {MAX_PDF_PAGES.get()} (MAX_PDF_PAGES).",
-        )
+        try:
+            numbers = expand_page_selection(selection, page_count)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=f"pages: {exc}.") from exc
+        if selection is None:
+            detail = f"PDF has too many pages: {page_count}. Limit is {MAX_PDF_PAGES.get()} (MAX_PDF_PAGES)."
+        else:
+            detail = (
+                f"Too many pages selected: {len(numbers)} of the PDF's {page_count}. "
+                f"Limit is {MAX_PDF_PAGES.get()} (MAX_PDF_PAGES)."
+            )
+        MAX_PDF_PAGES.check(len(numbers), detail=detail)
 
         dpi = tool_limits.PDF_RENDER_DPI.get()
         scale = render_scale(dpi)
         page_results: List[Dict[str, Any]] = []
-        for page_num in range(page_count):
-            what = f"Page {page_num + 1} at {dpi} dpi"
+        for number in numbers:
+            what = f"Page {number} at {dpi} dpi"
             with _PDFIUM_LOCK:
-                img = render_page(pdf_document, page_num, scale, lambda w, h: _check_image_pixels(w, h, what))
+                img = render_page(pdf_document, number - 1, scale, lambda w, h: _check_image_pixels(w, h, what))
 
             predictions = manager.predict(img, version=version, topn=topn)
             if isinstance(predictions, dict) and "error" in predictions:
-                raise HTTPException(status_code=500, detail=f"Page {page_num + 1}: {predictions['error']}")
-            page_results.append({"page": page_num + 1, "predictions": predictions})
+                raise HTTPException(status_code=500, detail=f"Page {number}: {predictions['error']}")
+            page_results.append({"page": number, "predictions": predictions})
         return page_results
     finally:
         with _PDFIUM_LOCK:
@@ -368,7 +398,14 @@ class PagePredictions(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    page: int = Field(description="The page, 1-based.")
+    page: int = Field(description="The page's physical position in the PDF, 1-based.")
+    page_label: Optional[str] = Field(
+        None,
+        description=(
+            "Only when the `document_json` baseline has a page row with this `page_index`: that row's `page` "
+            "(the PDF page label, e.g. `iv`), the key this page's category is written under in the record."
+        ),
+    )
     predictions: List[PredictionResult] = Field(description="The `topn` best categories, best first.")
 
 
@@ -378,7 +415,9 @@ class DocumentResponse(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     type: str = Field(description="`document`.")
-    pages: List[PagePredictions] = Field(description="One entry per page, in page order.")
+    pages: List[PagePredictions] = Field(
+        description="One entry per classified page (every page, or the `pages` selection), in page order."
+    )
     limits_applied: List[LimitNote] = Field(
         description="Every limit that shaped the result without refusing it; `[]` today (each limit refuses)."
     )
@@ -386,7 +425,8 @@ class DocumentResponse(BaseModel):
         None,
         description=(
             "Only with a `document_json` baseline or `document_json_out=true`: the record with "
-            "page-classification's `page_categories` block and `pages[]` fields updated for every page."
+            "page-classification's `page_categories` block and `pages[]` fields updated for every classified "
+            "page, keyed by the baseline's own page labels where its rows carry `page_index`."
         ),
     )
     document_json_schema_error: Optional[str] = Field(
@@ -423,6 +463,11 @@ _DOCUMENT_JSON_DESC = (
     "untouched. A baseline that does not validate against atrium_document.schema.json is still "
     "accepted (rule 6), but the response then also carries `document_json_schema_error`; one that "
     "cannot be opened is refused (422 `invalid_record`). An empty part counts as none."
+)
+_PAGES_DESC = (
+    "Optional: classify only these pages, 1-based physical positions, e.g. `1,3,5-7`. Empty (the default): every "
+    "page. A malformed value, or a page past the end of the PDF, is refused (422); MAX_PDF_PAGES counts the pages "
+    "classified. The response lists only these pages, and only they are written into the record."
 )
 _DOCUMENT_JSON_OUT_DESC = (
     "Return a document record even with no baseline uploaded. page-classification is stage 1 "
@@ -597,8 +642,9 @@ async def predict_document(
         None, description=_DOCUMENT_JSON_DESC, json_schema_extra={"contentMediaType": "application/json"}
     ),
     document_json_out: bool = Form(False, description=_DOCUMENT_JSON_OUT_DESC),
+    pages: Optional[str] = Form(None, description=_PAGES_DESC),
 ):
-    """Extracts pages from a PDF and classifies each page."""
+    """Extracts pages from a PDF and classifies each page (or the `pages` selection)."""
     _refuse_if_draining()
     if not file.content_type or file.content_type != "application/pdf":
         # §4.4: 415 `unsupported_media_type` (a 400 before atrium-project#32 round 2).
@@ -609,6 +655,10 @@ async def predict_document(
             accepted=["application/pdf"],
         )
     _check_version(version)
+    try:
+        selection = parse_page_selection(pages)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=f"pages: {exc}.") from exc
 
     content = await read_upload_bounded(file, MAX_UPLOAD.get(), "File")
     baseline_bytes = await _read_record_part(document_json)
@@ -618,15 +668,23 @@ async def predict_document(
         # MAX_PDF_PAGES sequential torch inferences, and running it inline in an
         # `async def` blocked the event loop — and therefore uvicorn's SIGTERM handler —
         # for the entire duration. See _classify_pdf_pages below.
-        page_results = await asyncio.to_thread(_classify_pdf_pages, content, version, topn)
+        page_results = await asyncio.to_thread(_classify_pdf_pages, content, version, topn, selection)
 
-        # A PDF is a whole document: the page numbers are its own 1..N, so no filename
-        # page-split here — just the canonical doc_id.
+        # A PDF is a whole document: the pages are its own 1..N, so no filename page-split here —
+        # just the canonical doc_id. A baseline that already names its pages (a born-digital record:
+        # PDF page labels, with the position in `page_index`) gets each category under its own
+        # label, never under a position that may be another page's label
+        # (atrium-digital-convert#2).
+        labels = baseline_page_labels(baseline_bytes)
+        keys = record_page_keys([r["page"] for r in page_results], labels)
+        for result in page_results:
+            if result["page"] in labels:
+                result["page_label"] = labels[result["page"]]
         record, schema_err = await _document_json_part(
             document_json_out or document_json is not None,
             baseline_bytes,
             doc_id_for_document(file.filename),
-            [(str(r["page"]), r["predictions"]) for r in page_results],
+            [(keys[r["page"]], r["predictions"]) for r in page_results if keys[r["page"]] is not None],
         )
 
         # limits_applied: see ImageResponse — present in every response, [] here today.

@@ -18,8 +18,9 @@ from atrium_limits import LimitSet, limit, upload_limit
 #: baseline). Over it → 413 ``limit_exceeded``.
 MAX_UPLOAD = upload_limit(10)
 
-#: Most pages a PDF sent to ``/predict_document`` may have. Checked before any page is
-#: rendered. Over it → 413 ``limit_exceeded``.
+#: Most pages one ``/predict_document`` call classifies: the whole PDF, or the pages its
+#: ``pages`` field selects (atrium-digital-convert#2). Checked before any page is rendered.
+#: Over it → 413 ``limit_exceeded``.
 MAX_PDF_PAGES = limit("MAX_PDF_PAGES", 50, unit="pages", minimum=1)
 
 #: Resolution PDF pages are rasterised at before classification. 300 matches

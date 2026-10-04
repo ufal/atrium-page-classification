@@ -230,6 +230,15 @@ def _owner_candidates(name: str) -> Tuple[str, ...]:
     return (owners,) if isinstance(owners, str) else tuple(owners)
 
 
+def _scoring_fields_only(program: Optional[str], name: str, fields: Optional[Iterable[str]]) -> bool:
+    """True when `program` is the quality model's owner and `fields` is a non-empty subset of
+    SCORING_FIELDS[name] — the shape of a scoring co-contribution (see SCORING_FIELDS)."""
+    if fields is None or not same_program(program, SCORING_PROGRAM):
+        return False
+    wanted = frozenset(fields)
+    return bool(wanted) and wanted <= SCORING_FIELDS.get(name, frozenset())
+
+
 def _originator_candidates(name: str) -> Tuple[str, ...]:
     """The DISTINCT writers of a block once a predecessor and its successor count as one.
 
@@ -371,6 +380,32 @@ def _add_successors() -> None:
 
 
 _add_successors()
+
+
+#: The common line-quality model's fields (atrium-digital-convert#4 W3, atrium-project#71): what
+#: ocr-postprocess may add to a positional plane ANOTHER tool originated. A born-digital
+#: record's lines are digital-convert's, but whether their text reads is the quality model's
+#: question, and the pilot wants one answer for every document, scanned or born-digital. A
+#: `merge_block()` by ocr-postprocess whose writable fields are a non-empty subset of this
+#: table is a scoring CO-CONTRIBUTION, not an origination:
+#:
+#:   * the §1a origin check notes it instead of refusing it (`_assert_origin_consistent`);
+#:   * it only updates rows the originator wrote — a row with no match is not appended, so a
+#:     score can never invent a line or page in someone else's plane;
+#:   * its stamp carries `contribution: "scoring"`, so `merge_document_records()`'s fan-in
+#:     check does not read it as a second originator (the stamp's object admits extra keys).
+#:
+#: Every other write ocr-postprocess makes on such a record (`text`, `bbox`, `ocr`, a new row,
+#: `content`, `tables`) is still refused unless the record asks for OCR (`needs_ocr`). Which
+#: lines to score is the caller's policy: the converter's own decode verdict (`Garbage`,
+#: `Inverted`) is never overwritten by ocr-postprocess's `/score_record`.
+SCORING_FIELDS: Dict[str, frozenset] = {
+    "lines": frozenset({"categ", "quality_score", "lang"}),
+    "pages": frozenset({"quality_score", "quality_band"}),
+}
+
+#: The program SCORING_FIELDS authorises: the common quality model's owner.
+SCORING_PROGRAM = "ocr-postprocess"
 
 
 #: Natural key fields per list block, used to align records when merging by field.
@@ -593,6 +628,11 @@ class DocumentRecord:
         self._dropped_fields: Dict[str, List[str]] = {}
         #: Blocks written before `source.origin` was known, re-checked once it is.
         self._origin_deferred: List[str] = []
+        #: For each deferred block, the fields its merges wrote (None: a wholesale or
+        #: unrestricted write), so a deferred scoring contribution is judged as one.
+        self._origin_deferred_fields: Dict[str, Optional[frozenset]] = {}
+        #: Blocks a scoring co-contribution was already noted for (one note per block).
+        self._scoring_noted: List[str] = []
         #: Origins already reported as unrecognised, so the note is emitted once each.
         self._origin_unmatched: List[str] = []
         self._finalised = False
@@ -793,7 +833,9 @@ class DocumentRecord:
                 f"{self.program!r} is neither an owner nor a declared field contributor of "
                 f"block {name!r} — own_fields narrows an existing grant, it does not create one"
             )
-        self._assert_origin_consistent(name)  # Issue #18 §1a
+        self._assert_origin_consistent(name, fields=allowed)  # Issue #18 §1a
+        # W3: a scoring co-contribution updates the originator's rows and never adds one.
+        scoring = self._is_scoring_contribution(name, allowed)
 
         writable = set(allowed) | set(keys)
 
@@ -815,18 +857,27 @@ class DocumentRecord:
         existing: List[Dict[str, Any]] = list(self._data.get(name) or [])
         index = {_record_key(r, keys): r for r in existing}
 
+        unmatched = 0
         for incoming in records:
             k = _record_key(incoming, keys)
             patch = {f: v for f, v in incoming.items() if f in writable}
             target = index.get(k)
             if target is None:
+                if scoring:
+                    unmatched += 1
+                    continue
                 existing.append(_sanitise(patch))
                 index[k] = existing[-1]
             else:
                 target.update(_sanitise(patch))
 
+        if unmatched:
+            self._complain(
+                f"block {name!r}: {unmatched} row(s) from {self.program!r} match no row the "
+                f"originator wrote — not added (a scoring contribution only scores existing rows)"
+            )
         self._data[name] = existing
-        self._stamp(name)
+        self._stamp(name, contribution="scoring" if scoring else None)
         return self
 
     def get_block(self, name: str, default: Any = None) -> Any:
@@ -931,10 +982,14 @@ class DocumentRecord:
             self._complain(f"block {name!r} is owned by {' or '.join(owners)}, not {self.program!r}")
         self._assert_origin_consistent(name)
 
-    def _assert_origin_consistent(self, name: str) -> None:
+    def _assert_origin_consistent(self, name: str, fields: Optional[Iterable[str]] = None) -> None:
         """
         Issue #18 §1a: for a block with several possible originators, the document's
         `source.origin` decides which one may write it.
+
+        `fields` is what a `merge_block()` may write (None for a wholesale `set_block()`). An
+        ocr-postprocess merge limited to SCORING_FIELDS is a scoring co-contribution and is
+        noted, not refused (atrium-digital-convert#4 W3; see SCORING_FIELDS).
 
         Self-guarding, so calling it unconditionally from both set_block() and
         merge_block() is a no-op for every pre-#18 caller. It returns early for:
@@ -968,8 +1023,13 @@ class DocumentRecord:
             return
         origin = (self._data.get("source") or {}).get("origin")
         if not origin:
+            written = frozenset(fields) if fields is not None else None
             if name not in self._origin_deferred:
                 self._origin_deferred.append(name)
+                self._origin_deferred_fields[name] = written
+            else:
+                held = self._origin_deferred_fields.get(name)
+                self._origin_deferred_fields[name] = None if held is None or written is None else held | written
             return
 
         originator = resolve_originator(origin)
@@ -983,6 +1043,15 @@ class DocumentRecord:
                 )
             return
         if same_program(originator, self.program):
+            return
+        if _scoring_fields_only(self.program, name, fields):
+            if name not in self._scoring_noted:
+                self._scoring_noted.append(name)
+                self._note(
+                    f"block {name!r}: {self.program!r} adds the quality model's "
+                    f"{sorted(fields or ())} to a {origin!r} document's rows — a scoring "
+                    f"co-contribution, not an origination (SCORING_FIELDS)"
+                )
             return
         if canonical_program(self.program) == "ocr-postprocess" and self._ocr_handoff_requested():
             # The documented digital-born -> OCR hand-off, not a mixed plane by accident.
@@ -1019,8 +1088,20 @@ class DocumentRecord:
     def _resolve_deferred_origin_checks(self) -> None:
         """Re-run the origin check for blocks written before `source.origin` was known."""
         pending, self._origin_deferred = list(self._origin_deferred), []
+        fields, self._origin_deferred_fields = dict(self._origin_deferred_fields), {}
         for name in pending:
-            self._assert_origin_consistent(name)
+            self._assert_origin_consistent(name, fields=fields.get(name))
+
+    def _is_scoring_contribution(self, name: str, fields: Optional[Iterable[str]]) -> bool:
+        """True for a merge limited to SCORING_FIELDS into a plane another tool originated.
+
+        False while the origin is unknown, on an origin no table entry resolves, and for the
+        record's own originator — those merges append rows as they always did.
+        """
+        if not _scoring_fields_only(self.program, name, fields):
+            return False
+        originator = resolve_originator((self._data.get("source") or {}).get("origin"))
+        return originator is not None and not same_program(originator, self.program)
 
     def _complain(self, message: str) -> None:
         if self.strict:
@@ -1037,8 +1118,12 @@ class DocumentRecord:
         """
         print(f"[document] NOTE – {message}", file=sys.stderr)
 
-    def _stamp(self, block: str) -> None:
-        """Rule 4: per-block provenance — this is where granularity comes from."""
+    def _stamp(self, block: str, contribution: Optional[str] = None) -> None:
+        """Rule 4: per-block provenance — this is where granularity comes from.
+
+        `contribution="scoring"` marks a SCORING_FIELDS co-contribution, so a reader (and the
+        fan-in check) can tell a score on another originator's plane from an origination.
+        """
         if block not in self._touched:
             self._touched.append(block)
         blocks = self._data.setdefault("assembled", {}).setdefault("blocks", {})
@@ -1047,6 +1132,8 @@ class DocumentRecord:
             stamp["run_uuid"] = self.run_uuid
         stamp["paradata_ref"] = self.paradata_ref
         stamp["updated_at"] = _utc_now_iso()
+        if contribution:
+            stamp["contribution"] = contribution
         blocks[block] = stamp
 
     def _provenance(self) -> Dict[str, Any]:
@@ -1433,6 +1520,8 @@ def merge_document_records(json_paths: List[str], out_path: str) -> str:
             if len(_originator_candidates(block)) < 2:
                 continue
             wrote = stamp.get("program")
+            if stamp.get("contribution") == "scoring" and same_program(wrote, SCORING_PROGRAM):
+                continue  # a score on the originator's rows (SCORING_FIELDS), not a second plane
             if wrote and wrote in _owner_candidates(block) and not same_program(wrote, authorised):
                 raise ValueError(
                     f"merged record mixes positional originators: block {block!r} was written "

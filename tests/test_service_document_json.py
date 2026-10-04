@@ -768,3 +768,160 @@ class TestLimits:
         monkeypatch.setenv("MAX_PDF_PAGES", "fifty")
         with pytest.raises(atrium_limits.LimitConfigError, match="MAX_PDF_PAGES"):
             atrium_limits.limit("MAX_PDF_PAGES", 50, unit="pages")
+
+
+# ── the `pages` selection and the record's own page labels (atrium-digital-convert#2) ─────────
+# digital-convert's `/describe` asks this service about the pages whose text layer is unusable,
+# sending the PDF and the born-digital record it made. That record names its pages by their PDF
+# page labels (`i`, `ii`, `1`, …) with the position in `pages[].page_index`; categories written
+# under the positions "1", "2", … would land on the wrong rows.
+
+from service.document_json import (  # noqa: E402
+    baseline_page_labels,
+    expand_page_selection,
+    parse_page_selection,
+    record_page_keys,
+)
+
+
+def _born_digital_baseline(doc_id="C-202000543A-DT-27"):
+    """A born-digital record as digital-convert writes it: labelled pages with `page_index`.
+
+    Built through `DocumentRecord` as the `digital-convert` originator, so it is the shape (and
+    the validity) of a real one rather than a hand-written approximation.
+    """
+    from atrium_document import DocumentRecord
+
+    canvas = {"width": 595.0, "height": 842.0, "unit": "pt"}
+    record = DocumentRecord(doc_id, "digital-convert")
+    record.set_source(SHA256, filename="report.pdf", media_type="application/pdf", origin="digital-born-pdf")
+    record.merge_block(
+        "pages",
+        [
+            {"page": "i", "page_index": 1, "canvas": canvas},
+            {"page": "ii", "page_index": 2, "canvas": canvas},
+            {"page": "1", "page_index": 3, "canvas": canvas, "needs_ocr": True, "needs_ocr_reason": "no text layer"},
+        ],
+        key_fields=["page"],
+    )
+    record.merge_block("lines", [{"page": "i", "line": 0, "text": "Zpráva o výzkumu"}], key_fields=["page", "line"])
+    data = record.to_dict()
+    validate_document(data)
+    return data
+
+
+class TestPageSelection:
+    @pytest.mark.parametrize(
+        "spec, ranges",
+        [
+            (None, None),
+            ("", None),
+            ("  ", None),
+            ("3", [(3, 3)]),
+            ("1,3,5-7", [(1, 1), (3, 3), (5, 7)]),
+            (" 2 - 4 , 9 ", [(2, 4), (9, 9)]),
+        ],
+    )
+    def test_the_field_parses_into_ranges(self, spec, ranges):
+        assert parse_page_selection(spec) == ranges
+
+    @pytest.mark.parametrize("spec", ["a", "1,,2", "0", "3-1", "1-", "-2", "1;2", "1.5"])
+    def test_a_malformed_selection_is_refused(self, spec):
+        with pytest.raises(ValueError):
+            parse_page_selection(spec)
+
+    def test_a_huge_range_costs_nothing_before_the_page_count_is_known(self):
+        assert parse_page_selection("1-999999999") == [(1, 999999999)]
+
+    def test_expansion_is_sorted_unique_and_bounded_by_the_pdf(self):
+        assert expand_page_selection(None, 3) == [1, 2, 3]
+        assert expand_page_selection([(3, 3), (1, 2), (2, 2)], 3) == [1, 2, 3]
+        with pytest.raises(ValueError, match="page 5 was asked for, but the PDF has 3"):
+            expand_page_selection([(1, 1), (4, 5)], 3)
+
+
+class TestRecordPageKeys:
+    def test_a_born_digital_baseline_names_its_pages_by_page_index(self):
+        labels = baseline_page_labels(json.dumps(_born_digital_baseline()).encode())
+        assert labels == {1: "i", 2: "ii", 3: "1"}
+
+    def test_a_baseline_without_page_index_maps_nothing(self):
+        assert baseline_page_labels(json.dumps(_upstream_baseline()).encode()) == {}
+        assert baseline_page_labels(None) == {}
+        assert baseline_page_labels(b"") == {}
+        assert baseline_page_labels(b"\xff not json") == {}
+
+    def test_positions_become_labels_and_a_colliding_position_is_left_out(self):
+        labels = {1: "i", 2: "ii", 3: "1", 5: "3"}
+        assert record_page_keys([1, 2, 3, 4, 5], labels) == {1: "i", 2: "ii", 3: "1", 4: "4", 5: "3"}
+        # page 6 has no row, and "3" is page 5's label — it must not be written onto that row
+        assert record_page_keys([6, 3], {3: "6"}) == {6: None, 3: "6"}
+        assert record_page_keys([1, 2], {}) == {1: "1", 2: "2"}
+
+
+class TestPredictDocumentPagesAndLabels:
+    def _post(self, client, data=None, baseline=None):
+        files = {"file": ("report.pdf", b"%PDF-1.4 fake", "application/pdf")}
+        if baseline is not None:
+            files["document_json"] = ("seed.document.json", json.dumps(baseline).encode("utf-8"), "application/json")
+        return client.post("/predict_document", data={"version": "v4.3", "topn": 3, **(data or {})}, files=files)
+
+    def test_only_the_selected_pages_are_rendered_classified_and_recorded(self, client, fake_pdfium):
+        response = self._post(client, {"pages": "1,3", "document_json_out": "true"})
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert [page["page"] for page in body["pages"]] == [1, 3]
+        assert all("page_label" not in page for page in body["pages"]), "no baseline, no labels"
+        assert len(_FakePdfPage.scale_requests) == 2
+        assert body["document_json"]["page_categories"] == {"1": "TEXT", "3": "TEXT"}
+
+    def test_a_malformed_selection_is_422_before_the_pdf_is_opened(self, client, fake_pdfium):
+        response = self._post(client, {"pages": "two"})
+        assert response.status_code == 422
+        assert response.json()["detail"].startswith("pages: ")
+        assert _FakePdfPage.events == []
+
+    def test_a_page_past_the_end_is_422_and_the_pdf_is_closed(self, client, fake_pdfium):
+        response = self._post(client, {"pages": "2-4"})
+        assert response.status_code == 422
+        assert response.json()["detail"] == "pages: page 4 was asked for, but the PDF has 3 page(s)."
+        assert _FakePdfPage.scale_requests == [] and _FakePdfPage.events == ["pdf.close"]
+
+    def test_max_pdf_pages_counts_the_pages_classified(self, client, fake_pdfium, monkeypatch):
+        monkeypatch.setenv("MAX_PDF_PAGES", "1")
+        assert self._post(client, {"pages": "2"}).status_code == 200
+        response = self._post(client, {"pages": "1-2"})
+        assert response.status_code == 413
+        assert response.json()["detail"] == "Too many pages selected: 2 of the PDF's 3. Limit is 1 (MAX_PDF_PAGES)."
+
+    def test_categories_land_on_the_born_digital_records_own_labels(self, client, fake_pdfium):
+        baseline = _born_digital_baseline()
+        response = self._post(client, baseline=baseline)
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert [(p["page"], p["page_label"]) for p in body["pages"]] == [(1, "i"), (2, "ii"), (3, "1")]
+        record = body["document_json"]
+        assert record["page_categories"] == {"i": "TEXT", "ii": "TEXT", "1": "TEXT"}
+        assert [p["page"] for p in record["pages"]] == ["i", "ii", "1"], "no page row invented"
+        for before, after in zip(baseline["pages"], record["pages"]):
+            assert {k: after[k] for k in before} == before, "the converter's fields are untouched"
+            assert after["category"] == "TEXT"
+        assert record["lines"] == baseline["lines"] and record["source"] == baseline["source"]
+        validate_document(record)
+
+    def test_a_selection_on_a_labelled_record_writes_only_those_pages(self, client, fake_pdfium):
+        response = self._post(client, {"pages": "3"}, baseline=_born_digital_baseline())
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert body["pages"] == [{"page": 3, "page_label": "1", "predictions": PREDS}]
+        record = body["document_json"]
+        assert record["page_categories"] == {"1": "TEXT"}
+        assert [p.get("category") for p in record["pages"]] == [None, None, "TEXT"]
+
+    def test_a_baseline_keyed_by_position_is_unchanged(self, client, fake_pdfium):
+        """An ALTO record (pages "1".."N", no page_index) gets the same keys as before."""
+        response = self._post(client, baseline=_upstream_baseline())
+        assert response.status_code == 200
+        body = response.json()
+        assert all("page_label" not in page for page in body["pages"])
+        assert body["document_json"]["page_categories"] == {"1": "TEXT", "2": "TEXT", "3": "TEXT"}

@@ -242,7 +242,7 @@
     "/predict_document": {
       "post": {
         "summary": "Predict Document",
-        "description": "Extracts pages from a PDF and classifies each page.",
+        "description": "Extracts pages from a PDF and classifies each page (or the `pages` selection).",
         "operationId": "predict_document",
         "requestBody": {
           "content": {
@@ -1455,6 +1455,18 @@
             "title": "Document Json Out",
             "description": "Return a document record even with no baseline uploaded. page-classification is stage 1 of the pipeline, so it ORIGINATES the record (the E2E smoke passes it `--document-json-out` alone); without this flag the service could accrete onto someone else's record but never start one. Mirrors the CLI's `--document-json-out`.",
             "default": false
+          },
+          "pages": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pages",
+            "description": "Optional: classify only these pages, 1-based physical positions, e.g. `1,3,5-7`. Empty (the default): every page. A malformed value, or a page past the end of the PDF, is refused (422); MAX_PDF_PAGES counts the pages classified. The response lists only these pages, and only they are written into the record."
           }
         },
         "type": "object",
@@ -1715,7 +1727,7 @@
             },
             "type": "array",
             "title": "Pages",
-            "description": "One entry per page, in page order."
+            "description": "One entry per classified page (every page, or the `pages` selection), in page order."
           },
           "limits_applied": {
             "items": {
@@ -1734,7 +1746,7 @@
                 "type": "null"
               }
             ],
-            "description": "Only with a `document_json` baseline or `document_json_out=true`: the record with page-classification's `page_categories` block and `pages[]` fields updated for every page."
+            "description": "Only with a `document_json` baseline or `document_json_out=true`: the record with page-classification's `page_categories` block and `pages[]` fields updated for every classified page, keyed by the baseline's own page labels where its rows carry `page_index`."
           },
           "document_json_schema_error": {
             "anyOf": [
@@ -2164,7 +2176,19 @@
           "page": {
             "type": "integer",
             "title": "Page",
-            "description": "The page, 1-based."
+            "description": "The page's physical position in the PDF, 1-based."
+          },
+          "page_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Label",
+            "description": "Only when the `document_json` baseline has a page row with this `page_index`: that row's `page` (the PDF page label, e.g. `iv`), the key this page's category is written under in the record."
           },
           "predictions": {
             "items": {

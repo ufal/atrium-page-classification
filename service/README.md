@@ -154,7 +154,15 @@ Example JSON response (every field is always present; `ImageResponse` in [`opena
 
 `/predict_document` answers `{"type": "document", "pages": [{"page": 1, "predictions": [...]}, ...],
 "limits_applied": []}` (`DocumentResponse`), with `document_json` (and `document_json_schema_error`)
-only when a record was asked for. A PDF that does not open is refused with `422`; a page the model
+only when a record was asked for. It takes the same fields, plus:
+
+* `pages`: (Optional) classify only these pages, 1-based positions in the PDF, e.g. `1,3,5-7`
+  (atrium-digital-convert#2: `/describe` asks only about the pages without a usable text layer).
+  Empty means every page. A malformed value, or a page past the end of the PDF, is refused with
+  `422`; `MAX_PDF_PAGES` counts the pages classified, not the PDF's. Only these pages are in the
+  response and written into the record.
+
+A PDF that does not open is refused with `422`; a page the model
 could not classify fails the request with `500` naming the page (it used to come back inside a `200`
 as that page's `{"error": ...}`). `paradata` is reserved for the run's provenance
 (atrium-project#67 R2) and not returned yet.
@@ -198,6 +206,13 @@ The response then carries the updated record under `document_json`:
   (`utils.doc_id_and_page`, which strips the page label and then defers to the shared
   `canonical_doc_id()`), so a service upload and a CLI run over the same file update the *same*
   record instead of forking it;
+* **page keys** (`/predict_document`): a PDF's pages are classified by position, 1..N. When the
+  baseline's page rows carry `page_index` — a born-digital record from atrium-digital-convert,
+  whose pages are named by their PDF page labels (`i`, `ii`, `1`, …) — each category is written
+  under the row with that `page_index`, and the response's page entry carries that label as
+  `page_label`. A record keyed "1".."N" without `page_index` (ALTO) is keyed as before. A position
+  with no row whose number is another row's label is left out of the record (never written onto
+  the wrong row); its prediction is still in the response;
 * a record page-classification builds that does not validate against
   `atrium_document.schema.json` is never returned — the request fails with `500` instead
   (Layer D). A **baseline** that does not validate is still accepted (rule 6: pass unknown
@@ -375,12 +390,12 @@ service at startup, naming the variable. Over a limit the service **refuses** th
 input, so every response's `limits_applied` is `[]`. `tests/test_limits_contract.py` checks
 this table against `tool_limits.py` and `.env.example`.
 
-| Key (`/info`)      | Variable           | Default   | Unit  | Over the limit                                                                          |
-|--------------------|--------------------|-----------|-------|-----------------------------------------------------------------------------------------|
-| `max_upload_mb`    | `MAX_UPLOAD_MB`    | 10        | MB    | 413 `limit_exceeded` — per part: the file, and the `document_json` baseline             |
-| `max_pdf_pages`    | `MAX_PDF_PAGES`    | 50        | pages | 413 `limit_exceeded`, before any page is rendered                                       |
-| `pdf_render_dpi`   | `PDF_RENDER_DPI`   | 300       | dpi   | — (the resolution PDF pages are rendered at; 300 is how the training pages were made)   |
-| `max_image_pixels` | `MAX_IMAGE_PIXELS` | 178956970 | px    | 413 `limit_exceeded`: an image, or a PDF page at `PDF_RENDER_DPI`, sized before decoding |
+| Key (`/info`)      | Variable           | Default   | Unit  | Over the limit                                                                            |
+|--------------------|--------------------|-----------|-------|-------------------------------------------------------------------------------------------|
+| `max_upload_mb`    | `MAX_UPLOAD_MB`    | 10        | MB    | 413 `limit_exceeded` — per part: the file, and the `document_json` baseline               |
+| `max_pdf_pages`    | `MAX_PDF_PAGES`    | 50        | pages | 413 `limit_exceeded`, before any page is rendered — counts the pages classified (`pages`) |
+| `pdf_render_dpi`   | `PDF_RENDER_DPI`   | 300       | dpi   | — (the resolution PDF pages are rendered at; 300 is how the training pages were made)     |
+| `max_image_pixels` | `MAX_IMAGE_PIXELS` | 178956970 | px    | 413 `limit_exceeded`: an image, or a PDF page at `PDF_RENDER_DPI`, sized before decoding  |
 
 Platform limits (not settings): Starlette's multipart defaults (1000 files, 1000 fields, 1 MiB
 per non-file field).

@@ -149,6 +149,23 @@ issue opens, matching its four siblings.
   thread safety, closes), `tests/test_compare_pdf_rasterisers.py`. Fast suite 645 passed, 7 skipped.
 * Tag draft: `v1.10.0-beta`. **Not pushed: files delivered in chat.**
 
+## 2026-10-04 — `/predict_document` for digital-convert's `/describe` (atrium-digital-convert#2)
+* **Why:** digital-convert `v1.1.0-beta`'s `POST /describe` asks this service about the pages of a born-digital PDF
+  whose text layer is unusable, and sends the record it made. That record names its pages by their PDF page labels
+  (`i`, `ii`, `1`, …) with the position in `pages[].page_index`; `/predict_document` keyed every page "1".."N", so on a
+  labelled PDF its categories landed on the wrong rows (or on new ones).
+* **Code:**
+  * `pages` form field (`1,3,5-7`, 1-based physical): only those pages are rendered and classified; malformed or past
+    the end → 422; `MAX_PDF_PAGES` counts the pages classified.
+  * Categories go under the baseline row's own label wherever it carries `page_index`
+    (`service/document_json.baseline_page_labels` / `record_page_keys`, torch-free). A position with no row whose
+    number is another row's label is left out of the record. ALTO records are unchanged.
+  * `page_label` in each page entry. The spec stays compatible (additive).
+* **Tests:** `test_service_document_json.py` (+26, a real `digital-convert`-built baseline). Full suite 710 passed.
+  The real app ran live against digital-convert's `/describe`.
+* **Docs:** `service/README.md`, `.env.example` / `tool_limits.py` wording of `MAX_PDF_PAGES`, CONTRIBUTING row.
+* Tag draft: `v1.10.0-beta`. **Not pushed: files delivered in chat.**
+
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
 state via the GitHub API (zero open), and the confirmed `@v1` reusable-workflow pin. Nothing removed from the issues

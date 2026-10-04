@@ -66,6 +66,7 @@ from atrium_document import (
     BLOCK_OWNERS,
     ORIGIN_ORIGINATORS,
     PROGRAM_SUCCESSORS,
+    SCORING_FIELDS,
     DocumentRecord,
     canonical_program,
     merge_document_records,
@@ -934,3 +935,129 @@ def test_enrichment_is_not_a_multi_originator_block_after_the_succession(tmp_pat
     with _open(tmp_path, mock_paradata, "keyword-extract", origin="ocr:pero") as doc:
         doc.set_block("enrichment", {"items": []})
         doc.finalize(str(tmp_path / "kw.document.json"))
+
+
+# ── W3: the quality model scores a plane another tool originated (atrium-digital-convert#4) ──
+
+
+def _digital_baseline(tmp_path, mock_paradata, needs_ocr=False):
+    """A born-digital record: digital-convert's pages and lines, nothing flagged for OCR."""
+    with _open(tmp_path, mock_paradata, DIGITAL, origin="digital-born-pdf") as doc:
+        doc.merge_block("pages", [{"page": "i", "page_index": 1, "needs_ocr": needs_ocr}])
+        doc.merge_block(
+            "lines",
+            [
+                {"page": "i", "line": 0, "text": "Zpráva o výzkumu", "bbox": [72, 64, 388, 80]},
+                {"page": "i", "line": 1, "text": "sondI", "categ": "Garbage"},
+            ],
+        )
+        return doc.to_dict()
+
+
+def test_scoring_fields_are_the_quality_models_and_a_subset_of_its_grant():
+    """The table must never grant ocr-postprocess more than its own declared fields."""
+    for block, fields in SCORING_FIELDS.items():
+        assert fields <= set(BLOCK_FIELD_OWNERS[block][OCR]), block
+    assert "text" not in SCORING_FIELDS["lines"] and "ocr" not in SCORING_FIELDS["pages"]
+
+
+def test_ocr_postprocess_may_score_a_digital_born_record(tmp_path, mock_paradata, capsys):
+    """W3: with no page flagged needs_ocr, a scoring-only merge is a co-contribution — noted,
+    not refused, even with strict=True — and the converter's own fields are untouched."""
+    baseline = _digital_baseline(tmp_path, mock_paradata)
+    doc = DocumentRecord("CTX000000001", OCR, baseline=baseline, out_dir=str(tmp_path), strict=True)
+    doc.merge_block(
+        "lines",
+        [{"page": "i", "line": 0, "categ": "Clear", "quality_score": 0.93, "lang": "ces"}],
+        own_fields=["categ", "quality_score", "lang"],
+    )
+    doc.merge_block("pages", [{"page": "i", "quality_score": 0.93, "quality_band": "Clear"}],
+                    own_fields=["quality_score", "quality_band"])
+    record = doc.to_dict()
+    line = record["lines"][0]
+    assert (line["text"], line["bbox"], line["categ"], line["lang"]) == (
+        "Zpráva o výzkumu", [72, 64, 388, 80], "Clear", "ces")
+    assert record["pages"][0]["quality_band"] == "Clear" and record["pages"][0]["page_index"] == 1
+    stamp = record["assembled"]["blocks"]["lines"]
+    assert (stamp["program"], stamp["contribution"]) == (OCR, "scoring")
+    assert record["source"]["origin"] == "digital-born-pdf"
+    assert "scoring co-contribution" in capsys.readouterr().err
+    validate_document(record)
+
+
+def test_a_scoring_contribution_never_adds_a_row(tmp_path, mock_paradata):
+    """A score with no matching row would invent a line in someone else's plane."""
+    baseline = _digital_baseline(tmp_path, mock_paradata)
+    strict = DocumentRecord("CTX000000001", OCR, baseline=baseline, out_dir=str(tmp_path), strict=True)
+    with pytest.raises(ValueError, match="match no row the originator wrote"):
+        strict.merge_block("lines", [{"page": "i", "line": 7, "categ": "Clear"}], own_fields=["categ"])
+
+    lenient = DocumentRecord("CTX000000001", OCR, baseline=baseline, out_dir=str(tmp_path), strict=False)
+    lenient.merge_block("lines", [{"page": "ii", "line": 0, "categ": "Clear"}], own_fields=["categ"])
+    assert [(r["page"], r["line"]) for r in lenient.get_block("lines")] == [("i", 0), ("i", 1)]
+
+
+def test_anything_beyond_the_scoring_fields_is_still_refused(tmp_path, mock_paradata):
+    """`text` (or the full grant, own_fields unset) is an origination, and stays digital-convert's."""
+    baseline = _digital_baseline(tmp_path, mock_paradata)
+    doc = DocumentRecord("CTX000000001", OCR, baseline=baseline, out_dir=str(tmp_path), strict=True)
+    with pytest.raises(ValueError, match="originated by 'digital-convert'"):
+        doc.merge_block("lines", [{"page": "i", "line": 0, "text": "x", "categ": "Clear"}],
+                        own_fields=["text", "categ"])
+    with pytest.raises(ValueError, match="originated by 'digital-convert'"):
+        doc.merge_block("lines", [{"page": "i", "line": 0, "categ": "Clear"}])
+    with pytest.raises(ValueError, match="originated by 'digital-convert'"):
+        doc.merge_block("lines", [{"page": "i", "line": 0}], own_fields=[])
+    with pytest.raises(ValueError, match="originated by 'digital-convert'"):
+        doc.set_block("content", {"text": "x"})
+
+
+def test_only_the_quality_model_scores(tmp_path, mock_paradata):
+    """SCORING_FIELDS authorises ocr-postprocess (and its predecessor's name) — not the other originator."""
+    with _open(tmp_path, mock_paradata, OCR, origin="ocr:pero") as doc:
+        doc.merge_block("lines", [{"page": "1", "line": 1, "text": "x"}])
+        baseline = doc.to_dict()
+    other = DocumentRecord("CTX000000001", DIGITAL, baseline=baseline, out_dir=str(tmp_path), strict=True)
+    with pytest.raises(ValueError, match="not 'digital-convert'"):
+        other.merge_block("lines", [{"page": "1", "line": 1, "categ": "Clear"}], own_fields=["categ"])
+    legacy = DocumentRecord("CTX000000001", ALTO, baseline=_digital_baseline(tmp_path, mock_paradata),
+                            out_dir=str(tmp_path), strict=True)
+    legacy.merge_block("lines", [{"page": "i", "line": 0, "categ": "Clear"}], own_fields=["categ"])
+
+
+def test_the_originators_own_merges_are_unchanged(tmp_path, mock_paradata):
+    """On its own OCR plane ocr-postprocess still appends rows and stamps without a contribution."""
+    with _open(tmp_path, mock_paradata, OCR, origin="ocr:pero") as doc:
+        doc.merge_block("lines", [{"page": "1", "line": 1, "categ": "Clear"}], own_fields=["categ"])
+        record = doc.to_dict()
+    assert record["lines"] == [{"page": "1", "line": 1, "categ": "Clear"}]
+    assert "contribution" not in record["assembled"]["blocks"]["lines"]
+
+
+def test_a_deferred_scoring_merge_is_judged_as_one(tmp_path, mock_paradata):
+    """A scoring merge made before the origin is known is accepted once a digital origin arrives."""
+    doc = DocumentRecord("CTX000000001", OCR, out_dir=str(tmp_path), strict=True)
+    doc.merge_block("lines", [{"page": "1", "line": 0, "categ": "Clear"}], own_fields=["categ"])
+    doc.set_source(origin="digital-born-pdf", filename="CTX000000001.pdf")
+    doc.to_dict()
+
+    unrestricted = DocumentRecord("CTX000000001", OCR, out_dir=str(tmp_path), strict=True)
+    unrestricted.merge_block("lines", [{"page": "1", "line": 0, "categ": "Clear"}], own_fields=["categ"])
+    unrestricted.merge_block("lines", [{"page": "1", "line": 0, "text": "x"}], own_fields=["text"])
+    with pytest.raises(ValueError, match="originated by 'digital-convert'"):
+        unrestricted.set_source(origin="digital-born-pdf", filename="CTX000000001.pdf")
+        unrestricted.to_dict()
+
+
+def test_the_fan_in_does_not_read_a_score_as_a_second_originator(tmp_path, mock_paradata):
+    """merge_document_records() checks block stamps against source.origin; a scoring stamp is not a plane."""
+    baseline = _digital_baseline(tmp_path, mock_paradata)
+    digital = tmp_path / "digital.document.json"
+    digital.write_text(json.dumps(baseline), encoding="utf-8")
+    scored = tmp_path / "scored.document.json"
+    with DocumentRecord("CTX000000001", OCR, baseline=baseline, out_dir=str(tmp_path), strict=True) as doc:
+        doc.merge_block("lines", [{"page": "i", "line": 0, "categ": "Clear"}], own_fields=["categ"])
+        doc.finalize(str(scored))
+    merged = json.loads(open(merge_document_records([str(digital), str(scored)], str(tmp_path / "m.json")),
+                             encoding="utf-8").read())
+    assert merged["assembled"]["blocks"]["lines"]["contribution"] == "scoring"
