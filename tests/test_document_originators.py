@@ -64,12 +64,14 @@ from atrium_document import (
     BLOCK_FIELD_OWNERS,
     BLOCK_KEY_FIELDS,
     BLOCK_OWNERS,
+    OCR_HANDOFF,
     ORIGIN_ORIGINATORS,
     PROGRAM_SUCCESSORS,
     SCORING_FIELDS,
     DocumentRecord,
     canonical_program,
     merge_document_records,
+    ocr_handoff_pages,
     resolve_originator,
     same_program,
     validate_document,
@@ -1061,3 +1063,214 @@ def test_the_fan_in_does_not_read_a_score_as_a_second_originator(tmp_path, mock_
     merged = json.loads(open(merge_document_records([str(digital), str(scored)], str(tmp_path / "m.json")),
                              encoding="utf-8").read())
     assert merged["assembled"]["blocks"]["lines"]["contribution"] == "scoring"
+
+
+# ── W4: the OCR hand-off, page by page (atrium-digital-convert#4) ──────────────────────────────
+
+
+def _mixed_baseline(tmp_path, mock_paradata):
+    """A born-digital PDF labelled i, ii, 1 whose page ii does not decode: digital-convert flags
+    it needs_ocr, with its garbled lines; page-classification has categorised page ii."""
+    with _open(tmp_path, mock_paradata, DIGITAL, origin="digital-born-pdf") as doc:
+        doc.merge_block(
+            "pages",
+            [
+                {"page": "i", "page_index": 1, "text_layer": "digital"},
+                {
+                    "page": "ii",
+                    "page_index": 2,
+                    "canvas": {"width": 595, "height": 842, "unit": "pt"},
+                    "needs_ocr": True,
+                    "needs_ocr_reason": "garbled text layer",
+                    "text_layer": "garbled",
+                },
+                {"page": "1", "page_index": 3, "text_layer": "digital"},
+            ],
+        )
+        doc.merge_block(
+            "lines",
+            [
+                {"page": "i", "line": 0, "text": "Zpráva o výzkumu"},
+                {"page": "ii", "line": 0, "text": "sondI", "categ": "Garbage"},
+                {"page": "ii", "line": 1, "text": "hIeby", "categ": "Garbage"},
+                {"page": "ii", "line": 2, "text": "\ufffd\ufffd", "categ": "Garbage"},
+                {"page": "1", "line": 0, "text": "Nálezy"},
+            ],
+        )
+        doc.set_block("content", {"text": "Zpráva o výzkumu\nNálezy", "reading_order": "layout"})
+        baseline = doc.to_dict()
+    with DocumentRecord("CTX000000001", "page-classification", baseline=baseline, out_dir=str(tmp_path)) as pc:
+        pc.merge_block("pages", [{"page": "ii", "category": "TEXT_P", "category_confidence": 0.9}])
+        return pc.to_dict()
+
+
+_OCR_LINES = [
+    {"page": "ii", "line": 1, "text": "sondě", "categ": "Clear", "quality_score": 0.91, "lang": "ces"},
+    {"page": "ii", "line": 2, "text": "hřeby", "categ": "Clear", "quality_score": 0.88, "lang": "ces"},
+]
+
+
+def test_text_layer_is_the_converters_alone():
+    """The converter reads the text layer; no other tool is granted the verdict."""
+    owners = [tool for tool, fields in BLOCK_FIELD_OWNERS["pages"].items() if "text_layer" in fields]
+    assert owners == [DIGITAL]
+
+
+def test_ocr_handoff_pages_lists_the_flagged_pages_in_order():
+    rows = [{"page": "i"}, {"page": "ii", "needs_ocr": True}, {"page": 3, "needs_ocr": True}, "x",
+            {"page": "iv", "needs_ocr": "yes"}]
+    assert ocr_handoff_pages(rows) == ["ii", "3"]
+    assert ocr_handoff_pages(None) == []
+
+
+def test_replace_page_rows_re_originates_a_flagged_page(tmp_path, mock_paradata, capsys):
+    """The OCR'd page holds the OCR lines only; every other page, and every co-owned field of the
+    flagged page's row, is untouched; the block stays in page order; the stamp says hand-off."""
+    baseline = _mixed_baseline(tmp_path, mock_paradata)
+    doc = DocumentRecord("CTX000000001", OCR, baseline=baseline, out_dir=str(tmp_path), strict=True)
+    doc.replace_page_rows("lines", ["ii"], _OCR_LINES)
+    doc.merge_block("pages", [{"page": "ii", "quality_score": 0.9, "quality_band": "Clear",
+                               "ocr": {"engine": "ocr:pero"}}])
+    record = doc.to_dict()
+
+    assert [(r["page"], r["line"], r["text"]) for r in record["lines"]] == [
+        ("i", 0, "Zpráva o výzkumu"), ("ii", 1, "sondě"), ("ii", 2, "hřeby"), ("1", 0, "Nálezy")]
+    page = record["pages"][1]
+    assert (page["page_index"], page["canvas"]["unit"], page["needs_ocr"], page["text_layer"]) == (
+        2, "pt", True, "garbled")
+    assert (page["category"], page["ocr"], page["quality_band"]) == ("TEXT_P", {"engine": "ocr:pero"}, "Clear")
+    for block in ("lines", "pages"):
+        stamp = record["assembled"]["blocks"][block]
+        assert (stamp["program"], stamp["contribution"]) == (OCR, OCR_HANDOFF)
+    assert record["source"]["origin"] == "digital-born-pdf"
+    assert record["content"] == baseline["content"]
+    assert "honouring the pages[].needs_ocr hand-off" in capsys.readouterr().err
+    validate_document(record)
+
+
+def test_the_hand_off_covers_the_flagged_pages_only(tmp_path, mock_paradata):
+    """One scanned insert must not let the OCR pass write the born-digital pages."""
+    baseline = _mixed_baseline(tmp_path, mock_paradata)
+    doc = DocumentRecord("CTX000000001", OCR, baseline=baseline, out_dir=str(tmp_path), strict=True)
+    with pytest.raises(ValueError, match=r"page\(s\) \['i'\] .* do not ask for OCR"):
+        doc.merge_block("lines", [{"page": "i", "line": 0, "text": "x", "categ": "Clear"}])
+    with pytest.raises(ValueError, match="do not ask for OCR"):
+        doc.replace_page_rows("lines", ["ii", "1"], _OCR_LINES)
+    with pytest.raises(ValueError, match="do not ask for OCR"):
+        doc.merge_block("pages", [{"page": "iii", "quality_score": 0.5}])
+    # A refusal under strict leaves the record as it was.
+    assert doc.get_block("lines") == baseline["lines"] and doc.get_block("pages") == baseline["pages"]
+
+
+def test_a_wholesale_write_is_refused_under_the_hand_off(tmp_path, mock_paradata):
+    """set_block() of content or tables would replace the converter's born-digital pages."""
+    baseline = _mixed_baseline(tmp_path, mock_paradata)
+    doc = DocumentRecord("CTX000000001", OCR, baseline=baseline, out_dir=str(tmp_path), strict=True)
+    with pytest.raises(ValueError, match="wholesale write"):
+        doc.set_block("content", {"text": "sondě hřeby"})
+    with pytest.raises(ValueError, match="wholesale write"):
+        doc.set_block("tables", [])
+
+
+def test_merge_block_on_a_flagged_page_is_still_honoured_and_stamped(tmp_path, mock_paradata):
+    """The pre-W4 call (merge_block on the flagged page) keeps working, now marked a hand-off."""
+    baseline = _mixed_baseline(tmp_path, mock_paradata)
+    doc = DocumentRecord("CTX000000001", OCR, baseline=baseline, out_dir=str(tmp_path), strict=True)
+    doc.merge_block("lines", [{"page": "ii", "line": 0, "text": "sondě", "categ": "Clear"}])
+    assert doc.to_dict()["assembled"]["blocks"]["lines"]["contribution"] == OCR_HANDOFF
+
+
+def test_replace_page_rows_refuses_what_it_cannot_do(tmp_path, mock_paradata):
+    baseline = _mixed_baseline(tmp_path, mock_paradata)
+    doc = DocumentRecord("CTX000000001", OCR, baseline=baseline, out_dir=str(tmp_path), strict=True)
+    with pytest.raises(ValueError, match="pages\\[\\] rows carry other tools' fields"):
+        doc.replace_page_rows("pages", ["ii"], [{"page": "ii"}])
+    with pytest.raises(ValueError, match="not one"):
+        doc.replace_page_rows("tables", ["ii"], [])
+    with pytest.raises(ValueError, match="not among the pages being replaced"):
+        doc.replace_page_rows("lines", ["ii"], [{"page": "1", "line": 0, "text": "x"}])
+    with pytest.raises(ValueError, match="needs the page keys"):
+        doc.replace_page_rows("lines", [], [])
+    with pytest.raises(ValueError, match="never replaces"):
+        doc.replace_page_rows("lines", ["ii"], [{"page": "ii", "line": 0, "categ": "Clear"}],
+                              own_fields=["categ"])
+
+
+def test_an_empty_ocr_pass_empties_the_page(tmp_path, mock_paradata):
+    """OCR found no text on the page: its garbled rows go, nothing comes, the stamp still says hand-off."""
+    baseline = _mixed_baseline(tmp_path, mock_paradata)
+    doc = DocumentRecord("CTX000000001", OCR, baseline=baseline, out_dir=str(tmp_path), strict=True)
+    doc.replace_page_rows("lines", ["ii"], [])
+    record = doc.to_dict()
+    assert [r["page"] for r in record["lines"]] == ["i", "1"]
+    assert record["assembled"]["blocks"]["lines"]["contribution"] == OCR_HANDOFF
+
+
+def test_page_order_follows_page_index_not_the_label(tmp_path, mock_paradata):
+    """The re-acquired page goes back where it sits in the document, by page_index."""
+    with _open(tmp_path, mock_paradata, DIGITAL, origin="digital-born-pdf") as doc:
+        doc.merge_block("pages", [{"page": "A-1", "page_index": 2}, {"page": "10", "page_index": 1,
+                                                                     "needs_ocr": True}])
+        doc.merge_block("lines", [{"page": "A-1", "line": 0, "text": "a"}])
+        baseline = doc.to_dict()
+    ocr = DocumentRecord("CTX000000001", OCR, baseline=baseline, out_dir=str(tmp_path), strict=True)
+    ocr.replace_page_rows("lines", ["10"], [{"page": "10", "line": 1, "text": "b"}])
+    assert [r["page"] for r in ocr.get_block("lines")] == ["10", "A-1"]
+
+
+def test_on_its_own_plane_replace_page_rows_carries_no_contribution(tmp_path, mock_paradata):
+    """Re-OCR of a scanned page is plain re-origination: no hand-off, no stamp marker."""
+    with _open(tmp_path, mock_paradata, OCR, origin="ocr:pero") as doc:
+        doc.merge_block("lines", [{"page": "1", "line": 1, "text": "old"}, {"page": "1", "line": 2, "text": "old"}])
+        doc.replace_page_rows("lines", ["1"], [{"page": "1", "line": 1, "text": "new"}])
+        record = doc.to_dict()
+    assert record["lines"] == [{"page": "1", "line": 1, "text": "new"}]
+    assert "contribution" not in record["assembled"]["blocks"]["lines"]
+
+
+def test_only_ocr_postprocess_takes_the_hand_off(tmp_path, mock_paradata):
+    """The flag asks for OCR; it does not open the plane to any other candidate originator."""
+    baseline = _mixed_baseline(tmp_path, mock_paradata)
+    with _open(tmp_path, mock_paradata, OCR, origin="ocr:pero") as doc:
+        doc.merge_block("pages", [{"page": "1", "needs_ocr": True}])
+        ocr_baseline = doc.to_dict()
+    other = DocumentRecord("CTX000000001", DIGITAL, baseline=ocr_baseline, out_dir=str(tmp_path), strict=True)
+    with pytest.raises(ValueError, match="not 'digital-convert'"):
+        other.merge_block("lines", [{"page": "1", "line": 0, "text": "x"}])
+    legacy = DocumentRecord("CTX000000001", ALTO, baseline=baseline, out_dir=str(tmp_path), strict=True)
+    legacy.replace_page_rows("lines", ["ii"], _OCR_LINES)
+    assert legacy.to_dict()["assembled"]["blocks"]["lines"]["contribution"] == OCR_HANDOFF
+
+
+def test_the_fan_in_accepts_the_hand_off_while_a_page_is_flagged(tmp_path, mock_paradata):
+    """merge_document_records(): the converter's record + the OCR'd one fold into one record."""
+    baseline = _mixed_baseline(tmp_path, mock_paradata)
+    digital = tmp_path / "digital.document.json"
+    digital.write_text(json.dumps(baseline), encoding="utf-8")
+    ocrd = tmp_path / "ocrd.document.json"
+    with DocumentRecord("CTX000000001", OCR, baseline=baseline, out_dir=str(tmp_path), strict=True) as doc:
+        doc.replace_page_rows("lines", ["ii"], _OCR_LINES)
+        doc.finalize(str(ocrd))
+    merged = json.loads(open(merge_document_records([str(digital), str(ocrd)], str(tmp_path / "m.json")),
+                             encoding="utf-8").read())
+    assert merged["assembled"]["blocks"]["lines"]["contribution"] == OCR_HANDOFF
+    assert [r["text"] for r in merged["lines"] if r["page"] == "ii"] == ["sondě", "hřeby"]
+
+    # The same stamp on a record that flags nothing is a second originator again.
+    record = json.loads(ocrd.read_text(encoding="utf-8"))
+    for page in record["pages"]:
+        page.pop("needs_ocr", None)
+    unflagged = tmp_path / "unflagged.document.json"
+    unflagged.write_text(json.dumps(record), encoding="utf-8")
+    with pytest.raises(ValueError, match="mixes positional originators"):
+        merge_document_records([str(unflagged)], str(tmp_path / "m2.json"))
+
+
+def test_a_deferred_hand_off_is_judged_per_page(tmp_path, mock_paradata):
+    """Rows written before the origin is known are re-checked page by page once it arrives."""
+    baseline = {"doc_id": "CTX000000001", "pages": [{"page": "1", "needs_ocr": True}, {"page": "2"}]}
+    doc = DocumentRecord("CTX000000001", OCR, baseline=baseline, out_dir=str(tmp_path), strict=True)
+    doc.merge_block("lines", [{"page": "2", "line": 0, "text": "x"}])
+    with pytest.raises(ValueError, match=r"page\(s\) \['2'\]"):
+        doc.set_source(origin="digital-born-pdf", filename="CTX000000001.pdf")
+        doc.to_dict()

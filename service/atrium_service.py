@@ -181,7 +181,9 @@ def build_info(
 #: ``unsupported_media_type`` (the media-type refusals of all five services),
 #: ``invalid_record`` (the record a request carries, the #67 R1 seed included) and
 #: ``ocr_text_layer`` (the born-digital refusal the AMČR route step sends to OCR,
-#: atrium-llm-enrich#10 W6; raised by ``api-digital``).
+#: atrium-llm-enrich#10 W6; raised by ``api-digital``). ``source_digest_mismatch`` followed on
+#: 2026-10-05: AMČR accepted it on atrium-digital-convert#2, and digital-convert, which holds the
+#: original's bytes, raises it; it published the code in its own spec from v1.1.0-beta.
 REASON_CODES: Dict[str, str] = {
     "limit_exceeded": (
         "The input is over one of the service's limits. The body's `limit` member names it "
@@ -210,6 +212,12 @@ REASON_CODES: Dict[str, str] = {
         "The PDF's text layer is an earlier OCR run's invisible text over page images, so the "
         "document is not born-digital (HTTP 422). Route it to OCR: that text layer is not trusted."
     ),
+    "source_digest_mismatch": (
+        "The record sent with the request names the original by its `source.sha512`, and the uploaded "
+        "file is not that file (HTTP 422): the record would describe one file under another file's "
+        "identity. Send the original the seed was made for, or a seed made for this file; do not retry "
+        "unchanged."
+    ),
 }
 
 #: The HTTP statuses each registered code may be sent with (§4.4). ``error_body`` and
@@ -222,6 +230,7 @@ REASON_STATUSES: Dict[str, Tuple[int, ...]] = {
     "unsupported_media_type": (415,),
     "invalid_record": (422,),
     "ocr_text_layer": (422,),
+    "source_digest_mismatch": (422,),
 }
 
 

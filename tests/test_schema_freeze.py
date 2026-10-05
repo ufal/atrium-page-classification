@@ -91,6 +91,12 @@ POST_FREEZE_CHANGES: Dict[str, Dict[str, Any]] = {
         "issue": "ufal/atrium-project#71",
         "changelog": "2026-10-01",
     },
+    "/properties/pages/items/properties/text_layer": {
+        "kind": "added: optional closed enum, the converter's verdict on a page's text layer",
+        "schema": {"type": "string", "enum": ["digital", "garbled", "ocr", "none", "blank"]},
+        "issue": "ufal/atrium-project#71",
+        "changelog": "2026-10-05",
+    },
 }
 
 #: Keywords that annotate and do not constrain. Changing them is not a schema change.

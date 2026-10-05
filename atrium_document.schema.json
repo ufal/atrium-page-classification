@@ -197,7 +197,7 @@
           "category_confidence": { "type": "number", "minimum": 0, "maximum": 1 },
           "needs_ocr": {
             "type": "boolean",
-            "description": "Set by whichever tool originated this page. On the digital-born path it means the embedded text layer exists but does not decode to trustworthy text (Issue #10: non-embedded WinAnsi with no /ToUnicode yields systematic diacritic corruption), i.e. this page should be re-acquired by OCR despite not being a scan. The converter reports; routing policy lives outside it. Because the two paths mean OPPOSITE things by it (no text layer vs. an untrustworthy one), always write needs_ocr_reason alongside. Setting this is also what authorises alto-postprocess to re-originate the positional plane of a digital-born record — see _assert_origin_consistent() in atrium_document.py.",
+            "description": "Set by whichever tool originated this page. On the digital-born path it means the embedded text layer exists but does not decode to trustworthy text (Issue #10: non-embedded WinAnsi with no /ToUnicode yields systematic diacritic corruption), i.e. this page should be re-acquired by OCR despite not being a scan. The converter reports; routing policy lives outside it. Because the two paths mean OPPOSITE things by it (no text layer vs. an untrustworthy one), always write needs_ocr_reason alongside. Setting this is also what authorises ocr-postprocess to re-originate THIS page of a digital-born record (the OCR hand-off, per page) — see OCR_HANDOFF and _assert_origin_consistent() in atrium_document.py. It stays set after the OCR pass: it is the converter's request, and pages[].ocr records that the request was served.",
             "examples": [true]
           },
           "needs_ocr_reason": {
@@ -207,6 +207,12 @@
               "no extractable text layer",
               "text layer decodes to corrupt diacritics (WinAnsi declared, no /ToUnicode)"
             ]
+          },
+          "text_layer": {
+            "type": "string",
+            "enum": ["digital", "garbled", "ocr", "none", "blank"],
+            "description": "The born-digital converter's verdict on this page's embedded text layer, so a routing step reads a value instead of parsing needs_ocr_reason: `digital` a layer that decodes; `garbled` a layer that exists but does not decode (mojibake, U+FFFD or control characters); `ocr` the layer is a prior OCR run's invisible text over a page image; `none` no text layer (a scan, text drawn as curves, a page that draws nothing a parser can see); `blank` an empty page of a format without page images (DOCX, ODT, sheets), with nothing to re-acquire. `garbled`, `ocr` and `none` are exactly the pages the converter flags needs_ocr. Written by digital-convert only; absent on OCR records.",
+            "examples": ["digital", "garbled"]
           },
           "ocr": {
             "type": ["object", "null"],

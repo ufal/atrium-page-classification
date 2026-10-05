@@ -38,7 +38,9 @@ and since Issue #18 they have two possible **originators**: `alto-postprocess` f
 document, `digital-convert` for a digital-born PDF/DOCX. Which one applies is fixed per record
 by `source.origin` (see `ORIGIN_ORIGINATORS` / `resolve_originator()`). Calling `set_source()`
 first is the natural order, but it is **no longer required**: a block written before the origin
-is known is re-checked as soon as one arrives, and again in `to_dict()`.
+is known is re-checked as soon as one arrives, and again in `to_dict()`. The one way a second
+program re-originates part of that plane is the OCR hand-off (atrium-digital-convert#4 W4): the
+pages the originator flagged `needs_ocr`, page by page (`replace_page_rows()`, `OCR_HANDOFF`).
 
 Two things the JSON Schema deliberately cannot check, and where they live instead:
 
@@ -289,6 +291,11 @@ BLOCK_FIELD_OWNERS: Dict[str, Dict[str, List[str]]] = {
         # positioned to detect it, and needs_ocr=True is how §3's "route per-page before
         # deferring to OCR" is expressed in the record. The converter REPORTS; routing
         # POLICY stays outside both tools.
+        #
+        # `text_layer` (2026-10-05, atrium-project#71) is the converter's per-page verdict on the
+        # embedded text layer — digital, garbled, ocr, none or blank — as a closed enum, so a
+        # routing step reads a value instead of parsing `needs_ocr_reason`'s prose. Only the
+        # converter reads a text layer, so only it is granted the field.
         "digital-convert": [
             "page_index",
             "canvas",
@@ -296,6 +303,7 @@ BLOCK_FIELD_OWNERS: Dict[str, Dict[str, List[str]]] = {
             "quality_band",
             "needs_ocr",
             "needs_ocr_reason",
+            "text_layer",
         ],
         "page-classification": ["category", "category_confidence"],
         "nlp-enrich": ["teitok_surface"],
@@ -396,9 +404,10 @@ _add_successors()
 #:     check does not read it as a second originator (the stamp's object admits extra keys).
 #:
 #: Every other write ocr-postprocess makes on such a record (`text`, `bbox`, `ocr`, a new row,
-#: `content`, `tables`) is still refused unless the record asks for OCR (`needs_ocr`). Which
-#: lines to score is the caller's policy: the converter's own decode verdict (`Garbage`,
-#: `Inverted`) is never overwritten by ocr-postprocess's `/score_record`.
+#: `content`, `tables`) is still refused, except the OCR hand-off of the pages the record flags
+#: `needs_ocr` (OCR_HANDOFF below). Which lines to score is the caller's policy: the converter's
+#: own decode verdict (`Garbage`, `Inverted`) is never overwritten by ocr-postprocess's
+#: `/score_record`.
 SCORING_FIELDS: Dict[str, frozenset] = {
     "lines": frozenset({"categ", "quality_score", "lang"}),
     "pages": frozenset({"quality_score", "quality_band"}),
@@ -406,6 +415,37 @@ SCORING_FIELDS: Dict[str, frozenset] = {
 
 #: The program SCORING_FIELDS authorises: the common quality model's owner.
 SCORING_PROGRAM = "ocr-postprocess"
+
+#: The OCR hand-off (atrium-digital-convert#4 W4, atrium-project#71): the converter flags a page
+#: `needs_ocr` because its embedded text layer is missing, does not decode, or is a prior OCR run;
+#: the pipeline OCRs that page; ocr-postprocess brings its lines back into the SAME record. The
+#: flag is the authorisation, and it is PER PAGE:
+#:
+#:   * ocr-postprocess may write `pages`/`lines` rows of a flagged page into a plane another tool
+#:     originated; a row on any other page is refused (`_assert_origin_consistent`), and so is a
+#:     wholesale `set_block()` of `content` or `tables`, which would erase the born-digital pages;
+#:   * `replace_page_rows()` re-originates a flagged page's `lines`: the converter's rows of that
+#:     page go, the OCR rows come in, and the block stays in page order. `merge_block()` alone
+#:     would leave the converter's lines past the OCR line count on the page — a mixed page;
+#:   * the block's stamp carries `contribution: "ocr-handoff"`, so `merge_document_records()`'s
+#:     fan-in check does not read it as a second originator while the record flags a page.
+#:
+#: What stays: `source` (the original's, first-writer-wins), `content` (the converter's
+#: reading-order text of its born-digital pages; per-page text is in `lines`), and `needs_ocr`
+#: itself — the converter's request. That the request was served is `pages[].ocr` (the engine),
+#: a field the converter is never granted.
+OCR_HANDOFF_PROGRAM = "ocr-postprocess"
+OCR_HANDOFF = "ocr-handoff"
+
+
+def ocr_handoff_pages(pages: Any) -> List[str]:
+    """The keys of the `pages[]` rows that set `needs_ocr: true`, in row order — the pages an OCR
+    hand-off may re-originate (see OCR_HANDOFF)."""
+    return [
+        _key_value(row.get("page"))
+        for row in pages or []
+        if isinstance(row, dict) and row.get("needs_ocr") is True and row.get("page") is not None
+    ]
 
 
 #: Natural key fields per list block, used to align records when merging by field.
@@ -553,6 +593,12 @@ def _record_key(record: Dict[str, Any], key_fields: Iterable[str]) -> tuple:
     return tuple(_key_value(record.get(k)) for k in key_fields)
 
 
+def _row_pages(records: Iterable[Any]) -> frozenset:
+    """The page keys a row write touches, compared as merge_block() compares keys (`_key_value`;
+    a row without a page counts as `null`, which no page is)."""
+    return frozenset(_key_value(r.get("page")) for r in records if isinstance(r, dict))
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 # The record
 # ──────────────────────────────────────────────────────────────────────────────
@@ -631,6 +677,9 @@ class DocumentRecord:
         #: For each deferred block, the fields its merges wrote (None: a wholesale or
         #: unrestricted write), so a deferred scoring contribution is judged as one.
         self._origin_deferred_fields: Dict[str, Optional[frozenset]] = {}
+        #: For each deferred block, the pages its row writes touched (None: a wholesale write),
+        #: so a deferred OCR hand-off is judged per page.
+        self._origin_deferred_pages: Dict[str, Optional[frozenset]] = {}
         #: Blocks a scoring co-contribution was already noted for (one note per block).
         self._scoring_noted: List[str] = []
         #: Origins already reported as unrecognised, so the note is emitted once each.
@@ -805,6 +854,71 @@ class DocumentRecord:
         Existing records are matched on `key_fields` and only `own_fields` are written, so a
         co-contributor's fields on the same row survive untouched. New rows are appended.
         """
+        return self._merge(name, records, key_fields=key_fields, own_fields=own_fields)
+
+    def replace_page_rows(
+        self,
+        name: str,
+        pages: Iterable[Any],
+        records: List[Dict[str, Any]],
+        own_fields: Optional[List[str]] = None,
+    ) -> "DocumentRecord":
+        """
+        Re-originate whole pages of a list block: the OCR hand-off's write (OCR_HANDOFF, W4).
+
+        Every existing row of `name` on one of `pages` is removed and `records` are merged in
+        their place, so a re-acquired page holds the new rows only — `merge_block()` would update
+        the rows whose keys match and leave the rest, a page half old and half new. Afterwards
+        the block is put in page order (`pages[].page_index` when every page row carries one,
+        else the order of `pages[]`; rows of a page `pages[]` does not list keep their order at
+        the end), so a reader that takes the rows in list order reads the pages in order.
+
+        For a block keyed by `page` other than `pages` itself (`lines`, `entities`): a page row
+        holds co-contributors' fields (`page_index`, `canvas`, `category`, …), so `pages[]` rows
+        are merged with `merge_block()`, never replaced. The origin check runs before anything is
+        removed, so a refusal under `strict` leaves the record as it was. An empty `records`
+        empties the pages (an OCR pass that found no text).
+        """
+        keys = BLOCK_KEY_FIELDS.get(name) or []
+        if name == "pages" or "page" not in keys:
+            raise ValueError(
+                f"replace_page_rows() replaces whole pages of a block keyed by page; {name!r} is not "
+                f"one (pages[] rows carry other tools' fields: merge them with merge_block())"
+            )
+        targets: List[str] = []
+        for page in pages:
+            if page is not None and _key_value(page) not in targets:
+                targets.append(_key_value(page))
+        if not targets:
+            raise ValueError("replace_page_rows() needs the page keys it replaces")
+        stray = sorted({_key_value(r.get("page")) for r in records if _key_value(r.get("page")) not in targets})
+        if stray:
+            raise ValueError(f"rows on page(s) {stray} are not among the pages being replaced {targets}")
+        self._merge(name, records, own_fields=own_fields, replace_pages=targets)
+        self._data[name] = self._in_page_order(self._data.get(name) or [])
+        return self
+
+    def _in_page_order(self, rows: List[Any]) -> List[Any]:
+        """`rows` stably sorted by their page's position in `pages[]` (see replace_page_rows)."""
+        page_rows = [p for p in self._data.get("pages") or [] if isinstance(p, dict) and p.get("page") is not None]
+        by_index = bool(page_rows) and all(
+            isinstance(p.get("page_index"), int) and not isinstance(p.get("page_index"), bool) for p in page_rows
+        )
+        position: Dict[str, float] = {}
+        for i, p in enumerate(page_rows):
+            position.setdefault(_key_value(p["page"]), float(p["page_index"] if by_index else i))
+        last = float("inf")
+        return sorted(rows, key=lambda r: position.get(_key_value(r.get("page")), last) if isinstance(r, dict) else last)
+
+    def _merge(
+        self,
+        name: str,
+        records: List[Dict[str, Any]],
+        key_fields: Optional[List[str]] = None,
+        own_fields: Optional[List[str]] = None,
+        replace_pages: Optional[List[str]] = None,
+    ) -> "DocumentRecord":
+        """merge_block()'s body; with `replace_pages`, the rows of those pages go first."""
         if name in RESERVED_KEYS:
             raise ValueError(f"{name!r} is maintained by the module, not a tool block.")
 
@@ -833,9 +947,15 @@ class DocumentRecord:
                 f"{self.program!r} is neither an owner nor a declared field contributor of "
                 f"block {name!r} — own_fields narrows an existing grant, it does not create one"
             )
-        self._assert_origin_consistent(name, fields=allowed)  # Issue #18 §1a
+        # The pages this write touches: the ones it replaces, or the pages its rows are on.
+        pages = frozenset(replace_pages) if replace_pages is not None else _row_pages(records)
+        self._assert_origin_consistent(name, fields=allowed, pages=pages)  # Issue #18 §1a
         # W3: a scoring co-contribution updates the originator's rows and never adds one.
         scoring = self._is_scoring_contribution(name, allowed)
+        if scoring and replace_pages is not None:
+            raise ValueError("a scoring contribution updates existing rows; it never replaces a page's rows")
+        # W4: the OCR hand-off of flagged pages, stamped so the fan-in can tell it from a mix.
+        handoff = not scoring and self._is_ocr_handoff(name, pages)
 
         writable = set(allowed) | set(keys)
 
@@ -855,6 +975,9 @@ class DocumentRecord:
                 )
 
         existing: List[Dict[str, Any]] = list(self._data.get(name) or [])
+        if replace_pages is not None:
+            wanted = set(replace_pages)
+            existing = [r for r in existing if not (isinstance(r, dict) and _key_value(r.get("page")) in wanted)]
         index = {_record_key(r, keys): r for r in existing}
 
         unmatched = 0
@@ -877,7 +1000,7 @@ class DocumentRecord:
                 f"originator wrote — not added (a scoring contribution only scores existing rows)"
             )
         self._data[name] = existing
-        self._stamp(name, contribution="scoring" if scoring else None)
+        self._stamp(name, contribution="scoring" if scoring else (OCR_HANDOFF if handoff else None))
         return self
 
     def get_block(self, name: str, default: Any = None) -> Any:
@@ -982,14 +1105,21 @@ class DocumentRecord:
             self._complain(f"block {name!r} is owned by {' or '.join(owners)}, not {self.program!r}")
         self._assert_origin_consistent(name)
 
-    def _assert_origin_consistent(self, name: str, fields: Optional[Iterable[str]] = None) -> None:
+    def _assert_origin_consistent(
+        self,
+        name: str,
+        fields: Optional[Iterable[str]] = None,
+        pages: Optional[Iterable[str]] = None,
+    ) -> None:
         """
         Issue #18 §1a: for a block with several possible originators, the document's
         `source.origin` decides which one may write it.
 
-        `fields` is what a `merge_block()` may write (None for a wholesale `set_block()`). An
-        ocr-postprocess merge limited to SCORING_FIELDS is a scoring co-contribution and is
-        noted, not refused (atrium-digital-convert#4 W3; see SCORING_FIELDS).
+        `fields` is what a `merge_block()` may write and `pages` the page keys its rows touch
+        (both None for a wholesale `set_block()`). An ocr-postprocess merge limited to
+        SCORING_FIELDS is a scoring co-contribution and is noted, not refused
+        (atrium-digital-convert#4 W3; see SCORING_FIELDS); its OCR hand-off is honoured page by
+        page (W4; see OCR_HANDOFF).
 
         Self-guarding, so calling it unconditionally from both set_block() and
         merge_block() is a no-op for every pre-#18 caller. It returns early for:
@@ -1000,8 +1130,9 @@ class DocumentRecord:
             and re-checked as soon as an origin is known (see below);
           * origins this table has not been taught (abstain rather than block, rule 6's
             spirit — a note goes to stderr so the silence is at least visible);
-          * a document whose own record already asks for OCR re-acquisition (see
-            `_ocr_handoff_requested`).
+          * an ocr-postprocess row write limited to the pages the record itself flags
+            `needs_ocr` (see OCR_HANDOFF) — a row on any other page, or a wholesale write, is
+            refused.
 
         The deferral matters. This check reads `source.origin`, so a run that wrote its
         blocks BEFORE calling set_source() used to escape it *permanently* — and since
@@ -1024,12 +1155,18 @@ class DocumentRecord:
         origin = (self._data.get("source") or {}).get("origin")
         if not origin:
             written = frozenset(fields) if fields is not None else None
+            touched = frozenset(pages) if pages is not None else None
             if name not in self._origin_deferred:
                 self._origin_deferred.append(name)
                 self._origin_deferred_fields[name] = written
+                self._origin_deferred_pages[name] = touched
             else:
                 held = self._origin_deferred_fields.get(name)
                 self._origin_deferred_fields[name] = None if held is None or written is None else held | written
+                held_pages = self._origin_deferred_pages.get(name)
+                self._origin_deferred_pages[name] = (
+                    None if held_pages is None or touched is None else held_pages | touched
+                )
             return
 
         originator = resolve_originator(origin)
@@ -1053,15 +1190,15 @@ class DocumentRecord:
                     f"co-contribution, not an origination (SCORING_FIELDS)"
                 )
             return
-        if canonical_program(self.program) == "ocr-postprocess" and self._ocr_handoff_requested():
+        if canonical_program(self.program) == OCR_HANDOFF_PROGRAM and self._ocr_handoff_requested():
             # The documented digital-born -> OCR hand-off, not a mixed plane by accident.
             # digital-convert is granted pages[].needs_ocr precisely so it can say "this
             # page's embedded text layer does not decode; re-acquire it by OCR" (Issue #10's
             # WinAnsi/no-/ToUnicode corruption), and the schema says routing policy then acts
             # on it. Without this branch that hand-off was unreachable: origin is frozen at
-            # `digital-born-*`, so every pages/lines write alto-postprocess made afterwards
-            # was refused, and §3's "route per page before deferring to OCR" contradicted
-            # §1a's "no document is ever both".
+            # `digital-born-*`, so every pages/lines write alto-postprocess made afterwards was
+            # refused, and §3's "route per page before deferring to OCR" contradicted §1a's
+            # "no document is ever both".
             #
             # It stays truthful. `source.origin` describes how the ORIGINAL INPUT was
             # acquired, and that really was a digital-born PDF; the OCR ran over its rendered
@@ -1069,9 +1206,28 @@ class DocumentRecord:
             # assembled.blocks[<block>].program — and `pages[].ocr` (never granted to
             # digital-convert) records that an engine ran. The authorisation is the
             # converter's own recorded request, so it is auditable from the record itself.
+            #
+            # And it is PER PAGE (W4, 2026-10-05). Until then any one flagged page let this
+            # program write every page, and set_block() the whole `content` or `tables`: a
+            # record with one scanned insert could lose its born-digital pages to the OCR pass.
+            flagged = set(self.handoff_pages())
+            if pages is None:
+                self._complain(
+                    f"block {name!r}: a wholesale write by {self.program!r} onto a {origin!r} document "
+                    f"would replace the pages {originator!r} wrote; the needs_ocr hand-off covers the "
+                    f"flagged pages {sorted(flagged)} only (replace_page_rows / merge_block)"
+                )
+                return
+            outside = sorted(set(pages) - flagged)
+            if outside:
+                self._complain(
+                    f"block {name!r}: page(s) {outside} of a {origin!r} document do not ask for OCR "
+                    f"(pages[].needs_ocr) — the hand-off covers {sorted(flagged)} only"
+                )
+                return
             self._note(
                 f"block {name!r}: honouring the pages[].needs_ocr hand-off — "
-                f"{self.program!r} re-originating a {origin!r} document"
+                f"{self.program!r} re-originating page(s) {sorted(set(pages))} of a {origin!r} document"
             )
             return
         self._complain(
@@ -1080,17 +1236,19 @@ class DocumentRecord:
 
     def _ocr_handoff_requested(self) -> bool:
         """True when this record's own `pages[]` asks for OCR re-acquisition."""
-        for page in self._data.get("pages") or []:
-            if isinstance(page, dict) and page.get("needs_ocr") is True:
-                return True
-        return False
+        return bool(self.handoff_pages())
+
+    def handoff_pages(self) -> List[str]:
+        """The pages this record flags `needs_ocr`: the ones an OCR hand-off may re-originate."""
+        return ocr_handoff_pages(self._data.get("pages"))
 
     def _resolve_deferred_origin_checks(self) -> None:
         """Re-run the origin check for blocks written before `source.origin` was known."""
         pending, self._origin_deferred = list(self._origin_deferred), []
         fields, self._origin_deferred_fields = dict(self._origin_deferred_fields), {}
+        pages, self._origin_deferred_pages = dict(self._origin_deferred_pages), {}
         for name in pending:
-            self._assert_origin_consistent(name, fields=fields.get(name))
+            self._assert_origin_consistent(name, fields=fields.get(name), pages=pages.get(name))
 
     def _is_scoring_contribution(self, name: str, fields: Optional[Iterable[str]]) -> bool:
         """True for a merge limited to SCORING_FIELDS into a plane another tool originated.
@@ -1102,6 +1260,18 @@ class DocumentRecord:
             return False
         originator = resolve_originator((self._data.get("source") or {}).get("origin"))
         return originator is not None and not same_program(originator, self.program)
+
+    def _is_ocr_handoff(self, name: str, pages: Optional[Iterable[str]]) -> bool:
+        """True for an ocr-postprocess row write, into a plane another tool originated, that
+        touches only pages the record flags `needs_ocr` — the OCR hand-off (OCR_HANDOFF)."""
+        if not pages or canonical_program(self.program) != OCR_HANDOFF_PROGRAM:
+            return False
+        if len(_originator_candidates(name)) < 2:
+            return False
+        originator = resolve_originator((self._data.get("source") or {}).get("origin"))
+        if originator is None or same_program(originator, self.program):
+            return False
+        return set(pages) <= set(self.handoff_pages())
 
     def _complain(self, message: str) -> None:
         if self.strict:
@@ -1121,8 +1291,9 @@ class DocumentRecord:
     def _stamp(self, block: str, contribution: Optional[str] = None) -> None:
         """Rule 4: per-block provenance — this is where granularity comes from.
 
-        `contribution="scoring"` marks a SCORING_FIELDS co-contribution, so a reader (and the
-        fan-in check) can tell a score on another originator's plane from an origination.
+        `contribution="scoring"` marks a SCORING_FIELDS co-contribution, and
+        `contribution="ocr-handoff"` the OCR hand-off of flagged pages (OCR_HANDOFF), so a reader
+        (and the fan-in check) can tell either from a second origination.
         """
         if block not in self._touched:
             self._touched.append(block)
@@ -1447,7 +1618,9 @@ def merge_document_records(json_paths: List[str], out_path: str) -> str:
       exists for. They are merged key-wise instead, first writer winning per key.
 
     A fan-in is also a third write path that bypassed the §1a check entirely, so the merged
-    positional plane is verified against the merged `source.origin` at the end.
+    positional plane is verified against the merged `source.origin` at the end. Two stamps by
+    ocr-postprocess are not a second originator there: a scoring contribution (SCORING_FIELDS),
+    and the OCR hand-off (OCR_HANDOFF) while the merged `pages[]` still flags a page.
     """
     if not json_paths:
         raise ValueError("no record paths given")
@@ -1522,6 +1695,12 @@ def merge_document_records(json_paths: List[str], out_path: str) -> str:
             wrote = stamp.get("program")
             if stamp.get("contribution") == "scoring" and same_program(wrote, SCORING_PROGRAM):
                 continue  # a score on the originator's rows (SCORING_FIELDS), not a second plane
+            if (
+                stamp.get("contribution") == OCR_HANDOFF
+                and same_program(wrote, OCR_HANDOFF_PROGRAM)
+                and ocr_handoff_pages(merged.get("pages"))
+            ):
+                continue  # the needs_ocr pages re-acquired by OCR (OCR_HANDOFF), not a second plane
             if wrote and wrote in _owner_candidates(block) and not same_program(wrote, authorised):
                 raise ValueError(
                     f"merged record mixes positional originators: block {block!r} was written "
