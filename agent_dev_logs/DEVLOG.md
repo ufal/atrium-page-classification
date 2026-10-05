@@ -147,7 +147,7 @@ issue opens, matching its four siblings.
   `atrium_openapi.py`, `service/atrium_service.py`, `tests/test_openapi_contract.py` (declared-rename rule).
 * Tests: fake-PDFium fixtures for the contract and document tests, real-PDFium tests (size checked = size rendered,
   thread safety, closes), `tests/test_compare_pdf_rasterisers.py`. Fast suite 645 passed, 7 skipped.
-* Tag draft: `v1.10.0-beta`. **Not pushed: files delivered in chat.**
+* Tag: `v1.9.1-beta` (drafted here as `v1.10.0-beta`; the maintainer set the number). Pushed as `db834e6`.
 
 ## 2026-10-04 — `/predict_document` for digital-convert's `/describe` (atrium-digital-convert#2)
 * **Why:** digital-convert `v1.1.0-beta`'s `POST /describe` asks this service about the pages of a born-digital PDF
@@ -168,6 +168,19 @@ issue opens, matching its four siblings.
 * 2026-10-04, evening: the CONTRIBUTING row now also lists the shared modules re-vendored since `v1.9.1-beta`
   (`f3e8f34`, `0e6af27`, `9bf252b`: the AMČR seed profile, `source.sha512` and `run_uuid` in the record schema,
   `run_uuid`/`run_agent` in CLI paradata, RO-Crate 1.2, the program successors; `41c84ca`: `SCORING_FIELDS`).
+
+## 2026-10-05 (evening) — The `v1.9.2-beta` tag smoke; tag line corrected
+* **Red tag run:** the `v1.9.2-beta` Docker run (37269822039) failed "Run container on a NON-DEFAULT port
+  (issue #58)". The cause was not the port. Each probe container downloaded the five models again, and the
+  `PORT=9000` container was still loading the fifth when the HEALTHCHECK budget ran out. The images were promoted
+  anyway, because the smoke job does not gate publishing.
+* **Fix, in the hub:** `4cbf900` (in `v1`) shares one named volume at `HF_HOME` across a job's probe containers and
+  names the warm-up in the error. This repository's first run on it (37298437914) is green.
+* **Still open here:** `paradata` is not returned yet. `/predict_image` returns `null` and `/predict_document`
+  omits it (atrium-project#71).
+* **DEVLOG:** the 2026-09-30 entry's tag draft now says what shipped: `v1.9.1-beta`, pushed as `db834e6`.
+
+  Files delivered in chat.
 
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
