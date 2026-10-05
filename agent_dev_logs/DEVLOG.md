@@ -164,7 +164,10 @@ issue opens, matching its four siblings.
 * **Tests:** `test_service_document_json.py` (+26, a real `digital-convert`-built baseline). Full suite 710 passed.
   The real app ran live against digital-convert's `/describe`.
 * **Docs:** `service/README.md`, `.env.example` / `tool_limits.py` wording of `MAX_PDF_PAGES`, CONTRIBUTING row.
-* Tag draft: `v1.10.0-beta`. **Not pushed: files delivered in chat.**
+* Tag: `v1.9.2-beta` (drafted here as `v1.10.0-beta`; the maintainer set the number). Pushed as `41c84ca`.
+* 2026-10-04, evening: the CONTRIBUTING row now also lists the shared modules re-vendored since `v1.9.1-beta`
+  (`f3e8f34`, `0e6af27`, `9bf252b`: the AMČR seed profile, `source.sha512` and `run_uuid` in the record schema,
+  `run_uuid`/`run_agent` in CLI paradata, RO-Crate 1.2, the program successors; `41c84ca`: `SCORING_FIELDS`).
 
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
