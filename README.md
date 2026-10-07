@@ -36,4 +36,4 @@ One-time, needs repository admin: **Settings &rarr; Pages &rarr; Build and deplo
 &rarr; Source: Deploy from a branch &rarr; Branch: `gh-pages` / `/ (root)`**.
 See `PAGES_SETUP.md` in the hub repository for the full note.
 
-_Generated 2026-09-25 for issue #57._
+_Generated 2026-10-07 for issue #57._
