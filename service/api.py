@@ -17,6 +17,7 @@ as ``tests/openapi_contract_data.py`` does, so torch is not needed)::
 
 import asyncio
 import io
+import json
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -114,14 +115,23 @@ except ImportError:
 
 # Every limit this service has, declared once (atrium-project#53, factor III). The repo
 # root is on sys.path by now: service/inference.py, imported above, puts it there.
+import atrium_rocrate  # noqa: E402
 import tool_limits  # noqa: E402
 from atrium_limits import LimitExceeded  # noqa: E402
+from atrium_paradata import ParadataLogger  # noqa: E402
 from tool_limits import LIMITS, MAX_IMAGE_PIXELS, MAX_PDF_PAGES, MAX_UPLOAD  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
 #: The tool id (/info `service`, the spec's `x-atrium-service`): the repository name.
 SERVICE = "atrium-page-classification"
+
+#: The program id: what the record's stamps name (atrium_document_adapter.PROGRAM) and
+#: para_config.txt's [tool] program, so the run's CreateAction names the same tool.
+PROGRAM = "page-classification"
+
+#: Where para_config.txt (the tool version and licences the paradata records) lives.
+_PARA_CONFIG_DIR = str(Path(__file__).resolve().parent.parent / "setup")
 
 # Import-time snapshots, kept because tests and clients import them. The service itself
 # reads each limit per request from tool_limits (atrium_limits reads the environment on
@@ -389,7 +399,10 @@ class ImageResponse(BaseModel):
         description="Only when the sent baseline did not validate (the record is returned anyway): the error; else null."
     )
     paradata: Optional[CreateAction] = Field(
-        description="The run's provenance (atrium-project#67 R2). Not returned yet: always null."
+        description=(
+            "The call's provenance: its Process Run Crate `CreateAction` (atrium-project#71 R2). Its `@id` is "
+            "the `run_uuid` stamped into `document_json` when a record was asked for."
+        )
     )
 
 
@@ -433,7 +446,11 @@ class DocumentResponse(BaseModel):
         None, description="Only when the sent baseline did not validate (the record is returned anyway): the error."
     )
     paradata: Optional[CreateAction] = Field(
-        None, description="The run's provenance (atrium-project#67 R2). Not returned yet: always absent."
+        None,
+        description=(
+            "The call's provenance: its Process Run Crate `CreateAction` (atrium-project#71 R2). Its `@id` is "
+            "the `run_uuid` stamped into `document_json` when a record was asked for."
+        ),
     )
 
 
@@ -477,6 +494,48 @@ _DOCUMENT_JSON_OUT_DESC = (
 )
 
 
+def _open_run(endpoint: str, **config: Any) -> ParadataLogger:
+    """The call's paradata (atrium-project#71 R2), opened before inference.
+
+    paradata_dir=None: a service writes no paradata file; the run goes back as the response's
+    `paradata`, and its run_id / run_uuid stamp the record. config_dir: para_config.txt sits
+    under setup/, found from here rather than from the working directory.
+    """
+    return ParadataLogger(
+        program=PROGRAM,
+        config={"endpoint": endpoint, **config},
+        paradata_dir=None,
+        output_types=["json"],
+        config_dir=_PARA_CONFIG_DIR,
+    )
+
+
+def _action(
+    run: ParadataLogger,
+    upload_name: str,
+    upload_bytes: bytes,
+    media_type: str,
+    baseline_sent: bool,
+    record: Optional[Dict[str, Any]],
+    predictions: Any,
+) -> Dict[str, Any]:
+    """The call's CreateAction (atrium-project#71 R2): what it read and what it wrote.
+
+    `object` is the upload and, when one was sent, the record; `result` is the record's blocks
+    this call stamped and the predictions it answers with.
+    """
+    run.log_success("json")
+    run.log_document_success()
+    run.finalize()
+    inputs = [atrium_rocrate.file_entity(upload_name, upload_bytes, media_type=media_type)]
+    if baseline_sent and record is not None:
+        inputs.append(atrium_rocrate.record_entity(str(record.get("doc_id"))))
+    outputs = atrium_rocrate.block_entities(atrium_rocrate.blocks_written(record, run.run_uuid))
+    answer = json.dumps(predictions, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    outputs.append(atrium_rocrate.file_entity("predictions.json", answer, media_type="application/json"))
+    return atrium_rocrate.create_action(run.record, inputs=inputs, outputs=outputs)
+
+
 async def _read_record_part(document_json: Optional[UploadFile]) -> Optional[bytes]:
     """The baseline part's bytes, read and opened BEFORE any model runs, or None.
 
@@ -499,6 +558,7 @@ async def _document_json_part(
     baseline_bytes: Optional[bytes],
     doc_id: str,
     pages: Sequence[Tuple[str, Any]],
+    run: Optional[ParadataLogger] = None,
 ) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
     """Run this tool's blocks through the CLI's own accretion path, or do nothing.
 
@@ -512,7 +572,7 @@ async def _document_json_part(
         return None, None
 
     try:
-        return build_document_record(doc_id, pages, baseline_bytes)
+        return build_document_record(doc_id, pages, baseline_bytes, paradata_logger=run)
     except ValueError as exc:
         # A baseline the adapter cannot migrate. _read_record_part already refused one that is
         # not JSON or has a newer schema_version major; this is the adapter's own refusal of
@@ -587,6 +647,7 @@ async def predict_image(
 
     content = await read_upload_bounded(file, MAX_UPLOAD.get(), "File")
     baseline_bytes = await _read_record_part(document_json)
+    run = _open_run("/predict_image", version=version, topn=topn)
 
     try:
         image = _open_image(content)  # reads the header only
@@ -605,7 +666,7 @@ async def predict_image(
         # -f path uses, or the service would fork the record it is supposed to accrete onto.
         doc_id, page_key = doc_id_for_image(file.filename)
         record, schema_err = await _document_json_part(
-            document_json_out or document_json is not None, baseline_bytes, doc_id, [(page_key, predictions)]
+            document_json_out or document_json is not None, baseline_bytes, doc_id, [(page_key, predictions)], run
         )
 
         return ImageResponse(
@@ -614,7 +675,9 @@ async def predict_image(
             limits_applied=[],
             document_json=record,
             document_json_schema_error=schema_err,
-            paradata=None,
+            paradata=_action(
+                run, file.filename, content, file.content_type, baseline_bytes is not None, record, predictions
+            ),
         )
     except (HTTPException, LimitExceeded):
         raise
@@ -662,6 +725,9 @@ async def predict_document(
 
     content = await read_upload_bounded(file, MAX_UPLOAD.get(), "File")
     baseline_bytes = await _read_record_part(document_json)
+    run = _open_run("/predict_document", version=version, topn=topn, pages=pages)
+    # The PDF engine renders every page this route classifies (para_config.txt, conditional).
+    run.log_component("pypdfium2")
 
     try:
         # One thread hop for the WHOLE loop, not one per page (issue #55): this is up to
@@ -685,6 +751,7 @@ async def predict_document(
             baseline_bytes,
             doc_id_for_document(file.filename),
             [(keys[r["page"]], r["predictions"]) for r in page_results if keys[r["page"]] is not None],
+            run,
         )
 
         # limits_applied: see ImageResponse — present in every response, [] here today.
@@ -693,6 +760,9 @@ async def predict_document(
             response["document_json"] = record
         if schema_err:
             response["document_json_schema_error"] = schema_err
+        response["paradata"] = _action(
+            run, file.filename, content, file.content_type, baseline_bytes is not None, record, page_results
+        )
         return response
     except (HTTPException, LimitExceeded):
         raise

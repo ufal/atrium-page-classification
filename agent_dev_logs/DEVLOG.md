@@ -182,6 +182,25 @@ issue opens, matching its four siblings.
 
   Files delivered in chat.
 
+## 2026-10-07 — `paradata` from both routes (atrium-project#71 R2)
+* **Why:** the one service without a `CreateAction` (#71, plan C.1): `/predict_image` returned `null`,
+  `/predict_document` omitted it.
+* **`service/api.py`:** one `ParadataLogger(program="page-classification", paradata_dir=None)` per call
+  (`_open_run`); `_action()` builds `atrium_rocrate.create_action()` as digital-convert does: `object` is the upload
+  (and `#record` when one was sent), `result` the blocks the call stamped and `predictions.json`.
+  `/predict_document` logs `pypdfium2`. The two field descriptions say what is returned.
+* **The record:** `service/document_json.build_document_record()` passes the run to
+  `atrium_document_adapter.write_document_record()`, which now stamps `run_uuid`; for a run that writes no paradata
+  file, `paradata_ref` is the run_uuid, as in the other services.
+* **Tests:** `tests/test_api_contract.py` requires a valid action (`action_problems()`) on both routes; a new test
+  checks `@id` = the stamps' run_uuid and the `object`/`result` entries. `tests/test_service_document_json.py`: the
+  response key set includes `paradata`.
+* **Spec:** `service/openapi.json` regenerated (two descriptions); `atrium_openapi.py check`: current; `compare`
+  against the committed spec: compatible.
+* **Docs:** `service/README.md` (*Provenance*), the CONTRIBUTING row.
+* **Checks:** `-m "not slow"`: 733 passed, 7 skipped, 2 xfailed; ruff clean.
+* Tag draft: `v1.9.3-beta`. **Not pushed: files delivered in chat.**
+
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
 state via the GitHub API (zero open), and the confirmed `@v1` reusable-workflow pin. Nothing removed from the issues

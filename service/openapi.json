@@ -1784,7 +1784,7 @@
                 "type": "null"
               }
             ],
-            "description": "The run's provenance (atrium-project#67 R2). Not returned yet: always absent."
+            "description": "The call's provenance: its Process Run Crate `CreateAction` (atrium-project#71 R2). Its `@id` is the `run_uuid` stamped into `document_json` when a record was asked for."
           }
         },
         "additionalProperties": true,
@@ -1990,7 +1990,7 @@
                 "type": "null"
               }
             ],
-            "description": "The run's provenance (atrium-project#67 R2). Not returned yet: always null."
+            "description": "The call's provenance: its Process Run Crate `CreateAction` (atrium-project#71 R2). Its `@id` is the `run_uuid` stamped into `document_json` when a record was asked for."
           }
         },
         "type": "object",

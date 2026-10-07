@@ -148,13 +148,13 @@ Example JSON response (every field is always present; `ImageResponse` in [`opena
   "limits_applied": [],
   "document_json": null,
   "document_json_schema_error": null,
-  "paradata": null
+  "paradata": {"@type": "CreateAction", "@id": "urn:uuid:…", "...": "…"}
 }
 ```
 
 `/predict_document` answers `{"type": "document", "pages": [{"page": 1, "predictions": [...]}, ...],
-"limits_applied": []}` (`DocumentResponse`), with `document_json` (and `document_json_schema_error`)
-only when a record was asked for. It takes the same fields, plus:
+"limits_applied": [], "paradata": {...}}` (`DocumentResponse`), with `document_json` (and
+`document_json_schema_error`) only when a record was asked for. It takes the same fields, plus:
 
 * `pages`: (Optional) classify only these pages, 1-based positions in the PDF, e.g. `1,3,5-7`
   (atrium-digital-convert#2: `/describe` asks only about the pages without a usable text layer).
@@ -164,8 +164,14 @@ only when a record was asked for. It takes the same fields, plus:
 
 A PDF that does not open is refused with `422`; a page the model
 could not classify fails the request with `500` naming the page (it used to come back inside a `200`
-as that page's `{"error": ...}`). `paradata` is reserved for the run's provenance
-(atrium-project#67 R2) and not returned yet.
+as that page's `{"error": ...}`).
+
+**Provenance.** Every successful call returns `paradata`, the call's Process Run Crate
+`CreateAction` (atrium-project#71 R2), built by `atrium_rocrate.create_action()` as in the other
+ATRIUM services: `object` is the upload and, when one was sent, the record; `result` is the record
+blocks the call stamped (`page_categories`, `pages`) and `predictions.json`, what it answered with.
+Its `@id` is the `run_uuid` stamped into those blocks, and `/predict_document` lists `pypdfium2`
+among the run's components. The service writes no paradata file.
 
 **PDF rendering.** Pages are rendered with **pypdfium2** (PDFium; Apache-2.0 or BSD-3-Clause,
 declared in `setup/para_config.txt`) at `PDF_RENDER_DPI` (scale `dpi / 72`), as RGB, one page at a

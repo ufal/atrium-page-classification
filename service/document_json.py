@@ -185,6 +185,7 @@ def build_document_record(
     doc_id: str,
     pages: Sequence[Tuple[str, Any]],
     baseline_bytes: Optional[bytes] = None,
+    paradata_logger: Any = None,
 ) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
     """Accrete this run's `page_categories` / `pages[]` onto an optional baseline record.
 
@@ -201,6 +202,10 @@ def build_document_record(
     Raises `RuntimeError` when the record this tool built is itself invalid — the adapter's
     Layer D refusal. `api.py` maps that to a 500, because a record page-classification
     cannot emit is a defect on this side.
+
+    `paradata_logger` is the call's run (atrium-project#71): its `run_id`, `run_uuid` and
+    licence block are stamped into the record, and its `run_uuid` is the `@id` of the
+    CreateAction the response carries.
 
     Everything happens in a TemporaryDirectory: the adapter's contract is file-in/file-out
     (matching the CLI flags exactly), and re-plumbing it for in-memory use would be a second
@@ -235,6 +240,7 @@ def build_document_record(
             rdf=pd.DataFrame(rows),
             document_json=str(baseline_path) if baseline_path is not None else None,
             document_json_out=str(out_path),
+            paradata_logger=paradata_logger,
         )
         record = load_document(str(out_path))
 

@@ -305,7 +305,13 @@ def test_an_image_response_conforms_with_every_field_present(manager):
     )
     assert body["predictions"] == [{"label": "TEXT", "score": 0.91}]
     # response_model sends every field: the nullable ones as null
-    assert (body["document_json"], body["document_json_schema_error"], body["paradata"]) == (None, None, None)
+    assert (body["document_json"], body["document_json_schema_error"]) == (None, None)
+    # ...and the call's CreateAction on every success (atrium-project#71 R2): with no record asked
+    # for, what it wrote is the predictions it answers with.
+    import atrium_rocrate
+
+    assert atrium_rocrate.action_problems(body["paradata"]) == []
+    assert [item["name"] for item in body["paradata"]["result"]] == ["predictions.json"]
 
 
 def test_an_image_response_with_a_seed_conforms_including_the_record(manager):
@@ -317,6 +323,25 @@ def test_an_image_response_with_a_seed_conforms_including_the_record(manager):
     }
     body = _conforms(200, client.post("/predict_image", files=files), "/predict_image")
     assert body["document_json"]["doc_id"] == _SEED_ID and body["document_json"]["page_categories"] == {"1": "TEXT"}
+
+
+def test_the_action_is_the_run_the_record_is_stamped_with(manager):
+    """atrium-project#71 R2: the CreateAction's `@id` is the run_uuid stamped into the blocks this
+    call wrote; `object` names the upload and the record sent with it, `result` the two blocks."""
+    import atrium_rocrate
+
+    files = {
+        "file": ("scan_0001.png", _png(), "image/png"),
+        "document_json": ("seed.document.json", json.dumps(_SEED).encode(), "application/json"),
+    }
+    body = _conforms(200, client.post("/predict_image", files=files), "/predict_image")
+    action, record = body["paradata"], body["document_json"]
+    assert atrium_rocrate.action_problems(action) == []
+    stamps = record["assembled"]["blocks"]
+    assert action["@id"] == stamps["page_categories"]["run_uuid"] == stamps["pages"]["run_uuid"]
+    assert record["assembled"]["blocks"]["pages"]["paradata_ref"] == action["@id"]
+    assert [item["@id"] for item in action["object"]][1:] == ["#record"]
+    assert {"#block-page_categories", "#block-pages"} <= {item["@id"] for item in action["result"]}
 
 
 def test_an_empty_record_part_still_originates_the_record(manager):
@@ -335,6 +360,14 @@ def test_a_document_response_conforms(manager, pdfium):
     body = _conforms(200, response, "/predict_document")
     assert [page["page"] for page in body["pages"]] == [1, 2]
     assert body["document_json"]["page_categories"] == {"1": "TEXT", "2": "TEXT"}
+
+    # The call's CreateAction (atrium-project#71 R2), with the PDF engine among its components.
+    import atrium_rocrate
+
+    action = body["paradata"]
+    assert atrium_rocrate.action_problems(action) == []
+    assert action["@id"] == body["document_json"]["assembled"]["blocks"]["page_categories"]["run_uuid"]
+    assert "pypdfium2" in json.dumps(action["paradataRecord"])
 
 
 @pytest.mark.parametrize(

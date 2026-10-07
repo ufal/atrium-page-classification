@@ -123,6 +123,10 @@ def _run_id_and_ref(paradata_logger: Any) -> tuple[Optional[str], str]:
     if paradata_logger is None:
         return None, ""
     run_id = getattr(paradata_logger, "run_id", None)
+    if hasattr(paradata_logger, "paradata_dir") and not paradata_logger.paradata_dir:
+        # A service run writes no paradata file (atrium-project#71): its stamp points at the
+        # run_uuid, the `@id` of the CreateAction the response carries.
+        return run_id, str(getattr(paradata_logger, "paradata_ref", "") or "")
     ref = f"paradata/{run_id}_{PROGRAM}.json" if run_id else ""
     return run_id, ref
 
@@ -165,6 +169,8 @@ def _write_one(
         PROGRAM,
         baseline=baseline,
         run_id=run_id,
+        # (atrium-project#71) the run's CreateAction `@id`, stamped with every block it writes.
+        run_uuid=getattr(paradata_logger, "run_uuid", None),
         paradata_ref=paradata_ref,
         strict=strict,
     )

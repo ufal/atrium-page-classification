@@ -472,8 +472,9 @@ class TestPredictDocumentDocumentJson:
             files={"file": ("CTX01.pdf", b"%PDF-1.4 fake", "application/pdf")},
         )
         assert response.status_code == 200
-        # limits_applied (atrium-project#53) is in every response; document_json is not.
-        assert set(response.json()) == {"type", "pages", "limits_applied"}
+        # limits_applied (atrium-project#53) and the call's CreateAction, paradata
+        # (atrium-project#71 R2), are in every response; document_json is not.
+        assert set(response.json()) == {"type", "pages", "limits_applied", "paradata"}
 
     def test_pages_are_rasterised_at_the_training_resolution(self, client, fake_pdfium):
         """PDFium renders at 72 dpi at scale 1; the training pages were made by pdf2png.sh at
