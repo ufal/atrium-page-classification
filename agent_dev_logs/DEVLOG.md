@@ -201,6 +201,19 @@ issue opens, matching its four siblings.
 * **Checks:** `-m "not slow"`: 733 passed, 7 skipped, 2 xfailed; ruff clean.
 * Tag draft: `v1.9.3-beta`. **Not pushed: files delivered in chat.**
 
+## 2026-10-07 (later) — The release bundle ships `atrium_rocrate.py`
+* **Why:** the `v1.9.3-beta` tag run
+  ([37624299589](https://github.com/ufal/atrium-page-classification/actions/runs/37624299589)) stopped at "Verify
+  bundle is self-contained". `service/api.py` imports `atrium_rocrate` since the CreateAction change, and the `cp`
+  list in `.github/workflows/release.yml` did not ship it. No release was published.
+* **Fix:** `atrium_rocrate.py` joins the `cp` list; `atrium_vocab.py`, which it imports, was already there.
+* **Checked locally** on `test` (`c8be0eb`) with the fix: the bundle check passes (23 modules), and so do the steps
+  after it: the version guard for `v1.9.3-beta`, the spec check, the stamp, and the compare against `v1.9.2-beta`
+  (compatible; oasdiff runs in CI only).
+* **Missed this morning:** the CreateAction change was checked with the test suite and the spec check, but not with
+  the bundle check, which only runs on a tag.
+* Tag: `v1.9.3-beta`, to be re-cut on the commit carrying this fix. **Not pushed: files delivered in chat.**
+
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
 state via the GitHub API (zero open), and the confirmed `@v1` reusable-workflow pin. Nothing removed from the issues
