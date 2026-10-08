@@ -14,8 +14,21 @@ from sklearn.metrics import ConfusionMatrixDisplay, classification_report
 
 from atrium_document import canonical_doc_id
 
-ImageFile.LOAD_TRUNCATED_IMAGES = True
-Image.MAX_IMAGE_PIXELS = 4221790634
+
+def tolerate_scan_quirks() -> None:
+    """Pillow settings for the batch tools: decode a truncated image (its missing part grey) and
+    allow up to 4.22 G pixels, which the large scans of the training collections need.
+
+    Process-wide, so it is a call the batch entry points make (`run.py`, `parallel_best.py`), not
+    something importing this module does. It used to run at import, and the service imports this
+    module lazily, on its first `/predict_image`: from then on the whole process decoded truncated
+    uploads into a classification of grey fill instead of refusing them with a 422 (`_decode_image`
+    in `service/api.py`), and its Pillow pixel guard went from "off" to 4.22 G. The first request
+    of a process behaved differently from every later one.
+    """
+    ImageFile.LOAD_TRUNCATED_IMAGES = True
+    Image.MAX_IMAGE_PIXELS = 4221790634
+
 
 #: Trailing PAGE NUMBER on a per-page image filename: `CTX01_0007.png` → doc `CTX01`,
 #: page `0007`. Greedy on purpose (last separator wins), so `report_2021_003` is

@@ -354,7 +354,9 @@ def _run_group(
     top_N: int,
 ) -> Tuple[Dict[str, pd.DataFrame], List[str]]:
     from classifier import ImageClassifier
-    from utils import dataframe_results
+    from utils import dataframe_results, tolerate_scan_quirks
+
+    tolerate_scan_quirks()
 
     classifiers: "OrderedDict[str, ImageClassifier]" = OrderedDict()
     for rev in group:
@@ -451,7 +453,9 @@ def run_best_sequential(
     paradata_logger=None,
 ) -> Dict[str, pd.DataFrame]:
     from classifier import ImageClassifier
-    from utils import dataframe_results
+    from utils import dataframe_results, tolerate_scan_quirks
+
+    tolerate_scan_quirks()
 
     all_rdfs: Dict[str, pd.DataFrame] = {}
     for rev, base_model in revision_best_models.items():

@@ -369,8 +369,17 @@ def main(argv=None):
 
     from classifier import ImageClassifier, average_model_weights, split_data_80_10_10, split_data_from_folds
     from parallel_best import run_best_models  # memory-aware best-models engine + averaging
-    from utils import collect_images, confusion_plot, dataframe_results, directory_scraper, doc_id_and_page
+    from utils import (
+        collect_images,
+        confusion_plot,
+        dataframe_results,
+        directory_scraper,
+        doc_id_and_page,
+        tolerate_scan_quirks,
+    )
     from yolo_classifier import YOLOClassifier
+
+    tolerate_scan_quirks()  # batch runs decode truncated scans; the service refuses them
 
     # ── data loading (train / eval) ───────────────────────────────────────────
     if args.train or args.eval:

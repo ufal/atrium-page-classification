@@ -214,6 +214,28 @@ issue opens, matching its four siblings.
   the bundle check, which only runs on a tag.
 * Tag: `v1.9.3-beta`, to be re-cut on the commit carrying this fix. **Not pushed: files delivered in chat.**
 
+## 2026-10-07 (evening) — A truncated image is refused for the life of the process
+* **Found in the atrium-project#53 audit (09-27), checked today:** `utils.py` set `ImageFile.LOAD_TRUNCATED_IMAGES =
+  True` and `Image.MAX_IMAGE_PIXELS = 4221790634` at import. The service imports `utils` lazily, in
+  `doc_id_for_image()` on the first `/predict_image`, so the first request of a process refused a truncated upload (422
+  from `_decode_image`) and every later one classified its grey fill. `service/api.py` had already worked around the
+  pixel half of the same history (`Image.MAX_IMAGE_PIXELS = None`, its own `MAX_IMAGE_PIXELS` check); the truncated
+  half had no such guard.
+* **Fix:** the two assignments left the import. `utils.tolerate_scan_quirks()` sets them, and the batch tools call it:
+  `run.py` after its `utils` import, `parallel_best.py` in both of its engines. The CLI decodes truncated scans as
+  before; the service no longer changes Pillow when it imports `utils`.
+* **`tests/test_pillow_switches.py` (5):** each case in a fresh interpreter, since the switches are process-wide:
+  importing `utils` and `doc_id_for_image()` leave them alone; a truncated JPEG is still refused after `utils` has been
+  imported; `tolerate_scan_quirks()` decodes it and sets both switches; `run.py` and `parallel_best.py` make the call.
+  All five fail on `test` (`5bc982c`) and pass now. No torch needed.
+* **Docs:** `service/README.md`: the published image is `ghcr.io/ufal/atrium-page-classification-api:<version>`, not
+  `…:<version>-api`; the dataset handle is `1-6184`, as in the README (hub #21).
+* **Checks:** full suite 750 tests, 0 failures, 12 skipped; ruff clean.
+* Not released: the fix rides the next page-classification tag (the maintainer's).
+* **Dev logs:** the pair of #48 belongs to a closed issue and can be deleted.
+
+  Files delivered in chat.
+
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
 state via the GitHub API (zero open), and the confirmed `@v1` reusable-workflow pin. Nothing removed from the issues

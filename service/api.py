@@ -141,9 +141,12 @@ MAX_UPLOAD_BYTES = int(MAX_UPLOAD_MB * 1024 * 1024)
 
 # The service checks the pixel count itself, against MAX_IMAGE_PIXELS, before anything is
 # decoded (_check_image_pixels). Pillow's own process-wide guard is switched off here
-# because it made the effective limit depend on request history: utils.py raises it to
-# 4.22 G px when it is first imported, which happens lazily on the first /predict_image,
+# because it made the effective limit depend on request history: utils.py raised it to
+# 4.22 G px when it was first imported, which happens lazily on the first /predict_image,
 # so the first request of a process ran with Pillow's default and every later one did not.
+# utils.py no longer touches Pillow's globals on import (tolerate_scan_quirks() is the batch
+# tools' call), so this stays true for the life of the process, and so does the 422 that
+# _decode_image gives a truncated image (tests/test_pillow_switches.py).
 Image.MAX_IMAGE_PIXELS = None
 
 #: The PDF rendering resolution's value at import, kept for the callers and tests that read

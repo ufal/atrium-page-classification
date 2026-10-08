@@ -456,7 +456,7 @@ image serves — equal to the release's `openapi.json.sha256` for an image built
 ## Shutdown behavior 🛑
 
 Issue [#55](https://github.com/ufal/atrium-project/issues/55). The published `api` image
-(`ghcr.io/ufal/atrium-page-classification:<version>-api`, new in that issue — before it
+(`ghcr.io/ufal/atrium-page-classification-api:<version>`, new in that issue — before it
 this service was only reachable via a compose entrypoint override, so no API image
 existed to deploy) declares `HEALTHCHECK` (shallow `GET /health`, via the vendored
 `service/healthcheck.py`) and `STOPSIGNAL SIGTERM`, and its `ENTRYPOINT` passes
@@ -572,6 +572,6 @@ Follow the file tree to the `atrium-page-classification/service/frontend-lindat`
 [^10]: https://developer.nvidia.com/cuda-python
 [^13]: https://huggingface.co/google/vit-base-patch16-384
 [^14]: https://huggingface.co/google/vit-large-patch16-384
-[^17]: http://hdl.handle.net/20.500.12800/1-5959
+[^17]: http://hdl.handle.net/20.500.12800/1-6184
 [^18]: https://huggingface.co/timm/regnety_160.swag_ft_in1k
 [^19]: https://huggingface.co/timm/tf_efficientnetv2_m.in21k_ft_in1k
