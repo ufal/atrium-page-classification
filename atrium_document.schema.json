@@ -26,7 +26,7 @@
 
   "allOf": [
     {
-      "$comment": "Stamp/payload coherence. assembled.blocks[<name>] is written by _stamp(), which runs only from set_block()/merge_block()/add_derived_from()/add_regenerable() -- i.e. only where the payload is written in the same call. So a stamp naming a block the record does not carry cannot be produced by the module, and means the record was hand-built, truncated in transit, or field-filtered down to nothing. One if/then per stampable name: the nine content blocks plus the two accreting maps. A name this table has not been taught (a newer block, rule 6) simply has no clause and passes -- the same abstain-rather-than-refuse idiom ORIGIN_ORIGINATORS uses."
+      "$comment": "Stamp/payload coherence. assembled.blocks[<name>] is written by _stamp(), which runs only from set_block()/merge_block()/add_derived_from()/add_regenerable() -- i.e. only where the payload is written in the same call. So a stamp naming a block the record does not carry cannot be produced by the module, and means the record was hand-built, truncated in transit, or field-filtered down to nothing. One if/then per stampable name: the eleven content blocks plus the two accreting maps. A name this table has not been taught (a newer block, rule 6) simply has no clause and passes -- the same abstain-rather-than-refuse idiom ORIGIN_ORIGINATORS uses."
     },
     { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["derived_from"] } } } } }, "then": { "required": ["derived_from"] } },
     { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["regenerable"] } } } } }, "then": { "required": ["regenerable"] } },
@@ -38,7 +38,9 @@
     { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["entities"] } } } } }, "then": { "required": ["entities"] } },
     { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["translations"] } } } } }, "then": { "required": ["translations"] } },
     { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["enrichment"] } } } } }, "then": { "required": ["enrichment"] } },
-    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["forms"] } } } } }, "then": { "required": ["forms"] } }
+    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["forms"] } } } } }, "then": { "required": ["forms"] } },
+    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["keywords"] } } } } }, "then": { "required": ["keywords"] } },
+    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["quality_summary"] } } } } }, "then": { "required": ["quality_summary"] } }
   ],
   "properties": {
     "schema_version": {
@@ -454,6 +456,66 @@
           }
         }
       }
+    },
+
+    "keywords": {
+      "description": "Owner: keyword-extract (atrium-project#73). The STATISTICAL keywords of the document and of each page: KeyBERT by default, YAKE or KER (`legacy`) when a run asks for them; one run writes one method's lists. The controlled-vocabulary keywords are `enrichment`'s and never appear here, and the two kinds are never merged into one list. A score means something different per method (KeyBERT: a cosine in [0, 1]; YAKE: normalised per document to [0, 1]; KER: an occurrence count), so compare scores only within one list; `rank` orders every list from 1.",
+      "type": "object",
+      "required": ["document", "pages"],
+      "additionalProperties": true,
+      "properties": {
+        "document": {
+          "type": "array",
+          "description": "The document's keywords, best first.",
+          "items": { "$ref": "#/$defs/statistical_keyword" }
+        },
+        "pages": {
+          "type": "array",
+          "description": "The same per page, in page order; empty when the run asked for document keywords only.",
+          "items": {
+            "type": "object",
+            "required": ["page", "keywords"],
+            "additionalProperties": true,
+            "properties": {
+              "page": { "type": "string", "description": "The page, as `lines[].page` has it." },
+              "keywords": { "type": "array", "items": { "$ref": "#/$defs/statistical_keyword" } }
+            }
+          }
+        }
+      }
+    },
+
+    "quality_summary": {
+      "description": "Owner: ocr-postprocess (atrium-project#73). A deterministic read-out of the stored quality fields, recomputed by atrium_document.quality_summary() whenever ocr-postprocess writes or scores pages and lines: statistics of `pages[].quality_score` and line counts per `lines[].categ`. Numbers only: no band, no threshold, and no tool reads it to route or refuse a document. `pages[].quality_score` stays the authoritative signal; a consumer that needs bands computes them from these numbers with its own thresholds.",
+      "type": "object",
+      "required": ["pages", "lines"],
+      "additionalProperties": true,
+      "properties": {
+        "pages": {
+          "type": "object",
+          "description": "`total`: rows in pages[]; `scored`: those with a quality_score; mean, median, min and max of those scores, absent when none is scored.",
+          "required": ["total", "scored"],
+          "additionalProperties": true,
+          "properties": {
+            "total": { "type": "integer", "minimum": 0 },
+            "scored": { "type": "integer", "minimum": 0 },
+            "mean": { "type": "number", "minimum": 0, "maximum": 1 },
+            "median": { "type": "number", "minimum": 0, "maximum": 1 },
+            "min": { "type": "number", "minimum": 0, "maximum": 1 },
+            "max": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "lines": {
+          "type": "object",
+          "description": "`total`: rows in lines[]; `by_categ`: rows per `categ` value (the `line-category` scheme). Rows without a category are `total` minus the sum.",
+          "required": ["total", "by_categ"],
+          "additionalProperties": true,
+          "properties": {
+            "total": { "type": "integer", "minimum": 0 },
+            "by_categ": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } }
+          }
+        }
+      }
     }
   },
 
@@ -489,6 +551,18 @@
       "properties": {
         "page": { "type": "string" },
         "line": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "statistical_keyword": {
+      "type": "object",
+      "description": "One statistical keyword (`keywords`): the phrase, the method that found it, the method's own score (higher is more relevant) and its place in its list.",
+      "required": ["keyword", "method", "score", "rank"],
+      "additionalProperties": true,
+      "properties": {
+        "keyword": { "type": "string", "minLength": 1 },
+        "method": { "type": "string", "minLength": 1, "examples": ["keybert", "yake", "legacy"] },
+        "score": { "type": "number" },
+        "rank": { "type": "integer", "minimum": 1 }
       }
     }
   }

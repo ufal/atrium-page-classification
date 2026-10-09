@@ -162,6 +162,12 @@ def same_program(a: Optional[str], b: Optional[str]) -> bool:
 #: `forms` has no such conflict — it is always llm-enrich (VLM/LLM-driven field
 #: extraction), regardless of whether the document is scanned or digital-born, so it
 #: is a plain single-owner block from day one.
+#:
+#: The two blocks of atrium-project#73 (2026-10-09) are named by their CURRENT program ids, since
+#: no predecessor ever wrote them: `keywords`, the statistical keywords, is keyword-extract's (the
+#: controlled ones stay in `enrichment`, and the two never share a list); `quality_summary`, the
+#: read-out of `quality_summary()` below, is the quality model's owner's. Neither is part of the
+#: positional plane, so ocr-postprocess writes `quality_summary` on a born-digital record as well.
 BLOCK_OWNERS: Dict[str, Union[str, Tuple[str, ...]]] = {
     "pages": ("alto-postprocess", "digital-convert"),
     "content": ("alto-postprocess", "digital-convert"),
@@ -172,6 +178,8 @@ BLOCK_OWNERS: Dict[str, Union[str, Tuple[str, ...]]] = {
     "entities": "nlp-enrich",
     "enrichment": "llm-enrich",
     "forms": "llm-enrich",
+    "keywords": "keyword-extract",
+    "quality_summary": "ocr-postprocess",
 }
 
 #: Which originator a document's `source.origin` authorises (Issue #18 §1a). Prefix
@@ -1366,9 +1374,11 @@ class DocumentRecord:
             "content",
             "lines",
             "tables",
+            "quality_summary",
             "entities",
             "translations",
             "enrichment",
+            "keywords",
             "forms",
         ]
         ordered = {k: out[k] for k in order if k in out}
@@ -1588,6 +1598,55 @@ def load_document(path: str) -> Dict[str, Any]:
         data = migrate_document(data)
 
     return data
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Derived read-outs (atrium-project#73)
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+def _score(value: Any) -> Optional[float]:
+    """A stored quality score as a float, or None (absent, a bool, not a number)."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    return float(value)
+
+
+def quality_summary(record: Dict[str, Any]) -> Dict[str, Any]:
+    """The `quality_summary` block of `record`: numbers read off its stored quality fields.
+
+    * `pages`: `total` rows; `scored`, those with a `quality_score`; and `mean`, `median`, `min`,
+      `max` of those scores (absent when none is scored);
+    * `lines`: `total` rows; `by_categ`, rows per `categ` value, in key order.
+
+    Pure and deterministic: the same `pages[]` and `lines[]` give the same dict, whatever else the
+    record holds; statistics are rounded to four decimals. It sets no threshold and makes no band,
+    so nothing in it can gate or route a document: `pages[].quality_score` stays the signal, and a
+    consumer computes its own bands from it (atrium-project#73). ocr-postprocess, the owner of the
+    quality model, writes the block whenever it writes or scores pages and lines.
+    """
+    pages = [row for row in record.get("pages") or [] if isinstance(row, dict)]
+    scores = sorted(s for s in (_score(row.get("quality_score")) for row in pages) if s is not None)
+    page_part: Dict[str, Any] = {"total": len(pages), "scored": len(scores)}
+    if scores:
+        middle = len(scores) // 2
+        median = scores[middle] if len(scores) % 2 else (scores[middle - 1] + scores[middle]) / 2
+        page_part.update(
+            mean=round(sum(scores) / len(scores), 4),
+            median=round(median, 4),
+            min=round(scores[0], 4),
+            max=round(scores[-1], 4),
+        )
+    lines = [row for row in record.get("lines") or [] if isinstance(row, dict)]
+    by_categ: Dict[str, int] = {}
+    for row in lines:
+        categ = row.get("categ")
+        if isinstance(categ, str) and categ:
+            by_categ[categ] = by_categ.get(categ, 0) + 1
+    return {
+        "pages": page_part,
+        "lines": {"total": len(lines), "by_categ": dict(sorted(by_categ.items()))},
+    }
 
 
 # ──────────────────────────────────────────────────────────────────────────────

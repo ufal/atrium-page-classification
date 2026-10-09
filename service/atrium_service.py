@@ -184,6 +184,10 @@ def build_info(
 #: atrium-llm-enrich#10 W6; raised by ``api-digital``). ``source_digest_mismatch`` followed on
 #: 2026-10-05: AMČR accepted it on atrium-digital-convert#2, and digital-convert, which holds the
 #: original's bytes, raises it; it published the code in its own spec from v1.1.0-beta.
+#: ``upstream_unavailable`` (2026-10-09, atrium-nlp-enrich#41) is the 502 of a backing service that
+#: did not answer after the tool's own retries, so a client (AMČR's Temporal activities) can tell an
+#: outage, which is worth retrying later, from a 502 with ``reason: null`` such as an empty run.
+#: A backing service's timeout is not this code: it is a 504 ``limit_exceeded`` naming the timeout.
 REASON_CODES: Dict[str, str] = {
     "limit_exceeded": (
         "The input is over one of the service's limits. The body's `limit` member names it "
@@ -218,6 +222,12 @@ REASON_CODES: Dict[str, str] = {
         "identity. Send the original the seed was made for, or a seed made for this file; do not retry "
         "unchanged."
     ),
+    "upstream_unavailable": (
+        "A backing service the tool calls (named at the start of `detail`, e.g. LINDAT UDPipe) did not "
+        "answer after the tool's own retries (HTTP 502): it returned a server error, or refused or dropped "
+        "the connection. The input is not at fault. Retry later with backoff. A backing service that timed "
+        "out is a 504 `limit_exceeded` instead."
+    ),
 }
 
 #: The HTTP statuses each registered code may be sent with (§4.4). ``error_body`` and
@@ -231,6 +241,7 @@ REASON_STATUSES: Dict[str, Tuple[int, ...]] = {
     "invalid_record": (422,),
     "ocr_text_layer": (422,),
     "source_digest_mismatch": (422,),
+    "upstream_unavailable": (502,),
 }
 
 

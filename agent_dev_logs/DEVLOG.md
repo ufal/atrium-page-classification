@@ -236,6 +236,16 @@ issue opens, matching its four siblings.
 
   Files delivered in chat.
 
+## 2026-10-09 — Shared modules re-vendored (atrium-project#73, atrium-nlp-enrich#41)
+* `atrium_document.py`, `atrium_document.schema.json`, `service/atrium_service.py`,
+  `tests/test_document_originators.py` and `tests/test_schema_freeze.py` re-vendored from the hub: the record's
+  `keywords` and `quality_summary` blocks (owned by keyword-extract and ocr-postprocess; this repository writes
+  neither) and the reason `upstream_unavailable`. `service/openapi.json` regenerated (the hoisted record schema, the
+  reason list). No behaviour change, no release.
+* **Checks:** 751 passed, 10 skipped, 2 xfailed; ruff check and format clean; spec current; image closure OK.
+
+  Files delivered in chat.
+
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
 state via the GitHub API (zero open), and the confirmed `@v1` reusable-workflow pin. Nothing removed from the issues

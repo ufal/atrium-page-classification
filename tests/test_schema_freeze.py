@@ -60,6 +60,12 @@ FREEZES: Dict[int, Dict[str, str]] = {
 #: The `run_uuid` pattern, shared by its two registered pointers: `urn:uuid:` and a lower-case UUID.
 _RUN_UUID_PATTERN = "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
 
+
+def _stamp_clause(block: str) -> Dict[str, Any]:
+    """The schema's `allOf` stamp/payload clause for `block`: stamped in `assembled.blocks`, so present."""
+    stamped = {"properties": {"assembled": {"required": ["blocks"], "properties": {"blocks": {"required": [block]}}}}}
+    return {"if": {"required": ["assembled"], **stamped}, "then": {"required": [block]}}
+
 #: Every structural change to the schema since the freeze of the current MAJOR, keyed by the JSON
 #: pointer it lives under. `schema` is the node at that pointer NOW, annotations left out -- so the
 #: register reads as the post-freeze contract, and a later edit under a registered pointer (a
@@ -96,6 +102,93 @@ POST_FREEZE_CHANGES: Dict[str, Dict[str, Any]] = {
         "schema": {"type": "string", "enum": ["digital", "garbled", "ocr", "none", "blank"]},
         "issue": "ufal/atrium-project#71",
         "changelog": "2026-10-05",
+    },
+    "/properties/keywords": {
+        "kind": "added: optional block, keyword-extract's statistical keywords per document and per page",
+        "schema": {
+            "type": "object",
+            "required": ["document", "pages"],
+            "additionalProperties": True,
+            "properties": {
+                "document": {"type": "array", "items": {"$ref": "#/$defs/statistical_keyword"}},
+                "pages": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": ["page", "keywords"],
+                        "additionalProperties": True,
+                        "properties": {
+                            "page": {"type": "string"},
+                            "keywords": {"type": "array", "items": {"$ref": "#/$defs/statistical_keyword"}},
+                        },
+                    },
+                },
+            },
+        },
+        "issue": "ufal/atrium-project#73",
+        "changelog": "2026-10-09",
+    },
+    "/$defs/statistical_keyword": {
+        "kind": "added: the item of `keywords`, with its method, score and rank",
+        "schema": {
+            "type": "object",
+            "required": ["keyword", "method", "score", "rank"],
+            "additionalProperties": True,
+            "properties": {
+                "keyword": {"type": "string", "minLength": 1},
+                "method": {"type": "string", "minLength": 1},
+                "score": {"type": "number"},
+                "rank": {"type": "integer", "minimum": 1},
+            },
+        },
+        "issue": "ufal/atrium-project#73",
+        "changelog": "2026-10-09",
+    },
+    "/properties/quality_summary": {
+        "kind": "added: optional block, ocr-postprocess's read-out of the stored page and line quality",
+        "schema": {
+            "type": "object",
+            "required": ["pages", "lines"],
+            "additionalProperties": True,
+            "properties": {
+                "pages": {
+                    "type": "object",
+                    "required": ["total", "scored"],
+                    "additionalProperties": True,
+                    "properties": {
+                        "total": {"type": "integer", "minimum": 0},
+                        "scored": {"type": "integer", "minimum": 0},
+                        "mean": {"type": "number", "minimum": 0, "maximum": 1},
+                        "median": {"type": "number", "minimum": 0, "maximum": 1},
+                        "min": {"type": "number", "minimum": 0, "maximum": 1},
+                        "max": {"type": "number", "minimum": 0, "maximum": 1},
+                    },
+                },
+                "lines": {
+                    "type": "object",
+                    "required": ["total", "by_categ"],
+                    "additionalProperties": True,
+                    "properties": {
+                        "total": {"type": "integer", "minimum": 0},
+                        "by_categ": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+                    },
+                },
+            },
+        },
+        "issue": "ufal/atrium-project#73",
+        "changelog": "2026-10-09",
+    },
+    "/allOf/12": {
+        "kind": "added: a stamped `keywords` must be present (stamp/payload coherence)",
+        "schema": _stamp_clause("keywords"),
+        "issue": "ufal/atrium-project#73",
+        "changelog": "2026-10-09",
+    },
+    "/allOf/13": {
+        "kind": "added: a stamped `quality_summary` must be present (stamp/payload coherence)",
+        "schema": _stamp_clause("quality_summary"),
+        "issue": "ufal/atrium-project#73",
+        "changelog": "2026-10-09",
     },
 }
 

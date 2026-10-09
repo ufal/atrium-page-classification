@@ -72,6 +72,7 @@ from atrium_document import (
     canonical_program,
     merge_document_records,
     ocr_handoff_pages,
+    quality_summary,
     resolve_originator,
     same_program,
     validate_document,
@@ -1274,3 +1275,112 @@ def test_a_deferred_hand_off_is_judged_per_page(tmp_path, mock_paradata):
     with pytest.raises(ValueError, match=r"page\(s\) \['2'\]"):
         doc.set_source(origin="digital-born-pdf", filename="CTX000000001.pdf")
         doc.to_dict()
+
+
+# ── atrium-project#73: the `keywords` and `quality_summary` blocks ─────────────────────────────
+
+_KEYWORDS = {
+    "document": [{"keyword": "hradiště", "method": "keybert", "score": 0.71, "rank": 1}],
+    "pages": [{"page": "1", "keywords": [{"keyword": "sonda", "method": "keybert", "score": 0.64, "rank": 1}]}],
+}
+
+
+def test_the_two_blocks_of_73_have_one_writer_each():
+    """Neither block is field-split, keyed or part of the positional plane: one writer, set_block()."""
+    assert BLOCK_OWNERS["keywords"] == "keyword-extract"
+    assert BLOCK_OWNERS["quality_summary"] == OCR
+    for block in ("keywords", "quality_summary"):
+        assert block not in BLOCK_FIELD_OWNERS and block not in BLOCK_KEY_FIELDS
+
+
+def test_keyword_extract_writes_both_kinds_side_by_side_never_in_one_list(tmp_path, mock_paradata):
+    with _open(tmp_path, mock_paradata, "keyword-extract", origin="ocr:pero") as doc:
+        doc.set_block("enrichment", {"items": [{"page": "1", "teater_category": "hradiště",
+                                                "extracted_keywords_cs": ["val"], "extracted_keywords_en": ["rampart"]}]})
+        doc.set_block("keywords", _KEYWORDS)
+        record = doc.to_dict()
+        doc.finalize(str(tmp_path / "kw.document.json"))
+    blocks = record["assembled"]["blocks"]
+    assert blocks["keywords"]["program"] == blocks["enrichment"]["program"] == "keyword-extract"
+    assert record["keywords"] == _KEYWORDS and "keywords" not in record["enrichment"]
+    validate_document(record)
+
+
+def test_no_other_program_writes_keywords(tmp_path, mock_paradata):
+    """llm-enrich never wrote the block, so its name is not a writer of it either."""
+    for program in ("nlp-enrich", "llm-enrich", OCR):
+        doc = _open(tmp_path, mock_paradata, program, origin="ocr:pero")
+        with pytest.raises(ValueError, match="owned by keyword-extract"):
+            doc.set_block("keywords", _KEYWORDS)
+
+
+def test_a_keyword_without_its_method_or_rank_does_not_validate(tmp_path, mock_paradata):
+    with _open(tmp_path, mock_paradata, "keyword-extract", origin="ocr:pero") as doc:
+        doc.set_block("keywords", {"document": [{"keyword": "val", "score": 0.5}], "pages": []})
+        record = doc.to_dict()
+        doc.finalize(str(tmp_path / "kw.document.json"))
+    with pytest.raises(Exception, match="method|rank"):
+        validate_document(record)
+
+
+def test_a_stamp_without_its_block_does_not_validate(tmp_path, mock_paradata):
+    """The schema's stamp/payload clauses cover the two new blocks."""
+    for program, block, payload in (("keyword-extract", "keywords", _KEYWORDS),
+                                    (OCR, "quality_summary", quality_summary({}))):
+        with _open(tmp_path, mock_paradata, program, origin="ocr:pero") as doc:
+            doc.set_block(block, payload)
+            record = doc.to_dict()
+            doc.finalize(str(tmp_path / f"{block}.document.json"))
+        validate_document(record)
+        del record[block]
+        with pytest.raises(Exception, match=block):
+            validate_document(record)
+
+
+def test_ocr_postprocess_writes_the_summary_on_a_born_digital_record(tmp_path, mock_paradata, capsys):
+    """The summary is not part of the positional plane, so §1a has nothing to say about it."""
+    baseline = _digital_baseline(tmp_path, mock_paradata)
+    doc = DocumentRecord("CTX000000001", OCR, baseline=baseline, out_dir=str(tmp_path), strict=True)
+    doc.set_block("quality_summary", quality_summary(baseline))
+    record = doc.to_dict()
+    assert record["assembled"]["blocks"]["quality_summary"]["program"] == OCR
+    assert record["assembled"]["blocks"]["pages"]["program"] == DIGITAL
+    assert record["quality_summary"]["lines"] == {"total": 2, "by_categ": {"Garbage": 1}}
+    validate_document(record)
+
+
+def test_quality_summary_reads_numbers_off_the_stored_fields():
+    record = {
+        "pages": [
+            {"page": "1", "quality_score": 0.9, "quality_band": "Clear"},
+            {"page": "2", "quality_score": 0.5},
+            {"page": "3"},
+            {"page": "4", "quality_score": True},
+            {"page": "5", "quality_score": 0.123456},
+        ],
+        "lines": [
+            {"page": "1", "line": 0, "categ": "Clear"},
+            {"page": "1", "line": 1, "categ": "Clear"},
+            {"page": "2", "line": 0, "categ": "Trash"},
+            {"page": "2", "line": 1, "categ": "Noisy"},
+            {"page": "3", "line": 0},
+        ],
+    }
+    assert quality_summary(record) == {
+        "pages": {"total": 5, "scored": 3, "mean": 0.5078, "median": 0.5, "min": 0.1235, "max": 0.9},
+        "lines": {"total": 5, "by_categ": {"Clear": 2, "Noisy": 1, "Trash": 1}},
+    }
+    assert quality_summary({}) == {"pages": {"total": 0, "scored": 0}, "lines": {"total": 0, "by_categ": {}}}
+
+
+def test_quality_summary_is_deterministic_and_reads_nothing_else():
+    """Same pages[] and lines[] in, the same summary out; other blocks change nothing; no band."""
+    record = {"pages": [{"page": "1", "quality_score": 0.8}, {"page": "2", "quality_score": 0.6}],
+              "lines": [{"page": "1", "line": 0, "categ": "Noisy"}]}
+    first = quality_summary(record)
+    assert json.dumps(first, sort_keys=False) == json.dumps(quality_summary(json.loads(json.dumps(record))))
+    noisy = dict(record, entities=[{"page": "1", "line": 0, "surface": "Praha"}], keywords=_KEYWORDS,
+                 page_categories={"1": "TEXT"})
+    assert quality_summary(noisy) == first
+    assert first["pages"]["median"] == 0.7
+    assert "band" not in json.dumps(first)
