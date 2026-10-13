@@ -420,7 +420,20 @@
               "page": { "type": ["string", "null"], "description": "Page label from the nearest PAGE_BREAK / '## Page N' marker." },
               "extracted_keywords_cs": { "type": "array", "items": { "type": "string" } },
               "extracted_keywords_en": { "type": "array", "items": { "type": "string" } },
-              "teater_category": { "type": "string", "description": "Single most relevant TEATER/AMCR vocabulary category." },
+              "teater_category": { "type": "string", "description": "Single most relevant TEATER/AMCR vocabulary category: the source label as the vocabulary spells it (e.g. `kostel`), not an ATRIUM theme." },
+              "teater_category_ids": {
+                "type": "array",
+                "description": "The AMCR and TEATER records `teater_category` stands for, by id: its own and those of the same label the vocabulary build merged into it. Written by keyword-extract; the RO-Crate names them by their source URIs (`https://api.aiscr.cz/id/<id>`, `https://teater.aiscr.cz/id/<id>`).",
+                "items": {
+                  "type": "object",
+                  "required": ["source", "id"],
+                  "additionalProperties": true,
+                  "properties": {
+                    "source": { "type": "string", "description": "`amcr` or `teater`." },
+                    "id": { "type": "string", "description": "The record's id in its source (`HES-…` for AMCR)." }
+                  }
+                }
+              },
               "confidence_score": { "type": "number", "minimum": 0, "maximum": 1 },
               "citation": { "type": "string", "examples": ["[Source: CTX000000001, Page 1]"] }
             }

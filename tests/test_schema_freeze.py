@@ -178,6 +178,20 @@ POST_FREEZE_CHANGES: Dict[str, Dict[str, Any]] = {
         "issue": "ufal/atrium-project#73",
         "changelog": "2026-10-09",
     },
+    "/properties/enrichment/properties/items/items/properties/teater_category_ids": {
+        "kind": "added: optional, the AMČR/TEATER records an item's label stands for (the crate's source URIs)",
+        "schema": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": ["source", "id"],
+                "additionalProperties": True,
+                "properties": {"source": {"type": "string"}, "id": {"type": "string"}},
+            },
+        },
+        "issue": "ufal/atrium-project#51",
+        "changelog": "2026-10-13",
+    },
     "/allOf/12": {
         "kind": "added: a stamped `keywords` must be present (stamp/payload coherence)",
         "schema": _stamp_clause("keywords"),

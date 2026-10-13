@@ -703,7 +703,11 @@ _ERROR_DESCRIPTIONS: Dict[int, str] = {
     429: "Busy (`reason: busy`): every processing slot or queue place is taken. Retry after `Retry-After` seconds.",
     500: "Processing failed. Report it; do not retry blindly.",
     501: "This deployment cannot read the input: a reader's optional dependency is not installed.",
-    502: "An upstream service failed. Retry three times with backoff.",
+    502: (
+        "An upstream service failed or the run produced nothing. With `reason: upstream_unavailable` a "
+        "backing service did not answer after the tool's own retries: retry three times with backoff. "
+        "Without a reason, `detail` names the cause; an input that yielded nothing fails the same way again."
+    ),
     503: "Not ready, warming up or draining. Retry three times with backoff.",
     504: "A time limit that depends on an upstream service expired (`reason: limit_exceeded`). Retry with backoff.",
 }

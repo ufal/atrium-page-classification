@@ -279,6 +279,52 @@ class TestRunCrate:
         assert per_doc_growth < len(rc.document_crate(record)["@graph"])
 
 
+class TestSourceConcepts:
+    """atrium-project#51 V-5: `teater_category` holds an AMČR/TEATER label, not an ATRIUM theme, so
+    the crate names the concepts in `teater_category_ids` by their own URIs and mints nothing."""
+
+    AMCR = "https://api.aiscr.cz/id/HES-000021"
+    TEATER = "https://teater.aiscr.cz/id/1333"
+
+    @staticmethod
+    def _crate(record, *items):
+        return rc.document_crate(dict(record, enrichment={"items": list(items)}))
+
+    def test_ids_become_the_sources_own_concepts(self, record):
+        ids = [{"source": "amcr", "id": "HES-000021"}, {"source": "teater", "id": "1333"}]
+        crate = self._crate(record, {"teater_category": "kostel", "teater_category_ids": ids})
+        by_id = _by_id(crate)
+        amcr = by_id[self.AMCR]
+        assert (amcr["@type"], amcr["name"], amcr["termCode"]) == ("DefinedTerm", "kostel", "HES-000021")
+        assert amcr["inDefinedTermSet"] == {"@id": rc.ATRIUM_BASE + "scheme/amcr-harvest"}
+        assert by_id[self.TEATER]["inDefinedTermSet"] == {"@id": rc.ATRIUM_BASE + "scheme/teater-harvest"}
+        assert by_id[rc.ATRIUM_BASE + "scheme/amcr-harvest"]["@type"] == "DefinedTermSet"
+        assert {self.AMCR, self.TEATER} <= {r["@id"] for r in by_id[rc.ROOT_ID]["about"]}
+
+    def test_a_label_without_ids_is_never_minted(self, record):
+        crate = self._crate(record, {"teater_category": "kostel"}, {"teater_category": "hradiště", "teater_category_ids": []})
+        assert "/theme/" not in rc.to_json(crate)
+        assert not [e for e in crate["@graph"] if e.get("name") in ("kostel", "hradiště")]
+
+    def test_unknown_sources_and_malformed_ids_are_skipped(self, record):
+        ids = [{"source": "getty", "id": "300000000"}, {"source": "amcr", "id": ""}, "HES-000021", {"source": "amcr"}]
+        crate = self._crate(record, {"teater_category": "kostel", "teater_category_ids": ids})
+        assert not [e for e in crate["@graph"] if e.get("name") == "kostel"]
+
+    def test_one_concept_under_two_labels_is_one_term_whatever_the_order(self, record):
+        ref = [{"source": "amcr", "id": "HES-000021"}]
+        a = {"teater_category": "zámek", "teater_category_ids": ref}
+        b = {"teater_category": "hrad", "teater_category_ids": ref}
+        first, second = self._crate(record, a, b), self._crate(record, b, a)
+        assert rc.to_json(first) == rc.to_json(second)
+        assert [e["name"] for e in first["@graph"] if e["@id"] == self.AMCR] == ["hrad"]
+
+    def test_the_source_uris_survive_degraded_mode(self, record, monkeypatch):
+        monkeypatch.setattr(rc, "atrium_vocab", None)
+        crate = self._crate(record, {"teater_category": "kostel", "teater_category_ids": [{"source": "amcr", "id": "HES-000021"}]})
+        assert _by_id(crate)[self.AMCR]["inDefinedTermSet"] == {"@id": rc.ATRIUM_BASE + "scheme/amcr-harvest"}
+
+
 class TestSerialisation:
     def test_to_json_is_byte_stable(self, crate):
         assert rc.to_json(crate) == rc.to_json(crate)

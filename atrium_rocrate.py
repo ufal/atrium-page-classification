@@ -46,9 +46,10 @@ Standard library only. An RDF library is deliberately **not** introduced, for th
 its input, and the output is drift-gated by byte comparison. The conformance check is the
 RO-Crate validator, run in the hub's CI (``tools/ci/rocrate_check.py``), never a dependency here.
 
-``atrium_vocab`` is imported softly — with it, every controlled term in the record becomes a
+``atrium_vocab`` is imported softly — with it, every ATRIUM-controlled term in the record becomes a
 ``DefinedTerm`` with a resolvable ``https://w3id.org/atrium/`` URI; without it the crate is still
-valid, just less semantic.
+valid, just less semantic. An AMČR or TEATER concept the record names by id
+(``enrichment.items[].teater_category_ids``) keeps its own source URI in either mode.
 
 DETERMINISM
 ===========
@@ -163,8 +164,17 @@ CONTROLLED_TERMS: Tuple[Tuple[str, str], ...] = (
     ("lines[].categ", "line-category"),
     ("entities[].type_teitok", "entity-type"),
     ("entities[].type_cnec", "cnec"),
-    ("enrichment.items[].teater_category", "theme"),
 )
+
+#: The source thesauri a record names concepts of, by id, in `enrichment.items[].teater_category_ids`
+#: (keyword-extract writes them): source -> (concept namespace, the ATRIUM harvest scheme the
+#: released vocabulary asset files them under). The concepts keep their own URIs, so the crate
+#: references them and mints nothing. `teater_category` itself is a source label, not an ATRIUM
+#: theme (V-5 in docs/skos_strategy.md), so it never becomes an ATRIUM URI either.
+SOURCE_CONCEPTS: Dict[str, Tuple[str, str]] = {
+    "amcr": (getattr(atrium_vocab, "NS", {}).get("amcr", "https://api.aiscr.cz/id/"), "amcr-harvest"),
+    "teater": (getattr(atrium_vocab, "NS", {}).get("teater", "https://teater.aiscr.cz/id/"), "teater-harvest"),
+}
 
 #: Terms this module emits that the RO-Crate 1.2 context does not define, declared in the
 #: crate's own `@context` so the graph stays interpretable without a side agreement. The
@@ -329,10 +339,32 @@ def _controlled_values(record: Dict[str, Any]) -> List[Tuple[str, str]]:
         if isinstance(ent, dict):
             add("entity-type", ent.get("type_teitok"))
             add("cnec", ent.get("type_cnec"))
-    for item in (record.get("enrichment") or {}).get("items") or []:
-        if isinstance(item, dict):
-            add("theme", item.get("teater_category"))
     return sorted(found)
+
+
+def _source_concepts(record: Dict[str, Any]) -> List[Tuple[str, str, str]]:
+    """Every (source, id, label) the record's enrichment items name, deduplicated and sorted.
+
+    The ids come from `teater_category_ids`; an item without them contributes nothing, since its
+    `teater_category` label alone cannot be resolved without guessing. When two items name the
+    same concept under different labels, the first label in sort order is kept, so the output
+    stays deterministic.
+    """
+    labels: Dict[Tuple[str, str], str] = {}
+    for item in (record.get("enrichment") or {}).get("items") or []:
+        if not isinstance(item, dict):
+            continue
+        label = item.get("teater_category")
+        for ref in item.get("teater_category_ids") or []:
+            if not isinstance(ref, dict):
+                continue
+            source, concept_id = ref.get("source"), ref.get("id")
+            if source not in SOURCE_CONCEPTS or not isinstance(concept_id, str) or not concept_id:
+                continue
+            name = label if isinstance(label, str) and label else concept_id
+            key = (source, concept_id)
+            labels[key] = min(labels.get(key, name), name)
+    return sorted((source, concept_id, name) for (source, concept_id), name in labels.items())
 
 
 def _concept_uri(scheme: str, value: str) -> str:
@@ -985,6 +1017,19 @@ def document_crate(
                 "name": value,
                 "termCode": value,
                 "inDefinedTermSet": _ref(_scheme_uri(scheme)),
+            }
+        )
+    for source, concept_id, name in _source_concepts(record):
+        namespace, harvest = SOURCE_CONCEPTS[source]
+        schemes.add(harvest)
+        about.append(namespace + concept_id)
+        graph.append(
+            {
+                "@id": namespace + concept_id,
+                "@type": "DefinedTerm",
+                "name": name,
+                "termCode": concept_id,
+                "inDefinedTermSet": _ref(_scheme_uri(harvest)),
             }
         )
     for scheme in sorted(schemes):
