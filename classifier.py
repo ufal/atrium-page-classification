@@ -498,12 +498,16 @@ class ImageClassifier:
         """
         print(f"Accessing the Hugging Face Hub repository {repo_id}, revision {revision}...")
 
+        # On this classifier's device, as every other load puts it: left on the CPU, the model
+        # failed each inference on a GPU node ("Input type (torch.cuda.FloatTensor) and weight
+        # type (torch.FloatTensor) should be the same"), and the "all" ensemble went on with the
+        # models that had loaded from local copies (atrium-digital-convert#5, 2026-10-14).
         model = AutoModelForImageClassification.from_pretrained(
             repo_id,
             revision=revision,
             num_labels=self.model.config.num_labels,  # ← pass through num_labels
             ignore_mismatched_sizes=True,  # ← allow head size mismatch
-        )
+        ).to(self.device)
         processor = AutoImageProcessor.from_pretrained(repo_id, revision=revision)
 
         self.model, self.processor = model, processor

@@ -72,6 +72,32 @@ def test_split_data_80_10_10_stratification():
     assert val_class_1 == 4
 
 
+def test_a_model_loaded_from_the_hub_is_moved_to_the_classifier_s_device():
+    """A first start downloads the models from the Hub. Left on the CPU there, a model failed
+    every inference on a GPU node, and the "all" ensemble silently went on without it
+    (atrium-digital-convert#5: 3 of 5 models, 533 pages)."""
+    from unittest.mock import MagicMock, patch
+
+    import classifier
+
+    clf = classifier.ImageClassifier.__new__(classifier.ImageClassifier)
+    clf.device = torch.device("cpu")
+    clf.model = MagicMock()
+    clf.model.config.num_labels = 11
+    loaded = MagicMock()
+    with (
+        patch.object(
+            classifier.AutoModelForImageClassification, "from_pretrained", return_value=loaded
+        ) as from_pretrained,
+        patch.object(classifier.AutoImageProcessor, "from_pretrained", return_value="processor"),
+    ):
+        clf.load_from_hub("ufal/vit-historical-page", revision="v2.4")
+    loaded.to.assert_called_once_with(clf.device)
+    assert clf.model is loaded.to.return_value and clf.processor == "processor"
+    assert from_pretrained.call_args.kwargs["revision"] == "v2.4"
+    assert from_pretrained.call_args.kwargs["num_labels"] == 11
+
+
 @pytest.mark.slow
 def test_image_classifier_instantiation():
     """Test actual model loading logic (marked slow to skip in fast CI)."""

@@ -38,6 +38,11 @@ class ModelManager:
         self.models = {}
         self.available_versions = AVAILABLE_VERSIONS
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        # Versions whose inference failed and has not succeeded since: their error is logged
+        # once, not once per page (a 529-page document logged 1,599 identical errors).
+        self._failing: set = set()
+        # Versions an ensemble answer has already been reported without (WARNING once).
+        self._warned: set = set()
 
     def _get_base_model_id(self, version: str) -> str:
         # One resolution rule, shared with service/api.py's up-front `version` check
@@ -162,17 +167,29 @@ class ModelManager:
 
     def _predict_averaged(self, image, topn):
         predictions_list = []
+        failed = []
 
         for v in self.available_versions:
             try:
                 results = self._run_single_inference(v, image, topn=len(CATEGORIES))
                 if isinstance(results, dict) and "error" in results:
+                    failed.append(v)
                     continue
                 predictions_list.append(results)
             except Exception as e:
                 logger.warning(f"Ensemble: model {v} failed, skipping: {e}")
+                failed.append(v)
                 continue
 
+        if failed and predictions_list:
+            # The answer is still an ensemble's, of fewer models: say so where it shows.
+            level = logging.DEBUG if set(failed) <= self._warned else logging.WARNING
+            logger.log(
+                level,
+                f"Ensemble: {len(predictions_list)} of {len(self.available_versions)} models "
+                f"answered; failing: {', '.join(failed)}",
+            )
+            self._warned |= set(failed)
         if not predictions_list:
             return {"error": "All models failed."}
         return average_prediction_dicts(predictions_list, CATEGORIES, topn)
@@ -181,9 +198,14 @@ class ModelManager:
         try:
             clf = self.load_model(version)
             predictions = clf.top_n_predictions(image, top_n=topn)
+            self._failing.discard(version)
             return [{"label": CATEGORIES[i], "score": float(s)} for i, s in predictions]
         except Exception as e:
-            logger.error(f"Inference failed for model {version}: {e}")
+            if version in self._failing:
+                logger.debug(f"Inference failed for model {version} again: {e}")
+            else:
+                logger.error(f"Inference failed for model {version}: {e}")
+                self._failing.add(version)
             return {"error": str(e)}
 
 

@@ -90,6 +90,32 @@ def test_predict_averaged_ensemble(mock_single, manager, dummy_image):
     assert res[0]["score"] == 0.70  # (0.8 + 0.6) / 2
 
 
+def test_a_failing_model_is_reported_once_and_the_others_still_answer(manager, dummy_image, caplog):
+    """atrium-digital-convert#5: 3 of 5 models failed on every page and logged 1,599 identical
+    errors, while the answer said nothing. Now: one ERROR per failing version, one WARNING that
+    the ensemble answered with fewer models, and the average of the models that answered."""
+    import logging
+
+    manager.available_versions = ["v1", "v2", "v3"]
+    good = MagicMock()
+    good.top_n_predictions.return_value = [(0, 0.9), (1, 0.1)]
+    bad = MagicMock()
+    bad.top_n_predictions.side_effect = RuntimeError(
+        "Input type (torch.cuda.FloatTensor) and weight type (torch.FloatTensor) should be the same"
+    )
+    with (
+        patch.object(manager, "load_model", side_effect=lambda v: bad if v == "v2" else good),
+        patch("service.inference.CATEGORIES", ["DRAW", "TEXT"]),
+        caplog.at_level(logging.DEBUG, logger="service.inference"),
+    ):
+        results = [manager.predict(dummy_image, version="all", topn=1) for _ in range(3)]
+    assert all(r == [{"label": "DRAW", "score": 0.9}] for r in results)
+    errors = [r.getMessage() for r in caplog.records if r.levelno == logging.ERROR]
+    warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
+    assert len(errors) == 1 and errors[0].startswith("Inference failed for model v2")
+    assert warnings == ["Ensemble: 2 of 3 models answered; failing: v2"]
+
+
 @patch("os.listdir")
 @patch.object(ModelManager, "load_model")
 def test_predict_directory_batch(mock_load, mock_listdir, manager):
