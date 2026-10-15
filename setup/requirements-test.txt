@@ -26,4 +26,4 @@ PyYAML>=6.0.3
 # The PDF engine of /predict_document (service/requirements.txt, same range): a ~3 MB wheel,
 # so tests/test_service_document_json.py's TestRealPdfium drives the real engine in the fast
 # lane instead of only a stand-in (atrium-project#72 D.1).
-pypdfium2>=5.13.0,<6.0
+pypdfium2>=5.14.0,<6.0
