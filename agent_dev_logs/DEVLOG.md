@@ -1,5 +1,8 @@
 # 📓 atrium-page-classification — agent_dev_logs/DEVLOG.md (timeline index)
-> _Historical page-image classification. No open issue here (#48 closed 2026-09-17; #15 and #26 closed). Its pilot work is tracked in hub issues (atrium-project #6, #53, #67). `test` HEAD `2e27073` (2026-09-26) · **v1.8.0-beta** (2026-09-16)._
+> _Historical page-image classification. No open issue here (#48 closed 2026-09-17; #15 and #26 closed; two open
+> Dependabot PRs, #56 and #57, as of 2026-10-15). Its pilot work is tracked in hub issues (atrium-project #6, #67, #72)
+> and in atrium-digital-convert#5. `test` = `f6c1aeb` (2026-10-14: the Hub-loader fix, unreleased) · **v1.9.3-beta**
+> (2026-10-07, `5bc982c`; published mutable, so its successor needs immutable releases turned on first, atrium-project#72)._
 > _Per-issue detail: `digests/48.digest.md` · `plans/48.plan.md` (the issue closed 2026-09-17 and its export was removed; the pair is to be removed too). This header previously claimed no such exports existed; they have since 2026-09-07. The 2026-08-02 → 09-06 entries below predate them and are reconstructed from `CONTRIBUTING.md`'s release-note table (source of truth for that window) and commit history, not from a digest._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
@@ -259,6 +262,28 @@ issue opens, matching its four siblings.
 * **Checks:** the API-contract and vendored shared tests, 223 passed; spec current.
 
   Files delivered in chat.
+
+## 2026-10-15 — The Hub loader puts its model on the device (atrium-digital-convert#5)
+* **Why:** in digital-convert#5's run of 2026-10-14 (job 7100515, stage 61), `classifier.load_from_hub` left the
+  three ViT models (v2.4, v3.4, v5.4) on the CPU on a GPU node. Every inference failed: "Input type
+  (torch.cuda.FloatTensor) and weight type (torch.FloatTensor) should be the same". The `all` ensemble answered
+  with the two models left, and nothing in its answer said so. 21 of the 533 routes there differ from the run with
+  all five models.
+* **`f6c1aeb` (14 October):**
+  * `classifier.py`: `load_from_hub` moves the model to `self.device`, as every other load does;
+  * `service/inference.py`: a failing model is logged once, not once per page (a 529-page document had logged
+    1,599 identical errors). An ensemble answer from fewer models logs "N of M models answered; failing: …" at
+    WARNING the first time.
+  * Tests: `tests/test_classifier.py`
+    `test_a_model_loaded_from_the_hub_is_moved_to_the_classifier_s_device` and `tests/test_inference.py`
+    `test_a_failing_model_is_reported_once_and_the_others_still_answer`.
+* **CI:** green on `f6c1aeb`.
+* **Not released.** It ships with this repository's next tag. Turn immutable releases on before that tag
+  (atrium-project#72). digital-convert#5's clean re-run (C2) checks it: no model failure in the log, and the 533
+  flagged pages routed alike in its stages 61 and 62.
+* **Dev logs:** this entry and the header (the `test` head, the latest tag, where the pilot work is tracked).
+
+  The code was delivered in chat on 2026-10-14 with digital-convert#5's R2; this entry is written after the push.
 
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
