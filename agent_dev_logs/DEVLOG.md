@@ -1,8 +1,9 @@
 # 📓 atrium-page-classification — agent_dev_logs/DEVLOG.md (timeline index)
 > _Historical page-image classification. No open issue here (#48 closed 2026-09-17; #15 and #26 closed; two open
 > Dependabot PRs, #56 and #57, as of 2026-10-15). Its pilot work is tracked in hub issues (atrium-project #6, #67, #72)
-> and in atrium-digital-convert#5. `test` = `f6c1aeb` (2026-10-14: the Hub-loader fix, unreleased) · **v1.9.3-beta**
-> (2026-10-07, `5bc982c`; published mutable, so its successor needs immutable releases turned on first, atrium-project#72)._
+> and in atrium-digital-convert#5. `test` = `b2b78ca` (2026-10-16; the Hub-loader fix `f6c1aeb`) · **v1.9.3-beta**
+> (2026-10-07, `5bc982c`; published mutable, so its successor needs immutable releases turned on first, atrium-project#72)
+> · **v1.9.4-beta** prepared 2026-10-18, tag held for that._
 > _Per-issue detail: `digests/48.digest.md` · `plans/48.plan.md` (the issue closed 2026-09-17 and its export was removed; the pair is to be removed too). This header previously claimed no such exports existed; they have since 2026-09-07. The 2026-08-02 → 09-06 entries below predate them and are reconstructed from `CONTRIBUTING.md`'s release-note table (source of truth for that window) and commit history, not from a digest._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
@@ -284,6 +285,24 @@ issue opens, matching its four siblings.
 * **Dev logs:** this entry and the header (the `test` head, the latest tag, where the pilot work is tracked).
 
   The code was delivered in chat on 2026-10-14 with digital-convert#5's R2; this entry is written after the push.
+
+## 2026-10-18 — v1.9.4-beta prepared: the loader fix, the Pillow switches, the shared modules
+* **Release row and files** (the tag waits for immutable releases, atrium-project#72): `setup/para_config.txt`,
+  `CITATION.cff`, the spec (`--prepare tests.openapi_contract_data:prepare`; compare: compatible). The row covers
+  the five commits since `v1.9.3-beta`:
+  * `f6c1aeb`: Hub-loaded models on the classifier's device; a failing model logged once; a reduced ensemble said
+    once (atrium-digital-convert#5);
+  * `cc07344`: `utils.py` no longer sets Pillow's globals on import, so a truncated upload stays a 422 on every
+    request; the batch tools call `tolerate_scan_quirks()`;
+  * `29bd955`, `4160a1a`: the shared modules of 5 and 13 October.
+* **#72's label run** (D1-c): stage 30 of atrium-digital-convert's `issue5_extras_job.sh` runs
+  `data_scripts/compare_pdf_rasterisers.py --labels --version all` on the 15 AMČR PDFs, in parts of 40 pages (the
+  script holds every render of a PDF in memory), with PyMuPDF only in a throwaway `--target` folder. Its table
+  goes into `data_scripts/pdf_rasteriser_comparison.md` from the archive.
+* **Checks:** 757 passed, 10 skipped, 2 xfailed (without torch); ruff clean; `check_version` OK
+  (`--para-config setup/para_config.txt`).
+
+  Files delivered in chat.
 
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
