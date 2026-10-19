@@ -59,22 +59,55 @@ engine resamples them, and pdftoppm is no closer to the scan there than PDFium i
 every page to its input size, so the extra column changes nothing it sees; the service checks
 `MAX_IMAGE_PIXELS` on PDFium's own rounding (`service/pdf_render.pixel_size`).
 
-## Still to run: labels on AMČR samples
+## Labels on AMČR samples (2026-10-19)
 
-The difference that decides is a changed label. It needs the models (torch and the weights from
-the Hugging Face Hub), which were not available where the table above was made. Run, from the
-repository root, in the environment of the service plus poppler-utils (and PyMuPDF only in a
-throwaway environment, if the before/after comparison is wanted):
+The difference that decides is a changed label. It was measured on the 15 born-digital AMČR reports of
+atrium-digital-convert#5 (2,514 pages, 34 to 529 per report), split into parts of 40 pages, with the service's
+renderer against PyMuPDF and the ensemble of every published model (`--version all`), page-classification
+`v1.9.4-beta`, on an RTX A4000 (atrium-project#72, job 7147054):
+
+```bash
+python3 data_scripts/compare_pdf_rasterisers.py <part>.pdf --labels --version all --out <part>.md
+```
+
+| Report       | Pages | Top-1 labels agree with PyMuPDF | PSNR vs PyMuPDF, full size (median) | At 224 px: median (lowest) |
+|--------------|-------|---------------------------------|-------------------------------------|----------------------------|
+| CTX200802472 | 282   | 280                             | 29.8                                | 46.7 (32.8)                |
+| CTX200914045 | 36    | 36                              | 28.4                                | 47.0 (37.4)                |
+| CTX201006925 | 85    | 85                              | 30.5                                | 48.3 (42.7)                |
+| CTX201100348 | 90    | 90                              | 28.6                                | 49.8 (44.7)                |
+| CTX201202683 | 178   | 178                             | 25.8                                | 47.9 (35.3)                |
+| CTX201303221 | 401   | 401                             | 27.9                                | 47.7 (32.2)                |
+| CTX201400303 | 431   | 429                             | 27.6                                | 43.2 (39.8)                |
+| CTX201504552 | 50    | 50                              | 27.1                                | 46.3 (30.9)                |
+| CTX201600915 | 106   | 106                             | 28.9                                | 45.8 (32.8)                |
+| CTX201703695 | 529   | 529                             | 27.7                                | 44.7 (31.9)                |
+| CTX201800066 | 75    | 75                              | 34.1                                | 52.1 (45.7)                |
+| CTX201900002 | 34    | 34                              | 29.3                                | 48.8 (39.2)                |
+| CTX202000362 | 83    | 83                              | 30.4                                | 50.5 (33.6)                |
+| CTX202100048 | 62    | 61                              | 30.1                                | 48.4 (37.6)                |
+| CTX202200566 | 72    | 72                              | 32.8                                | 49.5 (41.8)                |
+| **All**      | 2,514 | **2,509 (99.8 %)**              | 28.1                                | 45.8 (30.9)                |
+
+The five pages that differ change to a neighbouring class, never across text and image:
+
+| Report, page     | pypdfium2 | PyMuPDF  | At 224 px |
+|------------------|-----------|----------|-----------|
+| CTX200802472 235 | `TEXT_P`  | `TEXT`   | 47.2      |
+| CTX200802472 257 | `LINE_P`  | `DRAW`   | 34.0      |
+| CTX201400303 3   | `LINE_P`  | `TEXT_P` | 45.9      |
+| CTX201400303 189 | `DRAW`    | `DRAW_L` | 41.2      |
+| CTX202100048 27  | `DRAW_L`  | `DRAW`   | 43.6      |
+
+**Reading.** The renderer does not change what the service says about AMČR reports: 2,509 of 2,514 labels are
+the same, and the five that move are borderline pages between two similar classes. pdftoppm, the renderer of
+the training pages, was not on the GPU node, so the column against it stays empty; the scanned-set table above
+already puts pypdfium2 as close to pdftoppm as PyMuPDF was. The fallback agreed on #6 (declare the
+training renderer with its licence) is not needed.
+
+To repeat it on other PDFs, in the service's environment plus PyMuPDF in a throwaway `--target` folder on
+`PYTHONPATH` (and poppler-utils for the pdftoppm column):
 
 ```bash
 python3 data_scripts/compare_pdf_rasterisers.py path/to/amcr_pdfs/ --labels --version all --out amcr_labels.md
 ```
-
-and record the summary line of each reference here:
-
-| Set              | Pages | Top-1 labels agree with pdftoppm | Top-1 labels agree with PyMuPDF |
-|------------------|-------|----------------------------------|---------------------------------|
-| AMČR sample PDFs |       |                                  |                                 |
-
-If the labels disagree on a noticeable share of pages, the fallback agreed on #6 applies: declare
-the renderer that matches the training pages, with its licence, rather than hide the difference.

@@ -1,9 +1,9 @@
 # 📓 atrium-page-classification — agent_dev_logs/DEVLOG.md (timeline index)
 > _Historical page-image classification. No open issue here (#48 closed 2026-09-17; #15 and #26 closed; two open
 > Dependabot PRs, #56 and #57, as of 2026-10-15). Its pilot work is tracked in hub issues (atrium-project #6, #67, #72)
-> and in atrium-digital-convert#5. `test` = `b2b78ca` (2026-10-16; the Hub-loader fix `f6c1aeb`) · **v1.9.3-beta**
-> (2026-10-07, `5bc982c`; published mutable, so its successor needs immutable releases turned on first, atrium-project#72)
-> · **v1.9.4-beta** prepared 2026-10-18, tag held for that._
+> and in atrium-digital-convert#5. `test` = `d0fac40` (2026-10-18) · **v1.9.4-beta** (2026-10-18, `d0fac40`; the
+> Hub-loader fix `f6c1aeb`), published mutable like v1.9.3-beta: immutable releases were switched on here on 2026-10-19
+> (atrium-project#72), so the next tag is the first immutable one._
 > _Per-issue detail: `digests/48.digest.md` · `plans/48.plan.md` (the issue closed 2026-09-17 and its export was removed; the pair is to be removed too). This header previously claimed no such exports existed; they have since 2026-09-07. The 2026-08-02 → 09-06 entries below predate them and are reconstructed from `CONTRIBUTING.md`'s release-note table (source of truth for that window) and commit history, not from a digest._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
@@ -301,6 +301,22 @@ issue opens, matching its four siblings.
   goes into `data_scripts/pdf_rasteriser_comparison.md` from the archive.
 * **Checks:** 757 passed, 10 skipped, 2 xfailed (without torch); ruff clean; `check_version` OK
   (`--para-config setup/para_config.txt`).
+
+  Files delivered in chat.
+
+## 2026-10-19 — #72's label run: the renderer changes 5 of 2,514 AMČR page labels
+* **The run** (atrium-digital-convert's extras job 7147054, RTX A4000, `v1.9.4-beta` at `d0fac40`): the 15
+  born-digital AMČR reports of atrium-digital-convert#5, 2,514 pages in parts of 40, every published model
+  (`--version all`), the service's pypdfium2 render against PyMuPDF. pdftoppm was not on the node.
+* **Result:** top-1 labels agree on 2,509 pages (99.8 %); the five that differ move between neighbouring classes
+  (`TEXT_P`/`TEXT`, `LINE_P`/`DRAW`, `LINE_P`/`TEXT_P`, `DRAW`/`DRAW_L`). Median PSNR against PyMuPDF 28.1 dB at full
+  size, 45.8 dB at the 224 px input (lowest 30.9). The table per report and the five pages are in
+  `data_scripts/pdf_rasteriser_comparison.md`, whose "still to run" section this replaces. The fallback of #6
+  (declare the training renderer) is not needed.
+* **On the way:** the job's first two attempts stopped on the project's disk quota (job 7147053), which the
+  scripts now test for before they start.
+* **Releases:** immutable releases are on here since 10-19 (atrium-project#72, @stranak); `v1.9.4-beta` (10-18)
+  stays mutable. Nothing in this entry needs a release.
 
   Files delivered in chat.
 
