@@ -500,6 +500,8 @@ After the model is downloaded, you should see a similar file structure:
 > `ghcr.io/ufal/atrium-page-classification-api:<version>` (the release without its leading `v`), and started
 > through a Docker compose profile. The service includes deployment hardening (strict payload size limits and PDF
 > page caps). Run `docker compose --profile api up --build` to start the classification service on port 8000.
+> Its operator runbook (start, models and caches, errors and what to do, limits) is
+> [`service/README.md`](service/README.md).
 
 > [!NOTE]
 > **Docker on Linux: run as yourself.** `./data` and `./data/output` are part of the clone and belong to you, while

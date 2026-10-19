@@ -10,6 +10,8 @@ Text, Drawing, Table) using various fine-tuned on historical data [^17] deep lea
 
 ### Table of contents 📑
 
+- [Start 🚀](#start-)
+- [Models and caches 🧠](#models-and-caches-)
 - [Service Description 📇](#service-description-)
 - [Directory Structure 📂](#directory-structure-)
 - [Supported Models 🧠](#supported-models-)
@@ -20,12 +22,37 @@ Text, Drawing, Table) using various fine-tuned on historical data [^17] deep lea
 - [Configuration (environment) ⚙️](#configuration-environment-)
 - [Limits 📏](#limits)
 - [Errors 🚨](#errors)
+- [Partial results](#partial-results)
+- [Known limits](#known-limits)
 - [OpenAPI (the typed contract) 📜](#openapi-the-typed-contract)
 - [Client Side Test 🎨](#client-side-test-)
 - [Contacts 📧](#contacts-)
 - [Acknowledgements 🙏](#acknowledgements-)
 
 ---
+
+## Start 🚀
+
+The published image first: it is what a deployment runs, and it needs no checkout.
+
+```bash
+docker run --rm -p 8000:8000 -v hf-cache:/cache/huggingface \
+  ghcr.io/ufal/atrium-page-classification-api:<version>     # e.g. 1.9.5-beta; add --gpus all on a GPU node
+curl -s http://localhost:8000/ready                         # 200 once the models are loaded
+# from a checkout:
+docker compose --profile api up --build
+```
+
+For development in a virtual environment, see [Installation & Setup](#installation--setup-) and
+[Quick API Test Launch](#quick-api-test-launch-).
+
+## Models and caches 🧠
+
+| What                            | From where                                   | Revision                                               | Into                                          | Without egress                                                                                                                                                              |
+|---------------------------------|----------------------------------------------|--------------------------------------------------------|-----------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| The five fine-tuned classifiers | Hugging Face Hub, `ufal/vit-historical-page` | by revision name (`v1.4` … `v5.4`, `/info` lists them) | `HF_HOME` (`/cache/huggingface` in the image) | fill the volume once where there is egress (`python3 run.py --hf -rev vX.4`); a model that cannot be loaded is left out of the ensemble (see [Known limits](#known-limits)) |
+
+The models are loaded at start, before `/ready` answers 200; the image holds no weights.
 
 ## Service Description 📇
 
@@ -413,20 +440,43 @@ Every error has one JSON body (hub `docs/agent_skill_strategy.md` §4.4):
 (`key`, `env`, `value`, `observed`, `unit`) when `reason` is `limit_exceeded`, and `errors`
 for request-validation problems.
 
-| Code | `reason`                 | When                                                                                                                                                                             |
-|------|--------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 413  | `limit_exceeded`         | over `MAX_UPLOAD_MB`, `MAX_PDF_PAGES` or `MAX_IMAGE_PIXELS`                                                                                                                      |
-| 415  | `unsupported_media_type` | the file is not an image (`/predict_image`, `accepted: ["image/*"]`) or not a PDF (`/predict_document`, `accepted: ["application/pdf"]`); a 400 before atrium-project#32 round 2 |
-| 422  | `invalid_record`         | the `document_json` baseline cannot be opened (not UTF-8 JSON, not an object, a newer `schema_version` major)                                                                    |
-| 422  | `null`                   | request validation (e.g. `topn` outside 1–11), an unknown `version`, or an image or PDF that cannot be read                                                                      |
-| 500  | `null`                   | processing failure (a page the model could not classify included), or a record rejected by its own schema                                                                        |
-| 503  | `null`                   | the replica is shutting down — retry against a live one                                                                                                                          |
+| Code | `reason`                 | When                                                                                                                                                                             | What to do                                                                           |
+|------|--------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| 413  | `limit_exceeded`         | over `MAX_UPLOAD_MB`, `MAX_PDF_PAGES` or `MAX_IMAGE_PIXELS`                                                                                                                      | send fewer pages (`pages`) or a smaller file, or raise the setting `limit.env` names |
+| 415  | `unsupported_media_type` | the file is not an image (`/predict_image`, `accepted: ["image/*"]`) or not a PDF (`/predict_document`, `accepted: ["application/pdf"]`); a 400 before atrium-project#32 round 2 | send an image to `/predict_image`, a PDF to `/predict_document`                      |
+| 422  | `invalid_record`         | the `document_json` baseline cannot be opened (not UTF-8 JSON, not an object, a newer `schema_version` major)                                                                    | send the record the previous stage wrote; update this service if the record is newer |
+| 422  | `null`                   | request validation (e.g. `topn` outside 1–11), an unknown `version`, or an image or PDF that cannot be read                                                                      | fix the field `errors` or `detail` names; repair or re-export an unreadable file     |
+| 500  | `null`                   | processing failure (a page the model could not classify included), or a record rejected by its own schema                                                                        | report it with `detail`; check the log for a model that failed to load               |
+| 503  | `null`                   | the replica is shutting down — retry against a live one                                                                                                                          | retry on another replica                                                             |
 
 ```json
 {"status": 413, "reason": "limit_exceeded",
  "detail": "PDF has too many pages: 73. Limit is 50 (MAX_PDF_PAGES).",
  "limit": {"key": "max_pdf_pages", "env": "MAX_PDF_PAGES", "value": 50, "observed": 73, "unit": "pages"}}
 ```
+
+## Partial results
+
+A 200 can carry less than was asked for. Read these before using the result:
+
+- `limits_applied` is present in every response and empty today: each limit of this service refuses
+  instead of shaping the result.
+- With `version=all`, a model that cannot be loaded or fails is left out, and the others are averaged.
+  The response does not say so; the service log does, once per failing model.
+- `/predict_document` classifies the pages asked for (`pages`), not the whole PDF.
+
+## Known limits
+
+- **A reduced ensemble is silent in the response** (above). After a model-loading failure, check the log
+  or ask with one `version` to see whether it answers.
+- **The renderer differs from the training pages'.** The service renders PDF pages with pypdfium2; the
+  training pages were made with pdftoppm. On 2,514 pages of 15 born-digital AMČR reports, 5 top-1
+  labels differed from the ones PyMuPDF renders gave, each to a neighbouring class
+  ([`data_scripts/pdf_rasteriser_comparison.md`](../data_scripts/pdf_rasteriser_comparison.md)).
+- **One request classifies at most `MAX_PDF_PAGES` pages** (50 by default); a longer PDF is sent in parts
+  with `pages`.
+- **The models were trained on scanned archival pages.** Born-digital pages are classified, but
+  their labels have not been checked against reviewed answers.
 
 ## OpenAPI (the typed contract)
 

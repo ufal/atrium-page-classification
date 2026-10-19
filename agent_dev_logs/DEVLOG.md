@@ -1,9 +1,9 @@
 # 📓 atrium-page-classification — agent_dev_logs/DEVLOG.md (timeline index)
 > _Historical page-image classification. No open issue here (#48 closed 2026-09-17; #15 and #26 closed; two open
 > Dependabot PRs, #56 and #57, as of 2026-10-15). Its pilot work is tracked in hub issues (atrium-project #6, #67, #72)
-> and in atrium-digital-convert#5. `test` = `d0fac40` (2026-10-18) · **v1.9.4-beta** (2026-10-18, `d0fac40`; the
+> and in atrium-digital-convert#5. `test` = `a467ee7` (2026-10-19) · **v1.9.4-beta** (2026-10-18, `d0fac40`; the
 > Hub-loader fix `f6c1aeb`), published mutable like v1.9.3-beta: immutable releases were switched on here on 2026-10-19
-> (atrium-project#72), so the next tag is the first immutable one._
+> (atrium-project#72), so **v1.9.5-beta** (prepared 2026-10-19, the runbook) is the first immutable one._
 > _Per-issue detail: `digests/48.digest.md` · `plans/48.plan.md` (the issue closed 2026-09-17 and its export was removed; the pair is to be removed too). This header previously claimed no such exports existed; they have since 2026-09-07. The 2026-08-02 → 09-06 entries below predate them and are reconstructed from `CONTRIBUTING.md`'s release-note table (source of truth for that window) and commit history, not from a digest._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
@@ -317,6 +317,25 @@ issue opens, matching its four siblings.
   scripts now test for before they start.
 * **Releases:** immutable releases are on here since 10-19 (atrium-project#72, @stranak); `v1.9.4-beta` (10-18)
   stays mutable. Nothing in this entry needs a release.
+
+  Files delivered in chat.
+
+## 2026-10-19 (evening) — v1.9.5-beta: the service README as a runbook (atrium-project#77)
+* **`service/README.md`** gets the five runbook sections of the hub's outline:
+  - Start: the published image first, with the model cache as a volume;
+  - Models and caches: the five classifiers from `ufal/vit-historical-page` by revision name into `HF_HOME`, loaded before `/ready`;
+  - a "What to do" column on all six error rows;
+  - Partial results;
+  - Known limits.
+
+  README.md now links it. The hub's `tools/runbook_check.py` passes.
+* **Found while writing it, not fixed here:** with `version=all`, a model that cannot be loaded is left out
+  and the others are averaged, but the response does not say so (only the log does). Stated in Known
+  limits; reporting it in the response is an additive API change for the next code release
+  (atrium-project#77).
+* **Release `v1.9.5-beta`:** no code change; the first immutable release here (switched on 10-19), so the S2
+  pinned set can name it. `setup/para_config.txt`, `CITATION.cff`, the spec (version only; compatible), the
+  CONTRIBUTING row.
 
   Files delivered in chat.
 
