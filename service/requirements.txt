@@ -33,7 +33,7 @@ python-multipart>=0.0.32
 # than relied on as fastapi's transitive dependency.
 pydantic==2.13.5
 # service/api.py: `Image.open(...)` on every /predict_image request.
-Pillow>=12.3.0
+Pillow>=13.0.0
 # service/api.py's /predict_document rasterises PDF pages with pypdfium2 (Apache-2.0 /
 # BSD-3-Clause; the PDFium it bundles is BSD-3-Clause), declared in setup/para_config.txt.
 # It replaced PyMuPDF (AGPL-3.0), which was imported here, installed in both published images
