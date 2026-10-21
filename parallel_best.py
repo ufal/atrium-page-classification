@@ -353,8 +353,10 @@ def _run_group(
     models_peak: Optional[dict],
     top_N: int,
 ) -> Tuple[Dict[str, pd.DataFrame], List[str]]:
-    from classifier import ImageClassifier
-    from utils import dataframe_results
+    from classifier import ImageClassifier, topn_pairs
+    from utils import dataframe_results, keep_readable, tolerate_scan_quirks
+
+    tolerate_scan_quirks()
 
     classifiers: "OrderedDict[str, ImageClassifier]" = OrderedDict()
     for rev in group:
@@ -368,8 +370,9 @@ def _run_group(
 
     loaders = {rev: clf.create_dataloader(test_images, batch) for rev, clf in classifiers.items()}
 
-    all_predictions: Dict[str, list] = {rev: [] for rev in group}
-    all_raw_scores: Dict[str, list] = {rev: [] for rev in group}
+    # Aligned with test_images: an image no loader could read keeps None (see infer_dataloader).
+    all_predictions: Dict[str, list] = {rev: [None] * len(test_images) for rev in group}
+    all_raw_scores: Dict[str, list] = {rev: [None] * len(test_images) for rev in group}
 
     dev = 0
     dropped: List[str] = []
@@ -387,16 +390,11 @@ def _run_group(
             with torch.no_grad():
                 inputs = b["pixel_values"].to(clf.device)
                 outputs = clf.model(pixel_values=inputs)
-                probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
+                probs = torch.nn.functional.softmax(outputs.logits, dim=-1).cpu()
 
-                all_raw_scores[rev].extend(probs.cpu().tolist())
-                if top_N > 1:
-                    topk_probs, topk_idx = torch.topk(probs, top_N, dim=-1)
-                    for idxs, prs in zip(topk_idx, topk_probs):
-                        prs_norm = prs / prs.sum()
-                        all_predictions[rev].append(list(zip(idxs.cpu().tolist(), prs_norm.cpu().tolist())))
-                else:
-                    all_predictions[rev].extend(probs.argmax(dim=-1).cpu().tolist())
+                for index, row in zip(b["indices"], probs):
+                    all_raw_scores[rev][index] = row.tolist()
+                    all_predictions[rev][index] = topn_pairs(row, top_N)
 
         if torch.cuda.is_available() and not guard_done and batch_idx >= _PROFILING_BATCHES - 1:
             guard_done = True
@@ -421,11 +419,12 @@ def _run_group(
 
     rdfs: Dict[str, pd.DataFrame] = {}
     for rev in list(all_predictions.keys()):
-        preds = all_predictions[rev]
-        raws = all_raw_scores[rev]
-        if not preds or rev in dropped:
+        if rev in dropped:
             continue
-        rdf, _ = dataframe_results(test_images, preds, categories, top_N=top_N, raw_scores=raws)
+        kept_images, preds, raws, _, _ = keep_readable(test_images, all_predictions[rev], all_raw_scores[rev])
+        if not preds:
+            continue
+        rdf, _ = dataframe_results(kept_images, preds, categories, top_N=top_N, raw_scores=raws)
         rdf.drop(columns=["CATEGORY"], inplace=True, errors="ignore")
         rdfs[rev] = rdf
 
@@ -451,7 +450,9 @@ def run_best_sequential(
     paradata_logger=None,
 ) -> Dict[str, pd.DataFrame]:
     from classifier import ImageClassifier
-    from utils import dataframe_results
+    from utils import dataframe_results, keep_readable, tolerate_scan_quirks
+
+    tolerate_scan_quirks()
 
     all_rdfs: Dict[str, pd.DataFrame] = {}
     for rev, base_model in revision_best_models.items():
@@ -464,8 +465,12 @@ def run_best_sequential(
         loader = clf.create_dataloader(test_images, batch)
 
         preds, raw_scores = clf.infer_dataloader(loader, top_n=top_N, raw=True)
+        kept_images, preds, raw_scores, _, skipped = keep_readable(test_images, preds, raw_scores)
+        if paradata_logger is not None:
+            for path in skipped:
+                paradata_logger.log_skip(path, "unreadable image")
 
-        rdf, _ = dataframe_results(test_images, preds, categories, top_N=top_N, raw_scores=raw_scores)
+        rdf, _ = dataframe_results(kept_images, preds, categories, top_N=top_N, raw_scores=raw_scores)
         rdf.drop(columns=["CATEGORY"], inplace=True, errors="ignore")
         all_rdfs[rev] = rdf
 

@@ -100,7 +100,7 @@ bash scripts/server.sh --gpu    # Docker with GPU (docker-compose.gpu.yml)
 bash scripts/server.sh --local  # force local uvicorn via setup/setup_api_service.sh
 ```
 
-The script is idempotent and health-waits on `/info`. Port defaults to `8000`
+The script is idempotent and waits on `/ready` (readiness). Port defaults to `8000`
 (`ATRIUM_PC_PORT` to change).
 
 ## Client usage 🪶

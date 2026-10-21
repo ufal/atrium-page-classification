@@ -16,6 +16,10 @@ env/
 /README.html
 # sample data + generated outputs (mounted at runtime instead)
 small_data_samples/
+# Not runtime (atrium-project#69, roadmap H5): research scripts and figures (19 MB; nothing
+# the ENTRYPOINTs reach reads them), and the test suite, which runs on the CI runner.
+supplementary/
+tests/
 result/
 model/
 model_output/

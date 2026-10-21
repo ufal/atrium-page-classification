@@ -13,9 +13,10 @@ declared in a different repository, in a different form — a Python list, a set
 That is not a stylistic complaint. It has already produced a live defect:
 ``lines[].categ`` has two authorised originators that emit **disjoint** label sets
 (``alto-postprocess`` → ``Clear``/``Noisy``/``Trash``/``Non-text``/``Empty``;
-``digital-convert`` → ``Garbage``/``Inverted``), and its only consumer filters on
-one of the two. See ``LINE_CATEGORY_ORIGINATORS`` below and §Defect register in
-``docs/skos_strategy.md``.
+``digital-convert`` → ``Garbage``/``Inverted``), and its only consumer filtered on
+one of the two (defect V-1, fixed 2026-09-25: it now filters on
+``UNTRUSTWORTHY_LINE_CATEGORIES``). See ``LINE_CATEGORY_ORIGINATORS`` below and
+§Defect register in ``docs/skos_strategy.md``.
 
 This module is the single declaration of those label sets, plus the ATRIUM-authored
 concepts they correspond to, plus a deterministic SKOS serialisation of both.
@@ -30,7 +31,7 @@ WHAT THIS MODULE IS NOT
 * **Not a copy of AMCR or TEATER.** Those 5,594 source concepts already carry their
   own resolvable identifiers (``https://api.aiscr.cz/id/HES-…``,
   ``https://teater.aiscr.cz/id/…``) and are serialised where they are built, by
-  ``atrium-nlp-enrich``'s ``vocab_build.py --skos``. This module mints URIs **only**
+  ``atrium-keyword-extract``'s ``vocab_build.py --skos``. This module mints URIs **only**
   for the ~90 concepts ATRIUM itself authors, and references the source URIs.
 * **Not a validator that fails builds.** ``validate_labels()`` reports and returns
   findings; it never raises. This matches the house idiom already used for the
@@ -196,8 +197,8 @@ CONCEPT_SCHEMES: Dict[str, Dict[str, Any]] = {
             "place. See LINE_CATEGORY_ORIGINATORS."
         ),
         "authority": (
-            "atrium-alto-postprocess/text_util.py determine_category(); "
-            "atrium-llm-enrich/api_util/digital_to_json.py classify_line()"
+            "atrium-ocr-postprocess/text_util.py determine_category(); "
+            "atrium-digital-convert/api_util/digital_to_json.py classify_line()"
         ),
         "fields": ("lines[].categ",),
     },
@@ -208,7 +209,7 @@ CONCEPT_SCHEMES: Dict[str, Dict[str, Any]] = {
             "plurality vote; ties favour the more optimistic band. The only controlled "
             "vocabulary in atrium_document.schema.json that is already a closed enum."
         ),
-        "authority": "atrium-alto-postprocess/document_hook.py quality_band()",
+        "authority": "atrium-ocr-postprocess/document_hook.py quality_band()",
         "fields": ("pages[].quality_band",),
     },
     "entity-type": {
@@ -243,8 +244,8 @@ CONCEPT_SCHEMES: Dict[str, Dict[str, Any]] = {
             "structure either source thesaurus asserts — which is exactly why they need "
             "ATRIUM-minted URIs while the source concepts do not."
         ),
-        "authority": "atrium-nlp-enrich/data_samples/taxonomy_config.json",
-        "fields": ("enrichment.items[].teater_category (indirectly, via the facet)",),
+        "authority": "atrium-keyword-extract/data_samples/taxonomy_config.json",
+        "fields": ("enrichment.items[].teater_category (indirectly, via the facet; it holds a source label, see V-5)",),
     },
 }
 
@@ -295,8 +296,8 @@ PAGE_CATEGORIES: Tuple[str, ...] = (
 )
 
 # ── line-category ─────────────────────────────────────────────────────────────
-# Definitions from atrium-alto-postprocess/text_util.py's "Categories Outputted"
-# docstring and from atrium-llm-enrich/api_util/digital_to_json.py.
+# Definitions from atrium-ocr-postprocess/text_util.py's "Categories Outputted"
+# docstring and from atrium-digital-convert/api_util/digital_to_json.py.
 
 _LINE_CATEGORY_DEFS: Dict[str, str] = {
     "Empty": "A blank line.",
@@ -330,6 +331,11 @@ LINE_CATEGORY_ORIGINATORS: Dict[str, Tuple[str, ...]] = {
     "digital-convert": ("Garbage", "Inverted"),
 }
 
+#: A program id succeeded by a repository move (atrium_document.PROGRAM_SUCCESSORS) emits what
+#: its predecessor emitted. Kept as an alias, not a second row of LINE_CATEGORY_ORIGINATORS,
+#: so no label is "emitted by two tools" and a concept's `originator` stays single.
+_ORIGINATOR_ALIASES: Dict[str, str] = {"ocr-postprocess": "alto-postprocess"}
+
 #: The union both consumers must understand.
 LINE_CATEGORIES: Tuple[str, ...] = tuple(
     sorted({v for values in LINE_CATEGORY_ORIGINATORS.values() for v in values})
@@ -337,12 +343,11 @@ LINE_CATEGORIES: Tuple[str, ...] = tuple(
 
 #: Labels that mean "this line's text is not trustworthy — do not show it to a model".
 #:
-#: This is the semantic set. It is deliberately NOT wired into
-#: atrium-llm-enrich/api_util/json_to_md.py's DROP_CATEGORIES, which today is
-#: frozenset({"Garbage", "Inverted"}) and therefore matches nothing on the OCR path.
-#: Changing that constant is a pipeline behaviour change and is out of scope for the
-#: registry; the discrepancy is recorded in docs/skos_strategy.md §6 (defect V-1) with
-#: the one-line fix, so it is available whenever someone decides to take it.
+#: This is the semantic set, and atrium-digital-convert/api_util/json_to_md.py's
+#: DROP_CATEGORIES is built from it (defect V-1 of docs/skos_strategy.md §6, fixed
+#: 2026-09-25). It used to be frozenset({"Garbage", "Inverted"}), digital-convert's
+#: labels only, and so matched nothing on the OCR path: every `Trash` line reached
+#: the model.
 UNTRUSTWORTHY_LINE_CATEGORIES: Tuple[str, ...] = ("Garbage", "Inverted", "Trash")
 
 # ── quality-band ──────────────────────────────────────────────────────────────
@@ -534,7 +539,6 @@ HESLAR_TO_THEME: Dict[str, str] = {
     "aktivita": "Activity Area",
     "areal": "Activity Area",
     "areal_kat": "Activity Area",
-    "jazyk": "Cultural & Geographic Context",
     "lokalita_druh": "Activity Area",
     "lokalita_druh_kat": "Activity Area",
     "lokalita_typ": "Activity Area",
@@ -559,7 +563,7 @@ HESLAR_TO_THEME: Dict[str, str] = {
 #: TEATER top-level branch id → ATRIUM theme, from _settings.teater_branch_map.
 #: The branch ids are TEATER concepts and resolve at https://teater.aiscr.cz/id/<id>.
 TEATER_BRANCH_TO_THEME: Dict[str, str] = {
-    "1": "Related Disciplines & Society",
+    "1": "Methods",
     "102": "Methods",
     "140": "Methods",
     "220": "Location & Admin",
@@ -692,7 +696,7 @@ def validate_labels(
         permitted = set()
 
     if originator is not None and scheme == "line-category":
-        allowed = set(LINE_CATEGORY_ORIGINATORS.get(originator, ()))
+        allowed = set(LINE_CATEGORY_ORIGINATORS.get(_ORIGINATOR_ALIASES.get(originator, originator), ()))
         if not allowed:
             findings.append(
                 Finding((scheme, "", f"unknown originator {originator!r}; not narrowing"))

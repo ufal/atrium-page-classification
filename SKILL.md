@@ -59,7 +59,7 @@ bash scripts/server.sh --gpu    # Docker with GPU
 bash scripts/server.sh --local  # force local uvicorn (no Docker)
 ```
 
-The script is idempotent: if `GET /info` already answers, it exits immediately. It waits
+The script is idempotent: if `GET /ready` already answers 200, it exits immediately. It waits
 up to 15 minutes for first-run warmup.
 
 ### 2. Classify
@@ -128,8 +128,8 @@ client prints this as a warning rather than failing.
 7. **Server not reachable** (exit code 2): start it with `bash scripts/server.sh` and
    retry once. If the start script fails, inspect `api_server.log` or
    `docker compose logs` and report the cause; do not silently retry in a loop.
-8. **Server errors** (exit code 3): the client already retries HTTP 502/503/504 three
-   times. A persistent 5xx usually means model warmup failure (missing weights, out of
+8. **Server errors** (exit code 3): the client already retries HTTP 503/504, and a 502
+   that is not final, three times. A persistent 5xx usually means model warmup failure (missing weights, out of
    memory) - check `GET /health?deep=true` and server logs, and suggest `--version`
    with a single small model (e.g. `v2.3`) as a lower-memory fallback.
 9. **Stay on the API**: do not bypass the service by importing the model code directly -

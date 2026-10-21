@@ -1,0 +1,17 @@
+model,model_version,acc,param
+tf_efficientnetv2_S,v1.3.1,97.87,48.2
+vit-B-p16-224,v2.3.5,98.79,86.6
+vit-B-p16-384,v3.3.2,98.92,86.6
+tf_efficientnetv2_L,v4.3.5,98.62,118.5
+vit-L-p16-384,v5.3.2,99.12,304.7
+regnety_120,v6.3.5,98.29,51.8
+regnety_160,v7.3.1,99.16,83.6
+regnety_640,v8.3.5,98.79,281.4
+dit-B-rvlcdip,v9.3.3,98.72,86
+dit-L-rvlcdip,v10.3.4,98.66,304
+dit-L,v11.3.2,98.53,304
+tf_efficientnetv2_M,v12.3.1,98.83,54.1
+CLIP-ViT-B/32 avg,v1.2.3,98.99,151
+CLIP-ViT-B/16 mid,v1.1.3.7,99.14,150
+CLIP-ViT-L/14 init,v2.1.3.1,98.97,428
+CLIP-ViT-L/14-336 gemini,v2.2.3.4,98.97,428

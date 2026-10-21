@@ -10,6 +10,8 @@ Text, Drawing, Table) using various fine-tuned on historical data [^17] deep lea
 
 ### Table of contents 📑
 
+- [Start 🚀](#start-)
+- [Models and caches 🧠](#models-and-caches-)
 - [Service Description 📇](#service-description-)
 - [Directory Structure 📂](#directory-structure-)
 - [Supported Models 🧠](#supported-models-)
@@ -18,11 +20,39 @@ Text, Drawing, Table) using various fine-tuned on historical data [^17] deep lea
 - [Installation & Setup 🛠](#installation--setup-)
 - [Quick API Test Launch 🚀](#quick-api-test-launch-)
 - [Configuration (environment) ⚙️](#configuration-environment-)
+- [Limits 📏](#limits)
+- [Errors 🚨](#errors)
+- [Partial results](#partial-results)
+- [Known limits](#known-limits)
+- [OpenAPI (the typed contract) 📜](#openapi-the-typed-contract)
 - [Client Side Test 🎨](#client-side-test-)
 - [Contacts 📧](#contacts-)
 - [Acknowledgements 🙏](#acknowledgements-)
 
 ---
+
+## Start 🚀
+
+The published image first: it is what a deployment runs, and it needs no checkout.
+
+```bash
+docker run --rm -p 8000:8000 -v hf-cache:/cache/huggingface \
+  ghcr.io/ufal/atrium-page-classification-api:<version>     # e.g. 1.9.5-beta; add --gpus all on a GPU node
+curl -s http://localhost:8000/ready                         # 200 once the models are loaded
+# from a checkout:
+docker compose --profile api up --build
+```
+
+For development in a virtual environment, see [Installation & Setup](#installation--setup-) and
+[Quick API Test Launch](#quick-api-test-launch-).
+
+## Models and caches 🧠
+
+| What                            | From where                                   | Revision                                               | Into                                          | Without egress                                                                                                                                                              |
+|---------------------------------|----------------------------------------------|--------------------------------------------------------|-----------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| The five fine-tuned classifiers | Hugging Face Hub, `ufal/vit-historical-page` | by revision name (`v1.4` … `v5.4`, `/info` lists them) | `HF_HOME` (`/cache/huggingface` in the image) | fill the volume once where there is egress (`python3 run.py --hf -rev vX.4`); a model that cannot be loaded is left out of the ensemble (see [Known limits](#known-limits)) |
+
+The models are loaded at start, before `/ready` answers 200; the image holds no weights.
 
 ## Service Description 📇
 
@@ -90,25 +120,32 @@ The models classify pages into 11 distinct structural categories:
 
 ### Endpoints 🔗
 
-| Method | Path                | Description                                                                                                                                                                 |
-|:-------|:--------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `GET`  | `/`                 | Serves the static `index.html` interface for manual testing.                                                                                                                |
-| `GET`  | `/info`             | Service identity + capabilities: `service`, `version`, `endpoints`, `limits`, plus available models and device.                                                             |
-| `GET`  | `/health`           | Liveness probe — 200 always, even mid-shutdown. `?deep=true` also checks at least one model version is loaded (503 on failure or while draining).                           |
-| `GET`  | `/ready`            | Readiness probe (issue #55) — 503 until model warmup finishes, 200 while serving, 503 the instant `SIGTERM` arrives. The Kubernetes `readinessProbe`/`startupProbe` target. |
-| `POST` | `/predict_image`    | Performs inference on an uploaded single image (JPG/PNG).                                                                                                                   |
-| `POST` | `/predict_document` | Performs inference on an uploaded multipage PDF document.                                                                                                                   |
+| Method | Path                | Description                                                                                                                                                                               |
+|:-------|:--------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `GET`  | `/`                 | Serves the static `index.html` interface for manual testing.                                                                                                                              |
+| `GET`  | `/info`             | Service identity + capabilities: `service`, `version`, `endpoints`, `limits` (every [limit](#limits), current value), `limits_meta` (the variable that sets each), plus available models. |
+| `GET`  | `/health`           | Liveness probe — 200 always, even mid-shutdown. `?deep=true` also checks at least one model version is loaded (503 on failure or while draining).                                         |
+| `GET`  | `/ready`            | Readiness probe (issue #55) — 503 until model warmup finishes, 200 while serving, 503 the instant `SIGTERM` arrives. The Kubernetes `readinessProbe`/`startupProbe` target.               |
+| `POST` | `/predict_image`    | Performs inference on an uploaded single image (JPG/PNG).                                                                                                                                 |
+| `POST` | `/predict_document` | Performs inference on an uploaded multipage PDF document.                                                                                                                                 |
 
 ### Request Example 💻
 
 **Endpoint:** `/predict_image`
 
 **Parameters (Form Data):**
-* `file`: The image file (JPEG or PNG).
-* `version`: The model version string (e.g., `v5.3`, `v1.3`) or `all`.
-* `topn`: (Optional) Number of top predictions to return (Default: 3).
+* `file`: The image file (JPEG or PNG); any other media type is refused with `415`
+  `unsupported_media_type`, and bytes that are not a readable image with `422`.
+* `version`: `all` (the ensemble, the default) or a model revision (e.g. `v4.4`; `/info`
+  `available_models` lists the published ones). A value no revision matches is refused with `422`
+  before any model runs (atrium-project#32 round 2; it was a `500` from the model loader).
+* `topn`: (Optional) Number of top predictions to return, 1–11 (one per category; Default: 3).
+  Outside that range the request is refused with 422.
 * `document_json`: (Optional) A baseline **ATRIUM Document JSON** record to accrete onto — the
-  service equivalent of the CLI's `--document-json`.
+  service equivalent of the CLI's `--document-json` — or an AMČR seed (`doc_id`, `source`). One
+  that cannot be opened (not UTF-8 JSON, not an object, a newer `schema_version` major) is refused
+  with `422` `invalid_record` before any model runs. An empty part means "no baseline" but still
+  asks for a record, which this stage-1 tool then originates.
 * `document_json_out`: (Optional, boolean) Return a record even with no baseline uploaded — the
   equivalent of `--document-json-out`. page-classification is stage 1 of the pipeline, so it
   *originates* the record as often as it updates one.
@@ -122,20 +159,52 @@ curl -X POST "http://localhost:8000/predict_image" \
   -F "topn=1"
 ```
 
-Example JSON response:
+Example JSON response (every field is always present; `ImageResponse` in [`openapi.json`](openapi.json)):
 ```json
 {
   "type": "image",
-  "model_version": "google/vit-base-patch16-224 (v2.3)",
-  "requested_topn": 1,
   "predictions": [
     {
       "label": "TEXT",
       "score": 0.975
     }
-  ]
+  ],
+  "limits_applied": [],
+  "document_json": null,
+  "document_json_schema_error": null,
+  "paradata": {"@type": "CreateAction", "@id": "urn:uuid:…", "...": "…"}
 }
 ```
+
+`/predict_document` answers `{"type": "document", "pages": [{"page": 1, "predictions": [...]}, ...],
+"limits_applied": [], "paradata": {...}}` (`DocumentResponse`), with `document_json` (and
+`document_json_schema_error`) only when a record was asked for. It takes the same fields, plus:
+
+* `pages`: (Optional) classify only these pages, 1-based positions in the PDF, e.g. `1,3,5-7`
+  (atrium-digital-convert#2: `/describe` asks only about the pages without a usable text layer).
+  Empty means every page. A malformed value, or a page past the end of the PDF, is refused with
+  `422`; `MAX_PDF_PAGES` counts the pages classified, not the PDF's. Only these pages are in the
+  response and written into the record.
+
+A PDF that does not open is refused with `422`; a page the model
+could not classify fails the request with `500` naming the page (it used to come back inside a `200`
+as that page's `{"error": ...}`).
+
+**Provenance.** Every successful call returns `paradata`, the call's Process Run Crate
+`CreateAction` (atrium-project#71 R2), built by `atrium_rocrate.create_action()` as in the other
+ATRIUM services: `object` is the upload and, when one was sent, the record; `result` is the record
+blocks the call stamped (`page_categories`, `pages`) and `predictions.json`, what it answered with.
+Its `@id` is the `run_uuid` stamped into those blocks, and `/predict_document` lists `pypdfium2`
+among the run's components. The service writes no paradata file.
+
+**PDF rendering.** Pages are rendered with **pypdfium2** (PDFium; Apache-2.0 or BSD-3-Clause,
+declared in `setup/para_config.txt`) at `PDF_RENDER_DPI` (scale `dpi / 72`), as RGB, one page at a
+time. It replaced PyMuPDF (AGPL-3.0, declared nowhere) in
+[atrium-project#72](https://github.com/ufal/atrium-project/issues/72) (D.1); what changes between
+the two engines is measured in
+[the renderer comparison](https://github.com/ufal/atrium-page-classification/blob/test/data_scripts/pdf_rasteriser_comparison.md). PDFium is
+not thread-safe, so the service holds one process-wide lock while it opens and renders; the model
+runs outside the lock, and concurrent requests queue only for the rendering.
 
 ### ATRIUM Document JSON accretion 🧩
 
@@ -167,6 +236,13 @@ The response then carries the updated record under `document_json`:
   (`utils.doc_id_and_page`, which strips the page label and then defers to the shared
   `canonical_doc_id()`), so a service upload and a CLI run over the same file update the *same*
   record instead of forking it;
+* **page keys** (`/predict_document`): a PDF's pages are classified by position, 1..N. When the
+  baseline's page rows carry `page_index` — a born-digital record from atrium-digital-convert,
+  whose pages are named by their PDF page labels (`i`, `ii`, `1`, …) — each category is written
+  under the row with that `page_index`, and the response's page entry carries that label as
+  `page_label`. A record keyed "1".."N" without `page_index` (ALTO) is keyed as before. A position
+  with no row whose number is another row's label is left out of the record (never written onto
+  the wrong row); its prediction is still in the response;
 * a record page-classification builds that does not validate against
   `atrium_document.schema.json` is never returned — the request fails with `500` instead
   (Layer D). A **baseline** that does not validate is still accepted (rule 6: pass unknown
@@ -195,17 +271,17 @@ chmod +x ./setup/setup_api_service.sh
 ./setup/setup_api_service.sh
 ```
 
-Key libraries include: fastapi, uvicorn, python-multipart, pillow, PyMuPDF, torch, timm,
+Key libraries include: fastapi, uvicorn, python-multipart, pillow, pypdfium2, torch, timm,
 transformers. The serving half is in `service/requirements.txt` and the model stack in
 `setup/requirements.txt`; the setup script installs both, and so does the Docker image.
 
-> [!NOTE] `service/requirements.txt` is the RUNTIME set the API needs — fastapi, uvicorn and
-> the model stack — not a test set. It had once been pruned to six pytest/contract packages
-> with **no `uvicorn` at all**, while this page and `docker-compose.yml` both still told you to
-> run it, so `docker compose --profile api up api` failed at container start
-> ([atrium-project#10](https://github.com/ufal/atrium-project/issues/10), finding G3). If you
-> add an entrypoint to a compose file or to the setup script, declare its dependency somewhere
-> the image installs from, or the container fails the same way again.
+> [!NOTE] `service/requirements.txt` had been pruned down to six pytest/contract packages —
+> **no `uvicorn` at all** — while this page and `docker-compose.yml` both still told you to run
+> it, so `docker compose --profile api up api` failed at container start
+> ([atrium-project#10](https://github.com/ufal/atrium-project/issues/10), finding G3). The
+> runtime set is restored, the contract test deps live in `setup/requirements-test.txt`, and
+> `tests/test_service_runtime_deps.py` now asserts that every entrypoint the compose files and
+> setup script invoke is actually declared somewhere the image installs from.
 
 > [!NOTE] The virtual environment name is stated in the setup script and can be changed to an existing
 > one if needed.
@@ -310,8 +386,9 @@ Or for `-v all` the best models ensemble (average of 5 class scores):
 | `ALLOWED_ORIGINS`     | `*`       | CSV of CORS origins                                                      |
 | `MAX_UPLOAD_MB`       | `10`      | canonical upload limit — no shared default across the five services      |
 
-This service reads nothing beyond the shared contract above: `service/inference.py`,
-`service/document_json.py` and `service/api_client.py` contain no environment reads.
+Beyond the shared contract above, this service reads only its [limits](#limits), declared in
+`tool_limits.py`: `service/inference.py`, `service/document_json.py` and
+`service/api_client.py` contain no environment reads.
 This table is the deployment-facing subset. The complete ledger — every variable this
 image reads — is [`.env.example`](../.env.example) at the repo root, whose layout is
 fixed by `docs/templates/env.example.template` in ufal/atrium-project. The
@@ -333,10 +410,100 @@ directly.
 > `service/healthcheck.py` always probes loopback by design and never reads `HOST`, so a
 > loopback bind passes every probe while being unreachable from outside the container.
 
+## Limits
+
+Every limit this service has (atrium-project#53). Each is an environment setting, declared once
+in [`tool_limits.py`](../tool_limits.py), reported with its current value in `GET /info`
+`limits` — and with the variable that sets it in `limits_meta`. A malformed value stops the
+service at startup, naming the variable. Over a limit the service **refuses** the input with
+`reason: "limit_exceeded"` (see [Errors](#errors)); none of this service's limits cuts an
+input, so every response's `limits_applied` is `[]`. `tests/test_limits_contract.py` checks
+this table against `tool_limits.py` and `.env.example`.
+
+| Key (`/info`)      | Variable           | Default   | Unit  | Over the limit                                                                            |
+|--------------------|--------------------|-----------|-------|-------------------------------------------------------------------------------------------|
+| `max_upload_mb`    | `MAX_UPLOAD_MB`    | 10        | MB    | 413 `limit_exceeded` — per part: the file, and the `document_json` baseline               |
+| `max_pdf_pages`    | `MAX_PDF_PAGES`    | 50        | pages | 413 `limit_exceeded`, before any page is rendered — counts the pages classified (`pages`) |
+| `pdf_render_dpi`   | `PDF_RENDER_DPI`   | 300       | dpi   | — (the resolution PDF pages are rendered at; 300 is how the training pages were made)     |
+| `max_image_pixels` | `MAX_IMAGE_PIXELS` | 178956970 | px    | 413 `limit_exceeded`: an image, or a PDF page at `PDF_RENDER_DPI`, sized before decoding  |
+
+Platform limits (not settings): Starlette's multipart defaults (1000 files, 1000 fields, 1 MiB
+per non-file field).
+
+## Errors
+
+Every error has one JSON body (hub `docs/agent_skill_strategy.md` §4.4):
+`{"status": <int>, "reason": <code or null>, "detail": "<text>"}`, plus `limit`
+(`key`, `env`, `value`, `observed`, `unit`) when `reason` is `limit_exceeded`, and `errors`
+for request-validation problems.
+
+| Code | `reason`                 | When                                                                                                                                                                             | What to do                                                                           |
+|------|--------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| 413  | `limit_exceeded`         | over `MAX_UPLOAD_MB`, `MAX_PDF_PAGES` or `MAX_IMAGE_PIXELS`                                                                                                                      | send fewer pages (`pages`) or a smaller file, or raise the setting `limit.env` names |
+| 415  | `unsupported_media_type` | the file is not an image (`/predict_image`, `accepted: ["image/*"]`) or not a PDF (`/predict_document`, `accepted: ["application/pdf"]`); a 400 before atrium-project#32 round 2 | send an image to `/predict_image`, a PDF to `/predict_document`                      |
+| 422  | `invalid_record`         | the `document_json` baseline cannot be opened (not UTF-8 JSON, not an object, a newer `schema_version` major)                                                                    | send the record the previous stage wrote; update this service if the record is newer |
+| 422  | `null`                   | request validation (e.g. `topn` outside 1–11), an unknown `version`, or an image or PDF that cannot be read                                                                      | fix the field `errors` or `detail` names; repair or re-export an unreadable file     |
+| 500  | `null`                   | processing failure (a page the model could not classify included), or a record rejected by its own schema                                                                        | report it with `detail`; check the log for a model that failed to load               |
+| 503  | `null`                   | the replica is shutting down — retry against a live one                                                                                                                          | retry on another replica                                                             |
+
+```json
+{"status": 413, "reason": "limit_exceeded",
+ "detail": "PDF has too many pages: 73. Limit is 50 (MAX_PDF_PAGES).",
+ "limit": {"key": "max_pdf_pages", "env": "MAX_PDF_PAGES", "value": 50, "observed": 73, "unit": "pages"}}
+```
+
+## Partial results
+
+A 200 can carry less than was asked for. Read these before using the result:
+
+- `limits_applied` is present in every response and empty today: each limit of this service refuses
+  instead of shaping the result.
+- With `version=all`, a model that cannot be loaded or fails is left out, and the others are averaged.
+  The response does not say so; the service log does, once per failing model.
+- `/predict_document` classifies the pages asked for (`pages`), not the whole PDF.
+
+## Known limits
+
+- **A reduced ensemble is silent in the response** (above). After a model-loading failure, check the log
+  or ask with one `version` to see whether it answers.
+- **The renderer differs from the training pages'.** The service renders PDF pages with pypdfium2; the
+  training pages were made with pdftoppm. On 2,514 pages of 15 born-digital AMČR reports, 5 top-1
+  labels differed from the ones PyMuPDF renders gave, each to a neighbouring class
+  ([the renderer comparison](https://github.com/ufal/atrium-page-classification/blob/test/data_scripts/pdf_rasteriser_comparison.md)).
+- **One request classifies at most `MAX_PDF_PAGES` pages** (50 by default); a longer PDF is sent in parts
+  with `pages`.
+- **The models were trained on scanned archival pages.** Born-digital pages are classified, but
+  their labels have not been checked against reviewed answers.
+
+## OpenAPI (the typed contract)
+
+The service's OpenAPI document is committed as [`service/openapi.json`](openapi.json) and
+attached to every release as `openapi.json` with its `openapi.json.sha256` (atrium-project#32
+round 2). It is what a client is generated from: every request and response field is typed,
+every error response is the `ErrorBody` above, the registered `reason` codes are listed in
+`x-atrium-reason-codes`, and a returned record is typed by the vendored record schema
+(`AtriumDocument`). `GET /info` reports `openapi_sha256`, the digest of the spec the running
+image serves — equal to the release's `openapi.json.sha256` for an image built from that tag.
+
+- **After an API change**, regenerate and commit it — torch is not needed, the model manager is
+  stubbed as the tests stub it: `python atrium_openapi.py export --app service.api:app --out
+  service/openapi.json --prepare tests.openapi_contract_data:prepare`.
+  `tests/test_openapi_contract.py` fails while it is stale.
+- **Compatibility.** Each release compares its spec with the previous release's
+  (`release.yml`, `atrium_openapi.py compare` with oasdiff): a breaking change fails the
+  release unless the major version went up (for 0.x, that means 1.0), and a removed reason
+  code always fails. New fields, endpoints and reason codes are additive.
+- **fastapi and pydantic are pinned** exactly (`service/requirements.txt`,
+  `setup/requirements-test.txt`): the spec is generated by them. Bump both by hand and regenerate.
+- **Tests.** `tests/test_api_contract.py` now runs in the fast lane too (the same stub): it drives
+  both endpoints and holds every response — 200s and refusals — to the published schema.
+- **The release bundle** ships `atrium_openapi.py` (the service imports it to finish and digest the
+  spec) and `service/openapi.json`.
+
 ## Shutdown behavior 🛑
 
 Issue [#55](https://github.com/ufal/atrium-project/issues/55). The published `api` image
-(`ghcr.io/ufal/atrium-page-classification:<version>-api`, new in that issue — before it
+(`ghcr.io/ufal/atrium-page-classification-api:<version>`, new in that issue — before it
 this service was only reachable via a compose entrypoint override, so no API image
 existed to deploy) declares `HEALTHCHECK` (shallow `GET /health`, via the vendored
 `service/healthcheck.py`) and `STOPSIGNAL SIGTERM`, and its `ENTRYPOINT` passes
@@ -353,7 +520,7 @@ event loop. That was a prerequisite, not a tidy-up: uvicorn's `SIGTERM` handler 
 event-loop callback, so while a synchronous `manager.predict()` held the loop, the signal
 could not be processed at all and `--timeout-graceful-shutdown` had nothing to measure.
 
-⚠️ A `/predict_document` call classifies up to `MAX_PDF_PAGES` (50) pages sequentially and
+⚠️ A `/predict_document` call classifies up to `MAX_PDF_PAGES` (default 50) pages sequentially and
 can legitimately outlive the 20s drain budget. Raise `--timeout-graceful-shutdown` and the
 deployment's grace period together for that workload — see `docs/k8s_deployment.md` in the
 hub.
@@ -363,15 +530,14 @@ signal on purpose so a supervisor sees the real cause. That is a normal stop, no
 
 ## Client Side Test 🎨
 
-This API service ships one frontend for immediate testing: `service/frontend/`, a lightweight,
-standalone vanilla JS interface with no build step and no external dependencies. It is mounted
-at `/frontend` whenever the directory is present, so it is reachable at
-`http://localhost:${PORT:-8000}/frontend` as soon as the server is up.
+This branch includes the standalone frontend, `service/frontend/`: a lightweight vanilla JS page served by the
+API itself. The LINDAT-integrated frontend and its development setup are on the
+[`test` branch](https://github.com/ufal/atrium-page-classification/tree/test).
 
 ### Running the Server 🚀
 
 To start the API server with hot-reloading enabled (useful for development), ensure your virtual
-environment is activated in your **first console window**: [^3]
+environment is activated: [^3]
 
 ```bash
 cd atrium-page-classification
@@ -379,7 +545,8 @@ source venv/bin/activate
 uvicorn service.api:app --reload
 ```
 
-The server will start at `http://0.0.0.0:8000` (access this to use the built-in standalone visual testing tool located in `service/frontend`).
+The server will start at `http://0.0.0.0:8000` (access this to use the built-in standalone visual testing tool
+located in `service/frontend`).
 
 ## Contacts 📧
 
@@ -402,12 +569,13 @@ The server will start at `http://0.0.0.0:8000` (access this to use the built-in 
 [^2]: https://huggingface.co/google/vit-base-patch16-224
 [^3]: https://docs.python.org/3/library/venv.html
 [^4]: https://atrium-research.eu/
+[^5]: https://github.com/ufal/lindat-common
 [^6]: https://www.ghostscript.com/releases/gsdnld.html
 [^7]: https://ufal.mff.cuni.cz/home-page
 [^8]: https://github.com/ufal/atrium-page-classification
 [^10]: https://developer.nvidia.com/cuda-python
 [^13]: https://huggingface.co/google/vit-base-patch16-384
 [^14]: https://huggingface.co/google/vit-large-patch16-384
-[^17]: http://hdl.handle.net/20.500.12800/1-5959
+[^17]: http://hdl.handle.net/20.500.12800/1-6184
 [^18]: https://huggingface.co/timm/regnety_160.swag_ft_in1k
 [^19]: https://huggingface.co/timm/tf_efficientnetv2_m.in21k_ft_in1k

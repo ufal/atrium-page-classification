@@ -1,6 +1,14 @@
 services:
   classify:
     image: ghcr.io/ufal/atrium-page-classification:${ATRIUM_VERSION:-dev}
+    # The host uid, group 0 (atrium-project#69, roadmap B6). ./data and ./data/output are in
+    # the clone (their .gitkeep files), owned by whoever cloned it, while the image runs as
+    # uid 10001 by default -- so without this the results written to /app/result (the
+    # ./data/output mount) fail with EACCES. Every path the image writes is group-0
+    # writable, so any uid with group 0 works. On Linux set ATRIUM_UID in .env
+    # (`echo "ATRIUM_UID=$(id -u)" >> .env`); Docker Desktop needs nothing. Unset, this is
+    # the image's own uid 10001. Inherited by `api` through `extends:`.
+    user: "${ATRIUM_UID:-10001}:0"
     build:
       context: .
       args:
@@ -30,12 +38,17 @@ services:
     # published (nothing to `docker pull` for Kubernetes) and the Dockerfile's
     # HEALTHCHECK/STOPSIGNAL could not apply to it. Publishing the stage also removes
     # the duplicate copy of the uvicorn command line.
-    image: ghcr.io/ufal/atrium-page-classification:${ATRIUM_VERSION:-dev}-api
+    #
+    # The published name (atrium-project#69, roadmap B2): `-api` is part of the image NAME,
+    # as docker-tool.reusable.yml publishes it, so `ATRIUM_VERSION=1.8.0-beta docker compose
+    # --profile api pull` fetches the released image. The old `…:<version>-api` tag was
+    # never published by any build.
+    image: ghcr.io/ufal/atrium-page-classification-api:${ATRIUM_VERSION:-dev}
     build:
       context: .
       target: api
       args:
-        ATRIUM_RUNNER_IMAGE: ghcr.io/ufal/atrium-page-classification:${ATRIUM_VERSION:-dev}-api
+        ATRIUM_RUNNER_IMAGE: ghcr.io/ufal/atrium-page-classification-api:${ATRIUM_VERSION:-dev}
         ATRIUM_RUNNER_REPO: https://github.com/ufal/atrium-page-classification
         ATRIUM_RUNNER_REF: ${ATRIUM_RUNNER_REF:-dev}
     # env_file delivers every OTHER variable in .env.example into the container --
@@ -48,11 +61,11 @@ services:
         required: false
     environment:
       # ATRIUM_RUNNER_IMAGE is overridden here on purpose: the build arg above
-      # correctly tags this stage "...-api", but `extends: classify` (above)
+      # correctly names this stage's image "...-api", but `extends: classify` (above)
       # inherits classify's environment: block, whose ATRIUM_RUNNER_IMAGE has no
       # such suffix -- so without this line, paradata recorded the BATCH image tag
       # for requests served by the API image. (atrium-project#60)
-      ATRIUM_RUNNER_IMAGE: ghcr.io/ufal/atrium-page-classification:${ATRIUM_VERSION:-dev}-api
+      ATRIUM_RUNNER_IMAGE: ghcr.io/ufal/atrium-page-classification-api:${ATRIUM_VERSION:-dev}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
       PORT: ${PORT:-8000}
     ports:

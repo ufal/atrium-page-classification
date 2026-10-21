@@ -18,7 +18,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PORT="${ATRIUM_PC_PORT:-8000}"
 BASE_URL="${ATRIUM_PC_URL:-http://localhost:${PORT}}"
-HEALTH_URL="${BASE_URL}/info"
+HEALTH_URL="${BASE_URL}/ready"  # readiness, not liveness (atrium-project#55)
 MODE="auto"
 
 for arg in "$@"; do

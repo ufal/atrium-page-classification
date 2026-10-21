@@ -14,8 +14,21 @@ from sklearn.metrics import ConfusionMatrixDisplay, classification_report
 
 from atrium_document import canonical_doc_id
 
-ImageFile.LOAD_TRUNCATED_IMAGES = True
-Image.MAX_IMAGE_PIXELS = 4221790634
+
+def tolerate_scan_quirks() -> None:
+    """Pillow settings for the batch tools: decode a truncated image (its missing part grey) and
+    allow up to 4.22 G pixels, which the large scans of the training collections need.
+
+    Process-wide, so it is a call the batch entry points make (`run.py`, `parallel_best.py`), not
+    something importing this module does. It used to run at import, and the service imports this
+    module lazily, on its first `/predict_image`: from then on the whole process decoded truncated
+    uploads into a classification of grey fill instead of refusing them with a 422 (`_decode_image`
+    in `service/api.py`), and its Pillow pixel guard went from "off" to 4.22 G. The first request
+    of a process behaved differently from every later one.
+    """
+    ImageFile.LOAD_TRUNCATED_IMAGES = True
+    Image.MAX_IMAGE_PIXELS = 4221790634
+
 
 #: Trailing PAGE NUMBER on a per-page image filename: `CTX01_0007.png` → doc `CTX01`,
 #: page `0007`. Greedy on purpose (last separator wins), so `report_2021_003` is
@@ -75,13 +88,52 @@ def directory_scraper(folder_path: Path, file_format: str = "png", file_list: li
     return file_list
 
 
+def as_pairs(prediction) -> list:
+    """One prediction as (class index, score) pairs, best first.
+
+    `ImageClassifier.infer_dataloader` returns pairs for every top-N. A bare class index (an older
+    caller, or YOLO before the same change) has no score, so its score is None, not the index.
+    """
+    if isinstance(prediction, (int, np.integer)):
+        return [(int(prediction), None)]
+    return list(prediction)
+
+
+def keep_readable(files: list, predictions: list, raw_scores: list = None, labels: list = None):
+    """Drop the images that could not be read, keeping every other list paired with its file.
+
+    `infer_dataloader` returns None for an image the loader could not read, at that image's
+    position. Returns (files, predictions, raw_scores, labels, skipped), where skipped lists the
+    dropped files for the paradata; raw_scores and labels stay None when given as None.
+    """
+    kept = [i for i, prediction in enumerate(predictions) if prediction is not None]
+    skipped = [str(files[i]) for i, prediction in enumerate(predictions) if prediction is None]
+
+    def pick(values):
+        return None if values is None else [values[i] for i in kept]
+
+    return pick(files), pick(predictions), pick(raw_scores), pick(labels), skipped
+
+
 def dataframe_results(
     test_images: list, test_predictions: list, categories: list, top_N: int, raw_scores: list = None
 ) -> (pd.DataFrame, pd.DataFrame):
+    # The two lists are paired by position, so they must be the same length: zipping a shorter
+    # prediction list once gave later pages their neighbours' categories without an error.
+    if len(test_images) != len(test_predictions):
+        raise ValueError(
+            f"{len(test_images)} images but {len(test_predictions)} predictions: "
+            "pass predictions aligned with the images (see keep_readable)"
+        )
     results = []
     raws = []
+    raw_rows = []
 
-    for image_file, predict_scores in zip(test_images, test_predictions):
+    for position, (image_file, predict_scores) in enumerate(zip(test_images, test_predictions)):
+        if predict_scores is None:  # an image the loader could not read
+            warnings.warn(f"No prediction for unreadable image '{image_file}'; it is left out.", UserWarning)
+            continue
+
         # One shared derivation for both CLI shapes — see doc_id_and_page (D3).
         document, page_num = doc_id_and_page(image_file)
 
@@ -94,13 +146,15 @@ def dataframe_results(
             )
             page_num = 1
 
-        labels = [categories[i[0]] for i in predict_scores] if top_N > 1 else [categories[predict_scores]]
-        scores = [round(i[1], 3) for i in predict_scores] if top_N > 1 else [round(predict_scores, 3)]
+        pairs = as_pairs(predict_scores)[:top_N]
+        labels = [categories[index] for index, _ in pairs]
+        scores = [None if score is None else round(score, 3) for _, score in pairs]
 
         res = [document, page_num] + labels + scores
         results.append(res)
         if raw_scores is not None:
             raws.append([document, page_num])
+            raw_rows.append(raw_scores[position])
 
     col = ["FILE", "PAGE"] + [f"CLASS-{j + 1}" for j in range(top_N)] + [f"SCORE-{j + 1}" for j in range(top_N)]
     rdf = pd.DataFrame(results, columns=col)
@@ -117,7 +171,7 @@ def dataframe_results(
         col = ["FILE", "PAGE"]
         rawdf = pd.DataFrame(raws, columns=col)
         # Ensure raw_scores is a numpy array before rounding
-        raw_weights = np.array(raw_scores).round(3)
+        raw_weights = np.array(raw_rows, dtype=float).reshape(len(raw_rows), len(categories)).round(3)
         rawdf[categories] = raw_weights
 
     return rdf, rawdf
@@ -130,32 +184,19 @@ def _advise_category_drift(categories: list, directory: str) -> None:
     when no reference list can be imported. Reported in the house idiom of
     `atrium_document.py::_note()` -- visible, but nothing stops.
 
-    WHAT IT MAKES VISIBLE. `collect_images()` derives its class list with
-    `sorted(os.listdir(directory))`, and `os.listdir()` returns FILES as well as
-    directories. The shipped `small_data_samples/` tree carries a `LICENSE` file, which
-    sorts to index 2, so the derived list is 12 entries long and every label from
-    `LINE_HW` onwards sits one index higher than `model_registry.CATEGORIES` puts it --
-    and the one-hot vectors are one column too wide. Two ways that lands:
+    WHAT IT MAKES VISIBLE. `collect_images()` derives its class list from the
+    sub-directories of the dataset root, sorted. Files at that level are ignored --
+    the shipped `small_data_samples/` carries a `LICENSE` file beside its eleven label
+    folders -- and so are hidden entries. (Before that filter, `sorted(os.listdir())`
+    listed the `LICENSE` file as a twelfth category at index 2 and the per-category
+    `os.listdir()` then raised `NotADirectoryError`.)
 
-      * a stray NON-directory (today's `small_data_samples/LICENSE`) reaches the
-        `os.listdir()` below and raises `NotADirectoryError` -- loud, but saying nothing
-        about which entry is at fault, or that a class list is what broke;
-      * a stray DIRECTORY (an `.ipynb_checkpoints/`, an `unsorted/` holding pen), or a
-        category directory that is simply absent, shifts the indices and returns
-        perfectly cleanly. Nothing errors: the run trains or evaluates against a
-        silently permuted label space, and the confusion matrix names the wrong classes.
-
-    This check speaks before either of those, and names the entries responsible.
-
-    THE REAL FIX is to filter the derivation to directories,
-
-        categories = sorted(e for e in os.listdir(directory) if os.path.isdir(os.path.join(directory, e)))
-
-    which is deliberately NOT applied here: it changes what `collect_images()` returns
-    and would change any training or evaluation run that has been living with the
-    current derivation. Recommended as a separate, explicitly behaviour-changing
-    follow-up. Until someone takes it, this check reports the disagreement instead of
-    letting it pass unremarked.
+    What a directory filter cannot catch is a stray or missing DIRECTORY: an
+    `unsorted/` holding pen, a mistyped label folder, or a category directory that is
+    simply absent. Each of those shifts the indices and returns perfectly cleanly --
+    nothing errors, the run trains or evaluates against a silently permuted label
+    space, and the confusion matrix names the wrong classes. This check names the
+    entries responsible.
     """
     try:
         try:
@@ -183,9 +224,8 @@ def _advise_category_drift(categories: list, directory: str) -> None:
         f"filesystem are not the {len(expected)} declared page categories -- "
         f"present but not a category {not_a_category}; declared but absent {absent}. "
         f"Class indices here are positional, so each disagreement shifts the labels after it out of step "
-        f"with model_registry.CATEGORIES (and a non-directory entry will additionally fail the "
-        f"os.listdir() below). Nothing has been changed; see _advise_category_drift.__doc__ for the "
-        f"(behaviour-changing) fix.",
+        f"with model_registry.CATEGORIES. Nothing has been changed; rename, add or remove the directories "
+        f"listed above if that is not intended.",
         file=sys.stderr,
     )
 
@@ -193,11 +233,19 @@ def _advise_category_drift(categories: list, directory: str) -> None:
 def collect_images(directory: str, ordered: bool = True) -> (list, list, list):
     print(f"Collecting images from {directory}...")
 
-    categories = sorted(os.listdir(directory))
+    # One category per sub-directory. Files at this level (the `LICENSE` shipped in
+    # `small_data_samples/`) and hidden entries (`.ipynb_checkpoints/`, `.DS_Store`) are
+    # not categories: listing them would shift every class index after them, and a file
+    # would make the per-category os.listdir() below raise NotADirectoryError.
+    categories = sorted(
+        entry
+        for entry in os.listdir(directory)
+        if not entry.startswith(".") and os.path.isdir(os.path.join(directory, entry))
+    )
     print(f"Category input directories found: {categories}")
 
-    # Advisory only -- never raises, never touches `categories`, and the derivation above
-    # is deliberately left exactly as it was (changing it changes training behaviour).
+    # Advisory only -- never raises, never touches `categories`. Reports a stray or
+    # missing category DIRECTORY, which the filter above cannot tell from a real one.
     _advise_category_drift(categories, directory)
 
     total_files, total_labels, total_classes = [], [], []
@@ -229,23 +277,20 @@ def confusion_plot(
     predictions: list, trues: list, categories: list, out_model: str, top_N: int = 1, output_dir: str = None
 ):
     single_pred = []
+    kept_trues = []
     correct = 0
-    for j, pred_scores in enumerate(predictions):
-        true_class = trues[j]
-
-        if top_N > 1:
-            classes = [i[0] for i in pred_scores]
-
-            if true_class in classes:
-                correct += 1
-                single_pred.append(true_class)
-            else:
-                single_pred.append(classes[0])
-
+    for pred_scores, true_class in zip(predictions, trues):
+        if pred_scores is None:  # an image the loader could not read: neither right nor wrong
+            continue
+        kept_trues.append(true_class)
+        # The best top_N classes; a hit anywhere among them counts as correct (Top-N accuracy).
+        classes = [index for index, _ in as_pairs(pred_scores)[:top_N]]
+        if true_class in classes:
+            correct += 1
+            single_pred.append(true_class)
         else:
-            single_pred.append(pred_scores)
-            if pred_scores == true_class:
-                correct += 1
+            single_pred.append(classes[0])
+    trues = kept_trues
 
     print("=" * 40)
     print("Percentage correct: ", round(100 * correct / len(trues), 2))

@@ -12,11 +12,11 @@ sys.path.append(str(Path(__file__).parent.parent))
 try:
     from classifier import ImageClassifier
     from ensemble import average_prediction_dicts
-    from model_registry import CATEGORIES, REVISION_BEST_MODELS, REVISION_TO_BASE_MODEL
+    from model_registry import CATEGORIES, REVISION_BEST_MODELS, resolve_base_model
 except ImportError:
     from classifier import ImageClassifier
     from ensemble import average_prediction_dicts
-    from model_registry import CATEGORIES, REVISION_BEST_MODELS, REVISION_TO_BASE_MODEL
+    from model_registry import CATEGORIES, REVISION_BEST_MODELS, resolve_base_model
 
 # (12-factor XI) No basicConfig() here. This module is imported as a library by
 # api.py and by tests; configuring the ROOT logger at import time is a side effect
@@ -38,14 +38,19 @@ class ModelManager:
         self.models = {}
         self.available_versions = AVAILABLE_VERSIONS
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        # Versions whose inference failed and has not succeeded since: their error is logged
+        # once, not once per page (a 529-page document logged 1,599 identical errors).
+        self._failing: set = set()
+        # Versions an ensemble answer has already been reported without (WARNING once).
+        self._warned: set = set()
 
     def _get_base_model_id(self, version: str) -> str:
-        if version in REVISION_TO_BASE_MODEL:
-            return REVISION_TO_BASE_MODEL[version]
-        for key, base_model in REVISION_TO_BASE_MODEL.items():
-            if version.startswith(key):
-                return base_model
-        raise ValueError(f"Base model not found for version: {version}")
+        # One resolution rule, shared with service/api.py's up-front `version` check
+        # (model_registry.resolve_base_model; atrium-project#32 round 2).
+        base_model = resolve_base_model(version)
+        if base_model is None:
+            raise ValueError(f"Base model not found for version: {version}")
+        return base_model
 
     def get_model_details(self, version: str) -> str:
         if version == "all":
@@ -119,8 +124,11 @@ class ModelManager:
 
                     model_preds = []
                     for pred_item in predictions:
+                        # None: the page image could not be read; it gets no vote from this model.
                         model_preds.append(
-                            [{"label": CATEGORIES[idx], "score": float(score)} for idx, score in pred_item]
+                            []
+                            if pred_item is None
+                            else [{"label": CATEGORIES[idx], "score": float(score)} for idx, score in pred_item]
                         )
                     all_model_predictions.append(model_preds)
                 except Exception as e:
@@ -135,7 +143,7 @@ class ModelManager:
             for i in range(n):
                 preds_for_image = []
                 for model_preds in all_model_predictions:
-                    if i < len(model_preds):
+                    if i < len(model_preds) and model_preds[i]:
                         preds_for_image.append(model_preds[i])
 
                 formatted_batch_results.append(average_prediction_dicts(preds_for_image, CATEGORIES, topn))
@@ -150,6 +158,9 @@ class ModelManager:
             formatted_batch_results = []
             for pred_item in predictions:
                 row_preds = []
+                if pred_item is None:  # the page image could not be read
+                    formatted_batch_results.append(row_preds)
+                    continue
                 for idx, score in pred_item[:topn]:
                     row_preds.append({"label": CATEGORIES[idx], "score": float(score)})
                 formatted_batch_results.append(row_preds)
@@ -162,17 +173,29 @@ class ModelManager:
 
     def _predict_averaged(self, image, topn):
         predictions_list = []
+        failed = []
 
         for v in self.available_versions:
             try:
                 results = self._run_single_inference(v, image, topn=len(CATEGORIES))
                 if isinstance(results, dict) and "error" in results:
+                    failed.append(v)
                     continue
                 predictions_list.append(results)
             except Exception as e:
                 logger.warning(f"Ensemble: model {v} failed, skipping: {e}")
+                failed.append(v)
                 continue
 
+        if failed and predictions_list:
+            # The answer is still an ensemble's, of fewer models: say so where it shows.
+            level = logging.DEBUG if set(failed) <= self._warned else logging.WARNING
+            logger.log(
+                level,
+                f"Ensemble: {len(predictions_list)} of {len(self.available_versions)} models "
+                f"answered; failing: {', '.join(failed)}",
+            )
+            self._warned |= set(failed)
         if not predictions_list:
             return {"error": "All models failed."}
         return average_prediction_dicts(predictions_list, CATEGORIES, topn)
@@ -181,9 +204,14 @@ class ModelManager:
         try:
             clf = self.load_model(version)
             predictions = clf.top_n_predictions(image, top_n=topn)
+            self._failing.discard(version)
             return [{"label": CATEGORIES[i], "score": float(s)} for i, s in predictions]
         except Exception as e:
-            logger.error(f"Inference failed for model {version}: {e}")
+            if version in self._failing:
+                logger.debug(f"Inference failed for model {version} again: {e}")
+            else:
+                logger.error(f"Inference failed for model {version}: {e}")
+                self._failing.add(version)
             return {"error": str(e)}
 
 
