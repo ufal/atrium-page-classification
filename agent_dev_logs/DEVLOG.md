@@ -339,6 +339,22 @@ issue opens, matching its four siblings.
 
   Files delivered in chat.
 
+## 2026-10-21 — The renderer note in README.md; two directory-run bugs found (atrium-project#66, #15)
+* `README.md` (§ licences, the PDF route): the two renderers are not identical; on 2,514 pages of 15 born-digital
+  AMČR reports, 2,509 kept their top-1 label and five moved to a neighbouring class. Linked to
+  `data_scripts/pdf_rasteriser_comparison.md`.
+* **Found while writing the Galaxy wrapper (atrium-project#66), not fixed here:**
+  * a directory run drops an unreadable image in `custom_collate`, and `dataframe_results` then pairs the
+    predictions with the file names by position: every later image gets its neighbour's row, and the last one is
+    lost, with no error. With `--no-inner`, any non-image file in the folder does it;
+  * with `-tn 1`, `infer_dataloader` returns class numbers, so `SCORE-1` holds the class number, not a score. The
+    service avoids it (`internal_topn = max(topn, 2)`).
+  Both need a run with torch to fix and test; this session had none. Issue text drafted for the user.
+* **Found for the paper (atrium-project#15):** in `result/stats/*FOLD_*_DATASETS.txt`, 4,296 of the 5,449 pages of
+  the manually checked evaluation set are in fold 1's training partition (the other folds are alike), and no stored
+  table gives 99.16 %. The held-out figures are each fold's 4,823-page test partition.
+* Docs only. **Checks:** none needed beyond the link check.
+
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
 state via the GitHub API (zero open), and the confirmed `@v1` reusable-workflow pin. Nothing removed from the issues

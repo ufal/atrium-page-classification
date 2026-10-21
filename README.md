@@ -1800,6 +1800,10 @@ uses Ultralytics, whose package and base weights are **AGPL-3.0**; a `--yolo` ru
 The API's `/predict_document` renders PDF pages with **pypdfium2** (Apache-2.0 or BSD-3-Clause, declared
 `conditional` in `setup/para_config.txt`); it replaced PyMuPDF, an AGPL-3.0 library that was installed in
 both images and declared nowhere ([atrium-project#72](https://github.com/ufal/atrium-project/issues/72)).
+The two renderers are not identical: on 2,514 pages of 15 born-digital AMČR reports they gave the same top-1
+label on 2,509, and the other five moved to a neighbouring class. The training pages were rendered with
+pdftoppm, which neither engine reproduces exactly. Measurements and the five pages:
+[data_scripts/pdf_rasteriser_comparison.md](data_scripts/pdf_rasteriser_comparison.md).
 
 Example of the [small_data_samples](small_data_samples) 📁 directory processing paradata log:
 [260315-120442_page-classification.json](paradata%2F260315-120442_page-classification.json) 📎
