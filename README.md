@@ -142,6 +142,12 @@ the training setup mapping adjusted for the HF 😊 hub revisions (which caused 
 The table and figure above show accuracy and parameters comparison of different base models tested on the same data. The figure
 demonstrates best models overall (above the trendline) and the table shows all the tested models with their best accuracy and precision scores.
 
+> [!NOTE]
+> The `vX.3` accuracies above were measured on the 5,449-page evaluation set. That set was meant to hold only pages no fold
+> trained on, but the script that selected it (`result/stats/unused.sh`, fixed since) missed zero-padded page numbers and ids
+> with a letter, so most of its pages were training pages ([atrium-project#15](https://github.com/ufal/atrium-project/issues/15)).
+> A re-run of the `vX.4` models on the test sets of the LINDAT dataset replaces these figures.
+
 ### Data 📜
 
 The dataset is provided under CC BY-NC 4.0 license, and consists of **48,499** PNG images of pages from **37,328** archival documents.

@@ -4,8 +4,10 @@ data_scripts/eval_by_document_overlap.py — accuracy on seen and unseen documen
 
 Why it exists. The cross-validation splits sample **pages**, not documents: a test page often comes
 from a report whose other pages were in training, which is easier than a report the model never
-saw. And the "5,449-page evaluation set" turned out to overlap the training partitions. Reporting
-one accuracy hides both. This script takes one split and one or more results tables and reports
+saw. And the "5,449-page evaluation set" overlaps the training partitions: `result/stats/unused.sh`,
+which selected it as the pages no fold used, compared file names as text and so missed zero-padded
+page numbers (`CTX192100040-01.png`) and ids with a letter (`CTX193401761A-11.png`). Reporting one
+accuracy hides both. This script takes one split and one or more results tables and reports
 the top-1 accuracy separately for
 
 * **in training** — the page itself was a training page (a held-out set should have none);

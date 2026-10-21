@@ -8,6 +8,8 @@ Scope
 * sort.sh    – CSV columns by header name, label/page validation, padding in the
                document folder and in onepagers/, no empty label folders, dry run
 * pdf2png.sh – PDFs kept by default, --delete, .PDF found, awkward filenames
+* result/stats/unused.sh – the pages of a CSV that no fold's split used: zero-padded page
+               numbers and ids with a letter count as used (atrium-project#15)
 
 Each test runs the real script with bash in a tmp_path sandbox. pdf2png.sh runs
 against a stand-in `pdftoppm` put first on PATH, so poppler is not needed. The
@@ -25,6 +27,7 @@ import pytest
 SCRIPTS = Path(__file__).resolve().parent.parent / "data_scripts" / "unix"
 SORT_SH = SCRIPTS / "sort.sh"
 PDF2PNG_SH = SCRIPTS / "pdf2png.sh"
+UNUSED_SH = SCRIPTS.parent.parent / "result" / "stats" / "unused.sh"
 
 BASH = shutil.which("bash")
 pytestmark = pytest.mark.skipif(BASH is None, reason="bash is not installed")
@@ -213,3 +216,53 @@ class TestPdf2PngSh:
         result = _run(PDF2PNG_SH, "--dir", empty, cwd=tmp_path, env=env)
         assert result.returncode == 0
         assert "No PDF files found" in result.stdout
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# result/stats/unused.sh
+# ════════════════════════════════════════════════════════════════════════════
+class TestUnusedSh:
+    """The 5,449-page evaluation set was this script's output, and 4,296 of its pages were
+    training pages: names like `CTX192100040-01.png` and `CTX193401761A-11.png` never matched."""
+
+    SPLIT = (
+        "Training set (4 images):\n"
+        "/pages/train_5/TEXT/CTX192100040-01.png\n"
+        "/pages/train_5/TEXT/CTX193401761A-11.png\n"
+        "/pages/train_5/DRAW/CTX192500554-1.png\n"
+        "/pages/train_5/PHOTO/CTX192000047.png\n"
+        "Validation set (1 images):\n"
+        "/pages/train_5/TEXT/CTX192700593-08.png\n"
+        "Test set (1 images):\n"
+        "/pages/train_5/TEXT/CTX192800606-1.png\n"
+    )
+    CSV = (
+        "file,page,category\n"
+        "CTX192100040,1,TEXT\n"
+        "CTX193401761A,11,TEXT\n"
+        "CTX192500554,1,DRAW\n"
+        "CTX192000047,1,PHOTO\n"
+        "CTX192700593,8,TEXT\n"
+        "CTX192800606,01,TEXT\n"
+        "CTX199900001,1,LINE_HW\n"
+    )
+
+    def _unused(self, tmp_path, *flags) -> list:
+        (tmp_path / "fold_1_DATASETS.txt").write_text(self.SPLIT)
+        (tmp_path / "eval.csv").write_text(self.CSV)
+        result = _run(UNUSED_SH, *flags, "eval.csv", "fold_1_DATASETS.txt", cwd=tmp_path)
+        assert result.returncode == 0, result.stdout + result.stderr
+        written = sorted(tmp_path.glob("unused_entries_*.csv"))
+        if not written:
+            return []
+        return written[-1].read_text().splitlines()[1:]
+
+    def test_padded_pages_lettered_ids_and_pageless_names_count_as_training(self, tmp_path):
+        assert self._unused(tmp_path, "-t") == [
+            "CTX192700593,8,TEXT",
+            "CTX192800606,01,TEXT",
+            "CTX199900001,1,LINE_HW",
+        ]
+
+    def test_every_partition_together_leaves_only_the_unseen_page(self, tmp_path):
+        assert self._unused(tmp_path, "-t", "-v", "-s") == ["CTX199900001,1,LINE_HW"]

@@ -1,11 +1,11 @@
 # 📓 atrium-page-classification — agent_dev_logs/DEVLOG.md (timeline index)
 > _Historical page-image classification. Open issues: #58 (decision-model experiments, 2026-10-20) and #61 (the
-> directory-run bug, 2026-10-21; fixed on the working branch, not released). #48 closed 2026-09-17; #15 and #26
-> closed; four open Dependabot PRs (#56, #57, #59, #60). Its pilot work is tracked in hub issues (atrium-project #6, #67, #72)
-> and in atrium-digital-convert#5. `test` = `9f4464b` (2026-10-21) · **v1.9.4-beta** (2026-10-18, `d0fac40`; the
-> Hub-loader fix `f6c1aeb`), published mutable like v1.9.3-beta: immutable releases were switched on here on 2026-10-19
-> (atrium-project#72), so **v1.9.5-beta** (prepared 2026-10-19, the runbook) is the first immutable one._
-> _Per-issue detail: `digests/48.digest.md` · `plans/48.plan.md` (the issue closed 2026-09-17 and its export was removed; the pair is to be removed too). This header previously claimed no such exports existed; they have since 2026-09-07. The 2026-08-02 → 09-06 entries below predate them and are reconstructed from `CONTRIBUTING.md`'s release-note table (source of truth for that window) and commit history, not from a digest._
+> directory-run bug, 2026-10-21; fixed on `test` in `688a841`, released with **v1.9.6-beta**, prepared 2026-10-21).
+> #48 closed 2026-09-17 (its pair removed 2026-10-21; the hub's history page cites the copy on `vit`); #15 and #26
+> closed; four open Dependabot PRs (#56, #57, #59, #60). Its pilot work is tracked in hub issues (atrium-project #6,
+> #67, #72) and in atrium-digital-convert#5. `test` = `d92966e` (2026-10-21) · **v1.9.5-beta** (2026-10-19, the
+> runbook) is the first immutable release (atrium-project#72)._
+> _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md`, `digests/61.digest.md` · `plans/61.plan.md`._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
 ## 2026-06-25
@@ -380,6 +380,25 @@ issue opens, matching its four siblings.
 * **Checks:** a py3.11 venv with torch 2.7.1 (PyPI). Full suite: 884 passed, 3 skipped, 2 xfailed; 2 failed, the
   same 2 as on unmodified `test` in this sandbox (one needs huggingface.co; one fails only after ultralytics has
   tried to install `pi-heif` offline). `ruff check` and `ruff format --check` clean.
+
+## 2026-10-21 (round 3) — The 5,449-page set's selection bug; v1.9.6-beta prepared (atrium-project#15, #61)
+* **Why 4,296 of the 5,449 "held-out" pages are training pages.** The set is
+  `result/stats/unused_entries_da5_f12345.csv`, made by `result/stats/unused.sh` from the five `*_FOLD_*_DATASETS.txt`
+  files as the pages no fold trained on: held out by design. The script matched only `CTX<digits>-<digits>` and
+  compared the page as text, so fold 1's training pages `CTX192100040-01.png` (3,679 zero-padded) and
+  `CTX193401761A-11.png` (617 ids with a letter) never met the CSV's `CTX192100040,1`. Every literal match it saw
+  is in a dev or test partition, as for a run with `-t`.
+* **Fixed:** `extract_doc_page` uses the rule of `utils.doc_id_and_page` (the label after the last `-` or `_`, as a
+  decimal number; a name without one is page 1), and the CSV's page is compared as a number. Re-run on the stored
+  splits and the old CSV, it leaves **130** of 5,450 pages, the ones in no fold's training partition. Two tests in
+  `tests/test_data_scripts.py` (`TestUnusedSh`) fail on the old script and pass on the new one.
+* README: a note under the accuracy table (the `vX.3` figures come from that set; the `vX.4` re-run on the LINDAT
+  test sets replaces them). CONTRIBUTING's model table points to it. `eval_by_document_overlap.py` names the cause.
+* **v1.9.6-beta prepared:** `setup/para_config.txt`, `CITATION.cff` and `service/openapi.json` (version only);
+  `check_version.py` agrees. The GitHub notes and the CONTRIBUTING row, which replaces the Unreleased row, are
+  drafted in chat. Tagging is the maintainer's.
+* **Dev logs:** the #48 pair is removed (closed 2026-09-17; the hub's history page links the copy on `vit`).
+* **Checks:** see the round's summary.
 
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue

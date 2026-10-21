@@ -59,15 +59,24 @@ extract_training_files() {
     awk "$awk_script" "$file"
 }
 
-# Function to extract document ID and page from a file path
+# Function to extract document ID and page from a file path, with the identity the rest of
+# the repository uses (utils.doc_id_and_page): the page label after the last '-' or '_' is a
+# decimal number, and the document id is everything before it.
 # E.g., /path/to/CTX192000019-7.png -> CTX192000019,7
+#       /path/to/CTX192100040-01.png -> CTX192100040,1   (zero-padded page)
+#       /path/to/CTX193401761A-11.png -> CTX193401761A,11 (an id with a letter)
+#       /path/to/CTX192000047.png -> CTX192000047,1      (no page label: page 1)
+# Matching only `CTX<digits>-<digits>` and comparing the page as text missed the last three
+# kinds, which put 4,296 training pages into the 5,449-page "unused" set (atrium-project#15).
 extract_doc_page() {
     local filepath="$1"
-    local filename
+    local filename stem
     filename=$(basename "$filepath")
-    # Extract CTX ID and page number from filename like CTX192000019-7.png
-    if [[ $filename =~ (CTX[0-9]+)-([0-9]+)\.png ]]; then
-        echo "${BASH_REMATCH[1]},${BASH_REMATCH[2]}"
+    stem="${filename%.png}"
+    if [[ $stem =~ ^(.+)[-_]([0-9]+)$ ]]; then
+        echo "${BASH_REMATCH[1]},$((10#${BASH_REMATCH[2]}))"
+    else
+        echo "${stem},1"
     fi
 }
 
@@ -170,7 +179,8 @@ main() {
 
     # Read input CSV (skip header) and extract file,page combinations
     echo -e "${BLUE}Step 3: Processing input CSV...${NC}"
-    tail -n +2 "$input_csv" | awk -F',' '{print $1","$2}' | sort -u > "$input_doc_pages"
+    # The page as a number, so `01` in a CSV meets the `1` of a file name.
+    tail -n +2 "$input_csv" | awk -F',' '{print $1","($2+0)}' | sort -u > "$input_doc_pages"
 
     local total_input
     total_input=$(wc -l < "$input_doc_pages")
@@ -215,7 +225,7 @@ main() {
         while IFS=',' read -r doc page; do
             # Match rows where first column is $doc and second column is $page
             awk -F',' -v doc="$doc" -v page="$page" \
-                'NR>1 && $1==doc && $2==page {print}' "$input_csv"
+                'NR>1 && $1==doc && $2+0==page+0 {print}' "$input_csv"
         done < "$unused_doc_pages" >> "$output_file"
 
         local output_rows
