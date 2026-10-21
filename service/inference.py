@@ -124,8 +124,11 @@ class ModelManager:
 
                     model_preds = []
                     for pred_item in predictions:
+                        # None: the page image could not be read; it gets no vote from this model.
                         model_preds.append(
-                            [{"label": CATEGORIES[idx], "score": float(score)} for idx, score in pred_item]
+                            []
+                            if pred_item is None
+                            else [{"label": CATEGORIES[idx], "score": float(score)} for idx, score in pred_item]
                         )
                     all_model_predictions.append(model_preds)
                 except Exception as e:
@@ -140,7 +143,7 @@ class ModelManager:
             for i in range(n):
                 preds_for_image = []
                 for model_preds in all_model_predictions:
-                    if i < len(model_preds):
+                    if i < len(model_preds) and model_preds[i]:
                         preds_for_image.append(model_preds[i])
 
                 formatted_batch_results.append(average_prediction_dicts(preds_for_image, CATEGORIES, topn))
@@ -155,6 +158,9 @@ class ModelManager:
             formatted_batch_results = []
             for pred_item in predictions:
                 row_preds = []
+                if pred_item is None:  # the page image could not be read
+                    formatted_batch_results.append(row_preds)
+                    continue
                 for idx, score in pred_item[:topn]:
                     row_preds.append({"label": CATEGORIES[idx], "score": float(score)})
                 formatted_batch_results.append(row_preds)

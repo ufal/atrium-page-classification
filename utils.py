@@ -88,13 +88,52 @@ def directory_scraper(folder_path: Path, file_format: str = "png", file_list: li
     return file_list
 
 
+def as_pairs(prediction) -> list:
+    """One prediction as (class index, score) pairs, best first.
+
+    `ImageClassifier.infer_dataloader` returns pairs for every top-N. A bare class index (an older
+    caller, or YOLO before the same change) has no score, so its score is None, not the index.
+    """
+    if isinstance(prediction, (int, np.integer)):
+        return [(int(prediction), None)]
+    return list(prediction)
+
+
+def keep_readable(files: list, predictions: list, raw_scores: list = None, labels: list = None):
+    """Drop the images that could not be read, keeping every other list paired with its file.
+
+    `infer_dataloader` returns None for an image the loader could not read, at that image's
+    position. Returns (files, predictions, raw_scores, labels, skipped), where skipped lists the
+    dropped files for the paradata; raw_scores and labels stay None when given as None.
+    """
+    kept = [i for i, prediction in enumerate(predictions) if prediction is not None]
+    skipped = [str(files[i]) for i, prediction in enumerate(predictions) if prediction is None]
+
+    def pick(values):
+        return None if values is None else [values[i] for i in kept]
+
+    return pick(files), pick(predictions), pick(raw_scores), pick(labels), skipped
+
+
 def dataframe_results(
     test_images: list, test_predictions: list, categories: list, top_N: int, raw_scores: list = None
 ) -> (pd.DataFrame, pd.DataFrame):
+    # The two lists are paired by position, so they must be the same length: zipping a shorter
+    # prediction list once gave later pages their neighbours' categories without an error.
+    if len(test_images) != len(test_predictions):
+        raise ValueError(
+            f"{len(test_images)} images but {len(test_predictions)} predictions: "
+            "pass predictions aligned with the images (see keep_readable)"
+        )
     results = []
     raws = []
+    raw_rows = []
 
-    for image_file, predict_scores in zip(test_images, test_predictions):
+    for position, (image_file, predict_scores) in enumerate(zip(test_images, test_predictions)):
+        if predict_scores is None:  # an image the loader could not read
+            warnings.warn(f"No prediction for unreadable image '{image_file}'; it is left out.", UserWarning)
+            continue
+
         # One shared derivation for both CLI shapes — see doc_id_and_page (D3).
         document, page_num = doc_id_and_page(image_file)
 
@@ -107,13 +146,15 @@ def dataframe_results(
             )
             page_num = 1
 
-        labels = [categories[i[0]] for i in predict_scores] if top_N > 1 else [categories[predict_scores]]
-        scores = [round(i[1], 3) for i in predict_scores] if top_N > 1 else [round(predict_scores, 3)]
+        pairs = as_pairs(predict_scores)[:top_N]
+        labels = [categories[index] for index, _ in pairs]
+        scores = [None if score is None else round(score, 3) for _, score in pairs]
 
         res = [document, page_num] + labels + scores
         results.append(res)
         if raw_scores is not None:
             raws.append([document, page_num])
+            raw_rows.append(raw_scores[position])
 
     col = ["FILE", "PAGE"] + [f"CLASS-{j + 1}" for j in range(top_N)] + [f"SCORE-{j + 1}" for j in range(top_N)]
     rdf = pd.DataFrame(results, columns=col)
@@ -130,7 +171,7 @@ def dataframe_results(
         col = ["FILE", "PAGE"]
         rawdf = pd.DataFrame(raws, columns=col)
         # Ensure raw_scores is a numpy array before rounding
-        raw_weights = np.array(raw_scores).round(3)
+        raw_weights = np.array(raw_rows, dtype=float).reshape(len(raw_rows), len(categories)).round(3)
         rawdf[categories] = raw_weights
 
     return rdf, rawdf
@@ -236,23 +277,20 @@ def confusion_plot(
     predictions: list, trues: list, categories: list, out_model: str, top_N: int = 1, output_dir: str = None
 ):
     single_pred = []
+    kept_trues = []
     correct = 0
-    for j, pred_scores in enumerate(predictions):
-        true_class = trues[j]
-
-        if top_N > 1:
-            classes = [i[0] for i in pred_scores]
-
-            if true_class in classes:
-                correct += 1
-                single_pred.append(true_class)
-            else:
-                single_pred.append(classes[0])
-
+    for pred_scores, true_class in zip(predictions, trues):
+        if pred_scores is None:  # an image the loader could not read: neither right nor wrong
+            continue
+        kept_trues.append(true_class)
+        # The best top_N classes; a hit anywhere among them counts as correct (Top-N accuracy).
+        classes = [index for index, _ in as_pairs(pred_scores)[:top_N]]
+        if true_class in classes:
+            correct += 1
+            single_pred.append(true_class)
         else:
-            single_pred.append(pred_scores)
-            if pred_scores == true_class:
-                correct += 1
+            single_pred.append(classes[0])
+    trues = kept_trues
 
     print("=" * 40)
     print("Percentage correct: ", round(100 * correct / len(trues), 2))

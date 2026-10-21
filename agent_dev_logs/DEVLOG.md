@@ -1,7 +1,8 @@
 # 📓 atrium-page-classification — agent_dev_logs/DEVLOG.md (timeline index)
-> _Historical page-image classification. No open issue here (#48 closed 2026-09-17; #15 and #26 closed; two open
-> Dependabot PRs, #56 and #57, as of 2026-10-15). Its pilot work is tracked in hub issues (atrium-project #6, #67, #72)
-> and in atrium-digital-convert#5. `test` = `a467ee7` (2026-10-19) · **v1.9.4-beta** (2026-10-18, `d0fac40`; the
+> _Historical page-image classification. Open issues: #58 (decision-model experiments, 2026-10-20) and #61 (the
+> directory-run bug, 2026-10-21; fixed on the working branch, not released). #48 closed 2026-09-17; #15 and #26
+> closed; four open Dependabot PRs (#56, #57, #59, #60). Its pilot work is tracked in hub issues (atrium-project #6, #67, #72)
+> and in atrium-digital-convert#5. `test` = `9f4464b` (2026-10-21) · **v1.9.4-beta** (2026-10-18, `d0fac40`; the
 > Hub-loader fix `f6c1aeb`), published mutable like v1.9.3-beta: immutable releases were switched on here on 2026-10-19
 > (atrium-project#72), so **v1.9.5-beta** (prepared 2026-10-19, the runbook) is the first immutable one._
 > _Per-issue detail: `digests/48.digest.md` · `plans/48.plan.md` (the issue closed 2026-09-17 and its export was removed; the pair is to be removed too). This header previously claimed no such exports existed; they have since 2026-09-07. The 2026-08-02 → 09-06 entries below predate them and are reconstructed from `CONTRIBUTING.md`'s release-note table (source of truth for that window) and commit history, not from a digest._
@@ -354,6 +355,31 @@ issue opens, matching its four siblings.
   the manually checked evaluation set are in fold 1's training partition (the other folds are alike), and no stored
   table gives 99.16 %. The held-out figures are each fold's 4,823-page test partition.
 * Docs only. **Checks:** none needed beyond the link check.
+
+## 2026-10-21 (round 2) — #61 fixed: the two directory-run bugs; the document-overlap evaluation (atrium-project#15)
+* **Alignment:** `ImageDataset.__getitem__` returns the image's index; inference uses `inference_collate`, which
+  keeps the indices of the images that loaded (training keeps `custom_collate`: the Trainer passes every collated
+  key to the model). `infer_dataloader` returns one entry per dataset item, `None` for an unreadable image.
+  `utils.keep_readable` drops those before `dataframe_results` and `run.py` logs each to the paradata as skipped;
+  `dataframe_results` refuses lists of different lengths. `parallel_best.py` (both paths) and
+  `service/inference.py` `predict_directory` do the same; YOLO models share the scoring.
+* **Top-N scores:** `classifier.topn_pairs` returns (class, probability) pairs for every N, renormalised over the
+  best max(N, 2) classes, the service's rule. `-tn 1` wrote the class number to `SCORE-1`, and
+  `top_n_predictions(top_n=1)` failed. README's score note says so.
+* **#15:** `data_scripts/eval_by_document_overlap.py` reports top-1 accuracy for pages in training, held-out pages
+  of documents seen in training, and unseen documents, from a folds CSV or a `*_DATASETS.txt`. On the stored fold 1
+  split it reproduces the 4,296 of 5,449 pages in training.
+* CONTRIBUTING: an Unreleased row. No version bump: the Galaxy wrapper stays on `1.9.5-beta` with its guard.
+* **#61** was opened at 07:59 from the issue text drafted the day before; its milestone is CAA Proceedings, because
+  the `vX.4` re-run for the papers (atrium-project#13, #15) needs the fix. Digest and plan:
+  `digests/61.digest.md`, `plans/61.plan.md`.
+* **The agent-skill branch** (atrium-project#77 C, archive only): re-derived with this fix; the client retries a 502
+  only when it is not final and exits 1 on a usage error; `scripts/server.sh` waits for `/ready`; `service/README.md`
+  is the v1.9.5 runbook, with the LINDAT frontend pointed at `test`. Skill-validate steps 1–4a and the drift check
+  pass. Delivered as `atrium-page-classification-agent-skill.zip`.
+* **Checks:** a py3.11 venv with torch 2.7.1 (PyPI). Full suite: 884 passed, 3 skipped, 2 xfailed; 2 failed, the
+  same 2 as on unmodified `test` in this sandbox (one needs huggingface.co; one fails only after ultralytics has
+  tried to install `pi-heif` offline). `ruff check` and `ruff format --check` clean.
 
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue

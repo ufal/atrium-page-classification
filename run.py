@@ -375,6 +375,7 @@ def main(argv=None):
         dataframe_results,
         directory_scraper,
         doc_id_and_page,
+        keep_readable,
         tolerate_scan_quirks,
     )
     from yolo_classifier import YOLOClassifier
@@ -506,6 +507,12 @@ def main(argv=None):
                 print(f"--- Evaluating on test set (column '{fold_column}') ---")
                 test_predictions, raw_prediction = classifier.infer_dataloader(test_loader, top_N, raw)
                 test_labels_indices = np.argmax(testLabels, axis=-1).tolist()
+                # An unreadable image has no prediction; keep files, predictions and labels paired.
+                testfiles, test_predictions, raw_prediction, test_labels_indices, skipped = keep_readable(
+                    testfiles, test_predictions, raw_prediction, test_labels_indices
+                )
+                for path in skipped:
+                    _paradata_logger.log_skip(path, "unreadable image")
 
                 top1_preds = [p[0][0] if isinstance(p, list) else p for p in test_predictions]
 
@@ -588,6 +595,12 @@ def main(argv=None):
                     print(f"--- Evaluating on test set for fold {i + 1} ---")
                     test_predictions, raw_prediction = classifier.infer_dataloader(test_loader, top_N, raw)
                     test_labels_indices = np.argmax(testLabels, axis=-1).tolist()
+                    # An unreadable image has no prediction; keep files, predictions and labels paired.
+                    testfiles, test_predictions, raw_prediction, test_labels_indices, skipped = keep_readable(
+                        testfiles, test_predictions, raw_prediction, test_labels_indices
+                    )
+                    for path in skipped:
+                        _paradata_logger.log_skip(path, "unreadable image")
 
                     top1_preds = [p[0][0] if isinstance(p, list) else p for p in test_predictions]
 
@@ -687,6 +700,12 @@ def main(argv=None):
             eval_predictions, raw_prediction = classifier.infer_dataloader(test_loader, top_N, raw)
 
         test_labels_indices = np.argmax(testLabels, axis=-1).tolist()
+        # An unreadable image has no prediction; keep files, predictions and labels paired.
+        testfiles, eval_predictions, raw_prediction, test_labels_indices, skipped = keep_readable(
+            testfiles, eval_predictions, raw_prediction, test_labels_indices
+        )
+        for path in skipped:
+            _paradata_logger.log_skip(path, "unreadable image")
 
         rdf, raw_df = dataframe_results(testfiles, eval_predictions, categories, top_N, raw_prediction)
         number_of_rows = len(rdf.index)
@@ -846,7 +865,13 @@ def main(argv=None):
                     test_loader = classifier.create_dataloader(test_images, batch)
 
                     test_predictions, raw_prediction = classifier.infer_dataloader(test_loader, top_N, raw)
-                    rdf, raw_df = dataframe_results(test_images, test_predictions, categories, top_N, raw_prediction)
+                    # An unreadable image has no prediction: record it, and keep the rest paired.
+                    kept_images, test_predictions, raw_prediction, _, skipped = keep_readable(
+                        test_images, test_predictions, raw_prediction
+                    )
+                    for path in skipped:
+                        _paradata_logger.log_skip(path, "unreadable image")
+                    rdf, raw_df = dataframe_results(kept_images, test_predictions, categories, top_N, raw_prediction)
 
                     _paradata_logger.log_success("csv", len(rdf.index))
 
@@ -894,9 +919,15 @@ def main(argv=None):
 
                         test_loader = classifier.create_dataloader(chunk_images, batch)
                         test_predictions, raw_prediction = classifier.infer_dataloader(test_loader, top_N, raw)
+                        # An unreadable image has no prediction: record it, and keep the rest paired.
+                        kept_images, test_predictions, raw_prediction, _, skipped = keep_readable(
+                            chunk_images, test_predictions, raw_prediction
+                        )
+                        for path in skipped:
+                            _paradata_logger.log_skip(path, "unreadable image")
 
                         rdf_chunk, raw_df_chunk = dataframe_results(
-                            chunk_images, test_predictions, categories, top_N, raw_prediction
+                            kept_images, test_predictions, categories, top_N, raw_prediction
                         )
 
                         _paradata_logger.log_success("csv", len(rdf_chunk.index))

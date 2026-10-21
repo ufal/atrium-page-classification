@@ -99,6 +99,34 @@ def custom_collate(batch: list) -> dict:
     return {"pixel_values": pixel_values, "labels": labels}
 
 
+def inference_collate(batch: list):
+    """`custom_collate` for inference: also returns the dataset indices of the images that loaded.
+
+    `custom_collate` drops an image that failed to load, so a batch can hold fewer images than were
+    asked for. With these indices `infer_dataloader` pairs each prediction with its own file; pairing
+    by position used to shift every later prediction onto the wrong file. The Trainer keeps
+    `custom_collate`, whose keys become model arguments.
+    """
+    indices = [item["index"] for item in batch if item is not None]
+    collated = custom_collate(batch)
+    if isinstance(collated, tuple):  # (None, None): no image of the batch loaded
+        return collated
+    collated["indices"] = indices
+    return collated
+
+
+def topn_pairs(probabilities: torch.Tensor, top_n: int) -> list:
+    """The `top_n` best (class index, score) pairs of one row of softmax probabilities, best first.
+
+    The scores are renormalised over the best max(top_n, 2) classes, then the first `top_n` are
+    kept, as the service always did: renormalised over one class, every top-1 score was 1.0.
+    """
+    k = min(max(top_n, 2), probabilities.shape[-1])
+    probs, indices = torch.topk(probabilities, k, dim=-1)
+    probs = probs / probs.sum()
+    return list(zip(indices.tolist(), probs.tolist()))[:top_n]
+
+
 # Added from few_shot_finetuning.py for balanced sampling during training
 class BalancedBatchSampler(torch.utils.data.sampler.BatchSampler):
     """
@@ -239,7 +267,7 @@ class ImageClassifier:
                 dataset, collate_fn=custom_collate, batch_sampler=BalancedBatchSampler(image_labels, batch_size, 1)
             )
         else:
-            dataloader = DataLoader(dataset, collate_fn=custom_collate, batch_size=batch_size)
+            dataloader = DataLoader(dataset, collate_fn=inference_collate, batch_size=batch_size)
 
         print(
             f"Dataloader of {'train' if train else 'eval'} dataset is ready:\t{len(image_paths)} images split into {len(dataloader)} batches of size {batch_size}"
@@ -360,16 +388,14 @@ class ImageClassifier:
             outputs = self.model(pixel_values=inputs)
             logits = outputs.logits
             probabilities = torch.nn.functional.softmax(logits, dim=-1)
-            top_n_probs, top_n_indices = torch.topk(probabilities, top_n, dim=-1)
-            top_n_probs = top_n_probs / top_n_probs.sum()
-        return list(zip(top_n_indices.squeeze().tolist(), top_n_probs.squeeze().tolist()))
+        return topn_pairs(probabilities[0], top_n)
 
     def create_dataloader(self, image_paths: list, batch_size: int, ignored_paths: list = None) -> DataLoader:
         """
         Turn an input list of image paths into a DataLoader without labels.
         """
         dataset = ImageDataset(image_paths, transform=self.eval_transforms, ignored_paths=ignored_paths)
-        dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=custom_collate)
+        dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=inference_collate)
         print(
             f"Dataloader of directory dataset is ready:\t{len(image_paths)} images split into {len(dataloader)} batches of size {batch_size}"
         )
@@ -378,10 +404,16 @@ class ImageClassifier:
     def infer_dataloader(self, dataloader, top_n: int, raw: bool = False) -> (list, list):
         """
         Perform inference on a DataLoader, optionally with top-N predictions.
+
+        Both lists are aligned with the dataset: item i belongs to the dataset's i-th image, and is
+        None when that image could not be read. Each prediction is a list of (class index, score)
+        pairs, best first, for every `top_n` (see `topn_pairs`).
         """
         self.model.eval()
-        predictions = []
-        raw_scores = []
+        n_items = len(dataloader.dataset)
+        predictions = [None] * n_items
+        raw_scores = [None] * n_items
+        n_pred = 0
 
         start_time = datetime.datetime.now()
         print(f"\tProcessing of {len(dataloader)} batches started at\t{start_time.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -397,27 +429,26 @@ class ImageClassifier:
                 logits = outputs.logits
 
                 probabilities = torch.nn.functional.softmax(logits, dim=-1)
-                raw_scores.extend(probabilities.tolist())
-                if top_n > 1:
-                    top_n_probs, top_n_indices = torch.topk(probabilities, top_n, dim=-1)
-                    for indices, probs in zip(top_n_indices, top_n_probs):
-                        top_n_probs_normalized = probs / probs.sum()
-                        predictions.append(list(zip(indices.tolist(), top_n_probs_normalized.tolist())))
-                else:
-                    predicted_class_idx = logits.argmax(-1).tolist()
-                    predictions.extend(predicted_class_idx)
+                # A loader without inference_collate has no indices; its batches are positional.
+                indices = batch.get("indices") or range(n_pred, n_pred + len(probabilities))
+                for index, row in zip(indices, probabilities):
+                    predictions[index] = topn_pairs(row, top_n)
+                    raw_scores[index] = row.tolist()
+                n_pred += len(probabilities)
 
                 if ib % 50 == 0:
                     elapsed_minutes = (datetime.datetime.now() - start_time).total_seconds() / 60
-                    print(f"{ib}-th batch\t\tProcessed {len(predictions)} images in\t{elapsed_minutes:.2f} min")
+                    print(f"{ib}-th batch\t\tProcessed {n_pred} images in\t{elapsed_minutes:.2f} min")
 
         end_time = datetime.datetime.now()
         total_minutes = (end_time - start_time).total_seconds() / 60
 
+        if n_pred < n_items:
+            print(f"\tWARNING: {n_items - n_pred} of {n_items} images could not be read and have no prediction.")
+
         # REVIEW FIX (Minor B): guard against an empty prediction set (every
         # batch skipped because all images were unreadable).  The original
         # divided by len(predictions) unconditionally → ZeroDivisionError.
-        n_pred = len(predictions)
         if n_pred == 0:
             print("\tWARNING: no images were successfully processed (all batches skipped).")
             return predictions, (None if not raw else raw_scores)
@@ -568,7 +599,8 @@ class ImageDataset(Dataset):
             label = self.image_labels[idx] if self.known else None
             # Keep the one-hot encoding as is - the collate function will handle tensor conversion
 
-            return {"pixel_values": image, "label": label}
+            # `index` lets inference_collate tell which images of a batch loaded.
+            return {"pixel_values": image, "label": label, "index": idx}
         except Exception as e:
             print(image_path, e)
             return None

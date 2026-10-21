@@ -13,6 +13,9 @@ import numpy as np
 import torch
 from PIL import Image
 
+# One top-N rule for both backends, so a YOLO and a ViT/CNN run write comparable scores.
+from classifier import topn_pairs as _topn_pairs
+
 # Ultralytics import guarded so the rest of the project still loads without it
 try:
     from ultralytics import YOLO
@@ -246,12 +249,7 @@ class YOLOClassifier:
         )
         probs = results[0].probs.data  # torch.Tensor, shape (num_classes,)
 
-        top_indices = probs.argsort(descending=True)[:top_n]
-        top_probs = probs[top_indices]
-        # Normalise so scores sum to 1 (matches ViT behaviour)
-        top_probs = top_probs / top_probs.sum()
-
-        return list(zip(top_indices.tolist(), top_probs.tolist()))
+        return _topn_pairs(probs, top_n)
 
     def create_dataloader(self, image_paths: list, batch_size: int, ignored_paths: list = None) -> list:
         """
@@ -274,8 +272,8 @@ class YOLOClassifier:
         Returns
         -------
         predictions : list
-            * top_n == 1  → list of int class indices
-            * top_n > 1   → list of [(idx, prob), …]
+            one list of (idx, score) pairs per image, best first, for every top_n
+            (the scores as `_topn_pairs` makes them)
         raw_scores  : list | None
             Full probability vectors if raw=True, else None.
         """
@@ -306,13 +304,7 @@ class YOLOClassifier:
                 if raw:
                     raw_scores.append(probs.cpu().tolist())
 
-                if top_n > 1:
-                    top_idx = probs.argsort(descending=True)[:top_n]
-                    top_probs = probs[top_idx]
-                    top_probs = top_probs / top_probs.sum()
-                    predictions.append(list(zip(top_idx.tolist(), top_probs.tolist())))
-                else:
-                    predictions.append(int(probs.argmax().item()))
+                predictions.append(_topn_pairs(probs, top_n))
 
             if (start // batch_size) % 10 == 0:
                 print(f"[YOLO]   Processed {min(start + batch_size, total)}/{total}")

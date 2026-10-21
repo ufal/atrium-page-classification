@@ -613,7 +613,10 @@ to run all the best models on a single PNG file - the output will be in the cons
 </details>
 
 > [!NOTE]
-> Console output and all result tables contain **normalized** scores for the highest N class 🪧  scores
+> Console output and all result tables contain **normalized** scores for the highest N class 🪧  scores:
+> the model's probabilities renormalised over the best max(N, 2) classes, so with `-tn 1` the score is the
+> best class's share of the best two (as the API's `topn=1`). An image that cannot be read gets no row:
+> it is recorded as skipped in the run's paradata, and every other page keeps its own result (#61).
 
 ### Directory processing 📁
 
