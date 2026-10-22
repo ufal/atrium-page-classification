@@ -93,6 +93,14 @@ declare -A version_to_base_model=(
     ["v103"]="microsoft/dit-large-finetuned-rvlcdip"
     ["v113"]="microsoft/dit-large"
     ["v123"]="timm/tf_efficientnetv2_m.in21k_ft_in1k"
+
+    # v*.4: the published five, retrained on the licence-compatible subset (model_registry.py);
+    # without them "v44" parsed as "v4", fold 4 (atrium-project#15)
+    ["v14"]="timm/tf_efficientnetv2_m.in21k_ft_in1k"
+    ["v24"]="google/vit-base-patch16-224"
+    ["v34"]="google/vit-base-patch16-384"
+    ["v44"]="timm/regnety_160.swag_ft_in1k"
+    ["v54"]="google/vit-large-patch16-384"
 )
 
 declare -A suffix_to_samples=(

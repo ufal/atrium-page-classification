@@ -408,10 +408,11 @@ to **pull the model from the HF 😊 hub repository [^1] 🔗** via:
 
     python3 run.py --hf -rev v2.0
 
-**OR** for specific base model version (e.g. `google/vit-large-patch16-384`) use the `--base` flag (only when the
-trained model version demands such base model as described [above](#versions-)):
+A revision builds on the base model that [model_registry.py](model_registry.py) lists for it (e.g. `v5.2` on
+`google/vit-large-patch16-384`, as described [above](#versions-)), whatever `--base` or the config says, because the
+image transforms are made from the base. The `--base` flag matters only for a revision the registry does not list:
 
-    python3 run.py --hf -rev v5.2 -b google/vit-large-patch16-384
+    python3 run.py --hf -rev v5.2
 
 > [!IMPORTANT]
 > If you already have the model files in the `model/movel_<revision>`
@@ -1631,16 +1632,31 @@ follows the rule `splitN ↔ foldN column ↔ seed = 420 + (N−1)`:
 > **not committed** — stage it locally and point the flag at it.
 
 The same `--folds_csv` flag works with `--eval`: the model is scored on **only the chosen fold's `test`
-pages**, selected at run time out of the global `[EVAL] FOLDER_PAGES` directory. This is what confirms a
-refinetuned model reaches the original accuracy on the *same held-out pages* (minus the removed ones):
+pages**, selected at run time out of the `--eval_dir` folder (default `[EVAL] FOLDER_PAGES`). This is what
+confirms a refinetuned model reaches the original accuracy on the *same held-out pages* (minus the removed ones):
 
-    python3 run.py --eval -rev v1.4 --folds_csv path/to/licensed_crossval_folds_CUT.csv
-    # evaluates ONLY the fold1 'test' pages found under [EVAL] FOLDER_PAGES
+    python3 run.py --eval -rev v1.4 --folds_csv path/to/licensed_crossval_folds.csv --eval_dir path/to/pages
+    # evaluates ONLY the fold1 'test' pages found under path/to/pages
 
 > [!NOTE]
 > `--eval --folds_csv` is **single-model only** — the fold column is resolved from `-rev` (or an explicit
 > `--fold_column`). It is not combined with `--best`, because each best model was trained on a different
 > fold, so an ensemble has no single shared held-out test set.
+
+The LINDAT record [^17] 🔗 holds the pages only in its category zips. [stage_fold_pages.py](data_scripts/stage_fold_pages.py) 📎
+extracts one fold's test pages from them into a folder `--eval_dir` reads, with all 11 category sub-folders:
+
+    python3 data_scripts/stage_fold_pages.py --folds_csv licensed_crossval_folds.csv --fold fold1 \
+        --zips path/to/lindat_zips --out stage/fold1
+
+[eval_vX4_job.sh](supplementary/scripts/eval_vX4_job.sh) 📎 is the SLURM job that re-runs the five `vX.4`
+models this way, one after another: each on its fold's test pages (Top-1, and Top-3 with `--raw`), then on the 5,449-page
+set and the sample pages, then as the `--best` ensemble. Its summary splits each Top-1 result into pages in training, pages
+of documents seen in training and unseen documents ([eval_by_document_overlap.py](data_scripts/eval_by_document_overlap.py) 📎).
+The weights are fetched first on a node with network, and the job itself runs offline:
+
+    bash supplementary/scripts/eval_vX4_job.sh prefetch   # Hub revisions to model/, their commits, the zips checked
+    sbatch supplementary/scripts/eval_vX4_job.sh          # result/tables, result/plots, result/stats/<stamp>_vX4_summary.md
 
 ### Evaluation 🏆
 

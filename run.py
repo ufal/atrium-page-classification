@@ -12,7 +12,7 @@ from atrium_paradata import ParadataLogger
 from model_registry import CATEGORIES as def_categ
 
 # [NEW] Import from central model registry
-from model_registry import REVISION_BEST_FOLDS, REVISION_BEST_MODELS, REVISION_TO_BASE_MODEL
+from model_registry import REVISION_BEST_FOLDS, REVISION_BEST_MODELS, REVISION_TO_BASE_MODEL, resolve_base_model
 
 # [Phase 1 / G1] Heavy third-party imports (numpy, pandas, sklearn, and the
 # torch chain via classifier/parallel_best/utils/yolo_classifier) are deferred
@@ -31,6 +31,17 @@ def resolve_fold_column(revision, explicit):
             f"(known: {list(REVISION_BEST_FOLDS.keys())})."
         )
     return fold_column
+
+
+def resolve_revision_base(revision, requested):
+    """The base model to build the classifier from for `revision`: the registry's entry (exact
+    key first, as the service resolves it) wins over a `-b` or config value that differs, and
+    `requested` is kept only when the registry has no entry (e.g. `main`).
+
+    The eval transforms (resize, mean/std) are built from this base and are not rebuilt when the
+    fine-tuned weights load, so `-rev v2.4` on the config's regnety_160 base fed the 224 px ViT
+    384 px images with ImageNet statistics (atrium-project#15)."""
+    return resolve_base_model(revision) or requested
 
 
 def build_parser(config):
@@ -182,6 +193,13 @@ def build_parser(config):
         help="Fold column to read from --folds_csv (e.g. fold1). If omitted, it is auto-resolved per "
         "revision from REVISION_BEST_FOLDS.",
     )
+    parser.add_argument(
+        "--eval_dir",
+        type=str,
+        default=config.get("EVAL", "FOLDER_PAGES"),
+        help="Folder with one sub-folder per category to evaluate on with --eval "
+        "(default: [EVAL] FOLDER_PAGES). With --folds_csv, only the fold's test pages in it are scored.",
+    )
 
     # Document JSON Integration Arguments — config-driven defaults, mirroring --folds_csv above.
     parser.add_argument(
@@ -283,15 +301,13 @@ def main(argv=None):
 
         revision_model_name_local = f"model_{args.revision.replace('.', '')}"
         args.model = f"{model_dir}/{revision_model_name_local}"
-        rev_code = next(key for key in revision_to_base_model.keys() if args.revision.startswith(key))
+        revision_base = resolve_revision_base(args.revision, args.base)
 
-        if args.base != config_base_model:
-            print(
-                f"Base model {config_base_model} does not match the revision {args.revision}. Using {revision_to_base_model[rev_code]} instead."
-            )
-            args.base = revision_to_base_model[rev_code]
+        if args.base != revision_base:
+            print(f"Base model {args.base} does not match the revision {args.revision}. Using {revision_base} instead.")
+            args.base = revision_base
         else:
-            print(f"Using base model\t{config_base_model} from CONFIG,\trevision\t{args.revision}.")
+            print(f"Using base model\t{args.base},\trevision\t{args.revision}.")
 
         if args.revision == "main":
             print(
@@ -303,10 +319,14 @@ def main(argv=None):
     _paradata_cfg = {
         "model_path": args.model if hasattr(args, "model") else config.get("SETUP", "model", fallback=""),
         "revision": args.revision if hasattr(args, "revision") else config.get("HF", "revision", fallback=""),
-        "base_model": args.yolo_base if args.yolo else config.get("SETUP", "base_model", fallback=""),
+        "base_model": args.yolo_base if args.yolo else args.base,
         "top_n": args.topn if hasattr(args, "topn") else config.get("SETUP", "top_n", fallback=""),
         "batch_size": config.get("SETUP", "batch", fallback=""),
-        "input_path": str(args.file or args.directory or config.get("INPUT", "FOLDER_INPUT", fallback="")),
+        "input_path": str(
+            args.file
+            or args.directory
+            or (args.eval_dir if args.eval else config.get("INPUT", "FOLDER_INPUT", fallback=""))
+        ),
         "inner_dirs": config.get("SETUP", "inner", fallback=""),
         "file_format": args.file_format if hasattr(args, "file_format") else "png",
         "mode": "file" if (hasattr(args, "file") and args.file) else "directory",
@@ -396,7 +416,7 @@ def main(argv=None):
             _paradata_logger.log_component("lindat_dataset")
 
     if args.eval:
-        data_dir = config.get("EVAL", "FOLDER_PAGES")
+        data_dir = args.eval_dir
         testfiles, testLabels, categories = collect_images(data_dir)
 
         if args.folds_csv:

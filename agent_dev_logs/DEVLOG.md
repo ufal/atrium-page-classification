@@ -1,10 +1,11 @@
 # 📓 atrium-page-classification — agent_dev_logs/DEVLOG.md (timeline index)
 > _Historical page-image classification. Open issues: #58 (decision-model experiments, 2026-10-20) and #61 (the
-> directory-run bug, 2026-10-21; fixed on `test` in `688a841`, released with **v1.9.6-beta**, prepared 2026-10-21).
+> directory-run bug, 2026-10-21; fixed on `test` in `688a841`, in **v1.9.6-beta**; its images first in v1.9.7-beta).
 > #48 closed 2026-09-17 (its pair removed 2026-10-21; the hub's history page cites the copy on `vit`); #15 and #26
 > closed; four open Dependabot PRs (#56, #57, #59, #60). Its pilot work is tracked in hub issues (atrium-project #6,
-> #67, #72) and in atrium-digital-convert#5. `test` = `d92966e` (2026-10-21) · **v1.9.5-beta** (2026-10-19, the
-> runbook) is the first immutable release (atrium-project#72)._
+> #67, #72) and in atrium-digital-convert#5. `test` = `43da42c` (2026-10-21, v1.9.7-beta) · **v1.9.8-beta** prepared
+> for the `vX.4` re-run of atrium-project#15 · **v1.9.5-beta** (2026-10-19, the runbook) is the first immutable
+> release (atrium-project#72)._
 > _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md`, `digests/61.digest.md` · `plans/61.plan.md`._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
@@ -399,6 +400,38 @@ issue opens, matching its four siblings.
   drafted in chat. Tagging is the maintainer's.
 * **Dev logs:** the #48 pair is removed (closed 2026-09-17; the hub's history page links the copy on `vit`).
 * **Checks:** see the round's summary.
+
+## 2026-10-21 (round 4) — The vX.4 re-run as one SLURM job; `-rev` builds on its own base (atrium-project#15)
+* **Why:** the user re-runs the `vX.4` models on the test sets of the LINDAT record on the cluster, and the results
+  replace the stored `vX.3` ones (atrium-project#15, #13).
+* **Found while tracing the run:** `run.py -rev vN.M` kept the config's base (`timm/regnety_160`) unless `-b` named
+  another (`if args.base != config_base_model`). The eval transforms (resize, mean/std) are built from that base and
+  are not rebuilt when the weights load. So `--eval -rev v2.4` gave the 224 px ViT 384 px images with ImageNet
+  statistics, and the other ViTs and EfficientNet got ImageNet statistics; `--train -rev v2.4` would have trained a
+  RegNetY. **Fixed:** `run.resolve_revision_base()` takes the registry's base, exact key first
+  (`model_registry.resolve_base_model`, as in the service), and the paradata records it.
+* **`--eval_dir`** (default `[EVAL] FOLDER_PAGES`): the folder to evaluate, from the command line.
+* **`data_scripts/stage_fold_pages.py`:** a fold's test pages out of the LINDAT category zips, into all 11
+  category folders. The cluster has no folder with the CSV's names: `PNG/data/` is per document with unpadded page
+  numbers, and `test_F12345` holds JPEGs. A page in no zip, or in another category's zip, stops it; a re-run
+  extracts nothing it already has.
+* **`supplementary/scripts/eval_vX4_job.sh`:** `prefetch` on the login node (Hub revisions to `model/`, their
+  commits, the folds against `licensed_crossval_folds_CUT.csv`, a dry run of the staging); then `sbatch`, offline.
+  It runs each model on its fold's test pages (Top-1; Top-3 with `--raw`), the 5,449-page set, the sample pages and
+  the `--best` ensemble. Each step is logged and the job goes on after a failure. The summary gives accuracy and the
+  per-group Top-1 of `eval_by_document_overlap.py`.
+* `supplementary/scripts/result_analysis.sh`: the `v14`–`v54` names (`v44` parsed as `v4`, fold 4).
+* **v1.9.8-beta prepared:** `setup/para_config.txt`, `CITATION.cff`, `service/openapi.json` (version only), the
+  CONTRIBUTING row. Tag it before the cluster run, so the paradata names the release.
+* **Checks:** a py3.11 venv with torch 2.7.1 (PyPI), `HF_HUB_OFFLINE=1`. Full suite (`-m "not slow"`): 905
+  passed, 2 xfailed, 1 failed; untouched `test` gives 885 passed and the same failure
+  (`test_an_unreadable_image_is_422_not_500`, which fails only in the full run, after ultralytics has tried to
+  install `pi-heif` offline). `ruff check` and `ruff format --check` clean; shellcheck clean; `check_version.py`
+  and `atrium_openapi.py check` OK. The job ran end to end on a fixture (zips built from `small_data_samples`, a
+  stand-in for `run.py`): 25 steps OK, 20 tables in the summary, the staged folds removed. The Hub lookup of the
+  prefetch needs network and was not run here.
+
+  Files delivered in chat.
 
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
