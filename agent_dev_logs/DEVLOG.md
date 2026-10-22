@@ -414,7 +414,9 @@ issue opens, matching its four siblings.
 * **`data_scripts/stage_fold_pages.py`:** a fold's test pages out of the LINDAT category zips, into all 11
   category folders. The cluster has no folder with the CSV's names: `PNG/data/` is per document with unpadded page
   numbers, and `test_F12345` holds JPEGs. A page in no zip, or in another category's zip, stops it; a re-run
-  extracts nothing it already has.
+  extracts nothing it already has. A row without a PNG name is left out with a note: the published
+  `licensed_crossval_folds.csv` has one, `test` in folds 1, 2 and 5, which the user's prefetch of 10-22 reported as
+  a page missing from the zips (`licensed_crossval_folds_CUT.csv` has no such row).
 * **`supplementary/scripts/eval_vX4_job.sh`:** `prefetch` on the login node (Hub revisions to `model/`, their
   commits, the folds against `licensed_crossval_folds_CUT.csv`, a dry run of the staging); then `sbatch`, offline.
   It runs each model on its fold's test pages (Top-1; Top-3 with `--raw`), the 5,449-page set, the sample pages and

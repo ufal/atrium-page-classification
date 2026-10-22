@@ -108,6 +108,14 @@ def test_another_partition_is_read_from_the_same_column(lindat):
         sf.wanted_pages(folds, "fold9")
 
 
+def test_a_row_without_a_png_name_is_left_out(lindat, capsys):
+    folds, zips, out = lindat
+    folds.write_text(FOLDS + "TEXT,test,test,,0\n", encoding="utf-8")
+    assert "" not in sf.wanted_pages(folds, "fold1")
+    assert _run(folds, zips, out) == 0
+    assert "1 fold1 test rows of folds.csv have no PNG name" in capsys.readouterr().err
+
+
 def test_the_zip_category_drops_the_part_number():
     assert sf.zip_category(Path("LINE_T_part002.zip")) == "LINE_T"
     assert sf.zip_category(Path("TEXT_HW.zip")) == "TEXT_HW"

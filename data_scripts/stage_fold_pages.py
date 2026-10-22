@@ -37,15 +37,26 @@ _PART = re.compile(r"_part\d+$")
 
 
 def wanted_pages(folds_csv: Path, fold: str, part: str = "test") -> dict:
-    """{PNG name: category} of the CSV rows whose `fold` cell is `part`."""
+    """{PNG name: category} of the CSV rows whose `fold` cell is `part`.
+
+    A row without a PNG name names no page and is left out, with a note (the published
+    `licensed_crossval_folds.csv` has one, `test` in folds 1, 2 and 5)."""
+    pages, unnamed = {}, 0
     with folds_csv.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
         absent = {"PNG", "categ", fold} - set(reader.fieldnames or ())
         if absent:
             raise ValueError(f"{folds_csv}: no column {sorted(absent)}")
-        pages = {
-            row["PNG"].strip(): row["categ"].strip() for row in reader if (row[fold] or "").strip().lower() == part
-        }
+        for row in reader:
+            if (row[fold] or "").strip().lower() != part:
+                continue
+            name = (row["PNG"] or "").strip()
+            if name:
+                pages[name] = row["categ"].strip()
+            else:
+                unnamed += 1
+    if unnamed:
+        print(f"NOTE: {unnamed} {fold} {part} rows of {folds_csv.name} have no PNG name; left out", file=sys.stderr)
     unknown = sorted(set(pages.values()) - set(CATEGORIES))
     if unknown:
         raise ValueError(f"{folds_csv}: categories not in model_registry.CATEGORIES: {unknown}")
