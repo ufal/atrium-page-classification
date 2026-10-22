@@ -124,3 +124,46 @@ def test_topn_upper_bound_matches_category_count():
     """The --topn ceiling tracks the model registry, not a magic number."""
     with pytest.raises(ValueError, match=str(len(CATEGORIES))):
         main(["--topn", str(len(CATEGORIES) + 1), "-d", "."])
+
+
+def test_an_evaluation_counts_its_pages_and_declares_the_dataset(tmp_path, monkeypatch):
+    """The paradata of --eval counts the pages it scored and the tables it wrote, and carries the
+    dataset's CC BY-NC license: the TRUE column is the dataset's annotation (atrium-project#15)."""
+    pytest.importorskip("torch")
+    import json
+
+    import numpy as np
+    from PIL import Image
+
+    import classifier
+    import utils
+
+    pages = tmp_path / "pages"
+    for index, category in enumerate(CATEGORIES):  # one page each: the report wants every category present
+        (pages / category).mkdir(parents=True)
+        Image.new("RGB", (8, 8)).save(pages / category / f"DOC{index}-1.png")
+
+    class FakeClassifier:
+        def __init__(self, checkpoint, num_labels, store_dir):
+            pass
+
+        def load_model(self, path):
+            pass
+
+        def process_images(self, files, labels, batch, train):
+            return list(labels)
+
+        def infer_dataloader(self, labels, top_n, raw):
+            return [[(int(np.argmax(label)), 1.0)] for label in labels], None
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(classifier, "ImageClassifier", FakeClassifier)
+    monkeypatch.setattr(utils, "tolerate_scan_quirks", lambda: None)  # process-wide Pillow switches
+    assert main(["--eval", "--no-hf", "--no-raw", "-tn", "1", "--eval_dir", str(pages), "-rev", "v4.4"]) == 0
+
+    record = json.loads(next((tmp_path / "result" / "paradata").glob("*.json")).read_text(encoding="utf-8"))
+    assert record["statistics"]["input_files_total"] == len(CATEGORIES)
+    assert record["statistics"]["successfully_processed"] == len(CATEGORIES)
+    assert record["statistics"]["output_counts_by_type"] == {"csv": 1, "png": 1}
+    assert "lindat_dataset" in {component["name"] for component in record["license_detail"]["components"]}
+    assert record["license_detail"]["is_non_commercial"] is True

@@ -1,11 +1,10 @@
 # 📓 atrium-page-classification — agent_dev_logs/DEVLOG.md (timeline index)
-> _Historical page-image classification. Open issues: #58 (decision-model experiments, 2026-10-20) and #61 (the
-> directory-run bug, 2026-10-21; fixed on `test` in `688a841`, in **v1.9.6-beta**; its images first in v1.9.7-beta).
-> #48 closed 2026-09-17 (its pair removed 2026-10-21; the hub's history page cites the copy on `vit`); #15 and #26
-> closed; four open Dependabot PRs (#56, #57, #59, #60). Its pilot work is tracked in hub issues (atrium-project #6,
-> #67, #72) and in atrium-digital-convert#5. `test` = `43da42c` (2026-10-21, v1.9.7-beta) · **v1.9.8-beta** prepared
-> for the `vX.4` re-run of atrium-project#15 · **v1.9.5-beta** (2026-10-19, the runbook) is the first immutable
-> release (atrium-project#72)._
+> _Historical page-image classification. Open issue: #58 (decision-model experiments, 2026-10-20). #61 (the
+> directory-run bug) closed 2026-10-22, fixed in **v1.9.6-beta**. #48 closed 2026-09-17; #15 and #26 closed; four open
+> Dependabot PRs (#56, #57, #59, #60). Its pilot work is tracked in hub issues (atrium-project #6, #67, #72) and in
+> atrium-digital-convert#5. `test` = `f6ef687` (2026-10-22, the `vX.4` results of atrium-project#15, run with
+> **v1.9.8-beta**) · **v1.9.9-beta** prepared (the results' documentation, the evaluation paradata) · **v1.9.5-beta**
+> (2026-10-19, the runbook) is the first immutable release (atrium-project#72)._
 > _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md`, `digests/61.digest.md` · `plans/61.plan.md`._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
@@ -432,6 +431,49 @@ issue opens, matching its four siblings.
   and `atrium_openapi.py check` OK. The job ran end to end on a fixture (zips built from `small_data_samples`, a
   stand-in for `run.py`): 25 steps OK, 20 tables in the summary, the staged folds removed. The Hub lookup of the
   prefetch needs network and was not run here.
+
+  Files delivered in chat.
+
+## 2026-10-22 — The vX.4 results kept, the old ones explained; evaluation paradata (atrium-project#15)
+* **The run** (job 7271549, `v1.9.8-beta` at `f14bc4b`; the user's push `582938c`…`f6ef687`): 25 steps OK, no
+  unreadable page, no fold-test page in training. Top-1 on each model's fold test pages 94.64–95.87 %, unseen documents
+  93.87–95.60 %, Top-3 99.75–99.90 %. Checked before writing:
+  * TOP-1 and TOP-3 tables agree page by page; RAW agrees except one tie at 0.496/0.496;
+  * Wilson intervals about ±0.6 points;
+  * McNemar on the shared folds: `v1.4`/`v4.4` p = 0.86, `v3.4`/`v5.4` p = 0.76.
+* **Kept and removed:**
+  * kept: the fold tables, plots and RAW; the 5,449-set tables (by group only); the ensemble demo; the run records;
+  * removed: the 5,449-set confusion plots, the 229-page sample evaluations (outside the training data, labels never
+    checked), the prefetch paradata, and `20260723-1659_model_v43_TOP-3.csv`. That last file holds `v4.4`'s
+    predictions: the same top-3 classes on all 229 pages, unlike the May `v4.3` table.
+* **The old results** (preserved at `789ff04`, as motyc asked on #15), in `result/README.md`:
+  * every `vX.3` figure, the README's "Best_Acc" included, is the 2025 sweep's on the 5,449-page set;
+  * the sweep chose each base model's fold (the highest figure, the lowest fold on a tie), and `REVISION_BEST_FOLDS`
+    matches it for all five;
+  * the README's plots contradicted its text: `v4.3` 98.92 % against 99.16 %, `v1.3` 96.81 % against 98.83 %;
+  * the 96.81 % run is consistent with the `-rev` base bug fixed in `v1.9.8-beta`;
+  * no two models' tables are identical, so the brief's "shifted labels" guess is wrong;
+  * the `a5` models had seen all but 129 of the 5,449 pages.
+* **README, CONTRIBUTING:** the held-out table leads; the sweep table stays, labelled; the results section shows the
+  fold matrices. The `vX.2` table had `v4.2`/`v5.2` swapped and `v3.2` 96.49 %, which no stored table gives (97.41 %).
+  The four `vX.2` RAW links all pointed to `v2.2`'s file, and the paradata example link was dead.
+* **`run.py`:**
+  * `--eval` counts its pages and tables in the paradata (`input_files_total` was 0, "processed" was the plot
+    count) and declares `lindat_dataset`, as `--train` does;
+  * `result/tables` and `result/plots` are made on their own: the paradata logger makes `result/` first, so an
+    evaluation into a new output folder failed on its first table.
+
+  Test: `tests/test_run.py::test_an_evaluation_counts_its_pages_and_declares_the_dataset` (it fails on the old
+  code).
+* **Not fixed, noted:** `utils.confusion_plot` needs every category in the evaluated set (`classification_report`
+  without `labels=`).
+* **v1.9.9-beta prepared:** `setup/para_config.txt`, `CITATION.cff`, `service/openapi.json` (version only), the
+  CONTRIBUTING row.
+* **Checks:** a py3.11 venv with torch 2.7.1 (PyPI), `HF_HUB_OFFLINE=1`. Full suite (`-m "not slow"`): 907
+  passed, 2 xfailed, 1 failed, the same `test_an_unreadable_image_is_422_not_500` as on untouched `test` in this
+  sandbox. `ruff check` and `ruff format --check` clean; `check_version.py` and `atrium_openapi.py check` OK; every
+  relative link in `README.md` and `result/README.md` resolves. README also: RegNetY-160's input is 384 px (its Hub
+  config, `MODEL_STATIC`), not 224.
 
   Files delivered in chat.
 

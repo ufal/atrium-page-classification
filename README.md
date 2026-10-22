@@ -86,7 +86,7 @@ service returns for `version=all`.
 |----------------------------------|--------------------|-----------------|----------|
 | `efficientnetv2_s.in21k`         | 48                 | 300             | v2.X     |
 | `efficientnetv2_m.in21k_ft_in1k` | 54                 | 384             | v1.3     |
-| `regnety_160.swag_ft_in1k`       | 84                 | 224             | v4.3     |
+| `regnety_160.swag_ft_in1k`       | 84                 | 384             | v4.3     |
 | `vit-base-patch16-224`           | 87                 | 224             | v2.X     |
 | `vit-base-patch16-384`           | 87                 | 384             | v3.X     |
 | `vit-large-patch16-384`          | 305                | 384             | v5.X     |
@@ -118,6 +118,34 @@ paper source into one of the categories - each responsible for the following con
 > or structured in tabular 📏 format text, as well as to mark the presence of the printed 🌄 or drawn 📈 graphic
 > materials to be extracted from the page images.
 
+The five published `vX.4` models, each scored on the test partition of its own fold of the LINDAT dataset [^17] 🔗,
+pages the model was not trained on (2026-10-22):
+
+| Base Model                                 | Revision | Fold | Test pages | Top-1 (%) | Top-3 (%) | Top-1, unseen documents (%) |
+|--------------------------------------------|----------|------|-----------:|----------:|----------:|----------------------------:|
+| **timm/tf_efficientnetv2_m.in21k_ft_in1k** | **v1.4** | 1    |      4,795 | **95.87** |     99.90 |                       95.60 |
+| **timm/regnety_160.swag_ft_in1k**          | **v4.4** | 1    |      4,795 | **95.81** |     99.79 |                       95.19 |
+| **google/vit-base-patch16-384**            | **v3.4** | 2    |      4,792 | **95.49** |     99.77 |                       94.96 |
+| **google/vit-large-patch16-384**           | **v5.4** | 2    |      4,792 | **95.58** |     99.75 |                       95.29 |
+| **google/vit-base-patch16-224**            | **v2.4** | 5    |      4,791 | **94.64** |     99.81 |                       93.87 |
+
+The split is by page: about a quarter of the test pages come from documents with other pages in training, and the
+last column leaves those out. Two models scored on the same pages do not differ significantly (`v1.4`/`v4.4`,
+`v3.4`/`v5.4`); `v2.4` is lower, but on another fold, so the model and the fold cannot be told apart. The 95 %
+intervals are about ±0.6 points. The provenance, the figures by group and what was wrong with the results published
+here before are in [result/README.md](result/README.md) 📎.
+
+<details>
+
+<summary>Base-model sweep of 2025 (`vX.3`), not held-out 👀</summary>
+
+> [!WARNING]
+> These figures were measured on the 5,449-page evaluation set, most of whose pages are training pages: the script that
+> selected it as "pages no fold trained on" (`result/stats/unused.sh`, fixed since) missed zero-padded page numbers and
+> ids with a letter ([atrium-project#15](https://github.com/ufal/atrium-project/issues/15)). They chose each base model's
+> fold ([how](result/README.md#how-the-folds-were-chosen)), and they are not held-out accuracy. The stored tables do not
+> all reproduce them either: `v4.3` gives 98.92 % there, not 99.16 %.
+
 | Base Model                                 | Revision | Best_Prec (%) | Best_Acc (%) | Fold | Note                  |
 |--------------------------------------------|----------|---------------|--------------|------|-----------------------|
 | **google/vit-base-patch16-224**            | **v2.3** | **98.79**     | **98.79**    | 5    | OK & Small            |
@@ -133,20 +161,14 @@ paper source into one of the categories - each responsible for the following con
 | **timm/tf_efficientnetv2_m.in21k_ft_in1k** | **v1.3** | **98.83**     | **98.83**    | 1    | Good & Small          |
 | timm/tf_efficientnetv2_s.in21k             | v7.3     | 97.90         | 97.87        | 1    |                       |
 
-
 The rows highlighted in bold correspond to the best models uploaded to the HF 😊 hub [^1] 🔗, and the versions correspond to
 the training setup mapping adjusted for the HF 😊 hub revisions (which caused the strange order of base model versions).
 
 ![comparison_graph.png](supplementary/figures/model_acc_compared.png)
 
-The table and figure above show accuracy and parameters comparison of different base models tested on the same data. The figure
-demonstrates best models overall (above the trendline) and the table shows all the tested models with their best accuracy and precision scores.
+The table and figure above compare the base models by these sweep figures and by their parameter counts.
 
-> [!NOTE]
-> The `vX.3` accuracies above were measured on the 5,449-page evaluation set. That set was meant to hold only pages no fold
-> trained on, but the script that selected it (`result/stats/unused.sh`, fixed since) missed zero-padded page numbers and ids
-> with a letter, so most of its pages were training pages ([atrium-project#15](https://github.com/ufal/atrium-project/issues/15)).
-> A re-run of the `vX.4` models on the test sets of the LINDAT dataset replaces these figures.
+</details>
 
 ### Data 📜
 
@@ -194,11 +216,15 @@ used a incremented by 1 random seed for the random shifts step.
 
 **Training** 💪 set of the model: **38625** images for `vX.3`
 
+**Training** 💪 set of the model: **38307** images for `vX.4`
+
 The training subsets above are followed by the test sets below:
 
 **Evaluation** 🏆 set:  **1290** images (taken from `v2.2` annotations)
 
-**Evaluation** 🏆 set:  **4823** images (for `vX.3` models)
+**Evaluation** 🏆 set:  **4823** images per fold (for `vX.3` models)
+
+**Evaluation** 🏆 set:  **4791–4795** images per fold (for `vX.4` models: the fold's test partition in the LINDAT record)
 
 Manual ✍️ annotation was performed beforehand and took some time ⌛, the categories 🪧 tabulated  [below](#categories-) were formed from
 different sources of the archival documents originated in the 1920-2020 years span.
@@ -697,24 +723,95 @@ Multi-page document inference processing diagram
 
 ## Results 📊
 
-There are accuracy performance measurements and plots of confusion matrices for the evaluation
-dataset (10% of the provided in `[TRAIN]`'s folder data). Both graphic plots and tables with
-results can be found in the [result](result) 📁 folder.
+The `vX.4` models were scored on the test partition of the fold each was trained on, as published in the LINDAT
+record [^17] 🔗: pages the model never saw in training (2026-10-22, [result/README.md](result/README.md) 📎 has the
+provenance and the figures for pages of seen and unseen documents). Both graphic plots and tables with results can be
+found in the [result](result) 📁 folder.
+
+| **Revision** | **Fold** | **Test pages** | **Top-1** | **Top-3** |
+|--------------|----------|---------------:|-----------|-----------|
+| `v1.4`       | 1        |          4,795 | **95.87** | **99.90** |
+| `v4.4`       | 1        |          4,795 | 95.81     | 99.79     |
+| `v3.4`       | 2        |          4,792 | 95.49     | 99.77     |
+| `v5.4`       | 2        |          4,792 | 95.58     | 99.75     |
+| `v2.4`       | 5        |          4,791 | 94.64     | 99.81     |
+
+`v1.4` accuracy on the test pages of fold 1 (4,795 pages): **95.87%** (Top-1), 99.90% (Top-3) 🏆
+
+<details>
+
+<summary>Confusion matrices 📊 TOP-1 and TOP-3 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2F20261022-0924_4795_model_v14_conf_mat_TOP-1.png)
+
+![TOP-3 confusion matrix](result%2Fplots%2F20261022-0937_4795_model_v14_conf_mat_TOP-3.png)
+
+</details>
+
+`v4.4` accuracy on the test pages of fold 1 (4,795 pages): **95.81%** (Top-1), 99.79% (Top-3) 🏆
+
+<details>
+
+<summary>Confusion matrices 📊 TOP-1 and TOP-3 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2F20261022-0951_4795_model_v44_conf_mat_TOP-1.png)
+
+![TOP-3 confusion matrix](result%2Fplots%2F20261022-1005_4795_model_v44_conf_mat_TOP-3.png)
+
+</details>
+
+`v3.4` accuracy on the test pages of fold 2 (4,792 pages): **95.49%** (Top-1), 99.77% (Top-3) 🏆
+
+<details>
+
+<summary>Confusion matrices 📊 TOP-1 and TOP-3 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2F20261022-1021_4792_model_v34_conf_mat_TOP-1.png)
+
+![TOP-3 confusion matrix](result%2Fplots%2F20261022-1035_4792_model_v34_conf_mat_TOP-3.png)
+
+</details>
+
+`v5.4` accuracy on the test pages of fold 2 (4,792 pages): **95.58%** (Top-1), 99.75% (Top-3) 🏆
+
+<details>
+
+<summary>Confusion matrices 📊 TOP-1 and TOP-3 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2F20261022-1053_4792_model_v54_conf_mat_TOP-1.png)
+
+![TOP-3 confusion matrix](result%2Fplots%2F20261022-1110_4792_model_v54_conf_mat_TOP-3.png)
+
+</details>
+
+`v2.4` accuracy on the test pages of fold 5 (4,791 pages): **94.64%** (Top-1), 99.81% (Top-3) 🏆
+
+<details>
+
+<summary>Confusion matrices 📊 TOP-1 and TOP-3 👀</summary>
+
+![TOP-1 confusion matrix](result%2Fplots%2F20261022-1125_4791_model_v24_conf_mat_TOP-1.png)
+
+![TOP-3 confusion matrix](result%2Fplots%2F20261022-1140_4791_model_v24_conf_mat_TOP-3.png)
+
+</details>
+
+<details>
+
+<summary>Earlier `vX.2` models (2025-07) 👀</summary>
+
+These models were scored on the `v2.2` evaluation set (1,583–1,586 pages). Whether that set
+overlaps their training data was never checked, so read the figures as examples, not as held-out accuracy. They are
+recomputed from the stored tables; this table had swapped `v4.2` and `v5.2` and gave `v3.2` 96.49 %, which no stored
+table gives.
 
 | **Revision** | **Top-1** | **Top-3** |
 |--------------|-----------|-----------|
 | `v1.2`       | 97.73     | 99.87     |
 | `v2.2`       | 97.54     | 99.94     |
-| `v3.2`       | 96.49     | 99.94     |
-| `v4.2`       | 97.73     | 99.87     |
-| `v5.2`       | 97.86     | 99.87     |
-| `v1.3`       | 98.83     | 99.78     |
-| `v2.3`       | 98.79     | 99.96     |
-| `v3.3`       | 98.92     | 99.98     |
-| `v4.3`       | 98.92     | **100.0** |
-| `v5.3`       | **99.12** | 99.94     |
-| `v6.3`       | 98.79     | 99.94     |
-
+| `v3.2`       | 97.41     | 99.94     |
+| `v4.2`       | 97.86     | 99.87     |
+| `v5.2`       | 97.73     | 99.87     |
 
 `v2.2` Evaluation set's accuracy (**Top-1**):  **97.54%** 🏆
 
@@ -726,7 +823,7 @@ results can be found in the [result](result) 📁 folder.
 
 </details>
 
-`v3.2` Evaluation set's accuracy (**Top-1**):  **96.49%** 🏆
+`v3.2` Evaluation set's accuracy (**Top-1**):  **97.41%** 🏆
 
 <details>
 
@@ -766,67 +863,10 @@ results can be found in the [result](result) 📁 folder.
 
 </details>
 
-
-`v1.3` Evaluation set's accuracy (**Top-1**):  **98.83%** 🏆
-
-<details>
-
-<summary>Confusion matrix 📊 TOP-1 👀</summary>
-
-![TOP-1 confusion matrix](result%2Fplots%2F20251020-1835_model_v13_conf_mat_TOP-1.png)
-
 </details>
 
-`v2.3` Evaluation set's accuracy (**Top-1**):  **98.79%** 🏆
-
-<details>
-
-<summary>Confusion matrix 📊 TOP-1 👀</summary>
-
-![TOP-1 confusion matrix](result%2Fplots%2F20251020-1841_model_v23_conf_mat_TOP-1.png)
-
-</details>
-
-`v3.3` Evaluation set's accuracy (**Top-1**):  **98.92%** 🏆
-
-<details>
-
-<summary>Confusion matrix 📊 TOP-1 👀</summary>
-
-![TOP-1 confusion matrix](result%2Fplots%2F20251020-1849_model_v33_conf_mat_TOP-1.png)
-
-</details>
-
-`v4.3` Evaluation set's accuracy (**Top-1**):  **99.16%** 🏆
-
-<details>
-
-<summary>Confusion matrix 📊 TOP-1 👀</summary>
-
-![TOP-1 confusion matrix](result%2Fplots%2F20251020-1856_model_v43_conf_mat_TOP-1.png)
-
-</details>
-
-`v5.3` Evaluation set's accuracy (**Top-1**):  **99.12%** 🏆
-
-<details>
-
-<summary>Confusion matrix 📊 TOP-1 👀</summary>
-
-![TOP-1 confusion matrix](result%2Fplots%2F20251020-1905_model_v53_conf_mat_TOP-1.png)
-
-</details>
-
-`v6.3` Evaluation set's accuracy (**Top-1**):  **98.79%** 🏆
-
-<details>
-
-<summary>Confusion matrix 📊 TOP-1 👀</summary>
-
-![TOP-1 confusion matrix](result%2Fplots%2F20251020-1913_model_v63_conf_mat_TOP-1.png)
-
-</details>
-
+The `vX.3` results shown here before were measured on pages most of which were training pages; they are described,
+and linked where they are preserved, in [result/README.md](result/README.md#earlier-results-and-their-problems) 📎.
 
 > **Confusion matrices** provided above show the diagonal of matching gold and predicted categories 🪧
 > while their off-diagonal elements show inter-class errors. By those graphs you can judge
@@ -890,56 +930,42 @@ Demo files  `v4.2`:
 - **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20250710-1942_model_v120106l_TOP-1.csv)📎
 
 
-Demo files  `v2.3`:
+Files  `v1.4` (fold 1 test pages):
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1835_5449_model_v23_TOP-1_EVAL.csv) 📎
+- Held-out test pages (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20261022-0911_4795_model_v14_TOP-1_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1842_5449_model_v23_TOP-3_EVAL.csv) 📎
+- Held-out test pages (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20261022-0924_4795_model_v14_TOP-3_EVAL.csv) 📎
 
-- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251020-1807_115_model_v23_TOP-1_EVAL.csv)📎
+Files  `v4.4` (fold 1 test pages):
 
-Demo files  `v3.3`:
+- Held-out test pages (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20261022-0938_4795_model_v44_TOP-1_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1841_5449_model_v33_TOP-1_EVAL.csv) 📎
+- Held-out test pages (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20261022-0951_4795_model_v44_TOP-3_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1854_5449_model_v33_TOP-3_EVAL.csv) 📎
+Files  `v3.4` (fold 2 test pages):
 
-- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251020-1808_115_model_v33_TOP-1_EVAL.csv)📎
+- Held-out test pages (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20261022-1007_4792_model_v34_TOP-1_EVAL.csv) 📎
 
-Demo files  `v5.3`:
+- Held-out test pages (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20261022-1021_4792_model_v34_TOP-3_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1856_5449_model_v53_TOP-1_EVAL.csv) 📎
+Files  `v5.4` (fold 2 test pages):
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1921_5449_model_v53_TOP-3_EVAL.csv) 📎
+- Held-out test pages (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20261022-1036_4792_model_v54_TOP-1_EVAL.csv) 📎
 
-- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251020-1809_115_model_v53_TOP-1_EVAL.csv)📎
+- Held-out test pages (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20261022-1053_4792_model_v54_TOP-3_EVAL.csv) 📎
 
-Demo files  `v1.3`:
+Files  `v2.4` (fold 5 test pages):
 
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1825_5449_model_v13_TOP-1_EVAL.csv) 📎
+- Held-out test pages (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20261022-1112_4791_model_v24_TOP-1_EVAL.csv) 📎
 
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1828_5449_model_v13_TOP-3_EVAL.csv) 📎
+- Held-out test pages (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20261022-1126_4791_model_v24_TOP-3_EVAL.csv) 📎
 
-- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251020-1807_115_model_v13_TOP-1_EVAL.csv)📎
+The same five models on the 5,449-page set, most of whose pages are training pages (for the report by group in
+[result/README.md](result/README.md#the-5449-page-set), not an accuracy): [`v1.4`](result%2Ftables%2F20261022-1140_5449_model_v14_TOP-1_EVAL.csv), [`v2.4`](result%2Ftables%2F20261022-1147_5449_model_v24_TOP-1_EVAL.csv), [`v3.4`](result%2Ftables%2F20261022-1154_5449_model_v34_TOP-1_EVAL.csv), [`v4.4`](result%2Ftables%2F20261022-1202_5449_model_v44_TOP-1_EVAL.csv), [`v5.4`](result%2Ftables%2F20261022-1208_5449_model_v54_TOP-1_EVAL.csv) 📎
 
-Demo files  `v4.3`:
-
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1849_5449_model_v43_TOP-1_EVAL.csv) 📎
-
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1908_5449_model_v43_TOP-3_EVAL.csv) 📎
-
-- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251020-1809_115_model_v43_TOP-1_EVAL.csv)📎
-
-Demo files  `v6.3`:
-
-- Manually ✍️ **checked** evaluation dataset (TOP-1): [model_TOP-1_EVAL.csv](result%2Ftables%2F20251020-1906_5449_model_v63_TOP-1_EVAL.csv) 📎
-
-- Manually ✍️ **checked** evaluation dataset (TOP-3): [model_TOP-3_EVAL.csv](result%2Ftables%2F20251020-1937_5449_model_v63_TOP-3_EVAL.csv) 📎
-
-- **Unchecked with TRUE** values (small): [model_TOP-1.csv](result%2Ftables%2F20251020-1810_115_model_v63_TOP-1_EVAL.csv)📎
-
-Plus, the best model inference results of the small subset (`small_data_samples` 📁 folder) for all 6 versions [best_6_models_TOP-1.csv](result%2Ftables%2F20251020-1812_BEST_6_models_TOP-1.csv)📎
-and the best 5 versions [best_5_models_TOP-1.csv](result%2Ftables%2F20260530-1234_BEST_5_models_TOP-1.csv)📎 are provided for the demonstration.
+Plus, the five `vX.4` models on the small subset (`small_data_samples` 📁 folder, no `TRUE` column) for the demonstration:
+their votes [BEST_5_models_TOP-1.csv](result%2Ftables%2F20261022-1218_BEST_5_models_TOP-1.csv)📎 and averaged
+result [BEST_5_models_AVG_TOP-3.csv](result%2Ftables%2F20261022-1218_BEST_5_models_AVG_TOP-3.csv)📎.
 
 With the following **columns** 📋:
 
@@ -958,6 +984,26 @@ and optionally
 
 <summary>Raw result tables 👀</summary>
 
+Files `v1.4`:
+
+- Held-out test pages of fold 1 **RAW**: [model_EVAL_RAW.csv](result%2Ftables%2F20261022-0924_4795_model_v14_EVAL_RAW.csv) 📎
+
+Files `v4.4`:
+
+- Held-out test pages of fold 1 **RAW**: [model_EVAL_RAW.csv](result%2Ftables%2F20261022-0951_4795_model_v44_EVAL_RAW.csv) 📎
+
+Files `v3.4`:
+
+- Held-out test pages of fold 2 **RAW**: [model_EVAL_RAW.csv](result%2Ftables%2F20261022-1021_4792_model_v34_EVAL_RAW.csv) 📎
+
+Files `v5.4`:
+
+- Held-out test pages of fold 2 **RAW**: [model_EVAL_RAW.csv](result%2Ftables%2F20261022-1053_4792_model_v54_EVAL_RAW.csv) 📎
+
+Files `v2.4`:
+
+- Held-out test pages of fold 5 **RAW**: [model_EVAL_RAW.csv](result%2Ftables%2F20261022-1126_4791_model_v24_EVAL_RAW.csv) 📎
+
 Demo files `v2.2`:
 
 - Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250710-1925_model_v220105p_EVAL_RAW.csv) 📎
@@ -966,25 +1012,25 @@ Demo files `v2.2`:
 
 Demo files `v3.2`:
 
-- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250710-1925_model_v220105p_EVAL_RAW.csv) 📎
+- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250710-1927_model_v320105p_EVAL_RAW.csv) 📎
 
 - **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250710-1936_model_v320105p_RAW.csv) 📎
 
 Demo files `v5.2`:
 
-- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250710-1925_model_v220105p_EVAL_RAW.csv) 📎
+- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250710-1928_model_v520105p_EVAL_RAW.csv) 📎
 
 - **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250710-1938_model_v520105p_RAW.csv) 📎
 
 Demo files `v1.2`:
 
-- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250710-1925_model_v220105p_EVAL_RAW.csv) 📎
+- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250710-1924_model_v120106s_EVAL_RAW.csv) 📎
 
 - **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250710-1941_model_v120106s_RAW.csv) 📎
 
 Demo files `v4.2`:
 
-- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250710-1925_model_v220105p_EVAL_RAW.csv) 📎
+- Manually ✍️ **checked** evaluation dataset **RAW**: [model_RAW_EVAL.csv](result%2Ftables%2F20250710-1921_model_v120106l_EVAL_RAW.csv) 📎
 
 - **Unchecked with TRUE** values (small) **RAW**: [model_RAW.csv](result%2Ftables%2F20250710-1942_model_v120106l_RAW.csv) 📎
 
@@ -1022,7 +1068,7 @@ The splitting script [per_doc_split.py](supplementary%2Fscripts%2Fper_doc_split.
 
 - **FILE** — name of the file (document)
 - **PAGE** — number of the page
-- **CLASS-1-vM.3** — Top-1 class predicted by model `vM.3` (`M` = 1…5); one
+- **CLASS-1-vM.4** — Top-1 class predicted by model `vM.4` (`M` = 1…5); one
   column per model
 
 **Averaged result** — `{date-time}_BEST_5_models_AVG_TOP-{N}.csv` (same column
@@ -1051,8 +1097,8 @@ inference, and writes **two** files to `result/tables/`:
 
 | File                                        | Contents                                                                                                   |
 |---------------------------------------------|------------------------------------------------------------------------------------------------------------|
-| `{date-time}_BEST_5_models_TOP-1.csv`       | **Wide per-model votes** — one Top-1 column per model (`CLASS-1-v1.3` … `CLASS-1-v5.3`).                   |
-| `{date-time}_BEST_5_models_AVG_TOP-{N}.csv` | **Final averaged result** — per-model votes (`V1.3` … `V5.3`) plus the probability-averaged Top-N classes. |
+| `{date-time}_BEST_5_models_TOP-1.csv`       | **Wide per-model votes** — one Top-1 column per model (`CLASS-1-v1.4` … `CLASS-1-v5.4`).                   |
+| `{date-time}_BEST_5_models_AVG_TOP-{N}.csv` | **Final averaged result** — per-model votes (`V1.4` … `V5.4`) plus the probability-averaged Top-N classes. |
 
 The averaging is a **mean of the softmax probabilities** across models (not a
 plain majority vote), so confident models carry more weight than uncertain
@@ -1089,10 +1135,10 @@ hyphen→underscore filename normalisation. See `python3 averaging.py --help`.
 </details>
 
 Examples shipped in the repo: the wide
-[best_5_models_TOP-1.csv](result%2Ftables%2F20260530-1234_BEST_5_models_TOP-1.csv) 📎
+[best_5_models_TOP-1.csv](result%2Ftables%2F20261022-1218_BEST_5_models_TOP-1.csv) 📎
 and the averaged [ARUB_averaged_SHORT.csv](result%2FARUB_averaged_SHORT.csv) &
 [ARUP_averaged_SHORT.csv](result%2FARUP_averaged_SHORT.csv) 📎 (each derived from
-the best 5 models with a Top-3 setting; only ~1/1000 of the collection results
+the `vX.3` best 5 models with a Top-3 setting; only ~1/1000 of the collection results
 is shared here for demonstration).
 
 ----
@@ -1831,7 +1877,7 @@ pdftoppm, which neither engine reproduces exactly. Measurements and the five pag
 [data_scripts/pdf_rasteriser_comparison.md](data_scripts/pdf_rasteriser_comparison.md).
 
 Example of the [small_data_samples](small_data_samples) 📁 directory processing paradata log:
-[260315-120442_page-classification.json](paradata%2F260315-120442_page-classification.json) 📎
+[261022-101849_page-classification.json](result%2Fparadata%2F261022-101849_page-classification.json) 📎
 
 ### Document record schema 📑
 

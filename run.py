@@ -349,10 +349,10 @@ def main(argv=None):
         if getattr(args, arg) is not None and getattr(args, arg) is not False and getattr(args, arg) != 0:
             print(arg, "\t=\t", getattr(args, arg))
 
-    if not output_dir.is_dir():
-        os.makedirs(output_dir)
-        os.makedirs(f"{output_dir}/tables")
-        os.makedirs(f"{output_dir}/plots")
+    # Each folder on its own: the paradata logger above has already made `<output>/paradata`, so
+    # "output folder missing" no longer means "tables and plots missing".
+    for folder in ("tables", "plots"):
+        os.makedirs(output_dir / folder, exist_ok=True)
 
     if not cp_dir.is_dir():
         os.makedirs(cp_dir)
@@ -425,6 +425,9 @@ def main(argv=None):
             _, _, testfiles, _, _, testLabels = split_data_from_folds(
                 testfiles, testLabels, args.folds_csv, fold_column, safe_check=False
             )
+        # The TRUE column of every evaluation table is the dataset's annotation (CC BY-NC 4.0), as for --train.
+        _paradata_logger.log_component("lindat_dataset")
+        _eval_inputs = len(testfiles)  # counted before evaluation: unreadable pages are inputs too
 
     # ── single classifier instantiation (YOLO or standard) ───────────────────
     if args.yolo:
@@ -726,6 +729,7 @@ def main(argv=None):
         )
         for path in skipped:
             _paradata_logger.log_skip(path, "unreadable image")
+        _eval_processed = len(testfiles)
 
         rdf, raw_df = dataframe_results(testfiles, eval_predictions, categories, top_N, raw_prediction)
         number_of_rows = len(rdf.index)
@@ -737,6 +741,7 @@ def main(argv=None):
             sep=",",
             index=False,
         )
+        _paradata_logger.log_success("csv")
         print(f"Evaluation results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
 
         if raw:
@@ -788,7 +793,7 @@ def main(argv=None):
             print(f"Could not determine base model for pattern: {args.average_pattern}")
 
     # ── inference ─────────────────────────────────────────────────────────────
-    _total_inputs = 0
+    _total_inputs = _eval_inputs if args.eval else 0  # an evaluation's pages are its inputs
     try:
         if args.file is not None:
             _total_inputs += 1
@@ -1031,7 +1036,8 @@ def main(argv=None):
                         )
 
     finally:
-        _paradata_logger.finalize(_total_inputs)
+        # An evaluation counts the pages it scored, not the tables and plots it wrote.
+        _paradata_logger.finalize(_total_inputs, _eval_processed if args.eval else None)
 
     return 0
 
