@@ -2,8 +2,9 @@
 > _Historical page-image classification. Open issue: #58 (decision-model experiments, 2026-10-20). #61 (the
 > directory-run bug) closed 2026-10-22, fixed in **v1.9.6-beta**. #48 closed 2026-09-17; the #48 and #61 pairs are removed this round; #15 and #26 closed; four open
 > Dependabot PRs (#56, #57, #59, #60). Its pilot work is tracked in hub issues (atrium-project #6, #67, #72) and in
-> atrium-digital-convert#5. `test` = `d67c7b1` (2026-10-22; the `vX.4` results of atrium-project#15 since `f6ef687`, run with
-> **v1.9.8-beta**) · **v1.9.9-beta** prepared (the results' documentation, the evaluation paradata, `models_used`) · **v1.9.5-beta**
+> atrium-digital-convert#5. `test` = `e989273` (2026-10-22; the `vX.4` results of atrium-project#15 since `f6ef687`, run with
+> **v1.9.8-beta**) · **v1.9.9-beta** (2026-10-22, `c91665b`: the results' documentation, the evaluation paradata) ·
+> **v1.9.10-beta** prepared (`models_used`, `collect`) · **v1.9.5-beta**
 > (2026-10-19, the runbook) is the first immutable release (atrium-project#72)._
 > _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md`._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
@@ -498,6 +499,11 @@ issue opens, matching its four siblings.
 * `atrium_vocab.py` and its two shared tests re-vendored (atrium-project#51). `scheduled-smoke.yml` reports through
   the hub's lane notifier (atrium-project#81).
 * **Dev logs:** the #48 and #61 pairs are removed (closed 2026-09-17 and 2026-10-22).
+* **v1.9.10-beta prepared (10-22 evening):** `v1.9.9-beta` was tagged at `c91665b` (12:12), before `models_used`
+  and `collect` reached `test` (`d67c7b1`, 19:13), so the tag carries neither, while `test` and `vit` held them under
+  the same version. They get their own release: `setup/para_config.txt`, `CITATION.cff`, `service/openapi.json`
+  (version), the runbook's image example, a CONTRIBUTING row of their own; the `v1.9.9-beta` row is back to what
+  that release holds.
 
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
