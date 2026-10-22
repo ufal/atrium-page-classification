@@ -1,11 +1,10 @@
 # 📓 atrium-page-classification — agent_dev_logs/DEVLOG.md (timeline index)
 > _Historical page-image classification. Open issue: #58 (decision-model experiments, 2026-10-20). #61 (the
-> directory-run bug) closed 2026-10-22: fixed in **v1.9.6-beta**, its images first in v1.9.7-beta. #48 closed
-> 2026-09-17; the #48 and #61 pairs are removed this round. #15 and #26 closed; four open Dependabot PRs (#56, #57,
-> #59, #60). Its pilot work is tracked in hub issues (atrium-project #6, #15, #67, #72, #77) and in
-> atrium-digital-convert#5. `test` = `789ff04` (2026-10-22) · **v1.9.8-beta** (`867c3eb`) runs the `vX.4`
-> evaluation (job 7271549, on `f14bc4b`) · **v1.9.9-beta** prepared (`models_used`) · **v1.9.5-beta** (2026-10-19)
-> is the first immutable release (atrium-project#72)._
+> directory-run bug) closed 2026-10-22, fixed in **v1.9.6-beta**. #48 closed 2026-09-17; the #48 and #61 pairs are removed this round; #15 and #26 closed; four open
+> Dependabot PRs (#56, #57, #59, #60). Its pilot work is tracked in hub issues (atrium-project #6, #67, #72) and in
+> atrium-digital-convert#5. `test` = `d67c7b1` (2026-10-22; the `vX.4` results of atrium-project#15 since `f6ef687`, run with
+> **v1.9.8-beta**) · **v1.9.9-beta** prepared (the results' documentation, the evaluation paradata, `models_used`) · **v1.9.5-beta**
+> (2026-10-19, the runbook) is the first immutable release (atrium-project#72)._
 > _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md`._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
@@ -436,26 +435,68 @@ issue opens, matching its four siblings.
 
   Files delivered in chat.
 
-## 2026-10-22 (round 4) — `models_used` in the service; the corrected evaluation kept apart (atrium-project#77, #15)
+## 2026-10-22 — The vX.4 results kept, the old ones explained; evaluation paradata (atrium-project#15)
+* **The run** (job 7271549, `v1.9.8-beta` at `f14bc4b`; the user's push `582938c`…`f6ef687`): 25 steps OK, no
+  unreadable page, no fold-test page in training. Top-1 on each model's fold test pages 94.64–95.87 %, unseen documents
+  93.87–95.60 %, Top-3 99.75–99.90 %. Checked before writing:
+  * TOP-1 and TOP-3 tables agree page by page; RAW agrees except one tie at 0.496/0.496;
+  * Wilson intervals about ±0.6 points;
+  * McNemar on the shared folds: `v1.4`/`v4.4` p = 0.86, `v3.4`/`v5.4` p = 0.76.
+* **Kept and removed:**
+  * kept: the fold tables, plots and RAW; the 5,449-set tables (by group only); the ensemble demo; the run records;
+  * removed: the 5,449-set confusion plots, the 229-page sample evaluations (outside the training data, labels never
+    checked), the prefetch paradata, and `20260723-1659_model_v43_TOP-3.csv`. That last file holds `v4.4`'s
+    predictions: the same top-3 classes on all 229 pages, unlike the May `v4.3` table.
+* **The old results** (preserved at `789ff04`, as motyc asked on #15), in `result/README.md`:
+  * every `vX.3` figure, the README's "Best_Acc" included, is the 2025 sweep's on the 5,449-page set;
+  * the sweep chose each base model's fold (the highest figure, the lowest fold on a tie), and `REVISION_BEST_FOLDS`
+    matches it for all five;
+  * the README's plots contradicted its text: `v4.3` 98.92 % against 99.16 %, `v1.3` 96.81 % against 98.83 %;
+  * the 96.81 % run is consistent with the `-rev` base bug fixed in `v1.9.8-beta`;
+  * no two models' tables are identical, so the brief's "shifted labels" guess is wrong;
+  * the `a5` models had seen all but 129 of the 5,449 pages.
+* **README, CONTRIBUTING:** the held-out table leads; the sweep table stays, labelled; the results section shows the
+  fold matrices. The `vX.2` table had `v4.2`/`v5.2` swapped and `v3.2` 96.49 %, which no stored table gives (97.41 %).
+  The four `vX.2` RAW links all pointed to `v2.2`'s file, and the paradata example link was dead.
+* **`run.py`:**
+  * `--eval` counts its pages and tables in the paradata (`input_files_total` was 0, "processed" was the plot
+    count) and declares `lindat_dataset`, as `--train` does;
+  * `result/tables` and `result/plots` are made on their own: the paradata logger makes `result/` first, so an
+    evaluation into a new output folder failed on its first table.
+
+  Test: `tests/test_run.py::test_an_evaluation_counts_its_pages_and_declares_the_dataset` (it fails on the old
+  code).
+* **Not fixed, noted:** `utils.confusion_plot` needs every category in the evaluated set (`classification_report`
+  without `labels=`).
+* **v1.9.9-beta prepared:** `setup/para_config.txt`, `CITATION.cff`, `service/openapi.json` (version only), the
+  CONTRIBUTING row.
+* **Checks:** a py3.11 venv with torch 2.7.1 (PyPI), `HF_HUB_OFFLINE=1`. Full suite (`-m "not slow"`): 907
+  passed, 2 xfailed, 1 failed, the same `test_an_unreadable_image_is_422_not_500` as on untouched `test` in this
+  sandbox. `ruff check` and `ruff format --check` clean; `check_version.py` and `atrium_openapi.py check` OK; every
+  relative link in `README.md` and `result/README.md` resolves. README also: RegNetY-160's input is 384 px (its Hub
+  config, `MODEL_STATIC`), not 224.
+
+  Files delivered in chat.
+
+## 2026-10-22 (round 4) — `models_used` in the service; a later evaluation kept apart (atrium-project#77, #15)
 * **Why:** motyc on atrium-project#77 (10-21): add `models_used` to the responses, per page in `/predict_document`,
-  in the next release. On #15 (10-22): keep the original result files, add the corrected evaluation separately with
-  the model revisions, the split provenance and the evaluated and skipped page counts, stop presenting the 5,449-page
-  figures as held-out accuracy, and say how the best folds were chosen.
+  in the next release. On #15 (10-22): the corrected evaluation with its revisions, provenance and evaluated and
+  skipped counts, kept apart from the original results.
 * **`models_used`:** `ModelManager.predict_detailed()` returns the predictions and the revisions that answered (the
   one asked for, or every ensemble member that answered); `predict()` wraps it, so the batch paths are unchanged.
   `ImageResponse` and `PagePredictions` declare the field; `service/openapi.json` regenerated (additive); the
   service README's examples and its Partial results; "a reduced ensemble is silent" is gone from Known limits.
-* **`data_scripts/collect_evaluation.py`**, run as `eval_vX4_job.sh collect <stamp>`: moves the files one run
-  wrote (its `_outputs.txt`) to `result/evaluations/<stamp>_vX4/`, keeping their paths under `result/`, and writes
-  `PROVENANCE.md` (the run's commit, the revisions and their Hub commits, the folds CSV's SHA-256, the LINDAT
-  record, per table the fold's test rows, the rows without a PNG name, the named pages, those evaluated and those
-  not). It reads the run's own lists, so it works on job 7271549, which runs `f14bc4b`.
-* **README:** the warning on the `vX.3` table says they are not held-out accuracies, and that the table is
-  `result_analysis.sh`'s "best fold per model" on the same 5,449-page set; the corrected figures replace them only
-  after the co-authors' review. `stage_fold_pages.py` and the 10-21 entry say 28 nameless rows in fold1, not one.
-* **v1.9.9-beta prepared:** `setup/para_config.txt`, `CITATION.cff`, `service/openapi.json`, the runbook's image
-  example, the CONTRIBUTING row. `agent-skill` follows (the service files, `Pillow>=13.0.0`, the version).
-* `atrium_vocab.py` and its two shared tests re-vendored (atrium-project#51).
+* **`data_scripts/collect_evaluation.py`**, run as `eval_vX4_job.sh collect <stamp>`: for a later run, moves the files
+  it wrote (its `_outputs.txt`) to `result/evaluations/<stamp>_vX4/`, keeping their paths under `result/`, and writes
+  `PROVENANCE.md` (the commit, the revisions and their Hub commits, the folds CSV's SHA-256, the LINDAT record, per
+  table the fold's test rows, the rows without a PNG name, the pages evaluated and not). The 10-22 run itself stays
+  in `result/` as committed (entry above); the README says so. 4 tests.
+* `stage_fold_pages.py` and the 10-21 entry say 28 nameless rows in fold1, not one.
+* **Merged with the entry above (10-22 evening):** this round's README, CONTRIBUTING and this file were built on
+  `789ff04` and, pushed whole as `d67c7b1`, replaced the versions of `c91665b`; they are merged back, the results
+  documentation of `c91665b` winning wherever both changed a line.
+* `atrium_vocab.py` and its two shared tests re-vendored (atrium-project#51). `scheduled-smoke.yml` reports through
+  the hub's lane notifier (atrium-project#81).
 * **Dev logs:** the #48 and #61 pairs are removed (closed 2026-09-17 and 2026-10-22).
 
 ---
