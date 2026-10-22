@@ -1,0 +1,6 @@
+revision,base_model,fold,hub_repo,hub_commit
+v1.4,timm/tf_efficientnetv2_m.in21k_ft_in1k,fold1,ufal/vit-historical-page,93f2dc7014010d899612c2df5dcf38f76bb7d7fc
+v2.4,google/vit-base-patch16-224,fold5,ufal/vit-historical-page,fd43cc4dbb44ab2c5dea1cb785526259c66d0932
+v3.4,google/vit-base-patch16-384,fold2,ufal/vit-historical-page,4d01050d4ff444574a3d04aaf4673f171f0a66c3
+v4.4,timm/regnety_160.swag_ft_in1k,fold1,ufal/vit-historical-page,73e32de64bebd7979788a4c8aefd4ddfa2f6c1b7
+v5.4,google/vit-large-patch16-384,fold2,ufal/vit-historical-page,174be14f82b4437fb089ea3145cb7d5415c03e04

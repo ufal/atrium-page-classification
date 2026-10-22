@@ -1,0 +1,66 @@
+{
+  "schema_version": "2.0",
+  "program": "page-classification",
+  "tool_version": "v1.9.8-beta",
+  "repository": "https://github.com/ufal/atrium-page-classification",
+  "runner_ref": "",
+  "docker_image": "",
+  "python_version": "3.11.4 (main, Jul 26 2023, 14:53:35) [GCC 11.3.0]",
+  "run_id": "261022-091200",
+  "run_uuid": "urn:uuid:c7c8886c-53fe-46b1-bfd5-ad3656f0bc72",
+  "run_agent": "",
+  "license": "MIT",
+  "license_url": "https://opensource.org/license/mit/",
+  "license_detail": {
+    "effective_license": "MIT",
+    "effective_license_url": "https://opensource.org/license/mit/",
+    "is_non_commercial": false,
+    "is_share_alike": false,
+    "determined_by": [
+      "vit_models"
+    ],
+    "components": [
+      {
+        "name": "vit_models",
+        "license": "MIT",
+        "license_url": "https://opensource.org/license/mit/",
+        "rank": 1
+      }
+    ],
+    "unknown_licenses": [],
+    "notes": "Effective output license is MIT, the most restrictive among 1 component(s) used."
+  },
+  "start_time": "2026-10-22T09:12:00.042384+00:00",
+  "end_time": "2026-10-22T09:25:59.160123+00:00",
+  "duration_seconds": 839.118,
+  "config": {
+    "model_path": "./model/model_v24",
+    "revision": "v2.4",
+    "base_model": "google/vit-base-patch16-224",
+    "top_n": 1,
+    "batch_size": "16",
+    "input_path": "/lnet/work/projects/atrium/page_util/pages/stage_vX4/fold5",
+    "inner_dirs": "True",
+    "file_format": "png",
+    "mode": "directory",
+    "raw_output": "False",
+    "best_models": "False",
+    "parallel_best": "False",
+    "yolo": "False"
+  },
+  "statistics": {
+    "input_files_total": 0,
+    "successfully_processed": 1,
+    "skipped_files": 0,
+    "output_counts_by_type": {
+      "csv": 0,
+      "png": 1
+    },
+    "performance_per_minute": {
+      "csv": 0.0,
+      "png": 0.0715
+    }
+  },
+  "skipped_files_detail": [],
+  "limits_applied": []
+}

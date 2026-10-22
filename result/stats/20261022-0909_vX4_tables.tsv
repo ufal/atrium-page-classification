@@ -1,0 +1,21 @@
+set	revision	fold	top_n	table
+fold1 test	v1.4	fold1	1	./result/tables/20261022-0911_4795_model_v14_TOP-1_EVAL.csv
+fold1 test	v1.4	fold1	3	./result/tables/20261022-0924_4795_model_v14_TOP-3_EVAL.csv
+fold1 test	v4.4	fold1	1	./result/tables/20261022-0938_4795_model_v44_TOP-1_EVAL.csv
+fold1 test	v4.4	fold1	3	./result/tables/20261022-0951_4795_model_v44_TOP-3_EVAL.csv
+fold2 test	v3.4	fold2	1	./result/tables/20261022-1007_4792_model_v34_TOP-1_EVAL.csv
+fold2 test	v3.4	fold2	3	./result/tables/20261022-1021_4792_model_v34_TOP-3_EVAL.csv
+fold2 test	v5.4	fold2	1	./result/tables/20261022-1036_4792_model_v54_TOP-1_EVAL.csv
+fold2 test	v5.4	fold2	3	./result/tables/20261022-1053_4792_model_v54_TOP-3_EVAL.csv
+fold5 test	v2.4	fold5	1	./result/tables/20261022-1112_4791_model_v24_TOP-1_EVAL.csv
+fold5 test	v2.4	fold5	3	./result/tables/20261022-1126_4791_model_v24_TOP-3_EVAL.csv
+5,449-page set	v1.4	fold1	1	./result/tables/20261022-1140_5449_model_v14_TOP-1_EVAL.csv
+small_data_samples	v1.4	fold1	1	./result/tables/20261022-1147_229_model_v14_TOP-1_EVAL.csv
+5,449-page set	v2.4	fold5	1	./result/tables/20261022-1147_5449_model_v24_TOP-1_EVAL.csv
+small_data_samples	v2.4	fold5	1	./result/tables/20261022-1154_229_model_v24_TOP-1_EVAL.csv
+5,449-page set	v3.4	fold2	1	./result/tables/20261022-1154_5449_model_v34_TOP-1_EVAL.csv
+small_data_samples	v3.4	fold2	1	./result/tables/20261022-1201_229_model_v34_TOP-1_EVAL.csv
+5,449-page set	v4.4	fold1	1	./result/tables/20261022-1202_5449_model_v44_TOP-1_EVAL.csv
+small_data_samples	v4.4	fold1	1	./result/tables/20261022-1208_229_model_v44_TOP-1_EVAL.csv
+5,449-page set	v5.4	fold2	1	./result/tables/20261022-1208_5449_model_v54_TOP-1_EVAL.csv
+small_data_samples	v5.4	fold2	1	./result/tables/20261022-1218_229_model_v54_TOP-1_EVAL.csv
