@@ -225,6 +225,12 @@ class _CountingManager:
         self.calls += 1
         return self.answer if self.answer is not None else [{"label": "TEXT", "score": 0.91}][:topn]
 
+    def predict_detailed(self, image, version, topn):
+        result = self.predict(image, version, topn)
+        if isinstance(result, dict):
+            return result
+        return {"predictions": result, "models_used": list(self.available_versions) if version == "all" else [version]}
+
 
 @pytest.fixture
 def manager(monkeypatch):
@@ -304,6 +310,8 @@ def test_an_image_response_conforms_with_every_field_present(manager):
         200, client.post("/predict_image", files={"file": ("p.png", _png(), "image/png")}), "/predict_image"
     )
     assert body["predictions"] == [{"label": "TEXT", "score": 0.91}]
+    # atrium-project#77: the revisions that answered, here the whole default ensemble
+    assert body["models_used"] == ["v1.4", "v2.4", "v3.4", "v4.4", "v5.4"]
     # response_model sends every field: the nullable ones as null
     assert (body["document_json"], body["document_json_schema_error"]) == (None, None)
     # ...and the call's CreateAction on every success (atrium-project#71 R2): with no record asked
@@ -360,6 +368,8 @@ def test_a_document_response_conforms(manager, pdfium):
     body = _conforms(200, response, "/predict_document")
     assert [page["page"] for page in body["pages"]] == [1, 2]
     assert body["document_json"]["page_categories"] == {"1": "TEXT", "2": "TEXT"}
+    # atrium-project#77: per page, the revisions that answered for that page
+    assert [page["models_used"] for page in body["pages"]] == [["v1.4", "v2.4", "v3.4", "v4.4", "v5.4"]] * 2
 
     # The call's CreateAction (atrium-project#71 R2), with the PDF engine among its components.
     import atrium_rocrate
@@ -394,6 +404,7 @@ def test_a_known_revision_prefix_is_not_refused(manager):
     """Only a version no revision matches is refused: a sub-revision the loader resolves passes."""
     response = client.post("/predict_image", data={"version": "v4.40"}, files={"file": ("p.png", _png(), "image/png")})
     assert response.status_code == 200 and manager.calls == 1
+    assert response.json()["models_used"] == ["v4.40"]
 
 
 @pytest.mark.parametrize("record", [b"[1, 2]", b"{not json", b'{"schema_version": "9.0", "doc_id": "x"}'])

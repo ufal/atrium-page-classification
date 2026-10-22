@@ -100,10 +100,23 @@ class ModelManager:
                 logger.warning(f"Could not pre-load model {v}: {e}")
 
     def predict(self, image: Image.Image, version: str, topn: int = 1):
+        """The top-N predictions, or `{"error": ...}`; `predict_detailed` also names the models."""
+        result = self.predict_detailed(image, version, topn)
+        return result if "error" in result else result["predictions"]
+
+    def predict_detailed(self, image: Image.Image, version: str, topn: int = 1) -> dict:
+        """`{"predictions": [...], "models_used": [...]}`, or `{"error": ...}` when no model answered.
+
+        `models_used` lists the revisions that actually contributed (atrium-project#77): the one
+        asked for, or every ensemble member that answered. A model that failed to load or to infer
+        is left out of the `all` average, and this is where a caller sees it.
+        """
         if version == "all":
             return self._predict_averaged(image, topn)
-        else:
-            return self._run_single_inference(version, image, topn)
+        results = self._run_single_inference(version, image, topn)
+        if isinstance(results, dict):
+            return results
+        return {"predictions": results, "models_used": [version]}
 
     def predict_directory(self, dir_path: str, version: str, topn: int = 3, batch_size: int = 16):
         image_paths = sorted(
@@ -173,6 +186,7 @@ class ModelManager:
 
     def _predict_averaged(self, image, topn):
         predictions_list = []
+        answered = []
         failed = []
 
         for v in self.available_versions:
@@ -182,6 +196,7 @@ class ModelManager:
                     failed.append(v)
                     continue
                 predictions_list.append(results)
+                answered.append(v)
             except Exception as e:
                 logger.warning(f"Ensemble: model {v} failed, skipping: {e}")
                 failed.append(v)
@@ -198,7 +213,7 @@ class ModelManager:
             self._warned |= set(failed)
         if not predictions_list:
             return {"error": "All models failed."}
-        return average_prediction_dicts(predictions_list, CATEGORIES, topn)
+        return {"predictions": average_prediction_dicts(predictions_list, CATEGORIES, topn), "models_used": answered}
 
     def _run_single_inference(self, version, image, topn):
         try:

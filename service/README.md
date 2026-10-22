@@ -37,7 +37,7 @@ The published image first: it is what a deployment runs, and it needs no checkou
 
 ```bash
 docker run --rm -p 8000:8000 -v hf-cache:/cache/huggingface \
-  ghcr.io/ufal/atrium-page-classification-api:<version>     # e.g. 1.9.7-beta; add --gpus all on a GPU node
+  ghcr.io/ufal/atrium-page-classification-api:<version>     # e.g. 1.9.9-beta; add --gpus all on a GPU node
 curl -s http://localhost:8000/ready                         # 200 once the models are loaded
 # from a checkout:
 docker compose --profile api up --build
@@ -172,6 +172,7 @@ Example JSON response (every field is always present; `ImageResponse` in [`opena
       "score": 0.975
     }
   ],
+  "models_used": ["v2.3"],
   "limits_applied": [],
   "document_json": null,
   "document_json_schema_error": null,
@@ -179,9 +180,13 @@ Example JSON response (every field is always present; `ImageResponse` in [`opena
 }
 ```
 
-`/predict_document` answers `{"type": "document", "pages": [{"page": 1, "predictions": [...]}, ...],
-"limits_applied": [], "paradata": {...}}` (`DocumentResponse`), with `document_json` (and
-`document_json_schema_error`) only when a record was asked for. It takes the same fields, plus:
+`models_used` lists the model revisions that produced the predictions: the one asked for, or, with
+`version=all`, every member of the ensemble that answered (atrium-project#77).
+
+`/predict_document` answers `{"type": "document", "pages": [{"page": 1, "predictions": [...],
+"models_used": [...]}, ...], "limits_applied": [], "paradata": {...}}` (`DocumentResponse`), with
+`models_used` per page and `document_json` (and `document_json_schema_error`) only when a record was
+asked for. It takes the same fields, plus:
 
 * `pages`: (Optional) classify only these pages, 1-based positions in the PDF, e.g. `1,3,5-7`
   (atrium-digital-convert#2: `/describe` asks only about the pages without a usable text layer).
@@ -462,13 +467,12 @@ A 200 can carry less than was asked for. Read these before using the result:
 - `limits_applied` is present in every response and empty today: each limit of this service refuses
   instead of shaping the result.
 - With `version=all`, a model that cannot be loaded or fails is left out, and the others are averaged.
-  The response does not say so; the service log does, once per failing model.
+  `models_used` (per page in `/predict_document`) lists the revisions that answered, so fewer than five
+  means a reduced ensemble; the service log names the failing model, once.
 - `/predict_document` classifies the pages asked for (`pages`), not the whole PDF.
 
 ## Known limits
 
-- **A reduced ensemble is silent in the response** (above). After a model-loading failure, check the log
-  or ask with one `version` to see whether it answers.
 - **The renderer differs from the training pages'.** The service renders PDF pages with pypdfium2; the
   training pages were made with pdftoppm. On 2,514 pages of 15 born-digital AMČR reports, 5 top-1
   labels differed from the ones PyMuPDF renders gave, each to a neighbouring class

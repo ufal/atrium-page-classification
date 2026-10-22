@@ -319,6 +319,27 @@ class TestSourceConcepts:
         assert rc.to_json(first) == rc.to_json(second)
         assert [e["name"] for e in first["@graph"] if e["@id"] == self.AMCR] == ["hrad"]
 
+    def test_the_meta_text_sentinel_mints_nothing(self, record):
+        """#51 acceptance: keyword-extract writes the sentinel with no ids (or none at all), and
+        no concept URI is invented for it."""
+        sentinel = "Nerelevantní (meta-text)"
+        crate = self._crate(
+            record, {"teater_category": sentinel, "teater_category_ids": []}, {"teater_category": sentinel}
+        )
+        assert "/theme/" not in rc.to_json(crate)
+        assert not [e for e in crate["@graph"] if e.get("name") == sentinel]
+
+    def test_two_concepts_sharing_a_label_stay_two_terms_and_are_not_made_equivalent(self, record):
+        """#51 acceptance: a shared label does not make two source concepts one, and the crate
+        asserts no equivalence between them."""
+        other = "https://api.aiscr.cz/id/HES-000999"
+        a = {"teater_category": "kostel", "teater_category_ids": [{"source": "amcr", "id": "HES-000021"}]}
+        b = {"teater_category": "kostel", "teater_category_ids": [{"source": "amcr", "id": "HES-000999"}]}
+        by_id = _by_id(self._crate(record, a, b))
+        assert {by_id[self.AMCR]["name"], by_id[other]["name"]} == {"kostel"}
+        for term in (by_id[self.AMCR], by_id[other]):
+            assert not {"sameAs", "exactMatch", "closeMatch", "skos:exactMatch"} & set(term)
+
     def test_the_source_uris_survive_degraded_mode(self, record, monkeypatch):
         monkeypatch.setattr(rc, "atrium_vocab", None)
         crate = self._crate(record, {"teater_category": "kostel", "teater_category_ids": [{"source": "amcr", "id": "HES-000021"}]})

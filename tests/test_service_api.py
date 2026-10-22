@@ -81,6 +81,9 @@ def mock_manager(monkeypatch):
         def predict(self, image, version, topn):
             return [{"label": "TEXT", "score": 0.99}]
 
+        def predict_detailed(self, image, version, topn):
+            return {"predictions": self.predict(image, version, topn), "models_used": [version]}
+
         def warmup(self, versions):
             pass
 

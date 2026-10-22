@@ -329,10 +329,12 @@ def _classify_pdf_pages(
             with _PDFIUM_LOCK:
                 img = render_page(pdf_document, number - 1, scale, lambda w, h: _check_image_pixels(w, h, what))
 
-            predictions = manager.predict(img, version=version, topn=topn)
-            if isinstance(predictions, dict) and "error" in predictions:
-                raise HTTPException(status_code=500, detail=f"Page {number}: {predictions['error']}")
-            page_results.append({"page": number, "predictions": predictions})
+            result = manager.predict_detailed(img, version=version, topn=topn)
+            if "error" in result:
+                raise HTTPException(status_code=500, detail=f"Page {number}: {result['error']}")
+            page_results.append(
+                {"page": number, "predictions": result["predictions"], "models_used": result["models_used"]}
+            )
         return page_results
     finally:
         with _PDFIUM_LOCK:
@@ -378,6 +380,13 @@ class ImageResponse(BaseModel):
 
     type: str = Field(description="`image`.")
     predictions: List[PredictionResult] = Field(description="The `topn` best categories, best first.")
+    models_used: List[str] = Field(
+        description=(
+            "The model revisions that produced `predictions` (atrium-project#77): the one asked for, or, with "
+            "`version=all`, every ensemble member that answered. A model that failed is left out of the average "
+            "and of this list."
+        )
+    )
     #: The limits that shaped this result without refusing it (atrium-project#53,
     #: docs/paradata_schema.md `limits_applied`). None of this service's limits does that
     #: today — each one refuses — so it is `[]`; it is declared so the field is present in
@@ -423,6 +432,12 @@ class PagePredictions(BaseModel):
         ),
     )
     predictions: List[PredictionResult] = Field(description="The `topn` best categories, best first.")
+    models_used: List[str] = Field(
+        description=(
+            "The model revisions that produced this page's `predictions` (atrium-project#77): the one asked for, "
+            "or every ensemble member that answered for this page."
+        )
+    )
 
 
 class DocumentResponse(BaseModel):
@@ -656,13 +671,14 @@ async def predict_image(
         image = _open_image(content)  # reads the header only
         _check_image_pixels(image.width, image.height, "The image")
         image = _decode_image(image)
-        # Off the event loop (issue #55): manager.predict() is synchronous torch
+        # Off the event loop (issue #55): manager.predict_detailed() is synchronous torch
         # inference. Called inline in an `async def`, it blocks the ONLY event loop, so
         # uvicorn's SIGTERM handler — an event-loop callback — could not run until the
         # inference returned, which made --timeout-graceful-shutdown meaningless here.
-        predictions = await asyncio.to_thread(manager.predict, image, version=version, topn=topn)
-        if isinstance(predictions, dict) and "error" in predictions:
-            raise HTTPException(status_code=500, detail=predictions["error"])
+        result = await asyncio.to_thread(manager.predict_detailed, image, version=version, topn=topn)
+        if "error" in result:
+            raise HTTPException(status_code=500, detail=result["error"])
+        predictions = result["predictions"]
 
         # A single image is ONE PAGE of a document, and which page is carried in its filename
         # — so the doc_id/page split is utils.doc_id_and_page(), the same derivation run.py's
@@ -675,6 +691,7 @@ async def predict_image(
         return ImageResponse(
             type="image",
             predictions=predictions,
+            models_used=result["models_used"],
             limits_applied=[],
             document_json=record,
             document_json_schema_error=schema_err,

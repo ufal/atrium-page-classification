@@ -81,16 +81,14 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: python -m pytest -m slow -v --tb=short
 
-      - name: Open issue on failure
-        if: failure()
-        uses: actions/github-script@v9
+      # One open issue per failing lane, commented on by each later failure; scheduled runs only
+      # (atrium-project#81). It used to open a new issue on every failing run.
+      - name: Open or update the lane's issue on scheduled failure
+        if: failure() && github.event_name == 'schedule'
+        uses: ufal/atrium-project/.github/actions/lane-failure-issue@v1
         with:
-          script: |
-            const title = `Scheduled smoke tests failed (${new Date().toISOString().slice(0,10)})`;
-            await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title,
-              body: `The scheduled \`slow\` test run failed: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n\nLikely cause: upstream HF revision moved, LINDAT API change, or a dependency update.`,
-              labels: ["ci", "upstream"],
-            });
+          lane: scheduled-smoke
+          title: Scheduled smoke tests failed
+          labels: ci,upstream
+          body: >-
+            The scheduled `slow` test run failed. Likely cause: upstream HF revision moved, LINDAT API change, or a dependency update.

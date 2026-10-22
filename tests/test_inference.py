@@ -116,6 +116,30 @@ def test_a_failing_model_is_reported_once_and_the_others_still_answer(manager, d
     assert warnings == ["Ensemble: 2 of 3 models answered; failing: v2"]
 
 
+@patch.object(ModelManager, "_run_single_inference")
+def test_models_used_names_every_ensemble_member_that_answered(mock_single, manager, dummy_image):
+    """atrium-project#77: the response says which revisions contributed, not only the log."""
+    manager.available_versions = ["v1.4", "v2.4", "v3.4"]
+    mock_single.side_effect = [
+        [{"label": "DRAW", "score": 0.8}, {"label": "TEXT", "score": 0.2}],
+        {"error": "weights missing"},
+        [{"label": "DRAW", "score": 0.6}, {"label": "TEXT", "score": 0.4}],
+    ]
+    res = manager.predict_detailed(dummy_image, version="all", topn=1)
+    assert res["models_used"] == ["v1.4", "v3.4"]
+    assert res["predictions"] == [{"label": "DRAW", "score": 0.70}]
+
+
+@patch.object(ModelManager, "_run_single_inference")
+def test_models_used_of_one_revision_and_of_a_failed_request(mock_single, manager, dummy_image):
+    mock_single.return_value = [{"label": "TEXT", "score": 0.9}]
+    assert manager.predict_detailed(dummy_image, version="v4.4", topn=1)["models_used"] == ["v4.4"]
+    mock_single.return_value = {"error": "weights missing"}
+    assert manager.predict_detailed(dummy_image, version="v4.4", topn=1) == {"error": "weights missing"}
+    manager.available_versions = ["v1.4", "v2.4"]
+    assert manager.predict_detailed(dummy_image, version="all", topn=1) == {"error": "All models failed."}
+
+
 @patch("os.listdir")
 @patch.object(ModelManager, "load_model")
 def test_predict_directory_batch(mock_load, mock_listdir, manager):

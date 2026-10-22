@@ -18,6 +18,7 @@
 #
 #   bash supplementary/scripts/eval_vX4_job.sh prefetch   # login node, online: weights, Hub commits, checks
 #   sbatch supplementary/scripts/eval_vX4_job.sh          # GPU node, offline
+#   bash supplementary/scripts/eval_vX4_job.sh collect <stamp>   # afterwards: the run's files to result/evaluations/
 #
 # Paths can be set by environment variable: ATRIUM, REPO, FOLDS_CSV, CUT_CSV, ZIPS, SET_5449, STAGE.
 # KEEP_STAGED=1 keeps the extracted test pages (one fold, ~8 GB, is on disk at a time otherwise).
@@ -49,6 +50,13 @@ mkdir -p "$STATS"
 # revision:fold pairs, from the one place they are declared
 mapfile -t PAIRS < <(python3 -c 'from model_registry import REVISION_BEST_FOLDS as F; print("\n".join(f"{r}:{f}" for r, f in F.items()))')
 mapfile -t FOLDS < <(printf '%s\n' "${PAIRS[@]}" | cut -d: -f2 | sort -u)
+
+# ── collect: after the job, its outputs into a folder of their own (atrium-project#15) ────────────────
+# result/evaluations/<stamp>_vX4/ with PROVENANCE.md; the vX.3 files in result/tables stay as they are.
+if [[ "${1:-}" == "collect" ]]; then
+    [[ -n "${2:-}" ]] || { echo "usage: $0 collect <stamp>   (the stamp of result/stats/<stamp>_vX4_summary.md)" >&2; exit 2; }
+    exec python3 data_scripts/collect_evaluation.py --stamp "$2" --results "$RESULTS" --folds_csv "$FOLDS_CSV"
+fi
 
 # ── prefetch: on the login node, with network ──────────────────────────────────────────────────────
 if [[ "${1:-}" == "prefetch" ]]; then

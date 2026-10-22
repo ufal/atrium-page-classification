@@ -2138,6 +2138,14 @@
             "title": "Predictions",
             "description": "The `topn` best categories, best first."
           },
+          "models_used": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Models Used",
+            "description": "The model revisions that produced `predictions` (atrium-project#77): the one asked for, or, with `version=all`, every ensemble member that answered. A model that failed is left out of the average and of this list."
+          },
           "limits_applied": {
             "items": {
               "$ref": "#/components/schemas/LimitNote"
@@ -2185,6 +2193,7 @@
         "required": [
           "type",
           "predictions",
+          "models_used",
           "limits_applied",
           "document_json",
           "document_json_schema_error",
@@ -2400,13 +2409,22 @@
             "type": "array",
             "title": "Predictions",
             "description": "The `topn` best categories, best first."
+          },
+          "models_used": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Models Used",
+            "description": "The model revisions that produced this page's `predictions` (atrium-project#77): the one asked for, or every ensemble member that answered for this page."
           }
         },
         "additionalProperties": true,
         "type": "object",
         "required": [
           "page",
-          "predictions"
+          "predictions",
+          "models_used"
         ],
         "title": "PagePredictions",
         "description": "The categories of one PDF page."

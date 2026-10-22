@@ -196,5 +196,13 @@ def test_mapping_targets_are_declared_concepts_or_known_external_namespaces():
             assert node in known or node.startswith(external), node
 
 
+def test_no_record_field_is_read_as_a_theme():
+    """#51 V-5 (decided 2026-10-22): `teater_category` holds the AMČR/TEATER source label, so the
+    theme scheme names no record field, and no scheme claims `teater_category`."""
+    assert av.CONCEPT_SCHEMES["theme"]["fields"] == ()
+    for scheme in av.CONCEPT_SCHEMES.values():
+        assert not any("teater_category" in field for field in scheme["fields"])
+
+
 def test_selftest_passes():
     assert av._selftest(stream=io.StringIO()) == 0

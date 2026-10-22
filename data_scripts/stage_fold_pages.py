@@ -39,8 +39,9 @@ _PART = re.compile(r"_part\d+$")
 def wanted_pages(folds_csv: Path, fold: str, part: str = "test") -> dict:
     """{PNG name: category} of the CSV rows whose `fold` cell is `part`.
 
-    A row without a PNG name names no page and is left out, with a note (the published
-    `licensed_crossval_folds.csv` has one, `test` in folds 1, 2 and 5)."""
+    A row without a PNG name names no page and is left out, with a note: the published
+    `licensed_crossval_folds.csv` has such rows, 28 of them among fold1's `test` rows (job 7271549,
+    2026-10-22), and folds 2 and 5 have some too."""
     pages, unnamed = {}, 0
     with folds_csv.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)

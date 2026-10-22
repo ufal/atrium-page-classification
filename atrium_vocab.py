@@ -242,10 +242,16 @@ CONCEPT_SCHEMES: Dict[str, Dict[str, Any]] = {
             "The facets the harmonised AMCR+TEATER vocabulary is rolled up into for "
             "prompt construction. These are ATRIUM's own editorial grouping, not a "
             "structure either source thesaurus asserts — which is exactly why they need "
-            "ATRIUM-minted URIs while the source concepts do not."
+            "ATRIUM-minted URIs while the source concepts do not. A theme is a derived "
+            "classification: it is placed from the vocabulary's curated taxonomy, never "
+            "inferred from a bare source label, and no record field holds one."
         ),
         "authority": "atrium-keyword-extract/data_samples/taxonomy_config.json",
-        "fields": ("enrichment.items[].teater_category (indirectly, via the facet; it holds a source label, see V-5)",),
+        # No record field holds a theme (atrium-project#51, V-5, decided 2026-10-22):
+        # `enrichment.items[].teater_category` keeps the AMČR/TEATER source label, or the
+        # meta-text sentinel, and is validated against the vocabulary offered to the model,
+        # never against these themes.
+        "fields": (),
     },
 }
 

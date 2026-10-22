@@ -44,6 +44,12 @@ class _MockManager:
     def predict(self, image, version, topn):
         return PREDS
 
+    def predict_detailed(self, image, version, topn):
+        result = self.predict(image, version, topn)
+        if isinstance(result, dict):
+            return result
+        return {"predictions": result, "models_used": list(self.available_versions) if version == "all" else [version]}
+
     def warmup(self, versions=None):
         pass
 
@@ -914,7 +920,7 @@ class TestPredictDocumentPagesAndLabels:
         response = self._post(client, {"pages": "3"}, baseline=_born_digital_baseline())
         assert response.status_code == 200, response.text
         body = response.json()
-        assert body["pages"] == [{"page": 3, "page_label": "1", "predictions": PREDS}]
+        assert body["pages"] == [{"page": 3, "page_label": "1", "predictions": PREDS, "models_used": ["v4.3"]}]
         record = body["document_json"]
         assert record["page_categories"] == {"1": "TEXT"}
         assert [p.get("category") for p in record["pages"]] == [None, None, "TEXT"]

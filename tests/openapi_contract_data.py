@@ -48,8 +48,8 @@ PREPARE = "tests.openapi_contract_data:prepare"
 
 class _StubManager:
     """Stands in for service.inference.manager: no weights, no torch. What the routes read of it:
-    `available_versions` and `get_model_details` (/info, the `version` check); `predict` answers
-    one category, as the real manager's top-N list does."""
+    `available_versions` and `get_model_details` (/info, the `version` check); `predict_detailed`
+    answers one category and the revisions, as the real manager does."""
 
     device = "cpu"
 
@@ -63,6 +63,12 @@ class _StubManager:
 
     def predict(self, image, version, topn):
         return [{"label": "TEXT", "score": 0.99}][:topn]
+
+    def predict_detailed(self, image, version, topn):
+        result = self.predict(image, version, topn)
+        if isinstance(result, dict):
+            return result
+        return {"predictions": result, "models_used": list(self.available_versions) if version == "all" else [version]}
 
     def warmup(self, versions=None):
         pass
