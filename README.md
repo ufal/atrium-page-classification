@@ -5,7 +5,7 @@ card, published by GitHub Pages at <https://ufal.github.io/atrium-page-classific
 
 * The **code** lives on [`vit`](https://github.com/ufal/atrium-page-classification/tree/vit).
 * The **documentation** lives in the ATRIUM hub site at
-  <https://ufal.github.io/atrium-project/tools/page-classification/>, written from this repository's own
+  <https://ufal.github.io/atrium-project/workflows/page-classification/>, written from this repository's own
   `README.md`, `CONTRIBUTING.md` and `agent_dev_logs/DEVLOG.md`, which stay the full
   manual. Nothing is copied here &mdash; see
   [`atrium-project` issue #57](https://github.com/ufal/atrium-project/issues/57).
@@ -36,4 +36,4 @@ One-time, needs repository admin: **Settings &rarr; Pages &rarr; Build and deplo
 &rarr; Source: Deploy from a branch &rarr; Branch: `gh-pages` / `/ (root)`**.
 See `PAGES_SETUP.md` in the hub repository for the full note.
 
-_Generated 2026-10-07 for issue #57._
+_Generated 2026-10-25 for issue #57._
