@@ -26,6 +26,8 @@ All fine-tuned models are revisions of one Hugging Face repository,
 [tf_efficientnetv2_m.in21k_ft_in1k](https://huggingface.co/timm/tf_efficientnetv2_m.in21k_ft_in1k); earlier
 generations also used [tf_efficientnetv2_s.in21k](https://huggingface.co/timm/tf_efficientnetv2_s.in21k) and
 [tf_efficientnetv2_l.in21k_ft_in1k](https://huggingface.co/timm/tf_efficientnetv2_l.in21k_ft_in1k).
+Each base model has its own licence on its card; `regnety_160.swag_ft_in1k`, the base of `v4.3` and `v4.4`, is
+Meta's SWAG weights under CC BY-NC 4.0 ([licences](licences.md#other-licences-in-the-repository)).
 
 **The Hub's `main` revision still resolves to `v4.3`,** the generation before `vX.4`. Pull a `vX.4` revision
 explicitly (`-rev v4.4`) until `main` is moved. `setup/config.txt`'s `[HF] latest` already names `v4.4`, but

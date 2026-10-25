@@ -20,13 +20,20 @@ ones it used, each with its licence ([paradata.md](paradata.md)).
 
 ## Other licences in the repository
 
-| What                                                               | Licence                                 | Where it is stated                                                                                                    |
-|--------------------------------------------------------------------|-----------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
-| the code                                                           | MIT                                     | [LICENSE](../../LICENSE), [CITATION.cff](../../CITATION.cff)                                                          |
-| the sample pages in `small_data_samples/`                          | CC BY-NC 4.0                            | [small_data_samples/LICENSE](../../small_data_samples/LICENSE)                                                        |
-| result tables with a `TRUE` column                                 | CC BY-NC 4.0 (the dataset's annotation) | [result/README.md](../../result/README.md#license-of-these-files)                                                     |
-| the base models (Google's ViTs, timm's RegNetY and EfficientNetV2) | their model cards'                      | the Hugging Face pages linked from [models.md](models.md#where-they-are-published); not declared in `para_config.txt` |
-| Windows data preparation: ImageMagick, Ghostscript                 | Ghostscript is AGPL                     | their download pages ([data-preparation.md](../data-preparation.md)); used only to make page images                   |
+| What                                                    | Licence                                 | Where it is stated                                                                                                    |
+|---------------------------------------------------------|-----------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| the code                                                | MIT                                     | [LICENSE](../../LICENSE), [CITATION.cff](../../CITATION.cff)                                                          |
+| the sample pages in `small_data_samples/`               | CC BY-NC 4.0                            | [small_data_samples/LICENSE](../../small_data_samples/LICENSE)                                                        |
+| result tables with a `TRUE` column                      | CC BY-NC 4.0 (the dataset's annotation) | [result/README.md](../../result/README.md#license-of-these-files)                                                     |
+| the base models (Google's ViTs, timm's EfficientNetV2)  | their model cards'                      | the Hugging Face pages linked from [models.md](models.md#where-they-are-published); not declared in `para_config.txt` |
+| the RegNetY base of `v4.3`/`v4.4` (Meta's SWAG weights) | CC BY-NC 4.0                            | its [model card](https://huggingface.co/timm/regnety_160.swag_ft_in1k); not in `para_config.txt` (below)              |
+| Windows data preparation: ImageMagick, Ghostscript      | Ghostscript is AGPL                     | their download pages ([data-preparation.md](../data-preparation.md)); used only to make page images                   |
+
+**The SWAG base is not a recorded component.** `para_config.txt` declares the fine-tuned models as `vit_models`
+(MIT), so a classification run's label stays MIT even when `v4.3`, `v4.4` or the ensemble, which includes `v4.4`, does
+the work. Whether the CC BY-NC 4.0 of the SWAG base, and of the dataset the `vX.4` models were trained on, carries
+over to the fine-tuned models, and so should be declared, is asked on
+[atrium-project#6](https://github.com/ufal/atrium-project/issues/6); the declaration changes with its answer.
 
 ## The label the paradata computes
 

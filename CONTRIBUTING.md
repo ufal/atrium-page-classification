@@ -127,15 +127,16 @@ and track model performance on evaluation datasets.
 
 ## Branches & Environments
 
-| Branch   | Environment          | Rule                                                                            |
-|----------|----------------------|---------------------------------------------------------------------------------|
-| `test`   | Staging              | Base for all development. Always branch from `test`.                            |
-| `master` | Stable / Integration | Merged exclusively by a human reviewer. Do not open PRs directly into `master`. |
+| Branch   | Environment      | Rule                                                                                                                 |
+|----------|------------------|----------------------------------------------------------------------------------------------------------------------|
+| `test`   | Staging          | Base for all development. Always branch from `test`.                                                                 |
+| `vit`    | Stable / Default | The default branch; releases are tagged from it. Merged from `test` exclusively by a human reviewer; no PRs into it. |
+| `master` | Index            | A short index pointing at the `vit` and `clip` variants ([docs/development.md](docs/development.md#branches)).       |
 
 ```text
 test    ←  feature-<name>
 test    ←  bugfix-<name>
-master  ←  (humans only, after test stabilises)
+vit     ←  (humans only, after test stabilises)
 
 ```
 
@@ -145,7 +146,7 @@ master  ←  (humans only, after test stabilises)
 |------------------|------------------|--------------------------|
 | New feature      | `feature-<name>` | `feature-new-model`      |
 | Bug fix          | `bugfix-<name>`  | `bugfix-truncated-image` |
-| Hotfix on master | `hotfix-<name>`  | `hotfix-flags-priority`  |
+| Hotfix on vit    | `hotfix-<name>`  | `hotfix-flags-priority`  |
 
 ---
 
@@ -175,7 +176,7 @@ Every PR must include:
 
 Use a **Draft PR** if the work is not ready for review.
 
-**Do not open PRs into `master` — merging into `master` is exclusively the
+**Do not open PRs into `vit`** — merging into `vit`, the default branch, is exclusively the
 maintainers' responsibility.
 
 > **Note on issue tracking:** Issues reference the commits and PRs that resolved

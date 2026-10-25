@@ -551,6 +551,17 @@ issue opens, matching its four siblings.
 * **The documentation check (atrium-project#79 E)** comes with this hub commit: Workflow Policy Lint now runs
   `docs_check.py` over this repository, advisory.
 
+
+## 2026-10-26 — `vit` named the default branch; the SWAG base licence stated (atrium-project#6)
+* **CONTRIBUTING, Branches:** `vit` is the default and stable branch (releases are tagged from it; merged from `test`
+  by a human), `master` the short index of the variants, as `docs/development.md` already said. The "no PRs" rule and
+  the hotfix row say `vit`; the rule's unclosed bold is closed. The release table is unchanged.
+* **The SWAG base:** `docs/reference/licences.md` states that `timm/regnety_160.swag_ft_in1k`, the base of `v4.3`
+  and `v4.4`, is CC BY-NC 4.0 on its model card. It is not a `para_config.txt` component, so a classification run's
+  calculated label stays MIT. Whether that base's licence, and the CC BY-NC 4.0 of the `vX.4` training data, carries
+  over to the fine-tuned models is asked on atrium-project#6. `docs/reference/models.md` points there.
+* **Checks:** `docs_check` OK.
+
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
 state via the GitHub API (zero open), and the confirmed `@v1` reusable-workflow pin. Nothing removed from the issues
