@@ -302,6 +302,8 @@ Each documentation file has one target audience and one responsibility. Rules ar
 The pages follow the ATRIUM
 [documentation style](https://github.com/ufal/atrium-project/blob/test/docs/documentation-style.md); what each page
 under `docs/` holds is listed in [docs/development.md](docs/development.md#the-documentation).
+What each CI check proves, and the checklist for a new one:
+[`docs/ci_policy.md`](https://github.com/ufal/atrium-project/blob/test/docs/ci_policy.md#changing-ci).
 
 * **Do not duplicate rules:** if a rule is defined in `CONTRIBUTING.md`, other files
 reference it rather than copying it.

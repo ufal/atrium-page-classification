@@ -529,6 +529,19 @@ issue opens, matching its four siblings.
 * **Checks:** 790 passed, 13 skipped, 2 xfailed (the docs agent's venv); 142 of the registry, vocabulary, docs
   and limits tests after the last edits; docs_check, runbook_check OK.
 
+
+## 2026-10-25 (evening) — CONTRIBUTING links the two checklists; the documentation check in CI (atrium-project#79, #81)
+* **CONTRIBUTING (atrium-project#79, #81):** the "Repository Documentation Management" section links the
+  hub's documentation style guide and `ci_policy.md#changing-ci`, the questions a new or changed CI check
+  answers, as the hub's CONTRIBUTING template does. Nothing else in the file changed.
+* **The documentation check in CI (atrium-project#79 E):** Workflow Policy Lint runs the hub's
+  `tools/docs_check.py` over this repository, advisory until the newcomer review, from the pin to the hub commit
+  that carries it (atrium-project#72 step B). It passes today.
+* **Quick start:** every endpoint, field, flag and sample file it shows exists at `v1.9.10-beta`, the release it
+  names (a static check; running it needs Docker and the Hugging Face Hub or LINDAT).
+* **atrium-project#81:** the release gate gets one clean dry run (`release.yml` dispatched on `test`)
+  before the next tag.
+
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
 state via the GitHub API (zero open), and the confirmed `@v1` reusable-workflow pin. Nothing removed from the issues
