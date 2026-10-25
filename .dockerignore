@@ -13,7 +13,6 @@ env/
 # large committed media not needed in the image (use-case.png alone is ~17 MB)
 /use-case.png
 /*.png
-/README.html
 # sample data + generated outputs (mounted at runtime instead)
 small_data_samples/
 # Not runtime (atrium-project#69, roadmap H5): research scripts and figures (19 MB; nothing

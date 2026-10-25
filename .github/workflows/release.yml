@@ -2,6 +2,15 @@ name: Automated Release
 
 # On a v* tag: package the standalone API service bundle and publish a GitHub Release.
 #
+# The release certifies its images (atrium-project#81, decided 2026-10-22): the `image` job builds,
+# probes, scans and promotes them through the hub's docker-tool.reusable.yml with
+# `release-gate: true`, and the release job needs it. A failed test, build, container probe or
+# fixable-CRITICAL gate therefore means no release; the release attaches `images.json` (the digest
+# each promoted tag resolves to) and its notes open with the digests. docker.yml no longer runs on
+# a tag, so one tag run does both (hub docs/ci_policy.md, Releases). A dispatched dry run builds
+# and probes the images without pushing them; with `simulate-probe-failure` the probe fails on
+# purpose and nothing may be pushed or released.
+#
 # Since atrium-project#32 round 2 each release also carries the service's OpenAPI document:
 # `openapi.json` (service/openapi.json, stamped with the release version) and
 # `openapi.json.sha256` — the spec the AMČR pipeline generates its clients from, and the
@@ -26,6 +35,11 @@ on:
       - 'v*' # Trigger on version tags
   # The dry run (see the header): no release is created.
   workflow_dispatch:
+    inputs:
+      simulate-probe-failure:
+        description: "Make the container probe fail on purpose (atrium-project#81): nothing may be published."
+        type: boolean
+        default: false
 
 permissions:
   contents: write # Needed to create a GitHub Release
@@ -69,9 +83,48 @@ jobs:
             python check_version.py --citation CITATION.cff --para-config setup/para_config.txt
           fi
 
+  # ── The images this release certifies (atrium-project#81) ──────────────────────────────────
+  # The one cross-repo `uses:` of this file, by decision: only the hub's reusable builds, probes,
+  # scans and promotes the image a release certifies (hub docs/release_trust.md). The inputs are
+  # docker.yml's. With release-gate a failed probe leg pushes nothing for any target, and the
+  # `release` job below never runs.
+  image:
+    needs: version-guard
+    permissions:
+      # docker-tool.reusable.yml's build-and-push uploads the post-publish Trivy SARIF and pushes
+      # to GHCR; a reusable's permissions are capped by this block (see docker.yml).
+      contents: read
+      packages: write
+      security-events: write
+    uses: ufal/atrium-project/.github/workflows/docker-tool.reusable.yml@v1
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    with:
+      image-name: ufal/atrium-page-classification
+      apt-packages: build-essential g++ libgl1 libglib2.0-0
+      pre-install-torch: torch==2.7.1 torchvision==0.22.1
+      requirements: setup/requirements.txt setup/requirements-test.txt service/requirements.txt
+      hf-model-cache: true
+      # Must track the -rev pin in the Dockerfile CMD (currently v4.3); bump the two
+      # together. (The hub's e2e-pipeline-smoke.yml keys its own HF cache by image
+      # tag; the PC_REVISION it once shared with this key no longer exists.)
+      hf-cache-key: v4.3
+      build-targets: '["base", "api"]'
+      # issue #55: `api` is a new Dockerfile stage. Before it existed, this repo's
+      # FastAPI service was reachable only via a docker-compose entrypoint override on
+      # the batch image, so no runnable API image was published and there was nothing
+      # for ARÚP/ARÚB to deploy. Only `api` is probed — `base` is a batch CLI.
+      probe-targets: '["api"]'
+      # atrium-project#72: `api` is this stage's production image, the one AMČR pins; its
+      # first-party files are declared in .github/production-image.json and checked by
+      # workflow-lint. `base` is the batch CLI (run.py): published, never pinned. The probe
+      # also fails an image with PyMuPDF installed (AGPL; the reusable's forbidden-distributions).
+      release-gate: true
+      simulate-probe-failure: ${{ github.event_name == 'workflow_dispatch' && inputs.simulate-probe-failure }}
+
   release:
     name: Package and Release
-    needs: version-guard
+    needs: [version-guard, image]
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -224,6 +277,30 @@ jobs:
           python atrium_openapi.py compare --base "$RUNNER_TEMP/previous.openapi.json" --rev dist/openapi.json \
             --para-config setup/para_config.txt --require-oasdiff --summary "$GITHUB_STEP_SUMMARY"
 
+      - name: Write images.json (atrium-project#81)
+        # The digests the image job promoted; on a tag the release is only reached when it passed,
+        # so an empty output there is a failure, not a release without its images.
+        if: github.ref_type == 'tag'
+        env:
+          IMAGES_JSON: ${{ needs.image.outputs.images-json }}
+        run: |
+          set -euo pipefail
+          if [ -z "$IMAGES_JSON" ]; then
+            echo "::error::the image job reported no promoted images; the release would not certify them"
+            exit 1
+          fi
+          mkdir -p dist
+          printf '%s\n' "$IMAGES_JSON" | python -m json.tool > dist/images.json
+          ( cd dist && sha256sum images.json > images.json.sha256 )
+          printf '%s\n\n' "**Images this release certifies** (\`images.json\`, atrium-project#81):" > "$RUNNER_TEMP/notes.md"
+          python - <<'PY' >> "$RUNNER_TEMP/notes.md"
+          import json
+          record = json.load(open("dist/images.json", encoding="utf-8"))
+          for entry in record["images"]:
+              print(f"- `{entry['image']}:{entry['tag']}` = `{entry['digest']}`")
+          PY
+          cat "$RUNNER_TEMP/notes.md" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Create GitHub Release
         if: github.ref_type == 'tag'
         # SHA-pinned: this action holds `contents: write`. A moving tag can be
@@ -235,8 +312,12 @@ jobs:
         # release (atrium-project#40) refuses assets added after it is published.
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64  # v3.0.3
         with:
+          # The certified images first, then the generated notes (atrium-project#81).
+          body_path: ${{ runner.temp }}/notes.md
           generate_release_notes: true
           files: |
             service_page_classifier.zip
             dist/openapi.json
             dist/openapi.json.sha256
+            dist/images.json
+            dist/images.json.sha256

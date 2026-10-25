@@ -1,5 +1,5 @@
 
-# ATRIUM Page Classification API Service 🚀
+# ATRIUM Page Classification API Service
 
 ### Goal: Serve historical document classification models via a lightweight REST API
 
@@ -8,30 +8,31 @@ It allows users to upload document images and receive structural classification 
 Text, Drawing, Table) using various fine-tuned on historical data [^17] deep learning models
 (ViT, EfficientNet, RegNetY). It includes basic static HTML frontends for both standalone testing and LINDAT integration.
 
-### Table of contents 📑
+### Table of contents
 
-- [Start 🚀](#start-)
-- [Models and caches 🧠](#models-and-caches-)
-- [Service Description 📇](#service-description-)
-- [Directory Structure 📂](#directory-structure-)
-- [Supported Models 🧠](#supported-models-)
-- [Categories 🪧](#categories-)
-- [API Usage 📡](#api-usage-)
-- [Installation & Setup 🛠](#installation--setup-)
-- [Quick API Test Launch 🚀](#quick-api-test-launch-)
-- [Configuration (environment) ⚙️](#configuration-environment-)
-- [Limits 📏](#limits)
-- [Errors 🚨](#errors)
+- [Start](#start)
+- [Models and caches](#models-and-caches)
+- [Service Description](#service-description)
+- [Directory Structure](#directory-structure)
+- [Supported Models](#supported-models)
+- [Categories](#categories)
+- [API Usage](#api-usage)
+- [Installation & Setup](#installation--setup)
+- [Quick API Test Launch](#quick-api-test-launch)
+- [Configuration (environment)](#configuration-environment)
+- [Limits](#limits)
+- [Errors](#errors)
 - [Partial results](#partial-results)
 - [Known limits](#known-limits)
-- [OpenAPI (the typed contract) 📜](#openapi-the-typed-contract)
-- [Client Side Test 🎨](#client-side-test-)
-- [Contacts 📧](#contacts-)
-- [Acknowledgements 🙏](#acknowledgements-)
+- [OpenAPI (the typed contract)](#openapi-the-typed-contract)
+- [Shutdown behavior](#shutdown-behavior)
+- [Client Side Test](#client-side-test)
+- [Contacts](#contacts)
+- [Acknowledgements](#acknowledgements)
 
 ---
 
-## Start 🚀
+## Start
 
 The published image first: it is what a deployment runs, and it needs no checkout.
 
@@ -43,10 +44,10 @@ curl -s http://localhost:8000/ready                         # 200 once the model
 docker compose --profile api up --build
 ```
 
-For development in a virtual environment, see [Installation & Setup](#installation--setup-) and
-[Quick API Test Launch](#quick-api-test-launch-).
+For development in a virtual environment, see [Installation & Setup](#installation--setup) and
+[Quick API Test Launch](#quick-api-test-launch).
 
-## Models and caches 🧠
+## Models and caches
 
 | What                            | From where                                   | Revision                                               | Into                                          | Without egress                                                                                                                                                              |
 |---------------------------------|----------------------------------------------|--------------------------------------------------------|-----------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -54,7 +55,7 @@ For development in a virtual environment, see [Installation & Setup](#installati
 
 The models are loaded at start, before `/ready` answers 200; the image holds no weights.
 
-## Service Description 📇
+## Service Description
 
 The API is built using **FastAPI** and is designed to run inference on single images or multipage PDFs.
 It acts as a bridge between the fine-tuned PyTorch models and downstream applications or web interfaces.
@@ -64,7 +65,7 @@ Key features:
 * **GPU Support:** Automatically detects and utilizes CUDA devices if available.
 * **Lightweight Frontends:** Includes simple HTML/JS interfaces for manual testing of the API, both as standalone and LINDAT-ready modules.
 
-## Directory Structure 📂
+## Directory Structure
 
 The service is designed to sit within the larger `atrium-page-classification` structure. The API logic resides in the `service/` directory, while models are loaded from the parent `model/` directory.
 
@@ -88,51 +89,34 @@ atrium-page-classification/
 └── classifier.py            # Base ImageClassifier class (imported by inference.py)
 ```
 
-## Supported Models 🧠
+## Supported Models
 
-The API exposes specific model versions defined in `inference.py`. These map to different underlying
-base architectures, allowing users to balance speed vs. accuracy.
+The API exposes the model versions defined in `inference.py`: the five revisions of the ensemble, `v1.4`–`v5.4`
+(`GET /info` lists them as `available_models`, with `all` for their average), on different underlying base
+architectures, so that users can balance speed against accuracy. Their base models, folds, sizes and held-out accuracy
+are listed in one place, [docs/reference/models.md](../docs/reference/models.md#the-ensemble).
 
-| Version  | Base Architecture                   | Description                                     |
-|:---------|:------------------------------------|:------------------------------------------------|
-| **v4.4** | `regnety_160.swag_ft_in1k`          | Balanced option. Best performing "Small" model. |
-| **v2.4** | `vit-base-patch16-224`              | Standard Transformer baseline.                  |
-| **v3.4** | `vit-base-patch16-384`              | Higher resolution Transformer baseline.         |
-| **v5.4** | `vit-large-patch16-384`             | Most accurate, slowest inference.               |
-| **v1.4** | `tf_efficientnetv2_m.in21k_ft_in1k` | CNN-based, faster inference.                    |
+## Categories
 
-## Categories 🪧
+The models classify pages into 11 distinct structural categories: `TEXT`, `TEXT_T`, `TEXT_P`, `TEXT_HW`, `LINE_T`,
+`LINE_P`, `LINE_HW`, `DRAW`, `DRAW_L`, `PHOTO` and `PHOTO_L` (`GET /info` lists them as `categories`). Their definitions
+are in one place, [docs/reference/categories.md](../docs/reference/categories.md).
 
-The models classify pages into 11 distinct structural categories:
+## API Usage
 
-| Label     | Description                                                |
-|:----------|:-----------------------------------------------------------|
-| `TEXT`    | 📰 Mixed text (printed, handwritten, typed).               |
-| `TEXT_T`  | 📄 Typed text (machine-typed paragraphs).                  |
-| `TEXT_P`  | 📄 Printed text (published paragraphs).                    |
-| `TEXT_HW` | ✏️📄 Handwritten text (paragraphs).                        |
-| `LINE_T`  | 📏 Typed Table.                                            |
-| `LINE_P`  | 📏 Printed Table.                                          |
-| `LINE_HW` | ✏️📏 Handwritten Table.                                    |
-| `DRAW`    | 📈 Drawing (maps, paintings, schematics).                  |
-| `DRAW_L`  | 📈📏 Structured Drawing (drawings within a layout/legend). |
-| `PHOTO`   | 🌄 Photo (photographs/cutouts).                            |
-| `PHOTO_L` | 🌄📏 Structured Photo (photos in a table layout).          |
+### Endpoints
 
-## API Usage 📡
+| Method | Path                     | Description                                                                                                                                                                                         |
+|:-------|:-------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `GET`  | `/`                      | A short JSON welcome message pointing at `/info`. The static `index.html` interface for manual testing is served at `/frontend`.                                                                    |
+| `GET`  | `/info`                  | Service identity + capabilities: `service`, `version`, `endpoints`, `limits` (every [limit](#limits), current value), `limits_meta` (the variable that sets each), plus available models.           |
+| `GET`  | `/health`                | Liveness probe — 200 always, even mid-shutdown. `?deep=true` also checks at least one model version is loaded (503 on failure or while draining, with `status`, `detail`, `in_flight`, `draining`). |
+| `GET`  | `/ready`                 | Readiness probe (issue #55) — 503 until model warmup finishes, 200 while serving, 503 the instant `SIGTERM` arrives. The Kubernetes `readinessProbe`/`startupProbe` target.                         |
+| `POST` | `/predict_image`         | Performs inference on an uploaded single image (JPG/PNG).                                                                                                                                           |
+| `POST` | `/predict_document`      | Performs inference on an uploaded multipage PDF document.                                                                                                                                           |
+| `GET`  | `/docs`, `/openapi.json` | FastAPI's built-in interactive documentation and the live OpenAPI document.                                                                                                                         |
 
-### Endpoints 🔗
-
-| Method | Path                | Description                                                                                                                                                                               |
-|:-------|:--------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `GET`  | `/`                 | Serves the static `index.html` interface for manual testing.                                                                                                                              |
-| `GET`  | `/info`             | Service identity + capabilities: `service`, `version`, `endpoints`, `limits` (every [limit](#limits), current value), `limits_meta` (the variable that sets each), plus available models. |
-| `GET`  | `/health`           | Liveness probe — 200 always, even mid-shutdown. `?deep=true` also checks at least one model version is loaded (503 on failure or while draining).                                         |
-| `GET`  | `/ready`            | Readiness probe (issue #55) — 503 until model warmup finishes, 200 while serving, 503 the instant `SIGTERM` arrives. The Kubernetes `readinessProbe`/`startupProbe` target.               |
-| `POST` | `/predict_image`    | Performs inference on an uploaded single image (JPG/PNG).                                                                                                                                 |
-| `POST` | `/predict_document` | Performs inference on an uploaded multipage PDF document.                                                                                                                                 |
-
-### Request Example 💻
+### Request Example
 
 **Endpoint:** `/predict_image`
 
@@ -158,7 +142,7 @@ Request example using `curl`:
 ```bash
 curl -X POST "http://localhost:8000/predict_image" \
   -F "file=@/path/to/image.png" \
-  -F "version=v2.3" \
+  -F "version=v4.4" \
   -F "topn=1"
 ```
 
@@ -172,7 +156,7 @@ Example JSON response (every field is always present; `ImageResponse` in [`opena
       "score": 0.975
     }
   ],
-  "models_used": ["v2.3"],
+  "models_used": ["v4.4"],
   "limits_applied": [],
   "document_json": null,
   "document_json_schema_error": null,
@@ -214,7 +198,7 @@ the two engines is measured in
 not thread-safe, so the service holds one process-wide lock while it opens and renders; the model
 runs outside the lock, and concurrent requests queue only for the rendering.
 
-### ATRIUM Document JSON accretion 🧩
+### ATRIUM Document JSON accretion
 
 Both `POST` endpoints implement accretion-contract rule 1 — *"services accept and return an
 optional `document_json` part"* — so a pipeline can thread one per-document record through the
@@ -258,7 +242,10 @@ The response then carries the updated record under `document_json`:
   problem, so an automated caller can notice without reading the service log.
 
 
-## Installation & Setup 🛠
+## Installation & Setup
+
+This sets up the service in a virtual environment. Installing and running the command line alone, without the
+service, is in [docs/usage.md](../docs/usage.md#install).
 
 ### 1. Prerequisites
 * **Python 3.11** (matches `python:3.11-slim`, the image base, and the CI lane — atrium-project#64)
@@ -312,7 +299,7 @@ python3 run.py --hf -rev vX.4
 ````
 where `X` is the model version (1, 2, 3, 4, or 5).
 
-## Quick API Test Launch 🚀
+## Quick API Test Launch
 
 Use this guide to verify the inference service is communicating correctly with the model manager.
 
@@ -330,15 +317,13 @@ Then, in each window, execute the respective commands:
 
 | **Server Console (Window 1)**                                                                                                                                                                         | **Client Console (Window 2)**                                                                                                                                                                                   |
 |-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **1. Start the API:**<br><br>Run the FastAPI server from the service directory.<br><br>`python3 api.py`<br><br>You should see startup logs indicating the server is running on `http://0.0.0.0:8000`. | **2. Send a Request:**<br><br> Top-3 Classification of `image.png`:<br><br>`python3 api_client.py -f .../image.png -v v5.3 --top 3`<br><br> where `-f` and `-v` stand for **input file** and **model version**. |
+| **1. Start the API:**<br><br>Run the FastAPI server from the service directory.<br><br>`python3 api.py`<br><br>You should see startup logs indicating the server is running on `http://0.0.0.0:8000`. | **2. Send a Request:**<br><br> Top-3 Classification of `image.png`:<br><br>`python3 api_client.py -f .../image.png -v v5.4 --top 3`<br><br> where `-f` and `-v` stand for **input file** and **model version**. |
 
 ### Expected Output
 
 ```json
 {
   "type": "image",
-  "model_version": "google/vit-large-patch16-384 (v5.3)",
-  "requested_topn": 3,
   "predictions": [
     {
       "label": "TEXT",
@@ -352,7 +337,12 @@ Then, in each window, execute the respective commands:
       "label": "LINE_P",
       "score": 0.002
     }
-  ]
+  ],
+  "models_used": ["v5.4"],
+  "limits_applied": [],
+  "document_json": null,
+  "document_json_schema_error": null,
+  "paradata": {"@type": "CreateAction", "...": "…"}
 }
 ```
 Or for `-v all` the best models ensemble (average of 5 class scores):
@@ -360,8 +350,6 @@ Or for `-v all` the best models ensemble (average of 5 class scores):
 ```json
 {
   "type": "image",
-  "model_version": "Ensemble (Average of 5 Models)",
-  "requested_topn": 5,
   "predictions": [
     {"label": "LINE_HW",
       "score": 0.9997688055038452
@@ -378,21 +366,26 @@ Or for `-v all` the best models ensemble (average of 5 class scores):
     {"label": "DRAW",
       "score": 3.168964675463182e-05
     }
-  ]
+  ],
+  "models_used": ["v1.4", "v2.4", "v3.4", "v4.4", "v5.4"],
+  "limits_applied": [],
+  "document_json": null,
+  "document_json_schema_error": null,
+  "paradata": {"@type": "CreateAction", "...": "…"}
 }
 ```
 
-## Configuration (environment) ⚙️
+## Configuration (environment)
 
-| Variable              | Default   | Meaning                                                                  |
-|-----------------------|-----------|--------------------------------------------------------------------------|
-| `PORT`                | `8000`    | port the service **binds**, and the one `service/healthcheck.py` probes  |
-| `HOST`                | `0.0.0.0` | bind address. ⚠️ see the warning below                                   |
-| `GRACEFUL_SHUTDOWN_S` | `20`      | seconds uvicorn waits for in-flight requests before closing them         |
-| `RELOAD`              | `false`   | filesystem auto-reload — development only, never in a deployment         |
-| `LOG_LEVEL`           | `INFO`    | root logger level for the `python -m service.api` start path (issue #61) |
-| `ALLOWED_ORIGINS`     | `*`       | CSV of CORS origins                                                      |
-| `MAX_UPLOAD_MB`       | `10`      | canonical upload limit — no shared default across the five services      |
+| Variable              | Default   | Meaning                                                                                                                           |
+|-----------------------|-----------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `PORT`                | `8000`    | port the service **binds**, and the one `service/healthcheck.py` probes                                                           |
+| `HOST`                | `0.0.0.0` | bind address. ⚠️ see the warning below                                                                                            |
+| `GRACEFUL_SHUTDOWN_S` | `20`      | seconds uvicorn waits for in-flight requests before closing them                                                                  |
+| `RELOAD`              | `false`   | filesystem auto-reload — development only, never in a deployment                                                                  |
+| `LOG_LEVEL`           | `INFO`    | root logger level for the `python -m service.api` start path (issue #61)                                                          |
+| `ALLOWED_ORIGINS`     | `*`       | CSV of CORS origins                                                                                                               |
+| `MAX_UPLOAD_MB`       | `10`      | canonical upload limit — no shared default across the five services; the older `MAX_UPLOAD_BYTES` is still honoured as a fallback |
 
 Beyond the shared contract above, this service reads only its [limits](#limits), declared in
 `tool_limits.py`: `service/inference.py`, `service/document_json.py` and
@@ -507,7 +500,7 @@ image serves — equal to the release's `openapi.json.sha256` for an image built
 - **The release bundle** ships `atrium_openapi.py` (the service imports it to finish and digest the
   spec) and `service/openapi.json`.
 
-## Shutdown behavior 🛑
+## Shutdown behavior
 
 Issue [#55](https://github.com/ufal/atrium-project/issues/55). The published `api` image
 (`ghcr.io/ufal/atrium-page-classification-api:<version>`, new in that issue — before it
@@ -535,7 +528,7 @@ hub.
 A clean shutdown exits **143** (128 + SIGTERM), not 0: uvicorn re-raises the captured
 signal on purpose so a supervisor sees the real cause. That is a normal stop, not a crash.
 
-## Client Side Test 🎨
+## Client Side Test
 
 This API service includes two versions of the frontend for immediate testing:
 1. `service/frontend/`: A lightweight, standalone vanilla JS frontend.
@@ -566,7 +559,7 @@ For client-side development within LINDAT, open a **second console window** and 
 For further details, please refer to the **LINDAT Common Development Guide**:
 [https://github.com/ufal/lindat-common/?tab=readme-ov-file#development](https://github.com/ufal/lindat-common/?tab=readme-ov-file#development).
 
-### Running the Server 🚀
+### Running the Server
 
 To start the API server with hot-reloading enabled (useful for development), ensure your virtual
 environment is activated in your **first console window**: [^3]
@@ -598,20 +591,23 @@ Open the URL `http://localhost:8080` in your web browser to access the LINDAT cl
 
 Follow the file tree to the `atrium-page-classification/service/frontend-lindat` directory. The frontend interface will open and allow you to upload images and test the API.
 
-## Contacts 📧
+## Contacts
 
-**For support write to:** lutsai.k@gmail.com responsible for this GitHub repository [^8] 🔗
+**For support write to:** lutsai@ufal.mff.cuni.cz, responsible for this GitHub repository [^8] 🔗
 
-## Acknowledgements 🙏
+## Acknowledgements
 
 - **Developed by** UFAL [^7] 👥
 - **Funded by** ATRIUM [^4]  💰
 - **Shared by** ATRIUM [^4] & UFAL [^7] 🔗
 - **Model type:**
   - fine-tuned ViT with a 224x224 [^2] 🔗 or 384x384 [^13] [^14] 🔗 resolution size
-  - fine-tuned RegNetY-16GF with a 224x224 resolution [^18] or EffNetV2 with a 384x384 [^19] 🔗 resolution size
+  - fine-tuned RegNetY-16GF with a 384x384 resolution [^18] or EffNetV2 with a 384x384 [^19] 🔗 resolution size
 
-**©️ 2026 UFAL & ATRIUM**
+Funded by [ATRIUM](https://atrium-research.eu/) (GA 101132163), with the support of the LINDAT/CLARIAH-CZ research
+infrastructure and the AIS CR infrastructure (LM2023031).
+
+**© 2026 UFAL & ATRIUM**
 
 ----
 

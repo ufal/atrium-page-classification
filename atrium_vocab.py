@@ -256,8 +256,8 @@ CONCEPT_SCHEMES: Dict[str, Dict[str, Any]] = {
 }
 
 # ── page-category ─────────────────────────────────────────────────────────────
-# Definitions are lifted verbatim from atrium-page-classification/README.md, which
-# is the only place they have ever been written down.
+# Definitions are lifted verbatim from atrium-page-classification's
+# docs/reference/categories.md, the one place they are written down.
 
 _PAGE_CATEGORY_DEFS: Dict[str, str] = {
     "DRAW": (

@@ -130,7 +130,7 @@ ATRIUM_BASE = getattr(atrium_vocab, "SKOS_BASE", "https://w3id.org/atrium/")
 AUTHORS: Tuple[Dict[str, str], ...] = (
     {"orcid": "https://orcid.org/0009-0002-4773-2797", "name": "Kateryna Lutsai"},
     {"orcid": "https://orcid.org/0000-0002-6895-8536", "name": "Pavel Straňák"},
-    {"orcid": "https://orcid.org/0009-0005-8722-0245", "name": "David Novák"},
+    {"orcid": "https://orcid.org/0000-0001-6592-6291", "name": "David Novák"},
     {"orcid": "https://orcid.org/0000-0001-5718-9447", "name": "Dana Křivánková"},
 )
 

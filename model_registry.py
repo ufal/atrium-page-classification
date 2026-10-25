@@ -17,10 +17,10 @@ import sys
 #
 #   * `atrium_vocab.PAGE_CATEGORIES`              -- the same 11 values, in this order;
 #   * `atrium_vocab.CONCEPTS["page-category"]`    -- one definition per label, lifted
-#     verbatim from README.md's "Categories 🪧" table. The README and the registry carry
-#     the prose; this list carries the binding.
-#   * `atrium_vocab.COLLECTIONS["page-category"]` -- the three orthogonal criteria the
-#     README names, as five `skos:Collection` facets: graphical / tabular / handwritten
+#     verbatim from docs/reference/categories.md's "Definitions" table. That page and the
+#     registry carry the prose; this list carries the binding.
+#   * `atrium_vocab.COLLECTIONS["page-category"]` -- the three orthogonal criteria that
+#     page names, as five `skos:Collection` facets: graphical / tabular / handwritten
 #     / printed / typed. Collections rather than `skos:broader`, because a label belongs
 #     to several facets at once and so has no single parent.
 #
@@ -86,7 +86,7 @@ else:
         print(
             f"[model_registry] NOTE – CATEGORIES and the atrium_vocab 'page-category' scheme disagree: "
             f"only here {_only_here}; only in the registry {_only_registry}. "
-            f"Definitions live in atrium_vocab.CONCEPTS['page-category'] and README.md. "
+            f"Definitions live in atrium_vocab.CONCEPTS['page-category'] and docs/reference/categories.md. "
             f"Nothing is changed: this list stays in training order and remains authoritative here.",
             file=sys.stderr,
         )

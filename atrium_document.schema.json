@@ -115,14 +115,14 @@
 
     "provenance": {
       "type": "object",
-      "description": "Accreting license union plus the list of contributing tool runs. Mirrors the paradata license block; references paradata rather than duplicating it.",
+      "description": "The list of contributing tool runs, plus a licence summary calculated from the components those runs used. Mirrors the paradata license block; references paradata rather than duplicating it. The summary is not the licence of the record or of any output: the rights in an output depend on the source document and are stated only by whoever holds them (atrium-project#6).",
       "additionalProperties": true,
       "properties": {
-        "license": { "type": "string", "examples": ["CC BY-NC-SA 4.0"] },
-        "license_url": { "type": "string" },
+        "license": { "type": "string", "examples": ["CC BY-NC-SA 4.0"], "description": "Calculated, not asserted: the most restrictive licence among the components the contributing runs used (para_licenses.merge_effective_licenses). It is not the licence of this record or of any output (atrium-project#6)." },
+        "license_url": { "type": "string", "description": "The URL of the calculated `license`; the same caveat applies." },
         "license_detail": {
           "type": "object",
-          "description": "Output of para_licenses.merge_effective_licenses over every contributing tool — most restrictive wins.",
+          "description": "Output of para_licenses.merge_effective_licenses over every contributing tool (most restrictive wins): evidence of the components' licences, not a licence of the output (atrium-project#6).",
           "additionalProperties": true
         },
         "contributors": {

@@ -505,6 +505,30 @@ issue opens, matching its four siblings.
   (version), the runbook's image example, a CONTRIBUTING row of their own; the `v1.9.9-beta` row is back to what
   that release holds.
 
+## 2026-10-25 — The documentation on the skeleton, the hub's section folded back (atrium-project#79); the release gate (#81)
+* **Shared modules (hub re-vendor, atrium-project#13, #6, #79):** `atrium_rocrate.py` writes David Novák's
+  correct ORCID (`0000-0001-6592-6291`) as a tool creator in every crate; `atrium_document.schema.json` describes
+  `provenance.license*` as calculated from the components, not the output's licence (descriptions only, no
+  `POST_FREEZE_CHANGES` entry); an `atrium_vocab.py` comment names page-classification's new categories page.
+  `service/openapi.json` regenerated: description-only, and the `x-atrium-record-schema` digest.
+* **`CITATION.cff`:** the ORCID corrected; each author's affiliation in its ROR name (Charles University;
+  Czech Academy of Sciences, Institute of Archaeology, Prague). Authors unchanged until they confirm (#13).
+* **atrium-project#81:** `release.yml` gains the `image` job (the hub's `docker-tool.reusable.yml` with this
+  repository's `docker.yml` inputs and `release-gate: true`), the `simulate-probe-failure` dispatch input, and
+  `images.json` in the release; `docker.yml` no longer runs on tags. It takes effect at the next tag, after
+  digital-convert's dispatched demonstration. No version bump.
+* **atrium-project#79:** README 2,009 → 160 lines on the hub's template; the rest, and the hub's five
+  `tools/page-classification/` pages, moved into `docs/` (usage, how-it-works, configuration, data-preparation,
+  training, development, reference/ (categories, the one home of the definitions; models, cli, outputs,
+  paradata, licences), evaluation/ (results, data, the 2025 sweep), decisions/history); map: the hub's
+  `plans/79.page-classification_relocation_map.md`. `README.html` (a stale rendering, 2,211 lines) removed.
+  `service/README.md`: plain headings; its examples follow the current response (`models_used`, no
+  `model_version`), RegNetY at 384 px. `model_registry.py`: its notice names the categories page.
+* **Left for the maintainer:** CONTRIBUTING's branch table calls `master` the stable branch, though the default
+  branch is `vit`; the SWAG RegNetY base weights' licence is not declared in `setup/para_config.txt` (#6).
+* **Checks:** 790 passed, 13 skipped, 2 xfailed (the docs agent's venv); 142 of the registry, vocabulary, docs
+  and limits tests after the last edits; docs_check, runbook_check OK.
+
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
 state via the GitHub API (zero open), and the confirmed `@v1` reusable-workflow pin. Nothing removed from the issues

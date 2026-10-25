@@ -1,4 +1,4 @@
-# 🤝 Contributing to the Historical Document Sorting Pipeline of the ATRIUM project
+# Contributing to the Historical Document Sorting Pipeline of the ATRIUM project
 
 Welcome! Thank you for your interest in contributing. This repository provides a robust workflow for sorting archive page images to
 facilitate further content-based processing. It addresses the common digital archive
@@ -11,7 +11,11 @@ The next step: Routing classified pages into content-specific data processing pi
 This document describes the project's capabilities, development workflow, code conventions,
 and rules for contributors.
 
-## 📦 Release History
+## Release History
+
+Versions below `v1.0` were research milestones; from `v1.0.3-beta` on, each release is a usable program, published as
+a GitHub pre-release. The arcs these releases form, and the decisions behind them, are told in
+[docs/decisions/history.md](docs/decisions/history.md).
 
 | Version          | Highlights                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Status      |     |             |
 |:-----------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------|-----|-------------|
@@ -54,11 +58,14 @@ and rules for contributors.
 | **v0.2.0**       | RFC low-dimension features (Random Forest Classifier from manually extracted image features (texture, color, etc.), Confusion matrix results are included, For the first time, labeled dataset is used, [FAILED])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Pre-release |     |             |
 | **v0.1.0**       | DeepDoctection (OCR + DLA) draft without golden truth (PDF input file recognized for layout and OCR -> manual algorithm of page categorization, Initial sketch for the project of page classification using recognized page content, [FAILED])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Pre-release |     |             |
 
+Tags without a row here have no published release note: `v0.3.0`, `v0.4.0`, `v0.6.0`, `v0.8.0`, `v0.10.0`,
+`v0.12.0`, `v1.0.0-beta`, `v1.0.1-beta`, `v1.0.2-beta` and `v1.1.1-beta` (`v1.4.1-beta` is tagged `v1.4.1.-beta`).
 
-## 🏗️ Project Contributions & Capabilities
+
+## Project Contributions & Capabilities
 
 This pipeline contributes 4 major stages to the data processing lifecycle, as detailed
-in the [README 📑 Table of contents](README.md#table-of-contents-).
+in the [README's documentation map](README.md#documentation).
 
 ### 1. Granular Data Management & Preparation
 
@@ -100,6 +107,8 @@ based on three main criteria: **presence of graphical elements**, **type of text
 * 📄 **Standard Text (`TEXT_HW`, `TEXT_P`, `TEXT_T`):** Paragraphs or blocks of purely handwritten, printed, or typed text.
 * 📰 **Mixed Text (`TEXT`):** Mixtures of different text types with minor graphical elements.
 
+The exact definitions of the eleven categories are in [docs/reference/categories.md](docs/reference/categories.md).
+
 ### 4. Inference, Ensembling, & Reporting
 
 The project supports both single-page processing and large-scale directory batching,
@@ -116,7 +125,7 @@ and track model performance on evaluation datasets.
 
 ---
 
-## 🌿 Branches & Environments
+## Branches & Environments
 
 | Branch   | Environment          | Rule                                                                            |
 |----------|----------------------|---------------------------------------------------------------------------------|
@@ -130,7 +139,7 @@ master  ←  (humans only, after test stabilises)
 
 ```
 
-### 🏷️ Branch Naming
+### Branch Naming
 
 | Type             | Pattern          | Example                  |
 |------------------|------------------|--------------------------|
@@ -140,7 +149,7 @@ master  ←  (humans only, after test stabilises)
 
 ---
 
-## 🔁 Contributor Workflow
+## Contributor Workflow
 
 1. **Create an issue** (or find an existing one) describing the problem or feature.
 2. **Branch from `test`:**
@@ -155,7 +164,7 @@ git checkout -b feature-<name>
 
 ---
 
-## 📋 Pull Request Format
+## Pull Request Format
 
 Every PR must include:
 
@@ -175,7 +184,7 @@ maintainers' responsibility.
 
 ---
 
-## ✏️ Commit Messages
+## Commit Messages
 
 Format:
 
@@ -200,7 +209,7 @@ Allowed types:
 
 ---
 
-## 🧪 Code Conventions & Testing
+## Code Conventions & Testing
 
 ### Code Conventions
 
@@ -279,14 +288,20 @@ tests/
 
 ---
 
-## 📁 Repository Documentation Management
+## Repository Documentation Management
 
 Each documentation file has one target audience and one responsibility. Rules are not repeated — cross-references are used instead.
 
-| File              | Audience        | Responsibility                                 |
-|-------------------|-----------------|------------------------------------------------|
-| `README.md`       | GitHub visitors | Project overview, workflow stages, quick start |
-| `CONTRIBUTING.md` | Developers      | Code conventions, branches, PRs, testing       |
+| File                | Audience                 | Responsibility                                                         |
+|---------------------|--------------------------|------------------------------------------------------------------------|
+| `README.md`         | GitHub visitors          | Project overview, quick start, limits, the documentation map           |
+| `docs/`             | Users and developers     | Usage, configuration, how it works, reference, evaluation, decisions   |
+| `service/README.md` | Deployers, integrators   | The service runbook and its API                                        |
+| `CONTRIBUTING.md`   | Developers               | Code conventions, branches, PRs, testing, the release history          |
+
+The pages follow the ATRIUM
+[documentation style](https://github.com/ufal/atrium-project/blob/test/docs/documentation-style.md); what each page
+under `docs/` holds is listed in [docs/development.md](docs/development.md#the-documentation).
 
 * **Do not duplicate rules:** if a rule is defined in `CONTRIBUTING.md`, other files
 reference it rather than copying it.
@@ -295,15 +310,18 @@ still point correctly.
 
 ---
 
-## 📞 Contacts & Acknowledgements
+## Contacts & Acknowledgements
 
-For support regarding this repository, please contact **lutsai.k@gmail.com**.
+For support regarding this repository, please contact **lutsai@ufal.mff.cuni.cz**.
 
 * **Developed by:** UFAL [^1]
 * **Funded & Shared by:** ATRIUM [^2] & UFAL
 * **Models Hosted via:** Hugging Face [^3]
 
-**©️ 2026 UFAL & ATRIUM**
+Funded by [ATRIUM](https://atrium-research.eu/) (GA 101132163), with the support of the LINDAT/CLARIAH-CZ research
+infrastructure and the AIS CR infrastructure (LM2023031).
+
+**© 2026 UFAL & ATRIUM**
 
 [^1]: https://ufal.mff.cuni.cz/home-page
 [^2]: https://atrium-research.eu/

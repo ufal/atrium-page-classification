@@ -7,15 +7,19 @@ authors:
   - family-names: "Lutsai"
     given-names: "Kateryna"
     orcid: https://orcid.org/0009-0002-4773-2797
+    affiliation: "Charles University, Faculty of Mathematics and Physics, Institute of Formal and Applied Linguistics"
   - family-names: "Straňák"
     given-names: "Pavel"
     orcid: https://orcid.org/0000-0002-6895-8536
+    affiliation: "Charles University, Faculty of Mathematics and Physics, Institute of Formal and Applied Linguistics"
   - family-names: "Novák"
     given-names: "David"
-    orcid: https://orcid.org/0009-0005-8722-0245
+    orcid: https://orcid.org/0000-0001-6592-6291
+    affiliation: "Czech Academy of Sciences, Institute of Archaeology, Prague"
   - family-names: "Křivánková"
     given-names: "Dana"
     orcid: https://orcid.org/0000-0001-5718-9447
+    affiliation: "Czech Academy of Sciences, Institute of Archaeology, Prague"
 repository-code: "https://github.com/ufal/atrium-page-classification"
 license: "MIT"
 references:
@@ -25,15 +29,19 @@ references:
       - family-names: "Lutsai"
         given-names: "Kateryna"
         orcid: https://orcid.org/0009-0002-4773-2797
+        affiliation: "Charles University, Faculty of Mathematics and Physics, Institute of Formal and Applied Linguistics"
       - family-names: "Straňák"
         given-names: "Pavel"
         orcid: https://orcid.org/0000-0002-6895-8536
+        affiliation: "Charles University, Faculty of Mathematics and Physics, Institute of Formal and Applied Linguistics"
       - family-names: "Novák"
         given-names: "David"
-        orcid: https://orcid.org/0009-0005-8722-0245
+        orcid: https://orcid.org/0000-0001-6592-6291
+        affiliation: "Czech Academy of Sciences, Institute of Archaeology, Prague"
       - family-names: "Křivánková"
         given-names: "Dana"
         orcid: https://orcid.org/0000-0001-5718-9447
+        affiliation: "Czech Academy of Sciences, Institute of Archaeology, Prague"
     version: "1.0"
     date-released: "2026-09-25"
     repository-code: "https://github.com/ufal/atrium-project"
