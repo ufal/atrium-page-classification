@@ -204,7 +204,9 @@ def test_a_born_digital_baseline_gets_its_own_page_labels_on_both_sides(cli, cli
     seed = tmp_path / "seed.document.json"
     seed.write_text(json.dumps(baseline), encoding="utf-8")
     out = tmp_path / "out.document.json"
-    assert cli(["-f", str(pdf), "--no-hf", "-tn", "1", "--document-json", str(seed), "--document-json-out", str(out)]) == 0
+    assert (
+        cli(["-f", str(pdf), "--no-hf", "-tn", "1", "--document-json", str(seed), "--document-json-out", str(out)]) == 0
+    )
     body = client.post(
         "/predict_document",
         data={"version": "v4.4", "topn": 1},
@@ -214,11 +216,15 @@ def test_a_born_digital_baseline_gets_its_own_page_labels_on_both_sides(cli, cli
         },
     ).json()
     cli_record = json.loads(out.read_text(encoding="utf-8"))
-    assert cli_record["page_categories"] == body["document_json"]["page_categories"] == {
-        "i": "DRAW",
-        "ii": "TEXT",
-        "1": "DRAW",
-    }
+    assert (
+        cli_record["page_categories"]
+        == body["document_json"]["page_categories"]
+        == {
+            "i": "DRAW",
+            "ii": "TEXT",
+            "1": "DRAW",
+        }
+    )
 
 
 def test_a_directory_of_pdfs_and_images_in_any_case(cli, tmp_path):
@@ -230,7 +236,10 @@ def test_a_directory_of_pdfs_and_images_in_any_case(cli, tmp_path):
     Image.new("RGB", (60, 80), color=COLOURS[1]).save(pages / "DOCB-1.PNG")
     Image.new("RGB", (60, 80), color=COLOURS[0]).save(pages / "DOCB-2.jpg")
     out_dir = tmp_path / "records"
-    assert cli(["-d", str(pages), "-ff", "png,JPG,pdf", "--no-hf", "-tn", "1", "--document-json-out-dir", str(out_dir)]) == 0
+    assert (
+        cli(["-d", str(pages), "-ff", "png,JPG,pdf", "--no-hf", "-tn", "1", "--document-json-out-dir", str(out_dir)])
+        == 0
+    )
     table = _table(tmp_path)
     got = {(row.FILE, int(row.PAGE)): row["CLASS-1"] for _, row in table.iterrows()}
     assert got == {
@@ -339,7 +348,9 @@ def test_per_model_is_opt_in(client):
     files = {"file": ("p-1.png", buf.getvalue(), "image/png")}
     plain = client.post("/predict_image", data={"version": "v4.4", "topn": 1}, files=files).json()
     assert plain["per_model"] is None
-    detailed = client.post("/predict_image", data={"version": "v4.4", "topn": 1, "per_model": "true"}, files=files).json()
+    detailed = client.post(
+        "/predict_image", data={"version": "v4.4", "topn": 1, "per_model": "true"}, files=files
+    ).json()
     assert detailed["per_model"] == {"v4.4": [{"label": "DRAW", "score": SCORE}]}
     pages = client.post(
         "/predict_document",
