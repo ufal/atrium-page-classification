@@ -116,7 +116,7 @@ class ModelManager:
         results = self._run_single_inference(version, image, topn)
         if isinstance(results, dict):
             return results
-        return {"predictions": results, "models_used": [version]}
+        return {"predictions": results, "models_used": [version], "per_model": {version: results}}
 
     def predict_directory(self, dir_path: str, version: str, topn: int = 3, batch_size: int = 16):
         image_paths = sorted(
@@ -213,7 +213,14 @@ class ModelManager:
             self._warned |= set(failed)
         if not predictions_list:
             return {"error": "All models failed."}
-        return {"predictions": average_prediction_dicts(predictions_list, CATEGORIES, topn), "models_used": answered}
+        # Each member's own top-N beside the average (`per_model=true`, atrium-project#72): what the
+        # CLI's `--best --save-intermediates` writes as one CSV per model.
+        per_model = {v: results[:topn] for v, results in zip(answered, predictions_list)}
+        return {
+            "predictions": average_prediction_dicts(predictions_list, CATEGORIES, topn),
+            "models_used": answered,
+            "per_model": per_model,
+        }
 
     def _run_single_inference(self, version, image, topn):
         try:

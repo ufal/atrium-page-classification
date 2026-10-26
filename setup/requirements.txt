@@ -20,6 +20,9 @@ matplotlib>=3.11.2
 numpy>=2.4.6,<2.5
 pandas>=3.0.6
 Pillow>=13.0.0
+# run.py renders PDF pages with the service's renderer (page_inputs.py -> service/pdf_render.py,
+# atrium-project#72): the same range as service/requirements.txt (Apache-2.0 / BSD-3-Clause).
+pypdfium2>=5.14.0,<6.0
 scikit-learn>=1.9.1
 torch==2.7.1
 torchvision==0.22.1

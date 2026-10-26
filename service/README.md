@@ -38,7 +38,7 @@ The published image first: it is what a deployment runs, and it needs no checkou
 
 ```bash
 docker run --rm -p 8000:8000 -v hf-cache:/cache/huggingface \
-  ghcr.io/ufal/atrium-page-classification-api:<version>     # e.g. 1.9.10-beta; add --gpus all on a GPU node
+  ghcr.io/ufal/atrium-page-classification-api:<version>     # e.g. 1.10.0-beta; add --gpus all on a GPU node
 curl -s http://localhost:8000/ready                         # 200 once the models are loaded
 # from a checkout:
 docker compose --profile api up --build
@@ -112,8 +112,8 @@ are in one place, [docs/reference/categories.md](../docs/reference/categories.md
 | `GET`  | `/info`                  | Service identity + capabilities: `service`, `version`, `endpoints`, `limits` (every [limit](#limits), current value), `limits_meta` (the variable that sets each), plus available models.           |
 | `GET`  | `/health`                | Liveness probe — 200 always, even mid-shutdown. `?deep=true` also checks at least one model version is loaded (503 on failure or while draining, with `status`, `detail`, `in_flight`, `draining`). |
 | `GET`  | `/ready`                 | Readiness probe (issue #55) — 503 until model warmup finishes, 200 while serving, 503 the instant `SIGTERM` arrives. The Kubernetes `readinessProbe`/`startupProbe` target.                         |
-| `POST` | `/predict_image`         | Performs inference on an uploaded single image (JPG/PNG).                                                                                                                                           |
-| `POST` | `/predict_document`      | Performs inference on an uploaded multipage PDF document.                                                                                                                                           |
+| `POST` | `/predict_image`         | Performs inference on an uploaded single image (any `image/*` type Pillow reads; an upload sent as `application/octet-stream` is recognised by its bytes).                                          |
+| `POST` | `/predict_document`      | Performs inference on an uploaded multipage PDF document (`application/pdf`, or `application/octet-stream` recognised by its bytes), or the `pages` selection of it.                                |
 | `GET`  | `/docs`, `/openapi.json` | FastAPI's built-in interactive documentation and the live OpenAPI document.                                                                                                                         |
 
 ### Request Example
@@ -121,8 +121,10 @@ are in one place, [docs/reference/categories.md](../docs/reference/categories.md
 **Endpoint:** `/predict_image`
 
 **Parameters (Form Data):**
-* `file`: The image file (JPEG or PNG); any other media type is refused with `415`
-  `unsupported_media_type`, and bytes that are not a readable image with `422`.
+* `file`: The image file, any `image/*` type Pillow reads (PNG, JPEG, TIFF, …). An upload sent without
+  a media type, or as `application/octet-stream`, is taken when its bytes are an image, as the CLI takes a
+  file (since v1.10.0-beta); any other media type, or such an upload that is not an image, is refused with
+  `415` `unsupported_media_type`, and an `image/*` upload that cannot be read with `422`.
 * `version`: `all` (the ensemble, the default) or a model revision (e.g. `v4.4`; `/info`
   `available_models` lists the published ones). A value no revision matches is refused with `422`
   before any model runs (atrium-project#32 round 2; it was a `500` from the model loader).
@@ -136,6 +138,14 @@ are in one place, [docs/reference/categories.md](../docs/reference/categories.md
 * `document_json_out`: (Optional, boolean) Return a record even with no baseline uploaded — the
   equivalent of `--document-json-out`. page-classification is stage 1 of the pipeline, so it
   *originates* the record as often as it updates one.
+* `per_model`: (Optional, boolean, since v1.10.0-beta) Also return each model revision's own `topn`
+  categories in `per_model` (per page for `/predict_document`): with `version=all`, the five votes
+  behind the averaged `predictions`, the CLI's `--best --save-intermediates`. Default false: the
+  answer is as before (`per_model: null`).
+
+The command line takes the same inputs the same way: `run.py -f report.pdf --pages 1-3` renders and
+classifies a PDF with this service's renderer, and writes the same record keys; the table of what
+differs, and why, is in [docs/usage.md](../docs/usage.md#the-command-line-and-the-service).
 
 Request example using `curl`:
 

@@ -186,24 +186,29 @@ Every output file and its columns: [reference/outputs.md](reference/outputs.md).
 
 ## Prepare the input
 
-The classifier reads **page images**, one file per page. Scanned PDFs are split first with the bundled converter,
-which renders every page at 300 dpi with poppler's `pdftoppm`, in parallel, into one sub-folder per PDF:
+The classifier reads **page images**, one file per page, and **PDFs**. A PDF given with `-f`, or found by `-d` when
+`-ff` names `pdf`, is rendered page by page with the service's renderer (pypdfium2, at `PDF_RENDER_DPI`, 300 dpi),
+so the command line and `POST /predict_document` see the same pixels; `--pages 1,3,5-7` classifies a selection.
+A file is taken as a PDF by its content, whatever its name. Splitting the PDFs into files first is still possible,
+with the bundled converter, which renders every page at 300 dpi with poppler's `pdftoppm`, in parallel, into one
+sub-folder per PDF:
 
 ```bash
 data_scripts/unix/pdf2png.sh --dir /data/pdfs --output /data/pages      # the PDFs are kept
 data_scripts/unix/pdf2png.sh --dir /data/pdfs --format jpg --dpi 200    # other options
 ```
 
-`data_scripts/windows/pdf2png.bat` does the same with ImageMagick and Ghostscript, one file at a time. The HTTP
-service needs neither: `POST /predict_document` takes the PDF itself and renders it at the same 300 dpi. The
-converters, and how to turn the pages into a training set: [data-preparation.md](data-preparation.md).
+`data_scripts/windows/pdf2png.bat` does the same with ImageMagick and Ghostscript, one file at a time. Neither the
+command line nor the HTTP service needs them any more for classification. The converters, and how to turn the pages
+into a training set: [data-preparation.md](data-preparation.md).
 
 ### Name the page images
 
 A page image is expected to be named `<document>-<page>.png` or `<document>_<page>.png`. The tool splits on the
 *last* separator, so `report_2021_003.png` is document `report_2021`, page 3. The two halves become the `FILE` and
 `PAGE` columns of every result table and the key of the document record. A name without a trailing page number is
-treated as page 1, with a warning.
+treated as page 1, with a warning. The pages of a PDF are named for you: `<document>-<page>`, where `<document>` is
+the PDF's name as `canonical_doc_id()` reads it and `<page>` its physical position, 1-based.
 
 ## Configure a run
 
@@ -227,10 +232,13 @@ python3 run.py -f '/full/path/to/file.png'                                      
 python3 run.py -f '/full/path/to/file.png' -tn 1                                  # the single best guess
 python3 run.py -f '/full/path/to/file.png' -rev v4.4                              # a named revision from model/
 python3 run.py -f '/full/path/to/file.png' --best                                 # all five models, averaged
+python3 run.py -f '/full/path/to/report.pdf' -rev v4.4 --pages 1-3                # a PDF: pages 1 to 3
 ```
 
 The result is printed to the console, one line per category with its score as a percentage
-([the Quick start](../README.md#quick-start) shows one).
+([the Quick start](../README.md#quick-start) shows one), and written as the one-row table a folder run writes
+(`result/tables/<time>_<model>_TOP-<N>.csv`; before v1.10.0-beta `-f` only printed). A PDF takes the folder path:
+one row per page.
 
 > ℹ️ The console output and every result table give **normalised** scores: the model's probabilities renormalised over
 > its best max(N, 2) categories, so with `-tn 1` the score is the best category's share of the best two (as the
@@ -241,8 +249,10 @@ The result is printed to the console, one line per category with its score as a 
 
 `-d` names the folder; `--dir` takes the folder in `[INPUT] FOLDER_INPUT` instead. Input is chosen only by `-f`,
 `-d` or `--dir`: without one of them nothing happens. `--inner` (the default) walks nested folders, `-ff` sets the
-file extension to collect (default `png`), and `--raw` also writes all eleven scores. The same `-tn` and `-m` flags
-apply as for one page.
+file extensions to collect, comma-separated and in any case (default `png`; `png,jpg,tif`; add `pdf` to render and
+classify the PDFs too), and `--raw` also writes all eleven scores. The same `-tn` and `-m` flags apply as for one
+page. A PDF is taken only when `-ff` names `pdf`, so a folder that holds a PDF beside its own page images is not
+classified twice; with `--no-inner`, which takes every file of the folder, a PDF is always rendered.
 
 ```bash
 python3 run.py -d /data/pages --inner                      # recurse into sub-folders
@@ -252,6 +262,7 @@ python3 run.py --dir --inner --best --parallel             # the same in one pas
 python3 run.py --dir --inner --best --save-intermediates   # also each model's own Top-N table
 python3 run.py --dir --inner --best --no-average-best      # only the wide per-model votes file
 python3 run.py -d /data/pages --chunk                      # write in chunks of [INPUT] chunk_size images
+python3 run.py -d /data/scans -ff png,jpg,pdf              # images of three kinds and every PDF's pages
 ```
 
 - A folder is processed **in batches** (`[SETUP] batch`), so mind the memory each batch size needs.
@@ -353,10 +364,17 @@ python3 run.py -rev v4.4 -d pages/ --document-json-dir baseline/ --document-json
 without one, page-classification starts the record. `--strict-document-json` turns ownership and schema warnings into
 errors. What the tool writes into the record: [reference/outputs.md](reference/outputs.md#the-document-record).
 
+- **A born-digital record names its pages by their PDF page labels** (`i`, `ii`, `1`, …) and keeps the position in
+  `pages[].page_index`. The pages of a PDF are written under those labels, as `/predict_document` writes them; a page
+  whose position is another page's label is left out of the record (it stays in the table).
+- `-f` with `--document-json-out-dir` writes `<doc_id>.document.json` into that directory (taking the baseline from
+  `--document-json-dir`, as a folder run does); `-d` with `--document-json-out` is refused, as one path cannot hold a
+  folder's records (it used to be ignored).
+
 ## Docker
 
 Two images are published to GHCR from the same [Dockerfile](../Dockerfile). `<version>` is the release without its
-leading `v` (for example `1.9.10-beta`), or `latest`; when each tag moves is on the hub's
+leading `v` (for example `1.10.0-beta`), or `latest`; when each tag moves is on the hub's
 [Operations](https://ufal.github.io/atrium-project/operations/) page.
 
 | Image                                                   | Stage  | Entry point                                       | What it is                    |
@@ -412,6 +430,27 @@ curl -F file=@page.png -F version=v4.4 -F topn=3 http://localhost:8000/predict_i
 curl -F file=@report.pdf -F version=all http://localhost:8000/predict_document
 curl -F file=@page.png -F document_json=@record.json http://localhost:8000/predict_image   # add to a record
 ```
+
+### The command line and the service
+
+They read the same inputs the same way, and write the same record:
+
+| What                             | Command line (`run.py`)                            | Service                                                                              |
+|----------------------------------|----------------------------------------------------|--------------------------------------------------------------------------------------|
+| a page image                     | `-f page.png`; any format Pillow reads             | `POST /predict_image`; recognised by content when sent as `application/octet-stream` |
+| a PDF, a page selection          | `-f report.pdf --pages 1-3`; `-d` with `-ff …,pdf` | `POST /predict_document`, `pages=1-3`                                                |
+| a record to add to, a new record | `--document-json`, `--document-json-out`           | `document_json`, `document_json_out=true`                                            |
+| each model's own top-N           | `--best --save-intermediates` (one CSV per model)  | `per_model=true`                                                                     |
+| all eleven scores                | `--raw`                                            | `topn=11`                                                                            |
+
+What only one side does, on purpose: the command line takes folders, trains and evaluates models, runs YOLO and
+writes CSV tables and a paradata file; the service takes one file per request, refuses uploads over its limits
+(`MAX_UPLOAD_MB`, `MAX_PDF_PAGES`, `MAX_IMAGE_PIXELS`) and returns its paradata as a `CreateAction`.
+
+Kept as they are, documented in [how-it-works.md](how-it-works.md#one-model-or-five): the two sides average the five
+models differently, the tables round scores to three decimals (the service does not), the default model differs
+(the CLI's config `main` and the batch image's `v4.3`, the service's `all`), and a transparent image is put on white
+by the command line but not by the service.
 
 `service/api_client.py` wraps the same calls and prints the JSON answer
 (`python3 service/api_client.py -f page.png -v v4.4 --top 3`), and a static page for trying it in a browser is served

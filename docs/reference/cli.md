@@ -18,18 +18,20 @@ On this page:
 
 ## Input and output
 
-| Flag                   | Default                        | What it does                                                                                                |
-|------------------------|--------------------------------|-------------------------------------------------------------------------------------------------------------|
-| `-f`, `--file`         | none                           | a single page image                                                                                         |
-| `-d`, `--directory`    | none                           | a folder of unprocessed pages                                                                               |
-| `--dir`                | off                            | process the folder named in `[INPUT] FOLDER_INPUT` instead of passing `-d`                                  |
-| `-ff`, `--file_format` | `png` (`[SETUP] files_format`) | the extension to collect from a directory                                                                   |
-| `--inner / --no-inner` | `True` (`[SETUP] inner`)       | recurse into nested folders                                                                                 |
-| `--chunk / --no-chunk` | `False` (`[INPUT] chunking`)   | write predictions in chunks of `[INPUT] chunk_size` (100), appending to the output file as the run proceeds |
-| `-tn`, `--topn`        | `3` (`[SETUP] top_N`)          | how many categories to report; checked at start: it must be 1–11                                            |
-| `--raw / --no-raw`     | `False` (`[SETUP] raw`)        | also write the scores of all eleven categories                                                              |
+| Flag                   | Default                        | What it does                                                                                                                       |
+|------------------------|--------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| `-f`, `--file`         | none                           | a single page image (its one-row table is written too), or a PDF, recognised by its content: its pages are rendered and classified |
+| `-d`, `--directory`    | none                           | a folder of unprocessed pages                                                                                                      |
+| `--dir`                | off                            | process the folder named in `[INPUT] FOLDER_INPUT` instead of passing `-d`                                                         |
+| `-ff`, `--file_format` | `png` (`[SETUP] files_format`) | the extensions to collect from a directory, comma-separated, any case (`png,jpg,tif`); `pdf` adds the PDFs, rendered               |
+| `--pages`              | none (every page)              | PDF inputs only: the pages to classify, `1,3,5-7`, as `/predict_document`'s `pages`; a malformed value exits 2                     |
+| `--inner / --no-inner` | `True` (`[SETUP] inner`)       | recurse into nested folders                                                                                                        |
+| `--chunk / --no-chunk` | `False` (`[INPUT] chunking`)   | write predictions in chunks of `[INPUT] chunk_size` (100), appending to the output file as the run proceeds                        |
+| `-tn`, `--topn`        | `3` (`[SETUP] top_N`)          | how many categories to report; checked at start: it must be 1–11                                                                   |
+| `--raw / --no-raw`     | `False` (`[SETUP] raw`)        | also write the scores of all eleven categories                                                                                     |
 
-Input is chosen only by `-f`, `-d` or `--dir`; without one of them nothing is processed.
+Input is chosen only by `-f`, `-d` or `--dir`; without one of them nothing is processed. A PDF is rendered at
+`PDF_RENDER_DPI` (300) by the service's renderer, its pages named `<doc_id>-<page>`.
 
 ## Model selection
 
@@ -83,4 +85,7 @@ How the engine schedules the models: [../how-it-works.md](../how-it-works.md#the
 | `--strict-document-json / --no-strict-document-json` | `False` (`[DOCUMENT] strict`)      | turn ownership and schema warnings into errors                  |
 
 The record is opt-in and a no-op unless an output path or directory is set, on the command line or in the config.
+`-f` with `--document-json-out-dir` writes `<doc_id>.document.json` there (its baseline from `--document-json-dir`);
+`-d` with `--document-json-out` exits 2, as one path cannot hold a folder's records. The pages of a PDF are written
+under a born-digital baseline's own page labels (`pages[].page_index`), as `/predict_document` writes them.
 What the record holds: [outputs.md](outputs.md#the-document-record).

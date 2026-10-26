@@ -562,6 +562,20 @@ issue opens, matching its four siblings.
   over to the fine-tuned models is asked on atrium-project#6. `docs/reference/models.md` points there.
 * **Checks:** `docs_check` OK.
 
+
+## 2026-10-26 (round 2) — The command line reads what the service reads (atrium-project#72, `v1.10.0-beta` prepared)
+* **Gaps closed:** the CLI took no PDF (it had to be split with `pdf2png.sh`) and one case-sensitive extension; `-f`
+  only printed; a born-digital baseline got its categories under positions, not its page labels; `-d` with
+  `--document-json-out` was ignored. New `page_inputs.py` (torch- and FastAPI-free) gives `run.py` the service's
+  renderer and helpers: `-f x.pdf`, `-ff png,jpg,pdf`, `--pages`, the same doc_id and page keys; `-f` writes its
+  one-row table; the flag combinations write or exit 2.
+* **Service:** `application/octet-stream` uploads are recognised by their bytes; `per_model=true` returns each model's
+  own top-N (`service/inference.py` keeps them beside the average). The spec gains the field.
+* **Kept apart, documented and pinned:** the ensemble average, the rounding, the default model, transparency
+  (open question on #72). `tests/test_cli_service_parity.py`: 12 tests, a colour-reading stand-in model on both sides.
+* **Citation:** the schema reference goes back to 1.0 (2026-09-25) with the hub's authors (atrium-project#13).
+* **Checks:** 802 passed, 13 skipped (torch, tensorboard, Hugging Face not reachable here); `docs_check` OK.
+
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
 state via the GitHub API (zero open), and the confirmed `@v1` reusable-workflow pin. Nothing removed from the issues

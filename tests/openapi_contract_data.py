@@ -68,7 +68,8 @@ class _StubManager:
         result = self.predict(image, version, topn)
         if isinstance(result, dict):
             return result
-        return {"predictions": result, "models_used": list(self.available_versions) if version == "all" else [version]}
+        used = list(self.available_versions) if version == "all" else [version]
+        return {"predictions": result, "models_used": used, "per_model": {v: result for v in used}}
 
     def warmup(self, versions=None):
         pass

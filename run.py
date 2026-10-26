@@ -13,6 +13,7 @@ from model_registry import CATEGORIES as def_categ
 
 # [NEW] Import from central model registry
 from model_registry import REVISION_BEST_FOLDS, REVISION_BEST_MODELS, REVISION_TO_BASE_MODEL, resolve_base_model
+from page_inputs import PDF_FORMAT, is_pdf, parse_formats, pdf_page_keys, remap_pages, render_pdf, scrape
 
 # [Phase 1 / G1] Heavy third-party imports (numpy, pandas, sklearn, and the
 # torch chain via classifier/parallel_best/utils/yolo_classifier) are deferred
@@ -70,13 +71,26 @@ def build_parser(config):
     config_model_path = f"{model_dir}/model_{hf_version.replace('.', '')}"
 
     parser = argparse.ArgumentParser(description="Page sorter based on ViT / YOLO-cls")
-    parser.add_argument("-f", "--file", type=str, default=None, help="Single page image path")
+    parser.add_argument(
+        "-f",
+        "--file",
+        type=str,
+        default=None,
+        help="A single page image, or a PDF (recognised by its content): every page, or --pages, is classified",
+    )
     parser.add_argument(
         "-ff",
         "--file_format",
         type=str,
         default=config_format,
-        help="File format to look for in the directory (e.g., png or jpeg)",
+        help="File formats to look for in the directory, comma-separated, any case (e.g. png or png,jpg,tif); "
+        "add pdf to render and classify the PDFs too",
+    )
+    parser.add_argument(
+        "--pages",
+        type=str,
+        default=None,
+        help='PDF inputs only: the pages to classify, "1,3,5-7" (1-based), as /predict_document\'s `pages`',
     )
     parser.add_argument("-d", "--directory", type=str, default=None, help="Path to folder with unprocessed pages")
     parser.add_argument(
@@ -273,6 +287,16 @@ def main(argv=None):
     # [Phase 1] Early CLI validation
     if args.topn < 1 or args.topn > len(def_categ):
         raise ValueError(f"Invalid --topn value {args.topn}: must be between 1 and {len(def_categ)}.")
+    if args.document_json_out and not args.file and (args.dir or args.directory is not None):
+        # It used to be ignored without a word; a -d run writes one record per document.
+        parser.error("--document-json-out names ONE record: with -d use --document-json-out-dir (a directory)")
+    if args.pages is not None:
+        from service.document_json import parse_page_selection
+
+        try:
+            parse_page_selection(args.pages)
+        except ValueError as exc:
+            parser.error(f"--pages: {exc}")
 
     input_dir = Path(config_input_dir) if args.directory is None else Path(args.directory)
     top_N, raw, chunked_result_record = args.topn, args.raw, args.chunk
@@ -361,6 +385,7 @@ def main(argv=None):
         os.makedirs(model_dir)
 
     # ── [FIX] EARLY EXIT FOR EMPTY INFERENCE INPUTS ───────────────────────────
+    formats = parse_formats(args.file_format)
     if not args.train and not args.eval and not args.average and not args.hf:
         _test_images = []
         if args.file is not None and Path(args.file).is_file():
@@ -368,9 +393,7 @@ def main(argv=None):
         elif args.dir or args.directory is not None:
             if Path(input_dir).is_dir():
                 if args.inner:
-                    from utils import directory_scraper  # lazy: utils pulls matplotlib/sklearn
-
-                    _test_images = directory_scraper(Path(input_dir), args.file_format)
+                    _test_images = scrape(input_dir, formats, inner=True)
                 else:
                     _test_images = [f for f in os.listdir(input_dir) if not f.startswith(".")]
 
@@ -393,7 +416,6 @@ def main(argv=None):
         collect_images,
         confusion_plot,
         dataframe_results,
-        directory_scraper,
         doc_id_and_page,
         keep_readable,
         tolerate_scan_quirks,
@@ -794,8 +816,68 @@ def main(argv=None):
 
     # ── inference ─────────────────────────────────────────────────────────────
     _total_inputs = _eval_inputs if args.eval else 0  # an evaluation's pages are its inputs
+
+    # PDFs are rendered page by page with the service's renderer (page_inputs.py,
+    # atrium-project#72): `-f x.pdf`, and the PDFs of `-d` when `-ff` names pdf. Their pages then
+    # take the batch path, as the pages of a directory do.
+    import tempfile
+
+    _render_root = tempfile.TemporaryDirectory(prefix="page_classification_pdf_")
+    pdf_pages = {}  # doc_id -> physical page numbers rendered
+
+    def _render(pdf_path):
+        doc_id, rendered = render_pdf(pdf_path, Path(_render_root.name) / str(len(pdf_pages)), pages=args.pages)
+        pdf_pages[doc_id] = [number for number, _ in rendered]
+        _paradata_logger.log_component("pypdfium2")
+        print(f"Rendered {len(rendered)} page(s) of {pdf_path} as {doc_id}-<page>.png")
+        return [path for _, path in rendered]
+
+    single_pdf = args.file is not None and is_pdf(args.file)
+    if args.file is not None and not args.document_json_out and args.document_json_out_dir:
+        # -f with the batch flags: the record goes into the directory under its doc_id, and the
+        # baseline is taken from --document-json-dir, as a -d run would take it.
+        from service.document_json import doc_id_for_document
+
+        _doc = doc_id_for_document(Path(args.file).name) if single_pdf else doc_id_and_page(args.file)[0]
+        args.document_json_out = str(Path(args.document_json_out_dir) / f"{_doc}.document.json")
+        if not args.document_json and args.document_json_dir:
+            candidate = Path(args.document_json_dir) / f"{_doc}.document.json"
+            args.document_json = str(candidate) if candidate.is_file() else None
+
+    def _baseline_of(doc_id):
+        if single_pdf:
+            return args.document_json
+        if args.document_json_dir:
+            return str(Path(args.document_json_dir) / f"{doc_id}.document.json")
+        return None
+
+    def _write_records(rdf, csv_ref):
+        """The records of a batch: a rendered PDF's pages under the record's own page keys
+        (a born-digital record's labels, as /predict_document writes them), then the adapter."""
+        rows = rdf
+        for doc_id, numbers in pdf_pages.items():
+            rows = remap_pages(rows, doc_id, pdf_page_keys(numbers, _baseline_of(doc_id)))
+        if single_pdf:
+            write_document_record(
+                rdf=rows,
+                document_json=args.document_json,
+                document_json_out=args.document_json_out,
+                classification_csv_ref=csv_ref,
+                paradata_logger=_paradata_logger,
+                strict=args.strict_document_json,
+            )
+        else:
+            write_document_records_dir(
+                rdf=rows,
+                document_json_dir=args.document_json_dir,
+                document_json_out_dir=args.document_json_out_dir,
+                classification_csv_ref=csv_ref,
+                paradata_logger=_paradata_logger,
+                strict=args.strict_document_json,
+            )
+
     try:
-        if args.file is not None:
+        if args.file is not None and not single_pdf:
             _total_inputs += 1
             if not args.best:
                 pred_scores = classifier.top_n_predictions(args.file, top_N)
@@ -806,6 +888,12 @@ def main(argv=None):
                 print(f"File {args.file} predicted:")
                 for lab, sc in zip(labels, scores):
                     print(f"\t{lab}:  {round(sc * 100, 2)}%")
+
+                # The same table a -d run writes, one row (atrium-project#72): -f printed only.
+                single_csv, _ = dataframe_results([args.file], [pred_scores], categories, top_N)
+                single_csv_path = f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_TOP-{top_N}.csv"
+                single_csv.to_csv(single_csv_path, sep=",", index=False)
+                print(f"Results for TOP-{top_N} predictions are recorded into {single_csv_path}")
 
                 if args.document_json_out:
                     # (atrium-project#10, D3) This used to carry its own copy of the
@@ -827,7 +915,7 @@ def main(argv=None):
                         rdf=single_rdf,
                         document_json=args.document_json,
                         document_json_out=args.document_json_out,
-                        classification_csv_ref=None,
+                        classification_csv_ref=single_csv_path,
                         paradata_logger=_paradata_logger,
                         strict=args.strict_document_json,
                     )
@@ -874,14 +962,24 @@ def main(argv=None):
                                 strict=args.strict_document_json,
                             )
 
-        if args.dir or args.directory is not None:
-            print(f"Starting inference of {input_dir}, saving results in chunks...")
-
-            if args.inner:
-                test_images = sorted(directory_scraper(Path(input_dir), args.file_format))
+        if single_pdf or args.dir or args.directory is not None:
+            if single_pdf:
+                print(f"Starting inference of the pages of {args.file}...")
+                test_images = _render(args.file)
             else:
-                test_images = sorted(os.listdir(input_dir))
-                test_images = [os.path.join(input_dir, img) for img in test_images]
+                print(f"Starting inference of {input_dir}, saving results in chunks...")
+                if args.inner:
+                    found = scrape(input_dir, formats, inner=True)
+                else:
+                    found = sorted(os.path.join(input_dir, img) for img in os.listdir(input_dir))
+                test_images = []
+                for path in found:
+                    # A PDF is rendered, not opened as an image: in --no-inner mode whatever its
+                    # name, otherwise when -ff names pdf.
+                    if is_pdf(path) and (not args.inner or PDF_FORMAT in formats):
+                        test_images.extend(_render(path))
+                    elif Path(path).suffix.lower() != f".{PDF_FORMAT}":
+                        test_images.append(path)
 
             _total_inputs = len(test_images)
 
@@ -909,14 +1007,7 @@ def main(argv=None):
                     )
                     print(f"Results for TOP-{top_N} predictions are recorded into {output_dir}/tables/ directory")
 
-                    write_document_records_dir(
-                        rdf=rdf,
-                        document_json_dir=args.document_json_dir,
-                        document_json_out_dir=args.document_json_out_dir,
-                        classification_csv_ref=top_out_path,
-                        paradata_logger=_paradata_logger,
-                        strict=args.strict_document_json,
-                    )
+                    _write_records(rdf, top_out_path)
 
                     if raw:
                         raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
@@ -961,14 +1052,7 @@ def main(argv=None):
                         write_header = not os.path.exists(top_out_path)
                         rdf_chunk.to_csv(top_out_path, sep=",", index=False, mode="a", header=write_header)
 
-                        write_document_records_dir(
-                            rdf=rdf_chunk,
-                            document_json_dir=args.document_json_dir,
-                            document_json_out_dir=args.document_json_out_dir,
-                            classification_csv_ref=top_out_path,
-                            paradata_logger=_paradata_logger,
-                            strict=args.strict_document_json,
-                        )
+                        _write_records(rdf_chunk, top_out_path)
 
                         if write_header:
                             print(f"Created and wrote TOP-{top_N} daily file: {top_out_path} (chunk {chunk_idx})")
@@ -1026,18 +1110,12 @@ def main(argv=None):
                         print(f"Averaged results for TOP-{top_N} predictions → {avg_csv_path}")
                         avg_df = pd.read_csv(avg_csv_path)
 
-                        write_document_records_dir(
-                            rdf=avg_df,
-                            document_json_dir=args.document_json_dir,
-                            document_json_out_dir=args.document_json_out_dir,
-                            classification_csv_ref=avg_csv_path,
-                            paradata_logger=_paradata_logger,
-                            strict=args.strict_document_json,
-                        )
+                        _write_records(avg_df, avg_csv_path)
 
     finally:
         # An evaluation counts the pages it scored, not the tables and plots it wrote.
         _paradata_logger.finalize(_total_inputs, _eval_processed if args.eval else None)
+        _render_root.cleanup()
 
     return 0
 

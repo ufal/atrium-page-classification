@@ -263,6 +263,23 @@ def _decode_image(image: Image.Image) -> Image.Image:
         raise HTTPException(status_code=422, detail=f"The upload is not a readable image: {exc}") from exc
 
 
+#: Media types that say nothing about the content: an upload sent with one of these is recognised by
+#: its bytes, as the CLI recognises a file (page_inputs.py, atrium-project#72), instead of a 415.
+_GENERIC_MEDIA_TYPES = frozenset({"", "application/octet-stream", "binary/octet-stream"})
+
+
+def _media_type(upload: UploadFile) -> str:
+    return (upload.content_type or "").split(";")[0].strip().lower()
+
+
+def _looks_like_image(content: bytes) -> bool:
+    try:
+        Image.open(io.BytesIO(content))
+    except (UnidentifiedImageError, OSError, SyntaxError):
+        return False
+    return True
+
+
 def _open_pdf(content: bytes):
     """Open the uploaded PDF, or refuse it with a 422 when it cannot be read. Hold ``_PDFIUM_LOCK``.
 
@@ -280,7 +297,11 @@ def _open_pdf(content: bytes):
 
 
 def _classify_pdf_pages(
-    content: bytes, version: str, topn: int, selection: Optional[List[Tuple[int, int]]] = None
+    content: bytes,
+    version: str,
+    topn: int,
+    selection: Optional[List[Tuple[int, int]]] = None,
+    per_model: bool = False,
 ) -> List[Dict[str, Any]]:
     """Rasterise the pages of a PDF and classify them — the blocking body of
     ``POST /predict_document``, extracted so it runs in ONE worker thread (issue #55).
@@ -332,9 +353,10 @@ def _classify_pdf_pages(
             result = manager.predict_detailed(img, version=version, topn=topn)
             if "error" in result:
                 raise HTTPException(status_code=500, detail=f"Page {number}: {result['error']}")
-            page_results.append(
-                {"page": number, "predictions": result["predictions"], "models_used": result["models_used"]}
-            )
+            entry = {"page": number, "predictions": result["predictions"], "models_used": result["models_used"]}
+            if per_model and result.get("per_model") is not None:
+                entry["per_model"] = result["per_model"]
+            page_results.append(entry)
         return page_results
     finally:
         with _PDFIUM_LOCK:
@@ -416,6 +438,13 @@ class ImageResponse(BaseModel):
             "the `run_uuid` stamped into `document_json` when a record was asked for."
         )
     )
+    per_model: Optional[Dict[str, List[PredictionResult]]] = Field(
+        None,
+        description=(
+            "Only with `per_model=true`: each model revision's own `topn` categories, keyed by revision — the "
+            "ensemble members' votes behind `predictions` (the CLI's `--best --save-intermediates`); else null."
+        ),
+    )
 
 
 class PagePredictions(BaseModel):
@@ -437,6 +466,10 @@ class PagePredictions(BaseModel):
             "The model revisions that produced this page's `predictions` (atrium-project#77): the one asked for, "
             "or every ensemble member that answered for this page."
         )
+    )
+    per_model: Optional[Dict[str, List[PredictionResult]]] = Field(
+        None,
+        description="Only with `per_model=true`: each model revision's own `topn` categories for this page.",
     )
 
 
@@ -503,6 +536,11 @@ _PAGES_DESC = (
     "Optional: classify only these pages, 1-based physical positions, e.g. `1,3,5-7`. Empty (the default): every "
     "page. A malformed value, or a page past the end of the PDF, is refused (422); MAX_PDF_PAGES counts the pages "
     "classified. The response lists only these pages, and only they are written into the record."
+)
+_PER_MODEL_DESC = (
+    "Also return each model revision's own `topn` categories (`per_model`): with `version=all`, the five ensemble "
+    "members' votes behind the averaged `predictions` — what the CLI's `--best --save-intermediates` writes, one "
+    "CSV per model. Default false: the response is as before."
 )
 _DOCUMENT_JSON_OUT_DESC = (
     "Return a document record even with no baseline uploaded. page-classification is stage 1 "
@@ -652,10 +690,13 @@ async def predict_image(
         None, description=_DOCUMENT_JSON_DESC, json_schema_extra={"contentMediaType": "application/json"}
     ),
     document_json_out: bool = Form(False, description=_DOCUMENT_JSON_OUT_DESC),
+    per_model: bool = Form(False, description=_PER_MODEL_DESC),
 ):
     """Classify a single uploaded image."""
     _refuse_if_draining()
-    if not file.content_type or not file.content_type.startswith("image/"):
+    media_type = _media_type(file)
+    sniff = media_type in _GENERIC_MEDIA_TYPES
+    if not sniff and not media_type.startswith("image/"):
         # §4.4: a media type this endpoint does not read is 415 `unsupported_media_type` (a
         # 400 before atrium-project#32 round 2), with the accepted type in the body.
         raise AtriumHTTPError(
@@ -664,6 +705,13 @@ async def predict_image(
     _check_version(version)
 
     content = await read_upload_bounded(file, MAX_UPLOAD.get(), "File")
+    if sniff and not _looks_like_image(content):
+        raise AtriumHTTPError(
+            415,
+            "The upload is not an image Pillow reads (sent without an image media type).",
+            reason="unsupported_media_type",
+            accepted=["image/*"],
+        )
     baseline_bytes = await _read_record_part(document_json)
     run = _open_run("/predict_image", version=version, topn=topn)
 
@@ -698,6 +746,7 @@ async def predict_image(
             paradata=_action(
                 run, file.filename, content, file.content_type, baseline_bytes is not None, record, predictions
             ),
+            per_model=result.get("per_model") if per_model else None,
         )
     except (HTTPException, LimitExceeded):
         raise
@@ -726,10 +775,13 @@ async def predict_document(
     ),
     document_json_out: bool = Form(False, description=_DOCUMENT_JSON_OUT_DESC),
     pages: Optional[str] = Form(None, description=_PAGES_DESC),
+    per_model: bool = Form(False, description=_PER_MODEL_DESC),
 ):
     """Extracts pages from a PDF and classifies each page (or the `pages` selection)."""
     _refuse_if_draining()
-    if not file.content_type or file.content_type != "application/pdf":
+    media_type = _media_type(file)
+    sniff = media_type in _GENERIC_MEDIA_TYPES
+    if not sniff and media_type != "application/pdf":
         # §4.4: 415 `unsupported_media_type` (a 400 before atrium-project#32 round 2).
         raise AtriumHTTPError(
             415,
@@ -744,6 +796,13 @@ async def predict_document(
         raise HTTPException(status_code=422, detail=f"pages: {exc}.") from exc
 
     content = await read_upload_bounded(file, MAX_UPLOAD.get(), "File")
+    if sniff and b"%PDF-" not in content[:1024]:
+        raise AtriumHTTPError(
+            415,
+            "The upload is not a PDF (sent without the application/pdf media type).",
+            reason="unsupported_media_type",
+            accepted=["application/pdf"],
+        )
     baseline_bytes = await _read_record_part(document_json)
     run = _open_run("/predict_document", version=version, topn=topn, pages=pages)
     # The PDF engine renders every page this route classifies (para_config.txt, conditional).
@@ -754,7 +813,7 @@ async def predict_document(
         # MAX_PDF_PAGES sequential torch inferences, and running it inline in an
         # `async def` blocked the event loop — and therefore uvicorn's SIGTERM handler —
         # for the entire duration. See _classify_pdf_pages below.
-        page_results = await asyncio.to_thread(_classify_pdf_pages, content, version, topn, selection)
+        page_results = await asyncio.to_thread(_classify_pdf_pages, content, version, topn, selection, per_model)
 
         # A PDF is a whole document: the pages are its own 1..N, so no filename page-split here —
         # just the canonical doc_id. A baseline that already names its pages (a born-digital record:

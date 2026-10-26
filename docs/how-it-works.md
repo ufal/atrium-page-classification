@@ -78,6 +78,26 @@ different folds ([evaluation/results.md](evaluation/results.md)).
 `--average` is a different thing: it averages the **weights** of several fold checkpoints of one base model into a
 single model, before any page is seen ([training.md](training.md#averaging-fold-models)).
 
+**Where the command line and the service still differ** (kept as they are since the service–CLI alignment of
+v1.10.0-beta, atrium-project#72, and pinned by `tests/test_cli_service_parity.py`):
+
+- **The ensemble average**, as described above: a mean of each model's renormalised Top-N on the command line, a
+  mean of the full eleven-class probabilities in the service. The same page can get slightly different scores, and,
+  for a page near a tie, a different second or third category.
+- **Rounding.** The command line's tables (and the record it writes) round scores to three decimals; the service
+  returns them unrounded.
+- **The default model.** The command line runs the model of `[HF] revision` in `setup/config.txt` (`main`), the batch
+  image's default command `v4.3`; the service runs the ensemble (`version=all`). Name the model (`-rev`, `version`) to
+  compare the two.
+- **Transparent images.** The command line's loaders put a transparent page on a white background before the model
+  sees it; the service converts the image to RGB, so a transparent pixel keeps the colour stored under it, often
+  black. Scans have no transparency, so archive pages are not affected; a PNG export with an alpha channel can be.
+  Which one is right is an open question in atrium-project#72.
+
+Everything else is the same on both sides: a PDF is rendered by one renderer at `PDF_RENDER_DPI`, a `pages`
+selection means the same pages, the doc_id and the page keys are derived by the same functions, and a born-digital
+record's page labels are honoured by both.
+
 ## From a document to its pages
 
 A document is classified page by page: a scanned PDF is first split into page images (on the command line, with the
