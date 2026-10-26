@@ -38,7 +38,7 @@ The published image first: it is what a deployment runs, and it needs no checkou
 
 ```bash
 docker run --rm -p 8000:8000 -v hf-cache:/cache/huggingface \
-  ghcr.io/ufal/atrium-page-classification-api:<version>     # e.g. 1.10.0-beta; add --gpus all on a GPU node
+  ghcr.io/ufal/atrium-page-classification-api:<version>     # e.g. 1.10.2-beta; add --gpus all on a GPU node
 curl -s http://localhost:8000/ready                         # 200 once the models are loaded
 # from a checkout:
 docker compose --profile api up --build

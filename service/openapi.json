@@ -3,7 +3,7 @@
   "info": {
     "title": "ATRIUM Page Classification API",
     "description": "API for classifying historical document page images.",
-    "version": "1.10.0-beta",
+    "version": "1.10.2-beta",
     "x-atrium-service": "atrium-page-classification"
   },
   "paths": {
