@@ -26,11 +26,11 @@ archaeological reports from Czech archives, 1920–2020, published as a dataset 
 
 ## Inputs and outputs
 
-| Input                                                                                                | Output                                                                                                                |
-|------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
-| a page image (any format Pillow reads: PNG, JPEG, TIFF, …), a folder or a tree of them, named `<document>-<page>.png` | per page, the best categories with their scores: a CSV (`FILE, PAGE, CLASS-1…N, SCORE-1…N`), or JSON from the service |
-| a PDF, recognised by its content: every page, or a `pages` selection, rendered at 300 dpi            | optionally all eleven scores (`--raw`, or `topn=11`) and each model's own vote (`--best --save-intermediates`, or `per_model=true`) |
-| optionally, an ATRIUM document record to add to                                                      | the record with its `page_categories` block and each page's `category` and `category_confidence`; the run's paradata  |
+| Input                                                                                                                 | Output                                                                                                                              |
+|-----------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| a page image (any format Pillow reads: PNG, JPEG, TIFF, …), a folder or a tree of them, named `<document>-<page>.png` | per page, the best categories with their scores: a CSV (`FILE, PAGE, CLASS-1…N, SCORE-1…N`), or JSON from the service               |
+| a PDF, recognised by its content: every page, or a `pages` selection, rendered at 300 dpi                             | optionally all eleven scores (`--raw`, or `topn=11`) and each model's own vote (`--best --save-intermediates`, or `per_model=true`) |
+| optionally, an ATRIUM document record to add to                                                                       | the record with its `page_categories` block and each page's `category` and `category_confidence`; the run's paradata                |
 
 The command line and the service read the same inputs the same way (since v1.10.0-beta): a PDF is rendered by the
 service's own renderer on both sides, with the same `pages` selection, doc_id and page keys, and a born-digital
