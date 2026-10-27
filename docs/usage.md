@@ -405,7 +405,7 @@ leading `v` (for example `1.10.0-beta`), or `latest`; when each tag moves is on 
 The `-api` suffix belongs to the image name. An image built locally with Compose carries its own local tag
 (`${ATRIUM_VERSION:-dev}`). Neither image holds model weights.
 
-The batch image passes options to `run.py` (`docker run IMAGE -d /data/input --best`). Since `v1.10.4-beta`, a first
+The batch image passes options to `run.py` (`docker run IMAGE -d /data/input --best`). Since `v1.10.5-beta`, a first
 argument that names a program runs that program instead (`docker run IMAGE /bin/sh job.sh`,
 `docker run IMAGE python3 /app/run.py --help`), which is how Galaxy starts a tool's container; before, it reached
 `run.py` and failed with "unrecognized arguments" (atrium-project#66).

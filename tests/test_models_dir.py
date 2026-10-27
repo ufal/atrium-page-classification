@@ -92,6 +92,9 @@ def test_a_staged_run_loads_the_base_and_the_model_from_the_folder(tmp_path, cle
         def load_model(self, path):
             seen["model"] = path
 
+        def top_n_predictions(self, path, top_n):  # what a -f run asks of its classifier
+            return [(0, 0.9), (1, 0.1)][:top_n]
+
         def process_images(self, files, labels, batch, train):
             return list(files)
 

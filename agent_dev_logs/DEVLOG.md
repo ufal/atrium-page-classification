@@ -604,6 +604,16 @@ issue opens, matching its four siblings.
   compileall; `check_version.py` OK; `docs_check` OK; `image_closure.py` OK.
 * **For the user:** bring `test` into `vit` after the tag, so the nightly smoke passes and #64 can close.
 
+## 2026-10-27 (round 2) — v1.10.5-beta: v1.10.4-beta stopped at one test (atrium-project#72, #66)
+* **Why:** the v1.10.4-beta release (run 40588142730) failed at "image / test": in
+  `tests/test_models_dir.py::test_a_staged_run_loads_the_base_and_the_model_from_the_folder`, the stand-in
+  classifier had no `top_n_predictions`, which a `-f` run calls. The test needs torch, so it was skipped in this
+  session's checks and ran only in CI (944 passed, 1 failed there). The images of v1.10.4-beta were not pushed.
+* **Fixed:** the stand-in answers `top_n_predictions`. The suite now also ran with torch 2.7.1 and transformers
+  4.57.6 (CPU wheels from PyPI, Python 3.11 as in CI): 945 passed, 2 xfailed, 5 slow deselected — the CI lane.
+* **Release:** v1.10.5-beta in `CITATION.cff`, `setup/para_config.txt`, the spec (version only), the two READMEs'
+  examples and `docs/usage.md` (the entry point's dispatch ships with this release's images).
+
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
 state via the GitHub API (zero open), and the confirmed `@v1` reusable-workflow pin. Nothing removed from the issues

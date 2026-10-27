@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "ATRIUM's page classifier: Classification of historical page images using fine-tuned ViT, RegNetY,and EfficientNetV2 models"
-version: "1.10.4-beta"
+version: "1.10.5-beta"
 date-released: "2026-10-27"
 authors:
   - family-names: "Lutsai"
