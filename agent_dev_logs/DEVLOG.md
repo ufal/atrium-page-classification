@@ -576,6 +576,34 @@ issue opens, matching its four siblings.
 * **Citation:** the schema reference goes back to 1.0 (2026-09-25) with the hub's authors (atrium-project#13).
 * **Checks:** 802 passed, 13 skipped (torch, tensorboard, Hugging Face not reachable here); `docs_check` OK.
 
+## 2026-10-27 — v1.10.4-beta: the release the v1.10 tags did not get; the image Galaxy can start (atrium-project#72, #66)
+* **Why no release since v1.10.0:** v1.10.0 and v1.10.2 failed at the image's tests (`page_inputs.py` was not
+  committed yet), v1.10.1 at the version check, v1.10.3 at "Verify bundle is self-contained" (`page_inputs.py`, which
+  `run.py` imports, was not in `release.yml`'s `cp` list). The images were pushed each time; the GitHub release was
+  not. The nightly smoke on `vit` (still at `1191e20`) opened #64 for the same missing module.
+* **Fixed:** `page_inputs.py` in the bundle. New `tests/test_release_bundle.py` reads the packaging step's `cp`
+  commands and applies the workflow's closure rule on every push (it fails on `f66ced0` with exactly the release's
+  message); the same test goes to ocr-postprocess. A local replay of the two release steps passes.
+* **Galaxy (atrium-project#66):** Mark's `planemo test --docker` failed with `run.py: error: unrecognized arguments:
+  /bin/sh …/tool_script.sh`: the entry point forwarded every argument to `run.py`. `entrypoint.py` is now a tracked
+  file (the Dockerfile wrote it with `printf`): options go to `run.py` as before, a first argument that names a
+  program runs it (the official images' docker-entrypoint rule; `run.py` takes no positional argument).
+  `tests/test_container_entrypoint.py`, 7 tests; a simulated `entrypoint.py /bin/sh script.sh` runs the script.
+* **Staged models:** `run.py --models-dir DIR` puts `model/`, `checkpoint/` (base models) and `hf/` (processors) in
+  one folder; `--hf` downloads into it, a run without `--hf` reads it with `HF_HUB_OFFLINE=1` and
+  `TRANSFORMERS_OFFLINE=1` set before any Hugging Face import. A GPU profile that cannot be saved (read-only folder)
+  is reported, not fatal. `.env.example` documents the two variables; `HF_HOME` leaves `CONSUMED_ELSEWHERE` (the
+  scanner sees `run.py` set it). `tests/test_models_dir.py`, 7 tests (one needs torch: skipped here).
+* **Docs:** usage (staging, the entry point), reference/cli (`--models-dir`); README: no decorative emoji (style
+  guide; the other four tools have none), the quick start's `-f` output line and version, the PDF limit (the CLI
+  renders PDFs since v1.10.0), the 2026 preprint and the Hub repository in the citation line; the service README's
+  tree and credits without emoji, `model_v44`; CONTRIBUTING's table loses two empty columns (and one doubled cell).
+* **Release:** v1.10.4-beta in `CITATION.cff`, `setup/para_config.txt`, the regenerated spec (version only),
+  `service/README.md`'s example.
+* **Checks:** 817 passed, 14 skipped (torch, tensorboard, Hugging Face), 2 xfailed; ruff and format clean;
+  compileall; `check_version.py` OK; `docs_check` OK; `image_closure.py` OK.
+* **For the user:** bring `test` into `vit` after the tag, so the nightly smoke passes and #64 can close.
+
 ---
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
 state via the GitHub API (zero open), and the confirmed `@v1` reusable-workflow pin. Nothing removed from the issues

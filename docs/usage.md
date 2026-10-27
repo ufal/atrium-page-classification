@@ -121,6 +121,26 @@ registry key matches, among them `main` given as `-rev` and the early `v1.2` and
 for r in v1.4 v2.4 v3.4 v4.4 v5.4; do python3 run.py --hf -rev "$r"; done
 ```
 
+### Stage the models once, run offline
+
+On a shared server (a Galaxy instance, a cluster) the weights should be downloaded once, not in every job.
+`--models-dir DIR` puts everything a run reads in one folder: the fine-tuned models in `DIR/model`, the base-model
+cache in `DIR/checkpoint` and the Hugging Face cache of the image processors in `DIR/hf`. With `--hf` the revision is
+downloaded into it; without `--hf` the run reads only that folder and switches the Hugging Face libraries offline
+(`HF_HUB_OFFLINE=1`), so a missing file stops the run instead of starting a download.
+
+```bash
+# once, with network: the five vX.4 models (about 2.5 GB)
+for r in v1.4 v2.4 v3.4 v4.4 v5.4; do python3 run.py --hf -rev "$r" --models-dir /srv/atrium-page-models; done
+
+# every run, offline: one model, or the five-model ensemble
+python3 run.py --models-dir /srv/atrium-page-models -rev v4.4 -d pages/
+python3 run.py --models-dir /srv/atrium-page-models --best -d pages/
+```
+
+The results still go to `result/` under the working directory. The staged folder can be read-only; a `--best` run on
+a GPU then re-measures its memory profile each time instead of saving it.
+
 After a download the checkout looks like this (`model/`, `result/` and `checkpoint/` are git-ignored runtime folders,
 created when the pipeline first runs; under Docker they are volumes, so data and models persist between runs;
 `model_output/` appears only after training):
@@ -384,6 +404,11 @@ leading `v` (for example `1.10.0-beta`), or `latest`; when each tag moves is on 
 
 The `-api` suffix belongs to the image name. An image built locally with Compose carries its own local tag
 (`${ATRIUM_VERSION:-dev}`). Neither image holds model weights.
+
+The batch image passes options to `run.py` (`docker run IMAGE -d /data/input --best`). Since `v1.10.4-beta`, a first
+argument that names a program runs that program instead (`docker run IMAGE /bin/sh job.sh`,
+`docker run IMAGE python3 /app/run.py --help`), which is how Galaxy starts a tool's container; before, it reached
+`run.py` and failed with "unrecognized arguments" (atrium-project#66).
 
 ```bash
 # the batch command line, over ./data/input, writing to ./data/output

@@ -86,33 +86,13 @@ RUN pip install -r requirements.txt -r service-requirements.txt
 
 COPY . .
 
-# REVIEW FIX (Blocker A/H): the GPU report is INFORMATIONAL only — it reports
-# whether a CUDA device is visible and never aborts.  CPU inference is a
-# supported (if slow) path, so the container must start regardless.  The GPU
-# overlay still requests the device; if it is missing the run simply proceeds
-# on CPU with a clear notice.
-#
-# (issue #55) This is now an ENTRYPOINT that ends in os.execv rather than a
-# standalone gpu_info.py invoked from `sh -c`. The old form was
-#     ENTRYPOINT ["sh", "-c", "python3 /app/gpu_info.py; exec python3 run.py \"$@\"", "--"]
-# which made PID 1 /bin/sh for the duration of the GPU report — and /bin/sh does not
-# forward signals, so a SIGTERM arriving in that window was silently dropped. Here
-# python3 is PID 1 from the first instruction, and os.execv REPLACES it in place, so
-# run.py inherits PID 1 and receives signals directly. No shell is involved at all.
-RUN printf '%s\n' \
-    'import os' \
-    'import sys' \
-    'try:' \
-    '    import torch' \
-    '    if torch.cuda.is_available():' \
-    '        print(f"[gpu] CUDA device detected: {torch.cuda.get_device_name(0)}", flush=True)' \
-    '    else:' \
-    '        print("[gpu] No CUDA device visible — running on CPU (slower).", flush=True)' \
-    '        print("[gpu] For GPU: build with TORCH_INDEX_URL=...cu126 and use docker-compose.gpu.yml.", flush=True)' \
-    'except Exception as exc:' \
-    '    print(f"[gpu] GPU probe unavailable ({exc}) — continuing.", flush=True)' \
-    'os.execv(sys.executable, [sys.executable, "/app/run.py", *sys.argv[1:]])' \
-    > /app/entrypoint.py
+# The ENTRYPOINT is entrypoint.py (tracked since v1.10.4-beta, copied with the rest above). It
+# reports the GPU it sees, informational only: CPU inference is a supported (if slow) path, so the
+# container always starts. Options go to run.py; a first argument that names a program (/bin/sh,
+# python3) runs as given, which is how Galaxy starts a tool's container (atrium-project#66).
+# It ends in os.execv, no shell in between, so the program is PID 1 and receives signals directly
+# (issue #55); the old `sh -c "python3 /app/gpu_info.py; exec python3 run.py"` form dropped a
+# SIGTERM that arrived during the GPU report.
 
 # Non-root runtime user. Owned atrium:0 and group-writable (`g=u`): the arbitrary-UID
 # convention (OpenShift's), atrium-project#69 / roadmap B6. docker-compose.yml runs this
@@ -136,7 +116,8 @@ USER atrium
 # runs on the same GPU and auto-invalidated (re-profiled) on a different one.
 # Pure exec form — no shell, so python3 is PID 1 and signals reach it directly
 # (issue #55). CMD args are forwarded to run.py by entrypoint.py's os.execv, so the
-# documented override still works: docker compose run --rm classify --dir --inner --best
+# documented override still works: docker compose run --rm classify --dir --inner --best.
+# A command instead of options runs as given: docker run IMAGE /bin/sh script.sh
 ENTRYPOINT ["python3", "/app/entrypoint.py"]
 CMD ["-d", "/data/input", "--hf", "-rev", "v4.3"]
 

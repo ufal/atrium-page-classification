@@ -41,6 +41,7 @@ Input is chosen only by `-f`, `-d` or `--dir`; without one of them nothing is pr
 | `-b`, `--base`       | `timm/regnety_160.swag_ft_in1k` (`[SETUP] base_model`)      | the base model of a revision that `model_registry.py` does not list                                 |
 | `-rev`, `--revision` | `[HF] revision` (`main`)                                    | the Hugging Face revision, `vN.M`; a revision no key of `REVISION_TO_BASE_MODEL` matches is refused |
 | `--hf / --no-hf`     | `False` (`[HF] use_hf`)                                     | take the model and processor from the Hugging Face Hub, and save them under `./model/`              |
+| `--models-dir`       | unset                                                       | a staged folder (`model/`, `checkpoint/`, `hf/`): `--hf` downloads into it, a run without `--hf` reads it offline |
 | `--yolo / --no-yolo` | `False` (`[YOLO] use_yolo`)                                 | use a YOLO-cls model instead of ViT/CNN; overrides `--base` and `--revision`                        |
 | `--yolo_base`        | `yolov8s-cls.pt` (`[YOLO] yolo_base`)                       | a short tag (`yv8s`), an Ultralytics id, or a local `.pt` path                                      |
 

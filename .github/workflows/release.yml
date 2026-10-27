@@ -164,6 +164,12 @@ jobs:
           # atrium_rocrate.py: service/api.py builds each call's CreateAction with it, returned
           # as the response's `paradata` (atrium-project#71 R2). It imports atrium_vocab.py,
           # which is already listed.
+          #
+          # page_inputs.py: run.py imports it since v1.10.0-beta (the service-CLI alignment,
+          # atrium-project#72): the formats, the PDF route and the record page keys the command
+          # line shares with the service. v1.10.0-v1.10.3-beta published their images but no
+          # release, because this list did not name it; tests/test_release_bundle.py now runs this
+          # step's closure check on every push.
           cp atrium_openapi.py \
              atrium_paradata.py \
              atrium_rocrate.py \
@@ -175,6 +181,7 @@ jobs:
              atrium_vocab.py \
              atrium_vocab.schema.json \
              para_licenses.py \
+             page_inputs.py \
              ensemble.py \
              model_registry.py \
              parallel_best.py \

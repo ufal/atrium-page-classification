@@ -45,6 +45,30 @@ def resolve_revision_base(revision, requested):
     return resolve_base_model(revision) or requested
 
 
+def staged_model_paths(models_dir):
+    """The three folders of a staged model folder (`--models-dir`): the fine-tuned models
+    (`model/`, as `run.py --hf` saves them), the base-model cache (`checkpoint/`) and the Hugging
+    Face cache of the processors (`hf/`)."""
+    root = Path(models_dir)
+    return root / "model", root / "checkpoint", root / "hf"
+
+
+def use_staged_models(models_dir, download, environ=None):
+    """Point the run at a staged model folder; returns (model_dir, cp_dir).
+
+    With `download` (`--hf`) the revision is fetched into the folder; without it the run reads
+    the folder only and the Hugging Face libraries are switched offline, so a missing file is an
+    error instead of a download in every job (Galaxy, atrium-project#66). Must run before
+    transformers or huggingface_hub is imported: both read these variables at import time."""
+    environ = os.environ if environ is None else environ
+    model_dir, cp_dir, hf_home = staged_model_paths(models_dir)
+    environ["HF_HOME"] = str(hf_home)
+    if not download:
+        environ["HF_HUB_OFFLINE"] = "1"
+        environ["TRANSFORMERS_OFFLINE"] = "1"
+    return str(model_dir), cp_dir
+
+
 def build_parser(config):
     """Construct the CLI argument parser."""
     revision_best_models = REVISION_BEST_MODELS
@@ -97,6 +121,13 @@ def build_parser(config):
         "-m", "--model", type=str, default=config_model_path, help="Path to the folder with model subfolders"
     )
     parser.add_argument("-b", "--base", type=str, default=config_base_model, help="Repository of the base model")
+    parser.add_argument(
+        "--models-dir",
+        type=str,
+        default=None,
+        help="A staged model folder (model/, checkpoint/, hf/). With --hf the revision is downloaded "
+        "into it; without --hf the run reads only this folder, offline",
+    )
     parser.add_argument(
         "-rev", "--revision", type=str, default=None, help="HuggingFace revision (e.g. `main`, `vN.0` or `vN.M`)"
     )
@@ -297,6 +328,17 @@ def main(argv=None):
             parse_page_selection(args.pages)
         except ValueError as exc:
             parser.error(f"--pages: {exc}")
+
+    if args.models_dir:
+        # The weights staged once, read by every run (atrium-project#66): fill the folder with
+        # `--hf -rev <revision> --models-dir DIR`, then classify with `--models-dir DIR` alone.
+        if not args.hf and not Path(args.models_dir).is_dir():
+            parser.error(f"--models-dir {args.models_dir}: no such folder; stage the models into it with --hf first")
+        default_model_path = config_model_path
+        model_dir, cp_dir = use_staged_models(args.models_dir, download=args.hf)
+        config_model_path = f"{model_dir}/{config_model_name_local}"
+        if args.model == default_model_path:
+            args.model = config_model_path
 
     input_dir = Path(config_input_dir) if args.directory is None else Path(args.directory)
     top_N, raw, chunked_result_record = args.topn, args.raw, args.chunk

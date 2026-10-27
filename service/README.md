@@ -38,7 +38,7 @@ The published image first: it is what a deployment runs, and it needs no checkou
 
 ```bash
 docker run --rm -p 8000:8000 -v hf-cache:/cache/huggingface \
-  ghcr.io/ufal/atrium-page-classification-api:<version>     # e.g. 1.10.3-beta; add --gpus all on a GPU node
+  ghcr.io/ufal/atrium-page-classification-api:<version>     # e.g. 1.10.4-beta; add --gpus all on a GPU node
 curl -s http://localhost:8000/ready                         # 200 once the models are loaded
 # from a checkout:
 docker compose --profile api up --build
@@ -71,19 +71,19 @@ The service is designed to sit within the larger `atrium-page-classification` st
 
 ```text
 atrium-page-classification/
-├── model/                   # 📦 Fine-tuned model weights (e.g., model_v53/)
-├── service/                 # 🚀 API Source Code
+├── model/                   # Fine-tuned model weights (e.g., model_v44/)
+├── service/                 # API Source Code
 │   ├── api.py               # FastAPI application entry point
 │   ├── inference.py         # Model loading and prediction logic
 │   ├── requirements.txt     # Python dependencies for the API
 │   ├── api_client.py        # Client script to test the API endpoints
-│   ├── frontend/            # 🎨 Standalone frontend assets (LINDAT-independent)
+│   ├── frontend/            # Standalone frontend assets (LINDAT-independent)
 │   │   ├── index.html       # Standalone web interface
 │   │   └── script.js        # Standalone logic
-│   └── frontend-lindat/     # 🎨 LINDAT-integrated frontend assets
+│   └── frontend-lindat/     # LINDAT-integrated frontend assets
 │       ├── index.html       # Web interface with LINDAT headers/footers
 │       └── script.js        # Logic handling LINDAT stylings
-├── setup/                   # ⚙️ Project configuration & setup scripts
+├── setup/                   # Project configuration & setup scripts
 │   └── setup_api_service.sh # Setup script for environment, dependencies, and models
 ├── run.py                   # Script to download models manually
 └── classifier.py            # Base ImageClassifier class (imported by inference.py)
@@ -603,16 +603,16 @@ Follow the file tree to the `atrium-page-classification/service/frontend-lindat`
 
 ## Contacts
 
-**For support write to:** lutsai@ufal.mff.cuni.cz, responsible for this GitHub repository [^8] 🔗
+**For support write to:** lutsai@ufal.mff.cuni.cz, responsible for this GitHub repository [^8]
 
 ## Acknowledgements
 
-- **Developed by** UFAL [^7] 👥
-- **Funded by** ATRIUM [^4]  💰
-- **Shared by** ATRIUM [^4] & UFAL [^7] 🔗
+- **Developed by** UFAL [^7]
+- **Funded by** ATRIUM [^4]
+- **Shared by** ATRIUM [^4] & UFAL [^7]
 - **Model type:**
-  - fine-tuned ViT with a 224x224 [^2] 🔗 or 384x384 [^13] [^14] 🔗 resolution size
-  - fine-tuned RegNetY-16GF with a 384x384 resolution [^18] or EffNetV2 with a 384x384 [^19] 🔗 resolution size
+  - fine-tuned ViT with a 224x224 [^2] or 384x384 [^13] [^14] resolution size
+  - fine-tuned RegNetY-16GF with a 384x384 resolution [^18] or EffNetV2 with a 384x384 [^19] resolution size
 
 Funded by [ATRIUM](https://atrium-research.eu/) (GA 101132163), with the support of the LINDAT/CLARIAH-CZ research
 infrastructure and the AIS CR infrastructure (LM2023031).

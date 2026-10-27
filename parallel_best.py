@@ -256,7 +256,12 @@ def _save_profile(model_dir: str, batch: int, models_peak: dict) -> None:
         "models": models_peak,
     }
     p = _profile_path(model_dir)
-    p.write_text(json.dumps(data, indent=2))
+    try:
+        p.write_text(json.dumps(data, indent=2))
+    except OSError as exc:
+        # A staged, read-only model folder (--models-dir): the run goes on, only re-profiles next time.
+        print(f"[parallel_best] GPU profile not saved ({exc}); the next run profiles again.")
+        return
     print(f"[parallel_best] GPU profile saved → {p}")
 
 
