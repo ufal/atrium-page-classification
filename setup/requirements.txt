@@ -1,5 +1,5 @@
 evaluate>=0.4.6
-configparser>=7.2.0
+configparser>=7.3.0
 # RUNTIME, not test-only: atrium_document_adapter._schema_error() calls
 # atrium_document.validate_document() on every document record this tool emits (Layer D,
 # atrium-project#10 D4). Undeclared, validate_document() raises its own fail-loud
@@ -18,7 +18,7 @@ matplotlib>=3.11.2
 # with cp311 wheels; 2.4.0 is yanked, hence the floor. Nothing here needs 2.5 — the
 # highest transitive floor is pandas' `numpy>=1.26.0`.
 numpy>=2.4.6,<2.5
-pandas>=3.0.6
+pandas>=3.1.0
 Pillow>=13.0.0
 # run.py renders PDF pages with the service's renderer (page_inputs.py -> service/pdf_render.py,
 # atrium-project#72): the same range as service/requirements.txt (Apache-2.0 / BSD-3-Clause).
@@ -29,4 +29,4 @@ torchvision==0.22.1
 transformers>=4.57.6,<5
 timm>=1.0.30
 tensorboard>=2.21.0
-ultralytics>=8.4.175
+ultralytics>=8.4.187
