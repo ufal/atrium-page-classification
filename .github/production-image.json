@@ -23,6 +23,7 @@
     "classifier.py",
     "ensemble.py",
     "model_registry.py",
+    "page_inputs.py",
     "tool_limits.py",
     "utils.py"
   ],

@@ -133,7 +133,7 @@ class ModelManager:
                 try:
                     clf = self.load_model(v)
                     dataloader = clf.create_dataloader(image_paths, batch_size=batch_size)
-                    predictions, _ = clf.infer_dataloader(dataloader, top_n=len(CATEGORIES), raw=False)
+                    predictions, _ = clf.infer_dataloader(dataloader, top_n=topn, raw=False)
 
                     model_preds = []
                     for pred_item in predictions:
@@ -189,9 +189,13 @@ class ModelManager:
         answered = []
         failed = []
 
+        # Each member's own top-N (renormalised over its N best), summed per category and divided by
+        # the members that answered: the command line's `--best` average (ensemble.average_rdfs), so
+        # both sides give the same scores since v1.11.0-beta (atrium-project#72). Before, the service
+        # averaged the full eleven-class probabilities.
         for v in self.available_versions:
             try:
-                results = self._run_single_inference(v, image, topn=len(CATEGORIES))
+                results = self._run_single_inference(v, image, topn=topn)
                 if isinstance(results, dict) and "error" in results:
                     failed.append(v)
                     continue

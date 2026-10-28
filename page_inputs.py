@@ -15,7 +15,10 @@ alignment):
   own renderer, at `PDF_RENDER_DPI`), with the `pages` selection of `/predict_document`
   (`service/document_json.py`);
 * `pdf_page_keys()` — the record key of each rendered page: a born-digital record's own page label
-  when the baseline carries `page_index`, as `/predict_document` writes it.
+  when the baseline carries `page_index`, as `/predict_document` writes it;
+* `flatten_on_white()` — an image as the models see it: RGB, with any transparency put on white
+  (both sides since v1.11.0-beta; the service used to keep the colour stored under a transparent
+  pixel, often black).
 
 Torch-free and FastAPI-free, like the two service modules it calls: the fast test lane imports it.
 """
@@ -27,6 +30,23 @@ from typing import Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 #: The format `-ff` takes when a PDF should be rendered rather than opened as an image.
 PDF_FORMAT = "pdf"
+
+
+def flatten_on_white(image):
+    """`image` in RGB, a transparent or semi-transparent pixel composited onto white.
+
+    The command line's loaders always did this; the service converted straight to RGB, so the same
+    PNG with an alpha channel reached the models with different pixels (atrium-project#72). Decoding
+    errors (a damaged or truncated file) propagate, as from `Image.convert`.
+    """
+    from PIL import Image
+
+    if image.mode == "RGB":
+        return image
+    rgba = image.convert("RGBA")
+    background = Image.new("RGBA", rgba.size, "WHITE")
+    background.paste(rgba, (0, 0), rgba)
+    return background.convert("RGB")
 
 
 def parse_formats(spec: Optional[str]) -> Set[str]:

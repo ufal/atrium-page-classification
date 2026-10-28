@@ -478,10 +478,10 @@ What only one side does, on purpose: the command line takes folders, trains and 
 writes CSV tables and a paradata file; the service takes one file per request, refuses uploads over its limits
 (`MAX_UPLOAD_MB`, `MAX_PDF_PAGES`, `MAX_IMAGE_PIXELS`) and returns its paradata as a `CreateAction`.
 
-Kept as they are, documented in [how-it-works.md](how-it-works.md#one-model-or-five): the two sides average the five
-models differently, the tables round scores to three decimals (the service does not), the default model differs
-(the CLI's config `main` and the batch image's `v4.3`, the service's `all`), and a transparent image is put on white
-by the command line but not by the service.
+Kept as they are, documented in [how-it-works.md](how-it-works.md#one-model-or-five): the tables round scores to
+three decimals (the service does not), and the default model differs (the CLI's config `main` and the batch image's
+`v4.3`, the service's `all`). Since `v1.11.0-beta` both sides average the five models the same way and put a
+transparent image on white.
 
 `service/api_client.py` wraps the same calls and prints the JSON answer
 (`python3 service/api_client.py -f page.png -v v4.4 --top 3`), and a static page for trying it in a browser is served

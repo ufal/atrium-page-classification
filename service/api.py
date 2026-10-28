@@ -159,6 +159,7 @@ PDF_RENDER_DPI = tool_limits.PDF_RENDER_DPI.get()
 #: torch error surfacing as a 500 (a single version). model_registry is torch-free.
 from model_registry import CATEGORIES as _CATEGORIES  # noqa: E402
 from model_registry import resolve_base_model  # noqa: E402
+from page_inputs import flatten_on_white  # noqa: E402
 
 _TOPN_MAX = len(_CATEGORIES)
 
@@ -256,9 +257,10 @@ def _open_image(content: bytes) -> Image.Image:
 
 
 def _decode_image(image: Image.Image) -> Image.Image:
-    """Decode the pixels as RGB, or refuse a damaged or truncated image with a 422."""
+    """Decode the pixels as RGB, transparency on white as the command line does (since
+    v1.11.0-beta, atrium-project#72), or refuse a damaged or truncated image with a 422."""
     try:
-        return image.convert("RGB")
+        return flatten_on_white(image)
     except (OSError, SyntaxError) as exc:
         raise HTTPException(status_code=422, detail=f"The upload is not a readable image: {exc}") from exc
 

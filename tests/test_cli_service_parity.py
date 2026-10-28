@@ -360,15 +360,88 @@ def test_per_model_is_opt_in(client):
     assert all(page["per_model"]["v4.4"] == page["predictions"] for page in pages)
 
 
-def test_transparency_is_handled_differently_and_pinned():
-    """Kept as it is, documented in docs/how-it-works.md ("Transparent images"): the CLI's loaders
-    (classifier.py) composite a transparent page onto WHITE; the service converts it to RGB, so a
-    fully transparent pixel keeps its underlying colour (here black). An open question in
-    atrium-project#72: the scores of such pages differ between the two sides."""
+def test_a_transparent_page_is_put_on_white_on_both_sides():
+    """Since v1.11.0-beta (atrium-project#72): the service composites a transparent page onto white,
+    as the CLI's loaders (classifier.py) always did, through the same function. Before, it converted
+    straight to RGB, and a fully transparent pixel kept the colour stored under it (here black)."""
     from PIL import Image
 
+    from page_inputs import flatten_on_white
+
     rgba = Image.new("RGBA", (4, 4), (0, 0, 0, 0))
-    assert api._decode_image(rgba).getpixel((0, 0)) == (0, 0, 0)
+    assert flatten_on_white(rgba).getpixel((0, 0)) == (255, 255, 255)
+    assert api._decode_image(rgba).getpixel((0, 0)) == (255, 255, 255)
+    half = Image.new("RGBA", (4, 4), (0, 0, 0, 128))
+    assert api._decode_image(half).getpixel((0, 0)) == flatten_on_white(half).getpixel((0, 0)) != (0, 0, 0)
+    rgb = Image.new("RGB", (4, 4), (10, 20, 30))
+    assert api._decode_image(rgb).getpixel((0, 0)) == (10, 20, 30)
+
+
+#: Three members' own top-3 (renormalised over their three best), as `topn_pairs` gives them.
+MEMBERS = {
+    "v1.4": [("TEXT", 0.6), ("TEXT_T", 0.3), ("LINE_T", 0.1)],
+    "v2.4": [("TEXT_T", 0.5), ("TEXT", 0.4), ("TEXT_P", 0.1)],
+    "v3.4": [("TEXT", 0.7), ("TEXT_P", 0.2), ("TEXT_T", 0.1)],
+}
+
+
+def test_the_ensemble_is_averaged_alike():
+    """Since v1.11.0-beta both sides average the members' own top-N, summed per category and divided
+    by the members that answered (the CLI's `--best`): the service used to average all eleven
+    probabilities, so a page near a tie could get another second or third category."""
+    import pandas as pd
+
+    from ensemble import average_prediction_dicts, average_rdfs
+
+    frames = {
+        rev: pd.DataFrame(
+            [
+                {"FILE": "doc", "PAGE": 1}
+                | {f"CLASS-{r}": label for r, (label, _) in enumerate(ranked, start=1)}
+                | {f"SCORE-{r}": score for r, (_, score) in enumerate(ranked, start=1)}
+            ]
+        )
+        for rev, ranked in MEMBERS.items()
+    }
+    cli = average_rdfs(frames, top_N=3, revision_best_models=dict.fromkeys(MEMBERS))
+    service = average_prediction_dicts(
+        [[{"label": label, "score": score} for label, score in ranked] for ranked in MEMBERS.values()],
+        CATEGORIES,
+        3,
+    )
+    row = cli.iloc[0]
+    assert (
+        [row["CLASS-1"], row["CLASS-2"], row["CLASS-3"]]
+        == [p["label"] for p in service]
+        == ["TEXT", "TEXT_T", "TEXT_P"]
+    )
+    assert [row["SCORE-1"], row["SCORE-2"], row["SCORE-3"]] == pytest.approx([p["score"] for p in service])
+    assert service[0]["score"] == pytest.approx((0.6 + 0.4 + 0.7) / 3)
+
+
+def test_the_service_asks_each_member_for_its_top_n():
+    """The service's ensemble runs each member with the request's `topn`, not with all eleven."""
+    pytest.importorskip("torch")
+    from PIL import Image
+
+    from ensemble import average_prediction_dicts
+    from service.inference import ModelManager
+
+    asked = []
+    manager = ModelManager()
+    manager.available_versions = list(MEMBERS)
+
+    def member(version, image, topn):
+        asked.append(topn)
+        return [{"label": label, "score": score} for label, score in MEMBERS[version][:topn]]
+
+    manager._run_single_inference = member
+    answer = manager._predict_averaged(Image.new("RGB", (4, 4)), 3)
+    assert asked == [3, 3, 3]
+    assert answer["models_used"] == list(MEMBERS)
+    assert answer["predictions"] == average_prediction_dicts(
+        [[{"label": label, "score": score} for label, score in ranked] for ranked in MEMBERS.values()], CATEGORIES, 3
+    )
 
 
 def test_the_formats_are_read_in_any_case_and_a_pdf_by_its_content(tmp_path):

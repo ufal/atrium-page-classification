@@ -627,3 +627,22 @@ themselves (per hub #29); this file is a derived reading aid in `agent_dev_logs/
   warning, and its drain-budget paragraph loses the emoji.
 * `docs/reference/cli.md`: the `--models-dir` row of v1.10.5-beta was wider than its table; shortened to fit.
 * No release (documentation only); it rides the next tag. `docs_check.py` and `runbook_check.py` OK.
+
+## 2026-10-28 (round 3) — v1.11.0-beta: the service averages and flattens as the command line does (atrium-project#72)
+
+* **Decided on #72 (K4TEL, 10-28):** the two differences kept apart since the alignment are aligned on the command
+  line's side.
+* **The ensemble:** `service/inference.py` asks each member for the request's `topn` (renormalised over its N best,
+  `classifier.topn_pairs`) instead of all eleven, and `ensemble.average_prediction_dicts` sums and divides by the members
+  that answered: the same as `ensemble.average_rdfs` for `--best`. `per_model` now shows each member's own top-N as
+  `--save-intermediates` writes it. `predict_directory`'s ensemble does the same.
+* **Transparency:** `page_inputs.flatten_on_white` is the one place an image becomes RGB with its transparency on white;
+  `classifier.preprocess_image`, the directory dataset and the service's `_decode_image` call it.
+  `.github/production-image.json` lists `page_inputs.py` (the service reaches it now).
+* **Tests:** `test_cli_service_parity.py` replaces the pinned difference with three checks (white on both sides; the
+  two averages agree on three members; the service asks each member for its top-N). Two of them fail on v1.10.5-beta.
+* **Docs:** `how-it-works.md` ("One model or five"), `usage.md` ("The command line and the service"), the service
+  runbook's ensemble example.
+* **Checks:** 948 passed, 3 skipped, 2 xfailed with torch; 1 failure needs huggingface.co, unreachable here
+  (`test_classifier.py::test_image_classifier_instantiation`). The spec is current (version only); image closure,
+  `check_version.py --tag v1.11.0-beta`, `docs_check.py`, ruff OK.

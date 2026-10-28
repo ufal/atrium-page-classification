@@ -65,10 +65,12 @@ lists for it ([models](reference/models.md#how-a-revision-is-named)).
 By default one model runs: the revision chosen with `-rev`, or a local checkpoint. `--best`, and the service's
 `version=all`, run the five models of the ensemble (`v1.4`–`v5.4`) on every page and average their scores:
 
-- **On the command line,** each model's Top-N scores are summed per category and divided by five, and the result is
-  ranked again. The run also records each model's own top-1 vote, so disagreement stays visible.
-- **In the service,** each model's probabilities over all eleven categories are averaged, and the best `topn` are
-  returned. A model that fails is left out of the average, and `models_used` names those that answered.
+- Each model gives its own Top-N categories, its scores renormalised over its N best. The scores are summed per
+  category and divided by the number of models that answered, and the result is ranked again. The command line and
+  the service do this alike since `v1.11.0-beta` (before, the service averaged the full eleven-class probabilities).
+- The command line also records each model's own top-1 vote, so disagreement stays visible; the service returns each
+  model's own top-N with `per_model=true`. A model that fails is left out of the service's average, and `models_used`
+  names those that answered.
 
 The averaging is a mean of probabilities, not a majority vote: confident models weigh more than uncertain ones. It
 usually raises overall accuracy, but it can lower it for the most ambiguous pairs, such as `TEXT` and `TEXT_T`, whose
@@ -81,22 +83,19 @@ single model, before any page is seen ([training.md](training.md#averaging-fold-
 **Where the command line and the service still differ** (kept as they are since the service–CLI alignment of
 v1.10.0-beta, atrium-project#72, and pinned by `tests/test_cli_service_parity.py`):
 
-- **The ensemble average**, as described above: a mean of each model's renormalised Top-N on the command line, a
-  mean of the full eleven-class probabilities in the service. The same page can get slightly different scores, and,
-  for a page near a tie, a different second or third category.
 - **Rounding.** The command line's tables (and the record it writes) round scores to three decimals; the service
   returns them unrounded.
 - **The default model.** The command line runs the model of `[HF] revision` in `setup/config.txt` (`main`), the batch
   image's default command `v4.3`; the service runs the ensemble (`version=all`). Name the model (`-rev`, `version`) to
   compare the two.
-- **Transparent images.** The command line's loaders put a transparent page on a white background before the model
-  sees it; the service converts the image to RGB, so a transparent pixel keeps the colour stored under it, often
-  black. Scans have no transparency, so archive pages are not affected; a PNG export with an alpha channel can be.
-  Which one is right is an open question in atrium-project#72.
 
-Everything else is the same on both sides: a PDF is rendered by one renderer at `PDF_RENDER_DPI`, a `pages`
-selection means the same pages, the doc_id and the page keys are derived by the same functions, and a born-digital
-record's page labels are honoured by both.
+Everything else is the same on both sides:
+- the ensemble is averaged as described above;
+- a transparent image is put on a white background before the model sees it (`page_inputs.flatten_on_white`; until
+  `v1.11.0-beta` the service kept the colour stored under a transparent pixel, often black);
+- a PDF is rendered by one renderer at `PDF_RENDER_DPI`, and a `pages` selection means the same pages;
+- the doc_id and the page keys are derived by the same functions, and a born-digital record's page labels are honoured
+  by both.
 
 ## From a document to its pages
 
