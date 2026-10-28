@@ -13,7 +13,8 @@ On this page:
 [What is not measured](#what-is-not-measured) ·
 [Earlier models](#earlier-models)
 
-> ℹ️ The test suite checks that the code does what this documentation says. It does not measure accuracy: the figures
+> [!NOTE]
+> The test suite checks that the code does what this documentation says. It does not measure accuracy: the figures
 > below come from scoring the models on annotated pages.
 
 ## The `vX.4` models on held-out pages

@@ -107,7 +107,8 @@ The table shows the categories of the data of successive model versions. The las
 the `vX.3` models, which used 14,000 pages of the `TEXT` category; the other columns count all the pages used, 80 %
 for training and 10 % each for development and test.
 
-> ℹ️ The disproportion of the categories, in the training data and in [small_data_samples](../../small_data_samples),
+> [!NOTE]
+> The disproportion of the categories, in the training data and in [small_data_samples](../../small_data_samples),
 > is **not** intentional: it follows from the nature of the source data.
 
 The timeline of the source documents:

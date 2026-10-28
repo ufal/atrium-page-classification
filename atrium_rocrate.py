@@ -123,16 +123,64 @@ RECORD_ID = "#record"
 #: with atrium_vocab.SKOS_BASE, which is the one place an ATRIUM URI is rooted.
 ATRIUM_BASE = getattr(atrium_vocab, "SKOS_BASE", "https://w3id.org/atrium/")
 
-#: The ATRIUM tool authors, identical in every tool repo's CITATION.cff. Since atrium-project#71
-#: they are each tool's `creator` — the people who made the software — and no longer the crate
-#: root's `author`: the record is the archive's, the tools are theirs. ORCIDs are the `@id`s, the
-#: RO-Crate convention, so no ATRIUM identifier is minted for a person.
+#: The people who wrote the ATRIUM tools. Since atrium-project#71 they are each tool's `creator`
+#: — the people who made the software — and no longer the crate root's `author`: the record is
+#: the archive's, the tools are theirs. ORCIDs are the `@id`s, the RO-Crate convention, so no
+#: ATRIUM identifier is minted for a person. Who wrote which tool is `PROGRAM_AUTHORS`.
 AUTHORS: Tuple[Dict[str, str], ...] = (
     {"orcid": "https://orcid.org/0009-0002-4773-2797", "name": "Kateryna Lutsai"},
     {"orcid": "https://orcid.org/0000-0002-6895-8536", "name": "Pavel Straňák"},
     {"orcid": "https://orcid.org/0000-0001-6592-6291", "name": "David Novák"},
     {"orcid": "https://orcid.org/0000-0001-5718-9447", "name": "Dana Křivánková"},
+    {"orcid": "https://orcid.org/0009-0002-8856-2501", "name": "David Spáčil"},
 )
+
+#: The authors every tool has (Lutsai, Novák, Straňák): the `creator` of a program the table
+#: below does not list, such as a predecessor whose CITATION.cff this module does not know.
+CORE_AUTHORS: Tuple[str, ...] = (
+    "https://orcid.org/0009-0002-4773-2797",
+    "https://orcid.org/0000-0001-6592-6291",
+    "https://orcid.org/0000-0002-6895-8536",
+)
+
+#: program -> its authors' ORCIDs, in the order of that tool's CITATION.cff (atrium-project#13).
+#: A tool's `creator` is its own authors, not everyone's (until 2026-10-28 every tool named the
+#: same four). `alto-postprocess` is ocr-postprocess under its old name. A service's `-api`
+#: suffix is stripped before the lookup, as in `_repository()`.
+PROGRAM_AUTHORS: Dict[str, Tuple[str, ...]] = {
+    "page-classification": (
+        "https://orcid.org/0009-0002-4773-2797",
+        "https://orcid.org/0000-0001-5718-9447",
+        "https://orcid.org/0000-0001-6592-6291",
+        "https://orcid.org/0000-0002-6895-8536",
+    ),
+    "ocr-postprocess": (
+        "https://orcid.org/0009-0002-4773-2797",
+        "https://orcid.org/0000-0001-5718-9447",
+        "https://orcid.org/0009-0002-8856-2501",
+        "https://orcid.org/0000-0001-6592-6291",
+        "https://orcid.org/0000-0002-6895-8536",
+    ),
+    "keyword-extract": (
+        "https://orcid.org/0009-0002-4773-2797",
+        "https://orcid.org/0009-0002-8856-2501",
+        "https://orcid.org/0000-0001-6592-6291",
+        "https://orcid.org/0000-0002-6895-8536",
+    ),
+    "digital-convert": CORE_AUTHORS,
+    "nlp-enrich": CORE_AUTHORS,
+    "translator": CORE_AUTHORS,
+}
+PROGRAM_AUTHORS["alto-postprocess"] = PROGRAM_AUTHORS["ocr-postprocess"]
+
+
+def authors_of(program: str) -> Tuple[Dict[str, str], ...]:
+    """The authors of one program (`PROGRAM_AUTHORS`), `CORE_AUTHORS` for a program it does not list."""
+    base = program[: -len("-api")] if program.endswith("-api") else program
+    orcids = PROGRAM_AUTHORS.get(program) or PROGRAM_AUTHORS.get(base) or CORE_AUTHORS
+    people = {a["orcid"]: a for a in AUTHORS}
+    return tuple(people[orcid] for orcid in orcids)
+
 
 #: program -> repository, mirroring atrium_paradata._REPO_URLS. Since the repository moves of
 #: 2026-10-01 every current program has its own repository: `ocr-postprocess` (a rename of
@@ -419,8 +467,13 @@ def _profile_entity() -> Dict[str, Any]:
     }
 
 
-def _person_entities() -> List[Dict[str, Any]]:
-    return [{"@id": a["orcid"], "@type": "Person", "name": a["name"]} for a in AUTHORS]
+def _person_entities(programs: Iterable[str]) -> List[Dict[str, Any]]:
+    """The `Person` entities of the given programs' authors, each once, in CITATION.cff order."""
+    people: Dict[str, Dict[str, Any]] = {}
+    for program in programs:
+        for a in authors_of(program):
+            people.setdefault(a["orcid"], {"@id": a["orcid"], "@type": "Person", "name": a["name"]})
+    return list(people.values())
 
 
 def ni_uri(sha256_hex: str) -> str:
@@ -459,7 +512,7 @@ def _tool_id(program: str, repository: str, version: str) -> str:
 
 def _tool_entity(program: str, paradata: Mapping[str, Any]) -> Dict[str, Any]:
     """The `SoftwareApplication` of one run: `version`, never `softwareVersion` (atrium-project#71),
-    and the ATRIUM authors as its `creator`. Without paradata the version is `UNRECORDED_VERSION`
+    and its own authors (`authors_of`) as its `creator`. Without paradata the version is `UNRECORDED_VERSION`
     and the id is the repository, not a release."""
     repository = _repository(program, paradata)
     version = _version(paradata.get("tool_version"))
@@ -472,7 +525,7 @@ def _tool_entity(program: str, paradata: Mapping[str, Any]) -> Dict[str, Any]:
             "alternateName": program,
             "url": repository,
             "version": version or UNRECORDED_VERSION,
-            "creator": _refs(a["orcid"] for a in AUTHORS),
+            "creator": _refs(a["orcid"] for a in authors_of(program)),
             "runtimePlatform": "Python " + python if python else None,
         }
     )
@@ -648,7 +701,7 @@ def create_action(
     pd = dict(paradata or {})
     program = str(pd.get("program") or pd.get("pipeline") or "unknown")
     tool = _tool_entity(program, pd)
-    tool["creator"] = _person_entities()
+    tool["creator"] = _person_entities([program])
     run_id = str(pd.get("run_id") or "")
     failed = status == "failed"
     version = tool.get("version") if tool.get("version") != UNRECORDED_VERSION else ""
@@ -1001,7 +1054,7 @@ def document_crate(
     graph.extend(tools.values())
     graph.extend(extras.values())
     if tools:
-        graph.extend(_person_entities())
+        graph.extend(_person_entities(t["alternateName"] for t in tools.values()))
 
     # ── controlled terms ──────────────────────────────────────────────────────
     schemes = set()
@@ -1202,7 +1255,7 @@ def run_crate(
     graph.extend(tools.values())
     graph.extend(extras.values())
     if tools:
-        graph.extend(_person_entities())
+        graph.extend(_person_entities(t["alternateName"] for t in tools.values()))
     if mentions:
         root["mentions"] = _refs(sorted(set(mentions)))
 
@@ -1575,8 +1628,10 @@ def _selftest(stream: Any = None) -> int:
             problems.append("tool {} lacks an absolute id or a recorded version".format(tool["@id"]))
         if "softwareVersion" in tool:
             problems.append("tool {} carries softwareVersion".format(tool["@id"]))
-        if {c["@id"] for c in tool.get("creator", [])} != {a["orcid"] for a in AUTHORS}:
-            problems.append("tool {} does not name the ATRIUM authors as creator".format(tool["@id"]))
+        if {c["@id"] for c in tool.get("creator", [])} != {a["orcid"] for a in authors_of(tool["alternateName"])}:
+            problems.append("tool {} does not name its own authors as creator".format(tool["@id"]))
+        if not all(isinstance(by_id.get(c["@id"]), dict) for c in tool.get("creator", [])):
+            problems.append("tool {} names a creator the graph does not describe".format(tool["@id"]))
     if "https://github.com/ufal/atrium-nlp-enrich/releases/tag/v0.22.0" not in by_id:
         problems.append("a release id was not built from the table's repository")
 

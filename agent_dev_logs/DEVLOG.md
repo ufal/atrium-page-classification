@@ -618,3 +618,12 @@ issue opens, matching its four siblings.
 _Timeline index refreshed 2026-09-26 (AMČR baseline entry and header); earlier 2026-09-07 against live `test`/`vit` HEAD, the `CONTRIBUTING.md` changelog table, open-issue
 state via the GitHub API (zero open), and the confirmed `@v1` reusable-workflow pin. Nothing removed from the issues
 themselves (per hub #29); this file is a derived reading aid in `agent_dev_logs/`._
+
+## 2026-10-28 — Documentation review: no decorative emoji, one table re-aligned (atrium-project#79)
+
+* The emoji callouts of `docs/usage.md`, `docs/how-it-works.md`, `docs/training.md`, `docs/data-preparation.md` and
+  three evaluation pages become GitHub alerts (WARNING, TIP, NOTE) with the same text; the category list in
+  CONTRIBUTING loses its emoji; `service/README.md` takes the runbook template's `> **Note:**` for the `HOST`
+  warning, and its drain-budget paragraph loses the emoji.
+* `docs/reference/cli.md`: the `--models-dir` row of v1.10.5-beta was wider than its table; shortened to fit.
+* No release (documentation only); it rides the next tag. `docs_check.py` and `runbook_check.py` OK.

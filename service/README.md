@@ -390,7 +390,7 @@ Or for `-v all` the best models ensemble (average of 5 class scores):
 | Variable              | Default   | Meaning                                                                                                                           |
 |-----------------------|-----------|-----------------------------------------------------------------------------------------------------------------------------------|
 | `PORT`                | `8000`    | port the service **binds**, and the one `service/healthcheck.py` probes                                                           |
-| `HOST`                | `0.0.0.0` | bind address. ⚠️ see the warning below                                                                                            |
+| `HOST`                | `0.0.0.0` | bind address; see the warning below                                                                                               |
 | `GRACEFUL_SHUTDOWN_S` | `20`      | seconds uvicorn waits for in-flight requests before closing them                                                                  |
 | `RELOAD`              | `false`   | filesystem auto-reload — development only, never in a deployment                                                                  |
 | `LOG_LEVEL`           | `INFO`    | root logger level for the `python -m service.api` start path (issue #61)                                                          |
@@ -417,7 +417,7 @@ reported unhealthy forever.
 has no package context for an import string to resolve against, so the app object is passed
 directly.
 
-> ⚠️ `HOST=127.0.0.1` yields a container that reports **healthy** and serves nobody:
+> **Note:** `HOST=127.0.0.1` yields a container that reports **healthy** and serves nobody:
 > `service/healthcheck.py` always probes loopback by design and never reads `HOST`, so a
 > loopback bind passes every probe while being unreachable from outside the container.
 
@@ -530,7 +530,7 @@ event loop. That was a prerequisite, not a tidy-up: uvicorn's `SIGTERM` handler 
 event-loop callback, so while a synchronous `manager.predict()` held the loop, the signal
 could not be processed at all and `--timeout-graceful-shutdown` had nothing to measure.
 
-⚠️ A `/predict_document` call classifies up to `MAX_PDF_PAGES` (default 50) pages sequentially and
+A `/predict_document` call classifies up to `MAX_PDF_PAGES` (default 50) pages sequentially and
 can legitimately outlive the 20s drain budget. Raise `--timeout-graceful-shutdown` and the
 deployment's grace period together for that workload — see `docs/k8s_deployment.md` in the
 hub.

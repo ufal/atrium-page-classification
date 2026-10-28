@@ -46,7 +46,8 @@ python3 run.py --average -ap model_v4                          # average existin
 python3 run.py --train
 ```
 
-> 💡 Train with the **default hyperparameters** if you have at least about 10,000 and fewer than 50,000 pages similar
+> [!TIP]
+> Train with the **default hyperparameters** if you have at least about 10,000 and fewer than 50,000 pages similar
 > to the original data. Fine-tuning for the same task on an extended or new dataset of document pages needs no other
 > change, and the number of categories does not matter while it stays under 20.
 
@@ -144,7 +145,8 @@ subsets, both of `test_size` (10 %); the rest is training data, 80/10/10. The me
 [evaluation/data.md](evaluation/data.md#how-the-dataset-is-split). This happens on a single `--train` run and on every
 fold of a cross-validation (`--folds N`, or `[TRAIN] cross_runs` above 0).
 
-> 💡 Cross-validation takes longer and selects the subsets again for each run, with the `seed` of `[SETUP]`
+> [!TIP]
+> Cross-validation takes longer and selects the subsets again for each run, with the `seed` of `[SETUP]`
 > incremented by one for each fold. The split of each fold is written as a `.txt` file to `result/stats`, and the
 > fold's test-set predictions to `result/tables`. The trained models are saved as `model_<revision><fold>`.
 
@@ -247,7 +249,8 @@ When a model is trained and you are happy with its tests, it can be pushed to yo
 trained model folder** after the `revision` value, without its dots (revision `v1.9.22` becomes the folder
 `model_v1922`), and only then push.
 
-> ⚠️ Set `repo_name` to an empty repository of your own on the Hub, and create a token under **Settings → Access
+> [!WARNING]
+> Set `repo_name` to an empty repository of your own on the Hub, and create a token under **Settings → Access
 > Tokens** of your Hugging Face account. Provide it as `HF_TOKEN` in the environment, which the Hugging Face libraries
 > read; `[HF] token` stays blank in version control. Never commit a token.
 

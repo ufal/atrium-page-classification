@@ -47,7 +47,8 @@ There is no `pip install .`: the repository ships no `pyproject.toml` and no con
 the requirements; whether a GPU is present is checked on first use and again before each model is initialised (for
 training, evaluation or prediction).
 
-> ⚠️ **`transformers` stays on 4.x.** On `transformers` 5.x, model construction moves to the `meta` device inside
+> [!WARNING]
+> **`transformers` stays on 4.x.** On `transformers` 5.x, model construction moves to the `meta` device inside
 > `from_pretrained`, and the timm-based architectures used here (RegNetY `v4.3`/`v4.4`, EfficientNetV2 `v1.3`/`v1.4`)
 > run shape-deriving operations (`torch.unique`, `.item()`) while they are built. These have no meta kernel and raise
 > an error. `setup/requirements.txt` therefore pins `transformers>=4.57.6,<5`, and `.github/dependabot.yml` ignores
@@ -105,7 +106,8 @@ You see a message about loading the model from the Hub, and then about saving it
 time than installing the dependencies. Once the files are in `model/model_<revision without dots>`, later runs load
 them from there and `--hf` is needed only to update the model.
 
-> ⚠️ **Name the revision.** The Hub's `main` revision still resolves to `v4.3`, the generation before `vX.4`, and
+> [!WARNING]
+> **Name the revision.** The Hub's `main` revision still resolves to `v4.3`, the generation before `vX.4`, and
 > `--hf` without `-rev` takes `[HF] revision`, which is `main`. Pass `-rev v4.4` (or another `vX.4`) until `main` is
 > moved. Which revisions exist: [reference/models.md](reference/models.md).
 
@@ -235,7 +237,8 @@ the PDF's name as `canonical_doc_id()` reads it and `<page>` its physical positi
 Defaults come from [setup/config.txt](../setup/config.txt). Before a first run, set the input folder in its
 `[INPUT]` section, and optionally `top_N` and `batch` in `[SETUP]`.
 
-> 💡 **Top-3** covers most images; **Top-5** helps with a small number of pages that are hard to classify.
+> [!TIP]
+> **Top-3** covers most images; **Top-5** helps with a small number of pages that are hard to classify.
 
 `batch` depends on your machine's memory: below 12 is safe for an office desktop, and 4 for an old one; on a
 high-performance cluster you can go above 20. The memory each batch size needs:
@@ -260,7 +263,8 @@ The result is printed to the console, one line per category with its score as a 
 (`result/tables/<time>_<model>_TOP-<N>.csv`; before v1.10.0-beta `-f` only printed). A PDF takes the folder path:
 one row per page.
 
-> ℹ️ The console output and every result table give **normalised** scores: the model's probabilities renormalised over
+> [!NOTE]
+> The console output and every result table give **normalised** scores: the model's probabilities renormalised over
 > its best max(N, 2) categories, so with `-tn 1` the score is the best category's share of the best two (as the
 > service's `topn=1`). An image that cannot be read gets no row: it is recorded as skipped in the run's paradata,
 > and every other page keeps its own result (#61).
@@ -320,7 +324,8 @@ label, and `pages[].category` and `pages[].category_confidence` carry the label 
 
 ## Combining and post-processing results
 
-> 💡 **The best way to classify a collection of messy files is to combine several models.** The five models give
+> [!TIP]
+> **The best way to classify a collection of messy files is to combine several models.** The five models give
 > different perspectives on the data, and their ensemble evens out each one's errors. With `--best` the ensembling
 > happens inside the program.
 
@@ -418,7 +423,8 @@ docker compose run --rm classify
 docker compose --profile api up --build      # then http://localhost:8000/info
 ```
 
-> ⚠️ The batch image's default command is `-d /data/input --hf -rev v4.3`, the generation before `vX.4`. Pass your own
+> [!WARNING]
+> The batch image's default command is `-d /data/input --hf -rev v4.3`, the generation before `vX.4`. Pass your own
 > arguments to choose the revision, for example `docker compose run --rm classify -d /data/input --hf -rev v4.4`.
 
 **On a GPU,** overlay the second compose file and build against the CUDA wheel index:

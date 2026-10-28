@@ -112,8 +112,23 @@ class TestDocumentCrate:
         tools = [e for e in crate["@graph"] if e.get("@type") == "SoftwareApplication"]
         assert tools
         for tool in tools:
-            assert {c["@id"] for c in tool["creator"]} == {a["orcid"] for a in rc.AUTHORS}
-            assert by_id[tool["creator"][0]["@id"]]["@type"] == "Person"
+            assert {c["@id"] for c in tool["creator"]} == {a["orcid"] for a in rc.authors_of(tool["alternateName"])}
+            assert all(by_id[c["@id"]]["@type"] == "Person" for c in tool["creator"])
+
+    def test_each_tool_names_its_own_authors(self):
+        """Who wrote a tool is its CITATION.cff, not the union of every tool's (atrium-project#13)."""
+        names = {program: [a["name"] for a in rc.authors_of(program)] for program in rc.PROGRAM_AUTHORS}
+        assert names["page-classification"] == ["Kateryna Lutsai", "Dana Křivánková", "David Novák", "Pavel Straňák"]
+        assert "David Spáčil" in names["ocr-postprocess"] and "David Spáčil" in names["keyword-extract"]
+        assert names["translator"] == names["nlp-enrich"] == names["digital-convert"]
+        assert "Dana Křivánková" not in names["translator"]
+        assert rc.authors_of("translator-api") == rc.authors_of("translator")
+        assert rc.authors_of("alto-postprocess") == rc.authors_of("ocr-postprocess")
+        assert [a["orcid"] for a in rc.authors_of("llm-enrich")] == list(rc.CORE_AUTHORS)
+
+    def test_a_crate_describes_only_the_people_of_its_tools(self):
+        action = rc.create_action({"program": "translator-api", "tool_version": "v1.6.1-beta", "run_id": "r"})
+        assert [c["name"] for c in action["instrument"]["creator"]] == ["Kateryna Lutsai", "David Novák", "Pavel Straňák"]
 
     def test_tools_carry_version_and_a_release_id(self, record):
         crate = rc.document_crate(record, paradata=rc._sample_paradata())

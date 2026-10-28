@@ -104,11 +104,11 @@ based on three main criteria: **presence of graphical elements**, **type of text
 **presence of tabular layouts**.
 
 **Data Categories:**
-* 📈 **Drawings (`DRAW`, `DRAW_L`):** Maps, schematics, and paintings (with or without tabular legends).
-* 🌄 **Photos (`PHOTO`, `PHOTO_L`):** Photographs or cutouts, potentially with captions or tabular layouts.
-* 📏 **Tables/Forms (`LINE_HW`, `LINE_P`, `LINE_T`):** Tabular structures containing handwritten, printed, or machine-typed text.
-* 📄 **Standard Text (`TEXT_HW`, `TEXT_P`, `TEXT_T`):** Paragraphs or blocks of purely handwritten, printed, or typed text.
-* 📰 **Mixed Text (`TEXT`):** Mixtures of different text types with minor graphical elements.
+* **Drawings (`DRAW`, `DRAW_L`):** Maps, schematics, and paintings (with or without tabular legends).
+* **Photos (`PHOTO`, `PHOTO_L`):** Photographs or cutouts, potentially with captions or tabular layouts.
+* **Tables/Forms (`LINE_HW`, `LINE_P`, `LINE_T`):** Tabular structures containing handwritten, printed, or machine-typed text.
+* **Standard Text (`TEXT_HW`, `TEXT_P`, `TEXT_T`):** Paragraphs or blocks of purely handwritten, printed, or typed text.
+* **Mixed Text (`TEXT`):** Mixtures of different text types with minor graphical elements.
 
 The exact definitions of the eleven categories are in [docs/reference/categories.md](docs/reference/categories.md).
 

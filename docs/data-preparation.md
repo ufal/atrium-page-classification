@@ -133,7 +133,8 @@ PdfFile1Name,11,Label3
 ...
 ```
 
-> 💡 Make the categories equal in size if you can, so that the model is not biased towards the over-represented
+> [!TIP]
+> Make the categories equal in size if you can, so that the model is not biased towards the over-represented
 > labels.
 
 On Windows, MS Excel is **not** recommended for writing CSV tables; a free alternative is Apache's
@@ -180,7 +181,8 @@ performance. Before training, set the path of this folder in the `[TRAIN]` secti
 [setup/config.txt](../setup/config.txt), and make sure the label folder names contain no special characters such as
 spaces, tabs or line breaks ([configuration.md](configuration.md#train)).
 
-> 💡 If some labels are significantly over-represented, lower `max_categ` in `[TRAIN]`, the maximum number of pages
+> [!TIP]
+> If some labels are significantly over-represented, lower `max_categ` in `[TRAIN]`, the maximum number of pages
 > taken per category. Set it above the size of the largest category to use **all** the pages.
 
 From here you can train or evaluate a model ([training.md](training.md)). The round trip of annotation, from

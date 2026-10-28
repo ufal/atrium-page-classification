@@ -4,7 +4,8 @@ For anyone who wonders why these five base models: the 2025 sweep that compared 
 of the ensemble, kept as evidence of that choice. Its figures are **not held-out accuracy**; the held-out results of
 the published models are in [results.md](results.md).
 
-> ⚠️ These figures were measured on the 5,449-page evaluation set, most of whose pages are training pages. The script
+> [!WARNING]
+> These figures were measured on the 5,449-page evaluation set, most of whose pages are training pages. The script
 > that selected it as "pages no fold trained on" (`result/stats/unused.sh`, fixed since `v1.9.6-beta`) missed
 > zero-padded page numbers and ids with a letter
 > ([atrium-project#15](https://github.com/ufal/atrium-project/issues/15)). The figures chose each base model's fold

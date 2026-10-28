@@ -113,7 +113,8 @@ The `--best` ensemble is implemented in [parallel_best.py](../parallel_best.py).
 one model at a time with a full pass over the data each: the guaranteed-safe path, and what `--best` alone does. The
 optional `--parallel` flag turns on a **memory-aware grouped engine** on CUDA.
 
-> ℹ️ **What `--parallel` does and does not buy you on a single GPU.** A single GPU serialises kernels across the
+> [!NOTE]
+> **What `--parallel` does and does not buy you on a single GPU.** A single GPU serialises kernels across the
 > models it holds, so holding several models in VRAM does **not** reduce GPU math time. The gain is turning *five
 > passes over the data* (one per model, decoding every page five times) into **one pass** that loads all the models
 > that fit and streams the inputs once, which removes repeated disk decoding and loading and unloading. How much that
@@ -166,7 +167,8 @@ An example profile:
 On a free 24 GB card the five models (a summed peak of about 7.9 GB) pack into a **single group**: one pass over the
 data for all of them.
 
-> ⚠️ `params_bytes` is **not** a reliable proxy for the peak: the ratio of peak to parameters across the five models
+> [!WARNING]
+> `params_bytes` is **not** a reliable proxy for the peak: the ratio of peak to parameters across the five models
 > ranges from about 2.3× (ViT-L, weight-heavy) to about 6.5× (RegNetY at 384 px, activation-heavy). Without a
 > measurement the engine therefore over-estimates from `params_bytes`, which tends to put a model in a group of its
 > own, so that it can never under-provision and run out of memory.
