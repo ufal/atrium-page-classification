@@ -868,7 +868,11 @@ def main(argv=None):
     pdf_pages = {}  # doc_id -> physical page numbers rendered
 
     def _render(pdf_path):
-        doc_id, rendered = render_pdf(pdf_path, Path(_render_root.name) / str(len(pdf_pages)), pages=args.pages)
+        try:
+            doc_id, rendered = render_pdf(pdf_path, Path(_render_root.name) / str(len(pdf_pages)), pages=args.pages)
+        except ValueError as exc:
+            # A selection past the last page: the service's 422 `pages: …`, here exit 2 (it was a traceback).
+            parser.error(f"--pages: {exc}.")
         pdf_pages[doc_id] = [number for number, _ in rendered]
         _paradata_logger.log_component("pypdfium2")
         print(f"Rendered {len(rendered)} page(s) of {pdf_path} as {doc_id}-<page>.png")
@@ -932,10 +936,20 @@ def main(argv=None):
                     print(f"\t{lab}:  {round(sc * 100, 2)}%")
 
                 # The same table a -d run writes, one row (atrium-project#72): -f printed only.
-                single_csv, _ = dataframe_results([args.file], [pred_scores], categories, top_N)
+                raw_scores = None
+                if raw:
+                    # --raw for one image too (it was ignored): every category's probability.
+                    _, raw_scores = classifier.infer_dataloader(
+                        classifier.create_dataloader([args.file], 1), top_N, raw=True
+                    )
+                single_csv, single_raw = dataframe_results([args.file], [pred_scores], categories, top_N, raw_scores)
                 single_csv_path = f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_TOP-{top_N}.csv"
                 single_csv.to_csv(single_csv_path, sep=",", index=False)
                 print(f"Results for TOP-{top_N} predictions are recorded into {single_csv_path}")
+                if single_raw is not None:
+                    raw_path = f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_RAW.csv"
+                    single_raw.to_csv(raw_path, sep=",", index=False)
+                    print(f"RAW Results are recorded into {raw_path}")
 
                 if args.document_json_out:
                     # (atrium-project#10, D3) This used to carry its own copy of the
@@ -1052,7 +1066,7 @@ def main(argv=None):
                     _write_records(rdf, top_out_path)
 
                     if raw:
-                        raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
+                        raw_df.sort_values(["FILE", "PAGE"], ascending=[True, True], inplace=True)
                         raw_df.to_csv(
                             f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_RAW.csv",
                             sep=",",
@@ -1103,7 +1117,7 @@ def main(argv=None):
 
                         if raw:
                             if raw_df_chunk is not None and not raw_df_chunk.empty:
-                                raw_df_chunk.sort_values(categories, ascending=[False] * len(categories), inplace=True)
+                                raw_df_chunk.sort_values(["FILE", "PAGE"], ascending=[True, True], inplace=True)
 
                             write_header_raw = not os.path.exists(raw_out_path)
                             raw_df_chunk.to_csv(raw_out_path, sep=",", index=False, mode="a", header=write_header_raw)
@@ -1125,9 +1139,9 @@ def main(argv=None):
 
                     if raw and os.path.exists(raw_out_path):
                         final_raw_df = pd.read_csv(raw_out_path)
-                        final_raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
+                        final_raw_df.sort_values(["FILE", "PAGE"], ascending=[True, True], inplace=True)
                         final_raw_df.to_csv(raw_out_path, sep=",", index=False)
-                        print("Final RAW daily file sorted by category scores.")
+                        print("Final RAW daily file sorted by FILE and PAGE, as the TOP file.")
 
             else:  # args.best == True
                 if args.yolo:

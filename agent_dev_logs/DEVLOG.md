@@ -2,10 +2,9 @@
 > _Historical page-image classification. Open issue: #58 (decision-model experiments, 2026-10-20). #61 (the
 > directory-run bug) closed 2026-10-22, fixed in **v1.9.6-beta**. #48 closed 2026-09-17; the #48 and #61 pairs are removed this round; #15 and #26 closed; four open
 > Dependabot PRs (#56, #57, #59, #60). Its pilot work is tracked in hub issues (atrium-project #6, #67, #72) and in
-> atrium-digital-convert#5. `test` = `e989273` (2026-10-22; the `vX.4` results of atrium-project#15 since `f6ef687`, run with
-> **v1.9.8-beta**) · **v1.9.9-beta** (2026-10-22, `c91665b`: the results' documentation, the evaluation paradata) ·
-> **v1.9.10-beta** prepared (`models_used`, `collect`) · **v1.9.5-beta**
-> (2026-10-19, the runbook) is the first immutable release (atrium-project#72)._
+> atrium-digital-convert#5. `test` = `253239b` (2026-10-28) · **v1.11.0-beta** (2026-10-28, the service = the CLI:
+> the ensemble average, transparency) · **v1.12.0-beta** prepared 2026-10-29 (the pilot candidate,
+> atrium-project#77) · **v1.9.5-beta** (2026-10-19, the runbook) is the first immutable release (atrium-project#72)._
 > _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md`._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
@@ -646,3 +645,32 @@ themselves (per hub #29); this file is a derived reading aid in `agent_dev_logs/
 * **Checks:** 948 passed, 3 skipped, 2 xfailed with torch; 1 failure needs huggingface.co, unreachable here
   (`test_classifier.py::test_image_classifier_instantiation`). The spec is current (version only); image closure,
   `check_version.py --tag v1.11.0-beta`, `docs_check.py`, ruff OK.
+
+## 2026-10-29 — v1.12.0-beta: one average, one confidence (atrium-project#72, #77)
+
+* **How it was checked:** a scratch harness (not committed) ran `run.main` and `/predict_image` /
+  `/predict_document` with the real `ImageClassifier` code (`flatten_on_white`, the eval transform, `ImageDataset`,
+  `inference_collate`, softmax, `topn_pairs`) and a deterministic network in place of the weights, seeded by the
+  revision so the five members differ: PNG, JPEG, TIFF, a transparent PNG, a truncated JPEG, a three-page PDF; one
+  model and the ensemble; top 1, 3, 11; the PDF whole and as `2-3`, `3`, `1,3`, `4`. 50 cases. Before: 43 differed
+  (the record's confidence: 0.989 against 0.98869…; the ensemble's scores, from member scores rounded to 3 decimals,
+  e.g. 0.3638 against 0.364; a top-11 of 8–10 categories against 11). After: only the truncated JPEG, which the
+  batch decodes and the service refuses (documented).
+* **CLI:** `parallel_best` uses `ensemble.average_rdfs` on unrounded member scores (`utils.dataframe_results(...,
+  decimals=None)`), and `_rounded` rounds the AVG and per-model tables on writing; its copies of `average_rdfs` and
+  `average_prediction_dicts` are gone. A member that cannot load or run is left out with a warning and a paradata
+  skip, and the run says which answered; every member failing is an error. `--pages` past the last page:
+  `parser.error`, exit 2, as the service's 422. `--raw` with `-f` on one image writes the RAW table; RAW tables are
+  ordered by FILE and PAGE, as the TOP ones.
+* **Both:** `atrium_document_adapter` writes `category_confidence` to 3 decimals.
+* **Service:** `service/api_client.py` defaults to `all` and `--top 3`, routes by content (`%PDF-`), and passes
+  `--pages`, `--per-model`, `--document-json`, `--document-json-out`. The unused `PageImageDataset` and
+  `ModelManager.predict_directory` (with its test) are removed.
+* **Tests:** `tests/test_cli_service_parity.py` pins the confidence, `--raw` with one image, `--pages` past the end,
+  and the `--best` engine on stand-in members (the service's average, rounded; a failing member left out).
+* **Docs:** `docs/usage.md`'s parity section is one table (the kept differences: the tables' rounding, the default
+  model and `main`, `derived_from.classification`, `--strict-document-json`, truncated and very large scans, an
+  unreadable page, the limits); README; how-it-works (the PDF renderer on both sides, the average, rounding);
+  licences.md (pypdfium2 on both sides); the docstrings of `ensemble.py`.
+* **Release:** v1.12.0-beta in `CITATION.cff` (2026-10-29), `setup/para_config.txt`, the regenerated spec, the
+  examples; CONTRIBUTING row.

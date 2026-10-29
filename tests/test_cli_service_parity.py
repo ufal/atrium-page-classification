@@ -12,6 +12,11 @@ answers by the colour of the page, so the two sides can only agree if they read 
 
 What differs on purpose, pinned below and explained in docs/how-it-works.md ("One model or five"):
 the CLI's table rounds scores to 3 decimals, the service's answer does not.
+
+v1.12.0-beta: the record's `category_confidence` has 3 decimals from both sides; `--best` averages the
+members' unrounded scores with `ensemble.average_rdfs` (its copy in `parallel_best` is gone) and leaves
+out a member that fails; `--pages` past the last page is exit 2, as the service's 422; `--raw` works
+with `-f` on one image.
 """
 
 from __future__ import annotations
@@ -88,7 +93,9 @@ class _FakeClassifier:
     def infer_dataloader(self, dataloader, top_n, raw=False):
         from PIL import Image
 
-        return [_ranked(Image.open(path), top_n) for path in dataloader], None
+        ranked = [_ranked(Image.open(path), len(CATEGORIES)) for path in dataloader]
+        raws = [[dict(pairs).get(i, 0.0) for i in range(len(CATEGORIES))] for pairs in ranked] if raw else None
+        return [pairs[:top_n] for pairs in ranked], raws
 
 
 class _Manager:
@@ -287,6 +294,33 @@ def test_a_single_image_now_writes_the_table_and_the_record(cli, client, tmp_pat
     # Kept apart on purpose: the table rounds to 3 decimals, the answer does not.
     assert row["SCORE-1"] == round(SCORE, 3)
     assert body["predictions"][0]["score"] == SCORE
+    # The record says the same from both: 3 decimals (it said 0.877 and 0.876543).
+    cli_pages = {p["page"]: p["category_confidence"] for p in cli_record["pages"]}
+    service_pages = {p["page"]: p["category_confidence"] for p in body["document_json"]["pages"]}
+    assert cli_pages == service_pages == {"7": round(SCORE, 3)}
+
+
+def test_raw_with_one_image_writes_the_raw_table(cli, tmp_path):
+    from PIL import Image
+
+    image = tmp_path / "CTX05-1.png"
+    Image.new("RGB", (60, 80), color=COLOURS[1]).save(image)
+    assert cli(["-f", str(image), "--no-hf", "-tn", "1", "--raw"]) == 0
+    assert len(list((tmp_path / "result" / "tables").glob("*_RAW.csv"))) == 1
+
+
+def test_pages_past_the_end_are_refused_alike(cli, client, tmp_path):
+    pdf = tmp_path / "CTX06.pdf"
+    pdf.write_bytes(_pdf())
+    with pytest.raises(SystemExit) as caught:
+        cli(["-f", str(pdf), "--no-hf", "-tn", "1", "--pages", "4"])
+    assert caught.value.code == 2
+    response = client.post(
+        "/predict_document",
+        data={"version": "v4.4", "topn": 1, "pages": "4"},
+        files={"file": ("CTX06.pdf", pdf.read_bytes(), "application/pdf")},
+    )
+    assert response.status_code == 422 and response.json()["detail"].startswith("pages:")
 
 
 def test_document_json_out_with_a_directory_run_is_refused(cli, tmp_path):
@@ -457,3 +491,53 @@ def test_the_formats_are_read_in_any_case_and_a_pdf_by_its_content(tmp_path):
         (tmp_path / name).write_bytes(b"x")
     assert [Path(p).name for p in scrape(tmp_path, {"png"})] == ["a.PNG", "b.png"]
     assert [Path(p).name for p in scrape(tmp_path, {"png"}, inner=False)] == ["a.PNG"]
+
+
+def test_best_averages_unrounded_scores_and_leaves_out_a_failing_member(monkeypatch, tmp_path):
+    """The `--best` engine on three stand-in members, one of which cannot load: the average is the
+    service's over the two that answered, rounded only in the table."""
+    pytest.importorskip("torch")
+    import pandas as pd
+
+    import parallel_best
+    from ensemble import average_prediction_dicts
+
+    scores = {"v1.4": [(0, 0.61234), (1, 0.38766)], "v2.4": [(1, 0.55555), (0, 0.44445)]}
+
+    class Member:
+        def __init__(self, checkpoint=None, num_labels=None, store_dir=None):
+            pass
+
+        def load_model(self, path):
+            self.rev = {"model_v14": "v1.4", "model_v24": "v2.4"}.get(Path(path).name)
+            if self.rev is None:
+                raise OSError("no weights")
+
+        def create_dataloader(self, images, batch):
+            return images
+
+        def infer_dataloader(self, loader, top_n, raw=False):
+            return [scores[self.rev][:top_n] for _ in loader], None
+
+    fake = types.ModuleType("classifier")
+    fake.ImageClassifier = Member
+    monkeypatch.setitem(sys.modules, "classifier", fake)
+    image = tmp_path / "DOC-1.png"
+    image.write_bytes(b"x")
+    avg_path = parallel_best.run_best_models(
+        [str(image)],
+        CATEGORIES,
+        {"v1.4": "a", "v2.4": "b", "v3.4": "c"},
+        str(tmp_path),
+        str(tmp_path),
+        1,
+        2,
+        str(tmp_path),
+        "t",
+    )
+    row = pd.read_csv(avg_path).iloc[0]
+    expected = average_prediction_dicts(
+        [[{"label": CATEGORIES[i], "score": s} for i, s in ranked] for ranked in scores.values()], CATEGORIES, 2
+    )
+    assert [row["CLASS-1"], row["CLASS-2"]] == [p["label"] for p in expected]
+    assert [row["SCORE-1"], row["SCORE-2"]] == [round(p["score"], 3) for p in expected]

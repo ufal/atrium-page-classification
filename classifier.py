@@ -27,28 +27,6 @@ from transformers import (
 from page_inputs import flatten_on_white
 
 
-class PageImageDataset(Dataset):
-    def __init__(self, image_paths, labels, processor):
-        self.image_paths = image_paths
-        self.labels = labels
-        self.processor = processor
-
-    def __len__(self):
-        return len(self.image_paths)
-
-    def __getitem__(self, idx):
-        try:
-            image = Image.open(self.image_paths[idx]).convert("RGB")
-            encoding = self.processor(images=image, return_tensors="pt")
-            item = {k: v.squeeze() for k, v in encoding.items()}
-            if self.labels is not None:
-                item["labels"] = torch.tensor(self.labels[idx])
-            return item
-        except Exception:
-            # Drop corrupted images safely without breaking the batch
-            return None
-
-
 def custom_collate(batch: list) -> dict:
     """
     Custom collate function to filter out None entries from the batch

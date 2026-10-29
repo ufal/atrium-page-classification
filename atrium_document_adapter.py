@@ -2,7 +2,7 @@
 atrium_document_adapter.py — page-classification's contribution to the ATRIUM "paradata pair".
 
 Bridges the classifier's per-page top-N predictions (a FILE/PAGE/CLASS-N/SCORE-N DataFrame,
-see utils.dataframe_results / parallel_best.average_rdfs) into AtriumDocument records via
+see utils.dataframe_results / ensemble.average_rdfs) into AtriumDocument records via
 atrium_document.DocumentRecord, writing only this tool's owned block(s):
 
   * `page_categories`             — whole block, owned outright (BLOCK_OWNERS).
@@ -112,7 +112,9 @@ def _page_patches(group: pd.DataFrame) -> tuple[dict, list]:
         patch = {"page": page_str, "category": cat}
         # Only add confidence if it exists (handles top_N == 1 missing score safely)
         if "SCORE-1" in row and pd.notna(row["SCORE-1"]):
-            patch["category_confidence"] = float(row["SCORE-1"])
+            # 3 decimals from either entry point: the CLI's tables are rounded, the service's answer
+            # is not, and the record used to say 0.989 from one and 0.9886918… from the other.
+            patch["category_confidence"] = round(float(row["SCORE-1"]), 3)
 
         page_patches.append(patch)
 

@@ -50,8 +50,8 @@ classifier on the `clip` branch ([models](reference/models.md#alternatives-besid
 
 1. **Load and resize.** Each page image is resized to the model's square input, 224 or 384 pixels depending on the
    base model, and normalised with that base model's own mean and standard deviation. Nothing is cropped or rotated:
-   the orientation and the margins of a page are part of what the model sees. The service first renders each page
-   of a PDF at 300 dpi (`PDF_RENDER_DPI`).
+   the orientation and the margins of a page are part of what the model sees. A PDF's pages are first rendered at
+   300 dpi (`PDF_RENDER_DPI`), by the same renderer on the command line and in the service.
 2. **Score.** The model produces one value per category; a softmax turns them into probabilities that sum to 1.
 3. **Rank.** The `N` highest (`-tn`, 3 by default) become `CLASS-1…N` and `SCORE-1…N`, best first. The scores are
    renormalised over the best max(N, 2) categories, so `SCORE-1` is the model's confidence in its top answer
@@ -66,11 +66,15 @@ By default one model runs: the revision chosen with `-rev`, or a local checkpoin
 `version=all`, run the five models of the ensemble (`v1.4`–`v5.4`) on every page and average their scores:
 
 - Each model gives its own Top-N categories, its scores renormalised over its N best. The scores are summed per
-  category and divided by the number of models that answered, and the result is ranked again. The command line and
-  the service do this alike since `v1.11.0-beta` (before, the service averaged the full eleven-class probabilities).
+  category and divided by the number of models that answered, and the result is ranked again: one function on the
+  command line (`ensemble.average_rdfs`) and its counterpart in the service (`average_prediction_dicts`), alike since
+  `v1.11.0-beta`. Since `v1.12.0-beta` the command line averages the scores as the models gave them and rounds only
+  its table: it averaged scores already rounded to three decimals, so a table could read `0.48200000000000004`, and
+  a category whose rounded scores were all 0 fell out of a top-11.
 - The command line also records each model's own top-1 vote, so disagreement stays visible; the service returns each
-  model's own top-N with `per_model=true`. A model that fails is left out of the service's average, and `models_used`
-  names those that answered.
+  model's own top-N with `per_model=true`. A model that fails is left out of the average on both sides (on the
+  command line since `v1.12.0-beta`; it stopped the run): the command line names the models that answered, the
+  service lists them in `models_used`.
 
 The averaging is a mean of probabilities, not a majority vote: confident models weigh more than uncertain ones. It
 usually raises overall accuracy, but it can lower it for the most ambiguous pairs, such as `TEXT` and `TEXT_T`, whose
@@ -83,8 +87,8 @@ single model, before any page is seen ([training.md](training.md#averaging-fold-
 **Where the command line and the service still differ** (kept as they are since the service–CLI alignment of
 v1.10.0-beta, atrium-project#72, and pinned by `tests/test_cli_service_parity.py`):
 
-- **Rounding.** The command line's tables (and the record it writes) round scores to three decimals; the service
-  returns them unrounded.
+- **Rounding.** The command line's tables round scores to three decimals; the service's answer does not. The
+  record's `category_confidence` has three decimals from both (since `v1.12.0-beta`; the service's was unrounded).
 - **The default model.** The command line runs the model of `[HF] revision` in `setup/config.txt` (`main`), the batch
   image's default command `v4.3`; the service runs the ensemble (`version=all`). Name the model (`-rev`, `version`) to
   compare the two.
@@ -99,9 +103,10 @@ Everything else is the same on both sides:
 
 ## From a document to its pages
 
-A document is classified page by page: a scanned PDF is first split into page images (on the command line, with the
-[data-preparation scripts](data-preparation.md#pdf-to-png); in the service, by rendering each page), and each page
-gets its own category. The file name carries the document and the page number
+A document is classified page by page: a PDF is rendered into page images by one renderer
+(`service/pdf_render.py`), on the command line (`-f report.pdf`, or `-d` with `-ff …,pdf`) and in the service alike,
+and each page gets its own category. The [data-preparation scripts](data-preparation.md#pdf-to-png) remain for
+splitting a collection ahead of a run. A page image's file name carries the document and the page number
 ([usage.md](usage.md#name-the-page-images)).
 
 ![Multi-page document inference](../supplementary/figures/use-case.png)

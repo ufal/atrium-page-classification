@@ -464,27 +464,37 @@ curl -F file=@page.png -F document_json=@record.json http://localhost:8000/predi
 
 ### The command line and the service
 
-They read the same inputs the same way, and write the same record:
+Both run the same image path (`page_inputs.flatten_on_white`, the model's transforms, softmax, `topn_pairs`), the same
+PDF renderer and page selection, the same doc_id and page keys, the same ensemble average and the same record writer
+(`atrium_document_adapter`). A scratch harness ran 50 combinations through `run.py` and the service on 2026-10-29,
+with the real classifier code and a deterministic network in place of the weights, different for each of the five
+models: PNG, JPEG, TIFF, a transparent PNG, a truncated JPEG and a three-page PDF; one model and the ensemble; top 1,
+3 and 11; the PDF whole and as `2-3`, `3`, `1,3` and the past-the-end `4`. The categories, the scores (to the table's
+three decimals) and the record were the same in every case but the truncated JPEG (below).
 
-| What                             | Command line (`run.py`)                            | Service                                                                              |
-|----------------------------------|----------------------------------------------------|--------------------------------------------------------------------------------------|
-| a page image                     | `-f page.png`; any format Pillow reads             | `POST /predict_image`; recognised by content when sent as `application/octet-stream` |
-| a PDF, a page selection          | `-f report.pdf --pages 1-3`; `-d` with `-ff …,pdf` | `POST /predict_document`, `pages=1-3`                                                |
-| a record to add to, a new record | `--document-json`, `--document-json-out`           | `document_json`, `document_json_out=true`                                            |
-| each model's own top-N           | `--best --save-intermediates` (one CSV per model)  | `per_model=true`                                                                     |
-| all eleven scores                | `--raw`                                            | `topn=11`                                                                            |
-
-What only one side does, on purpose: the command line takes folders, trains and evaluates models, runs YOLO and
-writes CSV tables and a paradata file; the service takes one file per request, refuses uploads over its limits
-(`MAX_UPLOAD_MB`, `MAX_PDF_PAGES`, `MAX_IMAGE_PIXELS`) and returns its paradata as a `CreateAction`.
-
-Kept as they are, documented in [how-it-works.md](how-it-works.md#one-model-or-five): the tables round scores to
-three decimals (the service does not), and the default model differs (the CLI's config `main` and the batch image's
-`v4.3`, the service's `all`). Since `v1.11.0-beta` both sides average the five models the same way and put a
-transparent image on white.
+| Input or setting                 | Command line (`run.py`)                                                   | Service                                                | Same?                                                                   |
+|----------------------------------|---------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------------------------------------------------|
+| A page image                     | `-f page.png`; any format Pillow reads                                    | `POST /predict_image`; recognised by content           | the same                                                                |
+| A PDF, a page selection          | `-f report.pdf --pages 1-3`; `-d` with `-ff …,pdf`                        | `POST /predict_document`, `pages=1-3`                  | the same                                                                |
+| A selection past the last page   | exit 2, `--pages: …`                                                      | 422, `pages: …`                                        | the same (a traceback on the CLI before `v1.12.0-beta`)                 |
+| The model                        | `-rev`, else `[HF] revision` (`main`); `-m`, `-b`, `--models-dir`, `--hf` | `version`, else `all`; `main` is refused (422)         | differs: name the model to compare; the CLI also runs local checkpoints |
+| The ensemble                     | `--best`                                                                  | `version=all`                                          | the same average; a failing member left out on both                     |
+| Each model's own top-N           | `--best --save-intermediates` (one CSV per model)                         | `per_model=true`                                       | the same                                                                |
+| All eleven scores                | `--raw` (also with `-f` on one image since `v1.12.0-beta`)                | `topn=11`                                              | the same scores                                                         |
+| Scores                           | the tables round to three decimals                                        | unrounded                                              | differs: a table is for reading                                         |
+| A record to add to, a new record | `--document-json`, `--document-json-out`                                  | `document_json`, `document_json_out=true`              | the same record; `category_confidence` to three decimals on both        |
+| The record's link to its table   | `derived_from.classification`, the CSV                                    | none                                                   | differs: the service writes no table                                    |
+| Ownership and schema problems    | warnings; `--strict-document-json` makes them errors                      | warnings                                               | differs: strictness is for a pipeline step                              |
+| A truncated scan                 | decoded, its missing part grey (`tolerate_scan_quirks`)                   | 422, the upload is not a readable image                | differs: the batch tools read old scans; an upload must be whole        |
+| A very large image               | up to 4.22 G pixels (`tolerate_scan_quirks`)                              | `MAX_IMAGE_PIXELS`, 413                                | differs: the service bounds a request                                   |
+| A page no reader opens           | left out of a batch, logged as skipped; `-f` stops with an error          | the request fails (422 for the upload, 500 for a page) | differs: one answer per request                                         |
+| How much per run                 | a file, a folder or a tree; training and evaluation                       | one file per request, `MAX_UPLOAD_MB`, `MAX_PDF_PAGES` | differs: the service is stateless                                       |
+| Paradata                         | a file in `<results>/paradata/`                                           | the answer's `paradata`, a `CreateAction`              | atrium-project#71                                                       |
 
 `service/api_client.py` wraps the same calls and prints the JSON answer
-(`python3 service/api_client.py -f page.png -v v4.4 --top 3`), and a static page for trying it in a browser is served
+(`python3 service/api_client.py -f page.png -v v4.4 --top 3`). Since `v1.12.0-beta` it takes the service's defaults
+(`-v all`, `--top 3`), chooses the endpoint by the file's content, and passes `--pages`, `--per-model`,
+`--document-json` and `--document-json-out` on. A static page for trying the service in a browser is served
 at `/frontend`. The request fields, the response, the limits and every error are in
 [../service/README.md](../service/README.md); the typed contract is [../service/openapi.json](../service/openapi.json).
 

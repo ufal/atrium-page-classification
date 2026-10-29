@@ -116,8 +116,18 @@ def keep_readable(files: list, predictions: list, raw_scores: list = None, label
 
 
 def dataframe_results(
-    test_images: list, test_predictions: list, categories: list, top_N: int, raw_scores: list = None
+    test_images: list,
+    test_predictions: list,
+    categories: list,
+    top_N: int,
+    raw_scores: list = None,
+    decimals: Optional[int] = 3,
 ) -> (pd.DataFrame, pd.DataFrame):
+    """The TOP-N table (and the RAW one, with *raw_scores*) of a run, scores rounded to *decimals*.
+
+    ``decimals=None`` keeps the scores as the model gave them: what an ensemble averages, as the
+    service averages them, before its own table is rounded (``parallel_best``, atrium-project#72).
+    """
     # The two lists are paired by position, so they must be the same length: zipping a shorter
     # prediction list once gave later pages their neighbours' categories without an error.
     if len(test_images) != len(test_predictions):
@@ -148,7 +158,7 @@ def dataframe_results(
 
         pairs = as_pairs(predict_scores)[:top_N]
         labels = [categories[index] for index, _ in pairs]
-        scores = [None if score is None else round(score, 3) for _, score in pairs]
+        scores = [score if score is None or decimals is None else round(score, decimals) for _, score in pairs]
 
         res = [document, page_num] + labels + scores
         results.append(res)
@@ -171,7 +181,9 @@ def dataframe_results(
         col = ["FILE", "PAGE"]
         rawdf = pd.DataFrame(raws, columns=col)
         # Ensure raw_scores is a numpy array before rounding
-        raw_weights = np.array(raw_rows, dtype=float).reshape(len(raw_rows), len(categories)).round(3)
+        raw_weights = np.array(raw_rows, dtype=float).reshape(len(raw_rows), len(categories))
+        if decimals is not None:
+            raw_weights = raw_weights.round(decimals)
         rawdf[categories] = raw_weights
 
     return rdf, rawdf

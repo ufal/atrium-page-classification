@@ -34,9 +34,10 @@ archaeological reports from Czech archives, 1920–2020, published as a dataset 
 
 The command line and the service read the same inputs the same way (since v1.10.0-beta): a PDF is rendered by the
 service's own renderer on both sides, with the same `pages` selection, doc_id and page keys, and a born-digital
-record's page labels are honoured on both. What differs, and why, is in [docs/usage.md](docs/usage.md#the-command-line-and-the-service):
-directories and training are the command line's, the upload limits the service's, and the two still average and
-round scores differently.
+record's page labels are honoured on both; the ensemble is averaged alike, and the record's confidence has three
+decimals from both. What differs, and why, is in [docs/usage.md](docs/usage.md#the-command-line-and-the-service):
+directories and training are the command line's, the upload limits the service's, and the tables round scores to
+three decimals where the service's answer does not.
 
 The eleven categories and their definitions: [docs/reference/categories.md](docs/reference/categories.md). The
 record follows the hub's [document contract](https://ufal.github.io/atrium-project/ecosystem/document-contract/);
@@ -48,7 +49,7 @@ The service, from the published image, on a sample page of this repository:
 
 ```bash
 docker run --rm -p 8000:8000 -v hf-cache:/cache/huggingface \
-  ghcr.io/ufal/atrium-page-classification-api:<version>     # the release without its v, e.g. 1.11.0-beta
+  ghcr.io/ufal/atrium-page-classification-api:<version>     # the release without its v, e.g. 1.12.0-beta
 curl -s localhost:8000/ready                                 # 200 once the five models are loaded
 curl --fail-with-body -sS -X POST localhost:8000/predict_image \
   -F "file=@small_data_samples/TEXT_T/pages_online_2.png" -F version=v4.4 -F topn=3

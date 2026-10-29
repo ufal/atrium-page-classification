@@ -13,8 +13,10 @@ def average_rdfs(
     top_N: int,
     revision_best_models: Optional[dict] = None,
 ) -> pd.DataFrame:
-    """Average per-model softmax probabilities and re-rank to Top-N.
-    Used primarily by the parallel_best.py CLI engine.
+    """Average the members' Top-N scores per category and re-rank to Top-N: the command line's `--best`
+    (parallel_best.run_best_models), on the scores the models gave, unrounded. The service's
+    `average_prediction_dicts` below gives the same numbers (atrium-project#72); the command line rounds
+    only the table it writes.
     """
     long_dfs = []
     num_models = len(all_rdfs)
@@ -110,10 +112,8 @@ def average_rdfs(
 def average_prediction_dicts(
     predictions_list: List[List[Dict[str, float]]], categories: List[str], top_n: int
 ) -> List[Dict[str, float]]:
-    """
-    Averages a list of prediction dictionaries.
-    Used primarily by the FastAPI service for rapid in-memory JSON generation.
-    """
+    """The service's ensemble average (`version=all`): `average_rdfs` on in-memory predictions, the
+    members' scores summed per category and divided by the members that answered."""
     if not predictions_list:
         return []
 

@@ -1,5 +1,4 @@
 import logging
-import os
 import sys
 from pathlib import Path
 
@@ -118,72 +117,6 @@ class ModelManager:
             return results
         return {"predictions": results, "models_used": [version], "per_model": {version: results}}
 
-    def predict_directory(self, dir_path: str, version: str, topn: int = 3, batch_size: int = 16):
-        image_paths = sorted(
-            [os.path.join(dir_path, f) for f in os.listdir(dir_path) if f.lower().endswith((".png", ".jpg", ".jpeg"))]
-        )
-        if not image_paths:
-            return []
-
-        if version == "all":
-            n = len(image_paths)
-            all_model_predictions = []
-
-            for v in self.available_versions:
-                try:
-                    clf = self.load_model(v)
-                    dataloader = clf.create_dataloader(image_paths, batch_size=batch_size)
-                    predictions, _ = clf.infer_dataloader(dataloader, top_n=topn, raw=False)
-
-                    model_preds = []
-                    for pred_item in predictions:
-                        # None: the page image could not be read; it gets no vote from this model.
-                        model_preds.append(
-                            []
-                            if pred_item is None
-                            else [{"label": CATEGORIES[idx], "score": float(score)} for idx, score in pred_item]
-                        )
-                    all_model_predictions.append(model_preds)
-                except Exception as e:
-                    logger.warning(f"Ensemble: model {v} failed on directory, skipping: {e}")
-                    continue
-
-            if not all_model_predictions:
-                logger.error("Ensemble batch inference failed: all models errored.")
-                return [[] for _ in image_paths]
-
-            formatted_batch_results = []
-            for i in range(n):
-                preds_for_image = []
-                for model_preds in all_model_predictions:
-                    if i < len(model_preds) and model_preds[i]:
-                        preds_for_image.append(model_preds[i])
-
-                formatted_batch_results.append(average_prediction_dicts(preds_for_image, CATEGORIES, topn))
-            return formatted_batch_results
-
-        try:
-            clf = self.load_model(version)
-            internal_topn = max(topn, 2)
-            dataloader = clf.create_dataloader(image_paths, batch_size=batch_size)
-            predictions, _ = clf.infer_dataloader(dataloader, top_n=internal_topn, raw=False)
-
-            formatted_batch_results = []
-            for pred_item in predictions:
-                row_preds = []
-                if pred_item is None:  # the page image could not be read
-                    formatted_batch_results.append(row_preds)
-                    continue
-                for idx, score in pred_item[:topn]:
-                    row_preds.append({"label": CATEGORIES[idx], "score": float(score)})
-                formatted_batch_results.append(row_preds)
-
-            return formatted_batch_results
-
-        except Exception:
-            logger.exception(f"Batch inference error for {version}")
-            raise
-
     def _predict_averaged(self, image, topn):
         predictions_list = []
         answered = []
@@ -191,8 +124,8 @@ class ModelManager:
 
         # Each member's own top-N (renormalised over its N best), summed per category and divided by
         # the members that answered: the command line's `--best` average (ensemble.average_rdfs), so
-        # both sides give the same scores since v1.11.0-beta (atrium-project#72). Before, the service
-        # averaged the full eleven-class probabilities.
+        # both sides give the same scores since v1.11.0-beta, and from unrounded scores since
+        # v1.12.0-beta (atrium-project#72). Before, the service averaged all eleven probabilities.
         for v in self.available_versions:
             try:
                 results = self._run_single_inference(v, image, topn=topn)

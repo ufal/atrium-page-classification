@@ -138,24 +138,3 @@ def test_models_used_of_one_revision_and_of_a_failed_request(mock_single, manage
     assert manager.predict_detailed(dummy_image, version="v4.4", topn=1) == {"error": "weights missing"}
     manager.available_versions = ["v1.4", "v2.4"]
     assert manager.predict_detailed(dummy_image, version="all", topn=1) == {"error": "All models failed."}
-
-
-@patch("os.listdir")
-@patch.object(ModelManager, "load_model")
-def test_predict_directory_batch(mock_load, mock_listdir, manager):
-    """Test batch directory predictions filtering non-images."""
-    mock_listdir.return_value = ["page1.png", "page2.jpg", "log.txt"]
-
-    mock_clf = MagicMock()
-    mock_clf.create_dataloader.return_value = "dummy_loader"
-    mock_clf.infer_dataloader.return_value = (
-        [[(0, 0.9)], [(1, 0.8)]],  # Image 1 and Image 2 predictions
-        [],
-    )
-    mock_load.return_value = mock_clf
-
-    with patch("service.inference.CATEGORIES", ["DRAW", "TEXT"]):
-        res = manager.predict_directory("/dummy/path", version="vtest", topn=1)
-        assert len(res) == 2  # txt file is ignored
-        assert res[0][0]["label"] == "DRAW"
-        assert res[1][0]["label"] == "TEXT"
