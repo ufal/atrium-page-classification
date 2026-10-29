@@ -451,7 +451,7 @@ def ocr_handoff_pages(pages: Any) -> List[str]:
     hand-off may re-originate (see OCR_HANDOFF)."""
     return [
         _key_value(row.get("page"))
-        for row in pages or []
+        for row in (pages if isinstance(pages, list) else [])
         if isinstance(row, dict) and row.get("needs_ocr") is True and row.get("page") is not None
     ]
 
@@ -605,6 +605,59 @@ def _row_pages(records: Iterable[Any]) -> frozenset:
     """The page keys a row write touches, compared as merge_block() compares keys (`_key_value`;
     a row without a page counts as `null`, which no page is)."""
     return frozenset(_key_value(r.get("page")) for r in records if isinstance(r, dict))
+
+
+class InvalidRecordError(ValueError):
+    """A record this module cannot add to: a block a tool merges rows into is not a list of objects.
+
+    ``reason`` is the services' registered code: ``atrium_service.attach_error_handlers()`` answers
+    it with HTTP 422 ``invalid_record``. A ``ValueError``, so a caller that already catches one keeps
+    working.
+    """
+
+    reason = "invalid_record"
+
+
+def _json_type(value: Any) -> str:
+    """The JSON name of `value`'s type, for messages about a record's shape."""
+    if isinstance(value, bool):
+        return "boolean"
+    if isinstance(value, (int, float)):
+        return "number"
+    if isinstance(value, str):
+        return "string"
+    if isinstance(value, dict):
+        return "object"
+    if isinstance(value, list):
+        return "array"
+    return "null" if value is None else type(value).__name__
+
+
+def _list_block(data: Dict[str, Any], name: str, rows: bool = True) -> List[Any]:
+    """The rows of list block `name` in `data` (a copy of the list), or [] when it has none.
+
+    A merge used to take ``list(data.get(name) or [])`` on trust: a `pages` sent as a string or an
+    object became its characters or keys, and the merge then failed on ``.get`` with an
+    AttributeError, a 500 from a service and a traceback from a CLI (atrium-project#72). Such a
+    record does not validate, but the merge runs before validation, so its shape is checked here.
+    An empty or missing block is still no rows, as before. With `rows`, every row must be an
+    object too, since the merge matches rows by their key fields.
+    """
+    value = data.get(name)
+    if not value:
+        return []
+    if not isinstance(value, list):
+        raise InvalidRecordError(
+            f"the record's {name!r} block is a JSON {_json_type(value)}, not a list, so it cannot be added to"
+        )
+    if rows:
+        for i, row in enumerate(value):
+            if not isinstance(row, dict):
+                raise InvalidRecordError(
+                    f"row {i} of the record's {name!r} block is a JSON {_json_type(row)}, not an object, "
+                    f"so the block cannot be added to"
+                )
+    return list(value)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -902,13 +955,15 @@ class DocumentRecord:
         stray = sorted({_key_value(r.get("page")) for r in records if _key_value(r.get("page")) not in targets})
         if stray:
             raise ValueError(f"rows on page(s) {stray} are not among the pages being replaced {targets}")
+        _list_block(self._data, "pages", rows=False)  # read by _in_page_order() below; refused before the merge
         self._merge(name, records, own_fields=own_fields, replace_pages=targets)
         self._data[name] = self._in_page_order(self._data.get(name) or [])
         return self
 
     def _in_page_order(self, rows: List[Any]) -> List[Any]:
         """`rows` stably sorted by their page's position in `pages[]` (see replace_page_rows)."""
-        page_rows = [p for p in self._data.get("pages") or [] if isinstance(p, dict) and p.get("page") is not None]
+        pages = _list_block(self._data, "pages", rows=False)
+        page_rows = [p for p in pages if isinstance(p, dict) and p.get("page") is not None]
         by_index = bool(page_rows) and all(
             isinstance(p.get("page_index"), int) and not isinstance(p.get("page_index"), bool) for p in page_rows
         )
@@ -933,6 +988,9 @@ class DocumentRecord:
         keys = key_fields or BLOCK_KEY_FIELDS.get(name)
         if not keys:
             raise ValueError(f"no key fields known for block {name!r} — pass key_fields=[...]")
+        # Before anything is noted or checked: a block that is not a list of objects is refused
+        # with the record left as it was (InvalidRecordError, the services' 422 invalid_record).
+        existing: List[Dict[str, Any]] = _list_block(self._data, name)
 
         # `is not None`, not `or`: an explicit own_fields=[] means "write the key fields and
         # nothing else", and `or` used to treat that as "not supplied" and hand back the
@@ -982,7 +1040,6 @@ class DocumentRecord:
                     f"Declare them in BLOCK_FIELD_OWNERS or pass own_fields=[...]"
                 )
 
-        existing: List[Dict[str, Any]] = list(self._data.get(name) or [])
         if replace_pages is not None:
             wanted = set(replace_pages)
             existing = [r for r in existing if not (isinstance(r, dict) and _key_value(r.get("page")) in wanted)]
@@ -1625,7 +1682,8 @@ def quality_summary(record: Dict[str, Any]) -> Dict[str, Any]:
     consumer computes its own bands from it (atrium-project#73). ocr-postprocess, the owner of the
     quality model, writes the block whenever it writes or scores pages and lines.
     """
-    pages = [row for row in record.get("pages") or [] if isinstance(row, dict)]
+    rows = record.get("pages")
+    pages = [row for row in (rows if isinstance(rows, list) else []) if isinstance(row, dict)]
     scores = sorted(s for s in (_score(row.get("quality_score")) for row in pages) if s is not None)
     page_part: Dict[str, Any] = {"total": len(pages), "scored": len(scores)}
     if scores:

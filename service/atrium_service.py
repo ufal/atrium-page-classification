@@ -39,7 +39,9 @@ service reports an identical shape and agents/clients can rely on it:
   root, which this module imports lazily, like ``atrium_limits``.
 * ``parse_record_part`` — opens the document record a request carries and refuses one that
   cannot be opened with ``reason: "invalid_record"``; a record that opens but fails the
-  schema is left to the tool, which reports it as ``document_json_schema_error``.
+  schema is left to the tool, which reports it as ``document_json_schema_error``. A record
+  whose block the tool adds rows to is not a list of objects is refused later, when the
+  tool's merge meets it (``atrium_document.InvalidRecordError``, the same 422).
 
 The module deliberately imports only FastAPI/Starlette, pydantic (FastAPI's own model layer,
 declared and pinned in every ``service/requirements.txt``, because the committed spec is a
@@ -209,8 +211,10 @@ REASON_CODES: Dict[str, str] = {
     "invalid_record": (
         "The document record sent with the request cannot be opened (HTTP 422): it is not UTF-8 "
         "JSON, not a JSON object, or its `schema_version` has a newer major than this tool reads. "
-        "A record that opens but does not validate against the schema is accepted and reported "
-        "in `document_json_schema_error` instead. Fix the record; do not retry it unchanged."
+        "Also sent when a block the tool adds rows to (`pages`, `lines`, `tables`, `entities`) "
+        "is not a list of objects. A record that opens but does not validate against the schema "
+        "is otherwise accepted and reported in `document_json_schema_error`. Fix the record; do "
+        "not retry it unchanged."
     ),
     "ocr_text_layer": (
         "The PDF's text layer is an earlier OCR run's invisible text over page images, so the "
@@ -316,6 +320,9 @@ def attach_error_handlers(app: FastAPI) -> None:
       FastAPI's list of problems in ``errors``.
     * ``atrium_limits.LimitExceeded`` → its own status (413/422/504) with
       ``reason: "limit_exceeded"`` and the ``limit`` member.
+    * ``atrium_document.InvalidRecordError`` → 422 with ``reason: "invalid_record"``: the
+      record a request carried has a block the tool merges rows into that is not a list of
+      objects (atrium-project#72).
     * Anything else → 500 ``{"status": 500, "reason": null, "detail": "Internal server
       error."}`` as JSON instead of a text/plain page. Starlette still re-raises it
       after the response, so the server logs the traceback as before.
@@ -326,6 +333,7 @@ def attach_error_handlers(app: FastAPI) -> None:
     from fastapi.encoders import jsonable_encoder
     from fastapi.exceptions import RequestValidationError
 
+    import atrium_document  # lazily: see the module docstring
     import atrium_limits  # lazily: see the module docstring
 
     # The router's own 404/405 raise Starlette's HTTPException, the base class of FastAPI's.
@@ -358,6 +366,13 @@ def attach_error_handlers(app: FastAPI) -> None:
     async def _limit_exceeded(request, exc):  # noqa: ANN001, ANN202
         body = error_body(exc.http_status, exc.detail, "limit_exceeded", limit=jsonable_encoder(exc.to_dict()))
         return JSONResponse(body, status_code=exc.http_status)
+
+    @app.exception_handler(atrium_document.InvalidRecordError)
+    async def _invalid_record(request, exc):  # noqa: ANN001, ANN202
+        # A record that opened but cannot be added to: a block the tool merges rows into is not a
+        # list of objects (atrium-project#72). It used to end as an AttributeError and a 500.
+        detail = f"The document record cannot be added to: {exc}."
+        return JSONResponse(error_body(422, detail, "invalid_record"), status_code=422)
 
     @app.exception_handler(Exception)
     async def _unhandled(request, exc):  # noqa: ANN001, ANN202

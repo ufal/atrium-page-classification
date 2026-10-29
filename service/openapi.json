@@ -3,7 +3,7 @@
   "info": {
     "title": "ATRIUM Page Classification API",
     "description": "API for classifying historical document page images.",
-    "version": "1.12.0-beta",
+    "version": "1.12.1-beta",
     "x-atrium-service": "atrium-page-classification"
   },
   "paths": {
@@ -2714,7 +2714,7 @@
       ]
     },
     "invalid_record": {
-      "description": "The document record sent with the request cannot be opened (HTTP 422): it is not UTF-8 JSON, not a JSON object, or its `schema_version` has a newer major than this tool reads. A record that opens but does not validate against the schema is accepted and reported in `document_json_schema_error` instead. Fix the record; do not retry it unchanged.",
+      "description": "The document record sent with the request cannot be opened (HTTP 422): it is not UTF-8 JSON, not a JSON object, or its `schema_version` has a newer major than this tool reads. Also sent when a block the tool adds rows to (`pages`, `lines`, `tables`, `entities`) is not a list of objects. A record that opens but does not validate against the schema is otherwise accepted and reported in `document_json_schema_error`. Fix the record; do not retry it unchanged.",
       "statuses": [
         422
       ]

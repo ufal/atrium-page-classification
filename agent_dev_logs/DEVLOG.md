@@ -674,3 +674,17 @@ themselves (per hub #29); this file is a derived reading aid in `agent_dev_logs/
   licences.md (pypdfium2 on both sides); the docstrings of `ensemble.py`.
 * **Release:** v1.12.0-beta in `CITATION.cff` (2026-10-29), `setup/para_config.txt`, the regenerated spec, the
   examples; CONTRIBUTING row.
+
+## 2026-10-29 (evening) — v1.12.1-beta: a record that cannot be added to is refused (atrium-project#72)
+
+* **Shared modules** (re-vendored from the hub with `scripts/revendor_shared.sh`): `atrium_document.py` raises
+  `InvalidRecordError` when a list block the merge adds rows to is not a list of objects, before anything is written,
+  and `service/atrium_service.py` answers it with 422 `invalid_record`. Here that is `pages`: a baseline whose `pages`
+  is a string or an object was a 500 from the service and a traceback from the CLI. The spec's registry text names the
+  case, and the `invalid_record` row of `service/README.md` names `pages`.
+* **README:** the style-guide link on `main`, as in the other five.
+* **CI:** the hub's workflows are pinned to the commit that carries the modules (the maintainer's pin move; the Trivy
+  database retry of `b07090f` is already in).
+* **Release:** v1.12.1-beta in `CITATION.cff`, `setup/para_config.txt`, the spec's version; CONTRIBUTING row; the
+  version examples of the README and the service README.
+* **Checks:** 859 passed, 12 skipped, 2 xfailed (without torch; the torch tests skip); pre-commit clean.

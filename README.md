@@ -49,7 +49,7 @@ The service, from the published image, on a sample page of this repository:
 
 ```bash
 docker run --rm -p 8000:8000 -v hf-cache:/cache/huggingface \
-  ghcr.io/ufal/atrium-page-classification-api:<version>     # the release without its v, e.g. 1.12.0-beta
+  ghcr.io/ufal/atrium-page-classification-api:<version>     # the release without its v, e.g. 1.12.1-beta
 curl -s localhost:8000/ready                                 # 200 once the five models are loaded
 curl --fail-with-body -sS -X POST localhost:8000/predict_image \
   -F "file=@small_data_samples/TEXT_T/pages_online_2.png" -F version=v4.4 -F topn=3
@@ -143,7 +143,7 @@ pages that have no usable text layer. The whole chain: the
 | read why it is built this way                                      | [docs/decisions/history.md](docs/decisions/history.md)                                                                                                                                                                               |
 
 The documentation follows the ATRIUM
-[documentation style](https://github.com/ufal/atrium-project/blob/test/docs/documentation-style.md).
+[documentation style](https://github.com/ufal/atrium-project/blob/main/docs/documentation-style.md).
 
 ## Licence, citation and acknowledgements
 

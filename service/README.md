@@ -38,7 +38,7 @@ The published image first: it is what a deployment runs, and it needs no checkou
 
 ```bash
 docker run --rm -p 8000:8000 -v hf-cache:/cache/huggingface \
-  ghcr.io/ufal/atrium-page-classification-api:<version>     # e.g. 1.12.0-beta; add --gpus all on a GPU node
+  ghcr.io/ufal/atrium-page-classification-api:<version>     # e.g. 1.12.1-beta; add --gpus all on a GPU node
 curl -s http://localhost:8000/ready                         # 200 once the models are loaded
 # from a checkout:
 docker compose --profile api up --build
@@ -453,7 +453,7 @@ for request-validation problems.
 |------|--------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
 | 413  | `limit_exceeded`         | over `MAX_UPLOAD_MB`, `MAX_PDF_PAGES` or `MAX_IMAGE_PIXELS`                                                                                                                      | send fewer pages (`pages`) or a smaller file, or raise the setting `limit.env` names |
 | 415  | `unsupported_media_type` | the file is not an image (`/predict_image`, `accepted: ["image/*"]`) or not a PDF (`/predict_document`, `accepted: ["application/pdf"]`); a 400 before atrium-project#32 round 2 | send an image to `/predict_image`, a PDF to `/predict_document`                      |
-| 422  | `invalid_record`         | the `document_json` baseline cannot be opened (not UTF-8 JSON, not an object, a newer `schema_version` major)                                                                    | send the record the previous stage wrote; update this service if the record is newer |
+| 422  | `invalid_record`         | the `document_json` baseline cannot be opened (not UTF-8 JSON, not an object, a newer `schema_version` major), or its `pages` is not a list of objects                           | send the record the previous stage wrote; update this service if the record is newer |
 | 422  | `null`                   | request validation (e.g. `topn` outside 1–11), an unknown `version`, or an image or PDF that cannot be read                                                                      | fix the field `errors` or `detail` names; repair or re-export an unreadable file     |
 | 500  | `null`                   | processing failure (a page the model could not classify included), or a record rejected by its own schema                                                                        | report it with `detail`; check the log for a model that failed to load               |
 | 503  | `null`                   | the replica is shutting down — retry against a live one                                                                                                                          | retry on another replica                                                             |
