@@ -132,6 +132,10 @@ documentation use the published one. The sweep itself: [../evaluation/sweep-2025
 | `vit-base-patch16-384`           | 87             | 384             | `v3.X`         | 345 MB                             |
 | `vit-large-patch16-384`          | 305            | 384             | `v5.X`         | 1.2 GB                             |
 
+The largest model, ViT-large (`v5.X`), has the most capacity and needs the most memory (1.2 GB on disk). The smallest,
+EfficientNetV2-M (`v1.X`, 213 MB), suits low-resource machines. ViT-base-384 (`v3.X`, 345 MB) balances size and
+accuracy. How accurate each is: [../evaluation/results.md](../evaluation/results.md).
+
 Up to 1 GB of disk is needed for the model files and checkpoints of a run, and up to 7 GB for the Python libraries.
 A model downloaded with `--hf` is saved to `model/model_<revision without dots>`, for example `model/model_v44`.
 

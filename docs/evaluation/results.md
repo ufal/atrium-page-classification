@@ -1,9 +1,14 @@
 # What was measured
 
-For anyone who has to judge the results: how accurate the published `vX.4` models are on pages they were not trained
-on, where they go wrong, and which older figures are not held-out accuracy. The provenance of every figure (code,
-model commits, folds, the run's own record) is in [result/README.md](../../result/README.md), which this page
-summarises; the data and the split are in [data.md](data.md).
+**In short:** Each of the five published `vX.4` models scores 94.64–95.87 % top-1 (99.75–99.90 % top-3) on about 4,800
+held-out pages of its own fold. Models scored on the same fold do not differ significantly. For pages like the
+training pages, expect the true category first for about 95 pages in 100, with `TEXT_T` and `LINE_HW` the weak spots.
+Not measured: the ensemble, born-digital pages, other archives and the YOLO backend.
+
+For anyone who has to judge the results. It shows how accurate the published `vX.4` models are on pages they were not
+trained on, where they go wrong, and which older figures are not held-out accuracy. This page summarises
+[result/README.md](../../result/README.md), which holds the provenance of every figure (code, model commits, folds,
+the run's own record). The data and the split are in [data.md](data.md).
 
 On this page:
 [The `vX.4` models on held-out pages](#the-vx4-models-on-held-out-pages) ·
@@ -21,7 +26,7 @@ On this page:
 
 Each of the five published `vX.4` models, those that `--best` and `version=all` use, was scored on the **test
 partition of the fold it was trained on**, as published in the
-[LINDAT record](http://hdl.handle.net/20.500.12800/1-6184): pages the model never saw in training (2026-10-22,
+[LINDAT record](http://hdl.handle.net/20.500.12800/1-6184). The model never saw these pages in training (2026-10-22,
 [atrium-project#15](https://github.com/ufal/atrium-project/issues/15)).
 
 | Base model                               | Revision | Fold | Test pages | Top-1 (%) | Top-3 (%) | Top-1, unseen documents (%) |
@@ -86,18 +91,18 @@ diagonal the errors between pairs of categories. It tells you **what kind of mis
   their labels have not been checked against reviewed answers.
 - **Other archives.** The categories and the training pages come from archaeological reports of 1920–2020; pages of
   a very different kind are forced into the nearest category.
-- **PDFs rendered by the service.** The service renders PDF pages with pypdfium2, the training pages were made with
-  pdftoppm; the difference was measured on labels, not against gold answers
+- **PDFs rendered by the service.** The service renders PDF pages with pypdfium2, and the training pages were made with
+  pdftoppm. The difference was measured on labels, not against gold answers
   ([reference/licences.md](../reference/licences.md#the-pdf-renderer)).
 - **The ensemble, the YOLO backend and the averaged fold models** have no held-out figure.
-- **The sample pages** in [small_data_samples](../../small_data_samples) scored 70–79 % top-1, but they come from
-  theses, slides, papers and web pages outside the training data, and their folders were never checked as
-  evaluation labels; those tables were removed ([result/README.md](../../result/README.md)).
+- **The sample pages** in [small_data_samples](../../small_data_samples) scored 70–79 % top-1. They come from theses,
+  slides, papers and web pages outside the training data, and their folders were never checked as evaluation labels,
+  so those tables were removed ([result/README.md](../../result/README.md)).
 
 ## Earlier models
 
 **The 2025 `vX.3` sweep** chose the five base models and their folds. Its figures (98–99 %, such as 99.16 % for
-`v4.3`) were measured on a 5,449-page set most of whose pages are training pages, so they are not held-out accuracy:
+`v4.3`) were measured on a 5,449-page set most of whose pages are training pages. They are not held-out accuracy:
 [sweep-2025.md](sweep-2025.md). The `vX.3` results shown here before, and what was wrong with them, are described,
 and linked where they are preserved, in [result/README.md](../../result/README.md#earlier-results-and-their-problems).
 

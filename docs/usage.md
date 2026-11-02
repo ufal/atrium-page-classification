@@ -1,26 +1,29 @@
 # Using page-classification
 
-For anyone who wants to classify their own page images: how to install the tool, get a model, classify one page or a
-whole folder, read and combine the results, and run it from the Docker images. Deploying and operating the HTTP
+For anyone who wants to classify their own page images. It shows how to install the tool, get a model, classify one
+page or a whole folder, read and combine the results, and run the Docker images. Deploying and operating the HTTP
 service, with every endpoint, limit and error, is in [../service/README.md](../service/README.md); every flag is in
-[reference/cli.md](reference/cli.md).
+[reference/cli.md](reference/cli.md). Terms such as record, paradata and ensemble are explained in the
+[ATRIUM glossary](https://ufal.github.io/atrium-project/glossary/).
 
 On this page:
-[Requirements](#requirements) ·
+[Check the requirements](#check-the-requirements) ·
 [Install](#install) ·
 [Get a model](#get-a-model) ·
 [Prepare the input](#prepare-the-input) ·
+[Configure a run](#configure-a-run) ·
 [Classify one page](#classify-one-page) ·
 [Classify a folder](#classify-a-folder) ·
 [Reading the output](#reading-the-output) ·
 [Combining and post-processing results](#combining-and-post-processing-results) ·
 [Write a document record](#write-a-document-record) ·
-[Docker](#docker) ·
-[The HTTP service](#the-http-service) ·
+[Run it in Docker](#run-it-in-docker) ·
+[Use the HTTP service](#use-the-http-service) ·
 [In the ATRIUM pipeline and from a coding agent](#in-the-atrium-pipeline-and-from-a-coding-agent) ·
+[The command line and the service](#the-command-line-and-the-service) ·
 [Troubleshooting](#troubleshooting)
 
-## Requirements
+## Check the requirements
 
 - **Python 3.11**, the version the container images and CI use across the ATRIUM repositories. `numpy` is pinned
   below 2.5, because 2.5 requires Python 3.12.
@@ -49,22 +52,21 @@ training, evaluation or prediction).
 
 > [!WARNING]
 > **`transformers` stays on 4.x.** On `transformers` 5.x, model construction moves to the `meta` device inside
-> `from_pretrained`, and the timm-based architectures used here (RegNetY `v4.3`/`v4.4`, EfficientNetV2 `v1.3`/`v1.4`)
-> run shape-deriving operations (`torch.unique`, `.item()`) while they are built. These have no meta kernel and raise
-> an error. `setup/requirements.txt` therefore pins `transformers>=4.57.6,<5`, and `.github/dependabot.yml` ignores
+> `from_pretrained`. The timm-based architectures used here (RegNetY `v4.3`/`v4.4`, EfficientNetV2 `v1.3`/`v1.4`)
+> then run shape-deriving operations (`torch.unique`, `.item()`) while they are built. These have no meta kernel and
+> raise an error. `setup/requirements.txt` therefore pins `transformers>=4.57.6,<5`, and `.github/dependabot.yml` ignores
 > the 5.x bump.
 
-The HTTP service has its own setup script, `setup/setup_api_service.sh`, which also installs
-`service/requirements.txt` and downloads the weights:
-[../service/README.md](../service/README.md#installation--setup).
+The HTTP service adds its own requirements and its own start command:
+[Run the service from a checkout](#run-the-service-from-a-checkout).
 
-### Branches
+### Choose a branch
 
 The code is on the default branch, `vit`; changes are staged on `test` ([CONTRIBUTING.md](../CONTRIBUTING.md)).
 `clip` holds a separate, CLIP-based classifier for the same categories, with its own Hugging Face repository; switch
 to it with `git checkout clip`. The other branches: [development.md](development.md#branches).
 
-### Updating a checkout
+### Update a checkout
 
 To keep your local changes and merge the latest files over them:
 
@@ -128,7 +130,7 @@ for r in v1.4 v2.4 v3.4 v4.4 v5.4; do python3 run.py --hf -rev "$r"; done
 On a shared server (a Galaxy instance, a cluster) the weights should be downloaded once, not in every job.
 `--models-dir DIR` puts everything a run reads in one folder: the fine-tuned models in `DIR/model`, the base-model
 cache in `DIR/checkpoint` and the Hugging Face cache of the image processors in `DIR/hf`. With `--hf` the revision is
-downloaded into it; without `--hf` the run reads only that folder and switches the Hugging Face libraries offline
+downloaded into it. Without `--hf` the run reads only that folder and switches the Hugging Face libraries offline
 (`HF_HUB_OFFLINE=1`), so a missing file stops the run instead of starting a download.
 
 ```bash
@@ -143,9 +145,9 @@ python3 run.py --models-dir /srv/atrium-page-models --best -d pages/
 The results still go to `result/` under the working directory. The staged folder can be read-only; a `--best` run on
 a GPU then re-measures its memory profile each time instead of saving it.
 
-After a download the checkout looks like this (`model/`, `result/` and `checkpoint/` are git-ignored runtime folders,
-created when the pipeline first runs; under Docker they are volumes, so data and models persist between runs;
-`model_output/` appears only after training):
+After a download the checkout looks like this. `model/`, `result/` and `checkpoint/` are git-ignored runtime folders,
+created when the pipeline first runs; under Docker they are volumes, so data and models persist between runs.
+`model_output/` appears only after training:
 
 ```text
 atrium-page-classification
@@ -209,11 +211,11 @@ Every output file and its columns: [reference/outputs.md](reference/outputs.md).
 ## Prepare the input
 
 The classifier reads **page images**, one file per page, and **PDFs**. A PDF given with `-f`, or found by `-d` when
-`-ff` names `pdf`, is rendered page by page with the service's renderer (pypdfium2, at `PDF_RENDER_DPI`, 300 dpi),
-so the command line and `POST /predict_document` see the same pixels; `--pages 1,3,5-7` classifies a selection.
-A file is taken as a PDF by its content, whatever its name. Splitting the PDFs into files first is still possible,
-with the bundled converter, which renders every page at 300 dpi with poppler's `pdftoppm`, in parallel, into one
-sub-folder per PDF:
+`-ff` names `pdf`, is rendered page by page with the service's renderer (pypdfium2, at `PDF_RENDER_DPI`, 300 dpi). The
+command line and `POST /predict_document` therefore see the same pixels, and `--pages 1,3,5-7` classifies a selection.
+A file is taken as a PDF by its content, whatever its name. You can also split the PDFs into files first, with the
+bundled converter. It renders every page at 300 dpi with poppler's `pdftoppm`, in parallel, into one sub-folder per
+PDF:
 
 ```bash
 data_scripts/unix/pdf2png.sh --dir /data/pdfs --output /data/pages      # the PDFs are kept
@@ -221,7 +223,7 @@ data_scripts/unix/pdf2png.sh --dir /data/pdfs --format jpg --dpi 200    # other 
 ```
 
 `data_scripts/windows/pdf2png.bat` does the same with ImageMagick and Ghostscript, one file at a time. Neither the
-command line nor the HTTP service needs them any more for classification. The converters, and how to turn the pages
+command line nor the HTTP service needs them for classification. The converters, and how to turn the pages
 into a training set: [data-preparation.md](data-preparation.md).
 
 ### Name the page images
@@ -260,23 +262,22 @@ python3 run.py -f '/full/path/to/report.pdf' -rev v4.4 --pages 1-3              
 
 The result is printed to the console, one line per category with its score as a percentage
 ([the Quick start](../README.md#quick-start) shows one), and written as the one-row table a folder run writes
-(`result/tables/<time>_<model>_TOP-<N>.csv`; before v1.10.0-beta `-f` only printed). A PDF takes the folder path:
-one row per page.
+(`result/tables/<time>_<model>_TOP-<N>.csv`). A PDF takes the folder path: one row per page.
 
 > [!NOTE]
 > The console output and every result table give **normalised** scores: the model's probabilities renormalised over
-> its best max(N, 2) categories, so with `-tn 1` the score is the best category's share of the best two (as the
-> service's `topn=1`). An image that cannot be read gets no row: it is recorded as skipped in the run's paradata,
-> and every other page keeps its own result (#61).
+> its best max(N, 2) categories. With `-tn 1` the score is therefore the best category's share of the best two, as in
+> the service's `topn=1`. An image that cannot be read gets no row: it is recorded as skipped in the run's paradata,
+> and every other page keeps its own result.
 
 ## Classify a folder
 
 `-d` names the folder; `--dir` takes the folder in `[INPUT] FOLDER_INPUT` instead. Input is chosen only by `-f`,
-`-d` or `--dir`: without one of them nothing happens. `--inner` (the default) walks nested folders, `-ff` sets the
+`-d` or `--dir`: without one of them nothing happens. `--inner` (the default) walks nested folders. `-ff` sets the
 file extensions to collect, comma-separated and in any case (default `png`; `png,jpg,tif`; add `pdf` to render and
-classify the PDFs too), and `--raw` also writes all eleven scores. The same `-tn` and `-m` flags apply as for one
-page. A PDF is taken only when `-ff` names `pdf`, so a folder that holds a PDF beside its own page images is not
-classified twice; with `--no-inner`, which takes every file of the folder, a PDF is always rendered.
+classify the PDFs too). `--raw` also writes all eleven scores. The same `-tn` and `-m` flags apply as for one page.
+A PDF is taken only when `-ff` names `pdf`, so a folder that holds a PDF beside its own page images is not classified
+twice. With `--no-inner`, which takes every file of the folder, a PDF is always rendered.
 
 ```bash
 python3 run.py -d /data/pages --inner                      # recurse into sub-folders
@@ -295,7 +296,7 @@ python3 run.py -d /data/scans -ff png,jpg,pdf              # images of three kin
 - Progress is printed every 50 batches, as `<i>-th batch  Processed <n> images in <t> min`, where `n` grows by the
   batch size (`[SETUP] batch`) with each batch. The output table is saved in `result/tables` only after every image
   is processed (with `--chunk`, chunk by chunk).
-- `--parallel` changes only how the models are scheduled on the GPU: its output files are identical to those of a
+- `--parallel` changes only how the models are scheduled on the GPU. Its output files are identical to those of a
   plain `--best` run, so the two can be diffed byte for byte ([how-it-works.md](how-it-works.md#the-memory-aware---best-engine)).
 - `--best` honours `-tn`: the averaged table keeps `top_N` ranked classes per page, while the per-model vote columns
   are always top-1.
@@ -336,13 +337,13 @@ label, and `pages[].category` and `pages[].category_confidence` carry the label 
 | `{date-time}_BEST_5_models_TOP-1.csv`       | the wide per-model votes: one top-1 column per model (`CLASS-1-v1.4` … `CLASS-1-v5.4`)                      |
 | `{date-time}_BEST_5_models_AVG_TOP-{N}.csv` | the final averaged result: the per-model votes (`V1.4` … `V5.4`) and the probability-averaged Top-N classes |
 
-The averaging is a mean of the models' probabilities, not a majority vote, so confident models weigh more than
+The averaging is a mean of the models' probabilities, not a majority vote. Confident models therefore weigh more than
 uncertain ones, and a page on which all five agree with certainty scores `1.0`
 ([how-it-works.md](how-it-works.md#one-model-or-five)).
 
 The wide `BEST_5_models_TOP-1.csv` is byte-compatible with
-[averaging.py](../supplementary/scripts/averaging.py), which stays available for manual re-averaging. It is no longer
-a required step. Reach for it instead of `--best` when:
+[averaging.py](../supplementary/scripts/averaging.py), which re-averages tables by hand. It is not a required step.
+Reach for it instead of `--best` when:
 
 * you already have saved per-model tables and want to combine them again without re-running inference
   (`--best --save-intermediates` writes those per-model files);
@@ -356,10 +357,12 @@ python3 supplementary/scripts/averaging.py --files result/tables/20261022-1218_B
 ```
 
 `--keep-zeros` keeps null scores and `--no-normalize` turns off the hyphen-to-underscore normalisation of file names;
-see `python3 supplementary/scripts/averaging.py --help`. Examples shipped in the repository: the wide
+see `python3 supplementary/scripts/averaging.py --help`. The repository ships examples: the wide
 [BEST_5_models_TOP-1.csv](../result/tables/20261022-1218_BEST_5_models_TOP-1.csv) and the averaged
-[ARUB_averaged_SHORT.csv](../result/ARUB_averaged_SHORT.csv) and [ARUP_averaged_SHORT.csv](../result/ARUP_averaged_SHORT.csv),
-each from the `vX.3` best five models with a Top-3 setting (about one thousandth of each collection's results).
+[ARUB_averaged_SHORT.csv](../result/ARUB_averaged_SHORT.csv) and
+[ARUP_averaged_SHORT.csv](../result/ARUP_averaged_SHORT.csv).
+Each comes from the `vX.3` best five models with a Top-3 setting, and holds about one thousandth of its collection's
+results.
 
 Two more scripts take result tables apart:
 
@@ -394,12 +397,12 @@ errors. What the tool writes into the record: [reference/outputs.md](reference/o
   whose position is another page's label is left out of the record (it stays in the table).
 - `-f` with `--document-json-out-dir` writes `<doc_id>.document.json` into that directory (taking the baseline from
   `--document-json-dir`, as a folder run does); `-d` with `--document-json-out` is refused, as one path cannot hold a
-  folder's records (it used to be ignored).
+  folder's records.
 
-## Docker
+## Run it in Docker
 
 Two images are published to GHCR from the same [Dockerfile](../Dockerfile). `<version>` is the release without its
-leading `v` (for example `1.10.0-beta`), or `latest`; when each tag moves is on the hub's
+leading `v` (for example `1.12.1-beta`), or `latest`; when each tag moves is on the hub's
 [Operations](https://ufal.github.io/atrium-project/operations/) page.
 
 | Image                                                   | Stage  | Entry point                                       | What it is                    |
@@ -410,10 +413,9 @@ leading `v` (for example `1.10.0-beta`), or `latest`; when each tag moves is on 
 The `-api` suffix belongs to the image name. An image built locally with Compose carries its own local tag
 (`${ATRIUM_VERSION:-dev}`). Neither image holds model weights.
 
-The batch image passes options to `run.py` (`docker run IMAGE -d /data/input --best`). Since `v1.10.5-beta`, a first
-argument that names a program runs that program instead (`docker run IMAGE /bin/sh job.sh`,
-`docker run IMAGE python3 /app/run.py --help`), which is how Galaxy starts a tool's container; before, it reached
-`run.py` and failed with "unrecognized arguments" (atrium-project#66).
+The batch image passes options to `run.py` (`docker run IMAGE -d /data/input --best`). A first argument that names a
+program runs that program instead (`docker run IMAGE /bin/sh job.sh`, `docker run IMAGE python3 /app/run.py --help`),
+which is how Galaxy starts a tool's container.
 
 ```bash
 # the batch command line, over ./data/input, writing to ./data/output
@@ -441,7 +443,7 @@ downloaded weights, so a container start does not download them again.
 **Run as yourself on Linux.** `./data` and `./data/output` are part of the clone and belong to you, while the images
 run as the non-root user `atrium`, uid 10001. Compose runs the services as `user: "${ATRIUM_UID:-10001}:0"`, so put
 your uid in `.env` once, `echo "ATRIUM_UID=$(id -u)" >> .env`, and the container writes the results as you. With
-`docker run`, pass `--user "$(id -u):0"`. Docker Desktop (macOS, Windows) needs neither (atrium-project#69). A host
+`docker run`, pass `--user "$(id -u):0"`. Docker Desktop (macOS, Windows) needs neither. A host
 folder the container's uid cannot write fails with `EACCES` before any page is classified.
 
 **`HF_TOKEN`** is optional: the models are public, but anonymous Hugging Face downloads are rate-limited, so an
@@ -451,7 +453,7 @@ The service image is hardened for deployment (upload size limits, a PDF page cap
 clean stop exits with **143**, which is expected. The operator runbook (start, models and caches, errors and what to
 do, limits, shutdown): [../service/README.md](../service/README.md).
 
-## The HTTP service
+## Use the HTTP service
 
 The service classifies one image (`POST /predict_image`) or a PDF (`POST /predict_document`) and answers in JSON,
 with the same models. A minimal call is in the [Quick start](../README.md#quick-start):
@@ -462,25 +464,76 @@ curl -F file=@report.pdf -F version=all http://localhost:8000/predict_document
 curl -F file=@page.png -F document_json=@record.json http://localhost:8000/predict_image   # add to a record
 ```
 
-### The command line and the service
+`service/api_client.py` wraps the same calls and prints the JSON answer
+(`python3 service/api_client.py -f page.png -v v4.4 --top 3`). It takes the service's defaults (`-v all`, `--top 3`),
+chooses the endpoint by the file's content, and passes `--pages`, `--per-model`, `--document-json` and
+`--document-json-out` on. A static page for trying the service in a browser is served at `/frontend`. The request
+fields, the response, the limits and every error are in [../service/README.md](../service/README.md); the typed
+contract is [../service/openapi.json](../service/openapi.json).
 
-Both run the same image path (`page_inputs.flatten_on_white`, the model's transforms, softmax, `topn_pairs`), the same
-PDF renderer and page selection, the same doc_id and page keys, the same ensemble average and the same record writer
-(`atrium_document_adapter`). A scratch harness ran 50 combinations through `run.py` and the service on 2026-10-29,
-with the real classifier code and a deterministic network in place of the weights, different for each of the five
-models: PNG, JPEG, TIFF, a transparent PNG, a truncated JPEG and a three-page PDF; one model and the ensemble; top 1,
-3 and 11; the PDF whole and as `2-3`, `3`, `1,3` and the past-the-end `4`. The categories, the scores (to the table's
-three decimals) and the record were the same in every case but the truncated JPEG (below).
+### Run the service from a checkout
+
+This sets up the service in a virtual environment, without Docker. Installing and running the command line alone is
+under [Install](#install).
+
+1. **Check the prerequisites.** Python 3.11, the version of the image and the CI. A CPU is enough, and a CUDA-capable
+   GPU makes inference faster. NodeJS is needed only to develop the LINDAT frontend
+   ([the runbook's tests](../service/README.md#client-side-test-with-lindat)).
+2. **Install the dependencies,** from the repository root, in an active virtual environment:
+
+   ```bash
+   pip install -r setup/requirements.txt -r service/requirements.txt
+   ```
+
+   The serving half (fastapi, uvicorn, python-multipart, pillow, pypdfium2) is in `service/requirements.txt`, and the
+   model stack (torch, timm, transformers) in `setup/requirements.txt`; the Docker image installs both.
+3. **Get the models.** Download the five `vX.4` models as in [Get a model](#get-a-model), or leave it to the first
+   start. When a model is missing from `model/`, `service/inference.py` downloads it from the Hugging Face Hub, so the
+   very first start takes a while. The service loads all five before it accepts a request.
+4. **Start the service:**
+
+   ```bash
+   python -m service.api                  # honours PORT and HOST; default 0.0.0.0:8000
+   uvicorn service.api:app --reload       # hot reload, for development
+   ```
+
+`setup/setup_api_service.sh` is a convenience script for the same steps. It creates the virtual environment, installs
+both requirement files and downloads the models. It fetches the `v1.3`–`v5.3` revisions, however, and its relative
+paths assume it runs from `setup/` while it looks for `run.py` in the working directory. Prefer the commands above.
+The virtual environment's name is set in the script and can be changed to an existing one.
+
+## In the ATRIUM pipeline and from a coding agent
+
+Each pipeline stage runs as its own container, and the document record passed with `--document-json` /
+`--document-json-out` is the hand-off between them. The reference sequence, with page-classification as its first
+stage, is on the hub's [workflow page](https://ufal.github.io/atrium-project/workflows/page-classification/) and its
+[Pipelines](https://ufal.github.io/atrium-project/pipelines/) page. The `agent-skill` branch packages the HTTP service
+as an Agent Skill, so a coding agent can classify a page or a PDF by calling a running service. How to install it, and
+the contract it relies on, are on the hub's [Agent skills](https://ufal.github.io/atrium-project/agent-skills/) page.
+
+## The command line and the service
+
+The command line and the service read the same inputs the same way. Both run the same image path
+(`page_inputs.flatten_on_white`, the model's transforms, softmax, `topn_pairs`), the same PDF renderer and page
+selection, and the same record writer (`atrium_document_adapter`). They use the same doc_id and page keys, so a
+born-digital record's page labels are honoured on both. They average the ensemble alike, and the record's
+`category_confidence` has three decimals from both.
+
+On 2026-10-29 a scratch harness ran 50 combinations through `run.py` and the service. It used the real classifier code
+and a deterministic network in place of the weights, different for each of the five models. The inputs were a PNG, a
+JPEG, a TIFF, a transparent PNG, a truncated JPEG and a three-page PDF. It ran one model and the ensemble, with top 1,
+3 and 11, and the PDF whole and as `2-3`, `3`, `1,3` and the past-the-end `4`. The categories, the scores (to the
+table's three decimals) and the record were the same in every case but the truncated JPEG (see the table).
 
 | Input or setting                 | Command line (`run.py`)                                                   | Service                                                | Same?                                                                   |
 |----------------------------------|---------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------------------------------------------------|
 | A page image                     | `-f page.png`; any format Pillow reads                                    | `POST /predict_image`; recognised by content           | the same                                                                |
 | A PDF, a page selection          | `-f report.pdf --pages 1-3`; `-d` with `-ff …,pdf`                        | `POST /predict_document`, `pages=1-3`                  | the same                                                                |
-| A selection past the last page   | exit 2, `--pages: …`                                                      | 422, `pages: …`                                        | the same (a traceback on the CLI before `v1.12.0-beta`)                 |
+| A selection past the last page   | exit 2, `--pages: …`                                                      | 422, `pages: …`                                        | the same                                                                |
 | The model                        | `-rev`, else `[HF] revision` (`main`); `-m`, `-b`, `--models-dir`, `--hf` | `version`, else `all`; `main` is refused (422)         | differs: name the model to compare; the CLI also runs local checkpoints |
 | The ensemble                     | `--best`                                                                  | `version=all`                                          | the same average; a failing member left out on both                     |
 | Each model's own top-N           | `--best --save-intermediates` (one CSV per model)                         | `per_model=true`                                       | the same                                                                |
-| All eleven scores                | `--raw` (also with `-f` on one image since `v1.12.0-beta`)                | `topn=11`                                              | the same scores                                                         |
+| All eleven scores                | `--raw` (also with `-f` on one image)                                     | `topn=11`                                              | the same scores                                                         |
 | Scores                           | the tables round to three decimals                                        | unrounded                                              | differs: a table is for reading                                         |
 | A record to add to, a new record | `--document-json`, `--document-json-out`                                  | `document_json`, `document_json_out=true`              | the same record; `category_confidence` to three decimals on both        |
 | The record's link to its table   | `derived_from.classification`, the CSV                                    | none                                                   | differs: the service writes no table                                    |
@@ -489,23 +542,7 @@ three decimals) and the record were the same in every case but the truncated JPE
 | A very large image               | up to 4.22 G pixels (`tolerate_scan_quirks`)                              | `MAX_IMAGE_PIXELS`, 413                                | differs: the service bounds a request                                   |
 | A page no reader opens           | left out of a batch, logged as skipped; `-f` stops with an error          | the request fails (422 for the upload, 500 for a page) | differs: one answer per request                                         |
 | How much per run                 | a file, a folder or a tree; training and evaluation                       | one file per request, `MAX_UPLOAD_MB`, `MAX_PDF_PAGES` | differs: the service is stateless                                       |
-| Paradata                         | a file in `<results>/paradata/`                                           | the answer's `paradata`, a `CreateAction`              | atrium-project#71                                                       |
-
-`service/api_client.py` wraps the same calls and prints the JSON answer
-(`python3 service/api_client.py -f page.png -v v4.4 --top 3`). Since `v1.12.0-beta` it takes the service's defaults
-(`-v all`, `--top 3`), chooses the endpoint by the file's content, and passes `--pages`, `--per-model`,
-`--document-json` and `--document-json-out` on. A static page for trying the service in a browser is served
-at `/frontend`. The request fields, the response, the limits and every error are in
-[../service/README.md](../service/README.md); the typed contract is [../service/openapi.json](../service/openapi.json).
-
-## In the ATRIUM pipeline and from a coding agent
-
-Each pipeline stage runs as its own container, and the document record passed with `--document-json` /
-`--document-json-out` is the hand-off between them. The reference sequence, with page-classification as its first
-stage, is on the hub's [workflow page](https://ufal.github.io/atrium-project/workflows/page-classification/) and its
-[Pipelines](https://ufal.github.io/atrium-project/pipelines/) page. The `agent-skill` branch packages the HTTP service
-as an Agent Skill, so a coding agent can classify a page or a PDF by calling a running service; installing it, and
-the contract it relies on, are on the hub's [Agent skills](https://ufal.github.io/atrium-project/agent-skills/) page.
+| Paradata                         | a file in `<results>/paradata/`                                           | the answer's `paradata`, a `CreateAction`              | differs: a file on the command line, the answer's field on the service  |
 
 ## Troubleshooting
 

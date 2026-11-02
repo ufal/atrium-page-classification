@@ -1,16 +1,19 @@
 # The base-model sweep of 2025 (`vX.3`)
 
-For anyone who wonders why these five base models: the 2025 sweep that compared twelve base models and chose the five
-of the ensemble, kept as evidence of that choice. Its figures are **not held-out accuracy**; the held-out results of
-the published models are in [results.md](results.md).
+**In short:** In 2025 twelve base models were trained on five folds each and compared, and the best five became the
+ensemble. The sweep scored 97.87–99.16 % top-1, but mostly on pages the models had been trained on, so none of it is
+held-out accuracy. Read it as the evidence for choosing these five, not as the accuracy to expect: the published
+models score 94.64–95.87 % on held-out pages ([results.md](results.md)).
+
+For anyone who wonders why these five base models: this page keeps the 2025 sweep as evidence of that choice.
 
 > [!WARNING]
 > These figures were measured on the 5,449-page evaluation set, most of whose pages are training pages. The script
-> that selected it as "pages no fold trained on" (`result/stats/unused.sh`, fixed since `v1.9.6-beta`) missed
+> that selected it as "pages no fold trained on" (`result/stats/unused.sh`, fixed in `v1.9.6-beta`) missed
 > zero-padded page numbers and ids with a letter
 > ([atrium-project#15](https://github.com/ufal/atrium-project/issues/15)). The figures chose each base model's fold
-> ([how](../../result/README.md#how-the-folds-were-chosen)), and they are not held-out accuracy. The stored tables do
-> not all reproduce them either: `v4.3` gives 98.92 % there, not 99.16 %.
+> ([how](../../result/README.md#how-the-folds-were-chosen)). They are not held-out accuracy. The stored tables do not
+> all reproduce them either: `v4.3` gives 98.92 % there, not 99.16 %.
 
 | Base model                                 | Revision | Best_Prec (%) | Best_Acc (%) | Fold | Note                  |
 |--------------------------------------------|----------|---------------|--------------|------|-----------------------|
@@ -27,11 +30,11 @@ the published models are in [results.md](results.md).
 | **timm/tf_efficientnetv2_m.in21k_ft_in1k** | **v1.3** | **98.83**     | **98.83**    | 1    | Good & Small          |
 | timm/tf_efficientnetv2_s.in21k             | v7.3     | 97.90         | 97.87        | 1    |                       |
 
-The rows in bold are the five models uploaded to the Hugging Face Hub, and their revisions are the published ones,
-adjusted for the Hub (which explains the odd order of the base models). The labels of the other rows follow neither
-the published numbering nor the sweep's own numbering in [model_accuracies_new.csv](../../model_accuracies_new.csv)
-and `REVISION_TO_BASE_MODEL`, which has, for example, RegNetY-120 as `v6.` and EfficientNetV2-S as `v1.3.1`; the base
-model names identify the rows ([the two namespaces](../reference/models.md#two-version-namespaces-and-where-they-collide)).
+The rows in bold are the five models uploaded to the Hugging Face Hub. Their revisions are the published ones,
+adjusted for the Hub, which explains the odd order of the base models. The labels of the other rows follow neither the
+published numbering nor the sweep's own numbering in [model_accuracies_new.csv](../../model_accuracies_new.csv) and
+`REVISION_TO_BASE_MODEL`. That has, for example, RegNetY-120 as `v6.` and EfficientNetV2-S as `v1.3.1`. The base model
+names identify the rows ([the two namespaces](../reference/models.md#two-version-namespaces-and-where-they-collide)).
 
 ![Accuracy against parameter count of the base models](../../supplementary/figures/model_acc_compared.png)
 
@@ -40,7 +43,7 @@ candidates were the five chosen models and the DiT family, RegNetY-120 and -640,
 
 ## How the five were chosen
 
-The sweep trained every base model on five folds and kept, per base model, the fold with the highest top-1 on the
-5,449-page set; a tie went to the lowest fold. These are the folds of `REVISION_BEST_FOLDS`, and the `vX.4` models were
-retrained on them; the `vX.4` test partitions played no part in any choice. The figures per fold, the 5,449-page set
-split by group, and what was wrong with the earlier results: [result/README.md](../../result/README.md).
+The sweep trained every base model on five folds. For each base model it kept the fold with the highest top-1 on the
+5,449-page set, and a tie went to the lowest fold. These are the folds of `REVISION_BEST_FOLDS`, and the `vX.4` models
+were retrained on them. The `vX.4` test partitions played no part in any choice. The figures per fold, the 5,449-page
+set split by group, and what was wrong with the earlier results are in [result/README.md](../../result/README.md).

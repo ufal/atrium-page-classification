@@ -1,7 +1,7 @@
 # Outputs and their columns
 
 For anyone who processes the result files further: what a command-line run writes, and the columns of each table. The service answers in JSON instead; its fields are
-in [service/README.md](../../service/README.md#api-usage) and [service/openapi.json](../../service/openapi.json).
+in [service/README.md](../../service/README.md#endpoints) and [service/openapi.json](../../service/openapi.json).
 How to read a result: [../usage.md](../usage.md#reading-the-output).
 
 On this page:

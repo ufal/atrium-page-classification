@@ -31,7 +31,7 @@ tools, and driven by this repository's [para_config.txt](../../setup/para_config
 The HTTP service writes no paradata file. Each successful answer carries the call's provenance instead, as
 `paradata`: its Process Run Crate `CreateAction`, whose `@id` is the `run_uuid` stamped into the record, with
 `pypdfium2` among the components when `/predict_document` rendered a PDF
-([service/README.md](../../service/README.md#api-usage)).
+([service/README.md](../../service/README.md#how-it-works)).
 
 Example: the paradata of the [small_data_samples](../../small_data_samples) run of the evaluation,
 [261022-101849_page-classification.json](../../result/paradata/261022-101849_page-classification.json).

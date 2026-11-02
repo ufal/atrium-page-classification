@@ -1,17 +1,19 @@
 # Development
 
-For contributors, and for anyone who wants to reuse this code as the base of their own image classification task:
-what each file does, the helper scripts, the branches, and where the rules for tests and releases are. The rules
+For contributors, and for anyone who wants to reuse this code as the base of their own image classification task. It
+shows what each file does, the helper scripts, the branches, and where the rules for tests and releases are. The rules
 themselves (branches, pull requests, commit messages, code conventions, the test suite) are in
 [CONTRIBUTING.md](../CONTRIBUTING.md), whose Release History is the changelog.
 
 On this page:
 [The files](#the-files) ·
+[Directory Structure](#directory-structure) ·
 [Command-line utility scripts](#command-line-utility-scripts) ·
 [Branches](#branches) ·
 [Shared and vendored files](#shared-and-vendored-files) ·
 [Tests and checks](#tests-and-checks) ·
-[The documentation](#the-documentation)
+[The documentation](#the-documentation) ·
+[Working records](#working-records)
 
 ## The files
 
@@ -38,6 +40,37 @@ On this page:
 
 For finer adjustments of training, see the functions in [classifier.py](../classifier.py), which hold predefined values
 that [run.py](../run.py) does not use ([training.md](training.md#hyperparameters)).
+
+## Directory Structure
+
+The HTTP service sits inside the repository. Its code is in `service/`, and it imports the classifier from the
+repository root. It loads the fine-tuned weights from the root's `model/` folder (`/app/model` in the image), and
+downloads a missing revision from the Hugging Face Hub into it.
+
+```text
+atrium-page-classification/
+├── model/                   # fine-tuned model weights (e.g. model_v44/), written by the first download
+├── service/                 # the HTTP service
+│   ├── api.py               # the FastAPI application and its entry point (python -m service.api)
+│   ├── inference.py         # model loading and prediction
+│   ├── pdf_render.py        # PDF pages to page images (pypdfium2)
+│   ├── document_json.py     # the ATRIUM document record: read the baseline, write the answer
+│   ├── atrium_service.py    # shared service helpers, vendored from the hub
+│   ├── healthcheck.py       # the image's HEALTHCHECK probe, vendored from the hub
+│   ├── openapi.json         # the typed API contract
+│   ├── requirements.txt     # the service's Python dependencies
+│   ├── api_client.py        # a command-line client for the two endpoints
+│   ├── frontend/            # the standalone web page, served at /frontend
+│   │   ├── index.html
+│   │   └── script.js
+│   └── frontend-lindat/     # the same page inside the LINDAT header and footer (lindat-common)
+│       ├── index.html
+│       └── script.js
+├── setup/                   # configuration, requirements and setup scripts
+│   └── setup_api_service.sh # a virtual environment with both requirement files
+├── run.py                   # the command line; also downloads models (--hf -rev)
+└── classifier.py            # the ImageClassifier class that service/inference.py builds on
+```
 
 ## Command-line utility scripts
 
@@ -111,3 +144,21 @@ The service has its own contract tests: the OpenAPI document (`tests/test_openap
 The pages follow the ATRIUM
 [documentation style](https://github.com/ufal/atrium-project/blob/test/docs/documentation-style.md); the hub's
 `tools/docs_check.py --repo atrium-page-classification` checks their links, anchors and headings.
+
+## Working records
+
+The maintainers keep their working records in [`agent_dev_logs/`](../agent_dev_logs/). They are not user
+documentation, and this is the only page that links them; every other page cites the issue instead. The folder holds:
+
+- `DEVLOG.md`, the repository's timeline, one dated entry per step;
+- `digests/` and `plans/`, one summary and one plan per open issue, refreshed as the issue moves;
+- `issues/`, verbatim exports of the issue threads.
+
+The digest and plan of a closed issue are removed from the folder, and the commit history keeps them. For example,
+the `vX.3` and `vX.4` comparison of [#48](https://github.com/ufal/atrium-page-classification/issues/48) (closed on
+2026-09-17) is in its
+[digest](https://github.com/ufal/atrium-page-classification/blob/5db7d1c/agent_dev_logs/digests/48.digest.md) and
+[plan](https://github.com/ufal/atrium-page-classification/blob/5db7d1c/agent_dev_logs/plans/48.plan.md), as they
+were in the last commit that held them. [decisions/history.md](decisions/history.md) is condensed from these
+records. The records that span the ATRIUM repositories are described on the hub's
+[Development history](https://ufal.github.io/atrium-project/development-history/) page.

@@ -698,3 +698,16 @@ themselves (per hub #29); this file is a derived reading aid in `agent_dev_logs/
 * **Docs:** README, `docs/reference/licences.md` (the SWAG paragraph records the answer; "The label the paradata
   computes" becomes "What the list does not say"), `docs/reference/models.md`, `docs/reference/paradata.md`.
 * **Checks:** 823 passed, 16 skipped, 2 xfailed (baseline 822: the new test).
+
+## 2026-11-02 — atrium-project#79 phase F, tool round: the docs for each kind of reader
+
+Documentation only; no code, test or configuration change.
+* **F3:** `docs/development.md` § Working records is the one Markdown pointer into `agent_dev_logs/`; other pages cite
+  the issue. CONTRIBUTING's documentation table follows the hub template.
+* **F4:** the opening is 74 words; "Start here" and the version clauses are gone; the CLI/service parity paragraph moved to `docs/usage.md`; "What you need" before the quick start.
+* **F5:** the runbook follows the template's order, with "At a glance" under Start and "Shutdown behaviour"; tracker
+  shorthand and version history are out of its running text. Its eleven legacy sections are relocated (Endpoints, Start, `docs/usage.md`, `docs/development.md`, the reference pages, Tests, a README link). It now says what the code does at start-up: no endpoint answers, `/health` included, until the five models are loaded.
+* **F6/F7:** task headings and a task list on `docs/usage.md`; "In short" on `evaluation/{data,results,sweep-2025}` and `decisions/history`; sentence passes (`sweep-2025` 22.9 → 16.8).
+* **Map:** the hub's `agent_dev_logs/plans/79.F-relocation_map.md` § atrium-page-classification (every moved block, corrected facts,
+  renamed anchors).
+* **Checks:** `docs_check` and `runbook_check` pass; 823 passed, 16 skipped, 2 xfailed, as at the head.

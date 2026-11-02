@@ -1,28 +1,13 @@
 # ATRIUM page-classification: scanned archive pages sorted into eleven page types
 
-page-classification looks at the image of a scanned archival page and says what kind of page it is: one of eleven
-categories that combine running text, tables or forms, drawings and photographs with handwritten, printed or typed
-text. The category tells which processing a page needs next (OCR, handwritten text recognition, table extraction or
-image extraction) before any of it is run. It reads the image only, so the language of the page does not matter.
-Use it on scans of paper documents; born-digital pages are classified too, but those labels have not been checked.
+page-classification reads the image of a scanned archival page and says what kind of page it is. It chooses one of
+eleven categories, such as running text, a table or form, a drawing or a photograph, with handwritten, printed or
+typed text. The category tells which processing the page needs next, for example OCR or table extraction. Use it on
+scans of paper documents; the labels it gives born-digital pages have not been checked.
 
 [Releases](https://github.com/ufal/atrium-page-classification/releases) · [MIT licence](LICENSE) ·
 [ATRIUM documentation](https://ufal.github.io/atrium-project/workflows/page-classification/) ·
 [Models on Hugging Face](https://huggingface.co/ufal/vit-historical-page)
-
-The classifiers are fine-tuned Vision Transformers, RegNetY and EfficientNetV2 models, published as revisions of
-`ufal/vit-historical-page`. One revision can run alone, or the five `vX.4` revisions run as an ensemble that
-averages their scores; the ensemble is the default of the HTTP service. They were trained on annotated pages of
-archaeological reports from Czech archives, 1920–2020, published as a dataset on LINDAT.
-
-## Start here
-
-1. Run the [Quick start](#quick-start) below: one sample page, through the service or the command line.
-2. Learn what the eleven labels mean: [docs/reference/categories.md](docs/reference/categories.md).
-3. Classify your own pages, a folder at a time, and read the result tables: [docs/usage.md](docs/usage.md).
-4. Before you rely on the results, read [Limits and maturity](#limits-and-maturity) and what was measured:
-   [docs/evaluation/results.md](docs/evaluation/results.md).
-5. Everything else is in the [documentation map](#documentation).
 
 ## Inputs and outputs
 
@@ -32,12 +17,9 @@ archaeological reports from Czech archives, 1920–2020, published as a dataset 
 | a PDF, recognised by its content: every page, or a `pages` selection, rendered at 300 dpi                             | optionally all eleven scores (`--raw`, or `topn=11`) and each model's own vote (`--best --save-intermediates`, or `per_model=true`) |
 | optionally, an ATRIUM document record to add to                                                                       | the record with its `page_categories` block and each page's `category` and `category_confidence`; the run's paradata                |
 
-The command line and the service read the same inputs the same way (since v1.10.0-beta): a PDF is rendered by the
-service's own renderer on both sides, with the same `pages` selection, doc_id and page keys, and a born-digital
-record's page labels are honoured on both; the ensemble is averaged alike, and the record's confidence has three
-decimals from both. What differs, and why, is in [docs/usage.md](docs/usage.md#the-command-line-and-the-service):
-directories and training are the command line's, the upload limits the service's, and the tables round scores to
-three decimals where the service's answer does not.
+The tool reads the image only, so the language of the page does not matter. The command line and the service read the
+same inputs the same way; what differs, and why, is in
+[docs/usage.md](docs/usage.md#the-command-line-and-the-service).
 
 The eleven categories and their definitions: [docs/reference/categories.md](docs/reference/categories.md). The
 record follows the hub's [document contract](https://ufal.github.io/atrium-project/ecosystem/document-contract/);
@@ -45,12 +27,16 @@ page-classification is its first stage, so it creates the record as often as it 
 
 ## Quick start
 
+**What you need:** Docker, or Python 3.11 and a checkout of this repository. Network access to `huggingface.co` on the
+first start, to download the models (about 2.44 GB for the five of the ensemble); the tool calls no other host. Memory
+for the models. A GPU is optional: a CPU works, more slowly.
+
 The service, from the published image, on a sample page of this repository:
 
 ```bash
 docker run --rm -p 8000:8000 -v hf-cache:/cache/huggingface \
   ghcr.io/ufal/atrium-page-classification-api:<version>     # the release without its v, e.g. 1.12.1-beta
-curl -s localhost:8000/ready                                 # 200 once the five models are loaded
+curl -s localhost:8000/ready                                 # fails until the five models are loaded, then 200
 curl --fail-with-body -sS -X POST localhost:8000/predict_image \
   -F "file=@small_data_samples/TEXT_T/pages_online_2.png" -F version=v4.4 -F topn=3
 ```
@@ -67,8 +53,9 @@ Expected result (abridged):
 The scores are those `v4.4` gave this page in the stored run
 [result/tables/20261022-1218_v44_TOP-3.csv](result/tables/20261022-1218_v44_TOP-3.csv), rounded. Without `version`
 the service uses the ensemble (`all`), and `models_used` lists the five revisions that answered. The image holds no
-weights: on its first start it downloads the five models from the Hugging Face Hub into the `hf-cache` volume, and
-`/ready` answers 503 until they are loaded. Every endpoint, limit and error: [service/README.md](service/README.md).
+weights. On its first start it downloads the five models from the Hugging Face Hub into the `hf-cache` volume. No
+endpoint answers until they are loaded: the connection is refused, then `/ready` returns 200. Every endpoint, limit
+and error: [service/README.md](service/README.md).
 
 The same page on the command line, from a checkout with its [setup](docs/usage.md#install) done:
 
@@ -88,6 +75,12 @@ Results for TOP-3 predictions are recorded into ./result/tables/<date-time>_mode
 
 ## How it works
 
+The classifiers are fine-tuned Vision Transformer, RegNetY and EfficientNetV2 models, published as revisions of
+[`ufal/vit-historical-page`](https://huggingface.co/ufal/vit-historical-page). They were trained on annotated pages of
+archaeological reports from Czech archives, 1920–2020, published as a dataset on LINDAT. One revision can run alone,
+or the five `vX.4` revisions run as an ensemble that averages their scores; the ensemble is the default of the HTTP
+service.
+
 Each page image is resized to the model's square input (224 or 384 pixels) and scored for all eleven categories;
 the scores become probabilities, and the best ones are kept, best first. With `--best` (or `version=all`) five
 models score every page and their probabilities are averaged, so a page on which they disagree gets a lower top
@@ -105,43 +98,52 @@ pages that have no usable text layer. The whole chain: the
 
 ## Limits and maturity
 
-- **What was measured.** Each of the five `vX.4` models was scored on the held-out test pages of the fold it was
-  trained on: 94.64–95.87 % top-1 and 99.75–99.90 % top-3, about 4,800 pages per model, one fold per model. The
-  split is by page: about a quarter of the test pages come from documents with other pages in training, and on pages
-  of unseen documents top-1 is 93.87–95.60 %. The ensemble has no held-out figure, because its members were trained
-  on different folds ([docs/evaluation/results.md](docs/evaluation/results.md)).
-- **What was not.** Born-digital pages, pages unlike the archaeological reports of the training data, and the
-  optional YOLO backend. The 2025 sweep's 98–99 % were measured mostly on training pages and are not held-out
-  accuracy ([the sweep](docs/evaluation/sweep-2025.md)). The test suite checks that the code does what it says;
-  it does not measure accuracy.
+- **Accuracy is measured for single models, not for the ensemble.** Each `vX.4` model scored 94.64–95.87 % top-1 and
+  99.75–99.90 % top-3 on about 4,800 held-out pages of the fold it was trained on. The split is by page, so about a
+  quarter of those pages come from documents with other pages in training; on pages of unseen documents top-1 is
+  93.87–95.60 %. The ensemble has no held-out figure, because its members were trained on different folds
+  ([docs/evaluation/results.md](docs/evaluation/results.md)).
+- **Some pages were not measured.** Born-digital pages, pages unlike the archaeological reports of the training data,
+  and the optional YOLO backend have no held-out figure, so treat their labels as unchecked. The 2025 sweep's 98–99 %
+  were measured mostly on training pages and are not held-out accuracy ([the sweep](docs/evaluation/sweep-2025.md)).
+  The test suite checks that the code does what it says; it does not measure accuracy.
 - **Neighbouring categories are the hard cases.** `TEXT_T` is most often taken for `TEXT` (recall 87–92 %), and
-  `LINE_HW` for `LINE_T`. One category is given per page.
-- **Name a revision.** The Hub's `main` revision still resolves to `v4.3`, the generation before `vX.4`; pass
+  `LINE_HW` for `LINE_T`, and one category is given per page. A low top score with a close second marks a page worth a
+  look ([reading the output](docs/usage.md#reading-the-output)).
+- **Name a revision.** The Hub's `main` revision still resolves to `v4.3`, the generation before `vX.4`, so pass
   `-rev v4.4` (or `--best`) rather than relying on it. `setup/config.txt` has `[HF] revision = main`, and the batch
   image's default command runs `-rev v4.3` ([models](docs/reference/models.md)).
-- **PDFs are rendered with pypdfium2** at 300 dpi, by the service and, since v1.10.0-beta, by the command line,
-  while the training pages were made with pdftoppm. One service request classifies at most `MAX_PDF_PAGES` pages (50
-  by default; a deployment can change it) and takes at most 10 MB (`MAX_UPLOAD_MB`); a longer PDF is sent in parts
-  with `pages` ([Limits](service/README.md#limits)). The command line has no such limit.
-- **The ensemble can answer with fewer models** when one fails to load; `models_used` then lists fewer than five
+- **PDFs are rendered with pypdfium2** at 300 dpi, by the service and by the command line, while the training pages
+  were made with pdftoppm ([the service's known limits](service/README.md#known-limits)).
+- **One service request is limited in size.** It classifies at most `MAX_PDF_PAGES` pages (50 by default; a deployment
+  can change it) and takes at most 10 MB (`MAX_UPLOAD_MB`). Send a longer PDF in parts with `pages`. The command line
+  has no such limit ([Limits](service/README.md#limits)).
+- **The ensemble can answer with fewer models** when one fails to load, so check that `models_used` lists five
   ([Partial results](service/README.md#partial-results)).
+- **The service answers nothing while it loads its models.** The first start downloads about 2.44 GB. Until then both
+  `/health` and `/ready` refuse the connection, so wait for `/ready` to return 200
+  ([Known limits](service/README.md#known-limits)).
 
 ## Documentation
 
-| To                                                                 | Read                                                                                                                                                                                                                                 |
-|--------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| install it, classify pages, read the results, use the images       | [docs/usage.md](docs/usage.md)                                                                                                                                                                                                       |
-| deploy and operate the service, its limits and errors              | [service/README.md](service/README.md)                                                                                                                                                                                               |
-| see the API contract                                               | [service/openapi.json](service/openapi.json)                                                                                                                                                                                         |
-| set every option of `setup/config.txt`                             | [docs/configuration.md](docs/configuration.md)                                                                                                                                                                                       |
-| understand how a page is classified and how the ensemble runs      | [docs/how-it-works.md](docs/how-it-works.md)                                                                                                                                                                                         |
-| look up the categories, models, flags, outputs, paradata, licences | [categories](docs/reference/categories.md), [models](docs/reference/models.md), [flags](docs/reference/cli.md), [outputs](docs/reference/outputs.md), [paradata](docs/reference/paradata.md), [licences](docs/reference/licences.md) |
-| see what was measured, and on which data                           | [results](docs/evaluation/results.md), [data](docs/evaluation/data.md), [the 2025 sweep](docs/evaluation/sweep-2025.md)                                                                                                              |
-| turn PDFs into an annotated training set                           | [docs/data-preparation.md](docs/data-preparation.md)                                                                                                                                                                                 |
-| train, retrain on the published folds, evaluate                    | [docs/training.md](docs/training.md)                                                                                                                                                                                                 |
-| contribute, test, release                                          | [docs/development.md](docs/development.md), [CONTRIBUTING.md](CONTRIBUTING.md) (its Release History is the changelog)                                                                                                                |
-| read why it is built this way                                      | [docs/decisions/history.md](docs/decisions/history.md)                                                                                                                                                                               |
+| For                 | To                                                                      | Read                                                                                                                                                                                     |
+|---------------------|-------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| using it            | see one result at once                                                  | the [Quick start](#quick-start) above                                                                                                                                                    |
+|                     | learn what the eleven labels mean                                       | [docs/reference/categories.md](docs/reference/categories.md)                                                                                                                             |
+|                     | classify your own pages, a folder at a time, and read the result tables | [docs/usage.md](docs/usage.md)                                                                                                                                                           |
+|                     | look up models, flags, outputs, paradata and licences                   | [models](docs/reference/models.md), [flags](docs/reference/cli.md), [outputs](docs/reference/outputs.md), [paradata](docs/reference/paradata.md), [licences](docs/reference/licences.md) |
+|                     | set every option of `setup/config.txt`                                  | [docs/configuration.md](docs/configuration.md)                                                                                                                                           |
+| running the service | deploy and operate it, and read its limits and errors                   | [service/README.md](service/README.md)                                                                                                                                                   |
+|                     | see the API contract                                                    | [service/openapi.json](service/openapi.json)                                                                                                                                             |
+| judging the results | decide how far to rely on them                                          | [Limits and maturity](#limits-and-maturity) above                                                                                                                                        |
+|                     | see what was measured, and on which data                                | [results](docs/evaluation/results.md), [data](docs/evaluation/data.md), [the 2025 sweep](docs/evaluation/sweep-2025.md)                                                                  |
+| changing the code   | understand how a page is classified and how the ensemble runs           | [docs/how-it-works.md](docs/how-it-works.md)                                                                                                                                             |
+|                     | set up, test, release; find the history                                 | [docs/development.md](docs/development.md), [CONTRIBUTING.md](CONTRIBUTING.md) (its Release History is the changelog)                                                                    |
+|                     | read why it is built this way                                           | [docs/decisions/history.md](docs/decisions/history.md)                                                                                                                                   |
+|                     | turn PDFs into an annotated training set                                | [docs/data-preparation.md](docs/data-preparation.md)                                                                                                                                     |
+|                     | train, retrain on the published folds, evaluate                         | [docs/training.md](docs/training.md)                                                                                                                                                     |
 
+Terms used across the tools are explained in the [ATRIUM glossary](https://ufal.github.io/atrium-project/glossary/).
 The documentation follows the ATRIUM
 [documentation style](https://github.com/ufal/atrium-project/blob/main/docs/documentation-style.md).
 

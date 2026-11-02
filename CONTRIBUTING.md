@@ -1,15 +1,16 @@
-# Contributing to the Historical Document Sorting Pipeline of the ATRIUM project
+# Contributing to ATRIUM page-classification
 
-Welcome! Thank you for your interest in contributing. This repository provides a robust workflow for sorting archive page images to
-facilitate further content-based processing. It addresses the common digital archive
-challenge of organizing unstructured, scanned paper sources by automatically categorizing
-them before specialized data extraction or OCR is applied.
+Welcome! Thank you for your interest in contributing. This repository [^repo] sorts the page images of scanned
+archival documents into eleven page types, so that each page can be sent to the processing it needs (OCR,
+handwritten text recognition, table extraction or image extraction). In the ATRIUM pipeline it is the first stage:
+page-classification → ocr-postprocess → nlp-enrich → keyword-extract → translator, or digital-convert for
+born-digital files.
 
-The next step: Routing classified pages into content-specific data processing pipelines
-(e.g., machine-typed OCR, handwritten text recognition, or graphic extraction).
-
-This document describes the project's capabilities, development workflow, code conventions,
-and rules for contributors.
+This document is for contributors: the release history, the branches, the pull request and commit formats, and the
+code and test conventions. What the tool does is in [README.md](README.md); how to set it up for development, and where
+the maintainers' working records are, is in [docs/development.md](docs/development.md). ATRIUM-wide conventions
+(branching, commit types, the test and lint standard) are identical across all repositories; anything specific to this
+repository is called out explicitly.
 
 ## Release History
 
@@ -45,7 +46,7 @@ a GitHub pre-release. The arcs these releases form, and the decisions behind the
 | **v1.7.0-beta**  | `atrium_document` standard of input in JSON format and output integrated. Aligned paradata template with the hub.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Pre-release |
 | **v1.6.0-beta**  | Update of the latest versions to `vX.4` for the licensed dataset models. OpenAPI standards for service applied - draft. Tests fixes. Updates and bumping of dependency versions. Edited GHA release workflow.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Pre-release |
 | **v1.5.1-beta**  | Added licenses test according to the template. Fixed auto version reading. Updated dependency versions. Added new tests. Fixes according to Fable review.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Pre-release |
-| **v1.5.0-beta**  | Added folds_csv argument insted of by-seed selection for re-training and re-evaluation of the models on the cropped dataset. Updated paradata-related code with a template for all 4 atrium-project repos. Added agent_dev_logs instead of issue comments, containing issues and their digests+plans.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Pre-release |
+| **v1.5.0-beta**  | Added folds_csv argument insted of by-seed selection for re-training and re-evaluation of the models on the cropped dataset. Updated paradata-related code with a template for all 4 atrium-project repos. Added the maintainers' working records (see docs/development.md).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Pre-release |
 | **v1.4.3-beta**  | Dataset link updated to reference licensed data and Docker GHA alignemnent continues                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Pre-release |
 | **v1.4.2-beta**  | Ruff checks applied but secret-scan removed - Docker GH actions alignemnent                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Pre-release |
 | **v1.4.1-beta**  | Next round of LLM review edits and Docker GH actions alignemnent                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Pre-release |
@@ -66,68 +67,6 @@ a GitHub pre-release. The arcs these releases form, and the decisions behind the
 
 Tags without a row here have no published release note: `v0.3.0`, `v0.4.0`, `v0.6.0`, `v0.8.0`, `v0.10.0`,
 `v0.12.0`, `v1.0.0-beta`, `v1.0.1-beta`, `v1.0.2-beta` and `v1.1.1-beta` (`v1.4.1-beta` is tagged `v1.4.1.-beta`).
-
-
-## Project Contributions & Capabilities
-
-This pipeline contributes 4 major stages to the data processing lifecycle, as detailed
-in the [README's documentation map](README.md#documentation).
-
-### 1. Granular Data Management & Preparation
-
-The project provides multiplatform utilities to transition from document-level files to
-page-level management.
-
-* **PDF to PNG Conversion:** Automatically breaks down document-level PDF files into individual,
-page-specific PNG images using provided Unix (`.sh`) and Windows (`.bat`) scripts.
-* **Automated Sorting:** Includes clustering scripts to seamlessly organize annotated images into
-category-specific subdirectories, preparing them for model training or evaluation.
-
-### 2. Multi-Model Image Classification
-
-Archive managers can choose from several pre-trained and fine-tuned visual models downloaded
-directly from the Hugging Face hub, allowing you to balance available hardware
-(CPU vs. GPU) with desired accuracy.
-
-| Base Model Type              | Model Size / Name          | Best For...               | Key Feature                                                                                                                                       |
-|:-----------------------------|:---------------------------|:--------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------|
-| **ViT (Vision Transformer)** | `vit-large-patch16-384`    | Largest capacity          | 95.58% Top-1 (`v5.4`) on its held-out fold; needs the most memory (1.2 GB).                                                                       |
-| **ViT (Vision Transformer)** | `vit-base-patch16-384`     | Good & Small              | Balance of size (345 Mb) and accuracy: 95.49% Top-1 (`v3.4`).                                                                                     |
-| **RegNetY**                  | `regnety_160.swag_ft_in1k` | Default & Small           | The recommended default (`main` branch). Fast CNN: 95.81% Top-1 (`v4.4`).                                                                         |
-| **EfficientNetV2**           | `efficientnetv2_m.in21k`   | Low-Resource Environments | Smallest model footprint (213 Mb): 95.87% Top-1 (`v1.4`).                                                                                         |
-
-Top-1 on each model's held-out test fold, from the `vX.4` evaluation in [result/README.md](result/README.md); models
-on the same fold do not differ significantly (95 % intervals of about ±0.6 points).
-
-### 3. Archival Content Categorization
-
-A core contribution of this project is its highly specific categorization system,
-trained on historical archaeological reports from 1920–2020. The pipeline evaluates each page
-based on three main criteria: **presence of graphical elements**, **type of text**, and
-**presence of tabular layouts**.
-
-**Data Categories:**
-* **Drawings (`DRAW`, `DRAW_L`):** Maps, schematics, and paintings (with or without tabular legends).
-* **Photos (`PHOTO`, `PHOTO_L`):** Photographs or cutouts, potentially with captions or tabular layouts.
-* **Tables/Forms (`LINE_HW`, `LINE_P`, `LINE_T`):** Tabular structures containing handwritten, printed, or machine-typed text.
-* **Standard Text (`TEXT_HW`, `TEXT_P`, `TEXT_T`):** Paragraphs or blocks of purely handwritten, printed, or typed text.
-* **Mixed Text (`TEXT`):** Mixtures of different text types with minor graphical elements.
-
-The exact definitions of the eleven categories are in [docs/reference/categories.md](docs/reference/categories.md).
-
-### 4. Inference, Ensembling, & Reporting
-
-The project supports both single-page processing and large-scale directory batching,
-generating clean analytical data for archive managers.
-
-* **Ensemble Learning (`averaging.py`):** A post-processing tool that combines predictions
-from different base architectures (e.g., merging a ViT run with a RegNetY run). This smooths
-out individual model errors and significantly improves accuracy on ambiguous pages without
-needing to reload heavy models.
-* **Tabular Outputs:** Automatically generates detailed CSV files containing the `FILE`,
-`PAGE`, `CLASS-N` (Top-N predictions), and normalized `SCORE-N` for immediate review.
-* **Visual Evaluation:** Generates confusion matrices to easily visualize inter-class errors
-and track model performance on evaluation datasets.
 
 ---
 
@@ -295,20 +234,34 @@ tests/
 
 ---
 
+## Shared ("drop-in") code
+
+The modules, schemas and tests vendored from the hub are listed in
+[docs/development.md](docs/development.md#shared-and-vendored-files). Do not edit them here: change the owner in the
+hub, then adopt the change in one pull request. The `para-drift` CI check fails the build if a copy differs from its
+source. What they read from this repository is `setup/para_config.txt`.
+
+---
+
 ## Repository Documentation Management
 
-Each documentation file has one target audience and one responsibility. Rules are not repeated — cross-references are used instead.
+| File                    | Reader                     | Holds                                                                     |
+|-------------------------|----------------------------|---------------------------------------------------------------------------|
+| `README.md`             | everyone, first            | what the tool does, inputs and outputs, quick start, limits, the docs map |
+| `docs/usage.md`         | users, integrators         | running it, choosing a mode, reading the result, troubleshooting          |
+| `service/README.md`     | operators, integrators     | the service runbook: start, models and caches, errors, limits, settings   |
+| `service/openapi.json`  | integrators                | the API contract                                                          |
+| `docs/configuration.md` | users, operators           | every option and its default                                              |
+| `docs/how-it-works.md`  | anyone who wants the idea  | the processing flow in plain words                                        |
+| `docs/reference/`       | developers, experts        | formats, fields, rules, paradata, licences                                |
+| `docs/evaluation/`      | anyone judging the results | what was measured, on which data; known failure modes                     |
+| `docs/decisions/`       | developers, managers       | dated decisions and why they were taken                                   |
+| `docs/development.md`   | developers                 | setup, tests, project layout; the only pointer to the working records     |
+| `CONTRIBUTING.md`       | contributors               | release history, branches, PRs, commits, code and test conventions        |
 
-| File                | Audience                 | Responsibility                                                         |
-|---------------------|--------------------------|------------------------------------------------------------------------|
-| `README.md`         | GitHub visitors          | Project overview, quick start, limits, the documentation map           |
-| `docs/`             | Users and developers     | Usage, configuration, how it works, reference, evaluation, decisions   |
-| `service/README.md` | Deployers, integrators   | The service runbook and its API                                        |
-| `CONTRIBUTING.md`   | Developers               | Code conventions, branches, PRs, testing, the release history          |
-
-The pages follow the ATRIUM
-[documentation style](https://github.com/ufal/atrium-project/blob/test/docs/documentation-style.md); what each page
-under `docs/` holds is listed in [docs/development.md](docs/development.md#the-documentation).
+The maintainers' working records are linked from `docs/development.md` and from no other page. The pages follow the
+ATRIUM [documentation style](https://github.com/ufal/atrium-project/blob/test/docs/documentation-style.md); what each
+page under `docs/` holds is listed in [docs/development.md](docs/development.md#the-documentation).
 What each CI check proves, and the checklist for a new one:
 [`docs/ci_policy.md`](https://github.com/ufal/atrium-project/blob/test/docs/ci_policy.md#changing-ci).
 
@@ -321,17 +274,13 @@ still point correctly.
 
 ## Contacts & Acknowledgements
 
-For support regarding this repository, please contact **lutsai@ufal.mff.cuni.cz**.
+Maintainer: **lutsai@ufal.mff.cuni.cz** [^repo] · Developed by ÚFAL [^ufal] · Funded by ATRIUM [^atrium] · Models
+hosted on Hugging Face [^hf]. The full acknowledgements, with the LINDAT/CLARIAH-CZ and AIS CR infrastructures, are
+in [README.md](README.md#licence-citation-and-acknowledgements).
 
-* **Developed by:** UFAL [^1]
-* **Funded & Shared by:** ATRIUM [^2] & UFAL
-* **Models Hosted via:** Hugging Face [^3]
+© 2026 ÚFAL & ATRIUM
 
-Funded by [ATRIUM](https://atrium-research.eu/) (GA 101132163), with the support of the LINDAT/CLARIAH-CZ research
-infrastructure and the AIS CR infrastructure (LM2023031).
-
-**© 2026 UFAL & ATRIUM**
-
-[^1]: https://ufal.mff.cuni.cz/home-page
-[^2]: https://atrium-research.eu/
-[^3]: https://huggingface.co/ufal/vit-historical-page
+[^repo]: https://github.com/ufal/atrium-page-classification
+[^ufal]: https://ufal.mff.cuni.cz/home-page
+[^atrium]: https://atrium-research.eu/
+[^hf]: https://huggingface.co/ufal/vit-historical-page
