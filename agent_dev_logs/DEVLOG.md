@@ -688,3 +688,13 @@ themselves (per hub #29); this file is a derived reading aid in `agent_dev_logs/
 * **Release:** v1.12.1-beta in `CITATION.cff`, `setup/para_config.txt`, the spec's version; CONTRIBUTING row; the
   version examples of the README and the service README.
 * **Checks:** 859 passed, 12 skipped, 2 xfailed (without torch; the torch tests skip); pre-commit clean.
+
+## 2026-11-02 — The fine-tuned models declared CC BY-NC 4.0 (atrium-project#6)
+
+* **`setup/para_config.txt`:** `vit_models = CC BY-NC 4.0` (was MIT). motyc, 10-29: "MIT is software licence, not a
+  model/data licence … it needs to stay CC BY-NC 4.0". Every generation is trained on the CC BY-NC 4.0 LINDAT
+  dataset, and `v4.3`/`v4.4` (so the default ensemble) also on Meta's SWAG weights. The code stays MIT.
+* **Test:** `tests/test_para_config.py::test_the_fine_tuned_models_are_cc_by_nc`.
+* **Docs:** README, `docs/reference/licences.md` (the SWAG paragraph records the answer; "The label the paradata
+  computes" becomes "What the list does not say"), `docs/reference/models.md`, `docs/reference/paradata.md`.
+* **Checks:** 823 passed, 16 skipped, 2 xfailed (baseline 822: the new test).

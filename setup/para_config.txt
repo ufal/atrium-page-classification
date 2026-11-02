@@ -5,7 +5,11 @@ version = v1.12.1-beta
 repository_fallback = https://github.com/ufal/atrium-page-classification
 
 [components]
-vit_models     = MIT              ; always      ; fine-tuned ViT/EffNet/RegNetY/CLIP classifiers
+# vit_models: the fine-tuned classifiers are CC BY-NC 4.0, not MIT (atrium-project#6, motyc, 2026-10-29: MIT is a
+# software licence, and it does not carry the NC clause of what the models are made from). Every generation is
+# trained on the LINDAT dataset (CC BY-NC 4.0), and v4.3/v4.4 (and so the default ensemble) are also fine-tuned
+# from Meta's SWAG weights, timm/regnety_160.swag_ft_in1k (CC BY-NC 4.0). The code stays MIT (LICENSE).
+vit_models     = CC BY-NC 4.0     ; always      ; fine-tuned ViT/EffNet/RegNetY/CLIP classifiers
 lindat_dataset = CC BY-NC 4.0     ; conditional ; LINDAT training dataset (48k+ pages)
 ultralytics    = AGPL-3.0         ; conditional ; YOLO-cls backend and base weights (--yolo)
 # (atrium-project#72 D.1) The PDF engine of the service's /predict_document, which replaced the

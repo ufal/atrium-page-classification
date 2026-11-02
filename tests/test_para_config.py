@@ -36,6 +36,15 @@ def test_lindat_dataset_is_cc_by_nc():
     assert _components()["lindat_dataset"]["license"] == "CC BY-NC 4.0"
 
 
+def test_the_fine_tuned_models_are_cc_by_nc():
+    """atrium-project#6 (2026-10-29): MIT is a software licence. The classifiers are trained on the CC BY-NC 4.0
+    LINDAT dataset, and v4.3/v4.4 also start from Meta's CC BY-NC 4.0 SWAG weights, so they are declared CC BY-NC 4.0
+    and listed in every run."""
+    comp = _components()["vit_models"]
+    assert comp["license"] == "CC BY-NC 4.0"
+    assert comp["loaded"] == "always"
+
+
 def test_every_logged_component_is_declared():
     """Each name run.py passes to log_component() must have a para_config.txt entry."""
     import re

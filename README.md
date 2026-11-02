@@ -147,7 +147,7 @@ The documentation follows the ATRIUM
 
 ## Licence, citation and acknowledgements
 
-The code is MIT ([LICENSE](LICENSE)). The fine-tuned models are declared MIT, the LINDAT training dataset and the
+The code is MIT ([LICENSE](LICENSE)). The fine-tuned models, the LINDAT training dataset they were trained on and the
 sample pages in [small_data_samples](small_data_samples) are CC BY-NC 4.0, the optional YOLO backend (Ultralytics)
 is AGPL-3.0, and the service renders PDFs with pypdfium2 (Apache-2.0 or BSD-3-Clause). Each component, with its
 licence and where that is stated: [docs/reference/licences.md](docs/reference/licences.md). The paradata of a run

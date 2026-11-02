@@ -24,9 +24,9 @@ tools, and driven by this repository's [para_config.txt](../../setup/para_config
   `ATRIUM_RUNNER_REF` and `ATRIUM_RUNNER_IMAGE` environment variables, so the reference names the actual runner
   rather than a fixed fork URL; outside a container `docker_image` is empty.
 * **Components:** each component the run used, with its licence, as declared in `para_config.txt`: the models
-  always; the LINDAT dataset with `--train` or `--eval`; Ultralytics with `--yolo`. The log also carries the label
-  that `para_licenses.py` computes from them, the most restrictive of their licences, with the supporting detail
-  under `license_detail`; the label is not the licence of the output ([licences.md](licences.md)).
+  always; the LINDAT dataset with `--train` or `--eval`; Ultralytics with `--yolo`; pypdfium2 when a PDF is
+  rendered. The list is under `license_detail`. None of these licences is the licence of the output, and the
+  `license` field beside the list is an older calculated value, not a licence ([licences.md](licences.md)).
 
 The HTTP service writes no paradata file. Each successful answer carries the call's provenance instead, as
 `paradata`: its Process Run Crate `CreateAction`, whose `@id` is the `run_uuid` stamped into the record, with
