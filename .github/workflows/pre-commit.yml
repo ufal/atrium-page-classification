@@ -22,4 +22,4 @@ permissions:
 
 jobs:
   pre-commit:
-    uses: ufal/atrium-project/.github/workflows/pre-commit.reusable.yml@439488bb285d48eec099195528f9d1772f3b1119  # v1
+    uses: ufal/atrium-project/.github/workflows/pre-commit.reusable.yml@6a10787c334771317ef2a8a260cdfc8166359993  # v1

@@ -741,3 +741,13 @@ Documentation only; no code, test or configuration change.
   * with torch: 921 passed, 2 skipped, coverage 71.7 %;
   * a real start with `LOG_LEVEL=WARNING`: `/health` 200 at 11 s, `/ready` 503 during the warm-up, exit 1.25 s after
     SIGTERM, no INFO line.
+
+## 2026-11-03 — v1.12.2-beta
+
+* **Version:** v1.12.1-beta → v1.12.2-beta in `setup/para_config.txt`, `CITATION.cff`, `service/openapi.json`, the version examples in README, `docs/usage.md` and `service/README.md`. `CITATION.cff` `date-released` 2026-11-03.
+* **CONTRIBUTING.md:** the release row. It covers the 11-02 licence wording (atrium-project#6), the documentation
+  round (#79) and the 11-03 CI fixes, with the hub's workflows pinned to `6a10787` (the pin sweep, committed
+  before this one).
+* **The 11-03 CI logs:** the transformers warning "Using a slow image processor as `use_fast` is unset" is gone.
+  The notice "Fast image processor class … is available … Using slow image processor class" stays: transformers
+  logs it for checkpoints whose processor config names no class, whether `use_fast` is unset or `False`.
