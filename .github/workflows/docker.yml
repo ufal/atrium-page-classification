@@ -28,7 +28,7 @@ jobs:
       contents: read
       packages: write
       security-events: write
-    uses: ufal/atrium-project/.github/workflows/docker-tool.reusable.yml@6a10787c334771317ef2a8a260cdfc8166359993  # v1
+    uses: ufal/atrium-project/.github/workflows/docker-tool.reusable.yml@e11c882f9e005f9bd38e8335bf1521f64dde4a64  # v1
     secrets:
       # Explicit instead of `secrets: inherit` — the reusable declares and
       # needs only this one (#18). inherit handed it every repo secret.

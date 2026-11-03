@@ -8,7 +8,7 @@ ENV ATRIUM_RUNNER_IMAGE=${ATRIUM_RUNNER_IMAGE} \
     ATRIUM_RUNNER_REPO=${ATRIUM_RUNNER_REPO} \
     ATRIUM_RUNNER_REF=${ATRIUM_RUNNER_REF} \
     PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_DEFAULT_TIMEOUT=60 \
     HF_HOME=/cache/huggingface
 
 # ── Distro security patches, applied at build time ───────────────────────────
@@ -73,7 +73,14 @@ WORKDIR /app
 # EfficientNetV2 (v1.3) checkpoints used by --best; the <5 pin is the meta-device
 # fix, so keep it in setup/requirements.txt.
 ARG TORCH_INDEX_URL="https://download.pytorch.org/whl/cpu"
-RUN pip install --index-url ${TORCH_INDEX_URL} torch==2.7.1 torchvision==0.22.1
+# pytorch.org's CDN can stall a download mid-wheel: on 2026-11-03 keyword-extract's `llm` build failed on
+# "Read timed out" at 25.7 of 196.2 MB of the CPU torch wheel. Up to three attempts, 20 s apart; the base
+# stage's PIP_DEFAULT_TIMEOUT=60 also lets a stall last 60 s instead of pip's 15.
+RUN for attempt in 1 2 3; do \
+        pip install --index-url ${TORCH_INDEX_URL} torch==2.7.1 torchvision==0.22.1 && break; \
+        [ "$attempt" = 3 ] && exit 1; \
+        echo "pip install failed (attempt $attempt of 3); retrying in 20 s"; sleep 20; \
+    done
 
 # Runtime requirements only (atrium-project#69, roadmap H4). setup/requirements-test.txt
 # (pytest, pytest-cov, httpx, openapi-spec-validator, PyYAML) used to be installed here too:
