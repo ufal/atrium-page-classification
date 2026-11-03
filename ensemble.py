@@ -67,7 +67,7 @@ def average_rdfs(
     grouped = combined.groupby(["FILE", "PAGE", "CLASS"])["SCORE"].sum().reset_index()
     grouped["AVG_SCORE"] = (grouped["SCORE"] / num_models).clip(upper=1.0)
 
-    grouped.sort_values(["FILE", "PAGE", "AVG_SCORE"], ascending=[True, True, False], inplace=True)
+    grouped = grouped.sort_values(["FILE", "PAGE", "AVG_SCORE"], ascending=[True, True, False])
     grouped["rank"] = grouped.groupby(["FILE", "PAGE"]).cumcount() + 1
     top_n_df = grouped[grouped["rank"] <= top_N].copy()
 
@@ -105,7 +105,7 @@ def average_rdfs(
 
     avg_cols = [c for c in result.columns if c not in (["FILE", "PAGE"] + vote_cols)]
     result = result[["FILE", "PAGE"] + vote_cols + avg_cols]
-    result.sort_values(["FILE", "PAGE"], ascending=[True, True], inplace=True)
+    result = result.sort_values(["FILE", "PAGE"], ascending=[True, True])
     return result
 
 

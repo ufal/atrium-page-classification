@@ -126,7 +126,7 @@ def load_and_melt(file_paths, normalize_filenames=True):
 
             if 'CLASS-1' in df.columns:
                 t_df = df.drop_duplicates(subset=['FILE', 'PAGE'])[['FILE', 'PAGE', 'CLASS-1']].copy()
-                t_df.rename(columns={'CLASS-1': col_name}, inplace=True)
+                t_df = t_df.rename(columns={'CLASS-1': col_name})
                 top1_dfs.append(t_df)
 
             # ── Detect wide multi-model format (CLASS-1-v1.3, CLASS-1-v2.3, …) ─
@@ -288,10 +288,9 @@ def main():
 
     # ── Rank and select Top-N ────────────────────────────────────────────────
     print(f"Ranking and selecting Top-{args.top_n}...")
-    grouped.sort_values(
+    grouped = grouped.sort_values(
         by=['FILE', 'PAGE', 'AVG_SCORE'],
         ascending=[True, True, False],
-        inplace=True,
     )
     grouped['rank'] = grouped.groupby(['FILE', 'PAGE']).cumcount() + 1
     top_n_df = grouped[grouped['rank'] <= args.top_n].copy()
@@ -327,7 +326,7 @@ def main():
     final_output = final_output[['FILE', 'PAGE'] + model_cols + avg_cols]
 
     # ── Final sort and zero cleanup ──────────────────────────────────────────
-    final_output.sort_values(by=['FILE', 'PAGE'], ascending=[True, True], inplace=True)
+    final_output = final_output.sort_values(by=['FILE', 'PAGE'], ascending=[True, True])
     final_output = final_output.replace({0: "", 0.0: ""})
 
     if args.zeros:

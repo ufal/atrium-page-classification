@@ -317,7 +317,7 @@ def _run_group(
             continue
         # Unrounded: the average is taken over the scores the models gave (rounded on writing).
         rdf, _ = dataframe_results(kept_images, preds, categories, top_N=top_N, raw_scores=raws, decimals=None)
-        rdf.drop(columns=["CATEGORY"], inplace=True, errors="ignore")
+        rdf = rdf.drop(columns=["CATEGORY"], errors="ignore")
         rdfs[rev] = rdf
 
     for clf in classifiers.values():
@@ -371,7 +371,7 @@ def run_best_sequential(
 
         # Unrounded: the average is taken over the scores the models gave (rounded on writing).
         rdf, _ = dataframe_results(kept_images, preds, categories, top_N=top_N, raw_scores=raw_scores, decimals=None)
-        rdf.drop(columns=["CATEGORY"], inplace=True, errors="ignore")
+        rdf = rdf.drop(columns=["CATEGORY"], errors="ignore")
         all_rdfs[rev] = rdf
 
         if paradata_logger is not None:
@@ -519,7 +519,7 @@ def run_best_models(
         rev: rdf[["FILE", "PAGE", "CLASS-1"]].copy() for rev, rdf in all_rdfs.items() if "CLASS-1" in rdf.columns
     }
     wide_df = merge_best(revision_best_models, top1_rdfs)
-    wide_df.sort_values(["FILE", "PAGE"], ascending=[True, True], inplace=True)
+    wide_df = wide_df.sort_values(["FILE", "PAGE"], ascending=[True, True])
     wide_path = str(out_tables / f"{time_stamp}_BEST_{n_models}_models_TOP-1.csv")
     wide_df.to_csv(wide_path, index=False)
     print(f"[parallel_best] Wide per-model votes → {wide_path}")

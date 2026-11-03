@@ -19,6 +19,7 @@ import asyncio
 import io
 import json
 import logging
+import threading
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
@@ -167,18 +168,39 @@ _TOPN_MAX = len(_CATEGORIES)
 #: Readiness/draining/in-flight state for the §4.6 disposability contract (issue #55).
 _state = ServiceState()
 
+#: True while the start-up warm-up loads the models. The classification endpoints answer 503
+#: until it ends (`_refuse_if_warming`). A separate flag, not `not _state.warm`: a bare
+#: TestClient runs no lifespan, so `_state.warm` stays False there while the endpoints must work.
+_warming = False
+
+
+def _warm_up() -> None:
+    """Load every model version, then mark the service warm. Runs in the warm-up thread."""
+    global _warming
+    try:
+        manager.warmup()
+    except Exception:  # warmup() handles each model's failure; anything else must not wedge /ready
+        logger.exception("Model warm-up failed; each model loads on its first request instead")
+    finally:
+        _warming = False
+        _state.warm = True
+        logger.info("Models loaded; the service is ready")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Warm up models on startup. Off the event loop: warmup loads several torch
-    # models, and doing that inline would block the loop through the whole startup
-    # (harmless before traffic, but it also delays the first /ready answer a
-    # startupProbe is waiting on).
+    # The models load in a background thread while the server already answers: /health is 200
+    # from the start (the image's HEALTHCHECK and a liveness probe), /ready and the
+    # classification endpoints are 503 until the models are loaded. A first start downloads
+    # about 2.4 GB, and loading them before serving left /health unanswered all that time.
+    # A daemon thread, not asyncio.to_thread: the default executor's threads are joined at
+    # exit, so a SIGTERM during the download would wait for the download to finish.
+    global _warming
     logger.info("Warming up models...")
-    await asyncio.to_thread(manager.warmup)
-    _state.warm = True
-    # issue #55: composes with the warmup above rather than replacing it. Flips /ready
-    # to 503 on SIGTERM and waits for in-flight classification to finish before exit.
+    _warming = True
+    threading.Thread(target=_warm_up, name="model-warmup", daemon=True).start()
+    # issue #55: flips /ready to 503 on SIGTERM and waits for in-flight classification to
+    # finish before exit.
     async with serve_lifecycle(_state):
         yield
     # Cleanup resources on shutdown if necessary
@@ -375,6 +397,17 @@ def _refuse_if_draining() -> None:
     """
     if _state.draining:
         raise HTTPException(status_code=503, detail="Service is shutting down; retry against a live replica.")
+
+
+def _refuse_if_warming() -> None:
+    """Reject work while the start-up warm-up still loads the models.
+
+    A request then would load a model a second time, beside the warm-up thread. /ready is 503
+    for the same span, so a probed deployment sends nothing here; this answers a caller that
+    does not wait for /ready.
+    """
+    if _warming:
+        raise HTTPException(status_code=503, detail="The models are still loading; retry once /ready answers 200.")
 
 
 # Mount frontend
@@ -696,6 +729,7 @@ async def predict_image(
 ):
     """Classify a single uploaded image."""
     _refuse_if_draining()
+    _refuse_if_warming()
     media_type = _media_type(file)
     sniff = media_type in _GENERIC_MEDIA_TYPES
     if not sniff and not media_type.startswith("image/"):
@@ -781,6 +815,7 @@ async def predict_document(
 ):
     """Extracts pages from a PDF and classifies each page (or the `pages` selection)."""
     _refuse_if_draining()
+    _refuse_if_warming()
     media_type = _media_type(file)
     sniff = media_type in _GENERIC_MEDIA_TYPES
     if not sniff and media_type != "application/pdf":
@@ -900,4 +935,8 @@ if __name__ == "__main__":
         # drain on top, and docs/k8s_deployment.md in the hub carries the full grace
         # budget the two have to fit inside. (issue #55)
         timeout_graceful_shutdown=int(os.getenv("GRACEFUL_SHUTDOWN_S", "20")),
+        # LOG_LEVEL governs uvicorn's own records too, its start-up lines and its access log: the level
+        # basicConfig() set above, so `WARN` and the other spellings logging accepts work here too.
+        # Without it uvicorn logged INFO under LOG_LEVEL=WARNING (atrium-project#61).
+        log_level=logging.getLogger().getEffectiveLevel(),
     )

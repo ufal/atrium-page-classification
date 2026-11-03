@@ -620,7 +620,7 @@ def main(argv=None):
 
                 rdf, raw_df = dataframe_results(testfiles, test_predictions, categories, top_N, raw_prediction)
                 rdf["TRUE"] = [categories[label] for label in test_labels_indices]
-                rdf.sort_values(["FILE", "PAGE"], ascending=[True, True], inplace=True)
+                rdf = rdf.sort_values(["FILE", "PAGE"], ascending=[True, True])
                 rdf.to_csv(
                     f"{output_dir}/tables/{time_stamp}_{len(test_labels_indices)}_{revision_model_name_local}_TEST.csv",
                     index=False,
@@ -628,7 +628,7 @@ def main(argv=None):
 
                 if raw:
                     raw_df["TRUE"] = [categories[label] for label in test_labels_indices]
-                    raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
+                    raw_df = raw_df.sort_values(categories, ascending=[False] * len(categories))
                     raw_df.to_csv(
                         f"{output_dir}/tables/{time_stamp}_{len(test_labels_indices)}_{revision_model_name_local}_TEST_RAW.csv",
                         index=False,
@@ -708,7 +708,7 @@ def main(argv=None):
 
                     rdf, raw_df = dataframe_results(testfiles, test_predictions, categories, top_N, raw_prediction)
                     rdf["TRUE"] = [categories[label] for label in test_labels_indices]
-                    rdf.sort_values(["FILE", "PAGE"], ascending=[True, True], inplace=True)
+                    rdf = rdf.sort_values(["FILE", "PAGE"], ascending=[True, True])
                     rdf.to_csv(
                         f"{output_dir}/tables/{time_stamp}_{len(test_labels_indices)}_{revision_model_name_local}_TEST_FOLD_{i + 1}.csv",
                         index=False,
@@ -716,7 +716,7 @@ def main(argv=None):
 
                     if raw:
                         raw_df["TRUE"] = [categories[label] for label in test_labels_indices]
-                        raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
+                        raw_df = raw_df.sort_values(categories, ascending=[False] * len(categories))
                         raw_df.to_csv(
                             f"{output_dir}/tables/{time_stamp}_{len(test_labels_indices)}_{revision_model_name_local}_TEST_RAW_FOLD_{i + 1}.csv",
                             index=False,
@@ -799,7 +799,7 @@ def main(argv=None):
         number_of_rows = len(rdf.index)
 
         rdf["TRUE"] = [categories[i] for i in test_labels_indices]
-        rdf.sort_values(["FILE", "PAGE"], ascending=[True, True], inplace=True)
+        rdf = rdf.sort_values(["FILE", "PAGE"], ascending=[True, True])
         rdf.to_csv(
             f"{output_dir}/tables/{time_stamp}_{number_of_rows}_{revision_model_name_local}_TOP-{top_N}_EVAL.csv",
             sep=",",
@@ -810,7 +810,7 @@ def main(argv=None):
 
         if raw:
             raw_df["TRUE"] = [categories[i] for i in test_labels_indices]
-            raw_df.sort_values(categories, ascending=[False] * len(categories), inplace=True)
+            raw_df = raw_df.sort_values(categories, ascending=[False] * len(categories))
             raw_df.to_csv(
                 f"{output_dir}/tables/{time_stamp}_{number_of_rows}_{revision_model_name_local}_EVAL_RAW.csv",
                 sep=",",
@@ -1054,7 +1054,7 @@ def main(argv=None):
 
                     _paradata_logger.log_success("csv", len(rdf.index))
 
-                    rdf.sort_values(["FILE", "PAGE"], ascending=[True, True], inplace=True)
+                    rdf = rdf.sort_values(["FILE", "PAGE"], ascending=[True, True])
                     top_out_path = f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_TOP-{top_N}.csv"
                     rdf.to_csv(
                         top_out_path,
@@ -1066,7 +1066,7 @@ def main(argv=None):
                     _write_records(rdf, top_out_path)
 
                     if raw:
-                        raw_df.sort_values(["FILE", "PAGE"], ascending=[True, True], inplace=True)
+                        raw_df = raw_df.sort_values(["FILE", "PAGE"], ascending=[True, True])
                         raw_df.to_csv(
                             f"{output_dir}/tables/{time_stamp}_{revision_model_name_local}_RAW.csv",
                             sep=",",
@@ -1103,7 +1103,7 @@ def main(argv=None):
                         )
 
                         _paradata_logger.log_success("csv", len(rdf_chunk.index))
-                        rdf_chunk.sort_values(["FILE", "PAGE"], ascending=[True, True], inplace=True)
+                        rdf_chunk = rdf_chunk.sort_values(["FILE", "PAGE"], ascending=[True, True])
 
                         write_header = not os.path.exists(top_out_path)
                         rdf_chunk.to_csv(top_out_path, sep=",", index=False, mode="a", header=write_header)
@@ -1117,7 +1117,7 @@ def main(argv=None):
 
                         if raw:
                             if raw_df_chunk is not None and not raw_df_chunk.empty:
-                                raw_df_chunk.sort_values(["FILE", "PAGE"], ascending=[True, True], inplace=True)
+                                raw_df_chunk = raw_df_chunk.sort_values(["FILE", "PAGE"], ascending=[True, True])
 
                             write_header_raw = not os.path.exists(raw_out_path)
                             raw_df_chunk.to_csv(raw_out_path, sep=",", index=False, mode="a", header=write_header_raw)
@@ -1133,13 +1133,13 @@ def main(argv=None):
 
                     if os.path.exists(top_out_path):
                         final_top_df = pd.read_csv(top_out_path)
-                        final_top_df.sort_values(["FILE", "PAGE"], ascending=[True, True], inplace=True)
+                        final_top_df = final_top_df.sort_values(["FILE", "PAGE"], ascending=[True, True])
                         final_top_df.to_csv(top_out_path, sep=",", index=False)
                         print(f"Final TOP-{top_N} daily file sorted by FILE and PAGE.")
 
                     if raw and os.path.exists(raw_out_path):
                         final_raw_df = pd.read_csv(raw_out_path)
-                        final_raw_df.sort_values(["FILE", "PAGE"], ascending=[True, True], inplace=True)
+                        final_raw_df = final_raw_df.sort_values(["FILE", "PAGE"], ascending=[True, True])
                         final_raw_df.to_csv(raw_out_path, sep=",", index=False)
                         print("Final RAW daily file sorted by FILE and PAGE, as the TOP file.")
 

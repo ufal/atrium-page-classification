@@ -123,23 +123,24 @@ REVISION_TO_BASE_MODEL = {
     "v12.": "timm/tf_efficientnetv2_m.in21k_ft_in1k",
     "v1.3": "timm/tf_efficientnetv2_m.in21k_ft_in1k",
     "v2.3": "google/vit-base-patch16-224",
-    # ── v*.4 retraining set (issue #15) ───────────────────────────────────────
+    # ── v*.4 retraining set (issue #15) and the v*.3 set ──────────────────────
     # These MUST precede the generic single-dot prefixes ("v3.", "v4.", "v5."):
     # run.py resolves the base model with `next(key ... if revision.startswith(key))`
     # (first match wins), so e.g. "v4.4".startswith("v4.") would otherwise grab the
     # generic effnetv2_l entry instead of regnety_160. Explicit entries first → correct.
+    # The v*.3 keys used to follow their generic prefix, so "v4.3.1" resolved to effnetv2_l.
     "v1.4": "timm/tf_efficientnetv2_m.in21k_ft_in1k",
     "v2.4": "google/vit-base-patch16-224",
     "v3.4": "google/vit-base-patch16-384",
     "v4.4": "timm/regnety_160.swag_ft_in1k",
     "v5.4": "google/vit-large-patch16-384",
+    "v3.3": "google/vit-base-patch16-384",
+    "v4.3": "timm/regnety_160.swag_ft_in1k",
+    "v5.3": "google/vit-large-patch16-384",
     # ──────────────────────────────────────────────────────────────────────────
     "v3.": "google/vit-base-patch16-384",
-    "v3.3": "google/vit-base-patch16-384",
     "v4.": "timm/tf_efficientnetv2_l.in21k_ft_in1k",
-    "v4.3": "timm/regnety_160.swag_ft_in1k",
     "v5.": "google/vit-large-patch16-384",
-    "v5.3": "google/vit-large-patch16-384",
     "v6.": "timm/regnety_120.sw_in12k_ft_in1k",
     "v7.": "timm/regnety_160.swag_ft_in1k",
     "v8.": "timm/regnety_640.seer",

@@ -3,7 +3,9 @@ pytest-cov
 # pinned exactly, with pydantic: see service/requirements.txt (atrium-project#32 round 2)
 fastapi==0.141.1
 pydantic==2.13.5
-httpx
+# httpx2, not httpx: starlette's TestClient takes it when installed and warns that httpx is
+# deprecated. Nothing in this repository imports httpx itself.
+httpx2
 python-multipart
 openapi-spec-validator
 matplotlib

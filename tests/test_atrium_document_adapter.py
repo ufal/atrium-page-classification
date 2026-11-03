@@ -313,6 +313,50 @@ class TestLayerDValidationGate:
             write_document_record(rdf=rdf, document_json=str(baseline), document_json_out=str(out_path))
         assert not out_path.exists()
 
+    @staticmethod
+    def _seed(**source):
+        """An AMČR seed: what the archive hands the first tool, before any tool wrote to it."""
+        return {
+            "schema_version": "1.0",
+            "record_type": "atrium-document",
+            "doc_id": "CTX01",
+            "source": {"sha512": "c" * 128, "filename": "zprava.pdf", "media_type": "application/pdf", **source},
+        }
+
+    def test_a_seed_baseline_is_checked_against_the_seed_profile(self, tmp_path, capsys):
+        """A seed has no `provenance` or `assembled`, so the full schema refuses it. Judged by
+        that schema, every pilot run warned that its baseline was invalid and demoted its own
+        output check; `validate_baseline` checks a seed against the seed profile instead."""
+        baseline = _baseline(tmp_path, "CTX01.seed.json", self._seed())
+        rdf = _rdf([{"FILE": "CTX01", "PAGE": "1", "CLASS-1": "Text", "SCORE-1": 0.87}])
+        out_path = tmp_path / "CTX01.out.json"
+
+        write_document_record(rdf=rdf, document_json=str(baseline), document_json_out=str(out_path))
+
+        data = load_document(str(out_path))
+        validate_document(data)
+        assert data["source"]["sha512"] == "c" * 128
+        assert "does not validate" not in capsys.readouterr().err
+
+    def test_a_seed_baseline_does_not_demote_the_own_output_check(self, tmp_path):
+        baseline = _baseline(tmp_path, "CTX01.seed.json", self._seed())
+        rdf = _rdf([{"FILE": "CTX01", "PAGE": "1", "CLASS-1": "Text", "SCORE-1": 1.5}])
+        out_path = tmp_path / "CTX01.out.json"
+
+        with pytest.raises(RuntimeError, match="refusing to emit it"):
+            write_document_record(rdf=rdf, document_json=str(baseline), document_json_out=str(out_path))
+        assert not out_path.exists()
+
+    def test_a_seed_that_breaks_the_seed_profile_still_warns(self, tmp_path, capsys):
+        """`source.origin` is refused in a seed: the profile, not a blanket pass, decides."""
+        baseline = _baseline(tmp_path, "CTX01.seed.json", self._seed(origin="ABBYY-ALTO"))
+        rdf = _rdf([{"FILE": "CTX01", "PAGE": "1", "CLASS-1": "Text", "SCORE-1": 0.87}])
+        out_path = tmp_path / "CTX01.out.json"
+
+        write_document_record(rdf=rdf, document_json=str(baseline), document_json_out=str(out_path))
+
+        assert "inherited baseline CTX01.seed.json does not validate" in capsys.readouterr().err
+
     def test_missing_jsonschema_degrades_loudly_exactly_once(self, tmp_path, monkeypatch, capsys):
         """`validate_document()` raises RuntimeError when `jsonschema` is absent. That means
         the GATE is missing, not that the record is bad, so it must not be mistaken for a

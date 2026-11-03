@@ -6,9 +6,8 @@ omit =
     *paradata.py
 
 [report]
-# Ratchet: set ~2 points below the measured fast-lane baseline of 40.62%
-# (2026-08-06, issue atrium-project#10 Phase 6). Raised from 28 — the suites grew
-# substantially in the 08-05/06 round, and a floor left far below the real number
-# stops being a ratchet: coverage can fall by twenty points and still pass.
-fail_under = 38
+# Ratchet: set below the test lane's measured 69.4% (the docker-tool test job, 2026-11-02).
+# Raised from 38 (2026-08-06, a fast-lane baseline of 40.62%): a floor left far below the
+# real number stops being a ratchet, and coverage could fall by thirty points and still pass.
+fail_under = 65
 show_missing = True

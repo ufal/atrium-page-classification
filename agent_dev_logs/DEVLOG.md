@@ -711,3 +711,33 @@ Documentation only; no code, test or configuration change.
 * **Map:** the hub's `agent_dev_logs/plans/79.F-relocation_map.md` § atrium-page-classification (every moved block, corrected facts,
   renamed anchors).
 * **Checks:** `docs_check` and `runbook_check` pass; 823 passed, 16 skipped, 2 xfailed, as at the head.
+
+## 2026-11-03 — What the green CI runs on the 11-02 `test` head hid (atrium-project, CI audit)
+
+* **An AMČR seed is checked against the seed profile:** `atrium_document_adapter.py` validates the inherited
+  baseline with the shared `validate_baseline()`, as the other five tools do. The full schema refuses every seed (no
+  `provenance`), so each pilot run warned that its baseline was invalid and demoted its own output check to a
+  warning (hub E2E, 11-01). Three new tests in `tests/test_atrium_document_adapter.py`; two of them fail on the old adapter.
+* **`/health` answers while the models load:**
+  * the lifespan starts the warm-up in a daemon thread and serves at once: `/health` 200, `/ready` 503 `starting`,
+    and the two `/predict_*` endpoints 503 "The models are still loading" until it ends;
+  * a daemon thread, not `asyncio.to_thread`: SIGTERM during the download then exits at once;
+  * before, a slow first download kept `/health` unanswered past the smoke probe's budget (11-02);
+  * new `tests/test_service_warmup.py`, whose SIGTERM test fails on the old lifespan;
+  * the runbook, README and usage sentences written on 11-02 now say this.
+* **`model_registry.py`:** the `v3.3`, `v4.3` and `v5.3` keys precede their generic prefixes, so `v4.3.1` resolves to
+  RegNetY, not EfficientNetV2-L; the two strict xfails that recorded it are gone.
+* **uvicorn gets the configured log level** (`service/api.py`); it logged INFO under `LOG_LEVEL=WARNING`.
+* **Hygiene:**
+  * every pandas `inplace=` in `run.py`, `ensemble.py`, `parallel_best.py`, `supplementary/scripts/averaging.py` and
+    `tests/test_averaging.py` became a rebinding;
+  * `use_fast=False` on the image processors (the slow processor transformers already picked, without its warning);
+  * `httpx2` instead of `httpx` in `setup/requirements-test.txt`;
+  * `.coveragerc` `fail_under` 38 → 65;
+  * pre-commit `ruff-check`; the weekly scan targets `-api`.
+* **Not changed:** `hf-cache-key` stays `v4.3`: it tracks the Dockerfile's default `-rev`.
+* **Checks:**
+  * without torch: 830 passed, 16 skipped (823, 16 and 2 xfailed at the head);
+  * with torch: 921 passed, 2 skipped, coverage 71.7 %;
+  * a real start with `LOG_LEVEL=WARNING`: `/health` 200 at 11 s, `/ready` 503 during the warm-up, exit 1.25 s after
+    SIGTERM, no INFO line.

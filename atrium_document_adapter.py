@@ -35,11 +35,18 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 import pandas as pd
 
-from atrium_document import FILE_SUFFIX, SCHEMA_FILENAME, DocumentRecord, load_document, validate_document
+from atrium_document import (
+    FILE_SUFFIX,
+    SCHEMA_FILENAME,
+    DocumentRecord,
+    load_document,
+    validate_baseline,
+    validate_document,
+)
 
 PROGRAM = "page-classification"
 
@@ -56,8 +63,11 @@ OWN_PAGE_FIELDS = ["category", "category_confidence"]
 _schema_gate_disabled_warned = False
 
 
-def schema_error(record: dict, what: str) -> Optional[str]:
+def schema_error(record: dict, what: str, validate: Optional[Callable[[dict], None]] = None) -> Optional[str]:
     """Validate one record against `atrium_document.schema.json`.
+
+    ``validate`` defaults to `validate_document`, for this tool's own output; a record the tool
+    was handed passes `validate_baseline`, which checks an AMČR seed against the seed profile.
 
     Returns None when it validates, or a one-line description of the schema error when it does
     not. This is plan §2's **Layer D** — "no doc.json is emitted if validation fails" — adopted
@@ -81,7 +91,7 @@ def schema_error(record: dict, what: str) -> Optional[str]:
     """
     global _schema_gate_disabled_warned
     try:
-        validate_document(record)
+        (validate or validate_document)(record)
     except (RuntimeError, FileNotFoundError, json.JSONDecodeError) as exc:
         if not _schema_gate_disabled_warned:
             print(
@@ -153,10 +163,12 @@ def _write_one(
     # refusing to run because alto-postprocess wrote something the schema rejects would turn one
     # bad record into a stalled pipeline, and rule 6 already commits to passing unknown content
     # through. It also sets the severity of the second half — a schema error we inherited is not
-    # ours to fail on.
+    # ours to fail on. validate_baseline checks an AMČR seed against the seed profile: the full
+    # schema refuses every seed (no `provenance`), which demoted this run's own output check on
+    # every pilot run.
     baseline_was_invalid = False
     if baseline and os.path.exists(baseline):
-        baseline_error = schema_error(load_document(baseline), f"baseline {Path(baseline).name}")
+        baseline_error = schema_error(load_document(baseline), f"baseline {Path(baseline).name}", validate_baseline)
         if baseline_error:
             baseline_was_invalid = True
             print(

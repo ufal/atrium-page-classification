@@ -195,7 +195,9 @@ class ImageClassifier:
                 cache_dir=store_dir,
                 ignore_mismatched_sizes=True,
             ).to(self.device)
-            self.processor = AutoImageProcessor.from_pretrained(checkpoint)
+            # use_fast=False: the slow (PIL) processor the models were trained and published with.
+            # Left unset, transformers picks it too but warns on every load.
+            self.processor = AutoImageProcessor.from_pretrained(checkpoint, use_fast=False)
             image_size = self.processor.size["height"]
             image_mean = self.processor.image_mean
             image_std = self.processor.image_std
@@ -450,7 +452,7 @@ class ImageClassifier:
         """
         Load a fine-tuned model and processor from the specified directory.
         """
-        self.processor = AutoImageProcessor.from_pretrained(load_directory)
+        self.processor = AutoImageProcessor.from_pretrained(load_directory, use_fast=False)
         self.model = AutoModelForImageClassification.from_pretrained(load_directory).to(self.device)
         print(f"Model and processor loaded from {load_directory}")
 
@@ -511,7 +513,7 @@ class ImageClassifier:
             num_labels=self.model.config.num_labels,  # ← pass through num_labels
             ignore_mismatched_sizes=True,  # ← allow head size mismatch
         ).to(self.device)
-        processor = AutoImageProcessor.from_pretrained(repo_id, revision=revision)
+        processor = AutoImageProcessor.from_pretrained(repo_id, revision=revision, use_fast=False)
 
         self.model, self.processor = model, processor
         print(f"Model and processor loaded from the Hugging Face Hub: {repo_id}")

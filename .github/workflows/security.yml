@@ -28,7 +28,7 @@ jobs:
     # (Trivy/SBOM read a public GHCR image, version-check reads the tree).
     # It previously carried `secrets: inherit` for no reason (#18).
     with:
-      image-ref: ghcr.io/ufal/atrium-page-classification:latest
+      image-ref: ghcr.io/ufal/atrium-page-classification-api:latest
       citation-path: CITATION.cff
       # CRITICAL: Page classification stores this in the setup folder
       para-config-path: setup/para_config.txt

@@ -363,6 +363,6 @@ class TestIntersectionAndAggregation:
         combined = pd.concat(long_dfs, ignore_index=True)
         grouped = combined.groupby(["FILE", "PAGE", "CLASS"])["SCORE"].sum().reset_index()
         grouped["AVG"] = grouped["SCORE"] / num
-        grouped.sort_values("AVG", ascending=False, inplace=True)
+        grouped = grouped.sort_values("AVG", ascending=False)
         assert grouped.iloc[0]["CLASS"] == "TEXT"
         assert grouped.iloc[0]["AVG"] == pytest.approx(2 / 3, abs=1e-6)

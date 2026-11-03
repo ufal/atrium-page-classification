@@ -53,9 +53,9 @@ Expected result (abridged):
 The scores are those `v4.4` gave this page in the stored run
 [result/tables/20261022-1218_v44_TOP-3.csv](result/tables/20261022-1218_v44_TOP-3.csv), rounded. Without `version`
 the service uses the ensemble (`all`), and `models_used` lists the five revisions that answered. The image holds no
-weights. On its first start it downloads the five models from the Hugging Face Hub into the `hf-cache` volume. No
-endpoint answers until they are loaded: the connection is refused, then `/ready` returns 200. Every endpoint, limit
-and error: [service/README.md](service/README.md).
+weights. On its first start it downloads the five models from the Hugging Face Hub into the `hf-cache` volume.
+`/health` answers at once; `/ready` returns 200 once the models are loaded. Every endpoint, limit and error:
+[service/README.md](service/README.md).
 
 The same page on the command line, from a checkout with its [setup](docs/usage.md#install) done:
 

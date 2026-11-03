@@ -489,7 +489,7 @@ under [Install](#install).
    model stack (torch, timm, transformers) in `setup/requirements.txt`; the Docker image installs both.
 3. **Get the models.** Download the five `vX.4` models as in [Get a model](#get-a-model), or leave it to the first
    start. When a model is missing from `model/`, `service/inference.py` downloads it from the Hugging Face Hub, so the
-   very first start takes a while. The service loads all five before it accepts a request.
+   very first start takes a while. Until all five are loaded, `/ready` and the classification endpoints answer 503.
 4. **Start the service:**
 
    ```bash

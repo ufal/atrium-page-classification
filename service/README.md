@@ -39,9 +39,9 @@ On this page:
 
 **At a glance:**
 
-| Image                                                   | CPU / GPU                                                             | Memory                                                                                                                                           | Volumes                                                                   | Calls out to                                                                                                                                      | Ready after                                                                                                                                      |
-|---------------------------------------------------------|-----------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| `ghcr.io/ufal/atrium-page-classification-api:<version>` | CPU is enough; a CUDA GPU is used when torch finds one (`--gpus all`) | about 2.44 GB of weights for the five ensemble models; `limits.memory: 4Gi` is a floor, not a comfortable fit; use in steady state: not measured | `/cache/huggingface` (the Hub cache) and `/app/model` (the saved weights) | `huggingface.co` only: the model revisions and the base-model configurations, at the first start and when an unlisted revision is first asked for | the first start downloads about 2.44 GB, and no endpoint answers until all five models are loaded; a start with the volumes filled: not measured |
+| Image                                                   | CPU / GPU                                                             | Memory                                                                                                                                           | Volumes                                                                   | Calls out to                                                                                                                                      | Ready after                                                                                                                                               |
+|---------------------------------------------------------|-----------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ghcr.io/ufal/atrium-page-classification-api:<version>` | CPU is enough; a CUDA GPU is used when torch finds one (`--gpus all`) | about 2.44 GB of weights for the five ensemble models; `limits.memory: 4Gi` is a floor, not a comfortable fit; use in steady state: not measured | `/cache/huggingface` (the Hub cache) and `/app/model` (the saved weights) | `huggingface.co` only: the model revisions and the base-model configurations, at the first start and when an unlisted revision is first asked for | `/health` at once; `/ready` once all five models are loaded, after the first start downloads about 2.44 GB; a start with the volumes filled: not measured |
 
 The published image first: it is what a deployment runs, and it needs no checkout.
 
@@ -57,9 +57,9 @@ python -m service.api                                       # honours PORT and H
 uvicorn service.api:app --reload                            # hot reload, for development
 ```
 
-The service loads all five models before it accepts any connection. On the first start it downloads them first, so
-until they are loaded neither `/health` nor `/ready` answers: the connection is refused, not answered with 503. Poll
-`/ready` until it returns 200 (see [Known limits](#known-limits)).
+The service answers at once and loads all five models in the background; on the first start it downloads them
+first. Until they are loaded, `/health` returns 200, while `/ready` and the two `/predict_*` endpoints return 503.
+Poll `/ready` until it returns 200.
 
 From a checkout you need Python 3.11 (the image's base and the CI lane) and the two requirement files above;
 NodeJS is needed only to develop the LINDAT frontend. The step-by-step setup, with the model download and a GPU image,
@@ -72,7 +72,7 @@ under [Tests](#tests).
 |---------------------------------|-------------------------------------------------------------------------------------------------|--------------------------------------------------------|----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | The five fine-tuned classifiers | Hugging Face Hub, [`ufal/vit-historical-page`](https://huggingface.co/ufal/vit-historical-page) | by revision name (`v1.4` … `v5.4`, `/info` lists them) | `HF_HOME` (`/cache/huggingface` in the image); the weights are then saved under `/app/model` | fill the volume once where there is egress (`python3 run.py --hf -rev vX.4`); a model that cannot be loaded is left out of the ensemble (see [Partial results](#partial-results)) |
 
-The models are loaded at start, before the service accepts any connection; the image holds no weights. When
+The models are loaded at start, while the service already answers `/health`; the image holds no weights. When
 `/app/model` (the `model/` folder of a checkout) has no copy of a revision, `service/inference.py` downloads it from
 the Hub by itself, and `python3 run.py --hf -rev vX.4` does the same ahead of time. Any other revision a request names
 is downloaded on its first use. `GET /info` lists the five as `available_models`, with `all` for their average, and the
@@ -80,15 +80,15 @@ labels as `categories`.
 
 ## Endpoints
 
-| Method | Path                     | Description                                                                                                                                                                                                                                                                                      |
-|:-------|:-------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `GET`  | `/`                      | A short JSON welcome message pointing at `/info`. The static `index.html` interface for manual testing is served at `/frontend`.                                                                                                                                                                 |
-| `GET`  | `/info`                  | Service identity + capabilities: `service`, `version`, `endpoints`, `limits` (every [limit](#limits), current value), `limits_meta` (the variable that sets each), plus available models.                                                                                                        |
-| `GET`  | `/health`                | Liveness probe — 200 while the process runs, even mid-shutdown, but not before the models are loaded (no connection is accepted until then). `?deep=true` also checks at least one model version is loaded (503 on failure or while draining, with `status`, `detail`, `in_flight`, `draining`). |
-| `GET`  | `/ready`                 | Readiness probe — 200 while serving, 503 the instant `SIGTERM` arrives. The Kubernetes `readinessProbe`/`startupProbe` target. The 503 "starting" of the shared contract is never seen here: no connection is accepted until the models are loaded.                                              |
-| `POST` | `/predict_image`         | Performs inference on an uploaded single image (any `image/*` type Pillow reads; an upload sent as `application/octet-stream` is recognised by its bytes).                                                                                                                                       |
-| `POST` | `/predict_document`      | Performs inference on an uploaded multipage PDF document (`application/pdf`, or `application/octet-stream` recognised by its bytes), or the `pages` selection of it.                                                                                                                             |
-| `GET`  | `/docs`, `/openapi.json` | FastAPI's built-in interactive documentation and the live OpenAPI document.                                                                                                                                                                                                                      |
+| Method | Path                     | Description                                                                                                                                                                                                                            |
+|:-------|:-------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `GET`  | `/`                      | A short JSON welcome message pointing at `/info`. The static `index.html` interface for manual testing is served at `/frontend`.                                                                                                       |
+| `GET`  | `/info`                  | Service identity + capabilities: `service`, `version`, `endpoints`, `limits` (every [limit](#limits), current value), `limits_meta` (the variable that sets each), plus available models.                                              |
+| `GET`  | `/health`                | Liveness probe — 200 while the process runs, from the start and even mid-shutdown. `?deep=true` also checks at least one model version is loaded (503 on failure or while draining, with `status`, `detail`, `in_flight`, `draining`). |
+| `GET`  | `/ready`                 | Readiness probe — 503 (`starting`) until the models are loaded, 200 while serving, 503 the instant `SIGTERM` arrives. The Kubernetes `readinessProbe`/`startupProbe` target.                                                           |
+| `POST` | `/predict_image`         | Performs inference on an uploaded single image (any `image/*` type Pillow reads; an upload sent as `application/octet-stream` is recognised by its bytes).                                                                             |
+| `POST` | `/predict_document`      | Performs inference on an uploaded multipage PDF document (`application/pdf`, or `application/octet-stream` recognised by its bytes), or the `pages` selection of it.                                                                   |
+| `GET`  | `/docs`, `/openapi.json` | FastAPI's built-in interactive documentation and the live OpenAPI document.                                                                                                                                                            |
 
 ### `POST /predict_image` (multipart form)
 
@@ -197,7 +197,7 @@ for request-validation problems.
 | 422  | `invalid_record`         | the `document_json` baseline cannot be opened (not UTF-8 JSON, not an object, a newer `schema_version` major), or its `pages` is not a list of objects | send the record the previous stage wrote; update this service if the record is newer |
 | 422  | `null`                   | request validation (e.g. `topn` outside 1–11), an unknown `version`, or an image or PDF that cannot be read                                            | fix the field `errors` or `detail` names; repair or re-export an unreadable file     |
 | 500  | `null`                   | processing failure (a page the model could not classify included), or a record rejected by its own schema                                              | report it with `detail`; check the log for a model that failed to load               |
-| 503  | `null`                   | the replica is shutting down — retry against a live one                                                                                                | retry on another replica                                                             |
+| 503  | `null`                   | the models are still loading, or the replica is shutting down                                                                                          | wait for `/ready` 200, or retry on another replica                                   |
 
 ```json
 {"status": 413, "reason": "limit_exceeded",
@@ -236,10 +236,6 @@ A 200 can carry less than was asked for. Read these before using the result:
 
 ## Known limits
 
-- **No endpoint answers while the models load.** The service warms all five models before it accepts a connection.
-  During the first start's download (about 2.44 GB) both `/health` and `/ready` are refused, although the endpoint
-  table says `/health` answers 200 while the process runs. An orchestrator's start-up probe has to allow for the
-  download: the image's own healthcheck waits 180 s before it counts a failure.
 - **The renderer differs from the training pages'.** The service renders PDF pages with pypdfium2; the
   training pages were made with pdftoppm. On 2,514 pages of 15 born-digital AMČR reports, 5 top-1
   labels differed from the ones PyMuPDF renders gave, each to a neighbouring class
