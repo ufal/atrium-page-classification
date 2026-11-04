@@ -1,5 +1,6 @@
 # 📓 atrium-page-classification — agent_dev_logs/DEVLOG.md (timeline index)
-> _Historical page-image classification. Open issue: #58 (decision-model experiments, 2026-10-20). #61 (the
+> _Historical page-image classification. Open issues: #58 (decision-model experiments, 2026-10-20) and #64 (the
+> scheduled-smoke failure of 10-27; the lane is green every day since 10-28, so it can close). Latest entry: 2026-11-04. #61 (the
 > directory-run bug) closed 2026-10-22, fixed in **v1.9.6-beta**. #48 closed 2026-09-17; the #48 and #61 pairs are removed this round; #15 and #26 closed; four open
 > Dependabot PRs (#56, #57, #59, #60). Its pilot work is tracked in hub issues (atrium-project #6, #67, #72) and in
 > atrium-digital-convert#5. `test` = `253239b` (2026-10-28) · **v1.11.0-beta** (2026-10-28, the service = the CLI:
@@ -760,3 +761,18 @@ Documentation only; no code, test or configuration change.
   `PIP_RESUME_RETRIES` would not help here: the `python:3.11` images ship a pip that predates it.
 * **Hub pin:** the callers move to the hub commit that turns the build cache off on tags (a tag run cannot read
   the `test` caches) and lists each CRITICAL and HIGH finding in the scan summary.
+
+## 2026-11-04 — The week's issue activity read in (#58, #64, atrium-project#66)
+
+* **#58:** the export now has the body's UPD of 10-29 16:58 and the first comment (K4TEL, 10-29 17:51), which posted
+  the digest's notes and asks who could annotate 100–200 pages. Digest and plan refreshed: track 1 can start; track
+  2's gold set waits for annotators.
+* **#64 (bot):** the scheduled-smoke run of 10-27 (40443152586) could not collect tests at `1191e20`: `tests/test_run.py`
+  imports `run.py`, which failed on `ModuleNotFoundError: No module named 'page_inputs'`. The lane has been green on
+  every run since 10-28 (the latest 41765334565, 11-04). Next round: close #64, citing those runs.
+* **The CSV's `CATEGORY` column (atrium-project#66):** Mark Greenwood's `planemo test` expected
+  `FILE,PAGE,CLASS-1,SCORE-1`; at `-tn 1` the CSV also has `CATEGORY`, a copy of `CLASS-1` (`utils.py:176`). Only
+  `docs/reference/outputs.md:23` says so. `README.md:16` and `docs/how-it-works.md:187` list
+  `FILE, PAGE, CLASS-1…N, SCORE-1…N`. Next round: both summaries mention the column and link the reference, in the
+  next patch release (after the atrium-project#77 candidate decision).
+* Not pushed: files delivered in chat.
