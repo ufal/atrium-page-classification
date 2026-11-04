@@ -35,4 +35,4 @@ jobs:
       security-events: write
       actions: read
       contents: read
-    uses: ufal/atrium-project/.github/workflows/codeql.reusable.yml@14110d7db2f48068b8814875975617d29bee74c1  # v1
+    uses: ufal/atrium-project/.github/workflows/codeql.reusable.yml@51aad6c9a657229a1d41f86ce7119bddbfcff9f5  # v1

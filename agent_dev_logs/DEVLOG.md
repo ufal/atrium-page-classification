@@ -1,11 +1,10 @@
 # 📓 atrium-page-classification — agent_dev_logs/DEVLOG.md (timeline index)
-> _Historical page-image classification. Open issues: #58 (decision-model experiments, 2026-10-20) and #64 (the
-> scheduled-smoke failure of 10-27; the lane is green every day since 10-28, so it can close). Latest entry: 2026-11-04. #61 (the
-> directory-run bug) closed 2026-10-22, fixed in **v1.9.6-beta**. #48 closed 2026-09-17; the #48 and #61 pairs are removed this round; #15 and #26 closed; four open
-> Dependabot PRs (#56, #57, #59, #60). Its pilot work is tracked in hub issues (atrium-project #6, #67, #72) and in
-> atrium-digital-convert#5. `test` = `253239b` (2026-10-28) · **v1.11.0-beta** (2026-10-28, the service = the CLI:
-> the ensemble average, transparency) · **v1.12.0-beta** prepared 2026-10-29 (the pilot candidate,
-> atrium-project#77) · **v1.9.5-beta** (2026-10-19, the runbook) is the first immutable release (atrium-project#72)._
+> _Historical page-image classification. Open issue: #58 (decision-model experiments, 2026-10-20); #64 (the
+> scheduled-smoke failure of 10-27) closed 2026-11-04; one open Dependabot PR (#65). #61 (the directory-run bug) closed
+> 2026-10-22, fixed in **v1.9.6-beta**; #48 closed 2026-09-17. Its pilot work is tracked in hub issues (atrium-project
+> #6, #66, #72, #77, #79, #81). **Pilot release: v1.12.3-beta** (`0a96bce`, 2026-11-04; immutable, with `images.json`;
+> atrium-project#77). **v1.9.5-beta** (2026-10-19, the runbook) is the first immutable release (atrium-project#72).
+> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-04 (afternoon)._
 > _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md`._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
@@ -798,3 +797,10 @@ Documentation only; no code, test or configuration change.
   `python3 scripts/pin_hub_reusables.py --sha <that commit>` from the hub so the pins and these copies land in one
   commit (para-drift compares them with the hub at the pin); then tag.
 * **Checks:** the suite on Python 3.11 with `requirements-test.txt` (the release lane, no torch): 838 passed, 17 skipped; `tests/test_openapi_contract.py` 12 of 12 against the app; `check_version.py --tag` agrees; the shared selftests pass; ruff clean.
+
+## 2026-11-04 (afternoon) — The pilot release out; records and comments aligned
+
+* **Released:** v1.12.3-beta (10:13Z), the pilot release (atrium-project#77). #64 closed 11:22 (the lane is green every day since 10-28).
+* **Hub pin:** the workflows move from `14110d7` to `51aad6c` (`v1`), which adds the 30 s pause before the Trivy scan's retry and the CVE gate's blocking retry (atrium-project#81). No release; the next one carries it. `workflow_lint --require-sha-pins` OK; shared files in parity.
+* **#6 wording:** `data_scripts/pdf_rasteriser_comparison.md` calls the most-restrictive value a calculated label, not the result's licence.
+* **Records:** the #58 export takes the first comment (10-29 17:51), which the 11-04 push left out; the header names the pilot release.
