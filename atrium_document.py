@@ -73,6 +73,10 @@ except ImportError:
 SCHEMA_VERSION = "1.0"
 LICENSE_NAME = "CC BY-NC 4.0"
 LICENSE_URL = "https://creativecommons.org/licenses/by-nc/4.0/"
+#: `provenance.license_basis`: how `license`/`license_url` were obtained. "calculated" is the
+#: most restrictive component licence (para_licenses) or the default above. It is a summary of
+#: component licences, not the licence of the record's content (atrium-project#6, 2026-10-29).
+LICENSE_BASIS_CALCULATED = "calculated"
 
 RECORD_TYPE = "atrium-document"
 RECORD_TYPE_MERGED = "atrium-document-merged"
@@ -1381,13 +1385,18 @@ class DocumentRecord:
             merged = merge_effective_licenses(blocks)
             prov["license"] = merged.get("effective_license", LICENSE_NAME)
             prov["license_url"] = merged.get("effective_license_url", LICENSE_URL)
+            prov["license_basis"] = LICENSE_BASIS_CALCULATED
             prov["license_detail"] = merged
         elif not prov.get("license"):
             prov["license"] = LICENSE_NAME
             prov["license_url"] = LICENSE_URL
+            prov["license_basis"] = LICENSE_BASIS_CALCULATED
             prov["license_note"] = (
                 "License helper unavailable or no components recorded; defaulted conservatively to CC BY-NC 4.0."
             )
+        if prov.get("license"):
+            # A record written before 2026-11-04 has the same calculated value without the mark.
+            prov.setdefault("license_basis", LICENSE_BASIS_CALCULATED)
 
         contributors: List[Dict[str, str]] = list(prov.get("contributors") or [])
         if self._touched and not any(
@@ -1839,6 +1848,7 @@ def merge_document_records(json_paths: List[str], out_path: str) -> str:
     merged["provenance"] = {
         "license": lic["effective_license"],
         "license_url": lic["effective_license_url"],
+        "license_basis": LICENSE_BASIS_CALCULATED,
         "license_detail": lic,
         "contributors": contributors,
     }

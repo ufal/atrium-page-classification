@@ -11,11 +11,11 @@ scans of paper documents; the labels it gives born-digital pages have not been c
 
 ## Inputs and outputs
 
-| Input                                                                                                                 | Output                                                                                                                              |
-|-----------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
-| a page image (any format Pillow reads: PNG, JPEG, TIFF, …), a folder or a tree of them, named `<document>-<page>.png` | per page, the best categories with their scores: a CSV (`FILE, PAGE, CLASS-1…N, SCORE-1…N`), or JSON from the service               |
-| a PDF, recognised by its content: every page, or a `pages` selection, rendered at 300 dpi                             | optionally all eleven scores (`--raw`, or `topn=11`) and each model's own vote (`--best --save-intermediates`, or `per_model=true`) |
-| optionally, an ATRIUM document record to add to                                                                       | the record with its `page_categories` block and each page's `category` and `category_confidence`; the run's paradata                |
+| Input                                                                                                                 | Output                                                                                                                                                                                                       |
+|-----------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| a page image (any format Pillow reads: PNG, JPEG, TIFF, …), a folder or a tree of them, named `<document>-<page>.png` | per page, the best categories with their scores: a CSV (`FILE, PAGE, CLASS-1…N, SCORE-1…N`; at `-tn 1` also `CATEGORY`, a copy of `CLASS-1`: [outputs](docs/reference/outputs.md)), or JSON from the service |
+| a PDF, recognised by its content: every page, or a `pages` selection, rendered at 300 dpi                             | optionally all eleven scores (`--raw`, or `topn=11`) and each model's own vote (`--best --save-intermediates`, or `per_model=true`)                                                                          |
+| optionally, an ATRIUM document record to add to                                                                       | the record with its `page_categories` block and each page's `category` and `category_confidence`; the run's paradata                                                                                         |
 
 The tool reads the image only, so the language of the page does not matter. The command line and the service read the
 same inputs the same way; what differs, and why, is in
@@ -35,7 +35,7 @@ The service, from the published image, on a sample page of this repository:
 
 ```bash
 docker run --rm -p 8000:8000 -v hf-cache:/cache/huggingface \
-  ghcr.io/ufal/atrium-page-classification-api:<version>     # the release without its v, e.g. 1.12.2-beta
+  ghcr.io/ufal/atrium-page-classification-api:<version>     # the release without its v, e.g. 1.12.3-beta
 curl -s localhost:8000/ready                                 # fails until the five models are loaded, then 200
 curl --fail-with-body -sS -X POST localhost:8000/predict_image \
   -F "file=@small_data_samples/TEXT_T/pages_online_2.png" -F version=v4.4 -F topn=3

@@ -195,6 +195,48 @@ class TestDocumentCrate:
         assert "contentSize" not in by_id["paradata/260724-101112_pipeline-run.json"]
 
 
+class TestNoLicenceAsserted:
+    """atrium-project#6, option (a) of 2026-10-29: a crate's root asserts no licence.
+
+    The record's calculated `provenance.license` (`license_basis: "calculated"`) is a summary of
+    component licences, so it must not become the crate's licence.
+    """
+
+    def test_the_document_root_names_no_licence_asserted(self, crate, record):
+        root = _by_id(crate)[rc.ROOT_ID]
+        assert root["license"] == {"@id": rc.NO_LICENCE_ID}
+        assert record["provenance"]["license_url"] not in _by_id(crate)
+
+    def test_the_entity_is_in_the_graph_and_asserts_nothing(self, crate):
+        entity = _by_id(crate)[rc.NO_LICENCE_ID]
+        assert entity["@type"] == "CreativeWork"
+        assert entity["name"] == "No licence asserted"
+        assert "permission" in entity["description"]
+
+    def test_no_entity_calls_a_calculated_licence_effective(self, crate):
+        assert "most restrictive" not in json.dumps(crate)
+
+    def test_the_root_description_says_rights_are_not_established(self, crate):
+        assert "not established" in _by_id(crate)[rc.ROOT_ID]["description"]
+
+    def test_the_run_root_names_no_licence_asserted(self, record):
+        run = rc.run_crate([record])
+        assert _by_id(run)[rc.ROOT_ID]["license"] == {"@id": rc.NO_LICENCE_ID}
+        assert rc.NO_LICENCE_ID in _by_id(run)
+
+    def test_a_fragment_carries_no_licence_entity(self, record):
+        frag = rc.document_crate(record, fragment=True)
+        ids = set(_by_id(frag))
+        assert rc.NO_LICENCE_ID not in ids
+        assert record["provenance"]["license_url"] not in ids
+
+    def test_a_stub_root_without_a_licence_names_no_licence_asserted(self, record):
+        frag = rc.document_crate(record, fragment=True)
+        crate = rc.wrap_fragment(frag, name="stub", description="stub", date_published="2026-07-24")
+        assert _by_id(crate)[rc.ROOT_ID]["license"] == {"@id": rc.NO_LICENCE_ID}
+        assert rc.NO_LICENCE_ID in _by_id(crate)
+
+
 class TestFragment:
     def test_a_fragment_has_no_descriptor_root_or_data_entity(self, record):
         frag = rc.document_crate(record, fragment=True)
@@ -422,7 +464,8 @@ class TestCli:
         out = tmp_path / "frag"
         assert rc._cli(["--document", src, "--fragment", "--wrap", "--out-dir", str(out)]) == 0
         crate = json.loads((out / rc.METADATA_FILENAME).read_text(encoding="utf-8"))
-        assert _by_id(crate)[rc.ROOT_ID]["license"] == {"@id": record["provenance"]["license_url"]}
+        assert _by_id(crate)[rc.ROOT_ID]["license"] == {"@id": rc.NO_LICENCE_ID}
+        assert rc.NO_LICENCE_ID in _by_id(crate)
 
     def test_run_mode_accepts_several_records(self, tmp_path, record):
         src = self._record_file(tmp_path, record)

@@ -6,10 +6,12 @@ atrium_paradata.py.
 
 Purpose
 -------
-The output license of an ATRIUM pipeline is NOT fixed.  It is the most
-restrictive license among the components (models, data, APIs) that a given
-run actually exercised.  This module turns a set of "components used" into a
-single effective output license, plus the supporting attribution detail.
+This module lists the components (models, data, APIs) a run exercised, each
+with its own licence, and derives a calculated label from them: the most
+restrictive of those licences. The label is NOT the licence of the run's
+output, and no output licence is asserted (atrium-project#6, 2026-10-29):
+records mark it `provenance.license_basis: "calculated"`, and an RO-Crate root
+names `#no-licence-asserted` instead.
 
 IMPORTANT – legal review required
 ---------------------------------
@@ -134,7 +136,7 @@ def normalise_license(name: str) -> str:
 def resolve_effective_license(
     components_used: Iterable[Tuple[str, str]],
 ) -> Dict[str, object]:
-    """Compute the effective output license from the components actually used."""
+    """List the components used with their licences, and the calculated label over them."""
     catalogue: List[Dict[str, object]] = []
     unknown: List[str] = []
     best_rank = -1
@@ -175,27 +177,26 @@ def resolve_effective_license(
     is_nc = effective_unknown or best_license in _NON_COMMERCIAL
     is_sa = effective_unknown or best_license in _SHARE_ALIKE
 
-    parts: List[str] = []
-    parts.append(
-        f"Effective output license is {best_license}, the most restrictive among {len(catalogue)} component(s) used."
-    )
-    if effective_unknown:
-        parts.append(
-            f"{best_license or 'The empty license string'} is not a recognised license, so the output is treated "
-            "as NON-COMMERCIAL and SHARE-ALIKE until its terms are catalogued; no license URL can be given."
-        )
-    elif is_nc:
-        parts.append(
-            "Outputs are NON-COMMERCIAL: downstream commercial use is not "
-            "permitted while this component is in the pipeline."
-        )
-    if is_sa and not effective_unknown:
-        parts.append("SHARE-ALIKE applies: derivatives must be licensed under the same terms.")
+    # The notes describe the components, not the output: a component's licence is not the
+    # licence of what the pipeline produced, and no output licence is asserted
+    # (atrium-project#6, 2026-10-29). effective_license and the two flags stay as the
+    # calculated label the record carries with license_basis "calculated".
+    nc_names = [str(c["name"]) for c in catalogue if c["license"] in _NON_COMMERCIAL]
+    sa_names = [str(c["name"]) for c in catalogue if c["license"] in _SHARE_ALIKE]
+    parts: List[str] = [
+        f"{len(catalogue)} component(s) used; each keeps its own licence or terms (see components). "
+        "No output licence is asserted."
+    ]
+    if nc_names:
+        parts.append("Components under a NON-COMMERCIAL licence: " + ", ".join(nc_names) + ".")
+    if sa_names:
+        parts.append("Components under a SHARE-ALIKE licence: " + ", ".join(sa_names) + ".")
     if unknown:
         parts.append(
             "WARNING: unrecognised license(s) "
-            + ", ".join(sorted(set(unknown)))
-            + " were treated as maximally restrictive. Update para_licenses.py."
+            + ", ".join(u or "(empty)" for u in sorted(set(unknown)))
+            + " are counted as NON-COMMERCIAL and SHARE-ALIKE in the calculated label until their terms"
+            " are catalogued; no license URL can be given. Update para_licenses.py."
         )
 
     return {

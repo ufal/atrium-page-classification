@@ -12,7 +12,7 @@ of 2026-09-30, items 1-3). Everything such a crate needs, ATRIUM already records
     source            -> the original input, by doc_id + sha256/sha512 (archive-managed, never a path)
     derived_from      -> the persistent step outputs = the crate's data entities
     regenerable       -> recipes for files that DO NOT EXIST = never data entities
-    provenance        -> the accreted licence union + one entry per contributing run
+    provenance        -> one entry per contributing run; the root asserts no licence
     assembled.blocks  -> per-block stamps = the granularity a CreateAction chain needs
     atrium_paradata   -> tool_version / repository / docker_image / run_uuid / times per run
     atrium_vocab      -> resolvable URIs for every controlled term the record carries
@@ -114,6 +114,11 @@ ROOT_ID = "./"
 
 #: The original input's entity in a crate built from a record, unless the host names its own.
 SOURCE_ID = "#source"
+
+# The root's `license` when no rights holder has asserted one (atrium-project#6, option (a),
+# 2026-10-29). It names a contextual entity that asserts nothing: a component's licence or a
+# service's terms are not the licence of a pipeline output, so the crate does not compute one.
+NO_LICENCE_ID = "#no-licence-asserted"
 
 #: The document record as an input of a service call (`create_action`).
 RECORD_ID = "#record"
@@ -335,28 +340,23 @@ def _date_published(record: Dict[str, Any]) -> str:
     return newest[:10] if len(newest) >= 10 else "1970-01-01"
 
 
-def _license_entity(provenance: Dict[str, Any]) -> Tuple[Optional[Dict[str, str]], List[Dict[str, Any]]]:
-    """The root's `license`, plus the contextual entity it points at.
+def _no_licence_entity() -> Dict[str, str]:
+    """The contextual entity the root's `license` names when no licence is asserted.
 
-    `para_licenses.merge_effective_licenses()` has already done the hard part — the
-    most-restrictive union over every contributing tool — so this only has to render it. A
-    licence with a URL becomes a referenced entity (dereferenceable, which is the point); one
-    without stays a literal, because inventing a URL for it would be a claim.
+    The pipeline does not assert rights in its outputs (atrium-project#6, 2026-10-29). The
+    calculated value in the record's `provenance.license` (`license_basis: "calculated"`) is a
+    summary of component licences, not the licence of this crate, so it is not exported here.
     """
-    name = str(provenance.get("license") or "")
-    url = str(provenance.get("license_url") or "")
-    if url:
-        entity = _prune(
-            {
-                "@id": url,
-                "@type": "CreativeWork",
-                "name": name,
-                "identifier": name,
-                "description": "The effective licence: the most restrictive of every contributing tool's.",
-            }
-        )
-        return _ref(url), [entity]
-    return ({"@value": name} if name else None), []
+    return {
+        "@id": NO_LICENCE_ID,
+        "@type": "CreativeWork",
+        "name": "No licence asserted",
+        "description": (
+            "No licence is asserted for this crate. The rights in its contents depend on the source "
+            "and on AMČR's permission to process it. The licences and terms of the components that "
+            "ran are listed in the record (provenance.license_detail) and in each run's paradata."
+        ),
+    }
 
 
 def _controlled_values(record: Dict[str, Any]) -> List[Tuple[str, str]]:
@@ -871,19 +871,13 @@ def document_crate(
         or (
             "Per-document aggregate record accreted across the ATRIUM pipeline, exported as "
             "RO-Crate. Blocks reflect contributed steps only; a block is absent until its tool "
-            "has run."
+            "has run. No licence is asserted: the rights in its contents are not established."
         ),
         "datePublished": _date_published(record),
         "schemaVersion": str(record.get("schema_version") or ""),
         "conformsTo": _ref(PROCESS_RUN_PROFILE),
     }
     root = _prune(root)
-
-    # ── licence ───────────────────────────────────────────────────────────────
-    license_ref, license_entities = _license_entity(provenance)
-    if license_ref is not None:
-        root["license"] = license_ref
-    graph.extend(license_entities)
 
     # ── the original input ────────────────────────────────────────────────────
     # NOT a data entity: `source` carries no path by design ("originals are archive-managed,
@@ -1094,6 +1088,9 @@ def document_crate(
 
     if fragment:
         return _fragment(graph)
+    # ── licence: none asserted (a fragment's host root decides its own) ──────
+    root["license"] = _ref(NO_LICENCE_ID)
+    graph.append(_no_licence_entity())
     if doc_id:
         graph.append(_identifier_entity("#doc_id", "doc_id", doc_id))
     graph.append(_profile_entity())
@@ -1141,19 +1138,15 @@ def run_crate(
         "description": description
         or (
             "One ATRIUM pipeline run, packaged as RO-Crate: the per-document crates it "
-            "produced, the paradata that records how it behaved, and the tool chain that ran."
+            "produced, the paradata that records how it behaved, and the tool chain that ran. "
+            "No licence is asserted: the rights in its contents are not established."
         ),
         "datePublished": _run_date_published(records, run_paradata),
         "conformsTo": _ref(PROCESS_RUN_PROFILE),
     }
 
-    provenance = (records[0].get("provenance") if records else {}) or {}
-    license_ref, license_entities = _license_entity(run if run_paradata else provenance)
-    if license_ref is None:
-        license_ref, license_entities = _license_entity(provenance)
-    if license_ref is not None:
-        root["license"] = license_ref
-    graph.extend(license_entities)
+    root["license"] = _ref(NO_LICENCE_ID)
+    graph.append(_no_licence_entity())
 
     # ── the per-document crates are the parts ─────────────────────────────────
     parts: List[str] = []
@@ -1310,7 +1303,7 @@ def wrap_fragment(
     *,
     name: str,
     description: str,
-    license: Union[str, Mapping[str, Any]],
+    license: Optional[Union[str, Mapping[str, Any]]] = None,
     date_published: str,
 ) -> Dict[str, Any]:
     """A fragment under a stub root: the smallest complete crate that embeds it.
@@ -1319,6 +1312,9 @@ def wrap_fragment(
     lists every `CreateAction` in `mentions`, every `DefinedTerm` in `about` and `#source` (when
     present) in `isBasedOn`, and declares the Process Run Crate profile. A fragment has no root,
     so this is also the only way to validate one (`tools/ci/rocrate_check.py`).
+
+    `license` is the host's own assertion. Without one the stub root, like any ATRIUM crate root,
+    names `#no-licence-asserted`.
     """
     graph = [dict(e) for e in fragment.get("@graph") or []]
     by_type: Dict[str, List[str]] = {}
@@ -1333,7 +1329,7 @@ def wrap_fragment(
             "name": name,
             "description": description,
             "datePublished": date_published,
-            "license": _license_value(license),
+            "license": _license_value(license) if license else _ref(NO_LICENCE_ID),
             "conformsTo": _ref(PROCESS_RUN_PROFILE),
             "mentions": _refs(
                 sorted(by_type.get("CreateAction", []) + [e["@id"] for e in graph if "regenerableFrom" in e])
@@ -1342,7 +1338,9 @@ def wrap_fragment(
             "isBasedOn": _ref(SOURCE_ID) if SOURCE_ID in {e["@id"] for e in graph} else None,
         }
     )
-    if isinstance(license, str) and license.startswith("http") and license not in {e["@id"] for e in graph}:
+    if not license:
+        graph.append(_no_licence_entity())
+    elif isinstance(license, str) and license.startswith("http") and license not in {e["@id"] for e in graph}:
         graph.append(
             {"@id": license, "@type": "CreativeWork", "name": license, "description": "The licence of this crate."}
         )
@@ -1350,7 +1348,7 @@ def wrap_fragment(
 
 
 def _license_value(license: Union[str, Mapping[str, Any]]) -> Any:
-    """A root `license`: a reference for a URL, a literal for a bare name, as `_license_entity()` does."""
+    """A root `license` a host asserts: a reference for a URL, a literal for a bare name."""
     if not isinstance(license, str):
         return dict(license)
     return _ref(license) if license.startswith("http") else {"@value": license}
@@ -1734,12 +1732,10 @@ def _cli(argv: Optional[Sequence[str]] = None) -> int:
             record, paradata=runs, fragment=args.fragment, source_id=args.source_id, data_dir=args.data_dir
         )
         if args.fragment and args.wrap:
-            provenance = record.get("provenance") or {}
             crate = wrap_fragment(
                 crate,
                 name="ATRIUM record fragment {} (stub root)".format(record.get("doc_id") or ""),
                 description="The fragment of one ATRIUM record under a stub root, as a host crate embeds it.",
-                license=str(provenance.get("license_url") or provenance.get("license") or "unspecified"),
                 date_published=_date_published(record),
             )
     elif args.run:

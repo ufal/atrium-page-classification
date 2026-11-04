@@ -3,7 +3,7 @@
   "info": {
     "title": "ATRIUM Page Classification API",
     "description": "API for classifying historical document page images.",
-    "version": "1.12.2-beta",
+    "version": "1.12.3-beta",
     "x-atrium-service": "atrium-page-classification"
   },
   "paths": {
@@ -837,6 +837,13 @@
               "license_url": {
                 "type": "string",
                 "description": "The URL of the calculated `license`; the same caveat applies."
+              },
+              "license_basis": {
+                "type": "string",
+                "enum": [
+                  "calculated"
+                ],
+                "description": "How `license` and `license_url` were obtained. \"calculated\": the most restrictive component licence, or the conservative default when no component is recorded. Never an assertion of the rights in an output; an RO-Crate export of the record names #no-licence-asserted on its root instead (atrium-project#6, 2026-11-04)."
               },
               "license_detail": {
                 "type": "object",
@@ -2740,6 +2747,6 @@
   },
   "x-atrium-record-schema": {
     "schema_version": "1.0",
-    "sha256": "334d5a4d04ac6beeb4bab0f77ccd9bf7d2cd910383f87c9c0988b6730b08f256"
+    "sha256": "13349c066d40ccc07f386c046f2dbabaa33d81b5b241dc646e5fe2ff7db19073"
   }
 }

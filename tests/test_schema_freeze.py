@@ -204,6 +204,12 @@ POST_FREEZE_CHANGES: Dict[str, Dict[str, Any]] = {
         "issue": "ufal/atrium-project#73",
         "changelog": "2026-10-09",
     },
+    "/properties/provenance/properties/license_basis": {
+        "kind": "added: optional, how `license` was obtained; only \"calculated\" so far",
+        "schema": {"type": "string", "enum": ["calculated"]},
+        "issue": "ufal/atrium-project#6",
+        "changelog": "2026-11-04",
+    },
 }
 
 #: Keywords that annotate and do not constrain. Changing them is not a schema change.

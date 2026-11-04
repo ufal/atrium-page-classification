@@ -120,6 +120,7 @@
       "properties": {
         "license": { "type": "string", "examples": ["CC BY-NC-SA 4.0"], "description": "Calculated, not asserted: the most restrictive licence among the components the contributing runs used (para_licenses.merge_effective_licenses). It is not the licence of this record or of any output (atrium-project#6)." },
         "license_url": { "type": "string", "description": "The URL of the calculated `license`; the same caveat applies." },
+        "license_basis": { "type": "string", "enum": ["calculated"], "description": "How `license` and `license_url` were obtained. \"calculated\": the most restrictive component licence, or the conservative default when no component is recorded. Never an assertion of the rights in an output; an RO-Crate export of the record names #no-licence-asserted on its root instead (atrium-project#6, 2026-11-04)." },
         "license_detail": {
           "type": "object",
           "description": "Output of para_licenses.merge_effective_licenses over every contributing tool (most restrictive wins): evidence of the components' licences, not a licence of the output (atrium-project#6).",

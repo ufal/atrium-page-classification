@@ -1384,3 +1384,24 @@ def test_quality_summary_is_deterministic_and_reads_nothing_else():
     assert quality_summary(noisy) == first
     assert first["pages"]["median"] == 0.7
     assert "band" not in json.dumps(first)
+
+
+def test_the_calculated_licence_is_marked_in_the_record_and_the_merge(tmp_path, mock_paradata):
+    """atrium-project#6 (2026-11-04): `license` is a calculation, never an assertion, and says so."""
+    run_id, ref = mock_paradata
+    first = DocumentRecord("CTX1", DIGITAL, run_id=run_id, paradata_ref=ref, out_dir=str(tmp_path))
+    first.set_source(sha256="a" * 64, origin="digital-born-pdf", filename="CTX1.pdf")
+    first.set_block("content", {"text": "body"})
+    p1 = first.finalize(str(tmp_path / "one.json"))
+    record = json.loads(open(p1, encoding="utf-8").read())
+    assert record["provenance"]["license"]
+    assert record["provenance"]["license_basis"] == "calculated"
+
+    second = DocumentRecord("CTX1", "nlp-enrich", run_id=run_id, paradata_ref=ref, out_dir=str(tmp_path))
+    second.set_source(origin="digital-born-pdf")
+    second.merge_block("entities", [{"page": "1", "line": 0, "char_span": [0, 4], "surface": "body"}])
+    p2 = second.finalize(str(tmp_path / "two.json"))
+
+    merged = json.loads(open(merge_document_records([p1, p2], str(tmp_path / "m.json")), encoding="utf-8").read())
+    assert merged["provenance"]["license_basis"] == "calculated"
+    assert "most restrictive" not in json.dumps(merged["provenance"])
