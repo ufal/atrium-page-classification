@@ -805,7 +805,7 @@ Documentation only; no code, test or configuration change.
 * **#6 wording:** `data_scripts/pdf_rasteriser_comparison.md` calls the most-restrictive value a calculated label, not the result's licence.
 * **Records:** the #58 export takes the first comment (10-29 17:51), which the 11-04 push left out; the header names the pilot release.
 
-## 2026-11-05 — #58: decision models planned across three repositories
+## 2026-11-05 — #58: decision models planned across four repositories
 
 * **#58 export:** K4TEL's comment of 11-05 20:09 added. The order is Clef 27B, then Clef-Flash 9B, then Strands
   Decider 2B; the comment also links the Superteams guide.
@@ -818,7 +818,8 @@ Documentation only; no code, test or configuration change.
   * **Clef:** run on 1×H200 with torch 2.11 / transformers 5.10.2; input capped at 16,384 tokens by default.
   * **Strands** reads text; its image support is experimental.
 * **Decided with the user:**
-  * this repository owns the shared `decision_client.py`, and ocr-postprocess and digital-convert pin copies;
+  * this repository owns the shared `decision_client.py`, and ocr-postprocess, digital-convert and keyword-extract
+    pin copies;
   * digital-convert's type set is a new document-type list, from AMČR's heslář `dokument_typ`.
 * **Plan and digest refreshed** (`plans/58.plan.md`, `digests/58.digest.md`):
   * Phase 0: the client and the servers;
@@ -826,8 +827,9 @@ Documentation only; no code, test or configuration change.
   * B2, a cascade behind the CNN, below τ, choosing among the CNN's top 3;
   * B3, four yes/no routes whose gold derives from the 11 labels.
   * Track 2 is unchanged.
-* **Sibling plans:** ocr-postprocess and digital-convert, `agent_dev_logs/plans/decision_models.plan.md`.
-* **Prepared:** a comment for #58, delivered in chat.
+* **Sibling plans:** ocr-postprocess, digital-convert and (the same evening) keyword-extract, each at
+  `agent_dev_logs/plans/decision_models.plan.md`. keyword-extract's descends the vocabulary for its #2.
+* **Prepared:** comments for #58 and keyword-extract#2, delivered in chat.
 * **Yours:**
   1. post the comment;
   2. AMČR's answer on the `dokument_typ` list;
