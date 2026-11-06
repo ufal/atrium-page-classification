@@ -4,7 +4,7 @@
 > 2026-10-22, fixed in **v1.9.6-beta**; #48 closed 2026-09-17. Its pilot work is tracked in hub issues (atrium-project
 > #6, #66, #72, #77, #79, #81). **Pilot release: v1.12.3-beta** (`0a96bce`, 2026-11-04; immutable, with `images.json`;
 > atrium-project#77). **v1.9.5-beta** (2026-10-19, the runbook) is the first immutable release (atrium-project#72).
-> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-05._
+> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-06._
 > _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md`._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
@@ -835,3 +835,11 @@ Documentation only; no code, test or configuration change.
   2. AMČR's answer on the `dokument_typ` list;
   3. the annotator question (10-29).
 * Not pushed: files delivered in chat.
+
+## 2026-11-06 — The shared container entry point vendored, not adopted (atrium-project#66)
+
+* The hub-canonical `container_entrypoint.py` and `tests/test_container_entrypoint_shared.py` are vendored here like
+  every shared file (para-drift needs them once the pins move), and `ruff.toml` excludes them from formatting (the
+  stated count is 26). The batch image keeps its own `entrypoint.py` (it also reports the GPU) until its next release;
+  no version change.
+* **Yours:** commit them with the pin sweep to the hub commit that adds them.
