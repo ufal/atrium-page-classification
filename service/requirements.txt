@@ -28,7 +28,7 @@
 # service.api:app --prepare tests.openapi_contract_data:prepare); dependabot ignores both.
 fastapi==0.141.1
 uvicorn[standard]>=0.54.0
-python-multipart>=0.0.32
+python-multipart>=0.0.33
 # api.py builds its response models with pydantic directly, so it is declared directly rather
 # than relied on as fastapi's transitive dependency.
 pydantic==2.13.5

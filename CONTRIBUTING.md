@@ -69,8 +69,8 @@ a GitHub pre-release. The arcs these releases form, and the decisions behind the
 
 **Tagging.** Tag a release only once its version bump is pushed, with the hub's helper, which refuses a tag the
 release gate would fail and pushes that one tag alone: `python3 ../atrium-project/scripts/tag_release.py
-vX.Y.Z-beta` (hub `docs/release_trust.md`, Tagging a release). If a tag push starts no Release Bundle run, run that
-workflow on the tag (*Actions → Release Bundle → Run workflow*, the tag as the ref): on a tag, that run is the
+vX.Y.Z-beta` (hub `docs/release_trust.md`, Tagging a release). If a tag push starts no run of `release.yml`, run that
+workflow on the tag (*Actions → Automated Release → Run workflow*, the tag as the ref): on a tag, that run is the
 release.
 
 Tags without a row here have no published release note: `v0.3.0`, `v0.4.0`, `v0.6.0`, `v0.8.0`, `v0.10.0`,
