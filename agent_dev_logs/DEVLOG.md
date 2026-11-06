@@ -1,10 +1,10 @@
 # 📓 atrium-page-classification — agent_dev_logs/DEVLOG.md (timeline index)
-> _Historical page-image classification. Open issue: #58 (decision-model experiments, 2026-10-20); #64 (the
+> _Historical page-image classification. Open issue: #58 (decision-model experiments, 2026-10-20; renamed 2026-11-06 "Decision Models (DM) application to incoming documents", a sub-issue of atrium-project#83); #64 (the
 > scheduled-smoke failure of 10-27) closed 2026-11-04; one open Dependabot PR (#65). #61 (the directory-run bug) closed
 > 2026-10-22, fixed in **v1.9.6-beta**; #48 closed 2026-09-17. Its pilot work is tracked in hub issues (atrium-project
 > #6, #66, #72, #77, #79, #81). **Pilot release: v1.12.3-beta** (`0a96bce`, 2026-11-04; immutable, with `images.json`;
 > atrium-project#77). **v1.9.5-beta** (2026-10-19, the runbook) is the first immutable release (atrium-project#72).
-> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-06._
+> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-06 (evening)._
 > _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md`._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
@@ -843,3 +843,44 @@ Documentation only; no code, test or configuration change.
   stated count is 26). The batch image keeps its own `entrypoint.py` (it also reports the GPU) until its next release;
   no version change.
 * **Yours:** commit them with the pin sweep to the hub commit that adds them.
+
+## 2026-11-06 (evening) — #58: the shared client and the experiment CLI, written (atrium-project#83)
+
+* **Read:**
+  * the push of 16:49 (`f6fc3a9`: the refreshed #58 pair);
+  * #58 renamed and made a sub-issue of atrium-project#83, beside ocr-postprocess#10, digital-convert#8 and
+    keyword-extract#3;
+  * the Clef model card and its `joint_schema_model.py`: answers keyed by id, `noul` as `{"type": "noul", "noul": p}`,
+    probabilities rounded to 4 decimals.
+* **Written (not pushed):**
+  * `decision_client.py`: builders, validation, the six statuses, lanes, metrics, `FakeSystemOne`, `--selftest` and
+    `--probe` (which image form the server reads; the report never names the host). Standard library only.
+  * `decide_pages.py`:
+    * B1;
+    * B2, behind a `run.py --raw` table: below τ, among the CNN's top 3;
+    * B3, the four routes.
+
+    It writes `DECIDE_RAW` tables with a summary and paradata, and takes `--resume`. It needs no torch and no
+    `requirements_decide.txt`.
+  * `decisions/page_category.v1.json` and `decisions/page_routes.v1.json` (`--write-question-sets`).
+  * `supplementary/scripts/decide_server_job.sh`: SGLang or `strands-decider serve` on a node, the probe, then the run.
+    A template, not run.
+  * `setup/para_config.txt`: `decision_model` (Apache-2.0, conditional). `tests/env_contract_data.py`: `DECISION_*`
+    under `NOT_PUBLISHED`.
+* **Checked:**
+  * `tests/test_decision_client.py` (56) and `tests/test_decide_pages.py` (16), with the env, para-config and licence
+    tests: 149 passed;
+  * the selftest's 15 cases;
+  * ruff;
+  * the hub's image closure: 19 files, unchanged.
+
+  **Not run here:** the probe of the internal endpoint.
+* **Records:** the #58 export (the new title, 3 comments); `plans/58.plan.md` and `digests/58.digest.md` (Phase 0 and
+  Phase B written; the siblings' numbers).
+* **Yours:**
+  1. push;
+  2. a version and a release, which the consumers' `ADOPTED` names (not prepared);
+  3. with `DECISION_MODEL_URL` set: `python3 decision_client.py --probe --model clef-oQ8e --image
+     small_data_samples/PHOTO/caa_conference-01.png --image small_data_samples/TEXT_P/<a page> --out probe.json`;
+  4. the comment for @david-spacil, delivered in chat.
+* Not pushed: files delivered as per-repo zips.

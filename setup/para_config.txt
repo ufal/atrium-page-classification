@@ -17,3 +17,7 @@ ultralytics    = AGPL-3.0         ; conditional ; YOLO-cls backend and base weig
 # BSD-3-Clause); recorded as Apache-2.0 because para_licenses does not parse SPDX `OR`
 # expressions (either choice is permissive), as atrium-alto-postprocess records it.
 pypdfium2      = Apache-2.0       ; conditional ; PDFium page rendering for PDF inputs (service /predict_document, CLI -f/-d)
+# (#58, atrium-project#83) The decision models of the experiment CLI decide_pages.py, served at
+# POST /v1/systemone and called through decision_client.py: Clef, Clef-Flash (Cloudflare) and Strands
+# Decider 2B, all Apache-2.0. Logged only by decide_pages.py; the service and run.py never load them.
+decision_model = Apache-2.0       ; conditional ; decision models (Clef, Clef-Flash, Strands Decider 2B) for the #58 experiments

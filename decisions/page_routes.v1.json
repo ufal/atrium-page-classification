@@ -1,0 +1,56 @@
+{
+  "name": "page_routes",
+  "version": 1,
+  "generated_by": "decide_pages.py --write-question-sets",
+  "state": {
+    "task": "Decide about the attached image of one scanned page.",
+    "collection": "archaeological reports and related material from Czech archives, 1920–2020"
+  },
+  "source": "#58 plan, B3; gold from the hub's 'What each category suggests doing next'",
+  "questions": {
+    "route_ocr": {
+      "type": "noul",
+      "instructions": "Does the page carry printed or typewritten text to read?"
+    },
+    "route_htr": {
+      "type": "noul",
+      "instructions": "Does the page carry handwritten text to read?"
+    },
+    "route_tables": {
+      "type": "noul",
+      "instructions": "Is any part of the page a table, a form or a tabular legend?"
+    },
+    "route_image_description": {
+      "type": "noul",
+      "instructions": "Is a photograph or a drawing the page's main content?"
+    }
+  },
+  "gold": {
+    "route_ocr": [
+      "TEXT",
+      "TEXT_P",
+      "TEXT_T",
+      "LINE_P",
+      "LINE_T"
+    ],
+    "route_htr": [
+      "TEXT",
+      "TEXT_HW",
+      "LINE_HW"
+    ],
+    "route_tables": [
+      "LINE_HW",
+      "LINE_P",
+      "LINE_T",
+      "DRAW_L",
+      "PHOTO_L"
+    ],
+    "route_image_description": [
+      "DRAW",
+      "DRAW_L",
+      "PHOTO",
+      "PHOTO_L"
+    ]
+  },
+  "schema_digest": "a6135e46cf014dbde5ac03f2974975f0bad893772d42c386dbba1c5333efd894"
+}

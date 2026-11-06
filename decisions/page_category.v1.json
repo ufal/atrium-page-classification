@@ -1,0 +1,30 @@
+{
+  "name": "page_category",
+  "version": 1,
+  "generated_by": "decide_pages.py --write-question-sets",
+  "state": {
+    "task": "Decide about the attached image of one scanned page.",
+    "collection": "archaeological reports and related material from Czech archives, 1920–2020"
+  },
+  "source": "labels: model_registry.CATEGORIES (order); descriptions: atrium_vocab.CONCEPTS['page-category']",
+  "questions": {
+    "page_category": {
+      "type": "choice",
+      "criteria": {
+        "DRAW": "drawings, maps, paintings, schematics, or graphics, potentially containing some text labels or captions",
+        "DRAW_L": "drawings, etc but presented within a table-like layout or includes a legend formatted as a table",
+        "LINE_HW": "handwritten text organized in a tabular or form-like structure",
+        "LINE_P": "printed text organized in a tabular or form-like structure",
+        "LINE_T": "machine-typed text organized in a tabular or form-like structure",
+        "PHOTO": "photographs or photographic cutouts, potentially with text captions",
+        "PHOTO_L": "photos presented within a table-like layout or accompanied by tabular annotations",
+        "TEXT": "mixtures of printed, handwritten, and/or typed text, potentially with minor graphical elements",
+        "TEXT_HW": "only handwritten text in paragraph or block form (non-tabular)",
+        "TEXT_P": "only printed text in paragraph or block form (non-tabular)",
+        "TEXT_T": "only machine-typed text in paragraph or block form (non-tabular)"
+      },
+      "instructions": "Which category best describes the attached page image?"
+    }
+  },
+  "schema_digest": "c38813ff2a55aa998a472c4e3016b6623299b4435a3f9e84d6d918dec09fee61"
+}

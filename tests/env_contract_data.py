@@ -8,10 +8,16 @@ design. See the canonical test's module docstring for the full rationale.
 from __future__ import annotations
 
 # Read by shipped code but deliberately absent from .env.example, each with a
-# reason. Empty here: page-classification's service layer reads nothing beyond the
-# shared set (service/inference.py, service/document_json.py, service/api_client.py
-# have zero environment reads), and the batch CLI is argparse/config.txt only.
-NOT_PUBLISHED: dict[str, str] = {}
+# reason. page-classification's service layer reads nothing beyond the shared set
+# (service/inference.py, service/document_json.py, service/api_client.py have zero
+# environment reads), and the batch CLI is argparse/config.txt only.
+NOT_PUBLISHED: dict[str, str] = {
+    "DECISION_*": (
+        "defaults of the decision-model experiment CLIs (decision_client.py, decide_pages.py; #58): "
+        "DECISION_MODEL_URL, DECISION_MODEL_NAME, DECISION_TIMEOUT_S. Not a service setting; the "
+        "server's address stays out of the repository"
+    ),
+}
 
 # In .env.example but read by no Python in this repo — each with a reason.
 CONSUMED_ELSEWHERE: dict[str, str] = {
