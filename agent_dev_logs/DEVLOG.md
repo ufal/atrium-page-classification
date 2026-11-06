@@ -4,7 +4,7 @@
 > 2026-10-22, fixed in **v1.9.6-beta**; #48 closed 2026-09-17. Its pilot work is tracked in hub issues (atrium-project
 > #6, #66, #72, #77, #79, #81). **Pilot release: v1.12.3-beta** (`0a96bce`, 2026-11-04; immutable, with `images.json`;
 > atrium-project#77). **v1.9.5-beta** (2026-10-19, the runbook) is the first immutable release (atrium-project#72).
-> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-06 (evening)._
+> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-06 (late evening)._
 > _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md`._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
@@ -883,4 +883,25 @@ Documentation only; no code, test or configuration change.
   3. with `DECISION_MODEL_URL` set: `python3 decision_client.py --probe --model clef-oQ8e --image
      small_data_samples/PHOTO/caa_conference-01.png --image small_data_samples/TEXT_P/<a page> --out probe.json`;
   4. the comment for @david-spacil, delivered in chat.
+* Not pushed: files delivered as per-repo zips.
+
+## 2026-11-06 (late evening) — #58: v1.13.0-beta prepared, the release the consumers' pins name (atrium-project#83)
+
+* **Read:** `test` at `39a7bea` (the client and the CLI, landed); the comment for @david-spacil on #58, posted.
+* **Written (not pushed):**
+  * **Version v1.13.0-beta** (prepared, not tagged): `CITATION.cff`, `setup/para_config.txt`, `service/openapi.json`,
+    the version examples in `README.md`, `service/README.md` and `docs/usage.md`, and the `CONTRIBUTING.md` row.
+  * **`decide_pages.py --served-on`:** where the pages went, in the paradata and the summary, never the URL. The Slurm
+    template passes `cluster-job`.
+  * `decision_client.py` is unchanged (`7031b3f5…`), so the consumers' pins of `39a7bea` hold.
+* **Checked:**
+  * `check_version.py --para-config setup/para_config.txt --tag v1.13.0-beta --require-tag`: OK;
+  * `tests/test_decide_pages.py` (17) with `test_decision_client.py`: 73 passed;
+  * ruff;
+  * shellcheck on the template.
+* **Records:** `plans/58.plan.md`, `digests/58.digest.md`.
+* **Yours:**
+  1. push `test`;
+  2. `python3 ../atrium-project/scripts/tag_release.py v1.13.0-beta`;
+  3. then push the three consumers, whose pins name this release.
 * Not pushed: files delivered as per-repo zips.

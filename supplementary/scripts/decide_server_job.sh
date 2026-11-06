@@ -113,6 +113,7 @@ python3 decision_client.py --probe --no-proxy "${probe_args[@]}" --out "$OUT/pro
 
 if [[ -n "${DECIDE_ARGS:-}" ]]; then
     # shellcheck disable=SC2086 # DECIDE_ARGS is a list of arguments
-    python3 decide_pages.py --no-proxy --model-revision "$(sed -n 's/^revision: //p' "$OUT/PROVENANCE.md")" $DECIDE_ARGS
+    python3 decide_pages.py --no-proxy --served-on cluster-job \
+        --model-revision "$(sed -n 's/^revision: //p' "$OUT/PROVENANCE.md")" $DECIDE_ARGS
 fi
 date

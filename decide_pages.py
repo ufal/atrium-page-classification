@@ -454,6 +454,20 @@ def _slug(text: str) -> str:
     return re.sub(r"[^A-Za-z0-9._-]+", "_", text).strip("_") or "model"
 
 
+SERVED_ON = ("cluster-job", "ufal-endpoint", "local", "other")
+
+
+def served_on(url: Optional[str], given: Optional[str] = None) -> str:
+    """Where the requests went, for the paradata (one of ``SERVED_ON``), never the URL itself: the
+    internal endpoint's host is not published. Without ``--served-on``, a loopback URL is ``local``."""
+    if given:
+        return given
+    from urllib.parse import urlsplit  # noqa: PLC0415
+
+    host = urlsplit(url or "").hostname or ""
+    return "local" if host in ("127.0.0.1", "localhost", "::1") else "other"
+
+
 def _env_float(name: str, default: float) -> float:
     try:
         return float(os.environ.get(name) or default)
@@ -485,6 +499,11 @@ def build_parser() -> argparse.ArgumentParser:
     server.add_argument("--url", default=os.environ.get("DECISION_MODEL_URL"), help="($DECISION_MODEL_URL)")
     server.add_argument("--model", default=os.environ.get("DECISION_MODEL_NAME"), help="($DECISION_MODEL_NAME)")
     server.add_argument("--model-revision", default="", help="the served build or HF revision, for the paradata")
+    server.add_argument(
+        "--served-on",
+        choices=SERVED_ON,
+        help="where the pages go, for the paradata (default: local for a loopback URL)",
+    )
     server.add_argument("--timeout", type=float, default=_env_float("DECISION_TIMEOUT_S", 120.0))
     server.add_argument("--retries", type=int, default=2)
     server.add_argument(
@@ -537,6 +556,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out = args.out or REPO_ROOT / "result" / "decide" / f"{stamp}_{args.task}_{_slug(args.model)}_DECIDE_RAW.csv"
     cnn_raw = read_cnn_raw(args.cnn_raw) if args.task == "b2" else None
     digest = dc.schema_digest(route_questions() if args.task == "b3" else page_questions())
+    where = served_on(args.url, args.served_on)
 
     from atrium_paradata import ParadataLogger  # noqa: PLC0415
 
@@ -546,6 +566,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "mode": f"decide_{args.task}",
             "decision_model": args.model,
             "decision_revision": args.model_revision,
+            "served_on": where,
             "decision_schema_digest": digest,
             "image_style": args.image_style,
             "max_side": max_sides,
@@ -578,7 +599,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     all_rows = read_rows(out)
     summary = summarise(args.task, all_rows)
     summary.update(
-        {"model": args.model, "model_revision": args.model_revision, "schema_digest": digest, "table": _relative(out)}
+        {
+            "model": args.model,
+            "model_revision": args.model_revision,
+            "served_on": where,
+            "schema_digest": digest,
+            "table": _relative(out),
+        }
     )
     summary_path = out.with_suffix(".summary.json")
     summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

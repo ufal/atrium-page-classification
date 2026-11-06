@@ -212,6 +212,14 @@ def test_main_end_to_end_writes_table_summary_and_paradata(tmp_path, monkeypatch
     assert records, "a paradata record is written beside the table"
     record = json.loads(records[0].read_text(encoding="utf-8"))
     assert "decision_model" in json.dumps(record)
+    assert record["config"]["served_on"] == summary["served_on"] == "local"  # by name, never the URL
+    assert fake.url not in json.dumps(record) and fake.url not in json.dumps(summary)
+
+
+def test_served_on_names_the_server_without_its_url():
+    assert dp.served_on("http://127.0.0.1:30000") == "local"
+    assert dp.served_on("http://decide.example:8000") == "other"
+    assert dp.served_on("http://decide.example:8000", "ufal-endpoint") == "ufal-endpoint"
 
 
 def test_main_refuses_an_unconfigured_server(monkeypatch):
