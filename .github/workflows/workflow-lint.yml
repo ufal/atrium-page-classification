@@ -30,7 +30,7 @@ permissions:
 
 jobs:
   workflow-lint:
-    uses: ufal/atrium-project/.github/workflows/workflow-lint.reusable.yml@28a22ebb1d1294e8238ca13bca9fc8bfe5761c05  # v1
+    uses: ufal/atrium-project/.github/workflows/workflow-lint.reusable.yml@da7a066f5a1c1ecf024f9a8b82cca949a9ee0e91  # v1
     with:
       require-sha-pins: true
-      hub-ref: 28a22ebb1d1294e8238ca13bca9fc8bfe5761c05
+      hub-ref: da7a066f5a1c1ecf024f9a8b82cca949a9ee0e91
