@@ -4,7 +4,7 @@
 > 2026-10-22, fixed in **v1.9.6-beta**; #48 closed 2026-09-17. Its pilot work is tracked in hub issues (atrium-project
 > #6, #66, #72, #77, #79, #81). **Pilot release: v1.12.3-beta** (`0a96bce`, 2026-11-04; immutable, with `images.json`;
 > atrium-project#77). **v1.9.5-beta** (2026-10-19, the runbook) is the first immutable release (atrium-project#72).
-> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-06 (late evening)._
+> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-08._
 > _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md`._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
@@ -905,3 +905,30 @@ Documentation only; no code, test or configuration change.
   2. `python3 ../atrium-project/scripts/tag_release.py v1.13.0-beta`;
   3. then push the three consumers, whose pins name this release.
 * Not pushed: files delivered as per-repo zips.
+
+## 2026-11-08 — #58: page triage (B3 v2) and page condition (B4); v1.14.0-beta prepared (atrium-project#83)
+
+* **Asked (K4TEL, in session):** the image alone decides which processors a page goes to (HTR, table/form
+  extraction, graphics extraction, each separately; a page may need all), and how damaged it is (stains, skew, faint
+  ink, torn edges, yellowing, water, rotated text, and similar), with a damage score for the paper and the content.
+* **Read:** `v1.13.0-beta` is tagged at `d5adc7b`, so the change is a new version.
+* **Written (not pushed):**
+  * **`decide_pages.py`:**
+    * B3 rewritten: 7 elements, 4 computed processor tags (OCR, HTR, tables, graphics), `primary_route`;
+    * B4 new: 15 defects, `orientation`, 3 scores from 0 to 4, check indices in code;
+    * `--task triage` (B3 + B4, 27 questions in one request);
+    * `--degradations` reads a manifest; the summary reports per-injected-defect pairs.
+  * **Question sets:** `decisions/page_routes.v2.json` (v1 removed, never run) and `decisions/page_condition.v1.json`.
+  * **`data_scripts/degrade_pages.py`:** controlled defects at three levels and a manifest.
+  * **Version v1.14.0-beta:** `CITATION.cff`, `setup/para_config.txt`, `service/openapi.json`, the version examples,
+    the `CONTRIBUTING.md` row. `decision_client.py` is unchanged.
+* **Checked:**
+  * the full suite: 952 passed, 14 skipped;
+  * `check_version.py --para-config setup/para_config.txt`: OK;
+  * the selftest;
+  * ruff;
+  * a contact sheet of the degradations;
+  * a triage run of 242 degraded sample images against the fake server.
+* **Records:** `plans/58.plan.md` (B3 rewritten, B4 and Phase S), `digests/58.digest.md`.
+* **Yours:** unpack and push `test`; tag `v1.14.0-beta`; the comment for #58, delivered in chat.
+* Not pushed: files delivered as per-repo archives.

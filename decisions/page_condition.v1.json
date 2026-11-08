@@ -1,0 +1,170 @@
+{
+  "name": "page_condition",
+  "version": 1,
+  "generated_by": "decide_pages.py --write-question-sets",
+  "state": {
+    "task": "Decide about the attached image of one scanned page.",
+    "collection": "archaeological reports and related material from Czech archives, 1920–2020"
+  },
+  "source": "#58 plan, B4 (2026-11-08): defects by aspect, orientation, three condition scores",
+  "questions": {
+    "stained": {
+      "type": "noul",
+      "instructions": "Is the paper stained or soiled (spots, smears, rust or ink marks that are not part of the content)?"
+    },
+    "yellowed": {
+      "type": "noul",
+      "instructions": "Is the paper yellowed, browned or discoloured with age?"
+    },
+    "torn_edges": {
+      "type": "noul",
+      "instructions": "Are the paper's edges torn, frayed or ragged?"
+    },
+    "water_damage": {
+      "type": "noul",
+      "instructions": "Does the paper show water damage (tide lines, rippling or washed-out patches)?"
+    },
+    "folds_creases": {
+      "type": "noul",
+      "instructions": "Does the paper show folds, creases or wrinkles?"
+    },
+    "holes_missing": {
+      "type": "noul",
+      "instructions": "Are pieces of the paper missing (holes, lost corners or torn-away parts)?"
+    },
+    "foxing_mould": {
+      "type": "noul",
+      "instructions": "Does the paper show foxing or mould (small brown spots or fuzzy patches)?"
+    },
+    "faint_ink": {
+      "type": "noul",
+      "instructions": "Is the ink or print faint or faded, hard to make out against the paper?"
+    },
+    "bleed_through": {
+      "type": "noul",
+      "instructions": "Does writing or print from the other side of the sheet show through?"
+    },
+    "smudged_ink": {
+      "type": "noul",
+      "instructions": "Is the ink smudged, blotted or smeared over the text?"
+    },
+    "skewed": {
+      "type": "noul",
+      "instructions": "Is the page or its text lines tilted by a few degrees in the image?"
+    },
+    "rotated_text": {
+      "type": "noul",
+      "instructions": "Does any text on the page run sideways or upside down?"
+    },
+    "blurred": {
+      "type": "noul",
+      "instructions": "Is the image blurred or out of focus?"
+    },
+    "cropped": {
+      "type": "noul",
+      "instructions": "Is part of the page or its content cut off at an edge of the image?"
+    },
+    "uneven_light": {
+      "type": "noul",
+      "instructions": "Is the lighting uneven (shadows, glare, a dark binding edge or a curved page)?"
+    },
+    "orientation": {
+      "type": "choice",
+      "criteria": {
+        "upright": "text lines run left to right, the right way up",
+        "cw90": "the page is turned a quarter clockwise: text lines run from top to bottom",
+        "upside_down": "the page is upside down: text lines run right to left with letters inverted",
+        "ccw90": "the page is turned a quarter counter-clockwise: text lines run from bottom to top",
+        "unclear": "there is no text, or which way up it is cannot be told"
+      },
+      "instructions": "Which way up is the page's main text in the image?"
+    },
+    "paper_condition": {
+      "type": "score",
+      "criteria": [
+        "intact: clean, whole and flat paper",
+        "slight: minor discolouration, small spots or creases",
+        "moderate: clear staining, yellowing, folds or frayed edges",
+        "heavy: large stains, tears, water damage or missing pieces",
+        "severe: the sheet is broken, lost or ruined in large part"
+      ],
+      "instructions": "How damaged is the paper itself?"
+    },
+    "content_condition": {
+      "type": "score",
+      "criteria": [
+        "intact: everything is crisp and legible",
+        "slight: a few faint or smudged spots, everything still legible",
+        "moderate: parts are faint, smudged or show-through, readable with effort",
+        "heavy: much of the content is hard to read or partly lost",
+        "severe: most of the content is illegible or lost"
+      ],
+      "instructions": "How damaged is the content (the text and the images) on the page?"
+    },
+    "overall_damage": {
+      "type": "score",
+      "criteria": [
+        "none: a clean page and a clean scan",
+        "slight: small flaws that will not hinder extraction",
+        "moderate: flaws that will cause some extraction errors",
+        "heavy: flaws that will cause many extraction errors",
+        "severe: extraction is unlikely to work; restore or re-scan first"
+      ],
+      "instructions": "Overall, how damaged is this page as an input for text and image extraction (the paper, the content and the scan together)?"
+    }
+  },
+  "aspects": {
+    "paper": [
+      "stained",
+      "yellowed",
+      "torn_edges",
+      "water_damage",
+      "folds_creases",
+      "holes_missing",
+      "foxing_mould"
+    ],
+    "content": [
+      "faint_ink",
+      "bleed_through",
+      "smudged_ink"
+    ],
+    "capture": [
+      "skewed",
+      "rotated_text",
+      "blurred",
+      "cropped",
+      "uneven_light"
+    ]
+  },
+  "score_range": [
+    0,
+    4
+  ],
+  "gold": {
+    "synthetic": [
+      "rotated_text",
+      "skewed",
+      "yellowed",
+      "faint_ink",
+      "blurred",
+      "cropped",
+      "uneven_light",
+      "orientation"
+    ],
+    "synthetic_from": "data_scripts/degrade_pages.py",
+    "annotation_only": [
+      "stained",
+      "torn_edges",
+      "water_damage",
+      "folds_creases",
+      "holes_missing",
+      "foxing_mould",
+      "bleed_through",
+      "smudged_ink",
+      "paper_condition",
+      "content_condition",
+      "overall_damage"
+    ]
+  },
+  "schema_digest": "6840075b54fa2d87be3e958da297072c779d51f93afc8e4ec5f83865895a193e"
+}

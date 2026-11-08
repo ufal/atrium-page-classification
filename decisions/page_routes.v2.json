@@ -1,0 +1,204 @@
+{
+  "name": "page_routes",
+  "version": 2,
+  "generated_by": "decide_pages.py --write-question-sets",
+  "state": {
+    "task": "Decide about the attached image of one scanned page.",
+    "collection": "archaeological reports and related material from Czech archives, 1920–2020"
+  },
+  "source": "#58 plan, B3 (v2, 2026-11-08): elements asked, processor tags computed from them; gold: elements from atrium_vocab.COLLECTIONS['page-category'], tags and primary from the hub's 'What each category suggests doing next'",
+  "questions": {
+    "has_printed_text": {
+      "type": "noul",
+      "instructions": "Does the page carry printed or machine-typed text (body text, headings, captions or labels)?"
+    },
+    "has_handwriting": {
+      "type": "noul",
+      "instructions": "Does the page carry handwritten text or numbers (notes, labels or filled-in entries)?"
+    },
+    "has_table_form": {
+      "type": "noul",
+      "instructions": "Is any part of the page a table, a form, a ledger grid or a tabular legend?"
+    },
+    "has_filled_fields": {
+      "type": "noul",
+      "instructions": "Does the page have form fields, blanks or stamp boxes filled in by hand or by typewriter?"
+    },
+    "has_photo": {
+      "type": "noul",
+      "instructions": "Does the page show a photograph or a photographic cutout?"
+    },
+    "has_drawing": {
+      "type": "noul",
+      "instructions": "Does the page show a drawing, map, plan, section or schematic?"
+    },
+    "has_stamp": {
+      "type": "noul",
+      "instructions": "Does the page carry a stamp or seal impression?"
+    },
+    "primary_route": {
+      "type": "choice",
+      "criteria": {
+        "ocr": "printed or machine-typed text recognition: the page is mainly printed or typed text",
+        "htr": "handwritten text recognition: the page is mainly handwritten text",
+        "tables": "table or form extraction: the page is mainly a table, a form, a ledger or a filled-in stamp",
+        "graphics": "graphics detection and extraction: the page is mainly photographs, drawings, maps or plans"
+      },
+      "instructions": "Which further processor matters most for this page?"
+    }
+  },
+  "route_elements": {
+    "ocr": [
+      "has_printed_text"
+    ],
+    "htr": [
+      "has_handwriting"
+    ],
+    "tables": [
+      "has_table_form",
+      "has_filled_fields",
+      "has_stamp"
+    ],
+    "graphics": [
+      "has_photo",
+      "has_drawing"
+    ]
+  },
+  "gold": {
+    "elements": {
+      "has_printed_text": {
+        "present": [
+          "LINE_P",
+          "LINE_T",
+          "TEXT",
+          "TEXT_P",
+          "TEXT_T"
+        ],
+        "absent": [
+          "TEXT_HW"
+        ]
+      },
+      "has_handwriting": {
+        "present": [
+          "LINE_HW",
+          "TEXT",
+          "TEXT_HW"
+        ],
+        "absent": [
+          "TEXT_P",
+          "TEXT_T"
+        ]
+      },
+      "has_table_form": {
+        "present": [
+          "DRAW_L",
+          "LINE_HW",
+          "LINE_P",
+          "LINE_T",
+          "PHOTO_L"
+        ],
+        "absent": [
+          "TEXT_HW",
+          "TEXT_P",
+          "TEXT_T"
+        ]
+      },
+      "has_filled_fields": {
+        "present": [],
+        "absent": []
+      },
+      "has_photo": {
+        "present": [
+          "PHOTO",
+          "PHOTO_L"
+        ],
+        "absent": [
+          "TEXT_HW",
+          "TEXT_P",
+          "TEXT_T"
+        ]
+      },
+      "has_drawing": {
+        "present": [
+          "DRAW",
+          "DRAW_L"
+        ],
+        "absent": [
+          "TEXT_HW",
+          "TEXT_P",
+          "TEXT_T"
+        ]
+      },
+      "has_stamp": {
+        "present": [],
+        "absent": []
+      }
+    },
+    "routes": {
+      "ocr": [
+        "TEXT",
+        "TEXT_P",
+        "TEXT_T",
+        "LINE_P",
+        "LINE_T"
+      ],
+      "htr": [
+        "TEXT",
+        "TEXT_HW",
+        "LINE_HW"
+      ],
+      "tables": [
+        "LINE_HW",
+        "LINE_P",
+        "LINE_T",
+        "DRAW_L",
+        "PHOTO_L"
+      ],
+      "graphics": [
+        "DRAW",
+        "DRAW_L",
+        "PHOTO",
+        "PHOTO_L"
+      ]
+    },
+    "primary_route": {
+      "TEXT_P": [
+        "ocr"
+      ],
+      "TEXT_T": [
+        "ocr"
+      ],
+      "TEXT_HW": [
+        "htr"
+      ],
+      "TEXT": [
+        "ocr",
+        "htr"
+      ],
+      "LINE_P": [
+        "tables"
+      ],
+      "LINE_T": [
+        "tables"
+      ],
+      "LINE_HW": [
+        "tables"
+      ],
+      "DRAW": [
+        "graphics"
+      ],
+      "PHOTO": [
+        "graphics"
+      ],
+      "DRAW_L": [
+        "graphics",
+        "tables"
+      ],
+      "PHOTO_L": [
+        "graphics",
+        "tables"
+      ]
+    }
+  },
+  "schema_digest": "35330a468461f3629f43ef60337e03c1946263106d6c7ace18e32b5e30c1c4d0"
+}

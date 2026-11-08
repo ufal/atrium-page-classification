@@ -1,4 +1,4 @@
-"""tests/test_decide_pages.py — the #58 track-1 experiment CLI (B1, B2, B3), against a fake server.
+"""tests/test_decide_pages.py — the #58 track-1 experiment CLI (B1–B4, triage), against a fake server.
 
 No model, GPU or network: ``decision_client.FakeSystemOne`` answers on 127.0.0.1, the pages are the
 public ``small_data_samples``, and B2's CNN table is synthetic.
@@ -6,6 +6,7 @@ public ``small_data_samples``, and B2's CNN table is synthetic.
 
 import csv
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -46,14 +47,79 @@ def test_the_category_choice_lists_the_registry_in_order_with_definitions():
 
 def test_route_gold_follows_the_hubs_next_step_table():
     routes_of = {label: {r for r, labels in dp.ROUTE_GOLD.items() if label in labels} for label in CATEGORIES}
-    assert routes_of["TEXT"] == {"route_ocr", "route_htr"}
-    assert routes_of["TEXT_P"] == routes_of["TEXT_T"] == {"route_ocr"}
-    assert routes_of["TEXT_HW"] == {"route_htr"}
-    assert routes_of["LINE_P"] == routes_of["LINE_T"] == {"route_tables", "route_ocr"}
-    assert routes_of["LINE_HW"] == {"route_tables", "route_htr"}
-    assert routes_of["DRAW"] == routes_of["PHOTO"] == {"route_image_description"}
-    assert routes_of["DRAW_L"] == routes_of["PHOTO_L"] == {"route_image_description", "route_tables"}
-    assert set(dp.ROUTE_GOLD) == set(dp.ROUTES)
+    assert routes_of["TEXT"] == {"ocr", "htr"}
+    assert routes_of["TEXT_P"] == routes_of["TEXT_T"] == {"ocr"}
+    assert routes_of["TEXT_HW"] == {"htr"}
+    assert routes_of["LINE_P"] == routes_of["LINE_T"] == {"tables", "ocr"}
+    assert routes_of["LINE_HW"] == {"tables", "htr"}
+    assert routes_of["DRAW"] == routes_of["PHOTO"] == {"graphics"}
+    assert routes_of["DRAW_L"] == routes_of["PHOTO_L"] == {"graphics", "tables"}
+    assert set(dp.ROUTE_GOLD) == set(dp.ROUTES) == set(dp.ROUTE_ELEMENTS)
+
+
+def test_the_primary_gold_is_one_of_the_tags_the_label_implies():
+    assert set(dp.PRIMARY_GOLD) == set(CATEGORIES)
+    for label, accepted in dp.PRIMARY_GOLD.items():
+        assert accepted and set(accepted) <= {r for r, labels in dp.ROUTE_GOLD.items() if label in labels}, label
+
+
+def test_every_element_feeds_exactly_one_tag_and_the_stamp_goes_with_tables():
+    fed = [e for elements in dp.ROUTE_ELEMENTS.values() for e in elements]
+    assert sorted(fed) == sorted(dp.ELEMENTS)
+    assert "has_stamp" in dp.ROUTE_ELEMENTS["tables"] and "has_filled_fields" in dp.ROUTE_ELEMENTS["tables"]
+
+
+def test_element_gold_comes_from_the_vocabulary_collections():
+    import atrium_vocab
+
+    table = dp.element_gold()
+    collections = atrium_vocab.COLLECTIONS["page-category"]
+    assert set(table["has_handwriting"]["present"]) == set(collections["handwritten"]["members"])
+    assert set(table["has_table_form"]["present"]) == set(collections["tabular"]["members"])
+    assert set(table["has_printed_text"]["present"]) == set(collections["printed"]["members"]) | set(
+        collections["typed"]["members"]
+    )
+    # "only …" labels rule an element out; nothing else does, and no label says anything about stamps
+    assert table["has_printed_text"]["absent"] == ["TEXT_HW"]
+    assert table["has_handwriting"]["absent"] == ["TEXT_P", "TEXT_T"]
+    assert table["has_stamp"] == table["has_filled_fields"] == {"present": [], "absent": []}
+    for entry in table.values():
+        assert not set(entry["present"]) & set(entry["absent"])
+    assert dp.gold_of(table, "has_photo", "PHOTO_L") == "1"
+    assert dp.gold_of(table, "has_photo", "TEXT_P") == "0"
+    assert dp.gold_of(table, "has_photo", "TEXT") == ""  # "minor graphical elements": unknown
+
+
+def test_the_question_sets_fit_one_request_and_triage_merges_them():
+    content, condition = dp.content_questions(), dp.condition_questions()
+    assert len(content) == len(dp.ELEMENTS) + 1 and len(condition) == len(dp.DEFECT_IDS) + 1 + len(dp.SCORES)
+    triage = dp.task_questions("triage")
+    assert len(triage) == len(content) + len(condition) <= dc.MAX_QUESTIONS
+    assert all(condition[qid]["type"] == "score" and len(condition[qid]["criteria"]) == 5 for qid in dp.SCORES)
+    assert set(dp.SYNTHETIC_DEFECTS) <= set(dp.DEFECT_IDS)
+    assert len(dp.DEFECT_IDS) == len(set(dp.DEFECT_IDS)) == 15
+
+
+def test_damage_indices_are_aspect_means():
+    p = {d: 0.0 for d in dp.DEFECT_IDS}
+    p.update(dict.fromkeys(dp.DEFECTS["content"], 1.0))
+    indices = dp.damage_indices(p)
+    assert indices["content_index"] == 1.0 and indices["paper_index"] == 0.0
+    assert indices["damage_index"] == pytest.approx(len(dp.DEFECTS["content"]) / len(dp.DEFECT_IDS), abs=1e-4)
+
+
+def test_spearman_handles_ties_and_degenerate_input():
+    assert dp.spearman([1, 2, 3, 4], [10, 20, 30, 40]) == 1.0
+    assert dp.spearman([1, 2, 3, 4], [4, 3, 2, 1]) == -1.0
+    assert dp.spearman([1, 1, 2, 2], [1, 2, 3, 4]) == pytest.approx(0.8944, abs=1e-4)
+    assert dp.spearman([1, 1, 1], [1, 2, 3]) is None and dp.spearman([1, 2], [1, 2]) is None
+
+
+def test_binary_scores_leave_precision_out_without_known_negatives():
+    only_positives = dp.binary_scores([(0.9, "1"), (0.2, "1"), (0.8, "")])
+    assert only_positives["known"] == 2 and only_positives["recall"] == 0.5 and only_positives["precision"] is None
+    mixed = dp.binary_scores([(0.9, "1"), (0.7, "0"), (0.1, "0")])
+    assert (mixed["precision"], mixed["recall"], mixed["f1"]) == (0.5, 1.0, pytest.approx(0.6667, abs=1e-4))
 
 
 # ── inputs ────────────────────────────────────────────────────────────────────────────────────
@@ -155,16 +221,106 @@ def test_b2_marks_a_page_without_a_cnn_row(tmp_path):
     assert row["status"] == "rejected" and not fake.requests
 
 
-def test_b3_writes_routes_with_their_gold(tmp_path):
+def test_b3_writes_elements_tags_and_the_primary_processor_with_their_gold(tmp_path):
     out = tmp_path / "b3.csv"
     with dc.FakeSystemOne() as fake:
         dp.run(_client(fake), "b3", _two_pages(), [128], out, progress=False)
+    assert set(fake.requests[0]["questions"]) == set(dp.content_questions())
     photo, text = _read(out)
-    assert photo["GOLD_route_image_description"] == "1" and photo["GOLD_route_ocr"] == "0"
+    assert list(photo) == dp.columns_for("b3")
+    assert photo["GOLD_route_graphics"] == "1" and photo["GOLD_route_ocr"] == "0"
     assert text["GOLD_route_ocr"] == "1" and text["GOLD_route_tables"] == "0"
-    assert all(0 <= float(photo[f"P_{route}"]) <= 1 for route in dp.ROUTES)
-    summary = dp.summarise("b3", _read(out))
-    assert set(summary["by_max_side"]["128"]["routes"]) == set(dp.ROUTES)
+    assert photo["GOLD_has_photo"] == "1" and text["GOLD_has_photo"] == "0" and text["GOLD_has_stamp"] == ""
+    assert photo["GOLD_primary"] == "graphics" and text["GOLD_primary"] == "ocr"
+    for row in (photo, text):
+        for route, elements in dp.ROUTE_ELEMENTS.items():
+            assert float(row[f"P_route_{route}"]) == pytest.approx(max(float(row[f"P_{e}"]) for e in elements))
+        assert row["primary_route"] in dp.ROUTES
+    entry = dp.summarise("b3", _read(out))["by_max_side"]["128"]["content"]
+    assert set(entry["routes"]) == set(dp.ROUTES) and set(entry["elements"]) == set(dp.ELEMENTS)
+    assert entry["elements"]["has_stamp"]["known"] == 0
+
+
+def test_b4_writes_defects_orientation_scores_and_indices(tmp_path):
+    out = tmp_path / "b4.csv"
+    with dc.FakeSystemOne() as fake:
+        dp.run(_client(fake), "b4", _two_pages()[:1], [128], out, progress=False)
+    assert set(fake.requests[0]["questions"]) == set(dp.condition_questions())
+    (row,) = _read(out)
+    assert list(row) == dp.columns_for("b4")
+    assert all(0 <= float(row[f"P_{d}"]) <= 1 for d in dp.DEFECT_IDS)
+    assert row["orientation"] in dp.ORIENTATIONS
+    assert all(0 <= float(row[f"E_{q}"]) <= dp.SCORE_MAX for q in dp.SCORES)
+    assert float(row["damage_score"]) == pytest.approx(float(row["E_overall_damage"]) / dp.SCORE_MAX, abs=1e-4)
+    assert float(row["damage_index"]) == pytest.approx(
+        sum(float(row[f"P_{d}"]) for d in dp.DEFECT_IDS) / len(dp.DEFECT_IDS), abs=1e-3
+    )
+
+
+def test_triage_asks_both_sets_in_one_request(tmp_path):
+    out = tmp_path / "triage.csv"
+    with dc.FakeSystemOne() as fake:
+        dp.run(_client(fake), "triage", _two_pages(), [128], out, progress=False)
+    assert len(fake.requests) == 2
+    assert set(fake.requests[0]["questions"]) == set(dp.task_questions("triage"))
+    rows = _read(out)
+    assert list(rows[0]) == dp.columns_for("triage")
+    assert all(r["primary_route"] and r["orientation"] and r["damage_score"] for r in rows)
+    assert {r["schema_digest"] for r in rows} == {dc.schema_digest(dp.task_questions("triage"))}
+
+
+def test_a_failed_triage_request_leaves_the_answers_empty(tmp_path):
+    out = tmp_path / "triage.csv"
+    with dc.FakeSystemOne(lambda r: (500, {"error": "down"})) as fake:
+        dp.run(_client(fake), "triage", _two_pages()[:1], [128], out, progress=False)
+    (row,) = _read(out)
+    assert row["status"] == "error" and row["primary_route"] == "" and row["damage_index"] == ""
+    assert row["GOLD_route_graphics"] == "1"  # the gold does not depend on the answer
+
+
+def _degraded(tmp_path, defects="skewed,rotated_text", levels="1,3"):
+    sys.path.insert(0, str(REPO_ROOT / "data_scripts"))
+    import degrade_pages
+
+    stage = tmp_path / "stage"
+    for path, label in _two_pages():
+        (stage / label).mkdir(parents=True, exist_ok=True)
+        (stage / label / path.name).write_bytes(path.read_bytes())
+    out = tmp_path / "degraded"
+    assert degrade_pages.main(["--dir", str(stage), "--out", str(out), "--defects", defects, "--levels", levels]) == 0
+    return out / "degradations.csv"
+
+
+def test_b4_reads_a_degradation_manifest_and_pairs_copies_with_originals(tmp_path):
+    manifest = _degraded(tmp_path)
+    pages, variants = dp.read_degradations(manifest)
+    assert len(pages) == 2 * (1 + 2 + 3)  # original, skewed at 2 levels, 3 orientations
+    out = tmp_path / "b4.csv"
+    with dc.FakeSystemOne() as fake:
+        dp.run(_client(fake), "b4", pages, [128], out, progress=False, variants=variants)
+    rows = _read(out)
+    originals = [r for r in rows if r["VARIANT"] == "original"]
+    assert len(originals) == 2 and {r["LEVEL"] for r in originals} == {"0"}
+    # a copy keeps its source's FILE and PAGE, so it pairs with the original
+    by_source = {}
+    for r in rows:
+        by_source.setdefault(r["SOURCE"], set()).add((r["FILE"], r["PAGE"]))
+    assert all(len(keys) == 1 for keys in by_source.values())
+    assert {r["GOLD_orientation"] for r in rows if r["VARIANT"] == "rotated_text"} == {"cw90", "upside_down", "ccw90"}
+    condition = dp.summarise("b4", rows)["by_max_side"]["128"]["condition"]
+    assert set(condition["injected"]) == {"skewed", "rotated_text"}
+    assert condition["injected"]["skewed"]["paired"] == 4 and condition["injected"]["rotated_text"]["paired"] == 6
+    assert condition["orientation_pages"] == 6  # the TEXT_P page and its five copies; PHOTO is not judged
+
+
+def test_main_refuses_per_label_sampling_of_a_manifest(tmp_path):
+    manifest = _degraded(tmp_path, defects="blurred", levels="1")
+    with pytest.raises(SystemExit):
+        dp.main(
+            ["--task", "b4", "--degradations", str(manifest), "--per-label", "1", "--url", "http://x", "--model", "m"]
+        )
+    with pytest.raises(SystemExit):
+        dp.main(["--task", "b1", "--degradations", str(manifest), "--url", "http://x", "--model", "m"])
 
 
 def test_summarise_counts_fixed_and_broken_pages():
