@@ -4,7 +4,7 @@
 > 2026-10-22, fixed in **v1.9.6-beta**; #48 closed 2026-09-17. Its pilot work is tracked in hub issues (atrium-project
 > #6, #66, #72, #77, #79, #81). **Pilot release: v1.12.3-beta** (`0a96bce`, 2026-11-04; immutable, with `images.json`;
 > atrium-project#77). **v1.9.5-beta** (2026-10-19, the runbook) is the first immutable release (atrium-project#72).
-> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-08._
+> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-08 (round 2)._
 > _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md`._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
@@ -931,4 +931,26 @@ Documentation only; no code, test or configuration change.
   * a triage run of 242 degraded sample images against the fake server.
 * **Records:** `plans/58.plan.md` (B3 rewritten, B4 and Phase S), `digests/58.digest.md`.
 * **Yours:** unpack and push `test`; tag `v1.14.0-beta`; the comment for #58, delivered in chat.
+* Not pushed: files delivered as per-repo archives.
+
+## 2026-11-08 (round 2) — #58: v1.14.0-beta not released; v1.14.1-beta prepared (atrium-project#83)
+
+* **Read:** `test` at `db01c12`, tagged `v1.14.0-beta`.
+* **Release run 42466674320:**
+  * tests, smoke builds and the push of the immutable image tags passed;
+  * both Trivy attempts failed while installing Trivy: `github.com/aquasecurity/trivy/releases/download/…` answered
+    504;
+  * so the CVE gate never ran, the release tags were not promoted, and there is no GitHub release.
+* **The same outage** turned API Meta-Contract red on `db01c12` (the baseline `openapi.json` is a release download).
+  Reproduced from here: every `github.com/…/releases/download/…` answered 504, while the API's asset endpoint answered
+  200.
+* **Written (not pushed):**
+  * **Version v1.14.1-beta:** `CITATION.cff`, `setup/para_config.txt`, `service/openapi.json`, the version examples.
+  * **`CONTRIBUTING.md`:** a v1.14.1 row ("v1.14.0-beta, released", as keyword-extract's v1.6.4); the v1.14.0 row
+    marked "Tagged, not released".
+  * **`plans/58.plan.md`, `digests/58.digest.md`:** the siblings' inputs. digital-convert reads the page image by
+    default, with the text layer on request and its new CLI; keyword-extract reads OCR text only.
+  * No code change.
+* **Checked:** the full suite; `check_version.py`; ruff.
+* **Yours:** push; once GitHub's release downloads work, re-run API Meta-Contract and tag `v1.14.1-beta`.
 * Not pushed: files delivered as per-repo archives.

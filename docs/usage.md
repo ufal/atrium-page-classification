@@ -402,7 +402,7 @@ errors. What the tool writes into the record: [reference/outputs.md](reference/o
 ## Run it in Docker
 
 Two images are published to GHCR from the same [Dockerfile](../Dockerfile). `<version>` is the release without its
-leading `v` (for example `1.14.0-beta`), or `latest`; when each tag moves is on the hub's
+leading `v` (for example `1.14.1-beta`), or `latest`; when each tag moves is on the hub's
 [Operations](https://ufal.github.io/atrium-project/operations/) page.
 
 | Image                                                   | Stage  | Entry point                                       | What it is                    |
