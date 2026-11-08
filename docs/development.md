@@ -37,6 +37,7 @@ On this page:
 | `supplementary/scripts/job_run.sh`           | runs the program on a server node                                                                                                                     |
 | `supplementary/scripts/result_analysis.sh`   | computes performance scores for saved model results                                                                                                   |
 | `supplementary/scripts/decide_server_job.sh` | a Slurm template: a decision-model server on a cluster node, and the experiment run against it                                                        |
+| `supplementary/scripts/decide_brief_job.sh`  | a Slurm job: a brief zero-shot pass on a sample of one fold partition of the LINDAT pages: the CNN baseline, then B1, B2 and triage, in one job       |
 | `supplementary/scripts/dataset_timeline.py`  | plots the distribution of the categories over time, from the file names                                                                               |
 | `supplementary/scripts/img2jpeg_v3.py`       | turns any images into JPEG                                                                                                                            |
 | `supplementary/scripts/logs_stat.py`         | makes a table of statistics for each TensorBoard directory of event logs                                                                              |
