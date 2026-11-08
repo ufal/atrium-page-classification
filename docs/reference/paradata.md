@@ -25,8 +25,9 @@ tools, and driven by this repository's [para_config.txt](../../setup/para_config
   rather than a fixed fork URL; outside a container `docker_image` is empty.
 * **Components:** each component the run used, with its licence, as declared in `para_config.txt`: the models
   always; the LINDAT dataset with `--train` or `--eval`; Ultralytics with `--yolo`; pypdfium2 when a PDF is
-  rendered. The list is under `license_detail`. None of these licences is the licence of the output, and the
-  `license` field beside the list is an older calculated value, not a licence ([licences.md](licences.md)).
+  rendered; the decision model in a run of the `decide_pages.py` experiment. The list is under `license_detail`. None
+  of these licences is the licence of the output, and the `license` field beside the list is an older calculated
+  value, not a licence ([licences.md](licences.md)).
 
 The HTTP service writes no paradata file. Each successful answer carries the call's provenance instead, as
 `paradata`: its Process Run Crate `CreateAction`, whose `@id` is the `run_uuid` stamped into the record, with

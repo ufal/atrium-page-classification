@@ -317,7 +317,9 @@ def main(argv=None):
 
     # [Phase 1] Early CLI validation
     if args.topn < 1 or args.topn > len(def_categ):
-        raise ValueError(f"Invalid --topn value {args.topn}: must be between 1 and {len(def_categ)}.")
+        # A usage error (exit 2), as the --pages errors below and as the service's 422 for `topn`,
+        # not a traceback.
+        parser.error(f"invalid --topn value {args.topn}: must be between 1 and {len(def_categ)}")
     if args.document_json_out and not args.file and (args.dir or args.directory is not None):
         # It used to be ignored without a word; a -d run writes one record per document.
         parser.error("--document-json-out names ONE record: with -d use --document-json-out-dir (a directory)")

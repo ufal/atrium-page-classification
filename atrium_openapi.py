@@ -20,6 +20,13 @@ matches that release (motyc, atrium-project#32, 2026-09-27). So each tool:
   release's ``openapi.json`` and ``compare`` fails on a breaking change unless the major version
   went up (0.x included: a 0.x tool needs 1.0 to break), and always on a removed reason code.
 
+How ``baseline`` fetches the asset. Through the API asset endpoint first
+(``api.github.com/…/releases/assets/<id>``), then through the public ``browser_download_url``;
+each URL is retried after a 5xx or a network error. On 2026-11-08, from about 09:10 UTC, every
+``github.com/<owner>/<repo>/releases/download/…`` URL answered 504 for hours while the API
+endpoint kept answering, and the API Meta-Contract job of four tools went red on that alone
+(atrium-project#83, round 3). Either route alone is now enough.
+
 A renamed service (atrium-project#72, the ocr-postprocess move of atrium-alto-postprocess#56)
 declares its old id: ``info.x-atrium-service-previous`` (written by ``atrium_service``'s
 ``attach_openapi_contract(app, service, previous=...)``). ``compare`` accepts a changed
@@ -62,12 +69,14 @@ import configparser
 import copy
 import hashlib
 import importlib
+import io
 import json
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import urllib.error
 import urllib.request
 import warnings
@@ -232,17 +241,76 @@ def stamp(spec: Dict[str, Any], version: str) -> Dict[str, Any]:
 # ── the baseline ───────────────────────────────────────────────────────────────────────────
 
 Opener = Callable[[urllib.request.Request], Any]
+Sleep = Callable[[float], Any]
+
+#: The pause (seconds) before each retry of one URL: three attempts in all. Only a 5xx or a
+#: network-level error is retried; a 4xx is the server's answer, and asking again changes nothing.
+RETRY_PAUSES: Tuple[float, ...] = (2, 4)
 
 
-def _get(url: str, token: Optional[str], opener: Opener, accept: str = "application/vnd.github+json") -> bytes:
+def _transient(exc: OSError) -> bool:
+    """True for a failure another attempt may not meet: a 5xx, a timeout, a refused connection."""
+    if isinstance(exc, urllib.error.HTTPError):
+        return exc.code >= 500
+    return True
+
+
+def _get(
+    url: str,
+    token: Optional[str],
+    opener: Opener,
+    accept: str = "application/vnd.github+json",
+    *,
+    unredirected_token: bool = False,
+    sleep: Sleep = time.sleep,
+) -> bytes:
+    """The body of ``GET url``, retried after a transient failure (:data:`RETRY_PAUSES`).
+
+    ``unredirected_token`` sends the token as an unredirected header: urllib copies a request's
+    ordinary headers to a redirect target but not those. The API asset endpoint answers with a
+    302 to a signed ``release-assets.githubusercontent.com`` URL, which refuses a token, so the
+    token must reach api.github.com and stop there.
+    """
     request = urllib.request.Request(url, headers={"Accept": accept, "User-Agent": "atrium-openapi"})
     if token:
-        request.add_header("Authorization", f"Bearer {token}")
-    try:
-        with opener(request) as response:
-            return response.read()
-    except (urllib.error.URLError, OSError) as exc:
-        raise OpenAPIError(f"GET {url} failed: {exc}") from exc
+        if unredirected_token:
+            request.add_unredirected_header("Authorization", f"Bearer {token}")
+        else:
+            request.add_header("Authorization", f"Bearer {token}")
+    for pause in (*RETRY_PAUSES, None):
+        try:
+            with opener(request) as response:
+                return response.read()
+        except OSError as exc:  # urllib.error.HTTPError and URLError are OSErrors
+            if isinstance(exc, urllib.error.HTTPError):
+                exc.close()  # an error response holds its connection open until read or closed
+            if pause is None or not _transient(exc):
+                raise OpenAPIError(f"GET {url} failed: {exc}") from exc
+            sleep(pause)
+    raise AssertionError("unreachable: the last attempt returns or raises")
+
+
+def _fetch_asset(row: Dict[str, Any], token: Optional[str], opener: Opener, sleep: Sleep) -> bytes:
+    """A release asset's bytes: the API asset endpoint first, the public download URL second.
+
+    The API route (``row["url"]``, ``Accept: application/octet-stream``) carries the token,
+    unredirected; the download route (``browser_download_url``) carries none, as it always has.
+    Two routes because they failed apart on 2026-11-08: ``releases/download`` answered 504 for
+    hours while the API endpoint answered (the module docstring). A failure of both is one
+    :class:`OpenAPIError` naming both URLs, never a bootstrap pass.
+    """
+    routes = []
+    if row.get("url"):
+        routes.append((row["url"], token))
+    if row.get("browser_download_url"):
+        routes.append((row["browser_download_url"], None))
+    errors = []
+    for url, auth in routes:
+        try:
+            return _get(url, auth, opener, accept="application/octet-stream", unredirected_token=True, sleep=sleep)
+        except OpenAPIError as exc:
+            errors.append(str(exc))
+    raise OpenAPIError("; ".join(errors) if errors else f"the asset {row.get('name')!r} lists no URL")
 
 
 def select_baseline(
@@ -276,16 +344,19 @@ def baseline(
     api_url: str = "https://api.github.com",
     opener: Opener = urllib.request.urlopen,
     max_pages: int = 10,
+    sleep: Sleep = time.sleep,
 ) -> Tuple[Optional[str], Optional[Dict[str, Any]]]:
     """``(tag, spec)`` of the baseline release, or ``(None, None)`` when there is none.
 
-    Any API or download error raises :class:`OpenAPIError`: only a successful listing that
-    finds no eligible release is the bootstrap pass. The asset is fetched from its public
-    ``browser_download_url`` without the token (the redirect target refuses one).
+    Any API or download error raises :class:`OpenAPIError` (after the retries of :func:`_get`):
+    only a successful listing that finds no eligible release is the bootstrap pass. The asset is
+    fetched by :func:`_fetch_asset`, through the API asset endpoint and then the public download
+    URL. ``sleep`` is the pause between attempts; tests pass a stub so they never wait.
     """
     releases: List[Dict[str, Any]] = []
     for page in range(1, max_pages + 1):
-        batch = json.loads(_get(f"{api_url}/repos/{repo}/releases?per_page=100&page={page}", token, opener))
+        listing = f"{api_url}/repos/{repo}/releases?per_page=100&page={page}"
+        batch = json.loads(_get(listing, token, opener, sleep=sleep))
         if not isinstance(batch, list):
             raise OpenAPIError(f"unexpected release listing for {repo}: {str(batch)[:200]}")
         releases.extend(batch)
@@ -294,8 +365,12 @@ def baseline(
     chosen = select_baseline(releases, tag, asset)
     if chosen is None:
         return None, None
-    url = next(a["browser_download_url"] for a in chosen["assets"] if a.get("name") == asset)
-    return chosen["tag_name"], json.loads(_get(url, None, opener, accept="application/octet-stream"))
+    row = next(a for a in chosen["assets"] if a.get("name") == asset)
+    try:
+        body = _fetch_asset(row, token, opener, sleep)
+    except OpenAPIError as exc:
+        raise OpenAPIError(f"cannot fetch {asset} of {chosen['tag_name']}: {exc}") from exc
+    return chosen["tag_name"], json.loads(body)
 
 
 # ── the comparison ─────────────────────────────────────────────────────────────────────────
@@ -708,6 +783,35 @@ def _selftest() -> int:
     assert select_baseline(listing, "v1.9.0")["tag_name"] == "v1.8.0-beta"
     assert select_baseline(listing, None)["tag_name"] == "v1.9.0"
     assert select_baseline(listing, "v1.7.5-beta") is None
+
+    # The asset's two routes (the 2026-11-08 outage): the API asset endpoint first, its token
+    # unredirected, retried after a 504; then the public download URL, without a token.
+    api_asset, download = "https://api.example.invalid/assets/1", "https://example.invalid/v1.2.0"
+    published = {
+        "tag_name": "v1.2.0",
+        "draft": False,
+        "prerelease": False,
+        "assets": [{"name": ASSET, "url": api_asset, "browser_download_url": download}],
+    }
+    seen: List[Tuple[str, Optional[str], Optional[str]]] = []
+
+    def opener(request: urllib.request.Request) -> io.BytesIO:
+        url = request.full_url
+        if "/releases?" in url:
+            return io.BytesIO(json.dumps([published] if url.endswith("page=1") else []).encode())
+        seen.append((url, request.headers.get("Authorization"), request.unredirected_hdrs.get("Authorization")))
+        if url == api_asset:
+            raise urllib.error.HTTPError(url, 504, "Gateway Time-out", {}, None)
+        return io.BytesIO(json.dumps(base).encode())
+
+    pauses: List[float] = []
+    fetched = baseline(
+        "ufal/atrium-test", None, token="t0ken", api_url="https://api.example.invalid", opener=opener,
+        sleep=pauses.append,
+    )
+    assert fetched == ("v1.2.0", base), fetched
+    assert seen == [(api_asset, None, "Bearer t0ken")] * 3 + [(download, None, None)], seen
+    assert pauses == list(RETRY_PAUSES), pauses
 
     print("atrium_openapi selftest: ok")
     return 0

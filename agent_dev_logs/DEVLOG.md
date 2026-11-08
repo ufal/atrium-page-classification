@@ -4,7 +4,7 @@
 > 2026-10-22, fixed in **v1.9.6-beta**; #48 closed 2026-09-17. Its pilot work is tracked in hub issues (atrium-project
 > #6, #66, #72, #77, #79, #81). **Pilot release: v1.12.3-beta** (`0a96bce`, 2026-11-04; immutable, with `images.json`;
 > atrium-project#77). **v1.9.5-beta** (2026-10-19, the runbook) is the first immutable release (atrium-project#72).
-> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-08 (round 2)._
+> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-08 (round 3)._
 > _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md`._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
@@ -954,3 +954,27 @@ Documentation only; no code, test or configuration change.
 * **Checked:** the full suite; `check_version.py`; ruff.
 * **Yours:** push; once GitHub's release downloads work, re-run API Meta-Contract and tag `v1.14.1-beta`.
 * Not pushed: files delivered as per-repo archives.
+
+## 2026-11-08 (round 3) — #58: review fixes; v1.14.2-beta prepared (atrium-project#83)
+
+* **Read:** `test` at `d73f273`. `v1.14.0-beta` and `v1.14.1-beta` are tagged, neither released: GitHub's release
+  downloads answered 504, so Trivy could not be installed and the CVE gate never ran. The tags are protected and stay.
+* **Written (committed locally, not pushed):**
+  * **`decide_pages.py`:** `--accept-at`/`--review-below` outside [0, 1] (or NaN), or `--review-below` above
+    `--accept-at`, now exit 2 before any page is read or request sent; `decision_client.lane()` raised `ValueError` on
+    the first answer, after a paid call. Docstrings for the nine public functions that had none.
+  * **`run.py`:** an out-of-range `--topn` is `parser.error` (exit 2), not `ValueError`, as the `--pages` errors and the
+    service's 422. Nothing caught the `ValueError`.
+  * **Tests:** `tests/test_decide_pages.py`, the threshold refusals (checked to fail fast on the old code), thresholds
+    on the bounds, and `--limit`; `tests/test_run.py`, the two `--topn` tests now expect exit 2 and the stderr message.
+    `run.py` has no `--limit`; the flag tested is `decide_pages.py`'s.
+  * **Docs:** `decide_pages.py` in `docs/reference/cli.md` (tasks, flags, lanes, outputs, paradata; no API counterpart),
+    `degrade_pages.py` and its manifest in `docs/data-preparation.md`, a README pointer, the decision-model files in
+    the `docs/development.md` file map, `decision_model` in `docs/reference/licences.md` and `paradata.md`; the `--topn`
+    row says exit 2.
+  * **Version v1.14.2-beta:** `CITATION.cff` (date kept), `setup/para_config.txt`, `service/openapi.json`, the version
+    examples; `CONTRIBUTING.md` row for v1.14.2-beta, the v1.14.1-beta row retitled "tagged, not released".
+  * `decision_client.py`, the vendored files and the workflows are unchanged.
+* **Checked:** the light lane, 956 passed, 14 skipped (torch, tensorboard, uvicorn absent), 3 slow deselected;
+  `check_version.py --tag v1.14.2-beta --require-tag`: OK; ruff; the hub's `docs_check.py`.
+* **Yours:** re-pin the hub reusables in the same push to `test`; once its runs are green, tag `v1.14.2-beta`.

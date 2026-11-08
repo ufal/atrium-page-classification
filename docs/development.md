@@ -17,26 +17,30 @@ On this page:
 
 ## The files
 
-| File                                        | What it is                                                                                                                  |
-|---------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| `run.py`                                    | the starting point of the program, with its main function; extend it for new flags and function arguments                   |
-| `classifier.py`                             | the model-specific classes and functions, including predefined values for the training arguments                            |
-| `utils.py`                                  | the task-related algorithms: collecting images, file names to document and page, result tables, confusion plots             |
-| `model_registry.py`                         | the one source of truth for the categories, the revisions and their base models, the ensemble and its folds, `MODEL_STATIC` |
-| `parallel_best.py`, `ensemble.py`           | the `--best` engine and the averaging of the ensemble                                                                       |
-| `yolo_classifier.py`                        | the optional YOLO-cls backend                                                                                               |
-| `atrium_document_adapter.py`                | writes this tool's blocks into the ATRIUM document record                                                                   |
-| `tool_limits.py`                            | the service's limits, each an environment setting                                                                           |
-| `service/`                                  | the HTTP service ([service/README.md](../service/README.md))                                                                |
-| `setup/config.txt`                          | the changeable variables of the program ([configuration.md](configuration.md))                                              |
-| `setup/para_config.txt`                     | the tool's version and its components for the paradata                                                                      |
-| `data_scripts/`                             | data preparation ([data-preparation.md](data-preparation.md)) and the evaluation helpers                                    |
-| `supplementary/scripts/job_run.sh`          | runs the program on a server node                                                                                           |
-| `supplementary/scripts/result_analysis.sh`  | computes performance scores for saved model results                                                                         |
-| `supplementary/scripts/dataset_timeline.py` | plots the distribution of the categories over time, from the file names                                                     |
-| `supplementary/scripts/img2jpeg_v3.py`      | turns any images into JPEG                                                                                                  |
-| `supplementary/scripts/logs_stat.py`        | makes a table of statistics for each TensorBoard directory of event logs                                                    |
-| `supplementary/scripts/visualize.py`        | plots a comparison of model types from an input CSV such as [model_accuracies_new.csv](../model_accuracies_new.csv)         |
+| File                                         | What it is                                                                                                                                            |
+|----------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `run.py`                                     | the starting point of the program, with its main function; extend it for new flags and function arguments                                             |
+| `classifier.py`                              | the model-specific classes and functions, including predefined values for the training arguments                                                      |
+| `utils.py`                                   | the task-related algorithms: collecting images, file names to document and page, result tables, confusion plots                                       |
+| `model_registry.py`                          | the one source of truth for the categories, the revisions and their base models, the ensemble and its folds, `MODEL_STATIC`                           |
+| `parallel_best.py`, `ensemble.py`            | the `--best` engine and the averaging of the ensemble                                                                                                 |
+| `yolo_classifier.py`                         | the optional YOLO-cls backend                                                                                                                         |
+| `atrium_document_adapter.py`                 | writes this tool's blocks into the ATRIUM document record                                                                                             |
+| `tool_limits.py`                             | the service's limits, each an environment setting                                                                                                     |
+| `decide_pages.py`                            | the decision-model experiment, outside the image and the service ([reference/cli.md](reference/cli.md#decision-models-on-page-images-decide_pagespy)) |
+| `decision_client.py`                         | the client for decision models at `POST /v1/systemone`; three other tools pin it by SHA-256, so change it here and re-vendor                          |
+| `decisions/`                                 | the question sets `decide_pages.py` sends, generated by `decide_pages.py --write-question-sets`, never edited by hand                                 |
+| `service/`                                   | the HTTP service ([service/README.md](../service/README.md))                                                                                          |
+| `setup/config.txt`                           | the changeable variables of the program ([configuration.md](configuration.md))                                                                        |
+| `setup/para_config.txt`                      | the tool's version and its components for the paradata                                                                                                |
+| `data_scripts/`                              | data preparation ([data-preparation.md](data-preparation.md)) and the evaluation helpers                                                              |
+| `supplementary/scripts/job_run.sh`           | runs the program on a server node                                                                                                                     |
+| `supplementary/scripts/result_analysis.sh`   | computes performance scores for saved model results                                                                                                   |
+| `supplementary/scripts/decide_server_job.sh` | a Slurm template: a decision-model server on a cluster node, and the experiment run against it                                                        |
+| `supplementary/scripts/dataset_timeline.py`  | plots the distribution of the categories over time, from the file names                                                                               |
+| `supplementary/scripts/img2jpeg_v3.py`       | turns any images into JPEG                                                                                                                            |
+| `supplementary/scripts/logs_stat.py`         | makes a table of statistics for each TensorBoard directory of event logs                                                                              |
+| `supplementary/scripts/visualize.py`         | plots a comparison of model types from an input CSV such as [model_accuracies_new.csv](../model_accuracies_new.csv)                                   |
 
 For finer adjustments of training, see the functions in [classifier.py](../classifier.py), which hold predefined values
 that [run.py](../run.py) does not use ([training.md](training.md#hyperparameters)).

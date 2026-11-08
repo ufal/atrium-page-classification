@@ -42,12 +42,14 @@ def test_cli_invalid_revision():
         main(["-rev", "v999.0", "-d", "."])
 
 
-def test_cli_invalid_topn():
-    """--topn outside 1..len(CATEGORIES) must fail fast with a clear message."""
-    with pytest.raises(ValueError, match="topn"):
-        main(["--topn", "999", "-d", "."])
-    with pytest.raises(ValueError, match="topn"):
-        main(["--topn", "0", "-d", "."])
+def test_cli_invalid_topn(capsys):
+    """--topn outside 1..len(CATEGORIES) is a usage error: exit 2 and the message on stderr,
+    as the --pages errors exit and as the service refuses `topn` with 422."""
+    for value in ("999", "0"):
+        with pytest.raises(SystemExit) as excinfo:
+            main(["--topn", value, "-d", "."])
+        assert excinfo.value.code == 2
+        assert f"invalid --topn value {value}: must be between 1 and {len(CATEGORIES)}" in capsys.readouterr().err
 
 
 def test_cli_missing_input(tmp_path, monkeypatch, capsys):
@@ -120,10 +122,12 @@ def test_eval_reads_the_eval_dir(tmp_path, monkeypatch, capsys):
     assert "Using google/vit-base-patch16-224 instead" in capsys.readouterr().out
 
 
-def test_topn_upper_bound_matches_category_count():
+def test_topn_upper_bound_matches_category_count(capsys):
     """The --topn ceiling tracks the model registry, not a magic number."""
-    with pytest.raises(ValueError, match=str(len(CATEGORIES))):
+    with pytest.raises(SystemExit) as excinfo:
         main(["--topn", str(len(CATEGORIES) + 1), "-d", "."])
+    assert excinfo.value.code == 2
+    assert f"between 1 and {len(CATEGORIES)}" in capsys.readouterr().err
 
 
 def test_an_evaluation_counts_its_pages_and_declares_the_dataset(tmp_path, monkeypatch):

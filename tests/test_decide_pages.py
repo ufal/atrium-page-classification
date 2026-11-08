@@ -382,3 +382,53 @@ def test_main_refuses_an_unconfigured_server(monkeypatch):
     monkeypatch.delenv("DECISION_MODEL_URL", raising=False)
     with pytest.raises(SystemExit):
         dp.main(["--task", "b1", "--dir", str(SAMPLES), "--url", "", "--model", "m"])
+
+
+@pytest.mark.parametrize(
+    "thresholds, message",
+    [
+        (["--accept-at", "0.9"], "--accept-at and --review-below go together"),
+        (["--accept-at", "1.5", "--review-below", "0.5"], "--accept-at 1.5 is outside [0, 1]"),
+        (["--accept-at", "0.9", "--review-below", "-0.1"], "--review-below -0.1 is outside [0, 1]"),
+        (["--accept-at", "nan", "--review-below", "0.5"], "--accept-at nan is outside [0, 1]"),
+        (["--accept-at", "0.5", "--review-below", "0.8"], "--review-below (0.8) must not exceed --accept-at (0.5)"),
+    ],
+)
+def test_main_refuses_lane_thresholds_before_any_request(thresholds, message, capsys, tmp_path):
+    # A usage error at the start: decision_client.lane() would raise only on the first answer,
+    # after a paid call. The URL is unreachable, so a run past the check would write one error
+    # row and exit 0 (quickly: one job, no retry), never raise SystemExit.
+    with pytest.raises(SystemExit) as excinfo:
+        dp.main(
+            ["--task", "b1", "--dir", str(SAMPLES), "--per-label", "1", "--limit", "1", "--retries", "0"]
+            + ["--url", "http://127.0.0.1:9", "--model", "m", "--out", str(tmp_path / "b1.csv"), *thresholds]
+        )
+    assert excinfo.value.code == 2
+    assert message in capsys.readouterr().err
+
+
+def test_main_accepts_lane_thresholds_on_the_bounds(tmp_path):
+    out = tmp_path / "b1.csv"
+    with dc.FakeSystemOne() as fake:
+        code = dp.main(
+            ["--task", "b1", "--dir", str(SAMPLES), "--per-label", "1", "--max-side", "128", "--limit", "1"]
+            + ["--url", fake.url, "--model", "fake-model", "--out", str(out)]
+            + ["--accept-at", "1", "--review-below", "0"]
+        )
+    assert code == 0
+    (row,) = _read(out)
+    assert row["status"] == "ok" and row["lane"] in ("accept", "escalate")  # nothing is below 0
+
+
+def test_limit_stops_after_the_first_n_page_and_size_jobs(tmp_path):
+    out = tmp_path / "b1.csv"
+    pages = _two_pages()
+    with dc.FakeSystemOne() as fake:
+        rows = dp.run(_client(fake), "b1", pages, [128, 256], out, limit=3, progress=False)
+    assert len(rows) == 3 and len(fake.requests) == 3
+    # the jobs run size by size, so the cut falls in the second size
+    assert [(r["image"], r["max_side"]) for r in rows] == [
+        (dp._relative(pages[0][0]), 128),
+        (dp._relative(pages[1][0]), 128),
+        (dp._relative(pages[0][0]), 256),
+    ]

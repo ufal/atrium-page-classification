@@ -35,7 +35,7 @@ The service, from the published image, on a sample page of this repository:
 
 ```bash
 docker run --rm -p 8000:8000 -v hf-cache:/cache/huggingface \
-  ghcr.io/ufal/atrium-page-classification-api:<version>     # the release without its v, e.g. 1.14.1-beta
+  ghcr.io/ufal/atrium-page-classification-api:<version>     # the release without its v, e.g. 1.14.2-beta
 curl -s localhost:8000/ready                                 # fails until the five models are loaded, then 200
 curl --fail-with-body -sS -X POST localhost:8000/predict_image \
   -F "file=@small_data_samples/TEXT_T/pages_online_2.png" -F version=v4.4 -F topn=3
@@ -142,6 +142,7 @@ pages that have no usable text layer. The whole chain: the
 |                     | read why it is built this way                                           | [docs/decisions/history.md](docs/decisions/history.md)                                                                                                                                   |
 |                     | turn PDFs into an annotated training set                                | [docs/data-preparation.md](docs/data-preparation.md)                                                                                                                                     |
 |                     | train, retrain on the published folds, evaluate                         | [docs/training.md](docs/training.md)                                                                                                                                                     |
+|                     | run the decision-model experiment `decide_pages.py`; not in the service | [docs/reference/cli.md](docs/reference/cli.md#decision-models-on-page-images-decide_pagespy)                                                                                             |
 
 Terms used across the tools are explained in the [ATRIUM glossary](https://ufal.github.io/atrium-project/glossary/).
 The documentation follows the ATRIUM

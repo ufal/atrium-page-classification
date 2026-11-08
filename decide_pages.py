@@ -374,10 +374,14 @@ def question_sets() -> Dict[Path, Dict[str, Any]]:
 
 
 def render_question_set(content: Mapping[str, Any]) -> str:
+    """One question set as its file's text, in one fixed form, so the drift test can compare the
+    committed file with the generator byte for byte."""
     return json.dumps(content, indent=2, ensure_ascii=False) + "\n"
 
 
 def write_question_sets() -> List[Path]:
+    """Regenerate every file of ``question_sets()`` under ``decisions/`` (``--write-question-sets``);
+    returns the paths written."""
     QUESTION_DIR.mkdir(exist_ok=True)
     written = []
     for path, content in question_sets().items():
@@ -486,6 +490,8 @@ def read_cnn_raw(path: Path) -> Dict[Tuple[str, str], Dict[str, float]]:
 
 
 def top_n(probabilities: Mapping[str, float], n: int = 3) -> List[str]:
+    """The *n* most probable labels, best first; a tie goes to the earlier label of ``CATEGORIES``,
+    so B2 offers the same options on every run."""
     return sorted(probabilities, key=lambda label: (-probabilities[label], CATEGORIES.index(label)))[:n]
 
 
@@ -507,6 +513,8 @@ INDEX_COLUMNS = ["paper_index", "content_index", "capture_index", "damage_index"
 
 
 def content_columns() -> List[str]:
+    """The B3 columns of a row: each element and each computed tag with its gold, then the primary
+    processor, its probabilities, its gold and its lane."""
     elements = [col for element in ELEMENTS for col in (f"P_{element}", f"GOLD_{element}")]
     routes = [col for route in ROUTES for col in (f"P_route_{route}", f"GOLD_route_{route}")]
     primary = ["primary_route"] + [f"P_primary_{route}" for route in ROUTES] + ["GOLD_primary", "lane"]
@@ -514,6 +522,8 @@ def content_columns() -> List[str]:
 
 
 def condition_columns() -> List[str]:
+    """The B4 columns of a row: the defects, the orientation with its gold, the three scores and
+    ``damage_score``, then the check indices."""
     defects = [f"P_{defect}" for defect in DEFECT_IDS]
     orientation = ["orientation"] + [f"P_orient_{o}" for o in ORIENTATIONS] + ["GOLD_orientation"]
     scores = [f"E_{qid}" for qid in SCORES] + ["damage_score"]
@@ -521,6 +531,8 @@ def condition_columns() -> List[str]:
 
 
 def columns_for(task: str) -> List[str]:
+    """The header of a *task*'s ``DECIDE_RAW`` table. One fixed list per task, so a resumed run
+    appends rows under the header it started with."""
     if task in ("b3", "b4", "triage"):
         middle = (content_columns() if task in ("b3", "triage") else []) + (
             condition_columns() if task in ("b4", "triage") else []
@@ -950,6 +962,8 @@ def summarise(task: str, rows: Iterable[Mapping[str, Any]]) -> Dict[str, Any]:
 
 
 def read_rows(path: Path) -> List[Dict[str, str]]:
+    """Every row of a ``DECIDE_RAW`` table, as strings: the summary reads the whole table back, so
+    rows from earlier runs of a ``--resume`` count too."""
     with path.open(newline="", encoding="utf-8") as handle:
         return list(csv.DictReader(handle))
 
@@ -983,6 +997,7 @@ def _env_float(name: str, default: float) -> float:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """The command line; ``main()`` checks the combinations argparse cannot express."""
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--write-question-sets", action="store_true", help="regenerate decisions/*.json and exit")
     parser.add_argument("--task", choices=TASKS)
@@ -1026,6 +1041,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
+    """Check the arguments, run the task, write the table, its summary and the paradata; returns 0.
+    Usage errors exit 2 before any request is sent."""
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.write_question_sets:
@@ -1038,6 +1055,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         parser.error("b2 needs --cnn-raw and --tau")
     if (args.accept_at is None) != (args.review_below is None):
         parser.error("--accept-at and --review-below go together")
+    if args.accept_at is not None:
+        # Checked here, before a page is read or a request is sent. decision_client.lane() refuses
+        # review_below > accept_at with a ValueError, but only on the first answer, after a paid
+        # model call, and decide_page() promises never to raise. A threshold outside [0, 1] (or
+        # NaN) is compared with a probability, so it would leave a lane empty without a word.
+        for flag, value in (("--accept-at", args.accept_at), ("--review-below", args.review_below)):
+            if not 0.0 <= value <= 1.0:
+                parser.error(f"{flag} {value} is outside [0, 1]")
+        if args.review_below > args.accept_at:
+            parser.error(f"--review-below ({args.review_below}) must not exceed --accept-at ({args.accept_at})")
     variants = None
     if args.degradations:
         if args.task not in ("b3", "b4", "triage"):

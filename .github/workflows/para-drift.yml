@@ -14,6 +14,6 @@ permissions:
 
 jobs:
   check-drift:
-    uses: ufal/atrium-project/.github/workflows/para-drift.reusable.yml@da7a066f5a1c1ecf024f9a8b82cca949a9ee0e91  # v1
+    uses: ufal/atrium-project/.github/workflows/para-drift.reusable.yml@4435ffbe75188a5d0a11c96180ca10efa616991d  # v1
     with:
-      hub-ref: da7a066f5a1c1ecf024f9a8b82cca949a9ee0e91
+      hub-ref: 4435ffbe75188a5d0a11c96180ca10efa616991d
