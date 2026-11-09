@@ -978,3 +978,20 @@ Documentation only; no code, test or configuration change.
 * **Checked:** the light lane, 956 passed, 14 skipped (torch, tensorboard, uvicorn absent), 3 slow deselected;
   `check_version.py --tag v1.14.2-beta --require-tag`: OK; ruff; the hub's `docs_check.py`.
 * **Yours:** re-pin the hub reusables in the same push to `test`; once its runs are green, tag `v1.14.2-beta`.
+
+## 2026-11-09 — #58: form from images, content from text; Track 2 image-only (atrium-project#83)
+
+* **Asked (K4TEL):** terms about a document's form and terms about its content are two groups, never mixed. This
+  repository gets images only; digital-convert images only; keyword-extract and ocr-postprocess text only. The
+  schemes are to suit a historical documentary archive.
+* **Decided in session:** Track 2 keeps form and what is visibly depicted (Artefact, Material, Feature); no text input.
+* **Written (not pushed):**
+  * **`plans/58.plan.md`:** B1–B4 stated as form, from the image; B3's "content and processors" heading is now
+    "elements and processors". Track 2 (Phases F–H): the linked-document block and the with/without-document runs
+    removed; `capture_context` replaced by `image_type`, AMČR's picture types from digital-convert's list v3 (to be
+    vendored when Track 2 is written); terms from the visual facets only; labels transcribed, with no key-value
+    parsing; gold annotated from the image. The siblings' summaries; the done criteria and out of scope.
+  * **`docs/reference/cli.md`:** B3's "content elements" → "page elements".
+  * **`digests/58.digest.md`.**
+* **No code or question set changes;** the client is unchanged, so the consumers' pins hold.
+* Committed locally, not pushed; files delivered as per-repo archives.

@@ -2,15 +2,14 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "ATRIUM page-classification"
 abstract: >-
-  page-classification reads the image of a scanned archival page and says what kind of page it is. It
-  chooses one of eleven categories, such as running text, a table or form, a drawing or a photograph,
-  with handwritten, printed or typed text. The category tells which processing the page needs next,
-  for example OCR or table extraction. Use it on scans of paper documents; the labels it gives
-  born-digital pages have not been checked.
+  page-classification sorts scanned pages of archival documents by what they show, for example running
+  text, a table or form, a drawing or a photograph, and whether the text is handwritten, printed or
+  typed. The category of each page tells which processing the page needs next, such as text
+  recognition or table extraction.
 keywords:
   - "historical documents"
   - "document image classification"
-  - "vision transformer"
+  - "page classification"
   - "digital archives"
   - "archaeology"
 version: "1.14.2-beta"
