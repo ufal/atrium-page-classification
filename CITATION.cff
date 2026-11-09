@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
-title: "ATRIUM page-classification: classification of scanned archival pages into eleven content categories with fine-tuned ViT, RegNetY and EfficientNetV2 models"
+title: "ATRIUM page-classification"
 abstract: >-
   page-classification reads the image of a scanned archival page and says what kind of page it is. It
   chooses one of eleven categories, such as running text, a table or form, a drawing or a photograph,
