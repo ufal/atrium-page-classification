@@ -1,11 +1,11 @@
 # 📓 atrium-page-classification — agent_dev_logs/DEVLOG.md (timeline index)
-> _Historical page-image classification. Open issue: #58 (decision-model experiments, 2026-10-20; renamed 2026-11-06 "Decision Models (DM) application to incoming documents", a sub-issue of atrium-project#83); #64 (the
+> _Historical page-image classification. Open issue: #58 (decision-model experiments, 2026-10-20; renamed 2026-11-06 "Decision Models (DM) application to incoming documents", a sub-issue of atrium-project#83; parked during the pilot phase since 2026-11-11); #64 (the
 > scheduled-smoke failure of 10-27) closed 2026-11-04; one open Dependabot PR (#65). #61 (the directory-run bug) closed
 > 2026-10-22, fixed in **v1.9.6-beta**; #48 closed 2026-09-17. Its pilot work is tracked in hub issues (atrium-project
-> #6, #66, #72, #77, #79, #81). **Pilot release: v1.12.3-beta** (`0a96bce`, 2026-11-04; immutable, with `images.json`;
+> #6, #66, #72, #77, #79, #81). **Starting set of the pilot phase: v1.12.3-beta** (`0a96bce`, 2026-11-04; immutable, with `images.json`;
 > atrium-project#77). **v1.9.5-beta** (2026-10-19, the runbook) is the first immutable release (atrium-project#72).
-> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-08 (round 3)._
-> _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md`._
+> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-11._
+> _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md` · `plans/doc-schema-v2.plan.md` (this repository's part of the hub's schema issue, not opened yet)._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
 ## 2026-06-25
@@ -995,3 +995,32 @@ Documentation only; no code, test or configuration change.
   * **`digests/58.digest.md`.**
 * **No code or question set changes;** the client is unchanged, so the consumers' pins hold.
 * Committed locally, not pushed; files delivered as per-repo archives.
+
+## 2026-11-11 — The output contract: this repository's part of doc-schema-v2 (atrium-project, issue to be opened)
+
+* **Asked (K4TEL):** align the logs with the meeting of 11-11 (ARÚP's output contract) and write this repository's
+  slice of the hub's consolidated schema issue
+  ([meeting digest](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/digests/project_state_1111.md),
+  [hub plan](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/doc-schema-v2.plan.md)).
+* **Decided in session:** plans only this round; the schema issue is not opened yet (placeholder name
+  `doc-schema-v2`); page classification runs on every PDF and image, bundled with the ATR call, and without ATR when
+  no page needs OCR; digital-convert's text-layer verdicts become their own marker set (`decode`), `categ` is
+  ocr-postprocess's only.
+* **Found:**
+  * the page rows are keyed by the record's page label; `page_index` would make the label mapping
+    (`page_inputs.pdf_page_keys()`, `service/document_json.record_page_keys()`) and the baseline input unnecessary;
+  * `predictions.json` is named in the action's result but is not a stored output (`service/api.py:625-626`);
+  * `gpu-inference.yml` has had no cron since 2026-07-29; only `scheduled-smoke.yml`'s daily cron goes with
+    atrium-project#81;
+  * `MAX_PDF_PAGES` already refuses rather than trims, as D13 wants.
+* **Written here (not pushed):**
+  * **`plans/doc-schema-v2.plan.md` (new):** the slice: its fields, seven tasks with their code locations, the
+    paradata, what it depends on, the superseded statements, what is not in scope (#58's decision models, the
+    TrueOpen.AI hosted pilot).
+  * **`digests/58.digest.md`, `plans/58.plan.md`:** parked during the pilot phase (the meeting's §0); `/describe` not
+    used in the pipeline (H11); the statements on Phase A, the next round and `/describe` marked superseded; the
+    rest kept as the record.
+  * **`DEVLOG.md`:** the header names v1.12.3-beta the starting set of the pilot phase, #58 parked, the latest entry
+    11-11 (it said 11-08 round 3); this entry.
+* **Not posted:** the question this slice depends on is the hub plan's Q1; nothing on GitHub.
+* Plans only; no code changed. Files delivered as full files.
