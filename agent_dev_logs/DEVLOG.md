@@ -4,8 +4,8 @@
 > 2026-10-22, fixed in **v1.9.6-beta**; #48 closed 2026-09-17. Its pilot work is tracked in hub issues (atrium-project
 > #6, #66, #72, #77, #79, #81). **Starting set of the pilot phase: v1.12.3-beta** (`0a96bce`, 2026-11-04; immutable, with `images.json`;
 > atrium-project#77). **v1.9.5-beta** (2026-10-19, the runbook) is the first immutable release (atrium-project#72).
-> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-11._
-> _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md` · `plans/doc-schema-v2.plan.md` (this repository's part of the hub's schema issue, not opened yet)._
+> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-12._
+> _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md` · `plans/84.plan.md` (this repository's part of atrium-project#84)._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
 ## 2026-06-25
@@ -1001,7 +1001,7 @@ Documentation only; no code, test or configuration change.
 * **Asked (K4TEL):** align the logs with the meeting of 11-11 (ARÚP's output contract) and write this repository's
   slice of the hub's consolidated schema issue
   ([meeting digest](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/digests/project_state_1111.md),
-  [hub plan](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/doc-schema-v2.plan.md)).
+  [hub plan](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/84.plan.md)).
 * **Decided in session:** plans only this round; the schema issue is not opened yet (placeholder name
   `doc-schema-v2`); page classification runs on every PDF and image, bundled with the ATR call, and without ATR when
   no page needs OCR; digital-convert's text-layer verdicts become their own marker set (`decode`), `categ` is
@@ -1023,4 +1023,25 @@ Documentation only; no code, test or configuration change.
   * **`DEVLOG.md`:** the header names v1.12.3-beta the starting set of the pilot phase, #58 parked, the latest entry
     11-11 (it said 11-08 round 3); this entry.
 * **Not posted:** the question this slice depends on is the hub plan's Q1; nothing on GitHub.
+* Plans only; no code changed. Files delivered as full files.
+
+## 2026-11-12 — atrium-project#84: the `needs_atr` pages only; TrueOpen.AI
+
+* **Asked (K4TEL):** align the logs with ARÚP's output contract of 12 November (the .docx of that day, replacing the
+  meeting document of 10 November) and with David Novák's comments of 11-12 (atrium-project#84 opened, #13, #16,
+  #78); `test` fetched first (all seven working branches = `test`).
+  Anchor: [contract digest](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/digests/project_state_1211.md) · [hub plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/84.plan.md).
+* **Decided in session:** the tool slices are named `plans/84.plan.md`; the translator keeps `amcr-fields.txt` as a
+  documented example that nothing loads (no default list, D34); the hub's #84 plan carries a reply draft agreeing on
+  points 1 and 2.
+* **Found:** `plans/doc-schema-v2.plan.md` of 11-11 was delivered but is not on `test`. `/predict_document` already
+  takes a `pages` selection; `MAX_PDF_PAGES` (50) applies to the selection (`service/api.py:337-361`). The hub's
+  Galaxy test images are copies of `small_data_samples/`, whose source dataset is not recorded.
+* **Written here (not pushed):**
+  * **`plans/84.plan.md`** (new): the `needs_atr` pages only, beside the ATR (H3, D33); `page_index`; no
+    `derived_from`; `predictions.json` out of the result; the 50-page limit for the pipeline;
+  * **`plans/58.plan.md`, `digests/58.digest.md`:** 11-12 sections: still parked; TrueOpen.AI option B (Kate answers
+    them); #16's Galaxy condition;
+  * **`DEVLOG.md`:** the header and this entry.
+* **Not posted:** nothing on GitHub; questions stay on the hub's list for the next meeting.
 * Plans only; no code changed. Files delivered as full files.
