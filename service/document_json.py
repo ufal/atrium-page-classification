@@ -19,15 +19,14 @@ assertion. A second copy of that logic in the service is exactly how alto's `/pr
 endpoint ended up writing junk (J1).
 
 Two more helpers serve `/predict_document` when a caller sends a record that already has
-pages (atrium-digital-convert#2's `/describe`):
+pages (the pipeline sends the `needs_atr` pages, H3):
 
 * `parse_page_selection()` / `expand_page_selection()` — the optional `pages` form field
   ("1,3,5-7", 1-based physical pages): only those pages are rendered and classified.
-* `baseline_page_labels()` / `record_page_keys()` — a PDF's pages are numbered 1..N by
-  position, but a born-digital record names them by their PDF page labels (`i`, `ii`, `1`, …)
-  and carries the position in `pages[].page_index`. Writing categories under "1", "2", … into
-  such a record would attach them to the wrong page rows (or invent new ones), so the page
-  keys are mapped through `page_index` to the record's own labels first.
+* `baseline_page_labels()` / `record_page_keys()` — the record's page rows are keyed by the
+  physical page (`pages[].page_index`, record schema 2.0) and carry the printed label in
+  `pages[].page` (`i`, `ii`, `1`, …). The rows are written by `page_index`; `page_categories`
+  is keyed by the label, so a page whose label would be another page's is left out of it.
 """
 
 from __future__ import annotations
@@ -156,8 +155,9 @@ def record_page_keys(page_numbers: Sequence[int], labels: Mapping[int, str]) -> 
     return keys
 
 
-def _top_rows(doc_id: str, pages: Sequence[Tuple[str, Any]]) -> List[Dict[str, Any]]:
-    """Flatten (page key, predictions) pairs into the adapter's FILE/PAGE/CLASS-1/SCORE-1 rows.
+def _top_rows(doc_id: str, pages: Sequence[Tuple[Any, ...]]) -> List[Dict[str, Any]]:
+    """Flatten (page key, predictions[, page_index]) tuples into the adapter's
+    FILE/PAGE/CLASS-1/SCORE-1[/PAGE_INDEX] rows.
 
     `manager.predict()` returns either a top-N list of `{label, score}` or, when every model
     failed, a bare `{"error": ...}` dict. Pages of the second kind are dropped rather than
@@ -166,7 +166,9 @@ def _top_rows(doc_id: str, pages: Sequence[Tuple[str, Any]]) -> List[Dict[str, A
     classified.
     """
     rows: List[Dict[str, Any]] = []
-    for page_key, predictions in pages:
+    for entry in pages:
+        page_key, predictions = entry[0], entry[1]
+        page_index = entry[2] if len(entry) > 2 else None
         if not isinstance(predictions, list) or not predictions:
             continue
         top = predictions[0]
@@ -174,6 +176,8 @@ def _top_rows(doc_id: str, pages: Sequence[Tuple[str, Any]]) -> List[Dict[str, A
         if not label:
             continue
         row: Dict[str, Any] = {"FILE": doc_id, "PAGE": str(page_key), "CLASS-1": label}
+        if page_index is not None:
+            row["PAGE_INDEX"] = int(page_index)
         score = top.get("score") if isinstance(top, dict) else None
         if score is not None:
             row["SCORE-1"] = float(score)
@@ -183,7 +187,7 @@ def _top_rows(doc_id: str, pages: Sequence[Tuple[str, Any]]) -> List[Dict[str, A
 
 def build_document_record(
     doc_id: str,
-    pages: Sequence[Tuple[str, Any]],
+    pages: Sequence[Tuple[Any, ...]],
     baseline_bytes: Optional[bytes] = None,
     paradata_logger: Any = None,
 ) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
@@ -203,9 +207,9 @@ def build_document_record(
     Layer D refusal. `api.py` maps that to a 500, because a record page-classification
     cannot emit is a defect on this side.
 
-    `paradata_logger` is the call's run (atrium-project#71): its `run_id`, `run_uuid` and
-    licence block are stamped into the record, and its `run_uuid` is the `@id` of the
-    CreateAction the response carries.
+    `paradata_logger` is the call's run: the adapter adds the record version read and the
+    record written (with the blocks and fields written) to its paradata; the record itself
+    carries no run data (record schema 2.0, atrium-project#84).
 
     Everything happens in a TemporaryDirectory: the adapter's contract is file-in/file-out
     (matching the CLI flags exactly), and re-plumbing it for in-memory use would be a second

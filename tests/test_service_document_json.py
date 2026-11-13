@@ -73,24 +73,25 @@ except ImportError:  # pragma: no cover - environment-dependent
     sys.modules.setdefault("service.inference", _stub)
 
 
-# `source.sha256` is pattern-constrained to 64 lowercase hex chars by the schema, so a
+# `source.sha512` is pattern-constrained to 128 lowercase hex chars by the schema, so a
 # placeholder like "abc123" makes the baseline itself invalid and every assertion below reads
 # as a Layer D warning instead of what it is testing.
-SHA256 = "9" * 64
+SHA512 = "9" * 128
 
 #: (atrium-project#68) An AMČR seed is keyed by the AMČR file id, never by the upload's name.
 SEED = "C-202000543A-DT-27"
 
 
 def _upstream_baseline(doc_id="CTX01"):
-    """A record as alto-postprocess/nlp-enrich would hand it over: blocks pc does not own."""
+    """A record as the record builder (ocr-postprocess) hands it over: blocks pc does not own,
+    page rows keyed by `page_index` with labels equal to the positions."""
     return {
-        "schema_version": "1.0",
+        "schema_version": "2.0",
         "doc_id": doc_id,
-        "source": {"sha256": SHA256, "filename": f"{doc_id}.alto.xml", "media_type": "application/xml"},
+        "source": {"sha512": SHA512, "filename": f"{doc_id}.pdf", "media_type": "application/pdf"},
         "pages": [
-            {"page": "1", "quality_score": 0.9, "quality_band": "Clear"},
-            {"page": "2", "quality_score": 0.4, "quality_band": "Noisy"},
+            {"page": "1", "page_index": 1, "quality_score": 0.9, "quality_band": "Clear"},
+            {"page": "2", "page_index": 2, "quality_score": 0.4, "quality_band": "Noisy"},
         ],
         "lines": [{"page": "1", "line": 1, "text": "Pohřebiště"}],
     }
@@ -129,16 +130,15 @@ class TestDocIdDerivation:
 
 class TestBuildDocumentRecord:
     def test_originates_a_record_with_no_baseline(self):
-        """page-classification is stage 1 of the pipeline: the E2E passes it
-        `--document-json-out` alone, so the service has to be able to START a record, not
-        only accrete onto one."""
+        """A standalone run (rule 3): `--document-json-out` alone starts a record holding only
+        this tool's blocks, its page rows keyed by `page_index` (record schema 2.0)."""
         record, schema_err = build_document_record("CTX01", [("1", PREDS)], baseline_bytes=None)
 
         assert schema_err is None
         assert record["doc_id"] == "CTX01"
         assert record["page_categories"] == {"1": "TEXT"}
-        assert record["pages"] == [{"page": "1", "category": "TEXT", "category_confidence": 0.91}]
-        assert record["assembled"]["had_baseline"] is False
+        assert record["pages"] == [{"page_index": 1, "category": "TEXT", "category_confidence": 0.91}]
+        assert "assembled" not in record and "provenance" not in record
         validate_document(record)
 
     def test_upstream_blocks_survive_the_accretion(self):
@@ -155,7 +155,6 @@ class TestBuildDocumentRecord:
         assert record["doc_id"] == baseline["doc_id"]  # identity unchanged (D2's failure mode)
         assert record["source"] == baseline["source"]  # first writer wins
         assert record["lines"] == baseline["lines"]  # a block we do not own
-        assert record["assembled"]["had_baseline"] is True
 
         pages = {p["page"]: p for p in record["pages"]}
         assert len(pages) == len(baseline["pages"])  # no forked rows
@@ -179,7 +178,7 @@ class TestBuildDocumentRecord:
             "CTX01", [("1", PREDS), ("2", {"error": "All models failed."})], baseline_bytes=None
         )
         assert record["page_categories"] == {"1": "TEXT"}
-        assert [p["page"] for p in record["pages"]] == ["1"]
+        assert [p["page_index"] for p in record["pages"]] == [1]
 
     def test_no_usable_prediction_contributes_nothing(self):
         """Rule 3's spirit: nothing to contribute means emit nothing, not an empty block."""
@@ -330,7 +329,8 @@ class TestPredictImageDocumentJson:
             },
         )
         assert response.status_code == 200
-        assert response.json()["document_json"]["assembled"]["had_baseline"] is False
+        record = response.json()["document_json"]
+        assert record["pages"] == [{"page_index": 1, "category": "TEXT", "category_confidence": 0.91}]
 
     def test_absent_part_leaves_the_old_response_shape(self, client):
         """The part is opt-in, so this is additive on the wire — an existing client that sends
@@ -437,7 +437,7 @@ class TestPredictDocumentDocumentJson:
         # no filename page-split for a whole PDF; `.pdf` is a known suffix, so the inner dot stays
         assert record["doc_id"] == "CTX01.scan"
         assert record["page_categories"] == {"1": "TEXT", "2": "TEXT", "3": "TEXT"}
-        assert [p["page"] for p in record["pages"]] == ["1", "2", "3"]
+        assert [p["page_index"] for p in record["pages"]] == [1, 2, 3]
 
     def test_a_seed_keyed_unlike_the_upload_comes_back_with_our_block(self, client, fake_pdfium):
         """(atrium-project#68) The PDF endpoint, same guarantee as the image one."""
@@ -777,11 +777,10 @@ class TestLimits:
             atrium_limits.limit("MAX_PDF_PAGES", 50, unit="pages")
 
 
-# ── the `pages` selection and the record's own page labels (atrium-digital-convert#2) ─────────
-# digital-convert's `/describe` asks this service about the pages whose text layer is unusable,
-# sending the PDF and the born-digital record it made. That record names its pages by their PDF
-# page labels (`i`, `ii`, `1`, …) with the position in `pages[].page_index`; categories written
-# under the positions "1", "2", … would land on the wrong rows.
+# ── the `pages` selection and the record's own page labels ──────────────────────────────────
+# The pipeline sends the `needs_atr` pages of a document (H3) with the record the record builder
+# made. That record names its pages by their printed labels (`i`, `ii`, `1`, …) with the physical
+# page in `pages[].page_index`, the key of every page row (record schema 2.0, H2).
 
 from service.document_json import (  # noqa: E402
     baseline_page_labels,
@@ -792,26 +791,30 @@ from service.document_json import (  # noqa: E402
 
 
 def _born_digital_baseline(doc_id="C-202000543A-DT-27"):
-    """A born-digital record as digital-convert writes it: labelled pages with `page_index`.
+    """A born-digital record as the record builder writes it: labelled pages with `page_index`.
 
-    Built through `DocumentRecord` as the `digital-convert` originator, so it is the shape (and
-    the validity) of a real one rather than a hand-written approximation.
+    Built through `DocumentRecord` as the record builder (`ocr-postprocess`), so it is the shape
+    (and the validity) of a real one rather than a hand-written approximation.
     """
     from atrium_document import DocumentRecord
 
     canvas = {"width": 595.0, "height": 842.0, "unit": "pt"}
-    record = DocumentRecord(doc_id, "digital-convert")
-    record.set_source(SHA256, filename="report.pdf", media_type="application/pdf", origin="digital-born-pdf")
+    record = DocumentRecord(doc_id, "ocr-postprocess")
+    record.set_source(sha512=SHA512, filename="report.pdf", media_type="application/pdf", origin="digital")
     record.merge_block(
         "pages",
         [
-            {"page": "i", "page_index": 1, "canvas": canvas},
-            {"page": "ii", "page_index": 2, "canvas": canvas},
-            {"page": "1", "page_index": 3, "canvas": canvas, "needs_ocr": True, "needs_ocr_reason": "no text layer"},
+            {"page": "i", "page_index": 1, "canvas": canvas, "content_status": "text"},
+            {"page": "ii", "page_index": 2, "canvas": canvas, "content_status": "empty"},
+            {"page": "1", "page_index": 3, "canvas": canvas, "content_status": "empty"},
         ],
-        key_fields=["page"],
+        key_fields=["page_index"],
     )
-    record.merge_block("lines", [{"page": "i", "line": 0, "text": "Zpráva o výzkumu"}], key_fields=["page", "line"])
+    record.merge_block(
+        "lines",
+        [{"page": "i", "line": 1, "text": "Zpráva o výzkumu", "text_source": "text-layer"}],
+        key_fields=["page", "line"],
+    )
     data = record.to_dict()
     validate_document(data)
     return data
@@ -853,7 +856,8 @@ class TestRecordPageKeys:
         assert labels == {1: "i", 2: "ii", 3: "1"}
 
     def test_a_baseline_without_page_index_maps_nothing(self):
-        assert baseline_page_labels(json.dumps(_upstream_baseline()).encode()) == {}
+        """Read leniently, before any migration: rows without `page_index` give no labels."""
+        assert baseline_page_labels(json.dumps({"pages": [{"page": "1"}, {"page": "2"}]}).encode()) == {}
         assert baseline_page_labels(None) == {}
         assert baseline_page_labels(b"") == {}
         assert baseline_page_labels(b"\xff not json") == {}
@@ -925,10 +929,14 @@ class TestPredictDocumentPagesAndLabels:
         assert record["page_categories"] == {"1": "TEXT"}
         assert [p.get("category") for p in record["pages"]] == [None, None, "TEXT"]
 
-    def test_a_baseline_keyed_by_position_is_unchanged(self, client, fake_pdfium):
-        """An ALTO record (pages "1".."N", no page_index) gets the same keys as before."""
+    def test_a_record_labelled_by_position_keeps_its_keys(self, client, fake_pdfium):
+        """A record whose labels are the positions ("1".."N"): the labels come back as they are,
+        and the page the record has no row for gets one, keyed by its `page_index`."""
         response = self._post(client, baseline=_upstream_baseline())
         assert response.status_code == 200
         body = response.json()
-        assert all("page_label" not in page for page in body["pages"])
-        assert body["document_json"]["page_categories"] == {"1": "TEXT", "2": "TEXT", "3": "TEXT"}
+        assert [page.get("page_label") for page in body["pages"]] == ["1", "2", None]
+        record = body["document_json"]
+        assert record["page_categories"] == {"1": "TEXT", "2": "TEXT", "3": "TEXT"}
+        assert [p["page_index"] for p in record["pages"]] == [1, 2, 3]
+        validate_document(record)

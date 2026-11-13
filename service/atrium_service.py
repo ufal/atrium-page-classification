@@ -190,6 +190,9 @@ def build_info(
 #: did not answer after the tool's own retries, so a client (AMČR's Temporal activities) can tell an
 #: outage, which is worth retrying later, from a 502 with ``reason: null`` such as an empty run.
 #: A backing service's timeout is not this code: it is a 504 ``limit_exceeded`` naming the timeout.
+#: ``ocr_text_layer`` is DEPRECATED since doc-schema-v2 (atrium-project#84, H12): digital-convert no
+#: longer refuses a document, it marks those pages `needs_atr` in docproc's routing. The code stays
+#: registered, since a published code is never removed, and no service sends it.
 REASON_CODES: Dict[str, str] = {
     "limit_exceeded": (
         "The input is over one of the service's limits. The body's `limit` member names it "
@@ -211,14 +214,15 @@ REASON_CODES: Dict[str, str] = {
     "invalid_record": (
         "The document record sent with the request cannot be opened (HTTP 422): it is not UTF-8 "
         "JSON, not a JSON object, or its `schema_version` has a newer major than this tool reads. "
-        "Also sent when a block the tool adds rows to (`pages`, `lines`, `tables`, `entities`) "
+        "Also sent when a block the tool adds rows to (`pages`, `lines`, `entities`) "
         "is not a list of objects. A record that opens but does not validate against the schema "
         "is otherwise accepted and reported in `document_json_schema_error`. Fix the record; do "
         "not retry it unchanged."
     ),
     "ocr_text_layer": (
-        "The PDF's text layer is an earlier OCR run's invisible text over page images, so the "
-        "document is not born-digital (HTTP 422). Route it to OCR: that text layer is not trusted."
+        "DEPRECATED since doc-schema-v2 (atrium-project#84, H12): no service sends it. It meant: the "
+        "PDF's text layer is an earlier OCR run's invisible text over page images (HTTP 422). Such "
+        "pages are now marked `needs_atr` in docproc's routing, and the document goes through the ATR."
     ),
     "source_digest_mismatch": (
         "The record sent with the request names the original by its `source.sha512`, and the uploaded "
@@ -557,13 +561,21 @@ class ErrorBody(BaseModel):
 
 
 class LimitNote(BaseModel):
-    """One limit that shaped a result without refusing it (`limits_applied`, §4.5)."""
+    """One limit that shaped a result without refusing it (the paradata `limits`, §4.5).
+
+    Since doc-schema-v2 (D13) only sampling and splitting are recorded: a limit that trims, skips
+    or stops content fails the request instead."""
 
     model_config = ConfigDict(extra="allow")
 
     limit: str = Field(description="The `/info` `limits` key.")
     value: Any = Field(description="The limit's value when it applied.")
-    effect: str = Field(description="What it did: `sampled`, `split`, `trimmed`, `skipped` or `stopped`.")
+    effect: str = Field(
+        description=(
+            "What it did: `sampled` or `split`. (`trimmed`, `skipped` and `stopped` fail the request since "
+            "doc-schema-v2, D13; they appear only in notes written before it.)"
+        )
+    )
     count: int = Field(description="How many times it applied.")
     detail: str = Field(description="A human-readable note.")
 
@@ -631,7 +643,9 @@ class CreateAction(BaseModel):
     authors as `creator`), the image as `containerImage`, the inputs as `object`, what the call
     wrote as `result`, the `agent`, `startTime`/`endTime` and `actionStatus`, and the run's whole
     paradata record as `paradataRecord`. Every service returns it with a successful response; its
-    `@id` is the `run_uuid` the call stamped into the record it returned.
+    `@id` is the run's `run_uuid`. Since doc-schema-v2 (atrium-project#84) the record carries no
+    stamps: the `result` names the record blocks AND fields the call wrote, and every input and output
+    is named by its AMČR distribution name and SHA-512.
     """
 
     model_config = ConfigDict(extra="allow")
@@ -642,7 +656,7 @@ class CreateAction(BaseModel):
     id: Optional[str] = Field(
         None,
         alias="@id",
-        description="The run's `urn:uuid:...`, equal to `run_uuid` in the blocks the call stamped into the record.",
+        description="The run's `urn:uuid:...`, its paradata `run_uuid`.",
     )
     type: Optional[str] = Field(None, alias="@type", description="`CreateAction`.")
     name: Optional[str] = Field(None, description="A human-readable name of the run.")
@@ -662,12 +676,16 @@ class CreateAction(BaseModel):
         None,
         alias="object",
         description=(
-            "The inputs: the uploaded file (`@id` `ni:///sha-256;...`, with `sha256` and `contentSize`) and "
-            "`#record`, the record sent with it."
+            "The inputs, each by AMČR distribution name (`name`) and SHA-512 (`sha512`): the uploaded file and "
+            "the record version sent with it. An input that is not stored carries `stored: false` (D23)."
         ),
     )
     result: Optional[List[Dict[str, Any]]] = Field(
-        None, description="The outputs: the record blocks the call wrote (`#block-<name>`) and any output file."
+        None,
+        description=(
+            "The outputs, by distribution name and SHA-512. The record's (`atrium/document-json`) names the "
+            "blocks and fields the call wrote in `recordFields`; an output that is not stored carries `stored: false`."
+        ),
     )
     agent: Optional[Dict[str, Any]] = Field(
         None, description="The organisation operating the service (`ATRIUM_RUN_AGENT`); absent when it is not set."
@@ -680,7 +698,7 @@ class CreateAction(BaseModel):
     )
     error: Optional[str] = Field(None, description="Why the run failed, with `FailedActionStatus`.")
     paradataRecord: Optional[Dict[str, Any]] = Field(
-        None, description="The run's atrium_paradata record (schema 2.0), as the tool wrote it."
+        None, description="The run's atrium_paradata record (schema 3.0: no calculated licence), as the tool wrote it."
     )
 
     # No return annotation on purpose: the published schema stays the fields above.
