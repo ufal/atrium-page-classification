@@ -122,6 +122,15 @@ service now ends with `os._exit(0)` when it stops while the warm-up still runs (
 (`/setup`) each raise `pypdfium2` in one manifest only, which `tests/test_service_runtime_deps.py` refuses: #70 takes
 the `/service` raise too after this PR merges, and #69 is closed.
 
+## Status — round 9 (11-14)
+
+#71 merged (`bfebf36`); the `/service` raise went to `test` as `111def2`, then #70 merged (`ed9105d`), and the `api`
+smoke passed. #69 did not close: dependabot rebased it to `pypdfium2>=5.15.2` in `/service` only, the same split.
+`.github/dependabot.yml` now has one pip entry for both directories; a `shared-deps` group with
+`group-by: dependency-name` (Pillow, pypdfium2) gives each dependency declared in both manifests one PR that raises
+both, and `tests/test_service_runtime_deps.py` checks that every such dependency is in it. #69 is closed once this is
+merged; dependabot opens the combined `pypdfium2` PR on its next run.
+
 ## Depends on
 
 - Hub tasks 1 (grants; `page_index`), 3 (`file_entity` with SHA-512), re-vendoring.

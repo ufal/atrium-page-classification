@@ -31,6 +31,7 @@ is still the belt to this braces and belongs in CI; see the plan's Phase 3.2 not
 
 import ast
 import configparser
+import fnmatch
 import json
 import re
 import shlex
@@ -72,6 +73,29 @@ def _normalise(name: str) -> str:
     """PEP 503 name normalisation, so `PyYAML` equals `pyyaml` and `python_multipart` equals
     `python-multipart`."""
     return re.sub(r"[-_.]+", "-", name).strip().lower()
+
+
+#: The pip manifests dependabot watches, by the directory its config names them with.
+_PIP_MANIFESTS = {
+    "/setup": REPO_ROOT / "setup" / "requirements.txt",
+    "/service": REPO_ROOT / "service" / "requirements.txt",
+}
+
+
+def _requirement_specs(path: Path) -> dict:
+    """{normalised name: specifier line without spaces} of one requirements file."""
+    specs = {}
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.split("#", 1)[0].strip()
+        if not line or line.startswith("-"):
+            continue
+        specs[_normalise(re.split(r"[<>=!~;\[]", line, maxsplit=1)[0])] = line.replace(" ", "")
+    return specs
+
+
+def _dependabot_directories(update: dict) -> set:
+    """The directories one dependabot `updates` entry covers (`directory` or `directories`)."""
+    return set(update.get("directories") or []) | ({update["directory"]} if update.get("directory") else set())
 
 
 def _declared_distributions() -> set:
@@ -320,13 +344,9 @@ class TestVersionPinsStayConsistent:
         resolve one of them away silently. Pillow is in both by design (the service imports it
         directly); this pins that they agree."""
         floors = {}
-        for path in (REPO_ROOT / "setup" / "requirements.txt", REPO_ROOT / "service" / "requirements.txt"):
-            for raw in path.read_text(encoding="utf-8").splitlines():
-                line = raw.split("#", 1)[0].strip()
-                if not line or line.startswith("-"):
-                    continue
-                name = _normalise(re.split(r"[<>=!~;\[]", line, maxsplit=1)[0])
-                floors.setdefault(name, set()).add(line.replace(" ", ""))
+        for path in _PIP_MANIFESTS.values():
+            for name, spec in _requirement_specs(path).items():
+                floors.setdefault(name, set()).add(spec)
 
         conflicting = {name: sorted(specs) for name, specs in floors.items() if len(specs) > 1}
         assert not conflicting, f"same dependency declared with different specifiers: {conflicting}"
@@ -351,10 +371,34 @@ class TestVersionPinsStayConsistent:
         for update in dependabot.get("updates", []):
             for ignore in update.get("ignore", []) or []:
                 if ignore.get("dependency-name") == "numpy" and ">= 2.5.0" in (ignore.get("versions") or []):
-                    guarded.add(update.get("directory"))
+                    guarded.update(_dependabot_directories(update))
         assert guarded == {"/setup", "/service"}, (
             f"the numpy>=2.5.0 dependabot ignore is live only for {sorted(guarded)}; it must "
             f"cover every pip manifest, or dependabot reopens the break for the uncovered one"
+        )
+
+    def test_a_dependency_in_both_manifests_is_bumped_in_both_at_once(self):
+        """The test above refuses two specifiers for one dependency, so dependabot must raise a
+        dependency declared in both manifests in both, in one PR. One pip entry per directory
+        raised one manifest only and failed it (#69 and #70, 11-10; #69 again, 11-14): every such
+        dependency must match a `group-by: dependency-name` group of a pip entry that covers both
+        directories."""
+        both = set(_requirement_specs(_PIP_MANIFESTS["/setup"])) & set(_requirement_specs(_PIP_MANIFESTS["/service"]))
+        assert both, "no dependency is declared in both manifests: the guard below would hold vacuously"
+
+        dependabot = yaml.safe_load((REPO_ROOT / ".github" / "dependabot.yml").read_text(encoding="utf-8"))
+        covered = set()
+        for update in dependabot.get("updates", []):
+            if update.get("package-ecosystem") != "pip" or not set(_PIP_MANIFESTS) <= _dependabot_directories(update):
+                continue
+            for group in (update.get("groups") or {}).values():
+                if group.get("group-by") != "dependency-name":
+                    continue
+                patterns = [_normalise(p) for p in group.get("patterns") or []]
+                covered |= {name for name in both if any(fnmatch.fnmatchcase(name, p) for p in patterns)}
+        assert covered == both, (
+            f"declared in both setup/ and service/ but not in a `group-by: dependency-name` group of a "
+            f"pip entry covering both directories: {sorted(both - covered)} (.github/dependabot.yml)"
         )
 
     def test_python_version_still_justifies_the_numpy_cap(self):

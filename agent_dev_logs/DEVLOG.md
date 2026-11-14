@@ -1088,3 +1088,11 @@ Documentation only; no code, test or configuration change.
 * **Written here (not pushed):** `service/api.py` (`_exit_now_if_warming()`), `tests/test_service_warmup.py`, the v2.0.0-beta row of CONTRIBUTING.md, `plans/doc-schema-v2.plan.md` (Status — round 8). For #70: `service/requirements.txt` with the same `pypdfium2` floor as `/setup`.
 * **Checked:** the warm-up tests, with the PID-1 case failing when the exit is removed; the full suite (offline lane).
 * **Not posted; not pushed.**
+
+## 2026-11-14 (evening) — atrium-project#84 round 9: shared dependencies in one dependabot PR
+
+* **Asked (K4TEL):** fetch `test` and its CI, and solve what remains before the report on atrium-project#84.
+* **Found:** `test` (`ed9105d`) is green, with the `api` smoke passing. Dependabot reopened #69 as `pypdfium2>=5.15.2` in `/service` only: one pip entry per directory splits every bump of a dependency both manifests declare.
+* **Written here (not pushed):** `.github/dependabot.yml` (one pip entry for `/setup` and `/service`, a `shared-deps` group by dependency name for Pillow and pypdfium2), `tests/test_service_runtime_deps.py` (the numpy guard reads `directories`; a new test keeps every shared dependency in that group), `plans/doc-schema-v2.plan.md` (Status — round 9).
+* **Checked:** the full suite (offline lane); the new test fails without pypdfium2 in the group and with the old two-entry config.
+* **Not posted; not pushed.**

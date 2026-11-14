@@ -14,14 +14,27 @@ updates:
   # entry that used to be here saw only the root requirements-test.txt — which is a
   # one-line `-r setup/requirements-test.txt` forwarding stub with nothing to bump —
   # so the actual dependency surface went unmonitored (#18, 2026-07-29 audit).
-  # Split per manifest directory, mirroring atrium-alto-postprocess.
+  #
+  # One entry for both manifest directories, not one per directory: Pillow and pypdfium2
+  # are declared in both, and tests/test_service_runtime_deps.py refuses two specifiers
+  # for one dependency. With an entry per directory each bump raised one manifest only
+  # and failed that test (#69 and #70, 11-10; #69 again on 11-14). The `shared-deps`
+  # group below gives each such dependency one PR that raises it in both directories;
+  # the test checks that every dependency declared in both manifests is in that group.
   - package-ecosystem: "pip"
-    directory: "/setup"
+    directories:
+      - "/setup"
+      - "/service"
     schedule:
       interval: "weekly"
     target-branch: "test"
     groups:
-      setup-deps:
+      shared-deps:
+        group-by: dependency-name
+        patterns:
+          - "pillow"
+          - "pypdfium2"
+      pip-deps:
         patterns:
           - "*"
     ignore:
@@ -43,36 +56,14 @@ updates:
       # atrium-project#10 (G2). The two halves of this policy — this ignore and the
       # `<2.5` cap in setup/requirements.txt — reference each other on purpose: a
       # future editor who lifts one without the other gets the bump back next Monday.
+      # It covers service/ too: no numpy is declared there today, but the fast lane
+      # installs both manifests into the same 3.11 interpreter.
       - dependency-name: "numpy"
         versions: [">= 2.5.0"]
-      # Pinned exactly here (requirements-test.txt) and in service/requirements.txt: the
+      # Pinned exactly in setup/requirements-test.txt and in service/requirements.txt: the
       # committed service/openapi.json is a function of both (atrium-project#32 round 2). Bump
       # them together by hand and regenerate the spec in the same commit (python
       # atrium_openapi.py export --app service.api:app --prepare tests.openapi_contract_data:prepare),
       # so the release's breaking-change check sees what the upgrade changes.
-      - dependency-name: "fastapi"
-      - dependency-name: "pydantic"
-
-  - package-ecosystem: "pip"
-    directory: "/service"
-    schedule:
-      interval: "weekly"
-    target-branch: "test"
-    groups:
-      service-deps:
-        patterns:
-          - "*"
-    ignore:
-      - dependency-name: "torch"
-      - dependency-name: "torchvision"
-      - dependency-name: "transformers"
-        versions: [">= 5.0.0"]
-      # Mirrors /setup deliberately, as the three above already do: this list is a
-      # uniform policy block, not a per-manifest minimum. No numpy here today, but the
-      # fast lane installs into the same 3.11 interpreter, so one arriving later
-      # inherits the constraint instead of rediscovering it the hard way.
-      - dependency-name: "numpy"
-        versions: [">= 2.5.0"]
-      # Pinned exactly: see the /setup entry above (atrium-project#32 round 2).
       - dependency-name: "fastapi"
       - dependency-name: "pydantic"
