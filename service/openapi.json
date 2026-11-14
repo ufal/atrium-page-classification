@@ -3,7 +3,7 @@
   "info": {
     "title": "ATRIUM Page Classification API",
     "description": "API for classifying historical document page images.",
-    "version": "1.14.2-beta",
+    "version": "2.0.0-beta",
     "x-atrium-service": "atrium-page-classification"
   },
   "paths": {
@@ -642,6 +642,13 @@
                   ],
                   "description": "How the box was obtained (D16, D25): measured for the line by its producer, derived from its docproc block, or none."
                 },
+                "unit": {
+                  "type": "string",
+                  "enum": [
+                    "block"
+                  ],
+                  "description": "Written by the record builder only: `block` marks a row that holds a whole docproc block scored as one unit, because the block came without lines and with no line break in its text (D18 rule 5). The row keeps its categ and quality_score (rule 1) but stays out of the calibrated statistics: pages[].quality_score and quality_summary.lines.by_categ (counted as quality_summary.lines.block_units). Absent: a visual line. The name is proposed by this implementation (atrium-project#84)."
+                },
                 "categ": {
                   "type": "string",
                   "enum": [
@@ -1007,7 +1014,7 @@
               },
               "lines": {
                 "type": "object",
-                "description": "`total`: rows in lines[]; `by_categ`: rows per `categ` value (the `line-category` scheme). Rows without a category are `total` minus the sum.",
+                "description": "`total`: rows in lines[]; `by_categ`: visual lines per `categ` value (the `line-category` scheme); `block_units`: rows marked `unit: block`, kept out of `by_categ` (D18 rule 5). Visual lines without a category are `total` minus `block_units` minus the sum of `by_categ`.",
                 "required": [
                   "total",
                   "by_categ"
@@ -1024,6 +1031,10 @@
                       "type": "integer",
                       "minimum": 0
                     }
+                  },
+                  "block_units": {
+                    "type": "integer",
+                    "minimum": 0
                   }
                 }
               }
@@ -2215,6 +2226,6 @@
   },
   "x-atrium-record-schema": {
     "schema_version": "2.0",
-    "sha256": "eb8c9cf51b181680e5f38e9e5c8eafcaf45eaa573db309ca4e32e5f208b67cd2"
+    "sha256": "901b5bb6ca36e347e8a415e364a3cf1ce06fdd15128e5af0171d493a28190492"
   }
 }

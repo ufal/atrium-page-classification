@@ -98,6 +98,10 @@ TEXT_SOURCES: Tuple[str, ...] = ("text-layer", "atr", "legacy")
 #: the docproc block that contains it, or none.
 BBOX_PRECISIONS: Tuple[str, ...] = ("measured", "derived", "absent")
 
+#: `lines[].unit` (D18 rule 5): `block` marks a row holding a whole docproc block scored as one unit.
+#: Absent means a visual line. Such a row keeps its score but stays out of the calibrated statistics.
+LINE_UNITS: Tuple[str, ...] = ("block",)
+
 #: `pages[].content_status` (D29): a page with text, or an empty page (no lines, no page score).
 CONTENT_STATUSES: Tuple[str, ...] = ("text", "empty")
 
@@ -186,6 +190,7 @@ BLOCK_FIELD_OWNERS: Dict[str, Dict[str, List[str]]] = {
             "block",
             "text_source",
             "bbox_precision",
+            "unit",
             "categ",
             "quality_score",
             "lang",
@@ -1177,7 +1182,9 @@ def quality_summary(record: Dict[str, Any]) -> Dict[str, Any]:
     * `pages`: `total` rows; `empty`, those with `content_status: empty` (counted apart, D18 rule
       7); `scored`, those with a `quality_score`; and `mean`, `median`, `min`, `max` of those
       scores (absent when none is scored);
-    * `lines`: `total` rows; `by_categ`, rows per `categ` value, in key order.
+    * `lines`: `total` rows; `by_categ`, visual lines per `categ` value, in key order; and, when
+      there are any, `block_units`, the rows marked `unit: block` (a whole block scored as one unit,
+      D18 rule 5), which stay out of `by_categ`.
 
     Pure and deterministic; statistics are rounded to four decimals. It sets no threshold and
     makes no band, so nothing in it can gate or route a document. The record builder writes it
@@ -1199,14 +1206,18 @@ def quality_summary(record: Dict[str, Any]) -> Dict[str, Any]:
         )
     lines = [row for row in record.get("lines") or [] if isinstance(row, dict)]
     by_categ: Dict[str, int] = {}
+    block_units = 0
     for row in lines:
+        if row.get("unit") == "block":
+            block_units += 1
+            continue
         categ = row.get("categ")
         if isinstance(categ, str) and categ:
             by_categ[categ] = by_categ.get(categ, 0) + 1
-    return {
-        "pages": page_part,
-        "lines": {"total": len(lines), "by_categ": dict(sorted(by_categ.items()))},
-    }
+    line_part: Dict[str, Any] = {"total": len(lines), "by_categ": dict(sorted(by_categ.items()))}
+    if block_units:
+        line_part["block_units"] = block_units
+    return {"pages": page_part, "lines": line_part}
 
 
 # ──────────────────────────────────────────────────────────────────────────────

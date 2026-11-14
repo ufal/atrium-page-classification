@@ -141,7 +141,7 @@ def test_the_field_grants_are_the_contracts_table():
         "nlp-enrich": ["teitok_surface"],
     }
     assert BLOCK_FIELD_OWNERS["lines"] == {
-        BUILDER: ["text", "bbox", "block", "text_source", "bbox_precision", "categ", "quality_score", "lang"],
+        BUILDER: ["text", "bbox", "block", "text_source", "bbox_precision", "unit", "categ", "quality_score", "lang"],
         "nlp-enrich": ["lemma", "upos", "feats", "teitok_ref"],
     }
     assert set(BLOCK_FIELD_OWNERS["entities"]) == {"nlp-enrich", "translator", "keyword-extract"}
@@ -199,6 +199,20 @@ def test_quality_summary_counts_empty_pages_apart(tmp_path):
     summary = _built(tmp_path).to_dict()["quality_summary"]
     assert summary["pages"] == {"total": 2, "empty": 1, "scored": 1, "mean": 0.93, "median": 0.93, "min": 0.93, "max": 0.93}
     assert summary["lines"] == {"total": 1, "by_categ": {"Clear": 1}}
+
+
+def test_a_block_scored_as_one_unit_stays_out_of_the_calibrated_counts(tmp_path):
+    """D18 rule 5: a row marked `unit: block` keeps its score but is counted apart from `by_categ`."""
+    doc = _built(tmp_path)
+    doc.merge_block("lines", [_line(line=2, text="Celý odstavec bez zalomení", unit="block", categ="Clear", quality_score=0.9)])
+    doc.set_block("quality_summary", quality_summary(doc.to_dict()))
+    out = doc.to_dict()
+    assert out["quality_summary"]["lines"] == {"total": 2, "by_categ": {"Clear": 1}, "block_units": 1}
+    assert out["lines"][1]["unit"] == "block" and out["lines"][1]["quality_score"] == 0.9
+    validate_document(out)
+    out["lines"][1]["unit"] = "line"  # only `block` is written; a visual line has no `unit`
+    with pytest.raises(_schema_error()):
+        validate_document(out)
 
 
 def test_digital_convert_cannot_write_the_record(tmp_path):

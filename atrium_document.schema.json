@@ -213,6 +213,11 @@
             "enum": ["measured", "derived", "absent"],
             "description": "How the box was obtained (D16, D25): measured for the line by its producer, derived from its docproc block, or none."
           },
+          "unit": {
+            "type": "string",
+            "enum": ["block"],
+            "description": "Written by the record builder only: `block` marks a row that holds a whole docproc block scored as one unit, because the block came without lines and with no line break in its text (D18 rule 5). The row keeps its categ and quality_score (rule 1) but stays out of the calibrated statistics: pages[].quality_score and quality_summary.lines.by_categ (counted as quality_summary.lines.block_units). Absent: a visual line. The name is proposed by this implementation (atrium-project#84)."
+          },
           "categ": {
             "type": "string",
             "enum": ["Clear", "Noisy", "Trash", "Non-text", "Empty"],
@@ -435,7 +440,7 @@
         },
         "lines": {
           "type": "object",
-          "description": "`total`: rows in lines[]; `by_categ`: rows per `categ` value (the `line-category` scheme). Rows without a category are `total` minus the sum.",
+          "description": "`total`: rows in lines[]; `by_categ`: visual lines per `categ` value (the `line-category` scheme); `block_units`: rows marked `unit: block`, kept out of `by_categ` (D18 rule 5). Visual lines without a category are `total` minus `block_units` minus the sum of `by_categ`.",
           "required": ["total", "by_categ"],
           "additionalProperties": true,
           "properties": {
@@ -443,7 +448,8 @@
             "by_categ": {
               "type": "object",
               "additionalProperties": {"type": "integer", "minimum": 0}
-            }
+            },
+            "block_units": {"type": "integer", "minimum": 0}
           }
         }
       }
