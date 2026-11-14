@@ -172,6 +172,32 @@ _state = ServiceState()
 #: TestClient runs no lifespan, so `_state.warm` stays False there while the endpoints must work.
 _warming = False
 
+#: The warm-up thread of the running server (`lifespan`), read by `_exit_now_if_warming()`.
+_warmup_thread: Optional[threading.Thread] = None
+
+
+def _exit_now_if_warming() -> None:
+    """End the process at once when the server stopped while the models were still loading.
+
+    The warm-up is a daemon thread. In the container the service is PID 1, which ignores the
+    SIGTERM uvicorn raises again after its graceful exit, so `uvicorn.run()` returns and Python's
+    teardown runs while that thread may still be inside torch's native code: on 2026-11-10 and
+    11-14 the `api` image ended with "terminate called without an active exception" and exit
+    139 instead of a clean stop. Nothing is lost by skipping the teardown here: the server has
+    stopped, no request is in flight, and the models never finished loading.
+    """
+    thread = _warmup_thread
+    if thread is None or not thread.is_alive():
+        return
+    import os
+    import sys
+
+    logger.info("Models still loading at shutdown; exiting without interpreter teardown")
+    logging.shutdown()
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(0)
+
 
 def _warm_up() -> None:
     """Load every model version, then mark the service warm. Runs in the warm-up thread."""
@@ -194,10 +220,11 @@ async def lifespan(app: FastAPI):
     # about 2.4 GB, and loading them before serving left /health unanswered all that time.
     # A daemon thread, not asyncio.to_thread: the default executor's threads are joined at
     # exit, so a SIGTERM during the download would wait for the download to finish.
-    global _warming
+    global _warming, _warmup_thread
     logger.info("Warming up models...")
     _warming = True
-    threading.Thread(target=_warm_up, name="model-warmup", daemon=True).start()
+    _warmup_thread = threading.Thread(target=_warm_up, name="model-warmup", daemon=True)
+    _warmup_thread.start()
     # issue #55: flips /ready to 503 on SIGTERM and waits for in-flight classification to
     # finish before exit.
     async with serve_lifecycle(_state):
@@ -938,3 +965,5 @@ if __name__ == "__main__":
         # Without it uvicorn logged INFO under LOG_LEVEL=WARNING (atrium-project#61).
         log_level=logging.getLogger().getEffectiveLevel(),
     )
+    # A stop during the warm-up: no teardown beside the warm-up thread's native code.
+    _exit_now_if_warming()

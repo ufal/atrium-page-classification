@@ -111,6 +111,17 @@ the pins again; then this PR. Hub:
 [plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/doc-schema-v2.plan.md),
 "Status — round 6".
 
+## Status — round 8 (11-14)
+
+The hub's second PR (atrium-project#87) merged and the six repositories' PRs were re-pinned to it; four have merged. On
+this PR, `docker-build-smoke (api)` failed with exit 139 when the image was stopped during its model warm-up: in the
+container the service is PID 1, so the SIGTERM uvicorn raises again after its graceful exit is ignored, `uvicorn.run()`
+returns, and Python's teardown met the warm-up thread inside torch (dependabot's #69 had hit the same on 11-10). The
+service now ends with `os._exit(0)` when it stops while the warm-up still runs (`service/api.py`,
+`_exit_now_if_warming()`; three tests in `tests/test_service_warmup.py`). Dependabot's #69 (`/service`) and #70
+(`/setup`) each raise `pypdfium2` in one manifest only, which `tests/test_service_runtime_deps.py` refuses: #70 takes
+the `/service` raise too after this PR merges, and #69 is closed.
+
 ## Depends on
 
 - Hub tasks 1 (grants; `page_index`), 3 (`file_entity` with SHA-512), re-vendoring.

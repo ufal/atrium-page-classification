@@ -6,7 +6,7 @@ start downloads about 2.4 GB, and loading them before serving left /health unans
 time, so a container's health check could fail before the start finished.
 
 These run the real lifespan (a TestClient used as a context manager) with a warm-up held on an
-Event, and one real uvicorn process for the SIGTERM case.
+Event, and real uvicorn processes for the SIGTERM cases.
 """
 
 import io
@@ -62,10 +62,10 @@ class _HeldManager:
 def held(monkeypatch):
     manager = _HeldManager()
     monkeypatch.setattr(api, "manager", manager)
-    saved = (api._state.warm, api._state.draining, api._warming)
+    saved = (api._state.warm, api._state.draining, api._warming, api._warmup_thread)
     yield manager
     manager.release.set()
-    api._state.warm, api._state.draining, api._warming = saved
+    api._state.warm, api._state.draining, api._warming, api._warmup_thread = saved
 
 
 def _png():
@@ -172,3 +172,90 @@ def test_sigterm_during_the_warm_up_exits_promptly():
             proc.kill()
             proc.wait()
             pytest.fail("the service did not exit within 15 s of SIGTERM during its warm-up")
+
+
+class _Exited(Exception):
+    """Raised by the stand-in for os._exit, so the test sees the exit code instead of ending."""
+
+
+def _stub_exit(monkeypatch):
+    def _exit(code):
+        raise _Exited(code)
+
+    monkeypatch.setattr(os, "_exit", _exit)
+    monkeypatch.setattr(api.logging, "shutdown", lambda: None)  # pytest's own log handlers stay open
+
+
+def test_a_stop_during_the_warm_up_ends_the_process_without_teardown(monkeypatch):
+    """The server stopped while the warm-up thread still loads: os._exit(0), no interpreter
+    teardown beside that thread's native code (exit 139 in the `api` image on 11-10 and 11-14)."""
+    _stub_exit(monkeypatch)
+    release = threading.Event()
+    thread = threading.Thread(target=release.wait, args=(10,), daemon=True)
+    thread.start()
+    monkeypatch.setattr(api, "_warmup_thread", thread)
+    try:
+        with pytest.raises(_Exited) as exited:
+            api._exit_now_if_warming()
+        assert exited.value.args == (0,)
+    finally:
+        release.set()
+        thread.join(5)
+
+
+def test_a_finished_or_absent_warm_up_leaves_the_exit_to_python(monkeypatch):
+    _stub_exit(monkeypatch)
+    monkeypatch.setattr(api, "_warmup_thread", None)
+    api._exit_now_if_warming()
+    finished = threading.Thread(target=lambda: None)
+    finished.start()
+    finished.join()
+    monkeypatch.setattr(api, "_warmup_thread", finished)
+    api._exit_now_if_warming()
+
+
+def test_a_stop_during_the_warm_up_as_pid_1_exits_cleanly():
+    """In the container the service is PID 1, which ignores the SIGTERM uvicorn raises again after
+    its graceful exit, so uvicorn.run() returns. Here SIGTERM is ignored before uvicorn starts,
+    which has the same effect; the service's own entry point then calls _exit_now_if_warming()."""
+    pytest.importorskip("uvicorn")
+    port = _free_port()
+    script = textwrap.dedent(
+        f"""
+        import signal
+        import threading
+        from tests.openapi_contract_data import prepare
+        prepare()
+        from service import api
+        api.manager.warmup = lambda versions=None: threading.Event().wait(600)
+        import uvicorn
+        signal.signal(signal.SIGTERM, signal.SIG_IGN)
+        uvicorn.run(api.app, host="127.0.0.1", port={port}, log_level="warning")
+        print("RUN RETURNED", flush=True)
+        api._exit_now_if_warming()
+        print("TEARDOWN REACHED", flush=True)
+        """
+    )
+    proc = subprocess.Popen(
+        [sys.executable, "-c", script],
+        cwd=ROOT,
+        env={**os.environ, "PYTHONPATH": str(ROOT)},
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        base = f"http://127.0.0.1:{port}"
+        assert _wait_for(lambda: _status(f"{base}/health") == 200, timeout=60), "no /health answer during warm-up"
+        assert _status(f"{base}/ready") == 503
+
+        proc.send_signal(signal.SIGTERM)
+        out, err = proc.communicate(timeout=30)
+    finally:
+        if proc.poll() is None:
+            proc.kill()
+            proc.wait()
+            pytest.fail("the service did not exit within 30 s of SIGTERM during its warm-up")
+    assert "RUN RETURNED" in out, err[-2000:]
+    assert "TEARDOWN REACHED" not in out, "the process went on to Python's teardown with the warm-up running"
+    assert proc.returncode == 0, err[-2000:]

@@ -1080,3 +1080,11 @@ Documentation only; no code, test or configuration change.
 * **Checked:** the full suite, 876 (offline lane) passed; the spec export; `compare` against the latest release: compatible at v2.0.0-beta.
 * **Next:** the hub's second PR for #84, then the pins; then this PR. Hub: [plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/doc-schema-v2.plan.md), "Status — round 6".
 * **Not posted; not pushed.**
+
+## 2026-11-14 (evening) — atrium-project#84 round 8: the `api` smoke and the dependabot PRs
+
+* **Asked (K4TEL):** fix this PR's failing check and handle the two dependabot PRs.
+* **Found:** `docker-build-smoke (api)` ended with exit 139 when stopped during the model warm-up: Python's teardown met the warm-up thread (PID 1 ignores the SIGTERM uvicorn raises again, so `uvicorn.run()` returns). #69 and #70 each raise `pypdfium2` in one manifest only, which `tests/test_service_runtime_deps.py` refuses.
+* **Written here (not pushed):** `service/api.py` (`_exit_now_if_warming()`), `tests/test_service_warmup.py`, the v2.0.0-beta row of CONTRIBUTING.md, `plans/doc-schema-v2.plan.md` (Status — round 8). For #70: `service/requirements.txt` with the same `pypdfium2` floor as `/setup`.
+* **Checked:** the warm-up tests, with the PID-1 case failing when the exit is removed; the full suite (offline lane).
+* **Not posted; not pushed.**
