@@ -15,7 +15,7 @@ matplotlib
 # noticed because it also installs setup/requirements.txt; a clean venv built from this
 # file alone — the Tier 2 discipline issue atrium-project#10 mandates — was red before a
 # single test ran. Light wheels, no torch: the fast lane stays fast.
-pandas>=3.1.0
+pandas>=3.1.1
 scikit-learn>=1.9.1
 # Layer D (atrium-project#10, D4): the adapter's schema gate needs a real validator, and the
 # tests that assert its raise-vs-warn policy need the real one rather than the degraded
@@ -28,4 +28,4 @@ PyYAML>=6.0.3
 # The PDF engine of /predict_document (service/requirements.txt, same range): a ~3 MB wheel,
 # so tests/test_service_document_json.py's TestRealPdfium drives the real engine in the fast
 # lane instead of only a stand-in (atrium-project#72 D.1).
-pypdfium2>=5.14.0,<6.0
+pypdfium2>=5.15.0,<6.0
