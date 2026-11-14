@@ -327,6 +327,10 @@ def attach_error_handlers(app: FastAPI) -> None:
     * ``atrium_document.InvalidRecordError`` → 422 with ``reason: "invalid_record"``: the
       record a request carried has a block the tool merges rows into that is not a list of
       objects (atrium-project#72).
+    * ``atrium_limits.ContentLimitError`` → 422 with ``reason: "limit_exceeded"`` and the
+      ``limit`` member, whose ``effect`` says what the limit did and ``observed`` how many units:
+      a limit trimmed, skipped or stopped content, so the step fails and nothing it produced is
+      returned (D13, atrium-project#84).
     * Anything else → 500 ``{"status": 500, "reason": null, "detail": "Internal server
       error."}`` as JSON instead of a text/plain page. Starlette still re-raises it
       after the response, so the server logs the traceback as before.
@@ -377,6 +381,13 @@ def attach_error_handlers(app: FastAPI) -> None:
         # list of objects (atrium-project#72). It used to end as an AttributeError and a 500.
         detail = f"The document record cannot be added to: {exc}."
         return JSONResponse(error_body(422, detail, "invalid_record"), status_code=422)
+
+    @app.exception_handler(atrium_limits.ContentLimitError)
+    async def _content_limit(request, exc):  # noqa: ANN001, ANN202
+        # D13: a trimmed, skipped or stopped result is not an output. The input was usable, so
+        # 422 (a per-input processing budget), with the limit that bit and its effect.
+        limit = {"key": exc.limit, "env": None, "value": None, "observed": exc.count, "unit": "units", "effect": exc.effect}
+        return JSONResponse(error_body(422, str(exc), "limit_exceeded", limit=limit), status_code=422)
 
     @app.exception_handler(Exception)
     async def _unhandled(request, exc):  # noqa: ANN001, ANN202
@@ -534,6 +545,13 @@ class LimitRef(BaseModel):
     value: Optional[float] = Field(description="The limit's effective value.")
     observed: Optional[float] = Field(description="What the input measured; null when it is not known exactly.")
     unit: str = Field(description="The unit of `value` and `observed`.")
+    effect: Optional[str] = Field(
+        None,
+        description=(
+            "Only when a limit trimmed, skipped or stopped content during processing (D13): that effect. "
+            "The step failed; `observed` is the number of units affected."
+        ),
+    )
 
 
 class ErrorBody(BaseModel):

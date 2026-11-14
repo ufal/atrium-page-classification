@@ -1,81 +1,86 @@
-# Strategy — doc-schema-v2 (atrium-project, issue to be opened): page-classification's part
+# Strategy — [atrium-project#84](https://github.com/ufal/atrium-project/issues/84) (doc-schema-v2): page-classification's part
 
-> _Written **2026-11-11** after the meeting of that day (ARÚP's output contract). Hub:
+> _**Refreshed 2026-11-13**: "Status — round 2" (the code, pushed 11-13 to `doc-schema-v2`) and round 4's notes. The file keeps
+> the name `doc-schema-v2.plan.md` (it was `84.plan.md` on 11-12 and 11-13)._
+> _**Written 2026-11-12** on ARÚP's output contract of 12 November and atrium-project#84 (motyc, 11-12), at this
+> checkout's head `cc35617` (= `test`). The hub carries the whole change:
 > [plan](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/doc-schema-v2.plan.md) ·
 > [digest](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/digests/doc-schema-v2.digest.md) ·
-> [meeting digest](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/digests/project_state_1111.md).
-> Read against the local checkout `16a2e52`. The issue is not opened; rename this file to the issue number once it
-> is._
+> [contract digest](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/digests/project_state_1211.md).
+> This file is the repository's slice only. It replaces the 11-11 slice of the same name, which had the classifier
+> on every PDF and image; 12 November changes that._
 
-**Status (2026-11-11)**: 📋 **Planned, no code. The classifier runs on every PDF and image, bundled with the ATR call
-at the AIS CR's ATR service, and without ATR when no page needs OCR (K4TEL). It writes its page rows under
-`page_index`; its categories are hints to the route and the ATR, not gates (H3). Code waits for the hub's shared
-modules.**
+**Status (2026-11-13)**: 🟡 **Implemented, pushed 11-13 to `doc-schema-v2`; see "Status — round 2". Deferred items are listed there.**
+
+**Status (2026-11-12)**: 📋 **Planned, plans only; small. page-classification runs on the pages that need ATR only,
+beside the ATR (H3): the `needs_atr` pages of a PDF, and every page of an image. Its output is unchanged —
+`page_categories` and each page's `category`/`category_confidence` in the record — and may be offered to the ATR as
+an optional weak signal, never as routing (D33). Code follows the hub's shared modules.**
 
 ## Its fields
 
-| Field                                             | Note                                                                                             |
-|---------------------------------------------------|--------------------------------------------------------------------------------------------------|
-| `page_categories`                                 | whole block; today keyed by the page label (`atrium_document_adapter._page_patches()`, :112-131) |
-| `pages[].page_index`                              | on its own rows, the join key (H2); today only digital-convert writes it                         |
-| `pages[].category`, `pages[].category_confidence` | the top class and its score (3 decimals)                                                         |
+| Record node                                   | In v2                                                                                       |
+|-----------------------------------------------|---------------------------------------------------------------------------------------------|
+| `page_categories`                             | written                                                                                     |
+| `pages[].category`, `category_confidence`     | written, for the pages that needed ATR; joined on `pages[].page_index` (H2)                 |
+| `derived_from.classification`                 | stops (D1): `atrium_document_adapter.py:223`                                                |
+| run data, licence detail                      | none (D1, D2), through the re-vendored `atrium_document.py`                                 |
 
 ## Tasks (next rounds)
 
-1. **Re-vendor** the hub's shared modules once hub tasks 1–5 land (`scripts/revendor_shared.sh`).
-2. **`page_index` on its rows** (H2): `_page_patches()` (`atrium_document_adapter.py:112-131`) writes the physical
-   page number the classifier already has (the rendered PDF page, or `utils.doc_id_and_page()` for an image). The
-   label mapping then has nothing to do: `page_inputs.pdf_page_keys()` and `remap_pages()` (:129-150),
-   `service/document_json.record_page_keys()` (:138-156). The original becomes the only input.
-3. **No run data or licence in the record** (D1, D2): `add_derived_from("classification", …)`
-   (`atrium_document_adapter.py:223`) and `add_license_detail()` (:228) go.
-4. **The action** (`service/api.py:604-627`): `object` the original, without the baseline record (:622-623);
-   `result` the record blocks `page_categories` and `pages`. `predictions.json` (:625-626) is not a stored output, so it leaves the result. Both `file_entity` calls
-   (:621, :626) take the hub's SHA-512 form (hub task 3). `run.py`'s paradata follow.
-5. **Limits** (D13): `MAX_PDF_PAGES` (50, `tool_limits.py:24`) already refuses with a 413 instead of trimming;
-   chunking is the cluster's (D3).
-6. **CI** (atrium-project#81): the daily `scheduled-smoke.yml` cron (:5) goes; `workflow_dispatch` stays.
-   `gpu-inference.yml` has had no cron since 2026-07-29; its "RESTORE" note (:17-19) goes.
-7. **Docs:** `docs/usage.md` (:395, :519 the page labels; :539 `derived_from.classification`),
-   `docs/reference/cli.md:92`, `docs/how-it-works.md:100`, `service/README.md` (:172-178; :294 `predictions.json`).
+1. **The `needs_atr` pages only** (H3). `/predict_document` (`service/api.py:795`) already takes a `pages` selection
+   (its `pages` form field; `expand_page_selection()`); the pipeline sends the original and the `needs_atr` page
+   numbers from digital-convert's routing. For an image, the whole image. Nothing in the tool decides which pages.
+2. **Page keys by `page_index`** (H2). The rows are keyed by the record's page label today
+   (`page_inputs.pdf_page_keys()`, `page_inputs.py:129`; `service/document_json.record_page_keys()`,
+   `service/document_json.py:138`); with `page_index` on every page row the label mapping and the baseline input are
+   not needed. The record builder writes the page rows first (ocr-postprocess), so this step adds fields to existing
+   rows.
+3. **`MAX_PDF_PAGES`** (`tool_limits.py:24`, 50; checked on the selection, `service/api.py:337-361`) refuses rather
+   than trims, as D13 wants. A mixed or scanned document with more than 50 `needs_atr` pages would fail the job: the
+   limit is raised for the pipeline, or the pipeline sends the pages in chunks (H1: the cluster side chunks). To
+   settle with aiscr-docs-pipeline when the step is assembled.
+4. **Paradata** (#84 §4). One action in `paradata/atrium/document-json`: object = the original by distribution name
+   and SHA-512, with the pages classified as a parameter; result = `page_categories` and `pages` with the fields
+   written. `predictions.json` (`service/api.py:626`) is not a stored output: it leaves the result.
+5. **The weak signal** (D33): if Ronald takes it up, the pipeline passes the categories to the ATR; nothing to build
+   here beyond the existing output.
 
-## Paradata
+## Status — round 2 (11-13)
 
-One action per job in `paradata/atrium/document-json`:
+Local branch from `test`, on the re-vendored shared modules (record 2.0, paradata 3.0,
+`ContentLimitError`); delivered as an archive with the commands to run; pushed 11-13 (below). Nothing posted.
 
-- `object`: the original (distribution name, SHA-512);
-- `result`: the record blocks `page_categories` and `pages`;
-- `parameters`: the model revision and the ensemble members;
-- `components` (facts, never combined): the fine-tuned ViT models `ufal/vit-historical-page` (CC BY-NC 4.0) and their
-  base models' licences (`model_registry.py`, `setup/para_config.txt`).
+- **Task 2, `page_index`:** the adapter writes `{page_index, category, category_confidence}` rows keyed by
+  `page_index`; `page_categories` is keyed by the baseline's label for that page, else `str(page_index)`.
+  `page_inputs.py` and `service/document_json.py` key by `page_index` and read a label only from a baseline.
+- **Task 4, paradata:** one action. `object`: the upload as `original` and the record read; `result`: the record's
+  fields written; `pages` classified as a parameter; `predictions.json` left out. No `derived_from`, no licence.
+- **Tasks 1, 3, 5:** no code. The pipeline sends the pages; `MAX_PDF_PAGES` still refuses (question for the
+  pipeline step).
+- **Docs and spec:** how-it-works, usage, outputs, paradata, licences, service README; `service/openapi.json`
+  regenerated.
+- **Tests:** 873 passed, 16 skipped (offline lane, -m "not slow").
+- **Pushed** to `doc-schema-v2` (11-13). Round 4 re-vendors the addendum's shared files; the suite then passes (873,
+  offline lane).
+- **[atrium-digital-convert#9](https://github.com/ufal/atrium-digital-convert/issues/9#issuecomment-6838301982)**
+  (point 5, agreed 11-13): of an office file, as of a PDF, only the pages that need the ATR come here (H3). Nothing
+  changes in the tool.
 
 ## Depends on
 
-- Hub tasks 1–5 (shared modules), 6 (docs), 7 (E2E lanes); the proof gate (D12).
-- The intake (H1, D3): pages are rendered on the cluster side. The models were trained on 300-dpi renders
-  (`tool_limits.PDF_RENDER_DPI`, :26-30), so another resolution changes what they see.
-- The ATR bundle and its service are ARÚP's (aiscr-atr).
-- Q1 (the per-block run map).
+- Hub tasks 1 (grants; `page_index`), 3 (`file_entity` with SHA-512), re-vendoring.
+- ocr-postprocess's slice: a page row for every page before this step writes.
+- aiscr-docs-pipeline: how the `needs_atr` pages and large documents are passed (task 3).
 
 ## Superseded in this repository's logs
 
-All in the open #58's files (no closed issue's files remain here); marked in place on 11-11 (line numbers after the
-marks; before them in brackets):
-
-- `plans/58.plan.md:77` (:71) and `digests/58.digest.md:79` (:73): "Phase A can start there": #58 is parked during
-  the pilot phase (meeting §0).
-- `plans/58.plan.md:89` (:82): the "Next round" list (probe, Phase A smoke run): parked likewise.
-- `plans/58.plan.md:498` (:480): digital-convert's "`/describe` stage waits until after 11-11": `/describe` is not
-  used in the pipeline (H11).
-- `digests/58.digest.md:274` (:254): "`/describe` already reports per page … a route": the same (H11); the route is
-  the pipeline's step.
+- The 11-11 slice (not committed): page classification on every PDF and image, bundled with the ATR call →
+  `needs_atr` pages only, beside the ATR (H3).
+- `plans/58.plan.md`, `digests/58.digest.md`: parked (atrium-project#83); their 11-11 link to the slice now points
+  here; the TrueOpen.AI note of 11-12.
 
 ## Not in scope
 
-- The decision models of #58: parked during the pilot phase. `v1.14.0-beta` and `v1.14.1-beta` are tagged, not
-  released; `v1.14.2-beta` is prepared. Releases are cut deliberately, with notes (working agreement), so the DM
-  CLIs wait.
-- The TrueOpen.AI hosted pilot: the contract's §9 has ARÚP prefer parking it until the chain runs, or a limited pilot
-  on the published CC BY-NC 4.0 dataset only; no archival images beyond it; non-commercial.
-- New categories, retraining, gating on a category.
-- The document's licence: AMČR's RO-Crate only.
+- #58's decision models (parked); the TrueOpen.AI request (option B, parked; Kate answers them).
+- Routing (the pipeline's, from digital-convert's verdicts); the ATR (ARÚP's).

@@ -81,6 +81,13 @@ def _open(tmp_path, program, baseline=None, strict=True, **kwargs):
     )
 
 
+def _schema_error():
+    """What `validate_document()` raises for a record the schema refuses: jsonschema's
+    ValidationError. Without jsonschema the test is skipped, so a missing validator (a
+    RuntimeError) can never pass for a refusal."""
+    return pytest.importorskip("jsonschema").ValidationError
+
+
 def _line(page="1", line=1, **extra):
     row = {
         "page": page,
@@ -247,7 +254,7 @@ def test_a_standalone_page_classification_run_is_valid(tmp_path):
 
 
 def test_a_record_with_nothing_written_is_refused(tmp_path):
-    with pytest.raises(Exception):
+    with pytest.raises(_schema_error()):
         validate_document(DocumentRecord("CTX000000001", "nlp-enrich", out_dir=str(tmp_path)).to_dict())
 
 
@@ -333,7 +340,7 @@ def test_the_schema_refuses_what_2_0_removed(tmp_path, path, value):
     for key in path[:-1]:
         node = node[key]
     node[path[-1]] = value
-    with pytest.raises(Exception):
+    with pytest.raises(_schema_error()):
         validate_document(out)
 
 
@@ -341,19 +348,19 @@ def test_the_schema_holds_the_line_and_page_rules(tmp_path):
     out = _built(tmp_path).to_dict()
     bad = copy.deepcopy(out)
     del bad["lines"][0]["bbox_precision"]  # a box says how it was obtained
-    with pytest.raises(Exception):
+    with pytest.raises(_schema_error()):
         validate_document(bad)
     bad = copy.deepcopy(out)
     bad["lines"][0]["bbox_precision"] = "absent"  # no box then
-    with pytest.raises(Exception):
+    with pytest.raises(_schema_error()):
         validate_document(bad)
     bad = copy.deepcopy(out)
     bad["pages"][1]["quality_score"] = 0.1  # an empty page has no score (D18 rule 7)
-    with pytest.raises(Exception):
+    with pytest.raises(_schema_error()):
         validate_document(bad)
     bad = copy.deepcopy(out)
     del bad["pages"][0]["page_index"]  # every page row has its physical page number (H2)
-    with pytest.raises(Exception):
+    with pytest.raises(_schema_error()):
         validate_document(bad)
 
 

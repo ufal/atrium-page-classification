@@ -756,8 +756,9 @@ def action_problems(action: Any) -> List[str]:
                 problems.append("{} entry {!r} has no distribution name".format(prop, item["@id"]))
             if prop == "result" and item.get("name") == RECORD_DISTRIBUTION and not item.get("recordFields"):
                 problems.append("the record result {!r} does not name the blocks and fields written".format(item["@id"]))
-    if status == COMPLETED_ACTION_STATUS and not action.get("result"):
-        problems.append("a completed action has no result")
+    # No result is not a problem: `result` names stored outputs only (#84 §4), and a call that
+    # answered without writing a stored distribution (a classification with no record asked for)
+    # has none.
     agent = action.get("agent")
     if agent is not None and (not isinstance(agent, dict) or agent.get("@type") not in ("Person", "Organization")):
         problems.append("agent is not a Person or Organization")
