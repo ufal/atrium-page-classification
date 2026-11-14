@@ -158,12 +158,16 @@ def _born_digital(doc_id: str, labels) -> dict:
     from atrium_document import DocumentRecord, validate_document
 
     canvas = {"width": 60.0, "height": 80.0, "unit": "pt"}
-    record = DocumentRecord(doc_id, "digital-convert")
-    record.set_source("0" * 64, filename=f"{doc_id}.pdf", media_type="application/pdf", origin="digital-born-pdf")
+    # As the record builder (ocr-postprocess) writes it: labelled rows keyed by `page_index`.
+    record = DocumentRecord(doc_id, "ocr-postprocess")
+    record.set_source(sha512="0" * 128, filename=f"{doc_id}.pdf", media_type="application/pdf", origin="digital")
     record.merge_block(
         "pages",
-        [{"page": label, "page_index": i, "canvas": canvas} for i, label in enumerate(labels, start=1)],
-        key_fields=["page"],
+        [
+            {"page": label, "page_index": i, "canvas": canvas, "content_status": "empty"}
+            for i, label in enumerate(labels, start=1)
+        ],
+        key_fields=["page_index"],
     )
     data = record.to_dict()
     validate_document(data)
@@ -203,8 +207,8 @@ def test_the_page_selection_means_the_same_on_both_sides(cli, client, tmp_path):
 
 
 def test_a_born_digital_baseline_gets_its_own_page_labels_on_both_sides(cli, client, tmp_path):
-    """The CLI wrote positions ("1", "2", …) into a record whose pages are labelled; it now maps
-    them through `page_index` as /predict_document does (atrium-digital-convert#2)."""
+    """Both sides key the rows by `page_index` and `page_categories` by the record's own labels
+    (record schema 2.0, H2)."""
     pdf = tmp_path / "CTX03.pdf"
     pdf.write_bytes(_pdf())
     baseline = _born_digital("CTX03", ["i", "ii", "1"])
@@ -295,9 +299,9 @@ def test_a_single_image_now_writes_the_table_and_the_record(cli, client, tmp_pat
     assert row["SCORE-1"] == round(SCORE, 3)
     assert body["predictions"][0]["score"] == SCORE
     # The record says the same from both: 3 decimals (it said 0.877 and 0.876543).
-    cli_pages = {p["page"]: p["category_confidence"] for p in cli_record["pages"]}
-    service_pages = {p["page"]: p["category_confidence"] for p in body["document_json"]["pages"]}
-    assert cli_pages == service_pages == {"7": round(SCORE, 3)}
+    cli_pages = {p["page_index"]: p["category_confidence"] for p in cli_record["pages"]}
+    service_pages = {p["page_index"]: p["category_confidence"] for p in body["document_json"]["pages"]}
+    assert cli_pages == service_pages == {7: round(SCORE, 3)}
 
 
 def test_raw_with_one_image_writes_the_raw_table(cli, tmp_path):

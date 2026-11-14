@@ -37,7 +37,7 @@ Pillow>=13.0.0
 # service/api.py's /predict_document rasterises PDF pages with pypdfium2 (Apache-2.0 /
 # BSD-3-Clause; the PDFium it bundles is BSD-3-Clause), declared in setup/para_config.txt.
 # It replaced PyMuPDF (AGPL-3.0), which was imported here, installed in both published images
-# and declared nowhere, so a /predict_document record left it out of its derived licence
+# and declared nowhere, so a /predict_document run left it out of its component list
 # (atrium-project#6 D, #72 D.1; the engine comparison is data_scripts/pdf_rasteriser_comparison.md).
 # Same range as atrium-alto-postprocess, which reads PDF text layers with it. PyMuPDF must not
 # come back: tests/test_para_config.py fails if any requirements file names it, and the hub's

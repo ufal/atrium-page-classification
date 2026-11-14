@@ -22,8 +22,9 @@ same inputs the same way; what differs, and why, is in
 [docs/usage.md](docs/usage.md#the-command-line-and-the-service).
 
 The eleven categories and their definitions: [docs/reference/categories.md](docs/reference/categories.md). The
-record follows the hub's [document contract](https://ufal.github.io/atrium-project/ecosystem/document-contract/);
-page-classification is its first stage, so it creates the record as often as it adds to one.
+record follows the hub's [document contract](https://ufal.github.io/atrium-project/ecosystem/document-contract/)
+(record schema 2.0): page-classification adds its categories to the page rows the record builder wrote, keyed by
+`pages[].page_index`; run on its own, it starts a record holding only its own blocks.
 
 ## Quick start
 
@@ -89,11 +90,9 @@ score. The command line writes CSV tables and a paradata log; the service answer
 
 ## Where it fits in ATRIUM
 
-page-classification is the first stage of the route for scanned documents. Its categories inform a routing
-decision, taken by a person or a script reading the results: which pages go to OCR, to handwriting recognition, to
-table extraction or to image extraction. The next stage, ocr-postprocess, works from the OCR output and does not
-read the categories. On the born-digital route, digital-convert's `/describe` asks `/predict_document` about the
-pages that have no usable text layer. The whole chain: the
+In the pipeline of ARÚP's output contract (atrium-project#84, H3), page-classification runs on the pages that need
+the ATR — the `needs_atr` pages digital-convert routes, or every page of an image — beside the ATR, and writes its
+categories into the record. They may be offered to the ATR as a weak signal, never as routing. The whole chain: the
 [hub's workflow page](https://ufal.github.io/atrium-project/workflows/page-classification/).
 
 ## Limits and maturity

@@ -40,8 +40,8 @@ CC BY-NC 4.0 and listed in every run ([atrium-project#6](https://github.com/ufal
 
 The components a run lists, with their licences, are not the licence of what the run produces: the rights in an
 output depend first on the source document. What weights trained on the dataset may be used for is for whoever
-publishes them to establish. The paradata's `license` field is an older calculated value, not a licence, and should
-not be used ([Licences and paradata](https://ufal.github.io/atrium-project/ecosystem/licences/) on the hub).
+publishes them to establish. Since paradata 3.0 no licence is calculated from the list
+([Licences and paradata](https://ufal.github.io/atrium-project/ecosystem/licences/) on the hub).
 
 ## The PDF renderer
 

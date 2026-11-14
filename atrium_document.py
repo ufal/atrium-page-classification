@@ -1,46 +1,39 @@
 """
-atrium_document.py  –  Per-document aggregate record ("paradata pair") for ATRIUM pipelines.
+atrium_document.py  –  Per-document aggregate record for ATRIUM pipelines (record schema 2.0).
 
-Sibling of `atrium_paradata.py`. Where paradata answers *how a run behaved*, this answers
-*what we know about one document*: its text, pages, tables, forms, entities and enrichment,
-gathered across the pipeline into one FAIR, versioned JSON.
+Where a step's paradata answer *how a run behaved*, this answers *what we know about one
+document*: the identity of the file, its text in a form the enrichment steps work on, and what
+they add. It holds CONTENT ONLY (doc-schema-v2, atrium-project#84): no run data, no licence, no
+copy of the layout.
 
 The tools are separate containers and never see each other's outputs, so the record is built
 by **accretion**: every tool takes the previous version of the JSON (if it is given one) and
-returns it with **only its own block** updated. Nothing else is touched.
+returns it with **only its own block(s)** updated. Nothing else is touched.
 
-    doc.json ──► [tool A] ──► doc.json ──► [tool B] ──► doc.json ──► …
-                  writes A's block only     writes B's block only
+    seed ──► [record builder] ──► doc.json ──► [nlp-enrich] ──► doc.json ──► …
+              pages, lines, content            its fields only
 
 Contract (see docs/document_schema.md):
-  1. Optional baseline in, updated record out. `doc_id` travels WITH the baseline: the
-     originator derives it once with `canonical_doc_id()`, every stage after it inherits.
-  2. A tool writes its own block(s) only; every other block is passed through untouched.
-  3. No baseline given → the tool emits just its own part (standalone-safe), and that is the
-     only case in which a later tool's own `canonical_doc_id()` decides the key.
-  4. Each block is stamped with the writing tool's program / run_id / paradata_ref.
-  5. Licenses accrete through `para_licenses.merge_effective_licenses` (most restrictive wins).
-  6. Unknown or newer blocks are preserved; a newer major schema is refused.
+  1. Optional baseline in, updated record out. `doc_id` travels WITH the baseline: the seed (or,
+     outside the pilot, the first tool) names the document, every stage after it inherits.
+  2. A tool writes its own block(s) and fields only; every other block is passed through untouched.
+  3. No baseline given → the tool emits just its own part (standalone-safe).
+  4. The record carries no run data: which run wrote which blocks and fields is named by that
+     run's paradata `result` (`DocumentRecord.written()` gives it), never by a stamp in the record.
+  5. No licence is computed or written anywhere (D2): components and their terms are paradata.
+  6. Unknown or newer blocks of the same major are preserved; a newer major is refused; an older
+     major is migrated on load (`migrate_document()`).
+
+The positional blocks — `pages`, `content`, `lines` — have ONE writer, the record builder
+(ocr-postprocess), which builds them from the document's stored `atr/docproc-json` whatever
+produced it (digital-convert, the ATR, the PCSS converter). The layout itself (blocks, tables,
+reading-order roles, page verdicts) stays in docproc; each line names its docproc block
+(`lines[].block`), its text source and how precise its box is (D16, D20, D25, D26).
 
 A record may start as an AMČR **seed** (atrium-project#71): `doc_id`, and a `source` with the
 archive's `sha512`, file name and media type, nothing else. A seed is valid INPUT, checked by
 `validate_seed()` (and by `validate_baseline()`, which every tool's inherited-baseline gate calls);
-a record a tool EMITS is always checked against the full schema. The seed's identity is kept as
-it is: `doc_id` is inherited, `source` is first-writer-wins, and the reading tool adds `sha256`
-and `origin`.
-
-Only ever reference **persistent** artifacts: the original input, or a previous step's stored
-output. Transient derivatives (page images/thumbnails, the annotated Markdown) belong in
-`regenerable` as a recipe, never as a stored path.
-
-Four blocks — `pages`, `content`, `lines`, `tables` — are the document's *positional plane*,
-and since Issue #18 they have two possible **originators**: `alto-postprocess` for an OCR/ALTO
-document, `digital-convert` for a digital-born PDF/DOCX. Which one applies is fixed per record
-by `source.origin` (see `ORIGIN_ORIGINATORS` / `resolve_originator()`). Calling `set_source()`
-first is the natural order, but it is **no longer required**: a block written before the origin
-is known is re-checked as soon as one arrives, and again in `to_dict()`. The one way a second
-program re-originates part of that plane is the OCR hand-off (atrium-digital-convert#4 W4): the
-pages the originator flagged `needs_ocr`, page by page (`replace_page_rows()`, `OCR_HANDOFF`).
+a record a tool EMITS is always checked against the full schema.
 
 Two things the JSON Schema deliberately cannot check, and where they live instead:
 
@@ -58,25 +51,15 @@ import json
 import os
 import re
 import sys
-from datetime import datetime, timezone
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
-
-try:
-    from para_licenses import merge_effective_licenses
-except ImportError:
-    merge_effective_licenses = None  # type: ignore
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Constants & Schema version
 # ──────────────────────────────────────────────────────────────────────────────
 
-SCHEMA_VERSION = "1.0"
-LICENSE_NAME = "CC BY-NC 4.0"
-LICENSE_URL = "https://creativecommons.org/licenses/by-nc/4.0/"
-#: `provenance.license_basis`: how `license`/`license_url` were obtained. "calculated" is the
-#: most restrictive component licence (para_licenses) or the default above. It is a summary of
-#: component licences, not the licence of the record's content (atrium-project#6, 2026-10-29).
-LICENSE_BASIS_CALCULATED = "calculated"
+#: 2.0: doc-schema-v2 (atrium-project#84). Released as the `doc-schema-v2` tag only after the
+#: validator, the E2E checks and a run through the assembled chain (D12); `doc-schema-v1` stays.
+SCHEMA_VERSION = "2.0"
 
 RECORD_TYPE = "atrium-document"
 RECORD_TYPE_MERGED = "atrium-document-merged"
@@ -89,33 +72,62 @@ FILE_SUFFIX = ".document.json"
 SEED_KEYS: Tuple[str, ...] = ("schema_version", "record_type", "doc_id", "source")
 
 #: What a seed's `source` must state: the archive's digest of the original, its file name and its
-#: media type. `origin` is deliberately NOT among them and is refused in a seed: it decides which
-#: tool writes the positional plane, so it belongs to the tool that reads the source.
+#: media type. `origin` is refused in a seed: it describes what the record builder found.
 SEED_SOURCE_REQUIRED: Tuple[str, ...] = ("sha512", "filename", "media_type")
 
-#: `source` fields that DESCRIBE the original rather than identify or authorise it. A tool reading
-#: a derived or uploaded file sees another name (`x.alto.xml`, a temporary upload) than the
-#: archive's, so disagreeing about them is expected: the first writer's value is kept with a NOTE,
-#: never a WARNING or a strict refusal.
+#: `source` fields that IDENTIFY the original. The seed writes them (intake, H1); outside the pilot
+#: the first tool may. First writer wins.
+SOURCE_IDENTITY_FIELDS: Tuple[str, ...] = ("sha512", "filename", "media_type")
+
+#: `source` fields that DESCRIBE the original, written by the record builder (§5 of the contract).
+SOURCE_DESCRIBED_FIELDS: Tuple[str, ...] = ("language", "page_count", "origin")
+
+#: `source` fields that may disagree between readers without being a fault: a tool reading a
+#: derived or uploaded file sees another name than the archive's. The first writer's value is
+#: kept with a NOTE, never a WARNING or a strict refusal.
 SOURCE_DESCRIPTIVE_FIELDS = frozenset({"filename", "media_type"})
 
-#: A run's stable identifier as `atrium_paradata` mints it: `urn:uuid:` and a lower-case UUID.
-#: The same pattern as `run_uuid` in atrium_document.schema.json.
+#: `source.origin` (descriptive since 2.0, #84 §1): how the record's text was obtained. It no longer
+#: selects a writer: the positional blocks have one.
+SOURCE_ORIGINS: Tuple[str, ...] = ("digital", "atr", "legacy")
+
+#: `lines[].text_source` (D25): the text layer of a born-digital file, the ATR, or converted PCSS ALTO.
+TEXT_SOURCES: Tuple[str, ...] = ("text-layer", "atr", "legacy")
+
+#: `lines[].bbox_precision` (D16, D25): a box the producer measured for the line, one derived from
+#: the docproc block that contains it, or none.
+BBOX_PRECISIONS: Tuple[str, ...] = ("measured", "derived", "absent")
+
+#: `lines[].unit` (D18 rule 5): `block` marks a row holding a whole docproc block scored as one unit.
+#: Absent means a visual line. Such a row keeps its score but stays out of the calibrated statistics.
+LINE_UNITS: Tuple[str, ...] = ("block",)
+
+#: `pages[].content_status` (D29): a page with text, or an empty page (no lines, no page score).
+CONTENT_STATUSES: Tuple[str, ...] = ("text", "empty")
+
+#: A run's stable identifier as `atrium_paradata` mints it: `urn:uuid:` and a lower-case UUID. Kept
+#: for callers that still pass `run_uuid`; it names the run's paradata, never a record field.
 RUN_UUID_PATTERN = re.compile(r"^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
 
-#: Structural keys the module itself maintains — never a tool's "own block".
-RESERVED_KEYS = frozenset({"schema_version", "record_type", "doc_id", "source", "provenance", "assembled"})
+#: Top-level keys schema 2.0 removed (D1, D2, D19, D26). The schema refuses them; a tool cannot
+#: write them; `_migrate_1_to_2()` drops them from a 1.x record.
+REMOVED_BLOCKS: Tuple[str, ...] = ("provenance", "assembled", "derived_from", "regenerable", "forms", "tables")
 
-#: Repository moves of 2026-10-01 (atrium-project#72, atrium-alto-postprocess#56,
-#: atrium-keyword-extract#1): a program id keeps working after its repository is succeeded.
-#: `alto-postprocess` became `ocr-postprocess` (a rename) and the LLM keyword stage of
-#: `llm-enrich` became `keyword-extract`. The successor is added BESIDE its predecessor as
-#: an allowed writer (see `_add_successors()` below) and every comparison goes through
-#: `canonical_program()`; an existing stamp in `assembled.blocks` or `provenance` is never
-#: rewritten, so a record written before the move still loads, merges and passes the origin
-#: check, and nothing already written is re-attributed (an additive change). `digital-convert`,
-#: `nlp-enrich`, `page-classification` and `translator` are roles, not repository names, and
-#: do not change.
+#: Fields schema 2.0 removed inside blocks, by block (`source` included).
+REMOVED_FIELDS: Dict[str, Tuple[str, ...]] = {
+    "source": ("sha256",),
+    "content": ("reading_order",),
+    "pages": ("text_layer", "needs_ocr", "needs_ocr_reason", "ocr"),
+    "lines": ("group_id", "style"),
+}
+
+#: Structural keys the module itself maintains, and the removed blocks — never a tool's own block.
+RESERVED_KEYS = frozenset({"schema_version", "record_type", "doc_id", "source"}) | frozenset(REMOVED_BLOCKS)
+
+#: Repository moves of 2026-10-01 (atrium-project#72): a program id keeps working after its
+#: repository is succeeded. `alto-postprocess` became `ocr-postprocess` and the LLM keyword stage
+#: of `llm-enrich` became `keyword-extract`. Grants are keyed by the current id; a predecessor's
+#: id resolves to it through `canonical_program()`.
 PROGRAM_SUCCESSORS: Dict[str, str] = {
     "alto-postprocess": "ocr-postprocess",
     "llm-enrich": "keyword-extract",
@@ -134,106 +146,25 @@ def same_program(a: Optional[str], b: Optional[str]) -> bool:
     return canonical_program(a) == canonical_program(b)
 
 
-#: Which tool owns which top-level block. One owner per block; blocks shared between
-#: tools are split by FIELD instead (see BLOCK_FIELD_OWNERS) so nothing is co-mutated.
-#:
-#: RESOLVED (Issue #18 §1a, 2026-08-03): a TUPLE value means the block has more than
-#: one possible ORIGINATOR and the choice is fixed per DOCUMENT, not per ecosystem.
-#: An ALTO/OCR document's positional plane (pages/content/lines/tables) comes from
-#: alto-postprocess; a digital-born PDF/DOCX's comes from digital-convert; and no
-#: document is ever both. Which one applies is decided by `source.origin` — already
-#: first-writer-wins in set_source() — via ORIGIN_ORIGINATORS below, and checked by
-#: _assert_origin_consistent().
-#:
-#: The two rejected alternatives, recorded so this is not relitigated:
-#:   1. Give alto-postprocess a "no-op passthrough" mode so it stays owner of record.
-#:      Rejected: it stamps assembled.blocks[<block>].program = "alto-postprocess"
-#:      and appends a provenance.contributors[] entry with a paradata_ref, for a run
-#:      that did nothing, in a record whose purpose is FAIR catalogue export. Rule 4
-#:      exists for attribution granularity; this would falsify it. It also puts the
-#:      alto container back on the digital-born critical path, which the whole
-#:      four-layer converter design exists to avoid.
-#:   2. Simply add a second name here with no further guard. Rejected: `content` and
-#:      `tables` are NOT field-split, so either originator could set_block() straight
-#:      over the other's. The mutual exclusivity that makes two originators safe would
-#:      be an unwritten assumption instead of a check.
-#:
-#: This table authorises WRITES only. The read-time answer to "who wrote this block in
-#: THIS record" is, as it always was, assembled.blocks[<block>].program. Any consumer
-#: hardcoding a program name off this table was already reading the wrong contract —
-#: see the ownership section of docs/document_schema.md.
-#:
-#: `forms` has no such conflict — it is always llm-enrich (VLM/LLM-driven field
-#: extraction), regardless of whether the document is scanned or digital-born, so it
-#: is a plain single-owner block from day one.
-#:
-#: The two blocks of atrium-project#73 (2026-10-09) are named by their CURRENT program ids, since
-#: no predecessor ever wrote them: `keywords`, the statistical keywords, is keyword-extract's (the
-#: controlled ones stay in `enrichment`, and the two never share a list); `quality_summary`, the
-#: read-out of `quality_summary()` below, is the quality model's owner's. Neither is part of the
-#: positional plane, so ocr-postprocess writes `quality_summary` on a born-digital record as well.
+#: The record builder (D20): the one writer of the positional blocks, of `source`'s described
+#: fields, and — as the line-quality model's owner (D18) — of every line's and page's score.
+RECORD_BUILDER = "ocr-postprocess"
+
+#: Which tool owns which top-level block. One owner per block; blocks other tools add fields to
+#: are split by FIELD (BLOCK_FIELD_OWNERS), so nothing is co-mutated. digital-convert owns no
+#: block since 2.0: it writes docproc (D20).
 BLOCK_OWNERS: Dict[str, Union[str, Tuple[str, ...]]] = {
-    "pages": ("alto-postprocess", "digital-convert"),
-    "content": ("alto-postprocess", "digital-convert"),
-    "lines": ("alto-postprocess", "digital-convert"),
-    "tables": ("alto-postprocess", "digital-convert"),
+    "pages": RECORD_BUILDER,
+    "content": RECORD_BUILDER,
+    "lines": RECORD_BUILDER,
+    "quality_summary": RECORD_BUILDER,
     "page_categories": "page-classification",
-    "translations": "translator",
     "entities": "nlp-enrich",
-    "enrichment": "llm-enrich",
-    "forms": "llm-enrich",
+    "enrichment": "keyword-extract",
     "keywords": "keyword-extract",
-    "quality_summary": "ocr-postprocess",
+    #: Reserved, not in the pilot (contract §5): declared, written by no tool.
+    "translations": "translator",
 }
-
-#: Which originator a document's `source.origin` authorises (Issue #18 §1a). Prefix
-#: match, so "ocr:pero"/"ocr:tesseract-ces" and "digital-born-pdf" both resolve without
-#: enumerating every engine. Order matters only in that the first matching prefix wins.
-#:
-#: Checked rather than assumed because the failure it catches is silent: a record
-#: carrying half an OCR positional plane and half a digital-born one means the routing
-#: that picks between them ran twice and disagreed, and nothing downstream would notice
-#: — the schema requires only page+line on a lines[] row, so a half-built plane
-#: validates clean.
-#:
-#: Since the repository moves of 2026-10-01 the originator is named by its CURRENT program id
-#: (`ocr-postprocess`); a record stamped by its predecessor `alto-postprocess` is the same
-#: writer (PROGRAM_SUCCESSORS), and every comparison goes through `same_program()`.
-#:
-#: An origin not listed here is not an error: the check simply abstains, so a new
-#: origin string can land before this table is taught about it (rule 6's spirit).
-#: Matching is CASE-INSENSITIVE, and the bare `pdf` spelling is listed alongside `docx`.
-#: Both were gaps rather than choices: the schema blesses bare `docx` but had no bare `pdf`,
-#: so the symmetric spelling a converter author reaches for matched nothing, and `DOCX` or
-#: `Digital-Born-PDF` or `abbyy-alto` matched nothing either. Since a non-match makes the
-#: check abstain, each of those spellings silently switched §1a off for that document — the
-#: opposite of the intended "refuse a mixed plane" behaviour, and invisible.
-ORIGIN_ORIGINATORS: Tuple[Tuple[str, str], ...] = (
-    ("digital-born", "digital-convert"),
-    ("docx", "digital-convert"),
-    ("pdf", "digital-convert"),
-    ("ABBYY-ALTO", "ocr-postprocess"),
-    ("ocr:", "ocr-postprocess"),
-    ("vlm:", "ocr-postprocess"),
-)
-
-
-def resolve_originator(origin: Optional[str]) -> Optional[str]:
-    """
-    The program authorised to originate a document's positional plane, from `source.origin`.
-
-    Returns None when `origin` is empty or matches no known prefix — callers must treat that
-    as "abstain", never as "refuse" (rule 6's spirit: a new acquisition method may land
-    before this table is taught about it). Public because the converter's routing and
-    merge_document_records() both need the same answer as the write-time check.
-    """
-    if not origin:
-        return None
-    folded = str(origin).casefold()
-    for prefix, originator in ORIGIN_ORIGINATORS:
-        if folded.startswith(prefix.casefold()):
-            return originator
-    return None
 
 
 def _owner_candidates(name: str) -> Tuple[str, ...]:
@@ -244,125 +175,27 @@ def _owner_candidates(name: str) -> Tuple[str, ...]:
     return (owners,) if isinstance(owners, str) else tuple(owners)
 
 
-def _scoring_fields_only(program: Optional[str], name: str, fields: Optional[Iterable[str]]) -> bool:
-    """True when `program` is the quality model's owner and `fields` is a non-empty subset of
-    SCORING_FIELDS[name] — the shape of a scoring co-contribution (see SCORING_FIELDS)."""
-    if fields is None or not same_program(program, SCORING_PROGRAM):
-        return False
-    wanted = frozenset(fields)
-    return bool(wanted) and wanted <= SCORING_FIELDS.get(name, frozenset())
-
-
-def _originator_candidates(name: str) -> Tuple[str, ...]:
-    """The DISTINCT writers of a block once a predecessor and its successor count as one.
-
-    `_owner_candidates` lists both names (both may write); a block is a multi-originator block
-    only when it has two different writers after that, e.g. `pages` (ocr-postprocess or
-    digital-convert) but not `enrichment` (llm-enrich and its successor keyword-extract).
-    """
-    seen: List[str] = []
-    for n in _owner_candidates(name):
-        c = canonical_program(n)
-        if c not in seen:
-            seen.append(c)
-    return tuple(seen)
-
-
-#: Field-level ownership inside list blocks that more than one tool contributes to.
+#: Field-level ownership inside list blocks that more than one tool contributes to (contract §5).
 #: A tool may only write the fields listed for it (plus the block's key fields).
 BLOCK_FIELD_OWNERS: Dict[str, Dict[str, List[str]]] = {
     "pages": {
-        # `page_index` and `needs_ocr_reason` are granted to BOTH originators.
-        #   * page_index — it is the only ordering key that works when `page` is 'iv' or
-        #     'A-1', and roman-numeral front matter is at least as common in scanned volumes
-        #     as in digital-born ones. Granting it to the digital path alone left ALTO
-        #     records with no ordering fallback at all, and the schema promises the label
-        #     survives.
-        #   * needs_ocr_reason — needs_ocr means OPPOSITE things on the two paths ("no text
-        #     layer" vs "a text layer that decodes to garbage"), the renderer emits it as a
-        #     cue the model reads, and with no field to carry the distinction every
-        #     digital-born page rendered as "no extractable text layer", which is false.
-        "alto-postprocess": [
-            "page_index",
-            "quality_score",
-            "quality_band",
-            "needs_ocr",
-            "needs_ocr_reason",
-            "ocr",
-            "canvas",
-        ],
-        # Issue #18: the digital-born originator fills the same positional ROLE as
-        # alto-postprocess (see BLOCK_OWNERS), so it needs substantially the same field
-        # set — minus `ocr` (no OCR engine ran; leaving it unowned is what keeps
-        # "was this OCR'd" answerable from the record) and plus `page_index`.
-        #
-        # `needs_ocr` IS granted, deliberately. Issue #10's research pass found
-        # digital-born PDFs with non-embedded WinAnsi Helvetica and no /ToUnicode decode
-        # to garbage across EVERY text parser (sondě -> sondI, hřeby -> hIeby) — a
-        # systematic, not random, failure. This converter is the only component
-        # positioned to detect it, and needs_ocr=True is how §3's "route per-page before
-        # deferring to OCR" is expressed in the record. The converter REPORTS; routing
-        # POLICY stays outside both tools.
-        #
-        # `text_layer` (2026-10-05, atrium-project#71) is the converter's per-page verdict on the
-        # embedded text layer — digital, garbled, ocr, none or blank — as a closed enum, so a
-        # routing step reads a value instead of parsing `needs_ocr_reason`'s prose. Only the
-        # converter reads a text layer, so only it is granted the field.
-        "digital-convert": [
-            "page_index",
-            "canvas",
-            "quality_score",
-            "quality_band",
-            "needs_ocr",
-            "needs_ocr_reason",
-            "text_layer",
-        ],
+        RECORD_BUILDER: ["page", "canvas", "content_status", "quality_score", "quality_band"],
         "page-classification": ["category", "category_confidence"],
         "nlp-enrich": ["teitok_surface"],
     },
     "lines": {
-        "alto-postprocess": ["categ", "quality_score", "lang", "text"],
-        "nlp-enrich": ["lemma", "upos", "feats", "teitok_ref", "bbox"],
-        # Issue #18: the digital-born originator. This MUST include `text` — the
-        # earlier draft granted only ["group_id"], which merge_block() silently
-        # honours: text and bbox were filtered out with no warning, and the result
-        # still validated because lines[] only *requires* page+line. That is the
-        # exact class of failure the round-trip assertion in the converter's
-        # Layer D and tests/test_document_originators.py now pin.
-        #
-        # `bbox` is granted here as well as to nlp-enrich, deliberately: on the ALTO
-        # path nlp-enrich derives it while aligning to TEITOK; on the digital-born
-        # path there is no TEITOK to align to, and the PDF adapter's native
-        # coordinates are the only bbox the record will ever have. The two never meet
-        # on one document — enforced by _assert_origin_consistent(), not left to
-        # convention.
-        #
-        # `style` closes the mapping table's last open row (plan §1, "Font family / size —
-        # ⚠️ still homeless", to be decided in PR 1). Decided as the plan's own recommended
-        # option (c): map SEMANTIC style only — bold / italic / heading_level — and drop
-        # typeface and point size. A downstream reader can act on "this was a heading"; it
-        # cannot act on "this was Helvetica 12pt", and heading-ness partly duplicates `categ`
-        # already. python-docx (w:b, w:i, outlineLvl) and pdfplumber (fontname, size) both
-        # supply what is needed. ALTO has no style signal, so the field is simply absent
-        # there — the same additive shape as group_id.
-        "digital-convert": [
+        RECORD_BUILDER: [
             "text",
             "bbox",
-            "group_id",
-            "style",
-            "lang",
-            "quality_score",
+            "block",
+            "text_source",
+            "bbox_precision",
+            "unit",
             "categ",
+            "quality_score",
+            "lang",
         ],
-    },
-    #: `tables` is field-split for the same reason `pages` is: two candidate originators
-    #: plus, on the ALTO path, no cell text of its own. Without this entry merge_block()
-    #: fell through to `allowed = []` and emptied every row down to its key — the §1b
-    #: silent-drop failure again, on a block the Definition of Done requires the converter
-    #: to originate.
-    "tables": {
-        "alto-postprocess": ["page", "caption", "n_rows", "n_cols", "group_id", "cells"],
-        "digital-convert": ["page", "caption", "n_rows", "n_cols", "group_id", "cells"],
+        "nlp-enrich": ["lemma", "upos", "feats", "teitok_ref"],
     },
     "entities": {
         "nlp-enrich": [
@@ -375,102 +208,21 @@ BLOCK_FIELD_OWNERS: Dict[str, Dict[str, List[str]]] = {
             "bbox",
             "teitok_ref",
         ],
-        # Reserved and unwritten (atrium-project#70): entities[] exists only after the
-        # translator has run. The grant stays -- re-attributing a field is breaking.
+        #: Reserved, written by no tool in the pilot (atrium-project#70).
         "translator": ["translation_en"],
-        "llm-enrich": ["pid"],
+        "keyword-extract": ["pid"],
     },
 }
 
-def _add_successors() -> None:
-    """Grant every successor in PROGRAM_SUCCESSORS what its predecessor holds, beside it.
+#: Who may write which DESCRIBED `source` field. The identity fields are first-writer-wins.
+SOURCE_FIELD_OWNERS: Dict[str, List[str]] = {RECORD_BUILDER: list(SOURCE_DESCRIBED_FIELDS)}
 
-    Done once, after the tables above, so the successor never drifts from the predecessor and
-    the tables stay readable. Stamps already written are never touched (see PROGRAM_SUCCESSORS).
-    """
-    for block, owners in list(BLOCK_OWNERS.items()):
-        names = (owners,) if isinstance(owners, str) else tuple(owners)
-        extra = tuple(PROGRAM_SUCCESSORS[n] for n in names if n in PROGRAM_SUCCESSORS and PROGRAM_SUCCESSORS[n] not in names)
-        if extra:
-            BLOCK_OWNERS[block] = names + extra
-    for fields in BLOCK_FIELD_OWNERS.values():
-        for old, new in PROGRAM_SUCCESSORS.items():
-            if old in fields and new not in fields:
-                fields[new] = list(fields[old])
-
-
-_add_successors()
-
-
-#: The common line-quality model's fields (atrium-digital-convert#4 W3, atrium-project#71): what
-#: ocr-postprocess may add to a positional plane ANOTHER tool originated. A born-digital
-#: record's lines are digital-convert's, but whether their text reads is the quality model's
-#: question, and the pilot wants one answer for every document, scanned or born-digital. A
-#: `merge_block()` by ocr-postprocess whose writable fields are a non-empty subset of this
-#: table is a scoring CO-CONTRIBUTION, not an origination:
-#:
-#:   * the §1a origin check notes it instead of refusing it (`_assert_origin_consistent`);
-#:   * it only updates rows the originator wrote — a row with no match is not appended, so a
-#:     score can never invent a line or page in someone else's plane;
-#:   * its stamp carries `contribution: "scoring"`, so `merge_document_records()`'s fan-in
-#:     check does not read it as a second originator (the stamp's object admits extra keys).
-#:
-#: Every other write ocr-postprocess makes on such a record (`text`, `bbox`, `ocr`, a new row,
-#: `content`, `tables`) is still refused, except the OCR hand-off of the pages the record flags
-#: `needs_ocr` (OCR_HANDOFF below). Which lines to score is the caller's policy: the converter's
-#: own decode verdict (`Garbage`, `Inverted`) is never overwritten by ocr-postprocess's
-#: `/score_record`.
-SCORING_FIELDS: Dict[str, frozenset] = {
-    "lines": frozenset({"categ", "quality_score", "lang"}),
-    "pages": frozenset({"quality_score", "quality_band"}),
-}
-
-#: The program SCORING_FIELDS authorises: the common quality model's owner.
-SCORING_PROGRAM = "ocr-postprocess"
-
-#: The OCR hand-off (atrium-digital-convert#4 W4, atrium-project#71): the converter flags a page
-#: `needs_ocr` because its embedded text layer is missing, does not decode, or is a prior OCR run;
-#: the pipeline OCRs that page; ocr-postprocess brings its lines back into the SAME record. The
-#: flag is the authorisation, and it is PER PAGE:
-#:
-#:   * ocr-postprocess may write `pages`/`lines` rows of a flagged page into a plane another tool
-#:     originated; a row on any other page is refused (`_assert_origin_consistent`), and so is a
-#:     wholesale `set_block()` of `content` or `tables`, which would erase the born-digital pages;
-#:   * `replace_page_rows()` re-originates a flagged page's `lines`: the converter's rows of that
-#:     page go, the OCR rows come in, and the block stays in page order. `merge_block()` alone
-#:     would leave the converter's lines past the OCR line count on the page — a mixed page;
-#:   * the block's stamp carries `contribution: "ocr-handoff"`, so `merge_document_records()`'s
-#:     fan-in check does not read it as a second originator while the record flags a page.
-#:
-#: What stays: `source` (the original's, first-writer-wins), `content` (the converter's
-#: reading-order text of its born-digital pages; per-page text is in `lines`), and `needs_ocr`
-#: itself — the converter's request. That the request was served is `pages[].ocr` (the engine),
-#: a field the converter is never granted.
-OCR_HANDOFF_PROGRAM = "ocr-postprocess"
-OCR_HANDOFF = "ocr-handoff"
-
-
-def ocr_handoff_pages(pages: Any) -> List[str]:
-    """The keys of the `pages[]` rows that set `needs_ocr: true`, in row order — the pages an OCR
-    hand-off may re-originate (see OCR_HANDOFF)."""
-    return [
-        _key_value(row.get("page"))
-        for row in (pages if isinstance(pages, list) else [])
-        if isinstance(row, dict) and row.get("needs_ocr") is True and row.get("page") is not None
-    ]
-
-
-#: Natural key fields per list block, used to align records when merging by field.
-#:
-#: `tables` is here for the same reason `pages` is: BLOCK_OWNERS gives it two candidate
-#: originators, so it is a real list block a tool may contribute to, and without an entry
-#: merge_block("tables", …) raised `no key fields known` — leaving set_block() as the only
-#: way in, which is wholesale replacement. `table_id` is the grid's identity; a table's
-#: page is a property of it, not part of its key.
+#: Natural key fields per list block, used to align records when merging by field. A page row is
+#: keyed by its physical page number, the join key with docproc `pageNumber` (H2); the printed
+#: label (`page`) is a field the record builder writes, and `lines[]`/`entities[]` name it.
 BLOCK_KEY_FIELDS: Dict[str, List[str]] = {
-    "pages": ["page"],
+    "pages": ["page_index"],
     "lines": ["page", "line"],
-    "tables": ["table_id"],
     "entities": ["page", "line", "char_span"],
 }
 
@@ -557,10 +309,6 @@ def canonical_doc_id(path_or_record: Any) -> str:
     return name.split(".")[0]
 
 
-def _utc_now_iso() -> str:
-    return datetime.now(tz=timezone.utc).isoformat()
-
-
 def _sanitise(obj: Any, _depth: int = 0) -> Any:
     if _depth > 10:
         return str(obj)
@@ -603,12 +351,6 @@ def _key_value(value: Any) -> str:
 
 def _record_key(record: Dict[str, Any], key_fields: Iterable[str]) -> tuple:
     return tuple(_key_value(record.get(k)) for k in key_fields)
-
-
-def _row_pages(records: Iterable[Any]) -> frozenset:
-    """The page keys a row write touches, compared as merge_block() compares keys (`_key_value`;
-    a row without a page counts as `null`, which no page is)."""
-    return frozenset(_key_value(r.get("page")) for r in records if isinstance(r, dict))
 
 
 class InvalidRecordError(ValueError):
@@ -664,6 +406,14 @@ def _list_block(data: Dict[str, Any], name: str, rows: bool = True) -> List[Any]
     return list(value)
 
 
+class RemovedInSchema2(RuntimeError):
+    """A call that wrote something schema 2.0 removed from the record (D1, D2).
+
+    Raised by the methods a 1.x caller used for run data, so a tool that re-vendors this module
+    fails at the call with the reason, not later at validation with a schema path.
+    """
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 # The record
 # ──────────────────────────────────────────────────────────────────────────────
@@ -673,16 +423,15 @@ class DocumentRecord:
     """
     One document's aggregate record, opened by one tool for one contribution.
 
-    Typical use, alongside the tool's existing ParadataLogger::
+    Typical use, alongside the tool's ParadataLogger::
 
-        with DocumentRecord.open(doc_id, "llm-enrich", baseline=args.document_json,
-                                 run_id=logger.run_id, run_uuid=logger.run_uuid,
-                                 paradata_ref=logger.paradata_ref) as doc:
+        with DocumentRecord.open(doc_id, "keyword-extract", baseline=args.document_json) as doc:
             doc.set_block("enrichment", {"items": items})
-            doc.add_regenerable("markdown", {"from": teitok_path,
-                                             "converter": "xml_to_md@0.3.0",
-                                             "detail": "full"})
-        # → writes <out_dir>/<doc_id>.document.json
+        logger.add_output("atrium/document-json", path=doc_path, record_fields=doc.written())
+        # → writes <out_dir>/<doc_id>.document.json; the paradata name what this run wrote
+
+    `run_id`, `run_uuid` and `paradata_ref` are still accepted, so a caller need not change at
+    once; since 2.0 none of them is written into the record (D1).
     """
 
     def __init__(
@@ -700,55 +449,34 @@ class DocumentRecord:
         if not doc_id:
             raise ValueError("doc_id is required — the record is keyed on it.")
         if run_uuid and not RUN_UUID_PATTERN.match(run_uuid):
-            # Refused here rather than by the schema at the end: a malformed id would otherwise
-            # surface as a Layer D failure of a record that is fine in every other respect.
             raise ValueError(f"run_uuid {run_uuid!r} is not 'urn:uuid:' and a lower-case UUID.")
 
         self.program = program
-        self.run_id = run_id or datetime.now(tz=timezone.utc).strftime("%y%m%d-%H%M%S")
-        #: The run's stable id (atrium_paradata `run_uuid`, atrium-project#71): stamped with every
-        #: block and contributor entry, and the `@id` of the run's RO-Crate CreateAction. `run_id`
-        #: has one-second resolution, so parallel runs can share one; this cannot.
+        self.run_id = run_id or ""
         self.run_uuid = run_uuid or ""
         self.paradata_ref = paradata_ref or ""
         self.out_dir = out_dir
         self.strict = strict
         #: Opt-in: complain when merge_block() filters out a field the caller supplied.
-        #: OFF by default deliberately. Some existing call sites pass context fields they
-        #: do not own for readability, so switching this on globally is a tightening pass
-        #: with its own call-site cleanup (Issue #18 §1b, "ecosystem" mitigation) rather
-        #: than something to change under other work. A tool that wants the guarantee
-        #: today asks for it here, or calls assert_fields_survived() after the merge.
         self.warn_dropped_fields = warn_dropped_fields
 
         # Rule 2/6: the baseline is deep-copied and never rewritten except where this tool writes.
-        self._data: Dict[str, Any] = copy.deepcopy(baseline) if baseline else {}
-        self._data.setdefault("schema_version", SCHEMA_VERSION)
+        # A 1.x baseline handed over as a dict is migrated here, as load_document() migrates a file.
+        data = copy.deepcopy(baseline) if baseline else {}
+        self._data: Dict[str, Any] = migrate_document(data) if data else {}
+        self._data["schema_version"] = SCHEMA_VERSION
         self._data.setdefault("record_type", RECORD_TYPE)
 
         #: What the CALLER derived for the file it happens to be reading. Kept because a tool
-        #: names its OWN outputs after that file (`<derived>_log.csv`, `<derived>.document.json`)
-        #: even when the record it accretes onto is keyed differently — see below.
+        #: names its OWN outputs after that file even when the record is keyed differently.
         self.derived_doc_id = doc_id
         self.doc_id = self._inherit_doc_id(doc_id)
         self._data["doc_id"] = self.doc_id
 
         self._had_baseline = bool(baseline)
-        self._touched: List[str] = []
-        self._license_blocks: List[Dict[str, Any]] = []
+        #: block -> fields this run wrote, in write order (`written()`).
+        self._written: Dict[str, List[str]] = {}
         self._dropped_fields: Dict[str, List[str]] = {}
-        #: Blocks written before `source.origin` was known, re-checked once it is.
-        self._origin_deferred: List[str] = []
-        #: For each deferred block, the fields its merges wrote (None: a wholesale or
-        #: unrestricted write), so a deferred scoring contribution is judged as one.
-        self._origin_deferred_fields: Dict[str, Optional[frozenset]] = {}
-        #: For each deferred block, the pages its row writes touched (None: a wholesale write),
-        #: so a deferred OCR hand-off is judged per page.
-        self._origin_deferred_pages: Dict[str, Optional[frozenset]] = {}
-        #: Blocks a scoring co-contribution was already noted for (one note per block).
-        self._scoring_noted: List[str] = []
-        #: Origins already reported as unrecognised, so the note is emitted once each.
-        self._origin_unmatched: List[str] = []
         self._finalised = False
 
     def _inherit_doc_id(self, derived: str) -> str:
@@ -822,88 +550,75 @@ class DocumentRecord:
 
     # ── writers ─────────────────────────────────────────────────────────────
 
-    def set_source(self, sha256: str = "", **fields: Any) -> "DocumentRecord":
+    def set_source(self, sha256: Any = None, **fields: Any) -> "DocumentRecord":
         """
-        Describe the ORIGINAL input. First writer wins — later tools must not overwrite it.
+        Describe the ORIGINAL input (contract §5, H1).
 
-        The durable key is `doc_id` + `sha256`; `filename`/`media_type`/`origin`/`page_count`/
-        `language` are metadata. Never a pipeline-local path to a derived artifact.
+        The identity fields (`sha512`, `filename`, `media_type`) come from the seed and are
+        first-writer-wins: a later call may fill one in, never change it; a different
+        `filename`/`media_type` is a NOTE (a tool reads a derivative), a different `sha512` a
+        complaint. The described fields (`language`, `page_count`, `origin`) are the record
+        builder's (`SOURCE_FIELD_OWNERS`); `origin` is one of `SOURCE_ORIGINS`.
 
-        A second call may FILL IN fields the first writer left unset; it may not change one
-        the first writer actually wrote. A second call carrying a DIFFERENT value for a field
-        already present complains instead of discarding it in silence. Since Issue #18 §1a,
-        `source.origin` is what authorises the positional blocks, so two stages disagreeing
-        about it is not a cosmetic duplicate — it means the routing that picks between the OCR
-        and the digital-born plane ran twice and reached two answers. Re-asserting the same
-        values stays silent, which is the common harmless case.
-
-        `filename` and `media_type` (SOURCE_DESCRIPTIVE_FIELDS) are the exception: a different
-        value is a NOTE, never a WARNING, and never refused under `strict`. An AMČR seed names the
-        archive's file (atrium-project#71), and the tool that reads it sees the OCR output, a page
-        split out of it or a temporary upload — so on the seeded path they differ on nearly every
-        call, and reporting that as a fault (or, for a strict writer, refusing the seed) was wrong.
-
-        For the same reason a `sha256` is not added to a source that carries the archive's
-        `sha512`: it is the digest of whatever the reader read, which may be such a derivative,
-        and one `source` must not name two files by digest. The archive's digest stays the only
-        one, and the dropped value is reported in a NOTE.
+        `sha256` was removed in 2.0: the original is named by its SHA-512 only. Passing it is a
+        complaint (an error under `strict`) and the value is not written; so is any other field.
         """
-        existing = self._data.get("source")
-        incoming = {k: v for k, v in fields.items() if v is not None}
         if sha256:
-            incoming["sha256"] = sha256
-        if existing:
-            clean = _sanitise(incoming)
-            differing = sorted(k for k, v in clean.items() if k in existing and existing[k] != v)
-            conflicts = [
-                f"{k}: {existing[k]!r} kept, {clean[k]!r} discarded"
-                for k in differing
-                if k not in SOURCE_DESCRIPTIVE_FIELDS
-            ]
-            if conflicts:
-                self._complain(
-                    "source is immutable after the first writer, but "
-                    f"{self.program!r} passed conflicting values — {'; '.join(conflicts)}"
-                )
-            described = [k for k in differing if k in SOURCE_DESCRIPTIVE_FIELDS]
-            if described:
-                self._note(
-                    f"{self.program!r} read the original as "
-                    + ", ".join(f"{k} {clean[k]!r}" for k in described)
-                    + "; the record keeps the first writer's "
-                    + ", ".join(f"{k} {existing[k]!r}" for k in described)
-                    + " (source is first-writer-wins; a seed names the archive's file)."
-                )
-            # Immutability protects the values that were WRITTEN, not the dict as a whole.
-            # A first writer that knew only sha256+filename has not thereby decided origin,
-            # and swallowing a later `origin=` made the entire call a silent no-op: nothing
-            # complained (no key collided), nothing was written, and the deferred §1a checks
-            # never resolved — reintroducing, through a different door, exactly the permanent
-            # abstention that _assert_origin_consistent()'s deferral exists to remove. So a
-            # key ABSENT from the first write is additive; a key present still belongs to the
-            # first writer. A call mixing the two is rejected WHOLE under strict — _complain()
-            # raises above, before the update — since a caller that got one field wrong has
-            # not earned the right to name another in the same breath. (issue atrium-project#10)
-            added = {k: v for k, v in clean.items() if k not in existing}
-            if existing.get("sha512") and "sha256" in added:
-                self._note(
-                    f"{self.program!r} read a file with sha256 {added.pop('sha256')!r}; the record keeps "
-                    "the archive's sha512 as the source's only digest (what a tool reads may be a "
-                    "derivative of the original)."
-                )
-            existing.update(added)
-            if "origin" in added:
-                self._resolve_deferred_origin_checks()
-            return self
-        self._data["source"] = _sanitise(incoming)
-        self._resolve_deferred_origin_checks()
+            self._complain("source.sha256 was removed in schema 2.0; the original is named by its sha512 only")
+        incoming = {k: v for k, v in fields.items() if v is not None}
+        unknown = sorted(k for k in incoming if k not in SOURCE_IDENTITY_FIELDS + SOURCE_DESCRIBED_FIELDS)
+        if unknown:
+            self._complain(f"source has no field(s) {unknown} in schema 2.0 — not written")
+        own = set(SOURCE_FIELD_OWNERS.get(canonical_program(self.program) or "", []))
+        refused = sorted(k for k in incoming if k in SOURCE_DESCRIBED_FIELDS and k not in own)
+        if refused:
+            self._complain(
+                f"source fields {refused} are written by the record builder ({RECORD_BUILDER}), not {self.program!r}"
+            )
+        origin = incoming.get("origin")
+        if origin is not None and origin not in SOURCE_ORIGINS:
+            self._complain(f"source.origin {origin!r} is not one of {list(SOURCE_ORIGINS)} — not written")
+            refused.append("origin")
+        clean = _sanitise({k: v for k, v in incoming.items() if k not in unknown and k not in refused})
+
+        existing = self._data.setdefault("source", {})
+        differing = sorted(k for k, v in clean.items() if k in existing and existing[k] != v)
+        conflicts = [f"{k}: {existing[k]!r} kept, {clean[k]!r} discarded" for k in differing if k not in SOURCE_DESCRIPTIVE_FIELDS]
+        if conflicts:
+            self._complain(
+                f"source is immutable after the first writer, but {self.program!r} passed conflicting values — "
+                + "; ".join(conflicts)
+            )
+        described = [k for k in differing if k in SOURCE_DESCRIPTIVE_FIELDS]
+        if described:
+            self._note(
+                f"{self.program!r} read the original as "
+                + ", ".join(f"{k} {clean[k]!r}" for k in described)
+                + "; the record keeps the first writer's "
+                + ", ".join(f"{k} {existing[k]!r}" for k in described)
+                + " (source is first-writer-wins; a seed names the archive's file)."
+            )
+        added = {k: v for k, v in clean.items() if k not in existing}
+        existing.update(added)
+        if added:
+            self._mark_written("source", added)
         return self
 
     def set_block(self, name: str, payload: Any) -> "DocumentRecord":
         """Replace this tool's OWN block wholesale (rule 2)."""
         self._assert_owner(name)
-        self._data[name] = _sanitise(payload)
-        self._stamp(name)
+        clean = _sanitise(payload)
+        self._data[name] = clean
+        if isinstance(clean, list):
+            fields: List[str] = []
+            for row in clean:
+                if isinstance(row, dict):
+                    fields.extend(f for f in row if f not in fields)
+            self._mark_written(name, fields)
+        elif isinstance(clean, dict):
+            self._mark_written(name, clean)
+        else:
+            self._mark_written(name, [])
         return self
 
     def merge_block(
@@ -916,79 +631,12 @@ class DocumentRecord:
         """
         Field-level merge into a list block shared by several tools.
 
-        Existing records are matched on `key_fields` and only `own_fields` are written, so a
-        co-contributor's fields on the same row survive untouched. New rows are appended.
+        Existing records are matched on `key_fields` and only `own_fields` (default: the
+        program's grant in BLOCK_FIELD_OWNERS) are written, so a co-contributor's fields on the
+        same row survive untouched. New rows are appended.
         """
-        return self._merge(name, records, key_fields=key_fields, own_fields=own_fields)
-
-    def replace_page_rows(
-        self,
-        name: str,
-        pages: Iterable[Any],
-        records: List[Dict[str, Any]],
-        own_fields: Optional[List[str]] = None,
-    ) -> "DocumentRecord":
-        """
-        Re-originate whole pages of a list block: the OCR hand-off's write (OCR_HANDOFF, W4).
-
-        Every existing row of `name` on one of `pages` is removed and `records` are merged in
-        their place, so a re-acquired page holds the new rows only — `merge_block()` would update
-        the rows whose keys match and leave the rest, a page half old and half new. Afterwards
-        the block is put in page order (`pages[].page_index` when every page row carries one,
-        else the order of `pages[]`; rows of a page `pages[]` does not list keep their order at
-        the end), so a reader that takes the rows in list order reads the pages in order.
-
-        For a block keyed by `page` other than `pages` itself (`lines`, `entities`): a page row
-        holds co-contributors' fields (`page_index`, `canvas`, `category`, …), so `pages[]` rows
-        are merged with `merge_block()`, never replaced. The origin check runs before anything is
-        removed, so a refusal under `strict` leaves the record as it was. An empty `records`
-        empties the pages (an OCR pass that found no text).
-        """
-        keys = BLOCK_KEY_FIELDS.get(name) or []
-        if name == "pages" or "page" not in keys:
-            raise ValueError(
-                f"replace_page_rows() replaces whole pages of a block keyed by page; {name!r} is not "
-                f"one (pages[] rows carry other tools' fields: merge them with merge_block())"
-            )
-        targets: List[str] = []
-        for page in pages:
-            if page is not None and _key_value(page) not in targets:
-                targets.append(_key_value(page))
-        if not targets:
-            raise ValueError("replace_page_rows() needs the page keys it replaces")
-        stray = sorted({_key_value(r.get("page")) for r in records if _key_value(r.get("page")) not in targets})
-        if stray:
-            raise ValueError(f"rows on page(s) {stray} are not among the pages being replaced {targets}")
-        _list_block(self._data, "pages", rows=False)  # read by _in_page_order() below; refused before the merge
-        self._merge(name, records, own_fields=own_fields, replace_pages=targets)
-        self._data[name] = self._in_page_order(self._data.get(name) or [])
-        return self
-
-    def _in_page_order(self, rows: List[Any]) -> List[Any]:
-        """`rows` stably sorted by their page's position in `pages[]` (see replace_page_rows)."""
-        pages = _list_block(self._data, "pages", rows=False)
-        page_rows = [p for p in pages if isinstance(p, dict) and p.get("page") is not None]
-        by_index = bool(page_rows) and all(
-            isinstance(p.get("page_index"), int) and not isinstance(p.get("page_index"), bool) for p in page_rows
-        )
-        position: Dict[str, float] = {}
-        for i, p in enumerate(page_rows):
-            position.setdefault(_key_value(p["page"]), float(p["page_index"] if by_index else i))
-        last = float("inf")
-        return sorted(rows, key=lambda r: position.get(_key_value(r.get("page")), last) if isinstance(r, dict) else last)
-
-    def _merge(
-        self,
-        name: str,
-        records: List[Dict[str, Any]],
-        key_fields: Optional[List[str]] = None,
-        own_fields: Optional[List[str]] = None,
-        replace_pages: Optional[List[str]] = None,
-    ) -> "DocumentRecord":
-        """merge_block()'s body; with `replace_pages`, the rows of those pages go first."""
         if name in RESERVED_KEYS:
-            raise ValueError(f"{name!r} is maintained by the module, not a tool block.")
-
+            raise ValueError(f"{name!r} is maintained by the module or removed in schema 2.0, not a tool block.")
         keys = key_fields or BLOCK_KEY_FIELDS.get(name)
         if not keys:
             raise ValueError(f"no key fields known for block {name!r} — pass key_fields=[...]")
@@ -996,80 +644,45 @@ class DocumentRecord:
         # with the record left as it was (InvalidRecordError, the services' 422 invalid_record).
         existing: List[Dict[str, Any]] = _list_block(self._data, name)
 
-        # `is not None`, not `or`: an explicit own_fields=[] means "write the key fields and
-        # nothing else", and `or` used to treat that as "not supplied" and hand back the
-        # program's full declared grant instead — writing more than the caller asked for. The
-        # `allowed is None` test below shows None was always the intended sentinel.
+        program = canonical_program(self.program) or ""
         declared = BLOCK_FIELD_OWNERS.get(name, {})
-        allowed = own_fields if own_fields is not None else declared.get(self.program)
+        allowed = own_fields if own_fields is not None else declared.get(program)
         if allowed is None:
             self._complain(f"{self.program!r} has no declared field ownership in block {name!r}")
             allowed = []
-        elif own_fields is not None and self.program not in declared and self.program not in _owner_candidates(name):
-            # own_fields is for a declared writer to NARROW or extend its own field set. It
-            # must not confer writership: merge_block() never calls _assert_owner(), and
-            # _assert_origin_consistent() abstains for non-candidates, so passing own_fields
-            # was the one way an undeclared program could write any block and get stamped as
-            # its author. The plan's Definition of Done asks for a mismatch to be refused on
-            # "both set_block() and merge_block()"; without this it held only for programs
-            # that happened to be declared.
+        elif own_fields is not None and program not in declared and program not in _owner_candidates(name):
+            # own_fields narrows or extends a declared writer's own set; it never confers writership.
             self._complain(
                 f"{self.program!r} is neither an owner nor a declared field contributor of "
                 f"block {name!r} — own_fields narrows an existing grant, it does not create one"
             )
-        # The pages this write touches: the ones it replaces, or the pages its rows are on.
-        pages = frozenset(replace_pages) if replace_pages is not None else _row_pages(records)
-        self._assert_origin_consistent(name, fields=allowed, pages=pages)  # Issue #18 §1a
-        # W3: a scoring co-contribution updates the originator's rows and never adds one.
-        scoring = self._is_scoring_contribution(name, allowed)
-        if scoring and replace_pages is not None:
-            raise ValueError("a scoring contribution updates existing rows; it never replaces a page's rows")
-        # W4: the OCR hand-off of flagged pages, stamped so the fan-in can tell it from a mix.
-        handoff = not scoring and self._is_ocr_handoff(name, pages)
+        removed = set(REMOVED_FIELDS.get(name, ()))
+        writable = (set(allowed) | set(keys)) - removed
 
-        writable = set(allowed) | set(keys)
-
-        # Issue #18 §1b: record what this merge is about to throw away. The filtering below
-        # is silent by design (a co-contributor passing context fields it does not own is
-        # normal), and that silence is exactly how a grant of only ["group_id"] produced
-        # records with no text in them that still validated. Tracking it costs nothing and
-        # makes the loss inspectable — via dropped_fields() or assert_fields_survived() —
-        # without changing behaviour for callers who have not asked.
         dropped = sorted({f for r in records for f in r} - writable)
         if dropped:
             self._dropped_fields[name] = dropped
-            if self.warn_dropped_fields:
+            if self.warn_dropped_fields or removed & set(dropped):
                 self._complain(
                     f"{self.program!r} may not write {dropped} in block {name!r} — dropped. "
                     f"Declare them in BLOCK_FIELD_OWNERS or pass own_fields=[...]"
+                    + (f" ({sorted(removed & set(dropped))} were removed in schema 2.0)" if removed & set(dropped) else "")
                 )
 
-        if replace_pages is not None:
-            wanted = set(replace_pages)
-            existing = [r for r in existing if not (isinstance(r, dict) and _key_value(r.get("page")) in wanted)]
         index = {_record_key(r, keys): r for r in existing}
-
-        unmatched = 0
+        wrote: List[str] = []
         for incoming in records:
             k = _record_key(incoming, keys)
             patch = {f: v for f, v in incoming.items() if f in writable}
+            wrote.extend(f for f in patch if f not in wrote)
             target = index.get(k)
             if target is None:
-                if scoring:
-                    unmatched += 1
-                    continue
                 existing.append(_sanitise(patch))
                 index[k] = existing[-1]
             else:
                 target.update(_sanitise(patch))
-
-        if unmatched:
-            self._complain(
-                f"block {name!r}: {unmatched} row(s) from {self.program!r} match no row the "
-                f"originator wrote — not added (a scoring contribution only scores existing rows)"
-            )
         self._data[name] = existing
-        self._stamp(name, contribution="scoring" if scoring else (OCR_HANDOFF if handoff else None))
+        self._mark_written(name, wrote)
         return self
 
     def get_block(self, name: str, default: Any = None) -> Any:
@@ -1127,220 +740,53 @@ class DocumentRecord:
                     f"{sorted(BLOCK_FIELD_OWNERS.get(name, {}).get(self.program) or [])})"
                 )
 
+    def written(self) -> Dict[str, List[str]]:
+        """The blocks this run wrote and, for each, the fields: what its paradata `result` names
+        for the record (#84 §4; `atrium_rocrate.record_result()`). Key fields of list blocks are
+        included. Empty when the run wrote nothing."""
+        return {k: list(v) for k, v in self._written.items()}
+
     def add_derived_from(self, key: str, ref: str) -> "DocumentRecord":
-        """Record a PERSISTENT step output this contribution was derived from."""
-        block = self._data.setdefault("derived_from", {})
-        block[key] = str(ref)
-        self._stamp("derived_from")
-        return self
+        """Removed in 2.0 (D1): an input is named in the run's paradata `object`, by distribution and SHA-512."""
+        raise RemovedInSchema2(
+            "derived_from was removed in record schema 2.0 (D1): name the input in the run's paradata "
+            "(ParadataLogger.add_input), not in the record"
+        )
 
     def add_regenerable(self, key: str, recipe: Dict[str, Any]) -> "DocumentRecord":
-        """
-        Record a DISPOSABLE derivation as a reproducible recipe, never a stored path.
-
-        e.g. add_regenerable("markdown", {"from": "TEITOK/x.teitok.xml",
-                                          "converter": "xml_to_md@0.3.0", "detail": "full"})
-        """
-        block = self._data.setdefault("regenerable", {})
-        block[key] = _sanitise(recipe)
-        self._stamp("regenerable")
-        return self
+        """Removed in 2.0 (D1): a regeneration recipe is run data, kept in the paradata if anywhere."""
+        raise RemovedInSchema2(
+            "regenerable was removed in record schema 2.0 (D1): a regeneration recipe is run data and "
+            "does not belong in the record"
+        )
 
     def add_license_detail(self, license_detail: Dict[str, Any]) -> "DocumentRecord":
-        """Contribute this tool's paradata `license_detail` to the accreting union (rule 5)."""
-        if license_detail:
-            self._license_blocks.append(license_detail)
-        return self
+        """Removed in 2.0 (D2): no licence is computed or written; components and their terms are paradata."""
+        raise RemovedInSchema2(
+            "the record carries no licence since schema 2.0 (D2): list components with their terms in "
+            "the paradata (ParadataLogger.log_component)"
+        )
 
     # ── internals ───────────────────────────────────────────────────────────
 
+    def _mark_written(self, block: str, fields: Iterable[str]) -> None:
+        held = self._written.setdefault(block, [])
+        held.extend(f for f in fields if f not in held)
+
     def _assert_owner(self, name: str) -> None:
         if name in RESERVED_KEYS:
-            raise ValueError(f"{name!r} is maintained by the module, not a tool block.")
+            raise ValueError(f"{name!r} is maintained by the module or removed in schema 2.0, not a tool block.")
         owners = _owner_candidates(name)
-        # The warning exists because a wholesale set_block() on a field-split block erases
-        # every CO-CONTRIBUTOR's fields. Alternative ORIGINATORS are not co-contributors —
-        # they are mutually exclusive per document (§1a), so they can never both have fields
-        # on one record to erase. `tables` is declared for both originators and nobody else,
-        # so set_block() is the correct call for it; `pages`, `lines` and `entities` each
-        # still have a genuine co-contributor and still warn exactly as before.
-        co_contributors = sorted(set(BLOCK_FIELD_OWNERS.get(name, {})) - {self.program} - set(owners))
+        program = canonical_program(self.program) or ""
+        # A wholesale set_block() on a field-split block erases every co-contributor's fields.
+        co_contributors = sorted(set(BLOCK_FIELD_OWNERS.get(name, {})) - {program} - set(owners))
         if co_contributors:
             self._complain(
                 f"block {name!r} is field-split with {co_contributors} — "
                 f"use merge_block(), not set_block(), or a co-contributor's fields will be lost"
             )
-        if owners and self.program not in owners:
+        if owners and program not in owners:
             self._complain(f"block {name!r} is owned by {' or '.join(owners)}, not {self.program!r}")
-        self._assert_origin_consistent(name)
-
-    def _assert_origin_consistent(
-        self,
-        name: str,
-        fields: Optional[Iterable[str]] = None,
-        pages: Optional[Iterable[str]] = None,
-    ) -> None:
-        """
-        Issue #18 §1a: for a block with several possible originators, the document's
-        `source.origin` decides which one may write it.
-
-        `fields` is what a `merge_block()` may write and `pages` the page keys its rows touch
-        (both None for a wholesale `set_block()`). An ocr-postprocess merge limited to
-        SCORING_FIELDS is a scoring co-contribution and is noted, not refused
-        (atrium-digital-convert#4 W3; see SCORING_FIELDS); its OCR hand-off is honoured page by
-        page (W4; see OCR_HANDOFF).
-
-        Self-guarding, so calling it unconditionally from both set_block() and
-        merge_block() is a no-op for every pre-#18 caller. It returns early for:
-          * single-owner blocks (len(owners) < 2);
-          * programs that are not originator candidates at all — nlp-enrich merging
-            morphology into lines[] is a field contribution, not an origination claim;
-          * records with no `source` yet — but only PROVISIONALLY: the block is remembered
-            and re-checked as soon as an origin is known (see below);
-          * origins this table has not been taught (abstain rather than block, rule 6's
-            spirit — a note goes to stderr so the silence is at least visible);
-          * an ocr-postprocess row write limited to the pages the record itself flags
-            `needs_ocr` (see OCR_HANDOFF) — a row on any other page, or a wholesale write, is
-            refused.
-
-        The deferral matters. This check reads `source.origin`, so a run that wrote its
-        blocks BEFORE calling set_source() used to escape it *permanently* — and since
-        set_source() is first-writer-wins, the wrong origin was then frozen in. Plan §2's
-        Layer C says set_source() must come first "since that is what authorizes them", but
-        that ordering was documented in the plan only, enforced nowhere, and produced
-        exactly the half-OCR/half-digital positional plane §1a exists to refuse, silently,
-        with strict=True. Deferring instead of abstaining removes the ordering requirement
-        from the caller altogether.
-
-        Deliberately reads `source.origin` rather than assembled.blocks[name].program:
-        rule 4 says the stamp on a field-split block names the MOST RECENT writer, so
-        once nlp-enrich merges into lines[] the originator signal is gone. `source` is
-        immutable after first write and `origin` is the field already designed to record
-        how the text was obtained.
-        """
-        owners = _owner_candidates(name)
-        if len(_originator_candidates(name)) < 2 or self.program not in owners:
-            return
-        origin = (self._data.get("source") or {}).get("origin")
-        if not origin:
-            written = frozenset(fields) if fields is not None else None
-            touched = frozenset(pages) if pages is not None else None
-            if name not in self._origin_deferred:
-                self._origin_deferred.append(name)
-                self._origin_deferred_fields[name] = written
-                self._origin_deferred_pages[name] = touched
-            else:
-                held = self._origin_deferred_fields.get(name)
-                self._origin_deferred_fields[name] = None if held is None or written is None else held | written
-                held_pages = self._origin_deferred_pages.get(name)
-                self._origin_deferred_pages[name] = (
-                    None if held_pages is None or touched is None else held_pages | touched
-                )
-            return
-
-        originator = resolve_originator(origin)
-        if originator is None:
-            if origin not in self._origin_unmatched:
-                self._origin_unmatched.append(origin)
-                self._note(
-                    f"source.origin {origin!r} matches no ORIGIN_ORIGINATORS prefix — the "
-                    f"§1a originator check is ABSTAINING for {self.program!r} on block "
-                    f"{name!r}. Teach ORIGIN_ORIGINATORS this origin to have it enforced."
-                )
-            return
-        if same_program(originator, self.program):
-            return
-        if _scoring_fields_only(self.program, name, fields):
-            if name not in self._scoring_noted:
-                self._scoring_noted.append(name)
-                self._note(
-                    f"block {name!r}: {self.program!r} adds the quality model's "
-                    f"{sorted(fields or ())} to a {origin!r} document's rows — a scoring "
-                    f"co-contribution, not an origination (SCORING_FIELDS)"
-                )
-            return
-        if canonical_program(self.program) == OCR_HANDOFF_PROGRAM and self._ocr_handoff_requested():
-            # The documented digital-born -> OCR hand-off, not a mixed plane by accident.
-            # digital-convert is granted pages[].needs_ocr precisely so it can say "this
-            # page's embedded text layer does not decode; re-acquire it by OCR" (Issue #10's
-            # WinAnsi/no-/ToUnicode corruption), and the schema says routing policy then acts
-            # on it. Without this branch that hand-off was unreachable: origin is frozen at
-            # `digital-born-*`, so every pages/lines write alto-postprocess made afterwards was
-            # refused, and §3's "route per page before deferring to OCR" contradicted §1a's
-            # "no document is ever both".
-            #
-            # It stays truthful. `source.origin` describes how the ORIGINAL INPUT was
-            # acquired, and that really was a digital-born PDF; the OCR ran over its rendered
-            # pages. Who wrote the plane is answered where rule 4 says it is —
-            # assembled.blocks[<block>].program — and `pages[].ocr` (never granted to
-            # digital-convert) records that an engine ran. The authorisation is the
-            # converter's own recorded request, so it is auditable from the record itself.
-            #
-            # And it is PER PAGE (W4, 2026-10-05). Until then any one flagged page let this
-            # program write every page, and set_block() the whole `content` or `tables`: a
-            # record with one scanned insert could lose its born-digital pages to the OCR pass.
-            flagged = set(self.handoff_pages())
-            if pages is None:
-                self._complain(
-                    f"block {name!r}: a wholesale write by {self.program!r} onto a {origin!r} document "
-                    f"would replace the pages {originator!r} wrote; the needs_ocr hand-off covers the "
-                    f"flagged pages {sorted(flagged)} only (replace_page_rows / merge_block)"
-                )
-                return
-            outside = sorted(set(pages) - flagged)
-            if outside:
-                self._complain(
-                    f"block {name!r}: page(s) {outside} of a {origin!r} document do not ask for OCR "
-                    f"(pages[].needs_ocr) — the hand-off covers {sorted(flagged)} only"
-                )
-                return
-            self._note(
-                f"block {name!r}: honouring the pages[].needs_ocr hand-off — "
-                f"{self.program!r} re-originating page(s) {sorted(set(pages))} of a {origin!r} document"
-            )
-            return
-        self._complain(
-            f"block {name!r}: source.origin {origin!r} is originated by {originator!r}, not {self.program!r}"
-        )
-
-    def _ocr_handoff_requested(self) -> bool:
-        """True when this record's own `pages[]` asks for OCR re-acquisition."""
-        return bool(self.handoff_pages())
-
-    def handoff_pages(self) -> List[str]:
-        """The pages this record flags `needs_ocr`: the ones an OCR hand-off may re-originate."""
-        return ocr_handoff_pages(self._data.get("pages"))
-
-    def _resolve_deferred_origin_checks(self) -> None:
-        """Re-run the origin check for blocks written before `source.origin` was known."""
-        pending, self._origin_deferred = list(self._origin_deferred), []
-        fields, self._origin_deferred_fields = dict(self._origin_deferred_fields), {}
-        pages, self._origin_deferred_pages = dict(self._origin_deferred_pages), {}
-        for name in pending:
-            self._assert_origin_consistent(name, fields=fields.get(name), pages=pages.get(name))
-
-    def _is_scoring_contribution(self, name: str, fields: Optional[Iterable[str]]) -> bool:
-        """True for a merge limited to SCORING_FIELDS into a plane another tool originated.
-
-        False while the origin is unknown, on an origin no table entry resolves, and for the
-        record's own originator — those merges append rows as they always did.
-        """
-        if not _scoring_fields_only(self.program, name, fields):
-            return False
-        originator = resolve_originator((self._data.get("source") or {}).get("origin"))
-        return originator is not None and not same_program(originator, self.program)
-
-    def _is_ocr_handoff(self, name: str, pages: Optional[Iterable[str]]) -> bool:
-        """True for an ocr-postprocess row write, into a plane another tool originated, that
-        touches only pages the record flags `needs_ocr` — the OCR hand-off (OCR_HANDOFF)."""
-        if not pages or canonical_program(self.program) != OCR_HANDOFF_PROGRAM:
-            return False
-        if len(_originator_candidates(name)) < 2:
-            return False
-        originator = resolve_originator((self._data.get("source") or {}).get("origin"))
-        if originator is None or same_program(originator, self.program):
-            return False
-        return set(pages) <= set(self.handoff_pages())
 
     def _complain(self, message: str) -> None:
         if self.strict:
@@ -1348,107 +794,34 @@ class DocumentRecord:
         print(f"[document] WARNING – {message}", file=sys.stderr)
 
     def _note(self, message: str) -> None:
-        """Visible but never fatal — for things a reader should know that are not errors.
-
-        Distinct from _complain() on purpose: an unrecognised `source.origin` must keep
-        abstaining even under strict=True (rule 6's spirit — a new acquisition method may
-        land before this module is taught about it), but abstaining in complete silence is
-        how §1a quietly stops applying to a whole class of documents.
-        """
+        """Visible but never fatal — for things a reader should know that are not errors."""
         print(f"[document] NOTE – {message}", file=sys.stderr)
-
-    def _stamp(self, block: str, contribution: Optional[str] = None) -> None:
-        """Rule 4: per-block provenance — this is where granularity comes from.
-
-        `contribution="scoring"` marks a SCORING_FIELDS co-contribution, and
-        `contribution="ocr-handoff"` the OCR hand-off of flagged pages (OCR_HANDOFF), so a reader
-        (and the fan-in check) can tell either from a second origination.
-        """
-        if block not in self._touched:
-            self._touched.append(block)
-        blocks = self._data.setdefault("assembled", {}).setdefault("blocks", {})
-        stamp = {"program": self.program, "run_id": self.run_id}
-        if self.run_uuid:
-            stamp["run_uuid"] = self.run_uuid
-        stamp["paradata_ref"] = self.paradata_ref
-        stamp["updated_at"] = _utc_now_iso()
-        if contribution:
-            stamp["contribution"] = contribution
-        blocks[block] = stamp
-
-    def _provenance(self) -> Dict[str, Any]:
-        prov: Dict[str, Any] = dict(self._data.get("provenance") or {})
-        prior = prov.get("license_detail")
-        blocks = ([prior] if prior else []) + self._license_blocks
-
-        if merge_effective_licenses is not None and blocks:
-            merged = merge_effective_licenses(blocks)
-            prov["license"] = merged.get("effective_license", LICENSE_NAME)
-            prov["license_url"] = merged.get("effective_license_url", LICENSE_URL)
-            prov["license_basis"] = LICENSE_BASIS_CALCULATED
-            prov["license_detail"] = merged
-        elif not prov.get("license"):
-            prov["license"] = LICENSE_NAME
-            prov["license_url"] = LICENSE_URL
-            prov["license_basis"] = LICENSE_BASIS_CALCULATED
-            prov["license_note"] = (
-                "License helper unavailable or no components recorded; defaulted conservatively to CC BY-NC 4.0."
-            )
-        if prov.get("license"):
-            # A record written before 2026-11-04 has the same calculated value without the mark.
-            prov.setdefault("license_basis", LICENSE_BASIS_CALCULATED)
-
-        contributors: List[Dict[str, str]] = list(prov.get("contributors") or [])
-        if self._touched and not any(
-            c.get("program") == self.program and c.get("run_id") == self.run_id for c in contributors
-        ):
-            entry = {"program": self.program, "run_id": self.run_id}
-            if self.run_uuid:
-                entry["run_uuid"] = self.run_uuid
-            entry["paradata_ref"] = self.paradata_ref
-            entry["blocks"] = ",".join(self._touched)
-            entry["at"] = _utc_now_iso()
-            contributors.append(entry)
-        prov["contributors"] = contributors
-        return prov
 
     # ── output ──────────────────────────────────────────────────────────────
 
     def to_dict(self) -> Dict[str, Any]:
         """The record as it would be written — baseline passed through, own blocks applied."""
-        # Last chance for the §1a check on blocks written before set_source(). A run that
-        # never calls set_source() at all is still fine (rule 3); this only fires when an
-        # origin arrived late and contradicts what was already written.
-        self._resolve_deferred_origin_checks()
         out = copy.deepcopy(self._data)
-        out["provenance"] = self._provenance()
-        assembled = out.setdefault("assembled", {})
-        assembled["had_baseline"] = self._had_baseline
-        assembled["note"] = "Blocks reflect CONTRIBUTED steps only; a block is absent until its tool has run."
+        if not out.get("source"):
+            out.pop("source", None)
         # Stable, predictable key order for diff-friendly output.
         order = [
             "schema_version",
             "record_type",
             "doc_id",
             "source",
-            "derived_from",
-            "regenerable",
-            "provenance",
-            "assembled",
             "page_categories",
             "pages",
             "content",
             "lines",
-            "tables",
             "quality_summary",
             "entities",
             "translations",
             "enrichment",
             "keywords",
-            "forms",
         ]
         ordered = {k: out[k] for k in order if k in out}
-        for k in out:  # any unknown/newer block is preserved (rule 6)
+        for k in out:  # any unknown/newer block of this major is preserved (rule 6)
             if k not in ordered:
                 ordered[k] = out[k]
         return ordered
@@ -1458,7 +831,7 @@ class DocumentRecord:
             # No `from None`: that only means anything inside an except block, and here it
             # would hide a real cause if finalize() is ever retried from a handler.
             raise RuntimeError("finalize() has already been called.")
-        if not self._touched:
+        if not self._written:
             print(
                 f"[document] WARNING – {self.program} contributed no block to {self.doc_id}",
                 file=sys.stderr,
@@ -1494,14 +867,153 @@ class DocumentRecord:
 # ──────────────────────────────────────────────────────────────────────────────
 
 
-def migrate_document(record: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Apply schema migrations up to the current SCHEMA_VERSION.
+def _major(version: Any) -> int:
+    """The MAJOR of a `schema_version` string; a missing or unreadable one counts as current."""
+    try:
+        return int(str(version).split(".")[0])
+    except (TypeError, ValueError):
+        return int(SCHEMA_VERSION.split(".")[0])
 
-    `1.0` is the first published version, so there is nothing to migrate yet. When a breaking
-    bump lands, add `_migrate_1_0_to_2_0()` and branch here — the same sequential pattern
-    `atrium_paradata.migrate_paradata()` uses.
+
+#: How a 1.x `source.origin` maps onto 2.0's descriptive value (prefix match, case-insensitive):
+#: the born-digital converter's spellings, the PCSS (ABBYY) ALTO route, and OCR/VLM engines.
+_ORIGIN_1_TO_2: Tuple[Tuple[str, str], ...] = (
+    ("digital", "digital"),
+    ("docx", "digital"),
+    ("pdf", "digital"),
+    ("abbyy", "legacy"),
+    ("alto", "legacy"),
+    ("ocr:", "atr"),
+    ("vlm:", "atr"),
+    ("atr", "atr"),
+    ("legacy", "legacy"),
+)
+
+_TEXT_SOURCE_FOR_ORIGIN = {"digital": "text-layer", "atr": "atr", "legacy": "legacy"}
+
+#: 1.x line categories that were digital-convert's decode verdicts, not text quality (D18 rule 2).
+_DECODE_VERDICTS_1X = frozenset({"Garbage", "Inverted"})
+
+
+def _migrate_1_to_2(record: Dict[str, Any]) -> Dict[str, Any]:
+    """Rewrite a 1.x record as 2.0 (doc-schema-v2, atrium-project#84). Content survives; run data,
+    licence and layout do not.
+
+    * removed: `provenance`, `assembled`, `derived_from`, `regenerable`, `forms`, `tables`,
+      `content.reading_order`, `source.sha256`, `pages[].text_layer|needs_ocr|needs_ocr_reason|ocr`,
+      `lines[].group_id|style`;
+    * `source.origin` → `digital`/`atr`/`legacy` (dropped when it maps to none), and each line's
+      `text_source` follows from it;
+    * a page whose lines were numbered from 0 (1.x digital-convert) is renumbered from 1, and the
+      entities on it follow;
+    * a `Garbage`/`Inverted` `categ` (a decode verdict) is dropped with its `quality_score`;
+    * a missing `pages[].page_index` is the numeric label, else the row's position; a missing
+      `content_status` follows from whether the page has lines (when the record has `lines`), and
+      an empty page loses its page score (D18 rule 7);
+      a canvas with no unit gets 1.x's default, `px`; a line with a box gets `bbox_precision:
+      measured`;
+    * a `quality_summary` is recomputed (`quality_summary()`): it reads the rows rewritten above.
     """
+    out = {k: v for k, v in record.items() if k not in REMOVED_BLOCKS}
+
+    source = out.get("source")
+    origin_2: Optional[str] = None
+    if isinstance(source, dict):
+        source = {k: v for k, v in source.items() if k in SOURCE_IDENTITY_FIELDS + SOURCE_DESCRIBED_FIELDS}
+        origin = source.pop("origin", None)
+        if isinstance(origin, str):
+            folded = origin.casefold()
+            origin_2 = next((new for prefix, new in _ORIGIN_1_TO_2 if folded.startswith(prefix)), None)
+        if origin_2:
+            source["origin"] = origin_2
+        out["source"] = source
+
+    content = out.get("content")
+    if isinstance(content, dict):
+        out["content"] = {k: v for k, v in content.items() if k not in REMOVED_FIELDS["content"]}
+
+    lines = out.get("lines")
+    offsets: Dict[str, int] = {}
+    if isinstance(lines, list):
+        first: Dict[str, int] = {}
+        for row in lines:
+            if isinstance(row, dict) and isinstance(row.get("line"), int) and not isinstance(row.get("line"), bool):
+                page = _key_value(row.get("page"))
+                first[page] = min(first.get(page, row["line"]), row["line"])
+        offsets = {page: 1 for page, low in first.items() if low == 0}
+        migrated: List[Any] = []
+        for row in lines:
+            if not isinstance(row, dict):
+                migrated.append(row)
+                continue
+            row = {k: v for k, v in row.items() if k not in REMOVED_FIELDS["lines"]}
+            if _key_value(row.get("page")) in offsets and isinstance(row.get("line"), int):
+                row["line"] = row["line"] + 1
+            if row.get("categ") in _DECODE_VERDICTS_1X:
+                row.pop("categ", None)
+                row.pop("quality_score", None)
+            if origin_2 and "text_source" not in row:
+                row["text_source"] = _TEXT_SOURCE_FOR_ORIGIN[origin_2]
+            if "bbox" in row and "bbox_precision" not in row:
+                row["bbox_precision"] = "measured"
+            migrated.append(row)
+        out["lines"] = migrated
+
+    entities = out.get("entities")
+    if offsets and isinstance(entities, list):
+        for row in entities:
+            if isinstance(row, dict) and _key_value(row.get("page")) in offsets and isinstance(row.get("line"), int):
+                row["line"] = row["line"] + 1
+
+    pages = out.get("pages")
+    if isinstance(pages, list):
+        with_lines = {_key_value(r.get("page")) for r in (lines or []) if isinstance(r, dict)} if isinstance(lines, list) else None
+        migrated_pages: List[Any] = []
+        for position, row in enumerate(pages, start=1):
+            if not isinstance(row, dict):
+                migrated_pages.append(row)
+                continue
+            row = {k: v for k, v in row.items() if k not in REMOVED_FIELDS["pages"]}
+            if not isinstance(row.get("page_index"), int) or isinstance(row.get("page_index"), bool):
+                label = str(row.get("page", ""))
+                row["page_index"] = int(label) if label.isdigit() and int(label) > 0 else position
+            if with_lines is not None and "content_status" not in row:
+                row["content_status"] = "text" if _key_value(row.get("page")) in with_lines else "empty"
+            if row.get("content_status") == "empty":  # an empty page carries no page score (D18 rule 7)
+                row.pop("quality_score", None)
+                row.pop("quality_band", None)
+            canvas = row.get("canvas")
+            if isinstance(canvas, dict) and "unit" not in canvas:
+                row["canvas"] = {**canvas, "unit": "px"}
+            migrated_pages.append(row)
+        out["pages"] = migrated_pages
+
+    if isinstance(out.get("quality_summary"), dict):  # a read-out of the rows just rewritten
+        out["quality_summary"] = quality_summary(out)
+
+    out["schema_version"] = "2.0"
+    return out
+
+
+def migrate_document(record: Dict[str, Any]) -> Dict[str, Any]:
+    """Apply schema migrations up to the current SCHEMA_VERSION (rule 6).
+
+    A record of an older MAJOR is rewritten step by step (`_migrate_1_to_2()`); a record of the
+    current major is returned as it is; a newer major is refused. A seed is identity only and is
+    the same in every major, so only its `schema_version` moves.
+    """
+    major = _major(record.get("schema_version", SCHEMA_VERSION))
+    current = _major(SCHEMA_VERSION)
+    if major > current:
+        raise ValueError(
+            f"Schema version {record.get('schema_version')} is newer than supported {SCHEMA_VERSION}. Please update tools."
+        )
+    if major == current:
+        return record
+    if is_seed(record):
+        return {**record, "schema_version": SCHEMA_VERSION}
+    if major == 1:
+        record = _migrate_1_to_2(record)
     return record
 
 
@@ -1547,13 +1059,13 @@ def load_schema() -> Dict[str, Any]:
 
 def validate_document(record: Dict[str, Any]) -> None:
     """
-    Validate a record against the canonical schema. Raises on failure, returns None on pass.
+    Validate a record against the canonical schema (the current major). Raises on failure,
+    returns None on pass.
 
-    The one call plan §2's Layer D needs, in the module that owns the contract, so the rule
-    "no doc.json is emitted if validation fails" does not have to be re-implemented per tool.
-    `jsonschema` is an optional import: without it this raises RuntimeError rather than
-    passing silently, because a validation gate that quietly becomes a no-op is worse than
-    no gate — you cannot tell the two apart from the output.
+    A record of an older major fails here: read it with `load_document()`, or pass it through
+    `migrate_document()` first. `jsonschema` is an optional import: without it this raises
+    RuntimeError rather than passing silently — a validation gate that quietly becomes a no-op is
+    worse than no gate.
     """
     try:
         import jsonschema
@@ -1573,8 +1085,8 @@ def validate_document(record: Dict[str, Any]) -> None:
 def is_seed(record: Any) -> bool:
     """True when `record` carries nothing beyond the seed's keys (`SEED_KEYS`).
 
-    That is the record before any tool has written to it: no `provenance`, no `assembled`, no
-    block. Whether it is a GOOD seed is `validate_seed()`'s question, not this one's.
+    That is the record before any tool has written to it. Whether it is a GOOD seed is
+    `validate_seed()`'s question, not this one's.
     """
     return isinstance(record, dict) and bool(record) and set(record) <= set(SEED_KEYS)
 
@@ -1585,8 +1097,9 @@ def seed_schema() -> Dict[str, Any]:
     A seed is `doc_id` and a `source` stating the archive's `sha512`, the file name and the media
     type (`SEED_SOURCE_REQUIRED`), optionally `schema_version` and `record_type`, and nothing
     else. Each property is the record schema's own subschema; the seed only adds what it
-    requires, refuses `source.origin` (left to the tool that reads the source) and closes the
-    top level. `python atrium_document.py seed-schema` prints it for a caller with no Python.
+    requires, refuses `source.origin` (the record builder's) and closes the top level. A seed is
+    identity only, the same in every major, so its `schema_version` may name any. `python
+    atrium_document.py seed-schema` prints it for a caller with no Python.
     """
     full = load_schema()
     props = full["properties"]
@@ -1608,7 +1121,7 @@ def seed_schema() -> Dict[str, Any]:
         "required": ["doc_id", "source"],
         "additionalProperties": False,
         "properties": {
-            "schema_version": copy.deepcopy(props["schema_version"]),
+            "schema_version": {"type": "string", "pattern": r"^[0-9]+\.[0-9]+$"},
             "record_type": record_type,
             "doc_id": copy.deepcopy(props["doc_id"]),
             "source": source,
@@ -1631,39 +1144,24 @@ def validate_seed(record: Dict[str, Any]) -> None:
 def validate_baseline(record: Dict[str, Any]) -> None:
     """Validate a record a tool was HANDED: a seed against the seed profile, anything else in full.
 
-    The inherited-baseline half of every tool's Layer D gate calls this instead of
-    `validate_document()`. A seed lacks `provenance` and `assembled`, so the full schema refused
-    it, and each tool then demoted its OWN output check to a warning as if it had inherited a
-    defect — on exactly the path the AMČR pilot uses. A record a tool emits is still checked
-    with `validate_document()`.
+    A 1.x baseline is checked as it will be used, after `migrate_document()` (on a copy). A record
+    a tool emits is still checked with `validate_document()`.
     """
     if is_seed(record):
         validate_seed(record)
     else:
-        validate_document(record)
+        validate_document(migrate_document(copy.deepcopy(record)))
 
 
 def load_document(path: str) -> Dict[str, Any]:
-    """Read a document record, migrating older schemas transparently (rule 6).
+    """Read a document record, migrating an older major transparently (rule 6).
 
     ``utf-8-sig`` reads a record with or without a UTF-8 byte-order mark (a seed saved by a
-    Windows editor has one). The services' ``atrium_service.parse_record_part`` accepts one,
-    so the file a service writes from that part must load here (atrium-project#32 round 2);
-    it used to fail with "Unexpected UTF-8 BOM".
+    Windows editor has one). A newer major is refused.
     """
     with open(path, "r", encoding="utf-8-sig") as fh:
         data = json.load(fh)
-
-    v = str(data.get("schema_version", SCHEMA_VERSION))
-    major = int(v.split(".")[0])
-    current_major = int(SCHEMA_VERSION.split(".")[0])
-
-    if major > current_major:
-        raise ValueError(f"Schema version {v} is newer than supported {SCHEMA_VERSION}. Please update tools.")
-    elif major < current_major:
-        data = migrate_document(data)
-
-    return data
+    return migrate_document(data)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -1681,20 +1179,22 @@ def _score(value: Any) -> Optional[float]:
 def quality_summary(record: Dict[str, Any]) -> Dict[str, Any]:
     """The `quality_summary` block of `record`: numbers read off its stored quality fields.
 
-    * `pages`: `total` rows; `scored`, those with a `quality_score`; and `mean`, `median`, `min`,
-      `max` of those scores (absent when none is scored);
-    * `lines`: `total` rows; `by_categ`, rows per `categ` value, in key order.
+    * `pages`: `total` rows; `empty`, those with `content_status: empty` (counted apart, D18 rule
+      7); `scored`, those with a `quality_score`; and `mean`, `median`, `min`, `max` of those
+      scores (absent when none is scored);
+    * `lines`: `total` rows; `by_categ`, visual lines per `categ` value, in key order; and, when
+      there are any, `block_units`, the rows marked `unit: block` (a whole block scored as one unit,
+      D18 rule 5), which stay out of `by_categ`.
 
-    Pure and deterministic: the same `pages[]` and `lines[]` give the same dict, whatever else the
-    record holds; statistics are rounded to four decimals. It sets no threshold and makes no band,
-    so nothing in it can gate or route a document: `pages[].quality_score` stays the signal, and a
-    consumer computes its own bands from it (atrium-project#73). ocr-postprocess, the owner of the
-    quality model, writes the block whenever it writes or scores pages and lines.
+    Pure and deterministic; statistics are rounded to four decimals. It sets no threshold and
+    makes no band, so nothing in it can gate or route a document. The record builder writes it
+    whenever it writes or scores pages and lines.
     """
     rows = record.get("pages")
     pages = [row for row in (rows if isinstance(rows, list) else []) if isinstance(row, dict)]
     scores = sorted(s for s in (_score(row.get("quality_score")) for row in pages) if s is not None)
-    page_part: Dict[str, Any] = {"total": len(pages), "scored": len(scores)}
+    empty = sum(1 for row in pages if row.get("content_status") == "empty")
+    page_part: Dict[str, Any] = {"total": len(pages), "empty": empty, "scored": len(scores)}
     if scores:
         middle = len(scores) // 2
         median = scores[middle] if len(scores) % 2 else (scores[middle - 1] + scores[middle]) / 2
@@ -1706,14 +1206,18 @@ def quality_summary(record: Dict[str, Any]) -> Dict[str, Any]:
         )
     lines = [row for row in record.get("lines") or [] if isinstance(row, dict)]
     by_categ: Dict[str, int] = {}
+    block_units = 0
     for row in lines:
+        if row.get("unit") == "block":
+            block_units += 1
+            continue
         categ = row.get("categ")
         if isinstance(categ, str) and categ:
             by_categ[categ] = by_categ.get(categ, 0) + 1
-    return {
-        "pages": page_part,
-        "lines": {"total": len(lines), "by_categ": dict(sorted(by_categ.items()))},
-    }
+    line_part: Dict[str, Any] = {"total": len(lines), "by_categ": dict(sorted(by_categ.items()))}
+    if block_units:
+        line_part["block_units"] = block_units
+    return {"pages": page_part, "lines": line_part}
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -1726,75 +1230,34 @@ def merge_document_records(json_paths: List[str], out_path: str) -> str:
     Fold several partial records for the SAME document into one.
 
     The pipeline is linear, so the normal path needs no merge — each tool hands its output to
-    the next. This exists for fan-out/fan-in (e.g. two tools run in parallel on one document)
-    and resolves per block using `assembled.blocks[*].updated_at`: newest contribution wins.
-
-    Three keys are NOT resolved that way, because "newest wins" is wrong for them:
-
-    * **`source`** is first-writer-wins for the life of the record (and since Issue #18 §1a
-      it is what authorises the positional plane). It carries no `assembled.blocks` stamp, so
-      both sides of the `updated_at` comparison were the empty string, `"" >= ""` was true,
-      and every input file overwrote the previous one — last-path-wins, silently, dropping
-      the first record's `sha256` and able to swap the origin out from under an
-      already-written plane. Now the first non-empty value wins per sub-key, and a
-      contradiction between two inputs is reported rather than resolved by argument order.
-    * **`derived_from`** and **`regenerable`** are append-only maps whose whole purpose is to
-      accumulate one entry per stage. Replacing them wholesale threw away every entry the
-      losing branch had added — real provenance loss on exactly the fan-in this function
-      exists for. They are merged key-wise instead, first writer winning per key.
-
-    A fan-in is also a third write path that bypassed the §1a check entirely, so the merged
-    positional plane is verified against the merged `source.origin` at the end. Two stamps by
-    ocr-postprocess are not a second originator there: a scoring contribution (SCORING_FIELDS),
-    and the OCR hand-off (OCR_HANDOFF) while the merged `pages[]` still flags a page.
+    the next. This exists for fan-out/fan-in. Since 2.0 the record has no stamps saying which run
+    wrote a block, so blocks are taken in ARGUMENT order: pass the records in chain order, and a
+    later record's block replaces an earlier one's. `source` is first-writer-wins per field, and a
+    contradiction between two inputs is an error, not resolved by order. Records of an older
+    major are migrated as they are read.
     """
     if not json_paths:
         raise ValueError("no record paths given")
 
     merged: Dict[str, Any] = {}
-    stamps: Dict[str, Dict[str, Any]] = {}
-    license_blocks: List[Dict[str, Any]] = []
-    contributors: List[Dict[str, str]] = []
     doc_ids: List[str] = []
     source: Dict[str, Any] = {}
     source_conflicts: List[str] = []
-    accumulating: Dict[str, Dict[str, Any]] = {"derived_from": {}, "regenerable": {}}
 
     for p in json_paths:
         data = load_document(p)
         doc_id = data.get("doc_id", "")
         if doc_id and doc_id not in doc_ids:
             doc_ids.append(doc_id)
-
-        blocks = (data.get("assembled") or {}).get("blocks") or {}
-        prov = data.get("provenance") or {}
-        if prov.get("license_detail"):
-            license_blocks.append(prov["license_detail"])
-        for c in prov.get("contributors") or []:
-            if c not in contributors:
-                contributors.append(c)
-
         for key, value in (data.get("source") or {}).items():
             if key not in source:
                 source[key] = value
-            elif source[key] != value:
+            elif source[key] != value and key not in SOURCE_DESCRIPTIVE_FIELDS:
                 source_conflicts.append(f"{key}: {source[key]!r} kept, {value!r} from {p} discarded")
-
-        for key, bucket in accumulating.items():
-            for sub, value in (data.get(key) or {}).items():
-                bucket.setdefault(sub, value)
-
         for key, value in data.items():
-            if key in ("assembled", "provenance", "source") or key in accumulating:
+            if key in ("source", "schema_version", "record_type"):
                 continue
-            incoming = blocks.get(key, {}).get("updated_at", "")
-            held = stamps.get(key, {}).get("updated_at", "")
-            # `>` not `>=`: on a tie (or on two unstamped keys) the FIRST record read wins,
-            # so the result does not depend on the order json_paths happens to be in.
-            if key not in merged or incoming > held:
-                merged[key] = value
-                if key in blocks:
-                    stamps[key] = blocks[key]
+            merged[key] = value
 
     if len(doc_ids) > 1:
         raise ValueError(f"records belong to different documents: {doc_ids}")
@@ -1804,64 +1267,16 @@ def merge_document_records(json_paths: List[str], out_path: str) -> str:
             + "; ".join(sorted(source_conflicts))
         )
 
+    out: Dict[str, Any] = {"schema_version": SCHEMA_VERSION, "record_type": RECORD_TYPE_MERGED}
+    if "doc_id" in merged:
+        out["doc_id"] = merged.pop("doc_id")
     if source:
-        merged["source"] = source
-    for key, bucket in accumulating.items():
-        if bucket:
-            merged[key] = bucket
-
-    # Issue #18 §1a on the fan-in path: a merged record must not carry half an OCR
-    # positional plane and half a digital-born one. Each block's stamp names who wrote it,
-    # and `source.origin` says who was authorised to.
-    authorised = resolve_originator(source.get("origin"))
-    if authorised:
-        for block, stamp in stamps.items():
-            if len(_originator_candidates(block)) < 2:
-                continue
-            wrote = stamp.get("program")
-            if stamp.get("contribution") == "scoring" and same_program(wrote, SCORING_PROGRAM):
-                continue  # a score on the originator's rows (SCORING_FIELDS), not a second plane
-            if (
-                stamp.get("contribution") == OCR_HANDOFF
-                and same_program(wrote, OCR_HANDOFF_PROGRAM)
-                and ocr_handoff_pages(merged.get("pages"))
-            ):
-                continue  # the needs_ocr pages re-acquired by OCR (OCR_HANDOFF), not a second plane
-            if wrote and wrote in _owner_candidates(block) and not same_program(wrote, authorised):
-                raise ValueError(
-                    f"merged record mixes positional originators: block {block!r} was written "
-                    f"by {wrote!r} but source.origin {source['origin']!r} authorises "
-                    f"{authorised!r}. One of the inputs was produced outside the §1a contract."
-                )
-
-    if merge_effective_licenses is not None and license_blocks:
-        lic = merge_effective_licenses(license_blocks)
-    else:
-        lic = {
-            "effective_license": LICENSE_NAME,
-            "effective_license_url": LICENSE_URL,
-            "notes": "License helper unavailable; defaulted to CC BY-NC 4.0.",
-        }
-
-    merged["schema_version"] = SCHEMA_VERSION
-    merged["record_type"] = RECORD_TYPE_MERGED
-    merged["provenance"] = {
-        "license": lic["effective_license"],
-        "license_url": lic["effective_license_url"],
-        "license_basis": LICENSE_BASIS_CALCULATED,
-        "license_detail": lic,
-        "contributors": contributors,
-    }
-    merged["assembled"] = {
-        "blocks": stamps,
-        "merged_from": len(json_paths),
-        "merged_at": _utc_now_iso(),
-        "note": "Blocks reflect CONTRIBUTED steps only; newest contribution per block wins.",
-    }
+        out["source"] = source
+    out.update(merged)
 
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as fh:
-        json.dump(merged, fh, ensure_ascii=False, indent=2)
+        json.dump(out, fh, ensure_ascii=False, indent=2)
     print(f"[document] Merged record → {out_path}", flush=True)
     return out_path
 
@@ -1884,12 +1299,10 @@ def _cli() -> None:
     st.add_argument("--payload", required=True, help="path to a JSON file, or '-' for stdin")
     st.add_argument("--baseline", default=None, help="previous version of the record")
     st.add_argument("--out", default=None)
-    st.add_argument("--run-id", default=None)
-    st.add_argument("--run-uuid", default=None, help="the run's urn:uuid (atrium_paradata run_uuid)")
-    st.add_argument("--paradata-ref", default="")
+    st.add_argument("--written", default=None, help="also write the blocks and fields written, as JSON, here")
     st.add_argument("--strict", action="store_true")
 
-    me = sub.add_parser("merge", help="fold parallel partial records for one document")
+    me = sub.add_parser("merge", help="fold parallel partial records for one document (chain order)")
     me.add_argument("--paths", nargs="+", required=True)
     me.add_argument("--out", required=True)
 
@@ -1902,18 +1315,13 @@ def _cli() -> None:
 
     if args.cmd == "set-block":
         raw = sys.stdin.read() if args.payload == "-" else open(args.payload, encoding="utf-8").read()
-        with DocumentRecord.open(
-            args.doc_id,
-            args.program,
-            baseline=args.baseline,
-            run_id=args.run_id,
-            run_uuid=args.run_uuid,
-            paradata_ref=args.paradata_ref,
-            strict=args.strict,
-        ) as doc:
+        with DocumentRecord.open(args.doc_id, args.program, baseline=args.baseline, strict=args.strict) as doc:
             doc.set_block(args.block, json.loads(raw))
             if args.out:
                 doc.finalize(args.out)
+            if args.written:
+                with open(args.written, "w", encoding="utf-8") as fh:
+                    json.dump(doc.written(), fh, ensure_ascii=False, indent=2)
 
     elif args.cmd == "merge":
         merge_document_records(args.paths, args.out)

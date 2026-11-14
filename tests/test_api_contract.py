@@ -207,7 +207,7 @@ import atrium_openapi  # noqa: E402
 _SPEC = atrium_openapi.load(Path(__file__).resolve().parent.parent / "service" / "openapi.json")
 _SEED_ID = "C-202000543A-DT-27"
 #: A #67 R1 seed: the AMČR file id and the source, nothing else.
-_SEED = {"doc_id": _SEED_ID, "source": {"sha256": "9" * 64, "filename": "scan_0001.png"}}
+_SEED = {"doc_id": _SEED_ID, "source": {"sha512": "9" * 128, "filename": "scan_0001.png", "media_type": "image/png"}}
 
 
 class _CountingManager:
@@ -314,12 +314,14 @@ def test_an_image_response_conforms_with_every_field_present(manager):
     assert body["models_used"] == ["v1.4", "v2.4", "v3.4", "v4.4", "v5.4"]
     # response_model sends every field: the nullable ones as null
     assert (body["document_json"], body["document_json_schema_error"]) == (None, None)
-    # ...and the call's CreateAction on every success (atrium-project#71 R2): with no record asked
-    # for, what it wrote is the predictions it answers with.
+    # ...and the call's CreateAction on every success (paradata 3.0, atrium-project#84): with no
+    # record asked for, it read the original and stored nothing, so it has no result (the
+    # predictions are the response, not a distribution).
     import atrium_rocrate
 
     assert atrium_rocrate.action_problems(body["paradata"]) == []
-    assert [item["name"] for item in body["paradata"]["result"]] == ["predictions.json"]
+    assert [item["name"] for item in body["paradata"]["object"]] == ["original"]
+    assert "result" not in body["paradata"]
 
 
 def test_an_image_response_with_a_seed_conforms_including_the_record(manager):
@@ -333,30 +335,38 @@ def test_an_image_response_with_a_seed_conforms_including_the_record(manager):
     assert body["document_json"]["doc_id"] == _SEED_ID and body["document_json"]["page_categories"] == {"1": "TEXT"}
 
 
-def test_the_action_is_the_run_the_record_is_stamped_with(manager):
-    """atrium-project#71 R2: the CreateAction's `@id` is the run_uuid stamped into the blocks this
-    call wrote; `object` names the upload and the record sent with it, `result` the two blocks."""
+def test_the_action_names_what_the_call_read_and_wrote(manager):
+    """Paradata 3.0 (atrium-project#84): the record carries no stamp. `object` names the original
+    and the record version read, `result` the record written with the blocks and fields this call
+    wrote, every one by distribution name and SHA-512."""
+    import hashlib
+
     import atrium_rocrate
 
+    seed = json.dumps(_SEED).encode()
     files = {
         "file": ("scan_0001.png", _png(), "image/png"),
-        "document_json": ("seed.document.json", json.dumps(_SEED).encode(), "application/json"),
+        "document_json": ("seed.document.json", seed, "application/json"),
     }
     body = _conforms(200, client.post("/predict_image", files=files), "/predict_image")
     action, record = body["paradata"], body["document_json"]
     assert atrium_rocrate.action_problems(action) == []
-    stamps = record["assembled"]["blocks"]
-    assert action["@id"] == stamps["page_categories"]["run_uuid"] == stamps["pages"]["run_uuid"]
-    assert record["assembled"]["blocks"]["pages"]["paradata_ref"] == action["@id"]
-    assert [item["@id"] for item in action["object"]][1:] == ["#record"]
-    assert {"#block-page_categories", "#block-pages"} <= {item["@id"] for item in action["result"]}
+    assert "assembled" not in record and "provenance" not in record
+    assert [item["name"] for item in action["object"]] == ["original", "atrium/document-json"]
+    assert action["object"][1]["sha512"] == hashlib.sha512(seed).hexdigest()
+    (written,) = action["result"]
+    assert written["name"] == "atrium/document-json"
+    assert written["recordFields"] == {
+        "page_categories": ["1"],
+        "pages": ["page_index", "category", "category_confidence"],
+    }
 
 
-def test_an_empty_record_part_still_originates_the_record(manager):
-    """page-classification is stage 1: sending the part at all opts into the record, as it did."""
+def test_an_empty_record_part_still_starts_a_record(manager):
+    """Sending the part at all opts into the record, as it did: a standalone record (rule 3)."""
     files = {"file": ("CTX01_0007.png", _png(), "image/png"), "document_json": ("e.json", b"", "application/json")}
     body = _conforms(200, client.post("/predict_image", files=files), "/predict_image")
-    assert body["document_json"]["assembled"]["had_baseline"] is False
+    assert [row["page_index"] for row in body["document_json"]["pages"]] == [7]
 
 
 def test_a_document_response_conforms(manager, pdfium):
@@ -376,7 +386,8 @@ def test_a_document_response_conforms(manager, pdfium):
 
     action = body["paradata"]
     assert atrium_rocrate.action_problems(action) == []
-    assert action["@id"] == body["document_json"]["assembled"]["blocks"]["page_categories"]["run_uuid"]
+    assert action["@id"] == action["paradataRecord"]["run_uuid"]
+    assert [item["name"] for item in action["result"]] == ["atrium/document-json"]
     assert "pypdfium2" in json.dumps(action["paradataRecord"])
 
 

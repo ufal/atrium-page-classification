@@ -5,10 +5,17 @@ Bridges the classifier's per-page top-N predictions (a FILE/PAGE/CLASS-N/SCORE-N
 see utils.dataframe_results / ensemble.average_rdfs) into AtriumDocument records via
 atrium_document.DocumentRecord, writing only this tool's owned block(s):
 
-  * `page_categories`             — whole block, owned outright (BLOCK_OWNERS).
-  * `pages[].category`            — field-level, shared with alto-postprocess/nlp-enrich
+  * `page_categories`             — whole block, owned outright (BLOCK_OWNERS), keyed by the
+                                    record's page label.
+  * `pages[].category`            — field-level, shared with ocr-postprocess/nlp-enrich
   * `pages[].category_confidence`   (BLOCK_FIELD_OWNERS), written via merge_block() so a
-                                    co-contributor's fields on the same page row survive.
+                                    co-contributor's fields on the same page row survive. Rows
+                                    are keyed by `page_index`, the physical page (record schema
+                                    2.0, H2): the record builder writes the rows and their labels.
+
+Record schema 2.0 (atrium-project#84): the record carries no run data and no licence, so nothing
+here stamps a run or names the classification table; what a run wrote goes to its paradata
+(`record_fields`, from `DocumentRecord.written()`).
 
 Two entry points mirror run.py's two CLI shapes exactly, so neither has to guess at the other's
 path semantics from a shared, overloaded pair of kwargs:
@@ -49,6 +56,9 @@ from atrium_document import (
 )
 
 PROGRAM = "page-classification"
+
+#: The AMČR distribution name of the record (paradata 3.0 inputs and outputs).
+RECORD_DISTRIBUTION = "atrium/document-json"
 
 #: This tool's field-level grant in the `pages` block — must stay a subset of
 #: BLOCK_FIELD_OWNERS["pages"]["page-classification"]. Named once, rather than repeated as a
@@ -109,8 +119,30 @@ def schema_error(record: dict, what: str, validate: Optional[Callable[[dict], No
     return None
 
 
-def _page_patches(group: pd.DataFrame) -> tuple[dict, list]:
-    """Build (page_categories, pages[]-patch) from one document's prediction rows."""
+def _page_index(row: pd.Series, label_index: dict) -> int:
+    """The physical page (`pages[].page_index`) of one prediction row.
+
+    `PAGE_INDEX` when the caller knows it (a rendered PDF page, the service), else a numeric
+    `PAGE` (an image's page suffix is its physical page), else the baseline row that carries
+    the label. A row none of these places is refused: writing it under a guessed page would
+    attach the category to another page's row.
+    """
+    value = row.get("PAGE_INDEX") if "PAGE_INDEX" in row else None
+    if value is not None and pd.notna(value):
+        return int(value)
+    label = str(row["PAGE"])
+    if label.isdigit() and int(label) >= 1:
+        return int(label)
+    if label in label_index:
+        return label_index[label]
+    raise ValueError(f"page {label!r} of {row.get('FILE')!r} has no page_index and no baseline row names it")
+
+
+def _page_patches(group: pd.DataFrame, label_index: Optional[dict] = None) -> tuple[dict, list]:
+    """Build (page_categories, pages[]-patch) from one document's prediction rows.
+
+    `page_categories` is keyed by the page label (`PAGE`); the `pages[]` rows by `page_index`.
+    """
     page_categories: dict = {}
     page_patches: list = []
 
@@ -119,7 +151,7 @@ def _page_patches(group: pd.DataFrame) -> tuple[dict, list]:
         cat = row["CLASS-1"]
 
         page_categories[page_str] = cat
-        patch = {"page": page_str, "category": cat}
+        patch = {"page_index": _page_index(row, label_index or {}), "category": cat}
         # Only add confidence if it exists (handles top_N == 1 missing score safely)
         if "SCORE-1" in row and pd.notna(row["SCORE-1"]):
             # 3 decimals from either entry point: the CLI's tables are rounded, the service's answer
@@ -131,16 +163,13 @@ def _page_patches(group: pd.DataFrame) -> tuple[dict, list]:
     return page_categories, page_patches
 
 
-def _run_id_and_ref(paradata_logger: Any) -> tuple[Optional[str], str]:
-    if paradata_logger is None:
-        return None, ""
-    run_id = getattr(paradata_logger, "run_id", None)
-    if hasattr(paradata_logger, "paradata_dir") and not paradata_logger.paradata_dir:
-        # A service run writes no paradata file (atrium-project#71): its stamp points at the
-        # run_uuid, the `@id` of the CreateAction the response carries.
-        return run_id, str(getattr(paradata_logger, "paradata_ref", "") or "")
-    ref = f"paradata/{run_id}_{PROGRAM}.json" if run_id else ""
-    return run_id, ref
+def _label_index(record: dict) -> dict:
+    """{page label: page_index} of a record's page rows that carry both (the record builder's)."""
+    index: dict = {}
+    for row in record.get("pages") or []:
+        if isinstance(row, dict) and isinstance(row.get("page_index"), int) and row.get("page") not in (None, ""):
+            index.setdefault(str(row["page"]), row["page_index"])
+    return index
 
 
 def _write_one(
@@ -149,13 +178,14 @@ def _write_one(
     *,
     baseline: Optional[str],
     out_path: str,
-    classification_csv_ref: Optional[str],
     paradata_logger: Any,
     strict: bool,
 ) -> str:
-    """Build one document's record and atomically write it to out_path."""
-    page_categories, page_patches = _page_patches(group)
-    run_id, paradata_ref = _run_id_and_ref(paradata_logger)
+    """Build one document's record and atomically write it to out_path.
+
+    With a `paradata_logger`, the run's paradata name the record version read (input) and the
+    record written with the blocks and fields this run wrote (output), by SHA-512.
+    """
 
     # Layer D, first half (atrium-project#10, D4): judge the baseline as it ARRIVED, before
     # DocumentRecord.open() re-reads it below, so the verdict is about the UPSTREAM tool's output
@@ -178,16 +208,8 @@ def _write_one(
                 file=sys.stderr,
             )
 
-    doc = DocumentRecord.open(
-        doc_id,
-        PROGRAM,
-        baseline=baseline,
-        run_id=run_id,
-        # (atrium-project#71) the run's CreateAction `@id`, stamped with every block it writes.
-        run_uuid=getattr(paradata_logger, "run_uuid", None),
-        paradata_ref=paradata_ref,
-        strict=strict,
-    )
+    doc = DocumentRecord.open(doc_id, PROGRAM, baseline=baseline, strict=strict)
+    page_categories, page_patches = _page_patches(group, _label_index(doc.to_dict()))
 
     # `page_categories` is a whole-block, single-owner block (rule 2: "own block only"), so a
     # set_block() call replaces it entirely. That's only correct if the payload already reflects
@@ -201,7 +223,7 @@ def _write_one(
     doc.merge_block(
         "pages",
         page_patches,
-        key_fields=["page"],
+        key_fields=["page_index"],
         own_fields=OWN_PAGE_FIELDS,
     )
     # Issue #18 §1b, adopted for atrium-project#10 (D8). merge_block() filters silently by
@@ -218,14 +240,6 @@ def _write_one(
     # the global warn_dropped_fields=True, which the module's own docstring notes needs a
     # call-site cleanup pass first.
     doc.assert_fields_survived("pages", page_patches)
-
-    if classification_csv_ref:
-        doc.add_derived_from("classification", classification_csv_ref)
-
-    if paradata_logger is not None:
-        license_block = paradata_logger.get_license_block()
-        if license_block:
-            doc.add_license_detail(license_block)
 
     record = doc.to_dict()
 
@@ -258,6 +272,12 @@ def _write_one(
     with open(tmp_p, "w", encoding="utf-8") as fh:
         json.dump(record, fh, ensure_ascii=False, indent=2)
     tmp_p.replace(out_p)
+    if paradata_logger is not None:
+        if baseline and os.path.exists(baseline):
+            paradata_logger.add_input(RECORD_DISTRIBUTION, path=baseline, media_type="application/json")
+        paradata_logger.add_output(
+            RECORD_DISTRIBUTION, path=str(out_p), media_type="application/json", record_fields=doc.written()
+        )
     return str(out_p)
 
 
@@ -266,7 +286,6 @@ def write_document_record(
     *,
     document_json: Optional[str] = None,
     document_json_out: Optional[str] = None,
-    classification_csv_ref: Optional[str] = None,
     paradata_logger: Any = None,
     strict: bool = False,
 ) -> Optional[str]:
@@ -284,7 +303,6 @@ def write_document_record(
         rdf,
         baseline=document_json,
         out_path=document_json_out,
-        classification_csv_ref=classification_csv_ref,
         paradata_logger=paradata_logger,
         strict=strict,
     )
@@ -295,7 +313,6 @@ def write_document_records_dir(
     *,
     document_json_dir: Optional[str] = None,
     document_json_out_dir: Optional[str] = None,
-    classification_csv_ref: Optional[str] = None,
     paradata_logger: Any = None,
     strict: bool = False,
 ) -> list:
@@ -331,7 +348,6 @@ def write_document_records_dir(
                 group,
                 baseline=baseline,
                 out_path=out_path,
-                classification_csv_ref=classification_csv_ref,
                 paradata_logger=paradata_logger,
                 strict=strict,
             )

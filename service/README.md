@@ -92,14 +92,14 @@ labels as `categories`.
 
 ### `POST /predict_image` (multipart form)
 
-| Field               | Default    | Notes                                                                                                                                                                                                                                                                                                                                                                                                                       |
-|---------------------|------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `file`              | *required* | The image, any `image/*` type Pillow reads (PNG, JPEG, TIFF, …). An upload sent without a media type, or as `application/octet-stream`, is taken when its bytes are an image, as the command line takes a file. Any other media type, or such an upload that is not an image, is refused with `415` `unsupported_media_type`; an `image/*` upload that cannot be read, with `422`.                                          |
-| `version`           | `all`      | `all` (the ensemble) or a model revision (for example `v4.4`; `/info` `available_models` lists the published ones). A value no revision matches is refused with `422` before any model runs.                                                                                                                                                                                                                                |
-| `topn`              | `3`        | Number of top predictions to return, 1–11 (one per category). Outside that range the request is refused with `422`.                                                                                                                                                                                                                                                                                                         |
-| `document_json`     | none       | A baseline **ATRIUM document record** to add to (the service equivalent of the command line's `--document-json`), or an AMČR seed (`doc_id`, `source`). One that cannot be opened (not UTF-8 JSON, not an object, a newer `schema_version` major) is refused with `422` `invalid_record` before any model runs. An empty part means "no baseline" but still asks for a record, which this first-stage tool then originates. |
-| `document_json_out` | `false`    | Boolean. Return a record even when no baseline is uploaded (the equivalent of `--document-json-out`). page-classification is the first stage of the pipeline, so it *originates* the record as often as it updates one.                                                                                                                                                                                                     |
-| `per_model`         | `false`    | Boolean. Also return each model revision's own `topn` categories in `per_model` (per page for `/predict_document`): with `version=all`, the five votes behind the averaged `predictions`, as the command line's `--best --save-intermediates` writes them. When false, `per_model` is `null`.                                                                                                                               |
+| Field               | Default    | Notes                                                                                                                                                                                                                                                                                                                                                                                                                    |
+|---------------------|------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `file`              | *required* | The image, any `image/*` type Pillow reads (PNG, JPEG, TIFF, …). An upload sent without a media type, or as `application/octet-stream`, is taken when its bytes are an image, as the command line takes a file. Any other media type, or such an upload that is not an image, is refused with `415` `unsupported_media_type`; an `image/*` upload that cannot be read, with `422`.                                       |
+| `version`           | `all`      | `all` (the ensemble) or a model revision (for example `v4.4`; `/info` `available_models` lists the published ones). A value no revision matches is refused with `422` before any model runs.                                                                                                                                                                                                                             |
+| `topn`              | `3`        | Number of top predictions to return, 1–11 (one per category). Outside that range the request is refused with `422`.                                                                                                                                                                                                                                                                                                      |
+| `document_json`     | none       | A baseline **ATRIUM document record** to add to (the service equivalent of the command line's `--document-json`), or an AMČR seed (`doc_id`, `source`). One that cannot be opened (not UTF-8 JSON, not an object, a newer `schema_version` major) is refused with `422` `invalid_record` before any model runs. An empty part means "no baseline" but still asks for a record, which then holds only this tool's blocks. |
+| `document_json_out` | `false`    | Boolean. Return a record even when no baseline is uploaded (the equivalent of `--document-json-out`): a standalone record with this tool's blocks only, its page rows keyed by `page_index`.                                                                                                                                                                                                                             |
+| `per_model`         | `false`    | Boolean. Also return each model revision's own `topn` categories in `per_model` (per page for `/predict_document`): with `version=all`, the five votes behind the averaged `predictions`, as the command line's `--best --save-intermediates` writes them. When false, `per_model` is `null`.                                                                                                                            |
 
 ```bash
 curl -X POST "http://localhost:8000/predict_image" \
@@ -152,13 +152,13 @@ record through the API exactly as it does through the command line: each stage a
 others on.
 
 ```bash
-# add to an upstream record (alto-postprocess → page-classification)
+# add to an upstream record (the record builder's → page-classification)
 curl -X POST "http://localhost:8000/predict_image" \
   -F "file=@CTX000000001_0007.png" \
   -F "document_json=@CTX000000001.document.json" \
   -F "version=v4.4"
 
-# or originate one (first stage, no baseline to inherit)
+# or start a standalone one (no baseline to inherit)
 curl -X POST "http://localhost:8000/predict_image" \
   -F "file=@CTX000000001_0007.png" \
   -F "document_json_out=true"
@@ -289,11 +289,13 @@ renderer of the training pages is measured in
 thread-safe, so the service holds one process-wide lock while it opens and renders; the model runs outside the lock,
 and concurrent requests queue only for the rendering.
 
-**Provenance.** Every successful call returns `paradata`, the call's Process Run Crate `CreateAction`, built by
-`atrium_rocrate.create_action()` as in the other ATRIUM services. `object` is the upload and, when one was sent, the
-record. `result` is the record blocks the call stamped (`page_categories`, `pages`) and `predictions.json`, what it
-answered with. Its `@id` is the `run_uuid` stamped into those blocks, and `/predict_document` lists `pypdfium2` among
-the run's components. The service writes no paradata file.
+**Paradata.** Every successful call returns `paradata`, the call's Process Run Crate `CreateAction` (paradata 3.0,
+atrium-project#84), built by `atrium_rocrate.action_from_paradata()` as in the other ATRIUM services. `object` is the
+original (the upload, distribution `original`) and, when one was sent, the record version read
+(`atrium/document-json`), each by SHA-512. `result` is the record written, when one was asked for, with the blocks
+and fields the call wrote; the predictions are the answer, not a stored output, so they are not in it. The pages
+classified are a parameter, and `/predict_document` lists `pypdfium2` among the run's components. The record carries
+no run data; the service writes no paradata file.
 
 ## Shutdown behaviour
 

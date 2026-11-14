@@ -910,7 +910,6 @@ def main(argv=None):
                 rdf=rows,
                 document_json=args.document_json,
                 document_json_out=args.document_json_out,
-                classification_csv_ref=csv_ref,
                 paradata_logger=_paradata_logger,
                 strict=args.strict_document_json,
             )
@@ -919,7 +918,6 @@ def main(argv=None):
                 rdf=rows,
                 document_json_dir=args.document_json_dir,
                 document_json_out_dir=args.document_json_out_dir,
-                classification_csv_ref=csv_ref,
                 paradata_logger=_paradata_logger,
                 strict=args.strict_document_json,
             )
@@ -973,7 +971,6 @@ def main(argv=None):
                         rdf=single_rdf,
                         document_json=args.document_json,
                         document_json_out=args.document_json_out,
-                        classification_csv_ref=single_csv_path,
                         paradata_logger=_paradata_logger,
                         strict=args.strict_document_json,
                     )
@@ -1015,7 +1012,6 @@ def main(argv=None):
                                 rdf=avg_df,
                                 document_json=args.document_json,
                                 document_json_out=args.document_json_out,
-                                classification_csv_ref=avg_csv_path,
                                 paradata_logger=_paradata_logger,
                                 strict=args.strict_document_json,
                             )

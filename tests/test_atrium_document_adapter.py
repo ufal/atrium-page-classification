@@ -65,16 +65,10 @@ def _record(doc_id="CTX01", **blocks):
     """A record carrying the schema's top-level envelope, plus whatever blocks are asked for.
 
     Every hand-built record in this file goes through here so the envelope lives in one
-    place. It has already drifted once: atrium-project#54 froze the contract at 1.0 and
-    `required` grew from ``[schema_version, doc_id]`` to include ``record_type``,
-    ``provenance`` and ``assembled``, which silently invalidated every literal here.
-
-    ``source`` is not decoration. On top of ``required`` the schema has an anyOf: a record
-    must carry EITHER ``source`` — the originator's handshake, which ``set_source()`` writes
-    without stamping a block — OR an ``assembled.blocks`` naming at least one block it
-    actually holds. An empty ``assembled`` satisfies neither, so a fixture that stamps
-    nothing is legal only via ``source``. That is also what a real baseline looks like: it
-    reaches this tool from an originator that set it.
+    place. It has drifted twice: atrium-project#54 froze 1.0 with `provenance` and `assembled`
+    required, and record schema 2.0 (atrium-project#84) removed both again. A 2.0 record holds
+    content only; `source` (here as the record builder describes it) satisfies the floor of
+    "source or a content block", and page rows carry `page_index`.
 
     Fixtures that are MEANT to be rejected build on this too, and add their one deliberate
     violation. Otherwise they would be rejected for a missing top-level key as well, and a
@@ -82,12 +76,10 @@ def _record(doc_id="CTX01", **blocks):
     what happened here (see TestFixtureContract).
     """
     return {
-        "schema_version": "1.0",
+        "schema_version": "2.0",
         "record_type": "atrium-document",
         "doc_id": doc_id,
-        "provenance": {},
-        "assembled": {},
-        "source": {"origin": "ABBYY-ALTO"},
+        "source": {"origin": "legacy"},
         **blocks,
     }
 
@@ -104,13 +96,13 @@ class TestWriteDocumentRecord:
         assert result == str(out_path)
         data = load_document(str(out_path))
         assert data["page_categories"] == {"1": "Text"}
-        assert data["pages"] == [{"page": "1", "category": "Text", "category_confidence": 0.87}]
-        assert data["assembled"]["had_baseline"] is False
+        assert data["pages"] == [{"page_index": 1, "category": "Text", "category_confidence": 0.87}]
+        assert "assembled" not in data and "provenance" not in data
 
     def test_baseline_fields_survive_alongside_own_fields(self, tmp_path):
         baseline_path = tmp_path / "CTX01.in.json"
         baseline_path.write_text(
-            json.dumps(_record(pages=[{"page": "1", "quality_score": 0.9, "quality_band": "Clear"}]))
+            json.dumps(_record(pages=[{"page": "1", "page_index": 1, "quality_score": 0.9, "quality_band": "Clear"}]))
         )
         rdf = _rdf([{"FILE": "CTX01", "PAGE": "1", "CLASS-1": "Text", "SCORE-1": 0.87}])
         out_path = tmp_path / "CTX01.out.json"
@@ -168,8 +160,8 @@ class TestWriteDocumentRecordsDir:
             json.dumps(
                 _record(
                     pages=[
-                        {"page": "1", "quality_band": "Clear"},
-                        {"page": "2", "quality_band": "Noisy"},
+                        {"page": "1", "page_index": 1, "quality_band": "Clear"},
+                        {"page": "2", "page_index": 2, "quality_band": "Noisy"},
                     ]
                 )
             )
@@ -257,7 +249,7 @@ class TestLayerDValidationGate:
             tmp_path,
             "CTX01.in.json",
             _record(
-                pages=[{"page": "1", "quality_band": "Clear"}],
+                pages=[{"page": "1", "page_index": 1, "quality_band": "Clear"}],
                 lines=[{"page": "1"}],  # missing the required `line` — the ONLY defect here
             ),
         )
@@ -275,27 +267,27 @@ class TestLayerDValidationGate:
         assert "inherited baseline CTX01.in.json does not validate" in err
         assert "emitting it anyway because the baseline was already invalid" in err
 
-    def test_own_merge_repairs_a_baseline_defect_in_its_own_field_scope(self, tmp_path, capsys):
-        """Companion to the above, and the reason it uses `lines` rather than `pages`: a
-        baseline whose `pages[].page` is an int is invalid, but this tool's merge rewrites that
-        very key as a string, so the emitted record is valid again. The baseline warning still
-        fires (the upstream record WAS invalid, and that is worth saying) while the own-output
-        check finds nothing to complain about."""
+    def test_a_defect_in_the_builders_page_label_is_passed_through(self, tmp_path, capsys):
+        """Companion to the above, in `pages`: a baseline whose `pages[].page` is an int is
+        invalid. Since record schema 2.0 the rows are keyed by `page_index` and the label is the
+        record builder's field, so this tool neither rewrites nor repairs it: the category lands
+        on the row, the defect passes through, and both warnings fire."""
         baseline = _baseline(
             tmp_path,
             "CTX01.in.json",
             # `page` an int, not a string — the ONLY defect here.
-            _record(pages=[{"page": 1}]),
+            _record(pages=[{"page": 1, "page_index": 1}]),
         )
-        rdf = _rdf([{"FILE": "CTX01", "PAGE": "1", "CLASS-1": "Text", "SCORE-1": 0.87}])
+        rdf = _rdf([{"FILE": "CTX01", "PAGE_INDEX": 1, "PAGE": "1", "CLASS-1": "Text", "SCORE-1": 0.87}])
         out_path = tmp_path / "CTX01.out.json"
 
         write_document_record(rdf=rdf, document_json=str(baseline), document_json_out=str(out_path))
 
-        validate_document(load_document(str(out_path)))
+        data = load_document(str(out_path))
+        assert data["pages"] == [{"page": 1, "page_index": 1, "category": "Text", "category_confidence": 0.87}]
         err = capsys.readouterr().err
         assert "inherited baseline CTX01.in.json does not validate" in err
-        assert "emitting it anyway" not in err
+        assert "emitting it anyway" in err
 
     def test_valid_baseline_does_not_demote_the_own_output_check(self, tmp_path):
         """The demotion must be conditional. With a VALID baseline, an invalid own output is
@@ -304,7 +296,7 @@ class TestLayerDValidationGate:
         baseline = _baseline(
             tmp_path,
             "CTX01.in.json",
-            _record(pages=[{"page": "1", "quality_band": "Clear"}]),
+            _record(pages=[{"page": "1", "page_index": 1, "quality_band": "Clear"}]),
         )
         rdf = _rdf([{"FILE": "CTX01", "PAGE": "1", "CLASS-1": "Text", "SCORE-1": 1.5}])
         out_path = tmp_path / "CTX01.out.json"
@@ -324,8 +316,8 @@ class TestLayerDValidationGate:
         }
 
     def test_a_seed_baseline_is_checked_against_the_seed_profile(self, tmp_path, capsys):
-        """A seed has no `provenance` or `assembled`, so the full schema refuses it. Judged by
-        that schema, every pilot run warned that its baseline was invalid and demoted its own
+        """A seed is identity only, so the full schema refuses it (no content block). Judged by
+        that schema, every pilot run would warn that its baseline was invalid and demote its own
         output check; `validate_baseline` checks a seed against the seed profile instead."""
         baseline = _baseline(tmp_path, "CTX01.seed.json", self._seed())
         rdf = _rdf([{"FILE": "CTX01", "PAGE": "1", "CLASS-1": "Text", "SCORE-1": 0.87}])
@@ -407,8 +399,8 @@ class TestFieldSurvivalAssertion:
         the assertion, merge_block() drops it in silence and the record still validates."""
         real_page_patches = adapter._page_patches
 
-        def _leaky_page_patches(group):
-            page_categories, patches = real_page_patches(group)
+        def _leaky_page_patches(group, *args):
+            page_categories, patches = real_page_patches(group, *args)
             for patch in patches:
                 patch["quality_band"] = "Clear"  # alto-postprocess's field, not ours
             return page_categories, patches
@@ -438,7 +430,7 @@ class TestFieldSurvivalAssertion:
         baseline = _baseline(
             tmp_path,
             "CTX01.in.json",
-            _record(pages=[{"page": "1", "quality_score": 0.9, "quality_band": "Clear"}]),
+            _record(pages=[{"page": "1", "page_index": 1, "quality_score": 0.9, "quality_band": "Clear"}]),
         )
         rdf = _rdf([{"FILE": "CTX01", "PAGE": "1", "CLASS-1": "Text", "SCORE-1": 0.87}])
         out_path = tmp_path / "CTX01.out.json"
@@ -487,15 +479,15 @@ class TestFixtureContract:
 
     def test_a_baseline_with_blocks_is_still_valid(self):
         """The shape the happy-path tests actually use."""
-        record = _record(pages=[{"page": "1", "quality_score": 0.9, "quality_band": "Clear"}])
+        record = _record(pages=[{"page": "1", "page_index": 1, "quality_score": 0.9, "quality_band": "Clear"}])
         assert _schema_errors(record) == []
 
     @pytest.mark.parametrize(
         "record,expected_path",
         [
-            (_record(pages=[{"page": 1}]), "$.pages[0].page"),
+            (_record(pages=[{"page": 1, "page_index": 1}]), "$.pages[0].page"),
             (
-                _record(pages=[{"page": "1", "quality_band": "Clear"}], lines=[{"page": "1"}]),
+                _record(pages=[{"page": "1", "page_index": 1, "quality_band": "Clear"}], lines=[{"page": "1"}]),
                 "$.lines[0]",
             ),
         ],

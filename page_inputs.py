@@ -135,7 +135,8 @@ def pdf_page_keys(numbers: Sequence[int], baseline_path=None) -> Dict[int, Optio
 
 
 def remap_pages(rdf, doc_id: str, keys: Dict[int, Optional[str]]):
-    """The rows of `rdf` (FILE/PAGE/...) with the rendered PDF's pages under their record keys.
+    """The rows of `rdf` (FILE/PAGE/...) with the rendered PDF's pages under their record keys,
+    and their physical page in `PAGE_INDEX`.
 
     Rows of other documents pass through. A page whose key is None is left out of what is
     written to the record (it stays in the CSV), as `/predict_document` leaves it out.
@@ -145,6 +146,11 @@ def remap_pages(rdf, doc_id: str, keys: Dict[int, Optional[str]]):
     rows = rdf.copy()
     rows["PAGE"] = rows["PAGE"].astype(object)  # a label replaces a number: no int column
     mine = rows["FILE"].astype(str) == str(doc_id)
+    # The physical page stays with the row: the record's page rows are keyed by it (H2).
+    if "PAGE_INDEX" not in rows:
+        rows["PAGE_INDEX"] = None
+    rows["PAGE_INDEX"] = rows["PAGE_INDEX"].astype(object)
+    rows.loc[mine, "PAGE_INDEX"] = rows.loc[mine, "PAGE"].map(int)
     mapped = rows.loc[mine, "PAGE"].map(lambda page: keys.get(int(page)))
     rows.loc[mine, "PAGE"] = mapped
     return rows[~(mine & rows["PAGE"].isna())]

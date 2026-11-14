@@ -86,15 +86,16 @@ class TestParadataLoggerLifecycle:
         data = json.loads(Path(path).read_text())
         assert data["program"] == PROGRAM_NAME
 
-    def test_license_field_present(self, tmp_path):
-        # config_dir isolated so the repo's para_config.txt is NOT discovered;
-        # deterministically exercises the conservative fallback license block
-        # regardless of which repo runs this (shared) test.
+    def test_no_licence_is_computed_and_components_are_listed(self, tmp_path):
+        # Paradata 3.0 (atrium-project#84, D2): no `license`, `license_url` or `license_detail`;
+        # `components` lists what the run used, as facts. config_dir isolated so the repo's
+        # para_config.txt is NOT discovered and the list is the run's own.
         logger = ParadataLogger(PROGRAM_NAME, {}, paradata_dir=str(tmp_path), config_dir=str(tmp_path))
         path = logger.finalize()
         data = json.loads(Path(path).read_text())
-        assert "CC BY-NC 4.0" in data["license"]
-        assert "creativecommons" in data["license_url"]
+        assert not {"license", "license_url", "license_detail"} & set(data)
+        assert data["components"] == []
+        assert data["schema_version"] == "3.0"
 
     def test_explicit_input_total_stored(self, tmp_path):
         logger = ParadataLogger(PROGRAM_NAME, {}, paradata_dir=str(tmp_path))

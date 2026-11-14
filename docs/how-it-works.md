@@ -186,15 +186,15 @@ The flags that change `--best` (`--parallel`, `--save-intermediates`, `--no-aver
 | **In**                  | a page image (PNG or JPEG), or, through the service, a PDF: up to 50 pages (`MAX_PDF_PAGES`) and 10 MB (`MAX_UPLOAD_MB`) by default                                                                                                |
 | **Out**                 | a Top-N CSV (`FILE, PAGE, CLASS-1…N, SCORE-1…N`; at `-tn 1` also `CATEGORY`, a copy of `CLASS-1`: [outputs](reference/outputs.md)), optionally a per-category raw CSV, a paradata JSON, and, when asked, an ATRIUM document record |
 | **Owns in the record**  | the whole `page_categories` block, and `pages[].category` and `pages[].category_confidence`                                                                                                                                        |
-| **Reads from upstream** | nothing: it is the first stage, and its input is the scan itself                                                                                                                                                                   |
+| **Reads from upstream** | the pages to classify (in the pipeline, the `needs_atr` pages digital-convert routes to the ATR) and the record's page rows                                                                                                        |
 
 page-classification's categories **inform a routing decision** rather than trigger one: which pages go to OCR,
 which to handwriting recognition, which to table extraction, which to image extraction. A person or a script reading
 the result tables makes that decision. The next stage, ocr-postprocess, works from OCR output and does not read
 `page_categories`.
 
-What travels between the stages is the **record**. Each stage takes `--document-json` in, writes only the block it
-owns, deep-copies everything else, and stamps `assembled.blocks[<block>]` with its `program`, `run_id` and
-`paradata_ref`. `BLOCK_OWNERS` in the hub's canonical `atrium_document.py` says which program **may** write a block;
-`assembled.blocks[<block>].program` in a given record says which program **did**. The file flow and the record flow,
-side by side: the hub's [Pipelines](https://ufal.github.io/atrium-project/pipelines/) page.
+What travels between the stages is the **record**. Each stage takes `--document-json` in, writes only the block or
+fields it owns, and deep-copies everything else. `BLOCK_OWNERS` in the hub's canonical `atrium_document.py` says which
+program writes a block. Since record schema 2.0 (atrium-project#84) the record carries no run data: which run wrote
+which fields is in that run's paradata. The file flow and the record flow, side by side: the hub's
+[Pipelines](https://ufal.github.io/atrium-project/pipelines/) page.

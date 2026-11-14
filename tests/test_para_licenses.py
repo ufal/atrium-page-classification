@@ -1,61 +1,41 @@
 """
 tests/test_para_licenses.py
 ===========================
-Unit tests for para_licenses.py (license normalisation, resolution, and the
-#12 cross-stage merge deduplication).
+Unit tests for para_licenses.py: the licence FACTS of a run's components — one spelling per
+licence, its URL, and the row the paradata list for a component. Nothing is ranked, resolved or
+merged into a licence (D2, atrium-project#84), and these tests hold that.
 
 Design notes
 ------------
 * No ML models, no network, no GPU required — pure stdlib + pytest.
-* This file is **intentionally identical** across all four ATRIUM
-  repositories; para_licenses.py itself is repo-agnostic, so unlike
-  test_paradata.py there is no per-repo constant to change.
-* The canonical copy lives in atrium-project
-  `docs/templates/shared/test_para_licenses.py`, next to the canonical
-  para_licenses.py enforced by the para-drift workflow.
+* This file is **intentionally identical** across the ATRIUM repositories; para_licenses.py is
+  repo-agnostic. The canonical copy lives in atrium-project `docs/templates/shared/`, next to the
+  canonical para_licenses.py enforced by the para-drift workflow.
 """
 
 import pytest
 
-from para_licenses import (
-    LICENSE_RANK,
-    LICENSE_URL,
-    merge_effective_licenses,
-    normalise_license,
-    resolve_effective_license,
-)
+import para_licenses
+from para_licenses import LICENSE_URL, component_terms, normalise_license
 
 # ════════════════════════════════════════════════════════════════════════════
 # Catalogue invariants
 # ════════════════════════════════════════════════════════════════════════════
 
 
-class TestCatalogueInvariants:
-    """The static tables must stay mutually consistent."""
-
-    def test_every_ranked_license_has_a_url(self):
-        missing = [lic for lic in LICENSE_RANK if lic not in LICENSE_URL]
-        assert missing == [], f"LICENSE_URL is missing entries for: {missing}"
-
-    def test_every_url_entry_is_ranked(self):
-        missing = [lic for lic in LICENSE_URL if lic not in LICENSE_RANK]
-        assert missing == [], f"LICENSE_RANK is missing entries for: {missing}"
-
-    def test_rank_ordering_sanity(self):
-        """Spot-check the restrictiveness ordering the resolver relies on."""
-        assert LICENSE_RANK["Public Domain"] < LICENSE_RANK["MIT"]
-        assert LICENSE_RANK["MIT"] < LICENSE_RANK["CC BY-SA 4.0"]
-        assert LICENSE_RANK["CC BY-SA 4.0"] < LICENSE_RANK["CC BY-NC 4.0"]
-        assert LICENSE_RANK["CC BY-NC 4.0"] < LICENSE_RANK["CC BY-NC-SA 4.0"]
-        assert max(LICENSE_RANK.values()) == LICENSE_RANK["CC BY-NC-SA 4.0"]
+class TestCatalogue:
+    def test_every_url_is_https(self):
+        assert all(url.startswith("https://") for url in LICENSE_URL.values())
 
     def test_agpl_is_catalogued(self):
-        """The AGPL-3.0 entries were once missing from one repo's copy —
-        their presence is exactly what the canonical superset guarantees."""
-        assert "AGPL-3.0" in LICENSE_RANK
-        assert LICENSE_RANK["AGPL-3.0"] == LICENSE_RANK["GPL-3.0"]
+        assert "AGPL-3.0" in LICENSE_URL
         assert "agpl.org" not in LICENSE_URL["AGPL-3.0"]  # gnu.org, not a squat
         assert LICENSE_URL["AGPL-3.0"].startswith("https://www.gnu.org/")
+
+    def test_nothing_combines_licences(self):
+        """D2: no effective, most-restrictive or calculated licence anywhere."""
+        for gone in ("LICENSE_RANK", "resolve_effective_license", "merge_effective_licenses"):
+            assert not hasattr(para_licenses, gone), gone
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -102,9 +82,9 @@ class TestNormaliseLicense:
 
     def test_canonical_key_not_in_alias_table_survives_exact_case(self):
         """Canonical keys like BSD-3-Clause have no alias entry; the exact
-        string must survive so it still matches LICENSE_RANK downstream."""
+        string must survive so it still finds its URL in the catalogue."""
         assert normalise_license("BSD-3-Clause") == "BSD-3-Clause"
-        assert normalise_license("BSD-3-Clause") in LICENSE_RANK
+        assert normalise_license("BSD-3-Clause") in LICENSE_URL
 
     @pytest.mark.parametrize(
         "spdx, canonical",
@@ -130,221 +110,41 @@ class TestNormaliseLicense:
     )
     def test_spdx_identifiers_resolve(self, spdx, canonical):
         """SPDX ids are what model cards and package metadata actually carry;
-        each must land on a ranked key, not fall through as "unknown"."""
+        each must land on a catalogued name, not fall through as given."""
         assert normalise_license(spdx) == canonical
         assert normalise_license(spdx.lower()) == canonical
-        assert canonical in LICENSE_RANK
+        assert canonical in LICENSE_URL
 
     def test_every_canonical_key_resolves_in_any_case(self):
-        for key in LICENSE_RANK:
+        for key in LICENSE_URL:
             assert normalise_license(key.lower()) == key
             assert normalise_license(key.upper()) == key
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# resolve_effective_license
+# component_terms — one component's row in the paradata
 # ════════════════════════════════════════════════════════════════════════════
 
 
-class TestResolveEffectiveLicense:
-    def test_no_components_defaults_to_mit(self):
-        result = resolve_effective_license([])
-        assert result["effective_license"] == "MIT"
-        assert result["components"] == []
-        assert result["determined_by"] == []
-        assert result["unknown_licenses"] == []
-        assert result["is_non_commercial"] is False
-        assert result["is_share_alike"] is False
+class TestComponentTerms:
+    def test_a_catalogued_licence_gets_its_canonical_name_and_url(self):
+        assert component_terms("fasttext", "cc-by-nc-4.0", "0.9.3") == {
+            "name": "fasttext",
+            "version": "0.9.3",
+            "license": "CC BY-NC 4.0",
+            "license_url": LICENSE_URL["CC BY-NC 4.0"],
+        }
 
-    def test_single_permissive_component(self):
-        result = resolve_effective_license([("mytool", "MIT")])
-        assert result["effective_license"] == "MIT"
-        assert result["effective_license_url"] == LICENSE_URL["MIT"]
-        assert result["determined_by"] == ["mytool"]
-        assert len(result["components"]) == 1
+    def test_unknown_terms_are_stated_not_guessed(self):
+        assert component_terms("in-house model", None) == {"name": "in-house model", "license": "UNKNOWN"}
+        assert component_terms("x", "Proprietary-EULA") == {"name": "x", "license": "Proprietary-EULA"}
 
-    def test_most_restrictive_component_wins(self):
-        result = resolve_effective_license([("code", "MIT"), ("cubbitt", "CC BY-NC-SA 4.0"), ("lib", "Apache-2.0")])
-        assert result["effective_license"] == "CC BY-NC-SA 4.0"
-        assert result["determined_by"] == ["cubbitt"]
+    def test_rows_are_facts_never_combined(self):
+        """Two components keep two rows, whatever their terms: nothing is merged (D2)."""
+        rows = [component_terms("UDPipe 2", "CC BY-NC-SA 4.0"), component_terms("fasttext", "CC BY-NC 4.0")]
+        assert [r["license"] for r in rows] == ["CC BY-NC-SA 4.0", "CC BY-NC 4.0"]
+        assert all(set(r) <= {"name", "version", "license", "license_url"} for r in rows)
 
-    def test_non_commercial_flag_and_note(self):
-        result = resolve_effective_license([("model", "CC BY-NC 4.0")])
-        assert result["is_non_commercial"] is True
-        assert result["is_share_alike"] is False
-        assert "NON-COMMERCIAL" in result["notes"]
-
-    def test_share_alike_flag_and_note(self):
-        result = resolve_effective_license([("data", "CC BY-SA 4.0")])
-        assert result["is_share_alike"] is True
-        assert result["is_non_commercial"] is False
-        assert "SHARE-ALIKE" in result["notes"]
-
-    def test_nc_sa_sets_both_flags(self):
-        result = resolve_effective_license([("cubbitt", "CC BY-NC-SA 4.0")])
-        assert result["is_non_commercial"] is True
-        assert result["is_share_alike"] is True
-
-    def test_glm4_is_non_commercial(self):
-        result = resolve_effective_license([("glm-4v-9b", "glm-4")])
-        assert result["effective_license"] == "glm-4"
-        assert result["is_non_commercial"] is True
-
-    def test_copyleft_code_licenses_are_share_alike(self):
-        for lic in ("GPL-3.0", "AGPL-3.0", "LGPL-3.0", "MPL 2.0"):
-            result = resolve_effective_license([("lib", lic)])
-            assert result["is_share_alike"] is True, lic
-
-    def test_equal_rank_tie_keeps_first_but_credits_all(self):
-        """Strict > comparison: first component of the winning rank names the
-        license; determined_by lists every component at that rank."""
-        result = resolve_effective_license([("a", "MIT"), ("b", "Apache-2.0")])
-        assert result["effective_license"] == "MIT"
-        assert result["determined_by"] == ["a", "b"]
-
-    def test_raw_strings_are_normalised_before_ranking(self):
-        result = resolve_effective_license([("x", "agplv3"), ("y", "mit license")])
-        assert result["effective_license"] == "AGPL-3.0"
-        licenses = {c["license"] for c in result["components"]}
-        assert licenses == {"AGPL-3.0", "MIT"}
-
-    def test_cdla_permissive_model_weights_stay_permissive(self):
-        """(llm-enrich #18) Docling's TableFormer weights are CDLA-Permissive-2.0,
-        which places no terms on Results: a run using them next to MIT code
-        resolves permissive, with nothing reported as unknown."""
-        result = resolve_effective_license([("pdfplumber", "MIT"), ("docling-tableformer", "CDLA-Permissive-2.0")])
-        assert result["unknown_licenses"] == []
-        assert result["effective_license"] == "MIT"
-        assert set(result["determined_by"]) == {"pdfplumber", "docling-tableformer"}
-        assert result["is_non_commercial"] is False
-        assert result["is_share_alike"] is False
-        assert LICENSE_RANK["CDLA-Permissive-2.0"] == LICENSE_RANK["MIT"]
-
-    def test_unknown_license_treated_as_maximally_restrictive(self):
-        result = resolve_effective_license([("blob", "Mystery-1.0"), ("code", "MIT")])
-        assert result["effective_license"] == "Mystery-1.0"
-        assert result["unknown_licenses"] == ["Mystery-1.0"]
-        assert "WARNING" in result["notes"]
-        assert "blob" in result["determined_by"]
-        # "maximally restrictive" in its terms too, not only in its rank
-        assert result["is_non_commercial"] is True
-        assert result["is_share_alike"] is True
-        assert result["effective_license_url"] == ""
-        assert "NON-COMMERCIAL" in result["notes"] and "SHARE-ALIKE" in result["notes"]
-
-    def test_undeclared_component_placeholder_is_not_permissive(self):
-        """atrium_paradata logs a component missing from para_config.txt as
-        "UNKNOWN". That used to resolve with both flags false — read by a
-        consumer as a permissive license."""
-        result = resolve_effective_license([("nllb", "UNKNOWN"), ("ctranslate2", "MIT")])
-        assert result["effective_license"] == "UNKNOWN"
-        assert result["is_non_commercial"] is True
-        assert result["is_share_alike"] is True
-
-    def test_spdx_spelling_is_ranked_not_unknown(self):
-        result = resolve_effective_license([("data", "CC-BY-SA-4.0"), ("lib", "bsd-3-clause")])
-        assert result["unknown_licenses"] == []
-        assert result["effective_license"] == "CC BY-SA 4.0"
-        assert result["is_share_alike"] is True
-        assert result["is_non_commercial"] is False
-
-    def test_unknown_does_not_displace_known_max_seen_first(self):
-        """A known max-rank license seen first keeps the title; the unknown
-        still ranks equal-max, so both components share determined_by."""
-        result = resolve_effective_license([("cubbitt", "CC BY-NC-SA 4.0"), ("blob", "Mystery-1.0")])
-        assert result["effective_license"] == "CC BY-NC-SA 4.0"
-        assert result["unknown_licenses"] == ["Mystery-1.0"]
-        assert set(result["determined_by"]) == {"cubbitt", "blob"}
-
-    def test_unknown_catalogue_entry_shape(self):
-        result = resolve_effective_license([("blob", "Mystery-1.0")])
-        (entry,) = result["components"]
-        assert entry["name"] == "blob"
-        assert entry["license"] == "Mystery-1.0"
-        assert entry["license_url"] == ""
-        assert entry["rank"] == -1
-
-    def test_known_catalogue_entry_shape(self):
-        result = resolve_effective_license([("udpipe", "CC BY-NC-SA 4.0")])
-        (entry,) = result["components"]
-        assert entry["license_url"] == LICENSE_URL["CC BY-NC-SA 4.0"]
-        assert entry["rank"] == LICENSE_RANK["CC BY-NC-SA 4.0"]
-
-    def test_duplicate_unknowns_reported_once_sorted(self):
-        result = resolve_effective_license([("a", "Zeta-1"), ("b", "Zeta-1"), ("c", "Alpha-1")])
-        assert result["unknown_licenses"] == ["Alpha-1", "Zeta-1"]
-
-    def test_notes_mention_component_count(self):
-        result = resolve_effective_license([("a", "MIT"), ("b", "MIT"), ("c", "MIT")])
-        assert "3 component(s)" in result["notes"]
-
-
-# ════════════════════════════════════════════════════════════════════════════
-# merge_effective_licenses — the #12 dedup blueprint
-# ════════════════════════════════════════════════════════════════════════════
-
-
-def _block(*components):
-    """Build a per-tool license block the way resolve_effective_license does."""
-    return resolve_effective_license(list(components))
-
-
-class TestMergeEffectiveLicenses:
-    def test_always_on_component_counted_once_across_stages(self):
-        """(#12) The same (name, license) pair appearing in several stage
-        blocks must survive as a single catalogue entry after the merge."""
-        stage_a = _block(("UDPipe", "CC BY-NC-SA 4.0"), ("mytool", "MIT"))
-        stage_b = _block(("UDPipe", "CC BY-NC-SA 4.0"), ("othertool", "MIT"))
-        merged = merge_effective_licenses([stage_a, stage_b])
-        names = [c["name"] for c in merged["components"]]
-        assert names.count("UDPipe") == 1
-        assert len(merged["components"]) == 3
-        assert "3 component(s)" in merged["notes"]
-
-    def test_same_name_different_license_is_not_deduped(self):
-        """Dedup key is (name, license) — a relicensed component is real
-        information and must keep both entries."""
-        merged = merge_effective_licenses([_block(("tool", "MIT")), _block(("tool", "GPL-3.0"))])
-        assert len(merged["components"]) == 2
-        assert merged["effective_license"] == "GPL-3.0"
-
-    def test_merge_resolution_matches_flat_resolution(self):
-        """Merging blocks must give the same answer as resolving the deduped
-        union directly."""
-        merged = merge_effective_licenses([_block(("code", "MIT")), _block(("cubbitt", "CC BY-NC-SA 4.0"))])
-        flat = resolve_effective_license([("code", "MIT"), ("cubbitt", "CC BY-NC-SA 4.0")])
-        assert merged["effective_license"] == flat["effective_license"]
-        assert merged["is_non_commercial"] is True
-        assert merged["is_share_alike"] is True
-
-    def test_merge_of_single_block_is_a_fixed_point(self):
-        block = _block(("a", "MIT"), ("b", "CC BY 4.0"))
-        merged = merge_effective_licenses([block])
-        assert merged["effective_license"] == block["effective_license"]
-        assert len(merged["components"]) == len(block["components"])
-
-    def test_empty_blocks_list_defaults_to_mit(self):
-        merged = merge_effective_licenses([])
-        assert merged["effective_license"] == "MIT"
-        assert merged["components"] == []
-
-    def test_block_without_components_key_is_tolerated(self):
-        merged = merge_effective_licenses([{}, _block(("a", "MIT"))])
-        assert merged["effective_license"] == "MIT"
-        assert len(merged["components"]) == 1
-
-    def test_unknowns_propagate_through_merge(self):
-        merged = merge_effective_licenses([_block(("blob", "Mystery-1.0")), _block(("code", "MIT"))])
-        assert merged["unknown_licenses"] == ["Mystery-1.0"]
-        assert "WARNING" in merged["notes"]
-
-    def test_realistic_atrium_pipeline_merge(self):
-        """LINDAT CUBBITT + UDPipe stages resolve to CC BY-NC-SA 4.0, the
-        documented effective license of the translation+enrichment chain."""
-        translate = _block(("LINDAT CUBBITT", "CC BY-NC-SA 4.0"), ("lxml", "BSD-3-Clause"))
-        enrich = _block(("UDPipe", "CC BY-NC-SA 4.0"), ("NameTag 3", "CC BY-NC-SA 4.0"))
-        merged = merge_effective_licenses([translate, enrich])
-        assert merged["effective_license"] == "CC BY-NC-SA 4.0"
-        assert merged["is_non_commercial"] is True
-        assert merged["is_share_alike"] is True
-        assert len(merged["components"]) == 4
+    @pytest.mark.parametrize("version", [None, ""])
+    def test_no_version_no_key(self, version):
+        assert "version" not in component_terms("x", "MIT", version)

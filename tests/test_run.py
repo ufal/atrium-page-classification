@@ -169,5 +169,6 @@ def test_an_evaluation_counts_its_pages_and_declares_the_dataset(tmp_path, monke
     assert record["statistics"]["input_files_total"] == len(CATEGORIES)
     assert record["statistics"]["successfully_processed"] == len(CATEGORIES)
     assert record["statistics"]["output_counts_by_type"] == {"csv": 1, "png": 1}
-    assert "lindat_dataset" in {component["name"] for component in record["license_detail"]["components"]}
-    assert record["license_detail"]["is_non_commercial"] is True
+    # paradata 3.0 (atrium-project#84): each component with its own terms, as facts; no licence
+    assert "lindat_dataset" in {component["name"] for component in record["components"]}
+    assert "license" not in record and "license_detail" not in record

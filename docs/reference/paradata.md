@@ -23,16 +23,23 @@ tools, and driven by this repository's [para_config.txt](../../setup/para_config
   a `docker_image` field. In a published container the repository and runner come from the `ATRIUM_RUNNER_REPO`,
   `ATRIUM_RUNNER_REF` and `ATRIUM_RUNNER_IMAGE` environment variables, so the reference names the actual runner
   rather than a fixed fork URL; outside a container `docker_image` is empty.
-* **Components:** each component the run used, with its licence, as declared in `para_config.txt`: the models
+* **Components:** each component the run used, with its own licence, as declared in `para_config.txt`: the models
   always; the LINDAT dataset with `--train` or `--eval`; Ultralytics with `--yolo`; pypdfium2 when a PDF is
-  rendered; the decision model in a run of the `decide_pages.py` experiment. The list is under `license_detail`. None
-  of these licences is the licence of the output, and the `license` field beside the list is an older calculated
-  value, not a licence ([licences.md](licences.md)).
+  rendered; the decision model in a run of the `decide_pages.py` experiment. The list is `components`, a list of
+  facts: no licence is computed from it, and none of these licences is the licence of the output
+  ([licences.md](licences.md)).
+* **Inputs and outputs** (paradata 3.0, atrium-project#84): the record version read and the record written, each by
+  its AMČR distribution name (`atrium/document-json`) and SHA-512; the record written names the blocks and fields
+  the run wrote (`record_fields`). No local path is recorded.
 
-The HTTP service writes no paradata file. Each successful answer carries the call's provenance instead, as
-`paradata`: its Process Run Crate `CreateAction`, whose `@id` is the `run_uuid` stamped into the record, with
-`pypdfium2` among the components when `/predict_document` rendered a PDF
+The HTTP service writes no paradata file. Each successful answer carries the call's paradata instead, as
+`paradata`: its Process Run Crate `CreateAction`. `object` is the original (the upload) and, when one was sent, the
+record version read; `result` is the record written, when one was asked for. The pages classified are a parameter,
+and `pypdfium2` is among the components when `/predict_document` rendered a PDF
 ([service/README.md](../../service/README.md#how-it-works)).
+
+The committed logs under `result/paradata` predate paradata 3.0: they carry the calculated `license` fields that
+3.0 removed.
 
 Example: the paradata of the [small_data_samples](../../small_data_samples) run of the evaluation,
 [261022-101849_page-classification.json](../../result/paradata/261022-101849_page-classification.json).
@@ -40,9 +47,12 @@ Example: the paradata of the [small_data_samples](../../small_data_samples) run 
 ## The document record schema
 
 The per-document record this tool reads and writes, `<doc_id>.document.json`, the pair of the paradata above,
-follows [atrium_document.schema.json](../../atrium_document.schema.json), schema version **`1.0`**. That version is
-frozen as the hub tag [`doc-schema-v1`](https://github.com/ufal/atrium-project/releases/tag/doc-schema-v1)
-(ufal/atrium-project@`544298b`), and it is the baseline this tool implements:
+follows [atrium_document.schema.json](../../atrium_document.schema.json), schema version **`2.0`**
+(doc-schema-v2, [atrium-project#84](https://github.com/ufal/atrium-project/issues/84)): content only, no run data
+and no licence, page rows keyed by `pages[].page_index`. A 1.x record is read and migrated. `doc-schema-v2` is tagged
+only after the end-to-end proof; until then the published reference is `doc-schema-v1`, frozen as the hub tag
+[`doc-schema-v1`](https://github.com/ufal/atrium-project/releases/tag/doc-schema-v1)
+(ufal/atrium-project@`544298b`):
 
 * [tests/test_schema_freeze.py](../../tests/test_schema_freeze.py) checks this repository's schema against the frozen
   copy beside it, [atrium_document.schema.doc-schema-v1.json](../../atrium_document.schema.doc-schema-v1.json): the

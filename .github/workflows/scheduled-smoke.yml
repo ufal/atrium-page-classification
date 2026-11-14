@@ -85,7 +85,7 @@ jobs:
       # (atrium-project#81). It used to open a new issue on every failing run.
       - name: Open or update the lane's issue on scheduled failure
         if: failure() && github.event_name == 'schedule'
-        uses: ufal/atrium-project/.github/actions/lane-failure-issue@4435ffbe75188a5d0a11c96180ca10efa616991d  # v1
+        uses: ufal/atrium-project/.github/actions/lane-failure-issue@733f464315384490bc628506286a6e456e7af894  # v1
         with:
           lane: scheduled-smoke
           title: Scheduled smoke tests failed

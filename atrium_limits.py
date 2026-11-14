@@ -62,7 +62,18 @@ Number = Union[int, float]
 #: * ``skipped`` — a unit of the input got no result (a segment left untranslated after
 #:   the retries ran out, a line whose reply was cut).
 #: * ``stopped`` — processing ended early (too many consecutive errors).
+#:
+#: Since doc-schema-v2 (atrium-project#84, D13) only the first two are recorded: a step whose
+#: limit trimmed, skipped or stopped content FAILS, so nothing partial is written to AMČR.
+#: ``LimitNotes.note()`` raises :class:`ContentLimitError` for them. All five stay here, so
+#: notes written before the change still read.
 EFFECTS: Tuple[str, ...] = ("sampled", "split", "trimmed", "skipped", "stopped")
+
+#: The effects a run records in its paradata ``limits`` (D13): explicit sampling and splitting.
+RECORDED_EFFECTS: Tuple[str, ...] = ("sampled", "split")
+
+#: The effects that fail the job instead of being recorded (D13).
+FAILING_EFFECTS: Tuple[str, ...] = ("trimmed", "skipped", "stopped")
 
 #: HTTP statuses a :class:`LimitExceeded` may carry (atrium-project#53, D7). The reason
 #: is always ``limit_exceeded``; the status follows the cause: 413 when the request
@@ -79,6 +90,24 @@ class LimitConfigError(ValueError):
     Raised when the spec is built, i.e. at import or startup, so a mis-set limit stops
     the process with a message naming the variable instead of being silently ignored.
     """
+
+
+class ContentLimitError(RuntimeError):
+    """A limit trimmed, skipped or stopped content (D13, atrium-project#84): the step fails and
+    writes nothing, rather than emitting a partial output with a note. ``limit`` is the ``/info``
+    key, ``effect`` one of :data:`FAILING_EFFECTS`, ``count`` the units affected."""
+
+    reason = "limit_exceeded"
+
+    def __init__(self, limit: str, effect: str, count: int = 1, detail: str = "") -> None:
+        self.limit = limit
+        self.effect = effect
+        self.count = count
+        self.detail = detail
+        super().__init__(
+            f"limit {limit!r} {effect} content ({count} unit(s)){': ' + detail if detail else ''} — "
+            "the step fails: a trimmed, skipped or stopped result is not written (D13)"
+        )
 
 
 class LimitExceeded(Exception):
@@ -434,7 +463,10 @@ class LimitNote:
 
 
 class LimitNotes:
-    """The limits that shaped one request's result (``limits_applied``).
+    """The limits that shaped one request's result (the paradata ``limits``).
+
+    Only :data:`RECORDED_EFFECTS` are recorded; :meth:`note` raises :class:`ContentLimitError`
+    for a :data:`FAILING_EFFECTS` one, so a step cannot emit a partial result (D13).
 
     Notes for the same limit and effect are merged: their counts add up and the first
     non-empty detail is kept, so a limit applied to 400 segments is one note with
@@ -456,17 +488,20 @@ class LimitNotes:
         *,
         value: Any = None,
     ) -> None:
-        """Record that ``spec`` shaped the result ``count`` times, with ``effect``."""
+        """Record that ``spec`` shaped the result ``count`` times, with ``effect``.
+
+        A ``trimmed``, ``skipped`` or ``stopped`` effect raises :class:`ContentLimitError`
+        (D13): the caller's job fails instead of recording it. A zero count records nothing.
+        """
         if effect not in EFFECTS:
             raise ValueError(f"LimitNotes.note(): effect must be one of {EFFECTS}, not {effect!r}")
         if count <= 0:
             return
-        if isinstance(spec, LimitSpec):
-            key = spec.key
-            if value is None:
-                value = spec.get()
-        else:
-            key = str(spec)
+        key = spec.key if isinstance(spec, LimitSpec) else str(spec)
+        if effect in FAILING_EFFECTS:
+            raise ContentLimitError(key, effect, int(count), str(detail or ""))
+        if isinstance(spec, LimitSpec) and value is None:
+            value = spec.get()
         self._add(LimitNote(limit=key, value=value, effect=effect, count=int(count), detail=str(detail or "")))
 
     def _add(self, new: LimitNote) -> None:
@@ -486,11 +521,17 @@ class LimitNotes:
             notes = notes.as_list()
         for item in notes:
             if isinstance(item, LimitNote):
+                if item.effect in FAILING_EFFECTS:
+                    raise ContentLimitError(item.limit, item.effect, item.count, item.detail)
                 self._add(LimitNote(item.limit, item.value, item.effect, item.count, item.detail))
             elif isinstance(item, Mapping):
                 effect = str(item.get("effect", ""))
                 if effect not in EFFECTS:
                     continue
+                if effect in FAILING_EFFECTS:  # D13: carried back from a subprocess, still a failure
+                    raise ContentLimitError(
+                        str(item.get("limit", "")), effect, int(item.get("count", 1) or 1), str(item.get("detail", "") or "")
+                    )
                 self._add(
                     LimitNote(
                         limit=str(item.get("limit", "")),
@@ -627,7 +668,7 @@ def _selftest() -> None:
     notes = LimitNotes()
     notes.note("lang_id_document_chars", "sampled", detail="first 20000 of 58213 characters", value=20000)
     notes.note("lang_id_document_chars", "sampled", 2)
-    notes.note("ne_summary_top_n", "trimmed", 0)  # a zero count records nothing
+    notes.note("ne_summary_top_n", "trimmed", 0)  # a zero count records nothing, and does not fail
     assert notes.as_list() == [
         {
             "limit": "lang_id_document_chars",
@@ -637,8 +678,14 @@ def _selftest() -> None:
             "detail": "first 20000 of 58213 characters",
         }
     ]
-    notes.note("vocab", "trimmed", detail="Příliš dlouhé")
-    assert notes.header_summary() == "lang_id_document_chars=sampled:3; vocab=trimmed:1"
+    notes.note("page_chunks", "split", detail="Příliš dlouhé")
+    assert notes.header_summary() == "lang_id_document_chars=sampled:3; page_chunks=split:1"
+    try:
+        notes.note("vocab", "trimmed", detail="the prompt's vocabulary")
+    except ContentLimitError as exc:
+        assert exc.effect == "trimmed" and exc.limit == "vocab"
+    else:
+        raise AssertionError("a trimmed effect was recorded instead of failing (D13)")
     assert LimitNotes(notes.as_list() + [{"effect": "unknown"}]).as_list() == notes.as_list()
     try:
         notes.note("x", "cut")

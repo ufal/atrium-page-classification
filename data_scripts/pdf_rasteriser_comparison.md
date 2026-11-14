@@ -14,9 +14,10 @@ one-call equivalent of the PyMuPDF render it replaces (`service/pdf_render.py`).
 | Ghostscript (`data_scripts/windows/pdf2png.bat`, via ImageMagick)      | AGPL-3.0                                         | as PyMuPDF                                                                                                    | host-side tool only, never in an image                         |
 | **pypdfium2** (PDFium)                                                 | Apache-2.0 or BSD-3-Clause (PDFium BSD-3-Clause) | records stay **MIT** (the models' licence); declared `conditional` in `setup/para_config.txt`                 | **chosen**; atrium-alto-postprocess already reads PDFs with it |
 
-`para_licenses` computes a record's calculated licence label as the most restrictive of the components
-that ran, and ranks GPL/AGPL above MIT, so an AGPL renderer would put AGPL on every record's label. The
-label is not the result's licence (atrium-project#6).
+Until paradata 3.0, `para_licenses` computed a calculated licence label as the most restrictive of the
+components that ran, ranking GPL/AGPL above MIT, so an AGPL renderer would have put AGPL on every
+record's label. Since atrium-project#84 nothing is calculated: each component is listed with its own
+licence, and none of them is the result's licence (atrium-project#6).
 
 ## What was measured
 

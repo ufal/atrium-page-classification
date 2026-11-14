@@ -128,12 +128,15 @@ def test_line_category_originators_are_disjoint_and_cover_the_scheme():
     assert "Trash" in alto and "Trash" not in digital
 
 
-def test_untrustworthy_set_spans_both_originators():
-    """The one-line fix for V-1 depends on this: a DROP_CATEGORIES built from it must
-    filter the OCR path as well as the digital-born one."""
-    untrusted = set(av.UNTRUSTWORTHY_LINE_CATEGORIES)
-    assert untrusted & set(av.LINE_CATEGORY_ORIGINATORS["alto-postprocess"])
-    assert untrusted & set(av.LINE_CATEGORY_ORIGINATORS["digital-convert"])
+def test_record_categories_and_decode_flags_split_the_scheme():
+    """doc-schema-v2 (D18 rule 2): `lines[].categ` holds the five record categories only, and
+    digital-convert's decode verdicts are flags on docproc lines. The untrustworthy set is drawn
+    from the record categories (V-1 stays fixed: `Trash` is in it)."""
+    assert set(av.RECORD_LINE_CATEGORIES) == set(av.LINE_CATEGORY_ORIGINATORS["alto-postprocess"])
+    assert set(av.DECODE_FLAGS) == {"Garbage", "Inverted"}
+    assert set(av.RECORD_LINE_CATEGORIES) | set(av.DECODE_FLAGS) == set(av.labels_for("line-category"))
+    assert av.UNTRUSTWORTHY_LINE_CATEGORIES == ("Trash",)
+    assert set(av.UNTRUSTWORTHY_LINE_CATEGORIES) <= set(av.RECORD_LINE_CATEGORIES)
 
 
 def test_page_categories_match_the_scheme():

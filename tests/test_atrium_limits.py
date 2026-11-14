@@ -139,7 +139,7 @@ def test_limit_notes_merge_and_header():
     notes = al.LimitNotes()
     notes.note("lang_id_segment_chars", "sampled", 3, value=2000)
     notes.note("lang_id_segment_chars", "sampled", 2, detail="first 2000 characters of each segment")
-    notes.note("vocab_terms", "trimmed", value=3462, detail="1257 of 4719 terms left out — příliš")
+    notes.note("page_chunk_lines", "split", value=3462, detail="1257 of 4719 lines in a second chunk — příliš")
     assert notes.as_list()[0] == {
         "limit": "lang_id_segment_chars",
         "value": 2000,
@@ -149,14 +149,28 @@ def test_limit_notes_merge_and_header():
     }
     header = notes.header_summary()
     header.encode("latin-1")  # a Starlette header value must encode as latin-1
-    assert header == "lang_id_segment_chars=sampled:5; vocab_terms=trimmed:1"
+    assert header == "lang_id_segment_chars=sampled:5; page_chunk_lines=split:1"
     with pytest.raises(ValueError):
         notes.note("x", "truncated")
 
 
+@pytest.mark.parametrize("effect", ["trimmed", "skipped", "stopped"])
+def test_a_limit_that_cuts_content_fails_the_step(effect):
+    """D13 (atrium-project#84): a trimmed, skipped or stopped result is not written — the step
+    fails, whether the note is made here or carried back from a subprocess."""
+    notes = al.LimitNotes()
+    with pytest.raises(al.ContentLimitError) as caught:
+        notes.note("vocab_terms", effect, 3, value=3462, detail="1257 terms left out")
+    assert caught.value.effect == effect and caught.value.count == 3 and not notes
+    with pytest.raises(al.ContentLimitError):
+        al.LimitNotes([{"limit": "vocab_terms", "effect": effect, "count": 1}])
+    notes.note("vocab_terms", effect, 0)  # nothing happened, nothing fails
+    assert al.RECORDED_EFFECTS + al.FAILING_EFFECTS == al.EFFECTS
+
+
 def test_limit_notes_round_trip_through_json():
     notes = al.LimitNotes()
-    notes.note("ppl_max_tokens", "trimmed", 4, value=1024)
+    notes.note("ppl_batch_lines", "split", 4, value=1024)
     carried = json.loads(json.dumps(notes.as_list()))  # e.g. back from a subprocess
     again = al.LimitNotes(carried)
     again.extend(notes)
@@ -167,37 +181,42 @@ def test_paradata_effects_match():
     assert ap._LIMIT_EFFECTS == al.EFFECTS
 
 
-def test_paradata_records_and_merges_limits_applied(tmp_path):
+def test_paradata_records_and_merges_limits(tmp_path):
     first = ap.ParadataLogger(program="stage-a", config={}, paradata_dir=str(tmp_path))
     notes = al.LimitNotes()
-    notes.note("keybert_chunk_words", "trimmed", 2, value=400)
+    notes.note("keybert_chunk_words", "split", 2, value=400)
     first.note_limits(notes)
-    first.note_limit("keybert_chunk_words", 400, "trimmed", 1)
+    first.note_limit("keybert_chunk_words", 400, "split", 1)
     with pytest.raises(ValueError):
         first.note_limit("x", 1, "cut")
+    with pytest.raises(al.ContentLimitError):  # D13: a cut fails the step, it is not a note
+        first.note_limit("keybert_chunk_words", 400, "trimmed", 1)
+    with pytest.raises(al.ContentLimitError):
+        first.note_limits([{"limit": "vocab_terms", "effect": "skipped", "count": 2}])
     path_a = first.finalize()
     second = ap.ParadataLogger(program="stage-b", config={}, paradata_dir=str(tmp_path))
     path_b = second.finalize()
 
     record_a = json.loads(Path(path_a).read_text(encoding="utf-8"))
-    assert record_a["limits_applied"] == [
-        {"limit": "keybert_chunk_words", "value": 400, "effect": "trimmed", "count": 3, "detail": ""}
+    assert record_a["limits"] == [
+        {"limit": "keybert_chunk_words", "value": 400, "effect": "split", "count": 3, "detail": ""}
     ]
-    assert json.loads(Path(path_b).read_text(encoding="utf-8"))["limits_applied"] == []
+    assert "limits_applied" not in record_a
+    assert json.loads(Path(path_b).read_text(encoding="utf-8"))["limits"] == []
 
     merged = json.loads(Path(ap.merge_run_paradata([path_a, path_b], str(tmp_path / "run.json"))).read_text())
-    assert merged["limits_applied"] == [{"program": "stage-a", **record_a["limits_applied"][0]}]
+    assert merged["limits"] == [{"program": "stage-a", **record_a["limits"][0]}]
     single = json.loads(
         Path(ap.merge_paradata_files([path_a, path_b], "in.xml", str(tmp_path / "one.json"))).read_text()
     )
-    assert single["limits_applied"] == merged["limits_applied"]
+    assert single["limits"] == merged["limits"]
 
 
 def test_paradata_state_round_trip_keeps_notes(tmp_path):
     logger = ap.ParadataLogger(program="stage", config={}, paradata_dir=str(tmp_path))
     logger.note_limit("word_chunk_limit", 900, "split", 4)
     restored = ap.ParadataLogger._from_state_dict(json.loads(json.dumps(logger._to_state_dict())))
-    assert restored.limits_applied == logger.limits_applied
+    assert restored.limits == logger.limits == restored.limits_applied
 
 
 _SERVICE_IMPORT = re.compile(r"^\s*(?:from|import)\s+(?:service\.)?atrium_service\b", re.MULTILINE)

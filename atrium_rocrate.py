@@ -3,19 +3,17 @@ atrium_rocrate.py — the RO-Crate view of an ATRIUM document record, and the ru
 
 WHY THIS MODULE EXISTS
 ======================
-``atrium_document.py`` produces a per-document record that ``docs/document_schema.md`` calls
-"one FAIR, versioned JSON for search and catalogue export". The DMP's WP3 standards column names
-**RO-Crate** (ufal/atrium-project#54), and the AMČR pilot stores every archived record as an
-RO-Crate with one Process Run Crate ``CreateAction`` per run (atrium-project#71; grounding report
-of 2026-09-30, items 1-3). Everything such a crate needs, ATRIUM already records:
+The AMČR pilot stores every distribution with its paradata: one Process Run Crate
+``CreateAction`` per step, RO-Crate 1.2 / Process Run Crate 0.5 (atrium-project#71, #84). Since
+record schema 2.0 the document record holds content only (no stamps, no contributors, no
+licence), so the runs are described by their actions alone:
 
-    source            -> the original input, by doc_id + sha256/sha512 (archive-managed, never a path)
-    derived_from      -> the persistent step outputs = the crate's data entities
-    regenerable       -> recipes for files that DO NOT EXIST = never data entities
-    provenance        -> one entry per contributing run; the root asserts no licence
-    assembled.blocks  -> per-block stamps = the granularity a CreateAction chain needs
-    atrium_paradata   -> tool_version / repository / docker_image / run_uuid / times per run
-    atrium_vocab      -> resolvable URIs for every controlled term the record carries
+    paradata 3.0 inputs   -> the action's `object`: distributions by name and SHA-512
+    paradata 3.0 outputs  -> the action's `result`; the record's names the blocks AND fields written
+    stored: false         -> an input or output that is not stored, still named by SHA-512 (D23)
+    tool_version / repository / docker_image / run_uuid / times -> instrument, image, @id, times
+    components            -> facts in the paradata record; nothing is combined into a licence (D2)
+    atrium_vocab          -> resolvable URIs for every controlled term the record carries
 
 So this module maps rather than invents. Where a field does not exist it is **omitted**, not
 guessed: a crate that quietly asserts a checksum nobody computed is worse than one that admits the
@@ -23,13 +21,20 @@ gap.
 
 WHAT IT PRODUCES
 ================
-* ``document_crate(record)`` — the crate of one record: RO-Crate 1.2, Process Run Crate 0.5.
-  With ``fragment=True`` the same entities WITHOUT the metadata descriptor and the root, for
-  embedding in a crate someone else owns (AMČR's record crate, aiscr-webamcr#4316).
+* ``create_action(paradata)`` / ``action_from_paradata(paradata)`` — one run as a nested JSON-LD
+  ``CreateAction``: what every service returns as ``paradata`` and what AMČR stores as the run's
+  paradata file.
+* ``document_crate(record, paradata=…)`` — ÚFAL's crate of one record and the runs that wrote it.
+  It is NOT AMČR's archival crate (whose root is the whole AMČR record and states the document's
+  licence); with ``fragment=True`` it gives the entities AMČR reuses: the actions, the software,
+  the controlled terms — no descriptor, no root, no block entities.
 * ``run_crate(records)`` — one pipeline run over several records, referencing their crates.
-* ``create_action(paradata)`` — one run as a nested JSON-LD ``CreateAction``: what every service
-  returns as ``paradata`` and what AMČR stores as the run's paradata file.
 * ``wrap_fragment(fragment)`` — a fragment under a stub root, which is how a fragment is validated.
+
+A crate root names a licence only when its caller asserts one (``license=``): the rights in a
+document are the archive's to state (contract §8, layer 1), and the tools assert none (D2). Without
+one the root's ``license`` names ``#no-licence-asserted``, an entity that asserts nothing: RO-Crate
+1.2 requires a root licence, and this is not a calculated one (atrium-project#6, confirmed 2026-11-12).
 
 WHAT THIS MODULE IS NOT
 =======================
@@ -53,15 +58,14 @@ valid, just less semantic. An AMČR or TEATER concept the record names by id
 
 DETERMINISM
 ===========
-Two calls on the same record produce byte-identical JSON. ``@graph`` is sorted by ``@id`` (with
+Two calls on the same input produce byte-identical JSON. ``@graph`` is sorted by ``@id`` (with
 the descriptor and the root pinned first) and ``json.dumps`` runs with ``sort_keys=True``.
-``datePublished`` is derived from the record's own newest block stamp, never from the clock, and a
-run's identifier is the ``run_uuid`` the record carries — nothing is minted here.
+``datePublished`` is derived from the newest run's end time, never from the clock, and a run's
+identifier is the ``run_uuid`` its paradata carry — nothing is minted here.
 """
 
 from __future__ import annotations
 
-import base64
 import hashlib
 import json
 import os
@@ -115,13 +119,13 @@ ROOT_ID = "./"
 #: The original input's entity in a crate built from a record, unless the host names its own.
 SOURCE_ID = "#source"
 
-# The root's `license` when no rights holder has asserted one (atrium-project#6, option (a),
-# 2026-10-29). It names a contextual entity that asserts nothing: a component's licence or a
-# service's terms are not the licence of a pipeline output, so the crate does not compute one.
-NO_LICENCE_ID = "#no-licence-asserted"
+#: The record's AMČR distribution name: an input or output with this name is the document record.
+RECORD_DISTRIBUTION = "atrium/document-json"
 
-#: The document record as an input of a service call (`create_action`).
-RECORD_ID = "#record"
+#: What a crate root's `license` names when its caller asserts none. RO-Crate 1.2 requires a root
+#: licence (rule 13.3); the tools assert none (D2), so the root names an entity that asserts nothing.
+#: Not a calculated licence: motyc's option 1 on atrium-project#6 (2026-10-29), confirmed 2026-11-12.
+NO_LICENCE_ID = "#no-licence-asserted"
 
 #: ATRIUM's own namespace, so extension terms carry a resolvable prefix rather than being
 #: dropped by a consumer that compacts strictly against the RO-Crate context. Kept in step
@@ -191,9 +195,9 @@ def authors_of(program: str) -> Tuple[Dict[str, str], ...]:
 #: 2026-10-01 every current program has its own repository: `ocr-postprocess` (a rename of
 #: atrium-alto-postprocess), `keyword-extract` (the keyword stage of atrium-nlp-enrich and
 #: atrium-llm-enrich) and `digital-convert` (atrium-llm-enrich's converter). The predecessors
-#: stay in the table, pointing at their archived repositories, because a record written before
-#: the move still names them in `assembled.blocks` and in `provenance.contributors`; the crate
-#: then links the release that really produced it. A service's logger names its program
+#: stay in the table, pointing at their archived repositories, because paradata written before
+#: the move still name them; the crate then links the release that really produced the run. A
+#: service's logger names its program
 #: `<program>-api`; `_repository()` strips that suffix before looking it up here.
 REPO_URLS: Dict[str, str] = {
     "ocr-postprocess": "https://github.com/ufal/atrium-ocr-postprocess",
@@ -232,15 +236,15 @@ SOURCE_CONCEPTS: Dict[str, Tuple[str, str]] = {
 #: Terms this module emits that the RO-Crate 1.2 context does not define, declared in the
 #: crate's own `@context` so the graph stays interpretable without a side agreement. The
 #: Workflow Run terms are declared here rather than through their remote context, so a crate
-#: depends on exactly one remote document. `paradataRecord` is a JSON literal (JSON-LD 1.1): the
-#: run's whole paradata record, kept as it is rather than flattened into undeclared properties.
+#: depends on exactly one remote document. `paradataRecord` and `recordFields` are JSON literals
+#: (JSON-LD 1.1): the run's whole paradata record, and the record blocks and fields a run wrote
+#: (#84 §4). `stored` is false on an input or output that is not stored (D23).
 _LOCAL_CONTEXT: Dict[str, Any] = {
     "@version": 1.1,
     "atrium": ATRIUM_BASE,
-    "regenerableFrom": ATRIUM_BASE + "term/regenerableFrom",
-    "regenerableWith": ATRIUM_BASE + "term/regenerableWith",
-    "recordBlock": ATRIUM_BASE + "term/recordBlock",
     "sha512": ATRIUM_BASE + "term/sha512",
+    "stored": ATRIUM_BASE + "term/stored",
+    "recordFields": {"@id": ATRIUM_BASE + "term/recordFields", "@type": "@json"},
     "paradataRecord": {"@id": ATRIUM_BASE + "term/paradataRecord", "@type": "@json"},
     "ContainerImage": WFRUN_BASE + "ContainerImage",
     "containerImage": WFRUN_BASE + "containerImage",
@@ -259,6 +263,12 @@ UNRECORDED_VERSION = "unrecorded"
 
 #: What a run's stable id looks like (atrium_paradata `run_uuid`).
 _RUN_UUID = re.compile(r"^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+
+#: A SHA-512 digest as the paradata carry it: 128 lower-case hex characters.
+_SHA512 = re.compile(r"^[0-9a-f]{128}$")
+
+#: The JSON-literal properties: objects in a nested action, JSON text in a (flat) crate.
+_JSON_LITERALS = ("paradataRecord", "recordFields")
 
 #: Process Run Crate's types for an action's `object` and `result`. `File` is deliberately not
 #: one of them here: in RO-Crate 1.2 a `File` is a data entity the root must list in `hasPart`,
@@ -322,41 +332,17 @@ def _timestamp(value: Any) -> Optional[str]:
     return parsed.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S+00:00")
 
 
-def _date_published(record: Dict[str, Any]) -> str:
-    """The record's own newest timestamp, as a date — never `datetime.now()`.
+def _date_published(actions: Iterable[Mapping[str, Any]]) -> str:
+    """The newest run's end date — never `datetime.now()`.
 
     RO-Crate requires `datePublished` on the root. Reading the clock would make the crate
-    non-reproducible: exporting an archived record twice would produce two different crates,
-    and the byte-comparison gate this module is meant to pass would fail on every run. The
-    newest block stamp is the honest answer to "when was this record finished".
+    non-reproducible: exporting an archived record twice would produce two different crates.
+    Since record schema 2.0 the record carries no stamps, so the runs that wrote it say when it was
+    finished; without any, the date is the epoch, stated rather than invented.
     """
-    stamps = [
-        str(b.get("updated_at") or "")
-        for b in ((record.get("assembled") or {}).get("blocks") or {}).values()
-        if isinstance(b, dict)
-    ]
-    stamps += [str(c.get("at") or "") for c in ((record.get("provenance") or {}).get("contributors") or [])]
-    newest = max((s for s in stamps if s), default="")
+    ends = [str(a.get("endTime") or "") for a in actions if isinstance(a, Mapping)]
+    newest = max((e for e in ends if e), default="")
     return newest[:10] if len(newest) >= 10 else "1970-01-01"
-
-
-def _no_licence_entity() -> Dict[str, str]:
-    """The contextual entity the root's `license` names when no licence is asserted.
-
-    The pipeline does not assert rights in its outputs (atrium-project#6, 2026-10-29). The
-    calculated value in the record's `provenance.license` (`license_basis: "calculated"`) is a
-    summary of component licences, not the licence of this crate, so it is not exported here.
-    """
-    return {
-        "@id": NO_LICENCE_ID,
-        "@type": "CreativeWork",
-        "name": "No licence asserted",
-        "description": (
-            "No licence is asserted for this crate. The rights in its contents depend on the source "
-            "and on AMČR's permission to process it. The licences and terms of the components that "
-            "ran are listed in the record (provenance.license_detail) and in each run's paradata."
-        ),
-    }
 
 
 def _controlled_values(record: Dict[str, Any]) -> List[Tuple[str, str]]:
@@ -364,9 +350,9 @@ def _controlled_values(record: Dict[str, Any]) -> List[Tuple[str, str]]:
 
     Deliberately tolerant: a value the registry has never heard of is still emitted as a
     DefinedTerm under its scheme. `atrium_vocab.validate_labels()` reports rather than raises,
-    and `atrium_document.schema.json` adds no `enum` anywhere precisely so a naming slip is an
-    advisory rather than a stalled pipeline — a crate exporter must not be stricter than the
-    contract it exports.
+    and outside `lines[].categ` (the five categories, D18 rule 2) the record schema adds no `enum`
+    for a controlled term, so a naming slip is an advisory rather than a stalled pipeline — a crate
+    exporter must not be stricter than the contract it exports.
     """
     found = set()
 
@@ -448,10 +434,6 @@ def _run_action_id(program: str, run_id: str, run_uuid: str) -> str:
     return run_uuid if _RUN_UUID.match(run_uuid or "") else _legacy_run_id(program, run_id)
 
 
-def _block_id(name: str) -> str:
-    return "#block-" + name
-
-
 def _identifier_entity(entity_id: str, name: str, value: str) -> Dict[str, Any]:
     """A root identifier as a `PropertyValue`, the form RO-Crate 1.2 recommends for it."""
     return {"@id": entity_id, "@type": "PropertyValue", "name": name, "propertyID": name, "value": value}
@@ -474,16 +456,6 @@ def _person_entities(programs: Iterable[str]) -> List[Dict[str, Any]]:
         for a in authors_of(program):
             people.setdefault(a["orcid"], {"@id": a["orcid"], "@type": "Person", "name": a["name"]})
     return list(people.values())
-
-
-def ni_uri(sha256_hex: str) -> str:
-    """The RFC 6920 named-information URI of a SHA-256 digest: `ni:///sha-256;<base64url>`.
-
-    A content-addressed id: the same bytes get the same id in every action, whichever service
-    read or wrote them, so the output of one stage and the input of the next join by themselves.
-    """
-    digest = bytes.fromhex(sha256_hex)
-    return "ni:///sha-256;" + base64.urlsafe_b64encode(digest).decode("ascii").rstrip("=")
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -589,21 +561,6 @@ def _paradata_records(paradata: Paradata) -> List[Dict[str, Any]]:
     return [dict(rec) for rec in paradata if rec]
 
 
-def _match_paradata(records: Sequence[Dict[str, Any]], program: str, run_id: str, run_uuid: str) -> Dict[str, Any]:
-    """The paradata of one run: by `run_uuid`, else by program and `run_id`, else by program."""
-    if run_uuid:
-        for rec in records:
-            if rec.get("run_uuid") == run_uuid:
-                return rec
-    for rec in records:
-        if rec.get("program") == program and run_id and rec.get("run_id") == run_id:
-            return rec
-    for rec in records:
-        if rec.get("program") == program:
-            return rec
-    return {}
-
-
 # ──────────────────────────────────────────────────────────────────────────────
 # One run, as a CreateAction (atrium-project#71 R2)
 # ──────────────────────────────────────────────────────────────────────────────
@@ -614,61 +571,85 @@ def file_entity(
     data: Optional[bytes] = None,
     *,
     media_type: Optional[str] = None,
-    sha256: Optional[str] = None,
+    sha512: Optional[str] = None,
     size: Optional[int] = None,
+    stored: bool = True,
 ) -> Dict[str, Any]:
-    """An input or output of a service call, for `create_action(inputs=…, outputs=…)`.
+    """An input or output of a run, for `create_action(inputs=…, outputs=…)` (#84 §4, §6).
 
-    With the bytes (or their sha256) the id is the content-addressed `ni:` URI, so the result of
-    one stage and the object of the next are one entity. A `CreativeWork`, not a `File`: the
-    call's files are not data entities of whichever crate embeds the action.
+    `name` is the AMČR distribution name (`atrium/document-json`, `atr/docproc-json`,
+    `atr/teitok-xml`, `metadata`, `metadata-en`). The file is named by its SHA-512 — computed from
+    `data`, or given — never by a local path or a SHA-256 `ni:` URI. The `@id` joins name and
+    digest, so the output of one step and the input of the next are one entity. A file that is not
+    stored (D23) carries `stored: false` and is still named by its SHA-512. A `CreativeWork`, not a
+    `File`: a run's inputs and outputs are not data entities of whichever crate embeds the action.
     """
     if data is not None:
-        sha256 = hashlib.sha256(data).hexdigest()
+        sha512 = hashlib.sha512(data).hexdigest()
         size = len(data)
-    entity_id = ni_uri(sha256) if sha256 else "#file-" + re.sub(r"[^A-Za-z0-9._-]", "_", name or "unnamed")
+    sha512 = str(sha512 or "").lower()
+    if not _SHA512.match(sha512):
+        raise ValueError("{}: an input or output is named by its SHA-512 (128 hex characters)".format(name))
+    if not name:
+        raise ValueError("an input or output is named by its AMČR distribution name")
     return _prune(
         {
-            "@id": entity_id,
+            "@id": "#{}@{}".format(name, sha512[:16]),
             "@type": "CreativeWork",
             "name": name,
             "encodingFormat": media_type,
             "contentSize": str(size) if size is not None else None,
-            "sha256": sha256,
+            "sha512": sha512,
+            "stored": None if stored else False,
         }
     )
 
 
-def record_entity(doc_id: str) -> Dict[str, Any]:
-    """The document record a call was handed (`#record`): the seed, or the previous stage's record."""
-    return {
-        "@id": RECORD_ID,
-        "@type": "CreativeWork",
-        "name": "{}.document.json".format(doc_id),
-        "identifier": doc_id,
-        "encodingFormat": "application/json",
-    }
+def record_entity(doc_id: str, data: Optional[bytes] = None, *, sha512: Optional[str] = None) -> Dict[str, Any]:
+    """The record version a run read (the seed, or the previous step's record), named by its
+    SHA-512 like any input, with the document's id."""
+    entity = file_entity(RECORD_DISTRIBUTION, data, media_type="application/json", sha512=sha512)
+    entity["identifier"] = doc_id
+    return entity
 
 
-def block_entities(names: Iterable[str]) -> List[Dict[str, Any]]:
-    """The record blocks a call wrote, as the same `#block-<name>` entities `document_crate` uses."""
-    return [
-        {"@id": _block_id(n), "@type": "CreativeWork", "name": n, "recordBlock": n} for n in sorted(set(names))
-    ]
+def record_result(
+    record_fields: Mapping[str, Iterable[str]],
+    data: Optional[bytes] = None,
+    *,
+    sha512: Optional[str] = None,
+    stored: bool = True,
+) -> Dict[str, Any]:
+    """The record a run wrote, as its `result`: the distribution by SHA-512 and the blocks AND
+    fields the run wrote (`DocumentRecord.written()`, #84 §4). Replaces the per-block stamps."""
+    entity = file_entity(RECORD_DISTRIBUTION, data, media_type="application/json", sha512=sha512, stored=stored)
+    entity["recordFields"] = {str(b): [str(f) for f in fields] for b, fields in sorted(record_fields.items())}
+    return entity
 
 
-def blocks_written(record: Optional[Dict[str, Any]], run_uuid: str = "", run_id: str = "", program: str = "") -> List[str]:
-    """The blocks of `record` whose stamp names this run: by `run_uuid`, else by `run_id` + `program`."""
-    stamps = ((record or {}).get("assembled") or {}).get("blocks") or {}
-    out = []
-    for name, stamp in stamps.items():
-        if not isinstance(stamp, dict):
-            continue
-        if run_uuid and stamp.get("run_uuid") == run_uuid:
-            out.append(name)
-        elif not run_uuid and run_id and stamp.get("run_id") == run_id and stamp.get("program") == program:
-            out.append(name)
-    return sorted(out)
+def _entity_from_paradata(item: Mapping[str, Any]) -> Dict[str, Any]:
+    """One paradata 3.0 `inputs`/`outputs` entry as an action's object or result."""
+    if item.get("record_fields") is not None:
+        return record_result(item["record_fields"], sha512=item.get("sha512"), stored=bool(item.get("stored", True)))
+    return file_entity(
+        str(item.get("name") or ""),
+        media_type=item.get("media_type"),
+        sha512=item.get("sha512"),
+        stored=bool(item.get("stored", True)),
+    )
+
+
+def action_from_paradata(paradata: Mapping[str, Any]) -> Dict[str, Any]:
+    """A paradata 3.0 record (`ParadataLogger.record`) as its `CreateAction`: `inputs` become the
+    `object`, `outputs` the `result`, `action_status`/`error` the status. The usual way to build one."""
+    pd = dict(paradata or {})
+    return create_action(
+        pd,
+        inputs=[_entity_from_paradata(i) for i in pd.get("inputs") or [] if isinstance(i, Mapping)],
+        outputs=[_entity_from_paradata(o) for o in pd.get("outputs") or [] if isinstance(o, Mapping)],
+        status="failed" if pd.get("action_status") == "failed" else "completed",
+        error=pd.get("error") or None,
+    )
 
 
 def create_action(
@@ -686,12 +667,11 @@ def create_action(
     action is what every service returns as `paradata`, and what AMČR stores as the run's
     paradata file; `action_fragment()` flattens it for a crate. It carries:
 
-    * `@id` — the run's `run_uuid`, the same value stamped into the record it wrote
-      (`action_id` overrides it where the record's stamp comes from another logger);
+    * `@id` — the run's `run_uuid` (`action_id` overrides it);
     * `instrument` — the tool (`version`, release-page id, its authors as `creator`) and
       `containerImage` — the image the service runs as (ATRIUM_RUNNER_IMAGE);
     * `object` / `result` — `inputs` / `outputs` (`file_entity()`, `record_entity()`,
-      `block_entities()`);
+      `record_result()`), by distribution name and SHA-512;
     * `agent` — ATRIUM_RUN_AGENT, only when it is set;
     * `startTime` / `endTime`, `actionStatus` (`completed` or `failed`, with `error`);
     * `paradataRecord` — the paradata record itself, so nothing it says is lost.
@@ -734,7 +714,8 @@ def action_problems(action: Any) -> List[str]:
     lives once. It checks the Process Run Crate MUST (an `instrument` that is a
     `SoftwareApplication`) and what ATRIUM guarantees on top: a `run_uuid` id, an absolute tool
     id with `version` and `url`, the profile's time format, a known `actionStatus` with `error`
-    only on failure, typed `object`/`result` entries, and the paradata record.
+    only on failure, typed `object`/`result` entries named by SHA-512 (never an `ni:` id, #84 §4),
+    the record's result naming its fields, and a paradata record with no calculated licence (D2).
     """
     if not isinstance(action, dict):
         return ["the action is a {}, not an object".format(type(action).__name__)]
@@ -773,13 +754,26 @@ def action_problems(action: Any) -> List[str]:
         for item in action.get(prop) or []:
             if not isinstance(item, dict) or not item.get("@id") or item.get("@type") not in _OBJECT_TYPES:
                 problems.append("{} entry {!r} has no @id or an unexpected @type".format(prop, item))
-    if status == COMPLETED_ACTION_STATUS and not action.get("result"):
-        problems.append("a completed action has no result")
+                continue
+            if str(item["@id"]).startswith("ni:"):
+                problems.append("{} entry {!r} is named by a SHA-256 ni: URI".format(prop, item["@id"]))
+            if not _SHA512.match(str(item.get("sha512") or "")):
+                problems.append("{} entry {!r} is not named by its SHA-512".format(prop, item["@id"]))
+            if not item.get("name"):
+                problems.append("{} entry {!r} has no distribution name".format(prop, item["@id"]))
+            if prop == "result" and item.get("name") == RECORD_DISTRIBUTION and not item.get("recordFields"):
+                problems.append("the record result {!r} does not name the blocks and fields written".format(item["@id"]))
+    # No result is not a problem: `result` names stored outputs only (#84 §4), and a call that
+    # answered without writing a stored distribution (a classification with no record asked for)
+    # has none.
     agent = action.get("agent")
     if agent is not None and (not isinstance(agent, dict) or agent.get("@type") not in ("Person", "Organization")):
         problems.append("agent is not a Person or Organization")
-    if not isinstance(action.get("paradataRecord"), dict):
+    record = action.get("paradataRecord")
+    if not isinstance(record, dict):
         problems.append("no paradataRecord")
+    elif {"license", "license_url", "license_detail"} & set(record):
+        problems.append("the paradata record carries a calculated licence (D2)")
     return problems
 
 
@@ -788,7 +782,7 @@ def _flatten(node: Any, out: Dict[str, Dict[str, Any]]) -> Any:
     if isinstance(node, list):
         return [_flatten(item, out) for item in node]
     if isinstance(node, dict) and "@id" in node and set(node) != {"@id"}:
-        entity = {k: (v if k == "paradataRecord" else _flatten(v, out)) for k, v in node.items() if k != "@context"}
+        entity = {k: (v if k in _JSON_LITERALS else _flatten(v, out)) for k, v in node.items() if k != "@context"}
         out.setdefault(node["@id"], {}).update(entity)
         return _ref(node["@id"])
     return node
@@ -805,9 +799,11 @@ def action_fragment(action: Mapping[str, Any]) -> Dict[str, Any]:
     for entity in entities.values():
         # RO-Crate requires a FLAT graph, and a validator reads a nested JSON object as a nested
         # entity whatever the term's @json type says. In a crate the paradata record therefore
-        # travels as its JSON text; in the nested action, which is not a crate, as the object.
-        if isinstance(entity.get("paradataRecord"), dict):
-            entity["paradataRecord"] = json.dumps(entity["paradataRecord"], ensure_ascii=False, sort_keys=True)
+        # travels as its JSON text; in the nested action, which is not a crate, as the object. The
+        # record fields a run wrote (`recordFields`) the same.
+        for key in _JSON_LITERALS:
+            if isinstance(entity.get(key), dict):
+                entity[key] = json.dumps(entity[key], ensure_ascii=False, sort_keys=True)
     return {"@context": _context(), "@graph": [entities[k] for k in sorted(entities)]}
 
 
@@ -828,62 +824,57 @@ def document_crate(
     record: Dict[str, Any],
     *,
     paradata: Paradata = None,
+    actions: Sequence[Mapping[str, Any]] = (),
     name: Optional[str] = None,
     description: Optional[str] = None,
     fragment: bool = False,
     source_id: Optional[str] = None,
-    data_dir: Optional[str] = None,
+    license: Optional[Union[str, Mapping[str, Any]]] = None,
 ) -> Dict[str, Any]:
-    """The RO-Crate metadata graph for ONE document record.
+    """ÚFAL's RO-Crate metadata graph for ONE document record and the runs that wrote it.
 
-    `record` is a parsed `<doc_id>.document.json`. `paradata` is the paradata records of the runs
-    that wrote it (a list; the older `{program: record}` map is still accepted). With them each
-    run's `CreateAction` gains its times, image and agent, and each tool its version and release
-    id; without them the crate is complete, just less specific about what ran.
+    `record` is a parsed `<doc_id>.document.json` (record schema 2.0: content only). The runs
+    come from `paradata` (paradata 3.0 records, as `ParadataLogger.record` has them; each becomes
+    its action through `action_from_paradata()`) and/or `actions` (CreateActions as the services
+    returned them). Each action names what it read and wrote by distribution and SHA-512, and the
+    record's result names the blocks and fields written — the record itself carries no stamps.
+    Without runs the crate is still complete, just silent about how the record was made.
 
-    **The reference-discipline rule, expressed in RO-Crate terms.** `derived_from` values are
-    data entities and go in `hasPart`. `regenerable` entries are recipes for files that do not
-    exist, so they are contextual entities and MUST NOT appear in `hasPart` — a crate that
-    lists a file it does not contain is invalid, and this is the exact failure the record's
-    "transient artifacts are never referenced" rule exists to prevent, one layer up.
+    **Not AMČR's archival crate.** AMČR builds that one; its root is the whole AMČR record and
+    states the document's licence. What AMČR reuses is the **fragment** (`fragment=True`): the
+    actions, the software, the controlled terms — no metadata descriptor, no root, no block
+    entities. The host lists the actions in its `mentions`, the terms in its `about`, and declares
+    the Process Run Crate profile; `source_id` names the host's entity for the original, which then
+    replaces `#source`. `wrap_fragment()` shows the whole of it.
 
-    **Fragment mode** (`fragment=True`): the same entities with no metadata descriptor, no root
-    and no `derived_from` files, for a crate someone else owns (AMČR's record crate). The host
-    keeps its own root `./`, lists the actions in its `mentions`, the terms in its `about`, and
-    declares the Process Run Crate profile; `source_id` names the host's entity for the original,
-    which then replaces `#source`. `wrap_fragment()` shows the whole of it.
-
-    `data_dir` is where the crate's files are: each data entity found there gains its
-    `contentSize`.
+    The root names a licence only when the caller asserts one (`license`); the tools assert none,
+    so without one it names `#no-licence-asserted`.
     """
     doc_id = str(record.get("doc_id") or "")
-    provenance = record.get("provenance") or {}
-    blocks = (record.get("assembled") or {}).get("blocks") or {}
-    runs = _paradata_records(paradata)
+    run_actions = [dict(a) for a in actions] + [action_from_paradata(pd) for pd in _paradata_records(paradata)]
 
     graph: List[Dict[str, Any]] = []
-    root: Dict[str, Any] = {
-        "@id": ROOT_ID,
-        "@type": "Dataset",
-        "identifier": _ref("#doc_id") if doc_id else None,
-        "name": name or "ATRIUM document record {}".format(doc_id),
-        "description": description
-        or (
-            "Per-document aggregate record accreted across the ATRIUM pipeline, exported as "
-            "RO-Crate. Blocks reflect contributed steps only; a block is absent until its tool "
-            "has run. No licence is asserted: the rights in its contents are not established."
-        ),
-        "datePublished": _date_published(record),
-        "schemaVersion": str(record.get("schema_version") or ""),
-        "conformsTo": _ref(PROCESS_RUN_PROFILE),
-    }
-    root = _prune(root)
+    root: Dict[str, Any] = _prune(
+        {
+            "@id": ROOT_ID,
+            "@type": "Dataset",
+            "identifier": _ref("#doc_id") if doc_id else None,
+            "name": name or "ATRIUM document record {}".format(doc_id),
+            "description": description
+            or (
+                "One ATRIUM document record (content only, record schema {}) and the runs that wrote "
+                "it, each described by its Process Run Crate CreateAction. The rights in the "
+                "document are stated by the archive, not by this crate.".format(record.get("schema_version") or "")
+            ),
+            "datePublished": _date_published(run_actions),
+            "schemaVersion": str(record.get("schema_version") or ""),
+            "conformsTo": _ref(PROCESS_RUN_PROFILE),
+        }
+    )
 
     # ── the original input ────────────────────────────────────────────────────
-    # NOT a data entity: `source` carries no path by design ("originals are archive-managed,
-    # not pipeline-local"), so the file is not in the crate and cannot be in `hasPart`. It is
-    # what the crate is BASED ON, which is a different and truthful claim. A host crate that
-    # holds the original itself names it with `source_id`, and no `#source` is written.
+    # NOT a data entity: the original is archive-managed and not in the crate. It is what the
+    # crate is BASED ON. A host crate that holds the original names it with `source_id`.
     source = record.get("source") or {}
     original = source_id or (SOURCE_ID if source else None)
     if source and not source_id:
@@ -895,11 +886,10 @@ def document_crate(
                     "name": source.get("filename") or doc_id,
                     "identifier": doc_id,
                     "encodingFormat": source.get("media_type"),
-                    "sha256": source.get("sha256"),
                     "sha512": source.get("sha512"),
                     "description": (
                         "The ORIGINAL input this record was built from, identified by doc_id and its "
-                        "digest. Archive-managed and not part of this crate. Acquired as: {}.".format(
+                        "SHA-512. Archive-managed and not part of this crate. Text obtained as: {}.".format(
                             source.get("origin") or "unrecorded"
                         )
                     ),
@@ -909,146 +899,19 @@ def document_crate(
     if original:
         root["isBasedOn"] = _ref(original)
 
-    # ── data entities: persistent step outputs only ───────────────────────────
-    has_part: List[str] = []
-    for key in sorted(record.get("derived_from") or {}):
-        path = str((record.get("derived_from") or {})[key])
-        if not path or fragment:
-            continue
-        has_part.append(path)
-        graph.append(
-            _prune(
-                {
-                    "@id": path,
-                    "@type": "File",
-                    "name": key,
-                    "description": "Persistent step output recorded in derived_from[{!r}].".format(key),
-                    "encodingFormat": _encoding_format(path),
-                    "contentSize": _content_size(path, data_dir),
-                }
-            )
-        )
-    if has_part:
-        root["hasPart"] = _refs(sorted(has_part))
-
-    # ── regenerable recipes: contextual, never hasPart ────────────────────────
+    # ── one CreateAction per run, flattened: tools, images, agents, files ─────
     mentions: List[str] = []
-    for key in sorted(record.get("regenerable") or {}):
-        recipe = (record.get("regenerable") or {})[key]
-        if not isinstance(recipe, dict):
-            continue
-        rid = "#regenerable-" + key
-        mentions.append(rid)
-        graph.append(
-            _prune(
-                {
-                    "@id": rid,
-                    "@type": "CreativeWork",
-                    "name": key,
-                    # A reference when the file it is regenerated from is in this crate, as
-                    # RO-Crate asks of any value naming an entity; a literal path otherwise.
-                    "regenerableFrom": (
-                        _ref(recipe["from"]) if recipe.get("from") in has_part else recipe.get("from")
-                    ),
-                    "regenerableWith": recipe.get("converter"),
-                    "description": (
-                        "DISPOSABLE derivation, recorded as a reproducible recipe rather than a "
-                        "stored path (detail: {}). Deliberately absent from hasPart: the file is "
-                        "not in this crate and is not meant to be.".format(recipe.get("detail") or "unspecified")
-                    ),
-                }
-            )
-        )
-
-    # ── one contextual entity per stamped block ───────────────────────────────
-    # This is where the record's granularity survives into the crate. `assembled.blocks` is
-    # "the source of granularity" — re-running one tool rewrites exactly one entry — and a
-    # crate that flattened it to a single "produced by the pipeline" claim would throw away
-    # the one thing the accretion design bought. Who wrote a block is the run whose action
-    # lists it as `result`; `creator` is for people (the tools' authors), not for tools.
-    for name_ in sorted(blocks):
-        stamp = blocks[name_] if isinstance(blocks[name_], dict) else {}
-        graph.append(
-            _prune(
-                {
-                    "@id": _block_id(name_),
-                    "@type": "CreativeWork",
-                    "name": name_,
-                    "recordBlock": name_,
-                    "dateModified": stamp.get("updated_at"),
-                    "description": "Block {!r} of the document record, as stamped by assembled.blocks.".format(name_),
-                }
-            )
-        )
-
-    # ── one CreateAction per contributing run, one SoftwareApplication per tool ──
-    # A stamp whose run has no provenance.contributors entry (a record assembled from a
-    # hand-built baseline) still gets an action, reconstructed from the stamp, so no block is
-    # left without the run that wrote it.
-    contributors = [c for c in provenance.get("contributors") or [] if isinstance(c, dict)]
-    seen_runs = {(str(c.get("program") or ""), str(c.get("run_id") or "")) for c in contributors}
-    for name_ in sorted(blocks):
-        stamp = blocks[name_] if isinstance(blocks[name_], dict) else {}
-        key = (str(stamp.get("program") or ""), str(stamp.get("run_id") or ""))
-        if key[0] and key not in seen_runs:
-            seen_runs.add(key)
-            contributors.append(
-                {
-                    "program": key[0],
-                    "run_id": key[1],
-                    "run_uuid": stamp.get("run_uuid", ""),
-                    "paradata_ref": stamp.get("paradata_ref", ""),
-                    "blocks": ",".join(n for n in sorted(blocks) if (blocks[n] or {}).get("run_id") == key[1]),
-                    "at": stamp.get("updated_at", ""),
-                    "_reconstructed": True,
-                }
-            )
-
-    tools: Dict[str, Dict[str, Any]] = {}
-    extras: Dict[str, Dict[str, Any]] = {}
-    for contributor in contributors:
-        program = str(contributor.get("program") or "unknown")
-        run_id = str(contributor.get("run_id") or "")
-        run_uuid = str(contributor.get("run_uuid") or "")
-        pd = _match_paradata(runs, program, run_id, run_uuid)
-        run_uuid = run_uuid or str(pd.get("run_uuid") or "")
-        tool = _tool_entity(program, pd)
-        tools.setdefault(tool["@id"], tool)
-        image = _container_image(str(pd.get("docker_image") or ""))
-        agent = _agent_entity(str(pd.get("run_agent") or ""))
-        for extra in (image, agent):
-            if extra:
-                extras.setdefault(extra["@id"], extra)
-        wrote = [b.strip() for b in str(contributor.get("blocks") or "").split(",") if b.strip()]
-        action_id = _run_action_id(program, run_id, run_uuid)
-        mentions.append(action_id)
-        how = (
-            "Reconstructed from assembled.blocks: the record lists no contributor entry for this run."
-            if contributor.get("_reconstructed")
-            else "Contributed block(s) {}.".format(", ".join(wrote) or "none recorded")
-        )
-        graph.append(
-            _prune(
-                {
-                    "@id": action_id,
-                    "@type": "CreateAction",
-                    "name": "{} run {}".format(program, run_id or "unknown"),
-                    "description": "{} Run paradata: {}.".format(how, contributor.get("paradata_ref") or "not recorded"),
-                    "startTime": _timestamp(pd.get("start_time")),
-                    "endTime": _timestamp(pd.get("end_time") or contributor.get("at")),
-                    "actionStatus": COMPLETED_ACTION_STATUS,
-                    "instrument": _ref(tool["@id"]),
-                    "containerImage": _ref(image["@id"]) if image else None,
-                    "agent": _ref(agent["@id"]) if agent else None,
-                    "object": _ref(original) if original else None,
-                    "result": _refs(_block_id(b) for b in wrote if b in blocks) or None,
-                }
-            )
-        )
-    graph.extend(tools.values())
-    graph.extend(extras.values())
-    if tools:
-        graph.extend(_person_entities(t["alternateName"] for t in tools.values()))
+    entities: Dict[str, Dict[str, Any]] = {}
+    for action in run_actions:
+        flat = action_fragment(action)
+        for entity in flat["@graph"]:
+            entities.setdefault(entity["@id"], {}).update(entity)
+            if entity.get("@type") == "CreateAction":
+                mentions.append(entity["@id"])
+    graph.extend(entities.values())
+    programs = [e["alternateName"] for e in entities.values() if e.get("@type") == "SoftwareApplication" and e.get("alternateName")]
+    if programs:
+        graph.extend(_person_entities(programs))
 
     # ── controlled terms ──────────────────────────────────────────────────────
     schemes = set()
@@ -1066,15 +929,15 @@ def document_crate(
                 "inDefinedTermSet": _ref(_scheme_uri(scheme)),
             }
         )
-    for source, concept_id, name in _source_concepts(record):
-        namespace, harvest = SOURCE_CONCEPTS[source]
+    for source_name, concept_id, label in _source_concepts(record):
+        namespace, harvest = SOURCE_CONCEPTS[source_name]
         schemes.add(harvest)
         about.append(namespace + concept_id)
         graph.append(
             {
                 "@id": namespace + concept_id,
                 "@type": "DefinedTerm",
-                "name": name,
+                "name": label,
                 "termCode": concept_id,
                 "inDefinedTermSet": _ref(_scheme_uri(harvest)),
             }
@@ -1088,9 +951,7 @@ def document_crate(
 
     if fragment:
         return _fragment(graph)
-    # ── licence: none asserted (a fragment's host root decides its own) ──────
-    root["license"] = _ref(NO_LICENCE_ID)
-    graph.append(_no_licence_entity())
+    root["license"] = _root_license(license, graph, "The licence the caller asserted.")
     if doc_id:
         graph.append(_identifier_entity("#doc_id", "doc_id", doc_id))
     graph.append(_profile_entity())
@@ -1138,15 +999,11 @@ def run_crate(
         "description": description
         or (
             "One ATRIUM pipeline run, packaged as RO-Crate: the per-document crates it "
-            "produced, the paradata that records how it behaved, and the tool chain that ran. "
-            "No licence is asserted: the rights in its contents are not established."
+            "produced, the paradata that records how it behaved, and the tool chain that ran."
         ),
-        "datePublished": _run_date_published(records, run_paradata),
+        "datePublished": _run_date_published(run_paradata),
         "conformsTo": _ref(PROCESS_RUN_PROFILE),
     }
-
-    root["license"] = _ref(NO_LICENCE_ID)
-    graph.append(_no_licence_entity())
 
     # ── the per-document crates are the parts ─────────────────────────────────
     parts: List[str] = []
@@ -1230,7 +1087,7 @@ def run_crate(
                     "position": stage.get("order"),
                     "startTime": _timestamp(stage.get("start_time")),
                     "endTime": _timestamp(stage.get("end_time")),
-                    "actionStatus": COMPLETED_ACTION_STATUS,
+                    "actionStatus": FAILED_ACTION_STATUS if stage.get("action_status") == "failed" else COMPLETED_ACTION_STATUS,
                     "result": _refs(documents) or None,
                     "description": (
                         "script={} method={} inputs={} processed={} skipped={} duration_s={}".format(
@@ -1258,17 +1115,16 @@ def run_crate(
 
     graph.append(_identifier_entity("#run_id", "run_uuid" if run.get("run_uuid") else "run_id",
                                     str(run.get("run_uuid") or "") or run_id or "atrium-run"))
+    root["license"] = _root_license(None, graph, "")
     graph.append(_profile_entity())
     graph.append(root)
     return _assemble(graph)
 
 
-def _run_date_published(records: Sequence[Dict[str, Any]], run_paradata: Optional[Dict[str, Any]]) -> str:
+def _run_date_published(run_paradata: Optional[Dict[str, Any]]) -> str:
+    """The run's end date from its merged paradata; the epoch when it has none (never the clock)."""
     explicit = str((run_paradata or {}).get("end_time") or "")
-    if len(explicit) >= 10:
-        return explicit[:10]
-    dates = [_date_published(r) for r in records]
-    return max(dates) if dates else "1970-01-01"
+    return explicit[:10] if len(explicit) >= 10 else "1970-01-01"
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -1313,8 +1169,8 @@ def wrap_fragment(
     present) in `isBasedOn`, and declares the Process Run Crate profile. A fragment has no root,
     so this is also the only way to validate one (`tools/ci/rocrate_check.py`).
 
-    `license` is the host's own assertion. Without one the stub root, like any ATRIUM crate root,
-    names `#no-licence-asserted`.
+    `license` is the host's own assertion (AMČR states the document's licence on its record
+    crate). Without one the stub root, like every root here, names `#no-licence-asserted` (D2).
     """
     graph = [dict(e) for e in fragment.get("@graph") or []]
     by_type: Dict[str, List[str]] = {}
@@ -1329,21 +1185,13 @@ def wrap_fragment(
             "name": name,
             "description": description,
             "datePublished": date_published,
-            "license": _license_value(license) if license else _ref(NO_LICENCE_ID),
+            "license": _root_license(license, graph, "The licence of this crate."),
             "conformsTo": _ref(PROCESS_RUN_PROFILE),
-            "mentions": _refs(
-                sorted(by_type.get("CreateAction", []) + [e["@id"] for e in graph if "regenerableFrom" in e])
-            ),
+            "mentions": _refs(sorted(by_type.get("CreateAction", []))),
             "about": _refs(sorted(by_type.get("DefinedTerm", []))),
             "isBasedOn": _ref(SOURCE_ID) if SOURCE_ID in {e["@id"] for e in graph} else None,
         }
     )
-    if not license:
-        graph.append(_no_licence_entity())
-    elif isinstance(license, str) and license.startswith("http") and license not in {e["@id"] for e in graph}:
-        graph.append(
-            {"@id": license, "@type": "CreativeWork", "name": license, "description": "The licence of this crate."}
-        )
     return _assemble(graph + [_profile_entity(), root])
 
 
@@ -1352,6 +1200,35 @@ def _license_value(license: Union[str, Mapping[str, Any]]) -> Any:
     if not isinstance(license, str):
         return dict(license)
     return _ref(license) if license.startswith("http") else {"@value": license}
+
+
+def _no_licence_entity() -> Dict[str, str]:
+    """The entity `NO_LICENCE_ID` names: no licence asserted, and nothing computed in its place."""
+    return {
+        "@id": NO_LICENCE_ID,
+        "@type": "CreativeWork",
+        "name": "No licence asserted",
+        "description": (
+            "No licence is asserted for this crate. The rights in its contents depend on the source "
+            "and on AMČR's permission to process it. Each run's paradata lists the components that "
+            "ran, each with its own terms."
+        ),
+    }
+
+
+def _root_license(
+    license: Optional[Union[str, Mapping[str, Any]]], graph: List[Dict[str, Any]], description: str
+) -> Any:
+    """A root's `license`: the caller's assertion, or `#no-licence-asserted` without one. The entity
+    it names (the placeholder, or an asserted URL) is added to `graph` unless already there."""
+    ids = {e.get("@id") for e in graph}
+    if not license:
+        if NO_LICENCE_ID not in ids:
+            graph.append(_no_licence_entity())
+        return _ref(NO_LICENCE_ID)
+    if isinstance(license, str) and license.startswith("http") and license not in ids:
+        graph.append({"@id": license, "@type": "CreativeWork", "name": license, "description": description})
+    return _license_value(license)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -1404,149 +1281,98 @@ def write_crate(crate: Dict[str, Any], out_dir: str) -> str:
     return path
 
 
-def _encoding_format(path: str) -> Optional[str]:
-    """Media type from the pipeline's own filename conventions, not from `mimetypes`.
-
-    `mimetypes` answers `text/xml` for `.teitok.xml` and nothing at all for `.conllu`, and the
-    suffixes here are a closed set fixed by `KNOWN_PIPELINE_SUFFIXES` in atrium_document.py.
-    Unknown suffix returns None, which `_prune()` then omits — see its docstring.
-    """
-    lower = path.lower()
-    for suffix, media in (
-        (".teitok.xml", "application/tei+xml"),
-        (".alto.xml", "application/alto+xml"),
-        (".conllu", "text/x-conllu"),
-        (".document.json", "application/json"),
-        (".json", "application/json"),
-        (".xml", "application/xml"),
-        (".csv", "text/csv"),
-        (".txt", "text/plain"),
-        (".md", "text/markdown"),
-        (".pdf", "application/pdf"),
-    ):
-        if lower.endswith(suffix):
-            return media
-    return None
-
-
 # ──────────────────────────────────────────────────────────────────────────────
 # Self-test
 # ──────────────────────────────────────────────────────────────────────────────
 
 _SAMPLE_RUN_UUIDS = {
-    "alto-postprocess": "urn:uuid:5a1e0c1e-1b2d-4c3e-8f40-0a1b2c3d4e5f",
+    "ocr-postprocess": "urn:uuid:5a1e0c1e-1b2d-4c3e-8f40-0a1b2c3d4e5f",
     "nlp-enrich": "urn:uuid:9c8b7a6d-5e4f-4321-9abc-def012345678",
+}
+
+#: Sample digests: the original, the stored docproc, and two record versions.
+_SAMPLE_SHA512 = {
+    "original": "b" * 128,
+    "docproc": "c" * 128,
+    "record-1": "d" * 128,
+    "record-2": "e" * 128,
+    "teitok": "f" * 128,
 }
 
 
 def _sample_record() -> Dict[str, Any]:
-    """A record exercising every mapping branch, including the ones that must NOT map."""
+    """A record-2.0 sample exercising every mapping branch the crate has."""
     return {
-        "schema_version": "1.0",
+        "schema_version": "2.0",
         "record_type": "atrium-document",
         "doc_id": "CTX000000001",
         "source": {
-            "sha256": "a" * 64,
-            "sha512": "b" * 128,
-            "filename": "CTX000000001.alto.xml",
-            "media_type": "application/alto+xml",
+            "sha512": _SAMPLE_SHA512["original"],
+            "filename": "CTX000000001.pdf",
+            "media_type": "application/pdf",
             "page_count": 1,
-            "origin": "ABBYY-ALTO",
-        },
-        "derived_from": {
-            "teitok": "TEITOK/CTX000000001.teitok.xml",
-            "paradata": "paradata/260724-101112_pipeline-run.json",
-        },
-        "regenerable": {
-            "markdown": {"from": "TEITOK/CTX000000001.teitok.xml", "converter": "xml_to_md@0.3.0", "detail": "full"}
-        },
-        "provenance": {
-            "license": "CC BY-NC-SA 4.0",
-            "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
-            "contributors": [
-                {
-                    "program": "alto-postprocess",
-                    "run_id": "260724-101112",
-                    "run_uuid": _SAMPLE_RUN_UUIDS["alto-postprocess"],
-                    "paradata_ref": "paradata/260724-101112_alto-postprocess.json",
-                    "blocks": "pages,content",
-                    "at": "2026-07-24T10:11:12.345678+00:00",
-                },
-                {
-                    "program": "nlp-enrich",
-                    "run_id": "260724-101500",
-                    "run_uuid": _SAMPLE_RUN_UUIDS["nlp-enrich"],
-                    "paradata_ref": "paradata/260724-101500_nlp-enrich.json",
-                    "blocks": "entities,derived_from",
-                    "at": "2026-07-24T10:15:00+00:00",
-                },
-            ],
-        },
-        "assembled": {
-            "blocks": {
-                "pages": {
-                    "program": "alto-postprocess",
-                    "run_id": "260724-101112",
-                    "run_uuid": _SAMPLE_RUN_UUIDS["alto-postprocess"],
-                    "updated_at": "2026-07-24T10:11:12+00:00",
-                },
-                "content": {
-                    "program": "alto-postprocess",
-                    "run_id": "260724-101112",
-                    "run_uuid": _SAMPLE_RUN_UUIDS["alto-postprocess"],
-                    "updated_at": "2026-07-24T10:11:12+00:00",
-                },
-                "entities": {
-                    "program": "nlp-enrich",
-                    "run_id": "260724-101500",
-                    "run_uuid": _SAMPLE_RUN_UUIDS["nlp-enrich"],
-                    "updated_at": "2026-07-24T10:15:00+00:00",
-                },
-                "derived_from": {
-                    "program": "nlp-enrich",
-                    "run_id": "260724-101500",
-                    "run_uuid": _SAMPLE_RUN_UUIDS["nlp-enrich"],
-                    "updated_at": "2026-07-24T10:15:00+00:00",
-                },
-            },
-            "had_baseline": True,
-            "note": "Blocks reflect CONTRIBUTED steps only; a block is absent until its tool has run.",
+            "origin": "atr",
         },
         "page_categories": {"1": "TEXT"},
-        "pages": [{"page": "1", "page_index": 1, "quality_band": "Clear", "category": "TEXT"}],
-        "content": {"text": "Náčrt sondy.", "reading_order": "ltr-columns"},
-        "entities": [{"surface": "Praha", "type_teitok": "LOC", "type_cnec": "gu", "page": "1", "line": 0}],
+        "pages": [{"page": "1", "page_index": 1, "content_status": "text", "quality_band": "Clear", "category": "TEXT"}],
+        "content": {"text": "Náčrt sondy."},
+        "lines": [{"page": "1", "line": 1, "text": "Náčrt sondy.", "block": "p1-b0", "text_source": "atr", "bbox_precision": "absent"}],
+        "entities": [{"surface": "Praha", "type_teitok": "LOC", "type_cnec": "gu", "page": "1", "line": 1}],
     }
 
 
 def _sample_paradata() -> List[Dict[str, Any]]:
-    """The paradata records of the sample record's two runs, as `ParadataLogger.record` has them."""
+    """The paradata 3.0 records of the sample record's two runs, as `ParadataLogger.record` has them."""
     return [
         {
-            "schema_version": "2.0",
-            "program": "alto-postprocess",
-            "tool_version": "v1.6.0-beta",
-            "repository": "https://github.com/ufal/atrium-alto-postprocess",
-            "docker_image": "ghcr.io/ufal/atrium-alto-postprocess-api:1.6.0-beta",
+            "schema_version": "3.0",
+            "program": "ocr-postprocess",
+            "tool_version": "v1.16.0-beta",
+            "repository": "https://github.com/ufal/atrium-ocr-postprocess",
+            "docker_image": "ghcr.io/ufal/atrium-ocr-postprocess-api:1.16.0-beta",
             "python_version": "3.11.15 (main) [GCC]",
             "run_id": "260724-101112",
-            "run_uuid": _SAMPLE_RUN_UUIDS["alto-postprocess"],
+            "run_uuid": _SAMPLE_RUN_UUIDS["ocr-postprocess"],
             "run_agent": "https://ror.org/00x0x0x00",
+            "action_status": "completed",
             "start_time": "2026-07-24T10:11:12.000001+00:00",
             "end_time": "2026-07-24T10:11:40.250000+00:00",
+            "parameters": {"rules": "frozen-2026-11"},
+            "inputs": [
+                {"name": "atr/docproc-json", "sha512": _SAMPLE_SHA512["docproc"], "media_type": "application/json", "stored": True},
+                {"name": "atrium/document-json", "sha512": _SAMPLE_SHA512["record-1"], "stored": True},
+            ],
+            "outputs": [
+                {
+                    "name": "atrium/document-json",
+                    "sha512": _SAMPLE_SHA512["record-2"],
+                    "stored": True,
+                    "record_fields": {"lines": ["page", "line", "text", "block", "text_source", "bbox_precision"], "pages": ["page", "page_index", "content_status"]},
+                }
+            ],
+            "components": [{"name": "fasttext", "license": "CC BY-NC 4.0"}],
+            "limits": [],
         },
         {
-            "schema_version": "2.0",
+            "schema_version": "3.0",
             "program": "nlp-enrich",
-            "tool_version": "0.22.0",
+            "tool_version": "1.4.0",
             "repository": "https://github.com/ufal",
-            "docker_image": "ghcr.io/ufal/atrium-nlp-enrich-api:0.22.0",
+            "docker_image": "ghcr.io/ufal/atrium-nlp-enrich-api:1.4.0",
             "python_version": "3.11.15",
             "run_id": "260724-101500",
             "run_uuid": _SAMPLE_RUN_UUIDS["nlp-enrich"],
             "run_agent": "https://ror.org/00x0x0x00",
+            "action_status": "completed",
             "start_time": "2026-07-24T10:15:00+00:00",
             "end_time": "2026-07-24T10:16:02+00:00",
+            "inputs": [{"name": "atrium/document-json", "sha512": _SAMPLE_SHA512["record-2"], "stored": True}],
+            "outputs": [
+                {"name": "atrium/document-json", "sha512": "a" * 128, "stored": True, "record_fields": {"entities": ["surface", "type_teitok", "type_cnec", "page", "line"]}},
+                {"name": "atr/teitok-xml", "sha512": _SAMPLE_SHA512["teitok"], "media_type": "application/tei+xml", "stored": True},
+            ],
+            "components": [{"name": "UDPipe 2", "license": "CC BY-NC-SA 4.0"}],
+            "limits": [],
         },
     ]
 
@@ -1581,7 +1407,7 @@ def _selftest(stream: Any = None) -> int:
     if graph[0].get("conformsTo") != {"@id": ROCRATE_CONFORMS_TO}:
         problems.append("descriptor does not conform to RO-Crate {}".format(ROCRATE_VERSION))
     root = by_id.get(ROOT_ID, {})
-    for prop in ("@type", "name", "description", "datePublished", "license"):
+    for prop in ("@type", "name", "description", "datePublished"):
         if not root.get(prop):
             problems.append("root is missing required property {!r}".format(prop))
     if root.get("@type") != "Dataset":
@@ -1590,6 +1416,8 @@ def _selftest(stream: Any = None) -> int:
         problems.append("root does not declare the Process Run Crate profile as an entity")
     if "author" in root:
         problems.append("root carries author: the ATRIUM authors are each tool's creator")
+    if root.get("license") != {"@id": NO_LICENCE_ID} or by_id.get(NO_LICENCE_ID) != _no_licence_entity():
+        problems.append("the root does not name #no-licence-asserted, its entity (RO-Crate 1.2 rule 13.3; D2)")
 
     # 2. No dangling references.
     for ref in sorted(set(_walk_refs(graph))):
@@ -1597,22 +1425,22 @@ def _selftest(stream: Any = None) -> int:
             continue
         problems.append("dangling reference {!r} — no entity and not an absolute URI".format(ref))
 
-    # 3. The reference-discipline rule: regenerable is never a part.
-    parts = {r["@id"] for r in root.get("hasPart", [])}
-    if any(p.startswith("#regenerable-") for p in parts):
-        problems.append("a regenerable recipe appears in hasPart")
-    if "TEITOK/CTX000000001.teitok.xml" not in parts:
-        problems.append("a derived_from output is missing from hasPart")
-    if SOURCE_ID in parts:
+    # 3. Nothing of record schema 1.x or of a calculated licence leaks into a crate.
+    text = to_json(crate)
+    for banned in ("ni:///", "#block-", "effective_license", "most restrictive", "license_detail"):
+        if banned in text:
+            problems.append("the crate carries {!r}".format(banned))
+    if SOURCE_ID in {r["@id"] for r in root.get("hasPart", [])}:
         problems.append("the archive-managed original appears in hasPart")
 
     # 4. Determinism — the property the byte-comparison gate depends on.
-    if to_json(document_crate(record)) != to_json(document_crate(record)):
+    if to_json(document_crate(record, paradata=_sample_paradata())) != text:
         problems.append("document_crate() is not deterministic")
     if root.get("datePublished") != "2026-07-24":
-        problems.append("datePublished was not derived from the record's own newest stamp")
+        problems.append("datePublished was not derived from the newest run's end time")
 
-    # 5. Runs, tools, people: stable ids, `version`, authors as creator, profile time format.
+    # 5. Runs, tools, people: stable ids, `version`, authors as creator, profile time format, and
+    #    the record's results naming their fields.
     for program, run_uuid in _SAMPLE_RUN_UUIDS.items():
         action = by_id.get(run_uuid, {})
         if action.get("@type") != "CreateAction":
@@ -1620,6 +1448,10 @@ def _selftest(stream: Any = None) -> int:
         for prop in ("startTime", "endTime"):
             if action.get(prop) and not _ACTION_TIME.match(action[prop]):
                 problems.append("{} {} is not in the profile's format".format(program, prop))
+        for res in action.get("result") or []:
+            entity = by_id.get(res["@id"], {})
+            if entity.get("name") == RECORD_DISTRIBUTION and not isinstance(entity.get("recordFields"), str):
+                problems.append("{}'s record result does not carry its fields as JSON text".format(program))
     tools = [e for e in graph if e.get("@type") == "SoftwareApplication"]
     for tool in tools:
         if not str(tool["@id"]).startswith("https://") or tool.get("version") in (None, "", UNRECORDED_VERSION):
@@ -1630,7 +1462,7 @@ def _selftest(stream: Any = None) -> int:
             problems.append("tool {} does not name its own authors as creator".format(tool["@id"]))
         if not all(isinstance(by_id.get(c["@id"]), dict) for c in tool.get("creator", [])):
             problems.append("tool {} names a creator the graph does not describe".format(tool["@id"]))
-    if "https://github.com/ufal/atrium-nlp-enrich/releases/tag/v0.22.0" not in by_id:
+    if "https://github.com/ufal/atrium-nlp-enrich/releases/tag/v1.4.0" not in by_id:
         problems.append("a release id was not built from the table's repository")
 
     # 6. Controlled terms became DefinedTerms.
@@ -1643,7 +1475,7 @@ def _selftest(stream: Any = None) -> int:
         run_paradata={
             "run_id": "260724-101112",
             "end_time": "2026-07-24T11:00:00+00:00",
-            "pipeline_stages": [{"order": 1, "program": "alto-postprocess", "run_id": "260724-101112"}],
+            "pipeline_stages": [{"order": 1, "program": "ocr-postprocess", "run_id": "260724-101112"}],
         },
         paradata_refs=["paradata/260724-101112_pipeline-run.json"],
     )
@@ -1652,6 +1484,8 @@ def _selftest(stream: Any = None) -> int:
         problems.append("run crate does not reference the per-document crate")
     if rroot.get("conformsTo") != {"@id": PROCESS_RUN_PROFILE}:
         problems.append("run crate does not declare the process-run profile")
+    if rroot.get("license") != {"@id": NO_LICENCE_ID} or NO_LICENCE_ID not in {e["@id"] for e in rc["@graph"]}:
+        problems.append("run crate root does not name #no-licence-asserted")
 
     # 8. The fragment: no descriptor, no root, no data entity; wrapped, it is a crate again.
     frag = document_crate(record, paradata=_sample_paradata(), fragment=True)
@@ -1662,21 +1496,35 @@ def _selftest(stream: Any = None) -> int:
         frag,
         name="stub",
         description="stub",
-        license="https://creativecommons.org/licenses/by-nc-sa/4.0/",
+        license="https://creativecommons.org/licenses/by-nc/4.0/",
         date_published="2026-07-24",
     )
     wroot = {e["@id"]: e for e in wrapped["@graph"]}[ROOT_ID]
     if not set(_SAMPLE_RUN_UUIDS.values()) <= {r["@id"] for r in wroot.get("mentions", [])}:
         problems.append("wrap_fragment() does not mention every action")
+    if wroot.get("license") != {"@id": "https://creativecommons.org/licenses/by-nc/4.0/"}:
+        problems.append("wrap_fragment() drops the licence its host asserted")
+    if NO_LICENCE_ID in frag_ids:
+        problems.append("the fragment carries a licence entity: the host's root decides its own")
 
-    # 9. A service's CreateAction meets the shared contract.
+    # 9. A service's CreateAction meets the shared contract; a 1.x-shaped one does not.
     action = create_action(
         _sample_paradata()[0],
-        inputs=[file_entity("x.alto.xml", b"<alto/>", media_type="application/alto+xml"), record_entity("C-1")],
-        outputs=block_entities(["pages", "lines"]),
+        inputs=[
+            file_entity("atr/docproc-json", b"{}", media_type="application/json"),
+            record_entity("C-1", b"{}"),
+            file_entity("atr/docproc-json", sha512="1" * 128, stored=False),
+        ],
+        outputs=[record_result({"lines": ["page", "line", "text"]}, b"{}")],
     )
     for problem in action_problems(action):
         problems.append("create_action(): " + problem)
+    for problem in action_problems(action_from_paradata(_sample_paradata()[1])):
+        problems.append("action_from_paradata(): " + problem)
+    old = dict(action, result=[{"@id": "ni:///sha-256;x", "@type": "CreativeWork", "name": "pages"}])
+    old["paradataRecord"] = dict(action["paradataRecord"], license="CC BY-NC 4.0")
+    if len(action_problems(old)) < 2:
+        problems.append("action_problems() accepts an ni: result or a calculated licence")
 
     # 10. JSON round-trip.
     for built in (crate, rc, wrapped, action):
@@ -1713,12 +1561,12 @@ def _cli(argv: Optional[Sequence[str]] = None) -> int:
         metavar="JSON",
         action="append",
         default=[],
-        help="a paradata record: with --document, each run's (repeat it); with --run, the merged run record",
+        help="a paradata 3.0 record: with --document, each run's (repeat it); with --run, the merged run record",
     )
     p.add_argument("--fragment", action="store_true", help="with --document: entities only, no descriptor or root")
     p.add_argument("--wrap", action="store_true", help="with --fragment: put the fragment under a stub root")
     p.add_argument("--source-id", metavar="ID", default=None, help="with --fragment: the host's id of the original")
-    p.add_argument("--data-dir", metavar="DIR", default=None, help="where the crate's files are (contentSize)")
+    p.add_argument("--data-dir", metavar="DIR", default=None, help="with --run: where the paradata files are (contentSize)")
     p.add_argument("--out-dir", metavar="DIR", default=None, help="write ro-crate-metadata.json here")
     args = p.parse_args(argv)
 
@@ -1728,15 +1576,13 @@ def _cli(argv: Optional[Sequence[str]] = None) -> int:
     if args.document:
         record = _load(args.document)
         runs = [_load(path) for path in args.paradata]
-        crate = document_crate(
-            record, paradata=runs, fragment=args.fragment, source_id=args.source_id, data_dir=args.data_dir
-        )
+        crate = document_crate(record, paradata=runs, fragment=args.fragment, source_id=args.source_id)
         if args.fragment and args.wrap:
             crate = wrap_fragment(
                 crate,
                 name="ATRIUM record fragment {} (stub root)".format(record.get("doc_id") or ""),
                 description="The fragment of one ATRIUM record under a stub root, as a host crate embeds it.",
-                date_published=_date_published(record),
+                date_published=_date_published(action_from_paradata(pd) for pd in runs),
             )
     elif args.run:
         crate = run_crate(

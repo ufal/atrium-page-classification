@@ -28,6 +28,13 @@ docs/document_schema.md, "Freeze & conformance".
 What needs the hub -- the tag itself, the changelog sections, and validating every producer's
 record shape under both schemas (jsonschema) -- is the hub's tests/test_schema_freeze_records.py.
 
+SCHEMA 2.0 (atrium-project#84). The MAJOR bump's first step is taken: `SCHEMA_VERSION = "2.0"`,
+`_migrate_1_to_2()`. Its freeze is PENDING: `doc-schema-v2` is cut only after the validator, the
+E2E checks and a run through the assembled chain (D12), so MAJOR 2 is in `PENDING_FREEZES`, the
+checks against the current major's freeze skip with that reason, and its register starts empty.
+The v1 frozen copy is still checked byte for byte, and the 1.x register stays as the record of
+1.x (`POST_FREEZE_CHANGES_BY_MAJOR[1]`).
+
 The imports below are plain top-level imports, as in test_document_originators.py: pytest puts
 this file's directory on sys.path in the hub, and pytest.ini's `pythonpath = .` does it in a tool
 repo.
@@ -57,6 +64,15 @@ FREEZES: Dict[int, Dict[str, str]] = {
     },
 }
 
+#: A MAJOR whose `SCHEMA_VERSION` is current but whose freeze tag is not cut yet, with the reason.
+#: Removed, and `FREEZES[n]` added, on the hub commit that cuts `doc-schema-v<n>`.
+PENDING_FREEZES: Dict[int, str] = {
+    2: (
+        "doc-schema-v2 is cut only after the validator, the E2E checks and a run through the "
+        "assembled chain (atrium-project#84, D12)"
+    ),
+}
+
 #: The `run_uuid` pattern, shared by its two registered pointers: `urn:uuid:` and a lower-case UUID.
 _RUN_UUID_PATTERN = "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
 
@@ -71,8 +87,9 @@ def _stamp_clause(block: str) -> Dict[str, Any]:
 #: register reads as the post-freeze contract, and a later edit under a registered pointer (a
 #: widened enum, say) has to edit its entry too. `changelog` is the date of its
 #: `## Changelog — <date>` section in the hub's docs/document_schema.md. An entry that matches no
-#: difference fails, so the register is exactly as long as the diff.
-POST_FREEZE_CHANGES: Dict[str, Dict[str, Any]] = {
+#: difference fails, so the register is exactly as long as the diff. This one is the 1.x register
+#: (relative to doc-schema-v1); 2.x starts its own, empty, at its freeze.
+POST_FREEZE_CHANGES_1: Dict[str, Dict[str, Any]] = {
     "/properties/lines/items/properties/style/properties/region": {
         "kind": "added: a closed enum; absent means body text",
         "schema": {"type": "string", "enum": ["page_header", "page_footer", "footnote"]},
@@ -212,6 +229,10 @@ POST_FREEZE_CHANGES: Dict[str, Dict[str, Any]] = {
     },
 }
 
+#: Each MAJOR's register; `POST_FREEZE_CHANGES` is the current MAJOR's.
+POST_FREEZE_CHANGES_BY_MAJOR: Dict[int, Dict[str, Dict[str, Any]]] = {1: POST_FREEZE_CHANGES_1, 2: {}}
+POST_FREEZE_CHANGES: Dict[str, Dict[str, Any]] = POST_FREEZE_CHANGES_BY_MAJOR[int(SCHEMA_VERSION.split(".")[0])]
+
 #: Keywords that annotate and do not constrain. Changing them is not a schema change.
 _ANNOTATIONS = frozenset({"description", "$comment", "examples", "title", "default"})
 
@@ -226,6 +247,8 @@ _NAMED = frozenset({"properties", "$defs", "patternProperties", "dependentSchema
 
 def current_freeze() -> Dict[str, str]:
     major = int(SCHEMA_VERSION.split(".")[0])
+    if major in PENDING_FREEZES:
+        pytest.skip(f"MAJOR {major}'s freeze is pending: {PENDING_FREEZES[major]}")
     if major not in FREEZES:
         pytest.fail(f"no freeze recorded for schema MAJOR {major} -- see test_the_current_major_has_a_freeze")
     return FREEZES[major]
@@ -334,7 +357,8 @@ def _under(pointer: str, prefix: str) -> bool:
 
 def test_the_current_major_has_a_freeze():
     major = int(SCHEMA_VERSION.split(".")[0])
-    assert major in FREEZES, (
+    assert major not in (set(FREEZES) & set(PENDING_FREEZES)), f"MAJOR {major} is both frozen and pending"
+    assert major in FREEZES or major in PENDING_FREEZES, (
         f"SCHEMA_VERSION is {SCHEMA_VERSION} and no freeze is recorded for MAJOR {major}. A MAJOR "
         f"bump ends with: re-vendor, move v1, cut doc-schema-v{major} on the hub commit that "
         f"carries the bump, add atrium_document.schema.doc-schema-v{major}.json to the shared "
@@ -342,9 +366,11 @@ def test_the_current_major_has_a_freeze():
     )
 
 
-def test_the_frozen_copy_is_the_tagged_blob():
-    """The vendored frozen copy is byte-for-byte the file the freeze tag names."""
-    freeze = current_freeze()
+@pytest.mark.parametrize("major", sorted(FREEZES))
+def test_the_frozen_copy_is_the_tagged_blob(major):
+    """Every vendored frozen copy is byte-for-byte the file its freeze tag names (doc-schema-v1
+    is published and cited: it never changes, whatever MAJOR is current)."""
+    freeze = FREEZES[major]
     load_snapshot(freeze)  # a clear failure when it was not vendored
     with open(snapshot_path(freeze), "rb") as fh:
         got = git_blob_id(fh.read())

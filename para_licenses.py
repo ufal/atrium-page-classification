@@ -1,53 +1,28 @@
 """
-para_licenses.py – License resolution for ATRIUM paradata.
+para_licenses.py – the licence facts of the components an ATRIUM run uses.
 
-DROP THIS FILE AS-IS into every ATRIUM repository root, next to
-atrium_paradata.py.
+DROP THIS FILE AS-IS into every ATRIUM repository root, next to atrium_paradata.py.
 
 Purpose
 -------
-This module lists the components (models, data, APIs) a run exercised, each
-with its own licence, and derives a calculated label from them: the most
-restrictive of those licences. The label is NOT the licence of the run's
-output, and no output licence is asserted (atrium-project#6, 2026-10-29):
-records mark it `provenance.license_basis: "calculated"`, and an RO-Crate root
-names `#no-licence-asserted` instead.
+A run's paradata list each component it used (software, model, dataset, service) with its
+version and its terms, as facts (contract §6, layer 2). Nothing here combines them: no
+"effective", "most restrictive" or "calculated" licence is derived, for a run, a record or a
+crate (D2, atrium-project#84). This module only normalises a licence name to one spelling and
+gives its URL, so the same terms read the same way in every tool's paradata.
 
-IMPORTANT – legal review required
----------------------------------
-The restrictiveness ordering and the share-alike propagation rule encoded
-below are a *mechanical engineering approximation*, not legal advice.
+The rights in a document's content are the document's own licence, otherwise AMČR's default,
+stated by AMČR in the record's RO-Crate (layer 1); AMČR's own conditions are layer 3. Neither is
+this module's business.
 """
 
 from __future__ import annotations
 
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, Optional
 
 # ──────────────────────────────────────────────────────────────────────────────
-# License catalogue
+# Licence catalogue: canonical names and their URLs
 # ──────────────────────────────────────────────────────────────────────────────
-
-LICENSE_RANK: Dict[str, int] = {
-    "Public Domain": 0,
-    "CC0": 0,
-    "MIT": 1,
-    "Apache-2.0": 1,
-    "BSD-3-Clause": 1,
-    # Community Data License Agreement – Permissive 2.0: the licence of model
-    # weights and datasets (e.g. Docling's TableFormer). It places no terms on
-    # "Results" (the output of a computation over the Data) — sharing the Data
-    # itself only needs the licence text alongside — so it ranks with MIT.
-    "CDLA-Permissive-2.0": 1,
-    "MPL 2.0": 2,
-    "LGPL-3.0": 3,
-    "GPL-3.0": 4,
-    "AGPL-3.0": 4,
-    "CC BY 4.0": 1,
-    "CC BY-SA 4.0": 3,
-    "CC BY-NC 4.0": 5,
-    "CC BY-NC-SA 4.0": 6,
-    "glm-4": 5,
-}
 
 LICENSE_URL: Dict[str, str] = {
     "Public Domain": "https://creativecommons.org/publicdomain/mark/1.0/",
@@ -67,9 +42,8 @@ LICENSE_URL: Dict[str, str] = {
     "glm-4": "https://huggingface.co/THUDM/glm-4v-9b/blob/main/LICENSE",
 }
 
-_SHARE_ALIKE = {"CC BY-SA 4.0", "CC BY-NC-SA 4.0", "GPL-3.0", "AGPL-3.0", "LGPL-3.0", "MPL 2.0"}
-_NON_COMMERCIAL = {"CC BY-NC 4.0", "CC BY-NC-SA 4.0", "glm-4"}
 
+# Spellings that are more than a case change (SPDX ids, long names) -> the canonical name.
 _ALIASES: Dict[str, str] = {
     "apache 2.0": "Apache-2.0",
     "apache-2.0": "Apache-2.0",
@@ -117,15 +91,13 @@ _ALIASES: Dict[str, str] = {
 }
 
 
-# Case-insensitive fallback onto the canonical keys themselves, so a catalogued
-# license in any casing ("mit", "Cc By 4.0", "bsd-3-clause") resolves without an
-# alias row per spelling. _ALIASES wins: it holds the spellings that are more than
-# a case change (SPDX ids, long names).
-_CANONICAL: Dict[str, str] = {k.lower(): k for k in LICENSE_RANK}
+# Case-insensitive fallback onto the canonical names themselves, so a catalogued licence in any
+# casing ("mit", "Cc By 4.0") resolves without an alias row per spelling. _ALIASES wins.
+_CANONICAL: Dict[str, str] = {k.lower(): k for k in LICENSE_URL}
 
 
 def normalise_license(name: str) -> str:
-    """Map a free-text license string to a canonical key. Unknown -> as-is."""
+    """Map a free-text licence string to its canonical name. Unknown -> as given (stripped)."""
     if not name:
         return ""
     key = name.strip()
@@ -133,102 +105,15 @@ def normalise_license(name: str) -> str:
     return _ALIASES.get(low) or _CANONICAL.get(low) or key
 
 
-def resolve_effective_license(
-    components_used: Iterable[Tuple[str, str]],
-) -> Dict[str, object]:
-    """List the components used with their licences, and the calculated label over them."""
-    catalogue: List[Dict[str, object]] = []
-    unknown: List[str] = []
-    best_rank = -1
-    best_license = "MIT"
-
-    for name, raw_lic in components_used:
-        lic = normalise_license(raw_lic)
-        rank = LICENSE_RANK.get(lic)
-        catalogue.append(
-            {
-                "name": name,
-                "license": lic,
-                "license_url": LICENSE_URL.get(lic, ""),
-                "rank": rank if rank is not None else -1,
-            }
-        )
-        if rank is None:
-            unknown.append(lic)
-            rank = max(LICENSE_RANK.values())
-            if rank > best_rank:
-                best_rank = rank
-                best_license = lic
-            continue
-        if rank > best_rank:
-            best_rank = rank
-            best_license = lic
-
-    determined_by = [
-        c["name"] for c in catalogue if (LICENSE_RANK.get(str(c["license"]), max(LICENSE_RANK.values())) == best_rank)
-    ]
-
-    # An unrecognised effective license is "treated as maximally restrictive" in
-    # rank, so it is in its terms too: both flags set, never both false. A consumer
-    # that reads only the flags must not take an unknown license (atrium_paradata
-    # logs an undeclared component as "UNKNOWN") for a permissive one. No URL can
-    # be claimed for it, so effective_license_url stays "".
-    effective_unknown = best_license not in LICENSE_RANK
-    is_nc = effective_unknown or best_license in _NON_COMMERCIAL
-    is_sa = effective_unknown or best_license in _SHARE_ALIKE
-
-    # The notes describe the components, not the output: a component's licence is not the
-    # licence of what the pipeline produced, and no output licence is asserted
-    # (atrium-project#6, 2026-10-29). effective_license and the two flags stay as the
-    # calculated label the record carries with license_basis "calculated".
-    nc_names = [str(c["name"]) for c in catalogue if c["license"] in _NON_COMMERCIAL]
-    sa_names = [str(c["name"]) for c in catalogue if c["license"] in _SHARE_ALIKE]
-    parts: List[str] = [
-        f"{len(catalogue)} component(s) used; each keeps its own licence or terms (see components). "
-        "No output licence is asserted."
-    ]
-    if nc_names:
-        parts.append("Components under a NON-COMMERCIAL licence: " + ", ".join(nc_names) + ".")
-    if sa_names:
-        parts.append("Components under a SHARE-ALIKE licence: " + ", ".join(sa_names) + ".")
-    if unknown:
-        parts.append(
-            "WARNING: unrecognised license(s) "
-            + ", ".join(u or "(empty)" for u in sorted(set(unknown)))
-            + " are counted as NON-COMMERCIAL and SHARE-ALIKE in the calculated label until their terms"
-            " are catalogued; no license URL can be given. Update para_licenses.py."
-        )
-
-    return {
-        "effective_license": best_license,
-        "effective_license_url": LICENSE_URL.get(best_license, ""),
-        "is_non_commercial": is_nc,
-        "is_share_alike": is_sa,
-        "determined_by": determined_by,
-        "components": catalogue,
-        "unknown_licenses": sorted(set(unknown)),
-        "notes": " ".join(parts),
-    }
-
-
-def merge_effective_licenses(
-    license_blocks: Iterable[Dict[str, object]],
-) -> Dict[str, object]:
-    """
-    Merge several per-tool license resolutions into one effective license.
-
-    (#12) The union of components across blocks is DEDUPLICATED on
-    (name, license) before resolving. Always-on components otherwise repeat once
-    per stage, inflating the component catalogue. Deduping ensures the reported
-    count reflects the unique set.
-    """
-    seen: set = set()
-    union: List[Tuple[str, str]] = []
-    for block in license_blocks:
-        for comp in block.get("components", []):  # type: ignore[union-attr]
-            key = (str(comp["name"]), str(comp["license"]))
-            if key in seen:
-                continue
-            seen.add(key)
-            union.append(key)
-    return resolve_effective_license(union)
+def component_terms(name: str, license: Optional[str], version: Optional[str] = None) -> Dict[str, str]:
+    """One component as the paradata list it: its name, its version when known, and its terms —
+    the canonical licence name and, for a catalogued one, its URL. `UNKNOWN` when no terms are
+    recorded. A fact about the component, never combined with another (D2)."""
+    terms = normalise_license(license or "") or "UNKNOWN"
+    row: Dict[str, str] = {"name": str(name)}
+    if version:
+        row["version"] = str(version)
+    row["license"] = terms
+    if terms in LICENSE_URL:
+        row["license_url"] = LICENSE_URL[terms]
+    return row
