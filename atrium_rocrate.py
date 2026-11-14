@@ -31,8 +31,10 @@ WHAT IT PRODUCES
 * ``run_crate(records)`` — one pipeline run over several records, referencing their crates.
 * ``wrap_fragment(fragment)`` — a fragment under a stub root, which is how a fragment is validated.
 
-No crate root here names a licence unless the caller asserts one (``license=``): the rights in a
-document are the archive's to state (contract §8, layer 1), and the tools assert none (D2).
+A crate root names a licence only when its caller asserts one (``license=``): the rights in a
+document are the archive's to state (contract §8, layer 1), and the tools assert none (D2). Without
+one the root's ``license`` names ``#no-licence-asserted``, an entity that asserts nothing: RO-Crate
+1.2 requires a root licence, and this is not a calculated one (atrium-project#6, confirmed 2026-11-12).
 
 WHAT THIS MODULE IS NOT
 =======================
@@ -119,6 +121,11 @@ SOURCE_ID = "#source"
 
 #: The record's AMČR distribution name: an input or output with this name is the document record.
 RECORD_DISTRIBUTION = "atrium/document-json"
+
+#: What a crate root's `license` names when its caller asserts none. RO-Crate 1.2 requires a root
+#: licence (rule 13.3); the tools assert none (D2), so the root names an entity that asserts nothing.
+#: Not a calculated licence: motyc's option 1 on atrium-project#6 (2026-10-29), confirmed 2026-11-12.
+NO_LICENCE_ID = "#no-licence-asserted"
 
 #: ATRIUM's own namespace, so extension terms carry a resolvable prefix rather than being
 #: dropped by a consumer that compacts strictly against the RO-Crate context. Kept in step
@@ -840,7 +847,8 @@ def document_crate(
     the Process Run Crate profile; `source_id` names the host's entity for the original, which then
     replaces `#source`. `wrap_fragment()` shows the whole of it.
 
-    The root names a licence only when the caller asserts one (`license`); the tools assert none.
+    The root names a licence only when the caller asserts one (`license`); the tools assert none,
+    so without one it names `#no-licence-asserted`.
     """
     doc_id = str(record.get("doc_id") or "")
     run_actions = [dict(a) for a in actions] + [action_from_paradata(pd) for pd in _paradata_records(paradata)]
@@ -943,10 +951,7 @@ def document_crate(
 
     if fragment:
         return _fragment(graph)
-    if license:
-        root["license"] = _license_value(license)
-        if isinstance(license, str) and license.startswith("http"):
-            graph.append({"@id": license, "@type": "CreativeWork", "name": license, "description": "The licence the caller asserted."})
+    root["license"] = _root_license(license, graph, "The licence the caller asserted.")
     if doc_id:
         graph.append(_identifier_entity("#doc_id", "doc_id", doc_id))
     graph.append(_profile_entity())
@@ -1110,6 +1115,7 @@ def run_crate(
 
     graph.append(_identifier_entity("#run_id", "run_uuid" if run.get("run_uuid") else "run_id",
                                     str(run.get("run_uuid") or "") or run_id or "atrium-run"))
+    root["license"] = _root_license(None, graph, "")
     graph.append(_profile_entity())
     graph.append(root)
     return _assemble(graph)
@@ -1164,7 +1170,7 @@ def wrap_fragment(
     so this is also the only way to validate one (`tools/ci/rocrate_check.py`).
 
     `license` is the host's own assertion (AMČR states the document's licence on its record
-    crate). Without one the stub root names none: the tools assert no licence (D2).
+    crate). Without one the stub root, like every root here, names `#no-licence-asserted` (D2).
     """
     graph = [dict(e) for e in fragment.get("@graph") or []]
     by_type: Dict[str, List[str]] = {}
@@ -1179,17 +1185,13 @@ def wrap_fragment(
             "name": name,
             "description": description,
             "datePublished": date_published,
-            "license": _license_value(license) if license else None,
+            "license": _root_license(license, graph, "The licence of this crate."),
             "conformsTo": _ref(PROCESS_RUN_PROFILE),
             "mentions": _refs(sorted(by_type.get("CreateAction", []))),
             "about": _refs(sorted(by_type.get("DefinedTerm", []))),
             "isBasedOn": _ref(SOURCE_ID) if SOURCE_ID in {e["@id"] for e in graph} else None,
         }
     )
-    if isinstance(license, str) and license.startswith("http") and license not in {e["@id"] for e in graph}:
-        graph.append(
-            {"@id": license, "@type": "CreativeWork", "name": license, "description": "The licence of this crate."}
-        )
     return _assemble(graph + [_profile_entity(), root])
 
 
@@ -1198,6 +1200,35 @@ def _license_value(license: Union[str, Mapping[str, Any]]) -> Any:
     if not isinstance(license, str):
         return dict(license)
     return _ref(license) if license.startswith("http") else {"@value": license}
+
+
+def _no_licence_entity() -> Dict[str, str]:
+    """The entity `NO_LICENCE_ID` names: no licence asserted, and nothing computed in its place."""
+    return {
+        "@id": NO_LICENCE_ID,
+        "@type": "CreativeWork",
+        "name": "No licence asserted",
+        "description": (
+            "No licence is asserted for this crate. The rights in its contents depend on the source "
+            "and on AMČR's permission to process it. Each run's paradata lists the components that "
+            "ran, each with its own terms."
+        ),
+    }
+
+
+def _root_license(
+    license: Optional[Union[str, Mapping[str, Any]]], graph: List[Dict[str, Any]], description: str
+) -> Any:
+    """A root's `license`: the caller's assertion, or `#no-licence-asserted` without one. The entity
+    it names (the placeholder, or an asserted URL) is added to `graph` unless already there."""
+    ids = {e.get("@id") for e in graph}
+    if not license:
+        if NO_LICENCE_ID not in ids:
+            graph.append(_no_licence_entity())
+        return _ref(NO_LICENCE_ID)
+    if isinstance(license, str) and license.startswith("http") and license not in ids:
+        graph.append({"@id": license, "@type": "CreativeWork", "name": license, "description": description})
+    return _license_value(license)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -1385,8 +1416,8 @@ def _selftest(stream: Any = None) -> int:
         problems.append("root does not declare the Process Run Crate profile as an entity")
     if "author" in root:
         problems.append("root carries author: the ATRIUM authors are each tool's creator")
-    if "license" in root:
-        problems.append("the root names a licence nobody asserted (D2)")
+    if root.get("license") != {"@id": NO_LICENCE_ID} or by_id.get(NO_LICENCE_ID) != _no_licence_entity():
+        problems.append("the root does not name #no-licence-asserted, its entity (RO-Crate 1.2 rule 13.3; D2)")
 
     # 2. No dangling references.
     for ref in sorted(set(_walk_refs(graph))):
@@ -1396,7 +1427,7 @@ def _selftest(stream: Any = None) -> int:
 
     # 3. Nothing of record schema 1.x or of a calculated licence leaks into a crate.
     text = to_json(crate)
-    for banned in ("ni:///", "no-licence-asserted", "#block-", "effective_license"):
+    for banned in ("ni:///", "#block-", "effective_license", "most restrictive", "license_detail"):
         if banned in text:
             problems.append("the crate carries {!r}".format(banned))
     if SOURCE_ID in {r["@id"] for r in root.get("hasPart", [])}:
@@ -1453,6 +1484,8 @@ def _selftest(stream: Any = None) -> int:
         problems.append("run crate does not reference the per-document crate")
     if rroot.get("conformsTo") != {"@id": PROCESS_RUN_PROFILE}:
         problems.append("run crate does not declare the process-run profile")
+    if rroot.get("license") != {"@id": NO_LICENCE_ID} or NO_LICENCE_ID not in {e["@id"] for e in rc["@graph"]}:
+        problems.append("run crate root does not name #no-licence-asserted")
 
     # 8. The fragment: no descriptor, no root, no data entity; wrapped, it is a crate again.
     frag = document_crate(record, paradata=_sample_paradata(), fragment=True)
@@ -1469,6 +1502,10 @@ def _selftest(stream: Any = None) -> int:
     wroot = {e["@id"]: e for e in wrapped["@graph"]}[ROOT_ID]
     if not set(_SAMPLE_RUN_UUIDS.values()) <= {r["@id"] for r in wroot.get("mentions", [])}:
         problems.append("wrap_fragment() does not mention every action")
+    if wroot.get("license") != {"@id": "https://creativecommons.org/licenses/by-nc/4.0/"}:
+        problems.append("wrap_fragment() drops the licence its host asserted")
+    if NO_LICENCE_ID in frag_ids:
+        problems.append("the fragment carries a licence entity: the host's root decides its own")
 
     # 9. A service's CreateAction meets the shared contract; a 1.x-shaped one does not.
     action = create_action(

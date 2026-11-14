@@ -14,7 +14,8 @@ service returns. Conformance itself is the validator's, in the hub's CI (tools/c
 
 Since doc-schema-v2 (atrium-project#84) the record carries no run data, so a crate's runs come from
 their paradata 3.0 records (or the services' actions): inputs and outputs by distribution name and
-SHA-512, the record's result naming the blocks and fields written, and no licence on any root (D2).
+SHA-512, the record's result naming the blocks and fields written, and a root that asserts no
+licence: `#no-licence-asserted` unless the caller asserts one (D2; atrium-project#6).
 """
 
 import json
@@ -78,7 +79,7 @@ class TestDocumentCrate:
         assert root["@type"] == "Dataset"
         for prop in ("name", "description", "datePublished"):
             assert root.get(prop), f"root is missing {prop!r}"
-        assert "license" not in root  # nobody asserted one (D2)
+        assert root["license"] == {"@id": rc.NO_LICENCE_ID}  # RO-Crate 1.2 requires one; nobody asserted one (D2)
 
     def test_no_reference_dangles(self, crate):
         known = set(_by_id(crate))
@@ -201,25 +202,38 @@ class TestDocumentCrate:
 
 class TestNoLicence:
     """D2 (atrium-project#84): no crate root names a licence the caller did not assert, and nothing
-    in a crate computes one. AMČR states the document's licence on its own record crate."""
+    in a crate computes one. AMČR states the document's licence on its own record crate. RO-Crate
+    1.2 still requires a root `license` (rule 13.3), so without an assertion the root names
+    `#no-licence-asserted`, an entity that asserts nothing (atrium-project#6, confirmed 2026-11-12)."""
 
-    def test_no_root_names_a_licence(self, crate, record):
-        assert "license" not in _by_id(crate)[rc.ROOT_ID]
-        assert "license" not in _by_id(rc.run_crate([record]))[rc.ROOT_ID]
+    def test_a_root_without_an_assertion_names_no_licence_asserted(self, crate, record):
         frag = rc.document_crate(record, fragment=True)
         stub = rc.wrap_fragment(frag, name="stub", description="stub", date_published="2026-07-24")
-        assert "license" not in _by_id(stub)[rc.ROOT_ID]
+        for built in (crate, rc.run_crate([record]), stub):
+            by_id = _by_id(built)
+            assert by_id[rc.ROOT_ID]["license"] == {"@id": rc.NO_LICENCE_ID}
+            assert by_id[rc.NO_LICENCE_ID] == rc._no_licence_entity()
+
+    def test_a_fragment_carries_no_licence_entity(self, record):
+        frag = rc.document_crate(record, fragment=True)
+        assert rc.NO_LICENCE_ID not in {e["@id"] for e in frag["@graph"]}  # the host's root decides
 
     def test_nothing_in_a_crate_computes_a_licence(self, crate):
         text = rc.to_json(crate)
-        for word in ("most restrictive", "effective_license", "no-licence-asserted", "license_detail"):
+        for word in ("most restrictive", "effective_license", "license_detail", "calculated"):
             assert word not in text
+
+    def test_the_placeholder_names_no_licence_and_no_record_field(self):
+        entity = rc._no_licence_entity()
+        assert entity["@type"] == "CreativeWork" and entity["name"] == "No licence asserted"
+        for word in ("CC BY", "provenance", "license_detail", "most restrictive", "calculated"):
+            assert word not in entity["description"]
 
     def test_a_licence_the_caller_asserts_goes_on_the_root(self, record):
         url = "https://creativecommons.org/licenses/by-nc/4.0/"
         crate = rc.document_crate(record, license=url)
         assert _by_id(crate)[rc.ROOT_ID]["license"] == {"@id": url}
-        assert url in _by_id(crate)
+        assert url in _by_id(crate) and rc.NO_LICENCE_ID not in _by_id(crate)
         stub = rc.wrap_fragment(rc.document_crate(record, fragment=True), name="s", description="s", license=url, date_published="2026-07-24")
         assert _by_id(stub)[rc.ROOT_ID]["license"] == {"@id": url}
 
@@ -492,7 +506,7 @@ class TestCli:
         assert rc._cli(["--document", src, "--fragment", "--wrap", "--out-dir", str(out)]) == 0
         crate = json.loads((out / rc.METADATA_FILENAME).read_text(encoding="utf-8"))
         assert crate["@graph"][0]["@id"] == rc.METADATA_FILENAME
-        assert "license" not in _by_id(crate)[rc.ROOT_ID]
+        assert _by_id(crate)[rc.ROOT_ID]["license"] == {"@id": rc.NO_LICENCE_ID}
 
     def test_run_mode_accepts_several_records(self, tmp_path, record):
         src = self._record_file(tmp_path, record)
