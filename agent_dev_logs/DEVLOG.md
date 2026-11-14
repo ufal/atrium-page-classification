@@ -4,8 +4,8 @@
 > 2026-10-22, fixed in **v1.9.6-beta**; #48 closed 2026-09-17. Its pilot work is tracked in hub issues (atrium-project
 > #6, #66, #72, #77, #79, #81). **Starting set of the pilot phase: v1.12.3-beta** (`0a96bce`, 2026-11-04; immutable, with `images.json`;
 > atrium-project#77). **v1.9.5-beta** (2026-10-19, the runbook) is the first immutable release (atrium-project#72).
-> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-12._
-> _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md` · `plans/84.plan.md` (this repository's part of atrium-project#84)._
+> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-13._
+> _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md` · `plans/doc-schema-v2.plan.md` (this repository's part of atrium-project#84)._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
 ## 2026-06-25
@@ -1001,7 +1001,7 @@ Documentation only; no code, test or configuration change.
 * **Asked (K4TEL):** align the logs with the meeting of 11-11 (ARÚP's output contract) and write this repository's
   slice of the hub's consolidated schema issue
   ([meeting digest](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/digests/project_state_1111.md),
-  [hub plan](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/84.plan.md)).
+  [hub plan](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/doc-schema-v2.plan.md)).
 * **Decided in session:** plans only this round; the schema issue is not opened yet (placeholder name
   `doc-schema-v2`); page classification runs on every PDF and image, bundled with the ATR call, and without ATR when
   no page needs OCR; digital-convert's text-layer verdicts become their own marker set (`decode`), `categ` is
@@ -1030,7 +1030,7 @@ Documentation only; no code, test or configuration change.
 * **Asked (K4TEL):** align the logs with ARÚP's output contract of 12 November (the .docx of that day, replacing the
   meeting document of 10 November) and with David Novák's comments of 11-12 (atrium-project#84 opened, #13, #16,
   #78); `test` fetched first (all seven working branches = `test`).
-  Anchor: [contract digest](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/digests/project_state_1211.md) · [hub plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/84.plan.md).
+  Anchor: [contract digest](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/digests/project_state_1211.md) · [hub plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/doc-schema-v2.plan.md).
 * **Decided in session:** the tool slices are named `plans/84.plan.md`; the translator keeps `amcr-fields.txt` as a
   documented example that nothing loads (no default list, D34); the hub's #84 plan carries a reply draft agreeing on
   points 1 and 2.
@@ -1045,3 +1045,30 @@ Documentation only; no code, test or configuration change.
   * **`DEVLOG.md`:** the header and this entry.
 * **Not posted:** nothing on GitHub; questions stay on the hub's list for the next meeting.
 * Plans only; no code changed. Files delivered as full files.
+
+## 2026-11-13 — atrium-project#84 round 2: the page rows keyed by `page_index`
+
+* **Asked (K4TEL):** adapt the tool repositories to the hub side of doc-schema-v2, on the re-vendored shared
+  modules; every new or edited file delivered, the vendored ones excepted. Decided: adapt plus the tasks that need
+  no docproc answer from ARÚP; windows as `split`, prompt budgets as `sampled`, every other cut fails (D13).
+* **Done (local branch, delivered as an archive):** page rows by `page_index`; paradata 3.0 (`original`, the record read, the fields written); no licence; docs and spec.
+* **Checked:** the full test suite; ruff; the regenerated spec against its contract test.
+* **Detail and what is deferred:** `plans/doc-schema-v2.plan.md`, "Status — round 2". Hub: [plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/doc-schema-v2.plan.md).
+* **Not posted; not pushed.**
+
+## 2026-11-13 — atrium-project#84 round 4: the push checked
+
+* **Asked (K4TEL):** fetch the pushed branches and the comments since 12 November, and bring the logs up to them.
+* **Found:** the push of 11-13 on `doc-schema-v2` lacks the addendum's re-vendored shared files; with them the suite passes (873, offline lane).
+* **Written here (not pushed):** `plans/doc-schema-v2.plan.md` (the round-1 text in place of the 11-11 one, the round-2 status, the push, atrium-digital-convert#9 point 5). This file: the round-2 entry of 11-13 and this one.
+* **Detail:** `plans/doc-schema-v2.plan.md`, "Status — round 2"; hub: [plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/doc-schema-v2.plan.md).
+* **Not posted; not pushed.**
+
+## 2026-11-14 — atrium-project#84 round 5: the PR's checks
+
+* **Asked (K4TEL):** check the doc-schema-v2 PRs and fix their problems.
+* **Found:** [atrium-page-classification#71](https://github.com/ufal/atrium-page-classification/pull/71) fails drift (the hub pin at `v1`) and api-contract (record major 1.0 → 2.0, no major version yet).
+* **Written here (not pushed):** the re-vendored `atrium_rocrate.py` and `tests/test_atrium_rocrate.py` (`#no-licence-asserted` on the crate root again); `plans/doc-schema-v2.plan.md`, "Status — PR".
+* **Checked:** the full suite (offline lane), 875 passed.
+* **Next:** the pin commit after the hub's PR merges; the major version at the release. Hub: [plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/doc-schema-v2.plan.md), "Status — PRs".
+* **Not posted; not pushed.**

@@ -2,52 +2,49 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/ufal/atrium-project/docs/templates/shared/atrium_document.schema.json",
   "title": "ATRIUM document record",
-  "description": "Per-document aggregate record built by accretion across the ATRIUM pipeline. Each tool writes only its own block and passes every other block through untouched. References are restricted to the original input and persistent step outputs; disposable derivations (Markdown, page images) appear in 'regenerable' as recipes, never as stored paths. Produced by atrium_document.py; sibling of the atrium_paradata.py provenance record. FROZEN AT 1.0 (atrium-project#54): the top-level assertions below are a compatibility obligation, not a design surface. Three of them, in the order a reader should apply them -- (a) `required` names the five keys every record written through DocumentRecord.to_dict() carries unconditionally; (b) `anyOf` says a record must carry EVIDENCE THAT SOMETHING WAS WRITTEN INTO IT, either `source` (the originator's first-writer handshake, which deliberately does not stamp a block) or at least one entry in `assembled.blocks`; (c) `allOf` says every block named in `assembled.blocks` must actually be present at top level -- a stamp without a payload is an incoherent record, not a sparse one.",
+  "description": "Per-document record built by accretion across the ATRIUM pipeline, schema 2.0 (doc-schema-v2, atrium-project#84). It holds content only: the identity of the original, its text in a form the enrichment steps work on, and what they add. No run data and no licence (D1, D2): which run wrote which blocks and fields is named by that run's paradata `result` (RO-Crate 1.2 / Process Run Crate 0.5 CreateAction). No copy of the layout (D26): blocks, tables, reading-order roles and page verdicts stay in the document's stored `atr/docproc-json`, and each line names its docproc block. The positional blocks (pages, content, lines) have one writer, the record builder (ocr-postprocess, D20). Keys removed in 2.0 are refused by name; any other unknown key passes, so a newer 2.x minor's additions survive a tool that vendored an older 2.x schema (rule 6). Produced by atrium_document.py; a 1.x record is migrated on load (migrate_document).",
   "type": "object",
-  "required": ["schema_version", "record_type", "doc_id", "provenance", "assembled"],
+  "required": ["schema_version", "record_type", "doc_id"],
   "additionalProperties": true,
-
+  "$comment": "A record carries evidence that something was written into it: the source (the seed's identity) or at least one content block. A stage that ran and wrote nothing is refused (the #54 floor, without stamps since 2.0).",
   "anyOf": [
     {
-      "$comment": "The originator's handshake. set_source() writes `source` and deliberately does NOT call _stamp(), so alto-postprocess/page_split.py -- stage 1 of the scanned pipeline -- legitimately emits a record with no `assembled.blocks` key at all. That record is the one case where 'contributed no block' is correct rather than a defect, and it is authorised HERE rather than by weakening the rule for everyone.",
       "required": ["source"]
     },
     {
-      "$comment": "Everything else. A record with neither `source` nor a stamped block is what atrium-project#54 calls 'a stage that produces nothing' -- finalize() already prints WARNING - <program> contributed no block, and this promotes that warning to a validation failure. minProperties lives here rather than on assembled.blocks itself so that a fan-in merge of two source-only records, which legitimately carries blocks: {}, still validates through the branch above.",
-      "required": ["assembled"],
-      "properties": {
-        "assembled": {
-          "required": ["blocks"],
-          "properties": { "blocks": { "minProperties": 1 } }
-        }
-      }
-    }
-  ],
-
-  "allOf": [
-    {
-      "$comment": "Stamp/payload coherence. assembled.blocks[<name>] is written by _stamp(), which runs only from set_block()/merge_block()/add_derived_from()/add_regenerable() -- i.e. only where the payload is written in the same call. So a stamp naming a block the record does not carry cannot be produced by the module, and means the record was hand-built, truncated in transit, or field-filtered down to nothing. One if/then per stampable name: the eleven content blocks plus the two accreting maps. A name this table has not been taught (a newer block, rule 6) simply has no clause and passes -- the same abstain-rather-than-refuse idiom ORIGIN_ORIGINATORS uses."
+      "required": ["page_categories"]
     },
-    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["derived_from"] } } } } }, "then": { "required": ["derived_from"] } },
-    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["regenerable"] } } } } }, "then": { "required": ["regenerable"] } },
-    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["page_categories"] } } } } }, "then": { "required": ["page_categories"] } },
-    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["pages"] } } } } }, "then": { "required": ["pages"] } },
-    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["content"] } } } } }, "then": { "required": ["content"] } },
-    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["lines"] } } } } }, "then": { "required": ["lines"] } },
-    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["tables"] } } } } }, "then": { "required": ["tables"] } },
-    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["entities"] } } } } }, "then": { "required": ["entities"] } },
-    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["translations"] } } } } }, "then": { "required": ["translations"] } },
-    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["enrichment"] } } } } }, "then": { "required": ["enrichment"] } },
-    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["forms"] } } } } }, "then": { "required": ["forms"] } },
-    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["keywords"] } } } } }, "then": { "required": ["keywords"] } },
-    { "if": { "required": ["assembled"], "properties": { "assembled": { "required": ["blocks"], "properties": { "blocks": { "required": ["quality_summary"] } } } } }, "then": { "required": ["quality_summary"] } }
+    {
+      "required": ["pages"]
+    },
+    {
+      "required": ["content"]
+    },
+    {
+      "required": ["lines"]
+    },
+    {
+      "required": ["quality_summary"]
+    },
+    {
+      "required": ["entities"]
+    },
+    {
+      "required": ["translations"]
+    },
+    {
+      "required": ["enrichment"]
+    },
+    {
+      "required": ["keywords"]
+    }
   ],
   "properties": {
     "schema_version": {
       "type": "string",
-      "pattern": "^[0-9]+\\.[0-9]+$",
-      "description": "Record schema version. A newer MAJOR than the reading tool supports must be refused; an older one is migrated transparently.",
-      "examples": ["1.0"]
+      "pattern": "^2\\.[0-9]+$",
+      "description": "Record schema version, MAJOR 2. A newer MAJOR than the reading tool supports must be refused; an older one is migrated (atrium_document.migrate_document).",
+      "examples": ["2.0"]
     },
     "record_type": {
       "type": "string",
@@ -60,201 +57,127 @@
       "description": "Stable document identifier, carried unchanged by every tool. In the AMČR pilot it is the AMČR file id, written by the seed before the first stage (atrium-project#71); a tool keeps the baseline's value and never re-derives it from a file name.",
       "examples": ["CTX000000001"]
     },
-
     "source": {
       "type": "object",
-      "description": "The ORIGINAL input. First writer wins; later tools must not overwrite it. The durable key is doc_id + sha256 (or sha512) — originals are archive-managed, not pipeline-local, so no path is required. In the AMČR pilot the seed writes it first: sha512, filename and media_type come from the archive and are never changed; the tool that reads the source adds origin, and no sha256 joins the archive's sha512 (atrium-project#71, docs/document_schema.md, The AMČR seed).",
+      "description": "The ORIGINAL input, named by the archive's SHA-512 (contract §5, H1). Intake (the AMČR seed, whose profile requires sha512, filename and media_type) writes the identity fields, first-writer-wins; the record builder adds language, page_count and origin. No path, no other digest. Absent on a standalone run that had no seed (rule 3).",
       "additionalProperties": true,
       "properties": {
-        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
         "sha512": {
           "type": "string",
           "pattern": "^[a-f0-9]{128}$",
           "description": "SHA-512 of the original's bytes as the archive computed it (AMČR: the Fedora digest), lower-case hex. Written by the seed and carried unchanged by every tool (atrium-project#71)."
         },
-        "filename": { "type": "string" },
-        "media_type": { "type": "string", "examples": ["application/alto+xml", "application/pdf"] },
-        "page_count": { "type": "integer", "minimum": 0 },
-        "language": { "type": "array", "items": { "type": "string" } },
+        "filename": {"type": "string"},
+        "media_type": {
+          "type": "string",
+          "examples": ["application/alto+xml", "application/pdf"]
+        },
+        "page_count": {"type": "integer", "minimum": 0},
+        "language": {
+          "type": "array",
+          "description": "Languages of the text, ISO 639-1 codes, dominant first.",
+          "items": {"type": "string"}
+        },
         "origin": {
           "type": "string",
-          "description": "How the text was obtained. Load-bearing since Issue #18: for the positional blocks (pages/content/lines/tables) this value selects which originator is authorised to write them — see ORIGIN_ORIGINATORS in atrium_document.py. First writer wins, so it is fixed for the life of the record.",
-          "examples": ["ABBYY-ALTO", "digital-born-pdf", "docx", "ocr:tesseract-ces", "ocr:pero", "vlm:glm-4v"]
-        }
-      }
-    },
-
-    "derived_from": {
-      "type": "object",
-      "description": "PERSISTENT step outputs this record was built from. Keys are stage-scoped; values are references to stored artifacts. Never a transient artifact.",
-      "additionalProperties": { "type": "string" },
-      "examples": [
-        {
-          "alto_categ": "DOC_LINE_CATEG/CTX000000001.csv",
-          "teitok": "TEITOK/CTX000000001.teitok.xml",
-          "enriched": "KW_PER_DOC_LLM/CTX000000001_enriched.json",
-          "paradata": "paradata/260724-101112_pipeline-run.json"
-        }
-      ]
-    },
-
-    "regenerable": {
-      "type": "object",
-      "description": "DISPOSABLE derivations recorded as reproducible recipes rather than stored paths — the annotated Markdown, and by the same rule any rendered page image.",
-      "additionalProperties": {
-        "type": "object",
-        "required": ["from"],
-        "additionalProperties": true,
-        "properties": {
-          "from": { "type": "string", "description": "Persistent artifact the derivation is regenerated from." },
-          "converter": { "type": "string", "examples": ["xml_to_md@0.3.0"] },
-          "detail": { "type": "string", "enum": ["full", "standard", "minimal"], "description": "Cue profile of the rendered Markdown (llm-enrich json_to_md/xml_to_md): full = every layout cue; standard = one box per block, no page margins; minimal = page skeleton and structure only. See docs/document_schema.md, Detail profiles (atrium-project#70)." }
-        }
-      }
-    },
-
-    "provenance": {
-      "type": "object",
-      "description": "The list of contributing tool runs, plus a licence summary calculated from the components those runs used. Mirrors the paradata license block; references paradata rather than duplicating it. The summary is not the licence of the record or of any output: the rights in an output depend on the source document and are stated only by whoever holds them (atrium-project#6).",
-      "additionalProperties": true,
-      "properties": {
-        "license": { "type": "string", "examples": ["CC BY-NC-SA 4.0"], "description": "Calculated, not asserted: the most restrictive licence among the components the contributing runs used (para_licenses.merge_effective_licenses). It is not the licence of this record or of any output (atrium-project#6)." },
-        "license_url": { "type": "string", "description": "The URL of the calculated `license`; the same caveat applies." },
-        "license_basis": { "type": "string", "enum": ["calculated"], "description": "How `license` and `license_url` were obtained. \"calculated\": the most restrictive component licence, or the conservative default when no component is recorded. Never an assertion of the rights in an output; an RO-Crate export of the record names #no-licence-asserted on its root instead (atrium-project#6, 2026-11-04)." },
-        "license_detail": {
-          "type": "object",
-          "description": "Output of para_licenses.merge_effective_licenses over every contributing tool (most restrictive wins): evidence of the components' licences, not a licence of the output (atrium-project#6).",
-          "additionalProperties": true
+          "enum": ["digital", "atr", "legacy"],
+          "description": "How the text was obtained, descriptive only (#84 §1): `digital` the text layer of a born-digital file, `atr` the ATR step, `legacy` converted PCSS (ABBYY) ALTO. It selects no writer: the positional blocks have one."
         },
-        "contributors": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "additionalProperties": true,
-            "properties": {
-              "program": { "type": "string" },
-              "run_id": { "type": "string" },
-              "run_uuid": { "type": "string", "pattern": "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", "description": "The run's stable identifier (atrium_paradata run_uuid): the @id of its RO-Crate CreateAction. Absent on records written before atrium-project#71." },
-              "paradata_ref": { "type": "string" },
-              "blocks": { "type": "string", "description": "Comma-separated blocks this run wrote." },
-              "at": { "type": "string", "format": "date-time" }
-            }
-          }
+        "sha256": {
+          "description": "REMOVED in 2.0 — the original is named by its sha512 only (§6).",
+          "not": {}
         }
       }
     },
-
-    "assembled": {
-      "type": "object",
-      "description": "Per-block provenance — the source of granularity. Re-running one tool rewrites exactly one entry here.",
-      "additionalProperties": true,
-      "properties": {
-        "blocks": {
-          "type": "object",
-          "description": "The stamp registry: one entry per block this record's contributing runs actually wrote, keyed by top-level block name. Written only by _stamp(). Two rules key off it and neither is expressible anywhere else -- the top-level `anyOf` (a record with no source needs at least one entry here) and the top-level `allOf` (every name here must have a payload at top level). Its absence is not an error: a record that carries only `source` has never been stamped. Consumers asking 'who wrote this block' read blocks[<name>].program, which names the MOST RECENT writer of a field-split block; the full picture is provenance.contributors[].",
-          "additionalProperties": {
-            "type": "object",
-            "additionalProperties": true,
-            "properties": {
-              "program": { "type": "string" },
-              "run_id": { "type": "string" },
-              "run_uuid": { "type": "string", "pattern": "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", "description": "The writing run's stable identifier, as in provenance.contributors[].run_uuid." },
-              "paradata_ref": { "type": "string" },
-              "updated_at": { "type": "string", "format": "date-time" }
-            }
-          }
-        },
-        "had_baseline": {
-          "type": "boolean",
-          "description": "False when the tool ran without a previous record and emitted only its own part."
-        },
-        "note": { "type": "string" }
-      }
-    },
-
     "page_categories": {
-      "description": "Owner: page-classification. Predicted category per page label. Values come from the `page-category` scheme in the hub-canonical atrium_vocab.py -- 11 concepts, `atrium_vocab.labels_for('page-category')` -- and each has a stable URI via `atrium_vocab.concept_uri('page-category', value)`. Deliberately NOT constrained by `enum`: page-classification derives its label list from the filesystem at runtime (utils.py collect_images), so an enum here would turn a naming slip into a hard pipeline failure instead of the advisory NOTE the registry raises. See docs/skos_strategy.md 4.",
+      "description": "Owner: page-classification. Predicted category per page label, for the pages that needed ATR (H3). Values come from the `page-category` scheme in the hub-canonical atrium_vocab.py -- 11 concepts, `atrium_vocab.labels_for('page-category')` -- and each has a stable URI via `atrium_vocab.concept_uri('page-category', value)`. Deliberately NOT constrained by `enum`: page-classification derives its label list from the filesystem at runtime (utils.py collect_images), so an enum here would turn a naming slip into a hard pipeline failure instead of the advisory NOTE the registry raises. See docs/skos_strategy.md 4.",
       "type": "object",
-      "additionalProperties": { "type": "string" },
+      "additionalProperties": {"type": "string"},
       "x-atrium-scheme": "page-category",
-      "examples": [{ "1": "TEXT", "2": "DRAW" }]
+      "examples": [{"1": "TEXT", "2": "DRAW"}]
     },
-
     "pages": {
-      "description": "Originator: ocr-postprocess (named alto-postprocess before 2026-10-01) (OCR/ALTO path) or digital-convert (digital-born PDF/DOCX path), selected per document by source.origin — never both. page-classification may write category fields; nlp-enrich may write teitok_surface. Field-level ownership — never co-mutated.",
+      "description": "Owner of the rows: the record builder (ocr-postprocess), one row for every page of the original, empty pages included (D29). page-classification adds category fields to the pages that needed ATR; nlp-enrich adds teitok_surface. Field-level ownership — never co-mutated. The page's text-layer verdict and needs_atr live in docproc's routing (D27).",
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["page"],
+        "required": ["page_index"],
         "additionalProperties": true,
         "properties": {
-          "page": { "type": "string", "description": "Page label as a string, so 'iv' or 'A-1' survive. Consumers must NOT derive ordering from it — use page_index." },
+          "page": {
+            "type": "string",
+            "description": "The printed page label as a string, so 'iv' or 'A-1' survive; written by the record builder, and what lines[].page and entities[].page name. Consumers must NOT derive ordering from it — use page_index."
+          },
           "page_index": {
             "type": "integer",
             "minimum": 1,
-            "description": "1-based physical position of this page in the document — the ordering key, and the only one that works when `page` is a roman numeral or an appendix label. Writable by both originators: an ALTO record needs it as much as a digital-born one, since roman-numeral front matter is common in both."
+            "description": "The physical page number, 1-based: the row's key, the join key with docproc `pageNumber` (H2) and the ordering key. Every writer of a page row passes it."
           },
-          "quality_score": { "type": "number", "minimum": 0, "maximum": 1 },
-          "quality_band": { "type": "string", "enum": ["Trash", "Noisy", "Clear"] },
-          "category": { "type": "string" },
-          "category_confidence": { "type": "number", "minimum": 0, "maximum": 1 },
-          "needs_ocr": {
-            "type": "boolean",
-            "description": "Set by whichever tool originated this page. On the digital-born path it means the embedded text layer exists but does not decode to trustworthy text (Issue #10: non-embedded WinAnsi with no /ToUnicode yields systematic diacritic corruption), i.e. this page should be re-acquired by OCR despite not being a scan. The converter reports; routing policy lives outside it. Because the two paths mean OPPOSITE things by it (no text layer vs. an untrustworthy one), always write needs_ocr_reason alongside. Setting this is also what authorises ocr-postprocess to re-originate THIS page of a digital-born record (the OCR hand-off, per page) — see OCR_HANDOFF and _assert_origin_consistent() in atrium_document.py. It stays set after the OCR pass: it is the converter's request, and pages[].ocr records that the request was served.",
-            "examples": [true]
-          },
-          "needs_ocr_reason": {
+          "canvas": {"$ref": "#/$defs/canvas"},
+          "content_status": {
             "type": "string",
-            "description": "Why this page needs OCR, in words, because needs_ocr alone is ambiguous between the two paths and the Markdown renderer emits it as a layout cue the model reads. Without it, api_util/xml_to_md.rows_to_layout_markdown() fell back to 'no extractable text layer' — factually inverted for every digital-born page, which by definition HAS a text layer.",
-            "examples": [
-              "no extractable text layer",
-              "text layer decodes to corrupt diacritics (WinAnsi declared, no /ToUnicode)"
-            ]
+            "enum": ["text", "empty"],
+            "description": "`text`: the page has text; `empty`: it has none — no lines, no page score, counted apart in quality_summary (D29; D18 rule 7)."
           },
-          "text_layer": {
+          "quality_score": {"type": "number", "minimum": 0, "maximum": 1},
+          "quality_band": {
             "type": "string",
-            "enum": ["digital", "garbled", "ocr", "none", "blank"],
-            "description": "The born-digital converter's verdict on this page's embedded text layer, so a routing step reads a value instead of parsing needs_ocr_reason: `digital` a layer that decodes; `garbled` a layer that exists but does not decode (mojibake, U+FFFD or control characters); `ocr` the layer is a prior OCR run's invisible text over a page image; `none` no text layer (a scan, text drawn as curves, a page that draws nothing a parser can see); `blank` an empty page of a format without page images (DOCX, ODT, sheets), with nothing to re-acquire. `garbled`, `ocr` and `none` are exactly the pages the converter flags needs_ocr. Written by digital-convert only; absent on OCR records.",
-            "examples": ["digital", "garbled"]
+            "enum": ["Trash", "Noisy", "Clear"]
           },
-          "ocr": {
-            "type": ["object", "null"],
-            "additionalProperties": true,
-            "properties": {
-              "engine": { "type": "string" },
-              "lang": { "type": "string" }
-            }
+          "category": {
+            "type": "string",
+            "description": "page-classification, on the pages that needed ATR (H3)."
           },
-          "canvas": {
-            "type": "object",
-            "description": "Page dimensions, and the unit every bbox on this page is expressed in. Write `unit` whenever any bbox is present — a digital-born PDF page is in points, an ALTO page is usually in pixels, and $defs/bbox has no other way to say which.",
-            "additionalProperties": true,
-            "properties": {
-              "width": { "type": "number" },
-              "height": { "type": "number" },
-              "unit": { "type": "string", "default": "px", "examples": ["pt", "px"] }
-            }
-          },
+          "category_confidence": {"type": "number", "minimum": 0, "maximum": 1},
           "teitok_surface": {
             "type": "string",
             "description": "Logical TEITOK <surface> id — an identifier, never an image path."
+          },
+          "text_layer": {
+            "description": "REMOVED in 2.0 — the page verdict lives in the stored docproc's routing (D27).",
+            "not": {}
+          },
+          "needs_ocr": {
+            "description": "REMOVED in 2.0 — became `needs_atr` in docproc's routing (D27).",
+            "not": {}
+          },
+          "needs_ocr_reason": {
+            "description": "REMOVED in 2.0 — its reason is docproc's, with needs_atr (D27).",
+            "not": {}
+          },
+          "ocr": {"description": "REMOVED in 2.0 — the engine is the producer's paradata (D9).", "not": {}}
+        },
+        "allOf": [
+          {
+            "$comment": "An empty page carries no page score (D18 rule 7).",
+            "if": {
+              "required": ["content_status"],
+              "properties": {
+                "content_status": {"const": "empty"}
+              }
+            },
+            "then": {
+              "not": {
+                "anyOf": [{"required": ["quality_score"]}, {"required": ["quality_band"]}]
+              }
+            }
           }
-        }
+        ]
       }
     },
-
     "content": {
-      "description": "Originator: ocr-postprocess (named alto-postprocess before 2026-10-01) or digital-convert, selected per document by source.origin (Issue #18) — never both. Reading-order text for search, or null when externalised by reference.",
+      "description": "Owner: the record builder. The text of the document, rebuilt in docproc's reading order, so the record never holds partial text (H8).",
       "type": "object",
       "additionalProperties": true,
       "properties": {
-        "text": { "type": ["string", "null"] },
-        "reading_order": { "type": "string", "examples": ["ltr-columns"] }
+        "text": {
+          "type": ["string", "null"]
+        },
+        "reading_order": {"description": "REMOVED in 2.0 — reading order is docproc's (D26).", "not": {}}
       }
     },
-
     "lines": {
-      "description": "Originator: ocr-postprocess (named alto-postprocess before 2026-10-01) (categ/quality/lang/text) or digital-convert (text/bbox/group_id/lang/quality_score/categ), selected per document by source.origin (Issue #18) — never both. nlp-enrich writes morphology and teitok_ref. Field-level ownership. NOTE for validators: only page+line are required, so a row stripped of its text by a field-ownership filter still validates here — the round-trip assertion belongs in the writing tool, not in this schema.",
+      "description": "Owner of the rows: the record builder (ocr-postprocess): text, box, docproc block, text source and box precision, and — as the line-quality model's owner (D18) — categ, quality_score and lang for every line. nlp-enrich adds lemma, upos, feats and teitok_ref. Field-level ownership. NOTE for validators: only page+line are required, so a row stripped of its text by a field-ownership filter still validates here — the round-trip assertion belongs in the writing tool.",
       "type": "array",
       "items": {
         "type": "object",
@@ -265,147 +188,136 @@
             "type": "string",
             "description": "Page LABEL, matching a pages[].page. A string for the same reason as there — 'iv' and 'A-1' must survive — so a writer must not pass an integer here: merge_block() keys rows on it, and a consumer sorting on int(page) needs pages[].page_index to order non-numeric labels."
           },
-          "line": { "type": "integer", "minimum": 0 },
-          "text": { "type": "string" },
-          "categ": {
-            "type": "string",
-            "description": "Line category. Open string with TWO authorised originators emitting DISJOINT label sets: ocr-postprocess (formerly alto-postprocess) emits Clear/Empty/Noisy/Non-text/Trash, digital-convert emits Garbage/Inverted. Both sets are declared in the hub-canonical atrium_vocab.py as the `line-category` scheme; `atrium_vocab.LINE_CATEGORY_ORIGINATORS` says which tool emits which. 'Garbage', 'Inverted' and 'Trash' are load-bearing for api_util/json_to_md.py's DROP_CATEGORIES, which filters on atrium_vocab.UNTRUSTWORTHY_LINE_CATEGORIES (defect V-1 in docs/skos_strategy.md 6, fixed 2026-09-25: it covered only the first two, so a Trash line reached the model exactly like a Clear one). A re-spelled category passes that filter unnoticed, so do not re-spell one on the way out. A re-spelling would not fail validation either -- it would only put a tool out of step with the registry, in silence.",
-            "x-atrium-scheme": "line-category",
-            "examples": ["Clear", "Noisy", "Trash", "Garbage", "Inverted"]
+          "line": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "1-based, in reading order within the page; with `page`, the row's key."
           },
-          "lang": { "type": "string" },
-          "quality_score": { "type": "number", "minimum": 0, "maximum": 1 },
-          "lemma": { "type": "string", "description": "nlp-enrich: UD lemma of the line's dominant token/lead form." },
-          "upos": { "type": "string", "description": "nlp-enrich: UD universal POS tag." },
-          "feats": { "type": "string", "description": "nlp-enrich: UD morphological features string." },
+          "text": {"type": "string"},
           "bbox": {
             "$ref": "#/$defs/bbox",
-            "description": "On the ALTO path, derived by nlp-enrich while aligning to TEITOK. On the digital-born path, the PDF adapter's native coordinates — the only bbox such a record will ever have, since there is no TEITOK to align to. Two declared writers, mutually exclusive per document by source.origin."
+            "description": "The line's box in the one coordinate space ($defs/bbox); how it was obtained is bbox_precision."
           },
-          "teitok_ref": { "type": "string" },
-          "group_id": {
-            "type": ["string", "null"],
-            "description": "Issue #18: groups lines belonging to the same source-structural unit — a DOCX paragraph or table CELL, or a PDF text block from the structural extractor. Lines sharing a group_id are contiguous and in the same reading order; null when the source has no such grouping (e.g. OCR/ALTO lines from alto-postprocess, which stays line-only). Not a schema block of its own — deliberately kept at line-granularity to avoid a second nesting level competing with 'lines' as the position-addressable unit the rest of the schema (bbox, entities' page/line keys) already keys off. CONSUMER CONTRACT: a group boundary renders as a paragraph break. Markdown already encodes paragraphs natively as a blank line, so this needs no new layout_md cue — implemented in api_util/xml_to_md.rows_to_layout_markdown() (which emits the blank line) and api_util/json_to_md._rows_from_lines() (which carries the field through); pinned by tests/test_json_to_md.py. 'table CELL', not 'table row': a per-row value cannot address the cell a line belongs to, which is what tables[].cells[].group_id joins on."
+          "block": {
+            "type": "string",
+            "pattern": "^p[0-9]+-b[0-9]+(\\.[a-z0-9]+)?$",
+            "description": "The id of the docproc block this line belongs to (D26), e.g. `p3-b7`; on a mixed document, the ATR block that contains a kept text-layer line (H6)."
           },
-          "style": {
-            "type": "object",
-            "description": "Issue #18 §1 (the 'font row', decided as option (c) — semantic style only). Carries what a downstream reader can ACT on and deliberately drops typeface and point size: the LLM cannot use 'Helvetica 12pt', while 'this is a level-2 heading' or 'this is the running header' it can. Absent on the ALTO path, where no style signal exists. Writer: digital-convert only.",
-            "additionalProperties": true,
-            "properties": {
-              "bold": { "type": "boolean" },
-              "italic": { "type": "boolean" },
-              "heading_level": {
-                "type": ["integer", "null"],
-                "minimum": 1,
-                "maximum": 6,
-                "description": "1-6 for a heading (DOCX outlineLvl + 1, or a PDF size/weight heuristic); null or absent for body text."
-              },
-              "region": {
-                "type": "string",
-                "enum": ["page_header", "page_footer", "footnote"],
-                "description": "llm-enrich #18 (declared 2026-09-25): where on its page a line that is NOT body text sits — the running header, the running footer (both: DOCX header/footer parts, PDF lines repeating in the page margins, or the Docling engine's layout labels), or a footnote/endnote (DOCX notes parts, or Docling's footnote label). Absent means body text, which is every line on the ALTO path. CONSUMER CONTRACT: api_util/json_to_md.py renders a page as header, body, footnotes, footer — the header and footer inside the HEADER_START/FOOTER_START cues, footnotes as `[^n]:` definitions — and digital-convert keeps header and footer lines out of content.text. A plain enum, not a SKOS scheme: nothing outside the digital-born path emits it."
-              }
-            }
-          }
-        }
-      }
-    },
-
-    "tables": {
-      "description": "Originator: ocr-postprocess (named alto-postprocess before 2026-10-01) (ALTO spatial-block tables) or digital-convert (DOCX/PDF structural extraction), selected per document by source.origin (Issue #18, resolved) — never both. Grid SHAPE only: cell text is never duplicated here, it lives once in lines[] and is linked back via group_id, so this stays the lossless structured twin of the disposable Markdown table in 'regenerable'.",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["table_id", "page"],
-        "additionalProperties": true,
-        "properties": {
-          "table_id": { "type": "string" },
-          "page": { "type": "string" },
-          "caption": { "type": "string" },
-          "n_rows": { "type": "integer", "minimum": 1 },
-          "n_cols": { "type": "integer", "minimum": 1 },
-          "group_id": {
-            "type": ["string", "null"],
-            "description": "Namespace prefix shared by this table's cell group_ids (e.g. 't1' for cells 't1.r0c0', 't1.r0c1'), so a consumer can find a table's lines without scanning cells[]. NOT the join key — that is per-cell, on cells[].group_id: one scalar for a whole table cannot address which lines carry which cell, so the 'linked back via group_id' contract was unimplementable while this was the only reference."
+          "text_source": {
+            "type": "string",
+            "enum": ["text-layer", "atr", "legacy"],
+            "description": "Where the line's text came from (D25): the born-digital text layer, the ATR, or converted PCSS ALTO."
           },
-          "cells": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": ["row", "col"],
-              "additionalProperties": true,
+          "bbox_precision": {
+            "type": "string",
+            "enum": ["measured", "derived", "absent"],
+            "description": "How the box was obtained (D16, D25): measured for the line by its producer, derived from its docproc block, or none."
+          },
+          "categ": {
+            "type": "string",
+            "enum": ["Clear", "Noisy", "Trash", "Non-text", "Empty"],
+            "x-atrium-scheme": "line-category",
+            "description": "Line category, the five values of the `line-category` scheme only (D18 rule 2). Written by the record builder for every line, whatever its text source. digital-convert's decode verdict (Garbage, Inverted) is a flag on docproc lines, never a category here."
+          },
+          "quality_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "From the text alone: one model, one set of constants, one band scheme for every source (D18 rule 3)."
+          },
+          "lang": {"type": "string", "description": "ISO 639-1."},
+          "lemma": {
+            "type": "string",
+            "description": "nlp-enrich: UD lemma of the line's dominant token/lead form."
+          },
+          "upos": {"type": "string", "description": "nlp-enrich: UD universal POS tag."},
+          "feats": {"type": "string", "description": "nlp-enrich: UD morphological features string."},
+          "teitok_ref": {"type": "string"},
+          "group_id": {"description": "REMOVED in 2.0 — layout grouping is docproc's (D26).", "not": {}},
+          "style": {"description": "REMOVED in 2.0 — layout cues are docproc's (D26).", "not": {}}
+        },
+        "dependentRequired": {
+          "bbox": ["bbox_precision"]
+        },
+        "allOf": [
+          {
+            "$comment": "`absent` precision means no box.",
+            "if": {
+              "required": ["bbox_precision"],
               "properties": {
-                "row": { "type": "integer", "minimum": 0 },
-                "col": { "type": "integer", "minimum": 0 },
-                "rowspan": { "type": "integer", "minimum": 1 },
-                "colspan": { "type": "integer", "minimum": 1 },
-                "is_header": { "type": "boolean" },
-                "bbox": { "$ref": "#/$defs/bbox" },
-                "group_id": {
-                  "type": ["string", "null"],
-                  "description": "THE join key: the lines[].group_id whose lines carry this cell's text. Never a copy of the text. Positional inference is not an alternative — rowspan/colspan mean lines-per-row is not n_cols, and a multi-line cell breaks any ordering assumption — so without this the grid cannot be reassembled from the record at all."
-                },
-                "lines": {
-                  "type": "array",
-                  "description": "Optional explicit line list for a cell whose text spans more than one group (rare). When present it wins over group_id.",
-                  "items": { "$ref": "#/$defs/line_ref" }
-                }
+                "bbox_precision": {"const": "absent"}
+              }
+            },
+            "then": {
+              "not": {
+                "required": ["bbox"]
               }
             }
           }
-        }
+        ]
       }
     },
-
     "entities": {
-      "description": "Owner: nlp-enrich; keyword-extract (llm-enrich before 2026-10-01) writes pid. `translation_en` is RESERVED: declared for the translator, written by no tool (atrium-project#70). Carries all three tagsets so no mapping is lost.",
+      "description": "Owner: nlp-enrich; keyword-extract writes pid. `translation_en` is RESERVED, not in the pilot (contract §5). Carries all three tagsets so no mapping is lost. `page` and `line` are the record's line key; `bbox` is in the one coordinate space.",
       "type": "array",
       "items": {
         "type": "object",
         "additionalProperties": true,
         "properties": {
-          "surface": { "type": "string" },
-          "lemma": { "type": "string" },
-          "type_onto": { "type": "string", "description": "OntoNotes v5 — the default configured NameTag tagset." },
-          "type_cnec": { "type": "string", "description": "CNEC 2.0 fine-grained code." },
-          "type_teitok": { "type": "string", "description": "Coarse TEITOK type (PER/ORG/LOC/MISC)." },
-          "page": { "type": "string" },
-          "line": { "type": "integer" },
+          "surface": {"type": "string"},
+          "lemma": {"type": "string"},
+          "type_onto": {"type": "string", "description": "OntoNotes v5 — the default configured NameTag tagset."},
+          "type_cnec": {"type": "string", "description": "CNEC 2.0 fine-grained code."},
+          "type_teitok": {"type": "string", "description": "Coarse TEITOK type (PER/ORG/LOC/MISC)."},
+          "page": {"type": "string"},
+          "line": {"type": "integer"},
           "char_span": {
             "type": "array",
-            "items": { "type": "integer", "minimum": 0 },
+            "items": {"type": "integer", "minimum": 0},
             "minItems": 2,
             "maxItems": 2
           },
-          "bbox": { "$ref": "#/$defs/bbox" },
-          "teitok_ref": { "type": "string" },
-          "translation_en": { "type": "string", "description": "RESERVED, written by no tool. Declared for the translator, which runs before nlp-enrich creates entities[]; English is produced only for free-text metadata in the AMČR pilot (atrium-project#70)." },
+          "bbox": {"$ref": "#/$defs/bbox"},
+          "teitok_ref": {"type": "string"},
+          "translation_en": {
+            "type": "string",
+            "description": "RESERVED, written by no tool. Declared for the translator, which runs before nlp-enrich creates entities[]; English is produced only for free-text metadata in the AMČR pilot (atrium-project#70)."
+          },
           "pid": {
             "type": "object",
             "description": "FAIR ontology cross-references — the ARIADNE/GoTriple hook. Null until resolved.",
             "additionalProperties": true,
             "properties": {
-              "wikidata": { "type": ["string", "null"] },
-              "geonames": { "type": ["string", "null"] },
-              "aat": { "type": ["string", "null"] },
-              "amcr": { "type": ["string", "null"] }
+              "wikidata": {
+                "type": ["string", "null"]
+              },
+              "geonames": {
+                "type": ["string", "null"]
+              },
+              "aat": {
+                "type": ["string", "null"]
+              },
+              "amcr": {
+                "type": ["string", "null"]
+              }
             }
           }
         }
       }
     },
-
     "translations": {
-      "description": "Owner: translator. Language pair and the persistent translated artifact it produced.",
+      "description": "RESERVED, not in the pilot (contract §5): the translator's metadata-en is a record-level job and writes nothing into this record.",
       "type": "object",
       "additionalProperties": true,
       "properties": {
-        "source_lang": { "type": "string" },
-        "target_lang": { "type": "string" },
-        "backend": { "type": "string", "examples": ["lindat", "ctranslate2", "llm"] }
+        "source_lang": {"type": "string"},
+        "target_lang": {"type": "string"},
+        "backend": {
+          "type": "string",
+          "examples": ["lindat", "ctranslate2", "llm"]
+        }
       }
     },
-
     "enrichment": {
       "description": "Owner: keyword-extract (llm-enrich before 2026-10-01). Superset of the LLM document schema, plus the explicit page citation.",
       "type": "object",
@@ -417,11 +329,23 @@
             "type": "object",
             "additionalProperties": true,
             "properties": {
-              "locator": { "type": "string", "description": "Short verbatim snippet copied from the document." },
-              "page": { "type": ["string", "null"], "description": "Page label from the nearest PAGE_BREAK / '## Page N' marker." },
-              "extracted_keywords_cs": { "type": "array", "items": { "type": "string" } },
-              "extracted_keywords_en": { "type": "array", "items": { "type": "string" } },
-              "teater_category": { "type": "string", "description": "Single most relevant TEATER/AMCR vocabulary category: the source label as the vocabulary spells it (e.g. `kostel`), not an ATRIUM theme." },
+              "locator": {"type": "string", "description": "Short verbatim snippet copied from the document."},
+              "page": {
+                "type": ["string", "null"],
+                "description": "Page label from the nearest PAGE_BREAK / '## Page N' marker."
+              },
+              "extracted_keywords_cs": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "extracted_keywords_en": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "teater_category": {
+                "type": "string",
+                "description": "Single most relevant TEATER/AMCR vocabulary category: the source label as the vocabulary spells it (e.g. `kostel`), not an ATRIUM theme."
+              },
               "teater_category_ids": {
                 "type": "array",
                 "description": "The AMCR and TEATER records `teater_category` stands for, by id: its own and those of the same label the vocabulary build merged into it. Written by keyword-extract; the RO-Crate names them by their source URIs (`https://api.aiscr.cz/id/<id>`, `https://teater.aiscr.cz/id/<id>`).",
@@ -430,48 +354,31 @@
                   "required": ["source", "id"],
                   "additionalProperties": true,
                   "properties": {
-                    "source": { "type": "string", "description": "`amcr` or `teater`." },
-                    "id": { "type": "string", "description": "The record's id in its source (`HES-…` for AMCR)." }
+                    "source": {"type": "string", "description": "`amcr` or `teater`."},
+                    "id": {
+                      "type": "string",
+                      "description": "The record's id in its source (`HES-…` for AMCR)."
+                    }
                   }
                 }
               },
-              "confidence_score": { "type": "number", "minimum": 0, "maximum": 1 },
-              "citation": { "type": "string", "examples": ["[Source: CTX000000001, Page 1]"] }
+              "confidence_score": {"type": "number", "minimum": 0, "maximum": 1},
+              "citation": {
+                "type": "string",
+                "examples": ["[Source: CTX000000001, Page 1]"]
+              }
             }
           }
         },
-        "summary": { "type": ["string", "null"] },
-        "topics": { "type": "array", "items": { "type": "string" } }
-      }
-    },
-
-    "forms": {
-      "description": "Owner: keyword-extract (llm-enrich before 2026-10-01). VLM/LLM-driven labeled fixed-field extraction (e.g. archival intake sheets: name/date/plot-number/signature). No deterministic ALTO/DOCX structural signal marks a region as a form field the way it does for tables, so this carries a confidence score per field and is always single-owner regardless of document origin.",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["field_id", "label"],
-        "additionalProperties": true,
-        "properties": {
-          "field_id": { "type": "string" },
-          "label": { "type": "string" },
-          "value": { "type": ["string", "null"] },
-          "value_type": { "type": "string", "enum": ["text", "date", "number", "checkbox", "signature_present"] },
-          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
-          "page": { "type": "string" },
-          "bbox": { "$ref": "#/$defs/bbox" },
-          "entity_ref": {
-            "type": ["integer", "null"],
-            "description": "DEPRECATED in favour of entity_key. A positional index into entities[], and therefore valid only within a single unmerged record: merge_document_records() resolves each top-level block independently by assembled.blocks[*].updated_at, so a `forms` block from one fan-out branch can end up beside an `entities` block from another and the index then addresses whatever happens to sit at that position — with the record still validating."
-          },
-          "entity_key": {
-            "oneOf": [{ "$ref": "#/$defs/entity_ref" }, { "type": "null" }],
-            "description": "The entities[] row this field's value is, addressed by the natural key BLOCK_KEY_FIELDS['entities'] merges on. Survives a fan-in merge; prefer this over entity_ref."
-          }
+        "summary": {
+          "type": ["string", "null"]
+        },
+        "topics": {
+          "type": "array",
+          "items": {"type": "string"}
         }
       }
     },
-
     "keywords": {
       "description": "Owner: keyword-extract (atrium-project#73). The STATISTICAL keywords of the document and of each page: KeyBERT by default, YAKE or KER (`legacy`) when a run asks for them; one run writes one method's lists. The controlled-vocabulary keywords are `enrichment`'s and never appear here, and the two kinds are never merged into one list. A score means something different per method (KeyBERT: a cosine in [0, 1]; YAKE: normalised per document to [0, 1]; KER: an occurrence count), so compare scores only within one list; `rank` orders every list from 1.",
       "type": "object",
@@ -481,7 +388,7 @@
         "document": {
           "type": "array",
           "description": "The document's keywords, best first.",
-          "items": { "$ref": "#/$defs/statistical_keyword" }
+          "items": {"$ref": "#/$defs/statistical_keyword"}
         },
         "pages": {
           "type": "array",
@@ -491,32 +398,39 @@
             "required": ["page", "keywords"],
             "additionalProperties": true,
             "properties": {
-              "page": { "type": "string", "description": "The page, as `lines[].page` has it." },
-              "keywords": { "type": "array", "items": { "$ref": "#/$defs/statistical_keyword" } }
+              "page": {"type": "string", "description": "The page, as `lines[].page` has it."},
+              "keywords": {
+                "type": "array",
+                "items": {"$ref": "#/$defs/statistical_keyword"}
+              }
             }
           }
         }
       }
     },
-
     "quality_summary": {
-      "description": "Owner: ocr-postprocess (atrium-project#73). A deterministic read-out of the stored quality fields, recomputed by atrium_document.quality_summary() whenever ocr-postprocess writes or scores pages and lines: statistics of `pages[].quality_score` and line counts per `lines[].categ`. Numbers only: no band, no threshold, and no tool reads it to route or refuse a document. `pages[].quality_score` stays the authoritative signal; a consumer that needs bands computes them from these numbers with its own thresholds.",
+      "description": "Owner: the record builder, ocr-postprocess (atrium-project#73). A deterministic read-out of the stored quality fields, recomputed by atrium_document.quality_summary() whenever ocr-postprocess writes or scores pages and lines: statistics of `pages[].quality_score` and line counts per `lines[].categ`. Numbers only: no band, no threshold, and no tool reads it to route or refuse a document. `pages[].quality_score` stays the authoritative signal; a consumer that needs bands computes them from these numbers with its own thresholds.",
       "type": "object",
       "required": ["pages", "lines"],
       "additionalProperties": true,
       "properties": {
         "pages": {
           "type": "object",
-          "description": "`total`: rows in pages[]; `scored`: those with a quality_score; mean, median, min and max of those scores, absent when none is scored.",
+          "description": "`total`: rows in pages[]; `empty`: those with content_status empty; `scored`: those with a quality_score; mean, median, min and max of those scores, absent when none is scored.",
           "required": ["total", "scored"],
           "additionalProperties": true,
           "properties": {
-            "total": { "type": "integer", "minimum": 0 },
-            "scored": { "type": "integer", "minimum": 0 },
-            "mean": { "type": "number", "minimum": 0, "maximum": 1 },
-            "median": { "type": "number", "minimum": 0, "maximum": 1 },
-            "min": { "type": "number", "minimum": 0, "maximum": 1 },
-            "max": { "type": "number", "minimum": 0, "maximum": 1 }
+            "total": {"type": "integer", "minimum": 0},
+            "scored": {"type": "integer", "minimum": 0},
+            "mean": {"type": "number", "minimum": 0, "maximum": 1},
+            "median": {"type": "number", "minimum": 0, "maximum": 1},
+            "min": {"type": "number", "minimum": 0, "maximum": 1},
+            "max": {"type": "number", "minimum": 0, "maximum": 1},
+            "empty": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Pages with content_status empty, counted apart (D18 rule 7)."
+            }
           }
         },
         "lines": {
@@ -525,21 +439,67 @@
           "required": ["total", "by_categ"],
           "additionalProperties": true,
           "properties": {
-            "total": { "type": "integer", "minimum": 0 },
-            "by_categ": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } }
+            "total": {"type": "integer", "minimum": 0},
+            "by_categ": {
+              "type": "object",
+              "additionalProperties": {"type": "integer", "minimum": 0}
+            }
           }
         }
       }
+    },
+    "provenance": {
+      "description": "REMOVED in 2.0 — run data and the calculated licence leave the record (D1, D2); the run's paradata describe it.",
+      "not": {}
+    },
+    "assembled": {
+      "description": "REMOVED in 2.0 — no stamps (D1): the run's paradata `result` names the blocks and fields it wrote.",
+      "not": {}
+    },
+    "derived_from": {
+      "description": "REMOVED in 2.0 — inputs are named in the run's paradata `object`, by distribution name and SHA-512 (D1, D23).",
+      "not": {}
+    },
+    "regenerable": {"description": "REMOVED in 2.0 — a regeneration recipe is run data (D1).", "not": {}},
+    "forms": {"description": "REMOVED in 2.0 — removed (D19).", "not": {}},
+    "tables": {
+      "description": "REMOVED in 2.0 — a table is docproc's `cellGrid`; its text stays in the record as lines (D26).",
+      "not": {}
     }
   },
-
   "$defs": {
     "bbox": {
       "type": "array",
-      "description": "[x_min, y_min, x_max, y_max] with the origin at the page TOP-LEFT and y increasing DOWNWARDS, in the unit named by that page's pages[].canvas.unit. This convention is normative and format-independent: it is what ALTO already uses, so the OCR path is unchanged, but it is NOT PDF user space, which puts the origin bottom-left. A digital-born PDF writer MUST convert before writing — with pdfplumber that means using 'top'/'bottom' (top-down, points) and never 'y0'/'y1' (bottom-up). Stated explicitly since Issue #18 gave this $def a second writer: the description used to say 'the coordinate space of the ALTO/TEITOK page', which a digital-born record does not have, leaving the y-axis direction and the unit undefined for exactly the writer whose selling point is exact coordinates.",
-      "items": { "type": "number" },
+      "description": "[x_min, y_min, x_max, y_max] in the ONE coordinate space of the record and docproc (D28): the displayed page, origin at the top-left of the CropBox, after /Rotate, y increasing downwards, in units of 1/72 inch × UserUnit (the page's canvas). Pages converted from PCSS ALTO whose original cannot be matched may be in px (canvas.unit).",
+      "items": {"type": "number"},
       "minItems": 4,
       "maxItems": 4
+    },
+    "canvas": {
+      "type": "object",
+      "description": "The displayed page's size and the unit of every box on it (D28).",
+      "additionalProperties": true,
+      "properties": {
+        "width": {"type": "number", "exclusiveMinimum": 0},
+        "height": {"type": "number", "exclusiveMinimum": 0},
+        "unit": {
+          "type": "string",
+          "enum": ["pt", "px"],
+          "default": "pt",
+          "description": "`pt`: 1/72 inch × user_unit; `px`: only for PCSS pages whose original cannot be matched."
+        },
+        "user_unit": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 1,
+          "description": "The PDF page's UserUnit factor (name proposed in #84's implementation)."
+        },
+        "pixel_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "For an image docproc wraps into a PDF: image pixels per unit, the ratio back to the image (name proposed in #84's implementation)."
+        }
+      }
     },
     "entity_ref": {
       "type": "object",
@@ -547,11 +507,11 @@
       "required": ["page", "line", "char_span"],
       "additionalProperties": false,
       "properties": {
-        "page": { "type": "string" },
-        "line": { "type": "integer" },
+        "page": {"type": "string"},
+        "line": {"type": "integer"},
         "char_span": {
           "type": "array",
-          "items": { "type": "integer", "minimum": 0 },
+          "items": {"type": "integer", "minimum": 0},
           "minItems": 2,
           "maxItems": 2
         }
@@ -563,8 +523,8 @@
       "required": ["page", "line"],
       "additionalProperties": false,
       "properties": {
-        "page": { "type": "string" },
-        "line": { "type": "integer", "minimum": 0 }
+        "page": {"type": "string"},
+        "line": {"type": "integer", "minimum": 1}
       }
     },
     "statistical_keyword": {
@@ -573,10 +533,14 @@
       "required": ["keyword", "method", "score", "rank"],
       "additionalProperties": true,
       "properties": {
-        "keyword": { "type": "string", "minLength": 1 },
-        "method": { "type": "string", "minLength": 1, "examples": ["keybert", "yake", "legacy"] },
-        "score": { "type": "number" },
-        "rank": { "type": "integer", "minimum": 1 }
+        "keyword": {"type": "string", "minLength": 1},
+        "method": {
+          "type": "string",
+          "minLength": 1,
+          "examples": ["keybert", "yake", "legacy"]
+        },
+        "score": {"type": "number"},
+        "rank": {"type": "integer", "minimum": 1}
       }
     }
   }

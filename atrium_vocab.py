@@ -79,6 +79,8 @@ __all__ = [
     "PAGE_CATEGORIES",
     "LINE_CATEGORIES",
     "LINE_CATEGORY_ORIGINATORS",
+    "RECORD_LINE_CATEGORIES",
+    "DECODE_FLAGS",
     "QUALITY_BANDS",
     "ENTITY_TYPES",
     "CNEC_TO_ENTITY_TYPE",
@@ -191,10 +193,11 @@ CONCEPT_SCHEMES: Dict[str, Dict[str, Any]] = {
     "line-category": {
         "title": "ATRIUM line category",
         "description": (
-            "Per-line verdicts carried by lines[].categ. The block has two authorised "
-            "originators (see docs/document_schema.md, Originators) and they emit "
-            "DISJOINT subsets of this scheme — which is why the union is declared in one "
-            "place. See LINE_CATEGORY_ORIGINATORS."
+            "Per-line verdicts. lines[].categ carries the five values of the line-quality "
+            "model, written by the record builder for every line (doc-schema-v2, D18). "
+            "Garbage and Inverted are digital-convert's decode verdicts, carried since "
+            "doc-schema-v2 as flags on docproc lines, never in lines[].categ (D18 rule 2). "
+            "See LINE_CATEGORY_ORIGINATORS, RECORD_LINE_CATEGORIES and DECODE_FLAGS."
         ),
         "authority": (
             "atrium-ocr-postprocess/text_util.py determine_category(); "
@@ -319,19 +322,20 @@ _LINE_CATEGORY_DEFS: Dict[str, str] = {
         "An embedded text layer that decodes to systematically wrong characters — the "
         "digital-born counterpart of Trash. Emitted when decode sanity falls below "
         "QUALITY_GARBAGE_BELOW, or on GARBAGE_MIN_HITS confusable characters regardless "
-        "of line length."
+        "of line length. Since doc-schema-v2 a flag on docproc lines, never a lines[].categ "
+        "value (D18 rule 2)."
     ),
     "Inverted": (
         "Mirrored or 180-degree-rotated text, whose extracted string is not evidence of "
         "anything. Wins over Garbage: the fault is at rendering level, so reporting a "
-        "decode verdict on it would be noise."
+        "decode verdict on it would be noise. Since doc-schema-v2 a flag on docproc lines, "
+        "never a lines[].categ value (D18 rule 2)."
     ),
 }
 
-#: Which originator emits which label. `lines[].categ`'s two authorised originators
-#: are mutually exclusive per document (fixed by `source.origin`), and their label
-#: sets do not overlap. A consumer that filters this field must handle BOTH sets or
-#: it silently does nothing on one of the two paths.
+#: Which tool emits which label; the two sets do not overlap. Since doc-schema-v2 only the first
+#: set is a `lines[].categ` value (`RECORD_LINE_CATEGORIES`, the record builder's); digital-convert's
+#: labels are flags on its docproc lines (`DECODE_FLAGS`), which scoring may read (D18 rule 2).
 LINE_CATEGORY_ORIGINATORS: Dict[str, Tuple[str, ...]] = {
     "alto-postprocess": ("Clear", "Empty", "Noisy", "Non-text", "Trash"),
     "digital-convert": ("Garbage", "Inverted"),
@@ -342,19 +346,24 @@ LINE_CATEGORY_ORIGINATORS: Dict[str, Tuple[str, ...]] = {
 #: so no label is "emitted by two tools" and a concept's `originator` stays single.
 _ORIGINATOR_ALIASES: Dict[str, str] = {"ocr-postprocess": "alto-postprocess"}
 
-#: The union both consumers must understand.
+#: Every concept of the scheme: the record's categories and the decode flags.
 LINE_CATEGORIES: Tuple[str, ...] = tuple(
     sorted({v for values in LINE_CATEGORY_ORIGINATORS.values() for v in values})
 )
 
-#: Labels that mean "this line's text is not trustworthy — do not show it to a model".
-#:
-#: This is the semantic set, and atrium-digital-convert/api_util/json_to_md.py's
-#: DROP_CATEGORIES is built from it (defect V-1 of docs/skos_strategy.md §6, fixed
-#: 2026-09-25). It used to be frozenset({"Garbage", "Inverted"}), digital-convert's
-#: labels only, and so matched nothing on the OCR path: every `Trash` line reached
-#: the model.
-UNTRUSTWORTHY_LINE_CATEGORIES: Tuple[str, ...] = ("Garbage", "Inverted", "Trash")
+#: What `lines[].categ` may hold since doc-schema-v2: the five values of the line-quality model,
+#: written by the record builder (ocr-postprocess) for every line, whatever its source (D18).
+RECORD_LINE_CATEGORIES: Tuple[str, ...] = tuple(sorted(LINE_CATEGORY_ORIGINATORS["alto-postprocess"]))
+
+#: digital-convert's decode verdicts, carried as flags on docproc lines since doc-schema-v2, never
+#: as a `lines[].categ` value (D18 rule 2).
+DECODE_FLAGS: Tuple[str, ...] = tuple(sorted(LINE_CATEGORY_ORIGINATORS["digital-convert"]))
+
+#: The record categories that mean "this line's text is not trustworthy — do not show it to a
+#: model". Since doc-schema-v2 `lines[].categ` holds the five categories only, so this is `Trash`;
+#: until 2026-11 it also named digital-convert's `Garbage` and `Inverted` (now `DECODE_FLAGS`, which
+#: a consumer of docproc lines checks instead). Its history: defect V-1 of docs/skos_strategy.md §6.
+UNTRUSTWORTHY_LINE_CATEGORIES: Tuple[str, ...] = ("Trash",)
 
 # ── quality-band ──────────────────────────────────────────────────────────────
 
@@ -1065,8 +1074,12 @@ def _selftest(stream: Any = None) -> int:
                 problems.append(f"line-category: {a} and {b} both emit {sorted(overlap)}")
 
     for value in UNTRUSTWORTHY_LINE_CATEGORIES:
-        if value not in CONCEPTS["line-category"]:
-            problems.append(f"UNTRUSTWORTHY_LINE_CATEGORIES: {value!r} is not a line-category")
+        if value not in RECORD_LINE_CATEGORIES:
+            problems.append(f"UNTRUSTWORTHY_LINE_CATEGORIES: {value!r} is not a record line category")
+    if set(RECORD_LINE_CATEGORIES) & set(DECODE_FLAGS):
+        problems.append("line-category: a decode flag is also a record category")
+    if set(RECORD_LINE_CATEGORIES) | set(DECODE_FLAGS) != set(CONCEPTS["line-category"]):
+        problems.append("line-category: record categories and decode flags do not cover the scheme")
 
     for code, coarse in CNEC_TO_ENTITY_TYPE.items():
         if coarse not in CONCEPTS["entity-type"]:

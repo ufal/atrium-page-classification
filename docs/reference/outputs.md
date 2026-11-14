@@ -93,10 +93,13 @@ The vote columns are always top-1; the averaged part keeps `-tn` classes per pag
 With `--document-json-out` (one file) or `--document-json-out-dir` (one `<doc_id>.document.json` per document), the
 run writes or updates an ATRIUM document record. page-classification writes only its own parts:
 
-- the whole `page_categories` block, which maps each page to its top-1 label;
-- each page's `pages[].category` and `pages[].category_confidence`, the label and its `SCORE-1`.
+- the whole `page_categories` block, which maps each page's label to its top-1 category;
+- each page's `pages[].category` and `pages[].category_confidence`, the label and its `SCORE-1`, on the page row
+  with that physical page (`pages[].page_index`, record schema 2.0). In the pipeline the record builder
+  (ocr-postprocess) writes the page rows and their labels first; a standalone run's rows carry `page_index` only.
 
-Every other block passes through unchanged. The record's schema and its freeze: [paradata.md](paradata.md#the-document-record-schema);
+Every other block passes through unchanged. The record names no run and no table: what a run wrote is in its
+paradata ([paradata.md](paradata.md)). The record's schema and its freeze: [paradata.md](paradata.md#the-document-record-schema);
 the contract: the hub's [document contract](https://ufal.github.io/atrium-project/ecosystem/document-contract/).
 `atrium_rocrate.py`, vendored from the hub, exports finished records as RO-Crate 1.2 (`ro-crate-metadata.json`,
 Process Run Crate 0.5) as a separate step with its own command line (`--document`, `--run`, `--paradata`,
