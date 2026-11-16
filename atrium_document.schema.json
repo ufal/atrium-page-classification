@@ -222,7 +222,7 @@
             "type": "string",
             "enum": ["Clear", "Noisy", "Trash", "Non-text", "Empty"],
             "x-atrium-scheme": "line-category",
-            "description": "Line category, the five values of the `line-category` scheme only (D18 rule 2). Written by the record builder for every line, whatever its text source. digital-convert's decode verdict (Garbage, Inverted) is a flag on docproc lines, never a category here."
+            "description": "Line category, the five values of the `line-category` scheme only (D18 rule 2). Written by the record builder for every line, whatever its text source. digital-convert's decode verdicts are a separate system: flags on docproc lines (`decode:garbled`, `decode:inverted`; the `decode-verdict` scheme), never a category here."
           },
           "quality_score": {
             "type": "number",
@@ -245,6 +245,7 @@
           "bbox": ["bbox_precision"]
         },
         "allOf": [
+          {"$ref": "#/$defs/line_key"},
           {
             "$comment": "`absent` precision means no box.",
             "if": {
@@ -263,11 +264,12 @@
       }
     },
     "entities": {
-      "description": "Owner: nlp-enrich; keyword-extract writes pid. `translation_en` is RESERVED, not in the pilot (contract §5). Carries all three tagsets so no mapping is lost. `page` and `line` are the record's line key; `bbox` is in the one coordinate space.",
+      "description": "Owner: nlp-enrich; keyword-extract writes pid. `translation_en` is RESERVED, not in the pilot (contract §5). Carries all three tagsets so no mapping is lost. `page` and `line` are the record's line key ($defs/line_key): when the record has lines[], the named row must exist; `char_span` counts within that line. `bbox` is in the one coordinate space.",
       "type": "array",
       "items": {
         "type": "object",
         "additionalProperties": true,
+        "allOf": [{"$ref": "#/$defs/line_key"}],
         "properties": {
           "surface": {"type": "string"},
           "lemma": {"type": "string"},
@@ -275,7 +277,6 @@
           "type_cnec": {"type": "string", "description": "CNEC 2.0 fine-grained code."},
           "type_teitok": {"type": "string", "description": "Coarse TEITOK type (PER/ORG/LOC/MISC)."},
           "page": {"type": "string"},
-          "line": {"type": "integer"},
           "char_span": {
             "type": "array",
             "items": {"type": "integer", "minimum": 0},
@@ -324,7 +325,7 @@
       }
     },
     "enrichment": {
-      "description": "Owner: keyword-extract (llm-enrich before 2026-10-01). Superset of the LLM document schema, plus the explicit page citation.",
+      "description": "Owner: keyword-extract (llm-enrich before 2026-10-01). Superset of the LLM document schema, plus the explicit page citation and, for an item drawn from one record line, that line's key.",
       "type": "object",
       "additionalProperties": true,
       "properties": {
@@ -333,11 +334,12 @@
           "items": {
             "type": "object",
             "additionalProperties": true,
+            "allOf": [{"$ref": "#/$defs/line_key"}],
             "properties": {
               "locator": {"type": "string", "description": "Short verbatim snippet copied from the document."},
               "page": {
                 "type": ["string", "null"],
-                "description": "Page label from the nearest PAGE_BREAK / '## Page N' marker."
+                "description": "Page label: the record line's page, or, for a document-level item, the nearest PAGE_BREAK / '## Page N' marker. With `line`, the record's line key ($defs/line_key)."
               },
               "extracted_keywords_cs": {
                 "type": "array",
@@ -507,30 +509,19 @@
         }
       }
     },
-    "entity_ref": {
+    "line_key": {
       "type": "object",
-      "description": "A reference to one entities[] row by its natural key — BLOCK_KEY_FIELDS['entities'].",
-      "required": ["page", "line", "char_span"],
-      "additionalProperties": false,
+      "description": "The record's one line key: a lines[] row's `page` and `line`, the key BLOCK_KEY_FIELDS['lines'] merges on. lines[] rows carry it; an entities[] or enrichment.items[] row names its line by it. A `line` needs its `page`; validate_document() checks that the named lines[] row exists (line_key_problems()).",
       "properties": {
-        "page": {"type": "string"},
-        "line": {"type": "integer"},
-        "char_span": {
-          "type": "array",
-          "items": {"type": "integer", "minimum": 0},
-          "minItems": 2,
-          "maxItems": 2
+        "line": {"type": "integer", "minimum": 1, "description": "1-based, in reading order within the page."}
+      },
+      "dependentSchemas": {
+        "line": {
+          "required": ["page"],
+          "properties": {
+            "page": {"type": "string", "description": "The page label, as lines[].page."}
+          }
         }
-      }
-    },
-    "line_ref": {
-      "type": "object",
-      "description": "A reference to one lines[] row by its natural key — the same key BLOCK_KEY_FIELDS['lines'] merges on. Survives merge_document_records(), which an array index does not.",
-      "required": ["page", "line"],
-      "additionalProperties": false,
-      "properties": {
-        "page": {"type": "string"},
-        "line": {"type": "integer", "minimum": 1}
       }
     },
     "statistical_keyword": {

@@ -131,6 +131,15 @@ smoke passed. #69 did not close: dependabot rebased it to `pypdfium2>=5.15.2` in
 both, and `tests/test_service_runtime_deps.py` checks that every such dependency is in it. #69 is closed once this is
 merged; dependabot opens the combined `pypdfium2` PR on its next run.
 
+## Status — the meeting's follow-ups (11-16 night)
+
+atrium-project#84 round 8 (comment 3's update): `forms` gone, decode verdicts apart, one line key, the services' JSON in the record's names. Paradata per distribution waits for the next meeting (Q23). Not pushed.
+
+- **The record's names.** `/predict_document`'s page entries: `page_index` (was `page`) and `page`, the label, when the baseline has one (was `page_label`); the frontends show the label, else the index.
+- Re-vendored shared modules; `service/openapi.json`; service README, CONTRIBUTING.
+- **Checked:** 882 passed.
+- **Next:** the hub's PR first; then this repository's, with the pins moved to it.
+
 ## Depends on
 
 - Hub tasks 1 (grants; `page_index`), 3 (`file_entity` with SHA-512), re-vendoring.

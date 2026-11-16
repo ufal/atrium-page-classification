@@ -1096,3 +1096,11 @@ Documentation only; no code, test or configuration change.
 * **Written here (not pushed):** `.github/dependabot.yml` (one pip entry for `/setup` and `/service`, a `shared-deps` group by dependency name for Pillow and pypdfium2), `tests/test_service_runtime_deps.py` (the numpy guard reads `directories`; a new test keeps every shared dependency in that group), `plans/doc-schema-v2.plan.md` (Status — round 9).
 * **Checked:** the full suite (offline lane); the new test fails without pypdfium2 in the group and with the old two-entry config.
 * **Not posted; not pushed.**
+
+## 2026-11-16 (night) — atrium-project#84 round 8: the meeting's follow-ups
+
+* **Asked (K4TEL):** the follow-ups of #84 that the meeting decided and need no outside answer; per-repository archives.
+* **Written here (not pushed):** `/predict_document` page entries in the record's names (`page_index`, `page`). 882 passed.
+* **Detail:** `plans/doc-schema-v2.plan.md`, "Status — the meeting's follow-ups"; hub: [plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/84.plan.md), "Status — round 8 (implemented)".
+* **Not posted; not pushed.**
+

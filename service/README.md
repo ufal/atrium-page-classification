@@ -172,9 +172,10 @@ The response then carries the updated record under `document_json`:
 * the record's `doc_id` is derived as on the command line (`utils.doc_id_and_page`, which strips the page label and
   then defers to the shared `canonical_doc_id()`). A service upload and a command-line run over the same file
   therefore update the *same* record instead of forking it;
-* **page keys** (`/predict_document`): a PDF's pages are classified by position, 1..N. When the baseline's page rows
-  carry `page_index`, each category is written under the row with that `page_index`, and the response's page entry
-  carries that label as `page_label`. Such a baseline is a born-digital record from digital-convert, whose pages are
+* **page keys** (`/predict_document`): a PDF's pages are classified by position, 1..N, and each response entry names
+  its page as the record does: `page_index`, and `page` (the label) when the baseline has one (atrium-project#84;
+  `page` and `page_label` before v2.0.0). When the baseline's page rows carry `page_index`, each category is written
+  under the row with that `page_index`. Such a baseline is a born-digital record from digital-convert, whose pages are
   named by their PDF page labels (`i`, `ii`, `1`, …). A record keyed "1".."N" without `page_index` (ALTO) is keyed by
   position. A position with no row whose number is another row's label is left out of the record, never written onto
   the wrong row; its prediction is still in the response;
