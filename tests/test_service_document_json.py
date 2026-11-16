@@ -593,7 +593,7 @@ class TestRealPdfium:
             files={"file": ("CTX01.pdf", self._pdf(), "application/pdf")},
         )
         assert response.status_code == 200, response.text
-        assert [page["page"] for page in response.json()["pages"]] == [1, 2]
+        assert [page["page_index"] for page in response.json()["pages"]] == [1, 2]
         assert response.json()["document_json"]["page_categories"] == {"1": "TEXT", "2": "TEXT"}
         assert [(image.mode, image.size) for image in seen] == [("RGB", (1224, 1584))] * 2
         for image, colour in zip(seen, self.COLOURS, strict=True):
@@ -881,8 +881,8 @@ class TestPredictDocumentPagesAndLabels:
         response = self._post(client, {"pages": "1,3", "document_json_out": "true"})
         assert response.status_code == 200, response.text
         body = response.json()
-        assert [page["page"] for page in body["pages"]] == [1, 3]
-        assert all("page_label" not in page for page in body["pages"]), "no baseline, no labels"
+        assert [page["page_index"] for page in body["pages"]] == [1, 3]
+        assert all("page" not in page for page in body["pages"]), "no baseline, no labels"
         assert len(_FakePdfPage.scale_requests) == 2
         assert body["document_json"]["page_categories"] == {"1": "TEXT", "3": "TEXT"}
 
@@ -910,7 +910,7 @@ class TestPredictDocumentPagesAndLabels:
         response = self._post(client, baseline=baseline)
         assert response.status_code == 200, response.text
         body = response.json()
-        assert [(p["page"], p["page_label"]) for p in body["pages"]] == [(1, "i"), (2, "ii"), (3, "1")]
+        assert [(p["page_index"], p["page"]) for p in body["pages"]] == [(1, "i"), (2, "ii"), (3, "1")]
         record = body["document_json"]
         assert record["page_categories"] == {"i": "TEXT", "ii": "TEXT", "1": "TEXT"}
         assert [p["page"] for p in record["pages"]] == ["i", "ii", "1"], "no page row invented"
@@ -924,7 +924,7 @@ class TestPredictDocumentPagesAndLabels:
         response = self._post(client, {"pages": "3"}, baseline=_born_digital_baseline())
         assert response.status_code == 200, response.text
         body = response.json()
-        assert body["pages"] == [{"page": 3, "page_label": "1", "predictions": PREDS, "models_used": ["v4.3"]}]
+        assert body["pages"] == [{"page_index": 3, "page": "1", "predictions": PREDS, "models_used": ["v4.3"]}]
         record = body["document_json"]
         assert record["page_categories"] == {"1": "TEXT"}
         assert [p.get("category") for p in record["pages"]] == [None, None, "TEXT"]
@@ -935,7 +935,7 @@ class TestPredictDocumentPagesAndLabels:
         response = self._post(client, baseline=_upstream_baseline())
         assert response.status_code == 200
         body = response.json()
-        assert [page.get("page_label") for page in body["pages"]] == ["1", "2", None]
+        assert [page.get("page") for page in body["pages"]] == ["1", "2", None]
         record = body["document_json"]
         assert record["page_categories"] == {"1": "TEXT", "2": "TEXT", "3": "TEXT"}
         assert [p["page_index"] for p in record["pages"]] == [1, 2, 3]

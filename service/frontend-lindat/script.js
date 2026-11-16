@@ -51,7 +51,7 @@ function renderResults(data) {
                 // 1. Thumbnail Column (From Backend Base64)
                 html += `<div class="thumb-col">`;
                 if (page.thumbnail) {
-                    html += `<img src="data:image/png;base64,${page.thumbnail}" alt="Page ${page.page} Thumbnail">`;
+                    html += `<img src="data:image/png;base64,${page.thumbnail}" alt="Page ${page.page ?? page.page_index} Thumbnail">`;
                 } else {
                     html += `<span class="text-muted">No Preview</span>`;
                 }
@@ -59,7 +59,7 @@ function renderResults(data) {
 
                 // 2. Data Column
                 html += `<div class="data-col">`;
-                html += `<h4>Page ${page.page}</h4>`;
+                html += `<h4>Page ${page.page ?? page.page_index}</h4>`;
                 html += renderPredictionsList(page.predictions);
                 html += `</div>`;
 

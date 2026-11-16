@@ -11,11 +11,13 @@ declared in a different repository, in a different form — a Python list, a set
 ``return`` statements, a JSON config, a dict literal — and nothing reconciles them.
 
 That is not a stylistic complaint. It has already produced a live defect:
-``lines[].categ`` has two authorised originators that emit **disjoint** label sets
+``lines[].categ`` had two authorised originators that emitted **disjoint** label sets
 (``alto-postprocess`` → ``Clear``/``Noisy``/``Trash``/``Non-text``/``Empty``;
 ``digital-convert`` → ``Garbage``/``Inverted``), and its only consumer filtered on
-one of the two (defect V-1, fixed 2026-09-25: it now filters on
-``UNTRUSTWORTHY_LINE_CATEGORIES``). See ``LINE_CATEGORY_ORIGINATORS`` below and
+one of the two (defect V-1, fixed 2026-09-25). Since doc-schema-v2 the two are kept
+fully apart: ``lines[].categ`` holds the line-quality model's five values only, and
+digital-convert's decode verdicts are a scheme of their own, ``decode-verdict``,
+carried as ``decode:``-prefixed flags on docproc lines (``DECODE_FLAGS``). See
 §Defect register in ``docs/skos_strategy.md``.
 
 This module is the single declaration of those label sets, plus the ATRIUM-authored
@@ -110,7 +112,7 @@ SKOS_BASE = "https://w3id.org/atrium/"
 #: Bumped when a concept is **added, removed or renamed**. Label-set membership is a
 #: contract other repos read, so a change here is a change to that contract. Editing
 #: a definition, note or mapping is additive and does not bump.
-REGISTRY_VERSION = "1.0"
+REGISTRY_VERSION = "2.0"
 
 # ── external namespaces referenced (never minted here) ────────────────────────
 
@@ -193,17 +195,26 @@ CONCEPT_SCHEMES: Dict[str, Dict[str, Any]] = {
     "line-category": {
         "title": "ATRIUM line category",
         "description": (
-            "Per-line verdicts. lines[].categ carries the five values of the line-quality "
-            "model, written by the record builder for every line (doc-schema-v2, D18). "
-            "Garbage and Inverted are digital-convert's decode verdicts, carried since "
-            "doc-schema-v2 as flags on docproc lines, never in lines[].categ (D18 rule 2). "
-            "See LINE_CATEGORY_ORIGINATORS, RECORD_LINE_CATEGORIES and DECODE_FLAGS."
+            "The line-quality model's verdict on a line's text. lines[].categ carries these "
+            "five values only, written by the record builder for every line, whatever its "
+            "text source (doc-schema-v2, D18). digital-convert's decode verdicts are a "
+            "separate system, the decode-verdict scheme (D18 rule 2)."
         ),
-        "authority": (
-            "atrium-ocr-postprocess/text_util.py determine_category(); "
-            "atrium-digital-convert/api_util/digital_to_json.py classify_line()"
-        ),
+        "authority": "atrium-ocr-postprocess/text_util.py determine_category()",
         "fields": ("lines[].categ",),
+    },
+    "decode-verdict": {
+        "title": "ATRIUM decode verdict",
+        "description": (
+            "digital-convert's verdict that an embedded text layer does not decode into the "
+            "text the page shows. A system apart from line quality (D18 rules 2 and 3): "
+            "carried as flags on docproc lines, spelled decode:<verdict> (DECODE_FLAGS), "
+            "never a lines[].categ value. Scoring may read the flag and scores the line "
+            "regardless."
+        ),
+        "authority": "atrium-digital-convert/api_util/digital_to_json.py classify_line()",
+        # A docproc line flag, not a record field.
+        "fields": (),
     },
     "quality-band": {
         "title": "ATRIUM page quality band",
@@ -318,27 +329,13 @@ _LINE_CATEGORY_DEFS: Dict[str, str] = {
         "Partially degraded text (e.g., isolated strange symbols, mid-word uppercase)."
     ),
     "Clear": "Structurally sound text with low perplexity.",
-    "Garbage": (
-        "An embedded text layer that decodes to systematically wrong characters — the "
-        "digital-born counterpart of Trash. Emitted when decode sanity falls below "
-        "QUALITY_GARBAGE_BELOW, or on GARBAGE_MIN_HITS confusable characters regardless "
-        "of line length. Since doc-schema-v2 a flag on docproc lines, never a lines[].categ "
-        "value (D18 rule 2)."
-    ),
-    "Inverted": (
-        "Mirrored or 180-degree-rotated text, whose extracted string is not evidence of "
-        "anything. Wins over Garbage: the fault is at rendering level, so reporting a "
-        "decode verdict on it would be noise. Since doc-schema-v2 a flag on docproc lines, "
-        "never a lines[].categ value (D18 rule 2)."
-    ),
 }
 
-#: Which tool emits which label; the two sets do not overlap. Since doc-schema-v2 only the first
-#: set is a `lines[].categ` value (`RECORD_LINE_CATEGORIES`, the record builder's); digital-convert's
-#: labels are flags on its docproc lines (`DECODE_FLAGS`), which scoring may read (D18 rule 2).
+#: Which tool emits which label. One originator since doc-schema-v2: the record builder's
+#: line-quality model (`RECORD_LINE_CATEGORIES`). digital-convert's decode verdicts left this
+#: scheme for `decode-verdict` (`DECODE_VERDICT_ORIGINATORS`).
 LINE_CATEGORY_ORIGINATORS: Dict[str, Tuple[str, ...]] = {
     "alto-postprocess": ("Clear", "Empty", "Noisy", "Non-text", "Trash"),
-    "digital-convert": ("Garbage", "Inverted"),
 }
 
 #: A program id succeeded by a repository move (atrium_document.PROGRAM_SUCCESSORS) emits what
@@ -346,7 +343,7 @@ LINE_CATEGORY_ORIGINATORS: Dict[str, Tuple[str, ...]] = {
 #: so no label is "emitted by two tools" and a concept's `originator` stays single.
 _ORIGINATOR_ALIASES: Dict[str, str] = {"ocr-postprocess": "alto-postprocess"}
 
-#: Every concept of the scheme: the record's categories and the decode flags.
+#: Every concept of the scheme.
 LINE_CATEGORIES: Tuple[str, ...] = tuple(
     sorted({v for values in LINE_CATEGORY_ORIGINATORS.values() for v in values})
 )
@@ -355,14 +352,52 @@ LINE_CATEGORIES: Tuple[str, ...] = tuple(
 #: written by the record builder (ocr-postprocess) for every line, whatever its source (D18).
 RECORD_LINE_CATEGORIES: Tuple[str, ...] = tuple(sorted(LINE_CATEGORY_ORIGINATORS["alto-postprocess"]))
 
-#: digital-convert's decode verdicts, carried as flags on docproc lines since doc-schema-v2, never
-#: as a `lines[].categ` value (D18 rule 2).
-DECODE_FLAGS: Tuple[str, ...] = tuple(sorted(LINE_CATEGORY_ORIGINATORS["digital-convert"]))
+# ── decode-verdict ────────────────────────────────────────────────────────────
+# digital-convert's verdicts on an embedded text layer, apart from line quality (D18 rule 2).
+
+_DECODE_VERDICT_DEFS: Dict[str, str] = {
+    "garbled": (
+        "An embedded text layer that decodes to systematically wrong characters (a font "
+        "without a usable ToUnicode map, CP1250 read as another code page). Emitted when "
+        "the line's decode score falls below digital-convert's threshold, or on enough "
+        "confusable characters regardless of line length."
+    ),
+    "inverted": (
+        "Mirrored or 180-degree-rotated text, whose extracted string is not evidence of "
+        "anything. Wins over garbled: the fault is at rendering level, so a decode verdict "
+        "on its characters would be noise."
+    ),
+}
+
+#: Which tool emits which decode verdict.
+DECODE_VERDICT_ORIGINATORS: Dict[str, Tuple[str, ...]] = {"digital-convert": ("garbled", "inverted")}
+
+#: The schemes whose concepts each have one originating tool (`validate_labels(originator=)`).
+_ORIGINATORS: Dict[str, Dict[str, Tuple[str, ...]]] = {
+    "line-category": LINE_CATEGORY_ORIGINATORS,
+    "decode-verdict": DECODE_VERDICT_ORIGINATORS,
+}
+
+#: Every decode verdict, sorted.
+DECODE_VERDICTS: Tuple[str, ...] = tuple(
+    sorted({v for values in DECODE_VERDICT_ORIGINATORS.values() for v in values})
+)
+
+#: How a decode verdict is spelled as a docproc line flag: `decode:<verdict>`.
+DECODE_FLAG_PREFIX = "decode:"
+
+#: digital-convert's decode verdicts as docproc line flags (D18 rule 2), never a `lines[].categ`
+#: value. A reader of docproc lines checks these.
+DECODE_FLAGS: Tuple[str, ...] = tuple(DECODE_FLAG_PREFIX + verdict for verdict in DECODE_VERDICTS)
+
+#: The flags' spelling in docproc written before 2026-11-16 (atrium-project#84 round 8), for
+#: readers of an older docproc: `Garbage` and `Inverted`, then also line categories.
+LEGACY_DECODE_FLAGS: Dict[str, str] = {"Garbage": "decode:garbled", "Inverted": "decode:inverted"}
 
 #: The record categories that mean "this line's text is not trustworthy — do not show it to a
 #: model". Since doc-schema-v2 `lines[].categ` holds the five categories only, so this is `Trash`;
-#: until 2026-11 it also named digital-convert's `Garbage` and `Inverted` (now `DECODE_FLAGS`, which
-#: a consumer of docproc lines checks instead). Its history: defect V-1 of docs/skos_strategy.md §6.
+#: until 2026-11 it also named digital-convert's decode verdicts (now `DECODE_FLAGS`, which a
+#: consumer of docproc lines checks instead). Its history: defect V-1 of docs/skos_strategy.md §6.
 UNTRUSTWORTHY_LINE_CATEGORIES: Tuple[str, ...] = ("Trash",)
 
 # ── quality-band ──────────────────────────────────────────────────────────────
@@ -502,6 +537,14 @@ CONCEPTS: Dict[str, Dict[str, Dict[str, Any]]] = {
             for name in names
         },
     ),
+    "decode-verdict": _concepts_from(
+        _DECODE_VERDICT_DEFS,
+        extra={
+            name: {"originator": originator}
+            for originator, names in DECODE_VERDICT_ORIGINATORS.items()
+            for name in names
+        },
+    ),
     "quality-band": _concepts_from(_QUALITY_BAND_DEFS),
     "entity-type": _concepts_from(_ENTITY_TYPE_DEFS),
     "cnec": {code: {"labels": {"en": code}} for code in sorted(CNEC_TO_ENTITY_TYPE)},
@@ -603,7 +646,7 @@ TEATER_BRANCH_TO_THEME: Dict[str, str] = {
 def _mappings() -> List[Tuple[str, str, str]]:
     """Every mapping assertion, as (subject URI, SKOS property, object URI).
 
-    Four families:
+    Three families:
 
     1. **CNEC → coarse entity type** — ``skos:broadMatch``. A fine-grained code is
        genuinely narrower than the coarse class it rolls up to.
@@ -612,12 +655,10 @@ def _mappings() -> List[Tuple[str, str, str]]:
     3. **AMCR heslář → theme** — ``skos:broadMatch``. A heslář is a named list rather
        than a concept, so it is minted here as a ``skos:Collection``
        (``atrium:heslar/<name>``) and the mapping is asserted from that collection.
-    4. **Trash ↔ Garbage** — ``skos:closeMatch``. The two originators' verdicts for
-       "this line's text is corrupt" are close but not identical: one is an OCR
-       judgement over a rendered image, the other a decode-sanity judgement over an
-       embedded text layer. ``closeMatch`` says "interchangeable in some applications"
-       and refuses the transitivity ``exactMatch`` would license — which is exactly
-       right here, and is the machine-readable form of defect V-1.
+
+    Until 2026-11-16 a fourth, ``Trash`` ``skos:closeMatch`` ``Garbage``, tied line quality
+    to the decode verdict; the two systems are now apart (D18 rules 2 and 3), so no mapping
+    joins them.
     """
     out: List[Tuple[str, str, str]] = []
     for code, coarse in CNEC_TO_ENTITY_TYPE.items():
@@ -632,13 +673,6 @@ def _mappings() -> List[Tuple[str, str, str]]:
         out.append(
             (f"{SKOS_BASE}heslar/{_slug(heslar)}", "skos:broadMatch", concept_uri("theme", theme))
         )
-    out.append(
-        (
-            concept_uri("line-category", "Trash"),
-            "skos:closeMatch",
-            concept_uri("line-category", "Garbage"),
-        )
-    )
     return sorted(out)
 
 
@@ -697,27 +731,29 @@ def validate_labels(
     reason: a gate that stops a pipeline over a label it does not recognise is worse
     than one that makes the disagreement visible.
 
-    ``originator`` narrows ``line-category`` to the subset that one tool may emit, so
-    a caller can check "did alto-postprocess emit something only digital-convert
-    should" as well as "did anyone emit something nobody should".
+    ``originator`` narrows ``line-category`` or ``decode-verdict`` to the subset that
+    one tool may emit (``_ORIGINATORS``), so a caller can check "did this tool emit a
+    label another tool owns" as well as "did anyone emit something nobody should".
     """
     stream = sys.stderr if stream is None else stream
     findings: List[Finding] = []
 
     try:
         permitted = set(labels_for(scheme))
+        checked = True
     except KeyError:
         findings.append(Finding((scheme, "", f"unknown scheme {scheme!r}")))
-        permitted = set()
+        permitted, checked = set(), False
 
-    if originator is not None and scheme == "line-category":
-        allowed = set(LINE_CATEGORY_ORIGINATORS.get(_ORIGINATOR_ALIASES.get(originator, originator), ()))
-        if not allowed:
+    if originator is not None and scheme in _ORIGINATORS:
+        tool = _ORIGINATOR_ALIASES.get(originator, originator)
+        if any(tool in originators for originators in _ORIGINATORS.values()):
+            # A known tool emits only its own labels here, which may be none at all.
+            permitted = set(_ORIGINATORS[scheme].get(tool, ()))
+        else:
             findings.append(
                 Finding((scheme, "", f"unknown originator {originator!r}; not narrowing"))
             )
-        else:
-            permitted = allowed
 
     seen: set = set()
     for value in observed:
@@ -725,16 +761,16 @@ def validate_labels(
             seen.add(value)
             continue
         seen.add(value)
-        if not permitted:
+        if not checked:
             continue
         hint = ""
         folded = {p.casefold(): p for p in permitted}
         if value.casefold() in folded:
             hint = f" — did you mean {folded[value.casefold()]!r}? (case differs)"
-        elif scheme == "line-category" and value in set(labels_for(scheme)):
+        elif scheme in _ORIGINATORS and value in set(labels_for(scheme)):
             other = [
                 tool
-                for tool, names in LINE_CATEGORY_ORIGINATORS.items()
+                for tool, names in _ORIGINATORS[scheme].items()
                 if value in names
             ]
             hint = f" — that label belongs to {', '.join(other)}"
@@ -1060,26 +1096,32 @@ def _selftest(stream: Any = None) -> int:
                 if m not in CONCEPTS.get(scheme, {}):
                     problems.append(f"{scheme}/{name}: member {m!r} is not a concept")
 
-    union = {v for names in LINE_CATEGORY_ORIGINATORS.values() for v in names}
-    if union != set(CONCEPTS["line-category"]):
-        problems.append(
-            "line-category: originator sets and concept table disagree: "
-            f"{sorted(union ^ set(CONCEPTS['line-category']))}"
-        )
-    tools = list(LINE_CATEGORY_ORIGINATORS)
-    for i, a in enumerate(tools):
-        for b in tools[i + 1 :]:
-            overlap = set(LINE_CATEGORY_ORIGINATORS[a]) & set(LINE_CATEGORY_ORIGINATORS[b])
-            if overlap:
-                problems.append(f"line-category: {a} and {b} both emit {sorted(overlap)}")
+    for scheme, originators in _ORIGINATORS.items():
+        union = {v for names in originators.values() for v in names}
+        if union != set(CONCEPTS[scheme]):
+            problems.append(
+                f"{scheme}: originator sets and concept table disagree: "
+                f"{sorted(union ^ set(CONCEPTS[scheme]))}"
+            )
+        tools = list(originators)
+        for i, a in enumerate(tools):
+            for b in tools[i + 1 :]:
+                overlap = set(originators[a]) & set(originators[b])
+                if overlap:
+                    problems.append(f"{scheme}: {a} and {b} both emit {sorted(overlap)}")
 
     for value in UNTRUSTWORTHY_LINE_CATEGORIES:
         if value not in RECORD_LINE_CATEGORIES:
             problems.append(f"UNTRUSTWORTHY_LINE_CATEGORIES: {value!r} is not a record line category")
-    if set(RECORD_LINE_CATEGORIES) & set(DECODE_FLAGS):
-        problems.append("line-category: a decode flag is also a record category")
-    if set(RECORD_LINE_CATEGORIES) | set(DECODE_FLAGS) != set(CONCEPTS["line-category"]):
-        problems.append("line-category: record categories and decode flags do not cover the scheme")
+    if set(RECORD_LINE_CATEGORIES) != set(CONCEPTS["line-category"]):
+        problems.append("line-category: the scheme is not the record's categories")
+    if set(DECODE_FLAGS) != {DECODE_FLAG_PREFIX + v for v in CONCEPTS["decode-verdict"]}:
+        problems.append("decode-verdict: DECODE_FLAGS are not the scheme's verdicts, prefixed")
+    folded = {c.casefold() for c in RECORD_LINE_CATEGORIES}
+    if folded & ({v.casefold() for v in DECODE_VERDICTS} | {f.casefold() for f in DECODE_FLAGS}):
+        problems.append("decode-verdict: a decode verdict is also a record line category")
+    if not set(LEGACY_DECODE_FLAGS.values()) <= set(DECODE_FLAGS):
+        problems.append("LEGACY_DECODE_FLAGS: a legacy spelling maps to no decode flag")
 
     for code, coarse in CNEC_TO_ENTITY_TYPE.items():
         if coarse not in CONCEPTS["entity-type"]:

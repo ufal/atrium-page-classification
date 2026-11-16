@@ -403,7 +403,7 @@ def _classify_pdf_pages(
             result = manager.predict_detailed(img, version=version, topn=topn)
             if "error" in result:
                 raise HTTPException(status_code=500, detail=f"Page {number}: {result['error']}")
-            entry = {"page": number, "predictions": result["predictions"], "models_used": result["models_used"]}
+            entry = {"page_index": number, "predictions": result["predictions"], "models_used": result["models_used"]}
             if per_model and result.get("per_model") is not None:
                 entry["per_model"] = result["per_model"]
             page_results.append(entry)
@@ -510,12 +510,14 @@ class ImageResponse(BaseModel):
 
 
 class PagePredictions(BaseModel):
-    """The categories of one PDF page."""
+    """The categories of one PDF page, in the record's field names (atrium-project#84)."""
 
     model_config = ConfigDict(extra="allow")
 
-    page: int = Field(description="The page's physical position in the PDF, 1-based.")
-    page_label: Optional[str] = Field(
+    page_index: int = Field(
+        description="The page's physical position in the PDF, 1-based: the record's `pages[].page_index`."
+    )
+    page: Optional[str] = Field(
         None,
         description=(
             "Only when the `document_json` baseline has a page row with this `page_index`: that row's `page` "
@@ -885,15 +887,19 @@ async def predict_document(
         # label, never under a position that may be another page's label
         # (atrium-digital-convert#2).
         labels = baseline_page_labels(baseline_bytes)
-        keys = record_page_keys([r["page"] for r in page_results], labels)
+        keys = record_page_keys([r["page_index"] for r in page_results], labels)
         for result in page_results:
-            if result["page"] in labels:
-                result["page_label"] = labels[result["page"]]
+            if result["page_index"] in labels:
+                result["page"] = labels[result["page_index"]]
         record, schema_err = await _document_json_part(
             document_json_out or document_json is not None,
             baseline_bytes,
             doc_id_for_document(file.filename),
-            [(keys[r["page"]], r["predictions"], r["page"]) for r in page_results if keys[r["page"]] is not None],
+            [
+                (keys[r["page_index"]], r["predictions"], r["page_index"])
+                for r in page_results
+                if keys[r["page_index"]] is not None
+            ],
             run,
         )
 

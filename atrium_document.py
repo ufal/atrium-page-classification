@@ -905,7 +905,8 @@ def _migrate_1_to_2(record: Dict[str, Any]) -> Dict[str, Any]:
     * `source.origin` → `digital`/`atr`/`legacy` (dropped when it maps to none), and each line's
       `text_source` follows from it;
     * a page whose lines were numbered from 0 (1.x digital-convert) is renumbered from 1, and the
-      entities on it follow;
+      entities and enrichment items on it follow; a `line` still below 1 (1.x's "unknown") is
+      dropped from an entity or enrichment item, which keeps its page ($defs/line_key);
     * a `Garbage`/`Inverted` `categ` (a decode verdict) is dropped with its `quality_score`;
     * a missing `pages[].page_index` is the numeric label, else the row's position; a missing
       `content_status` follows from whether the page has lines (when the record has `lines`), and
@@ -959,11 +960,27 @@ def _migrate_1_to_2(record: Dict[str, Any]) -> Dict[str, Any]:
             migrated.append(row)
         out["lines"] = migrated
 
+    def _keyed(row: Any) -> Any:
+        # The line key of an entity or enrichment item follows its page's renumbering; a line
+        # that is still below 1 meant "unknown" in 1.x and names no row, so it goes.
+        if not isinstance(row, dict):
+            return row
+        row = dict(row)
+        line = row.get("line")
+        if isinstance(line, int) and not isinstance(line, bool):
+            if _key_value(row.get("page")) in offsets:
+                line += 1
+                row["line"] = line
+            if line < 1:
+                row.pop("line")
+        return row
+
     entities = out.get("entities")
-    if offsets and isinstance(entities, list):
-        for row in entities:
-            if isinstance(row, dict) and _key_value(row.get("page")) in offsets and isinstance(row.get("line"), int):
-                row["line"] = row["line"] + 1
+    if isinstance(entities, list):
+        out["entities"] = [_keyed(row) for row in entities]
+    enrichment = out.get("enrichment")
+    if isinstance(enrichment, dict) and isinstance(enrichment.get("items"), list):
+        out["enrichment"] = {**enrichment, "items": [_keyed(row) for row in enrichment["items"]]}
 
     pages = out.get("pages")
     if isinstance(pages, list):
@@ -1059,8 +1076,9 @@ def load_schema() -> Dict[str, Any]:
 
 def validate_document(record: Dict[str, Any]) -> None:
     """
-    Validate a record against the canonical schema (the current major). Raises on failure,
-    returns None on pass.
+    Validate a record against the canonical schema (the current major), then check that every
+    line reference resolves (`line_key_problems()`). Raises `jsonschema.ValidationError` on
+    either failure, returns None on pass.
 
     A record of an older major fails here: read it with `load_document()`, or pass it through
     `migrate_document()` first. `jsonschema` is an optional import: without it this raises
@@ -1075,6 +1093,40 @@ def validate_document(record: Dict[str, Any]) -> None:
             "(requirements-test.txt / requirements_digital.txt) rather than skipping the gate."
         ) from exc
     jsonschema.validate(record, load_schema())
+    problems = line_key_problems(record)
+    if problems:
+        shown = "; ".join(problems[:5]) + (f"; and {len(problems) - 5} more" if len(problems) > 5 else "")
+        raise jsonschema.ValidationError(f"{len(problems)} line reference(s) name no lines[] row: {shown}")
+
+
+def line_key_problems(record: Dict[str, Any]) -> List[str]:
+    """The rows that name a line the record does not have (the one line key, `$defs/line_key`).
+
+    When the record has `lines[]`, every `entities[]` row and every `enrichment.items[]` row that
+    carries a `line` must name an existing `lines[]` row by `page` and `line`, compared as
+    merge_block() compares keys (`_key_value`). A record without `lines[]` (a seed, or a text a
+    tool enriched without the record builder) has no line to name, so nothing is checked.
+    `validate_document()` raises on any; an empty list means every reference resolves.
+    """
+    lines = record.get("lines")
+    if not isinstance(lines, list) or not lines:
+        return []
+    keys = {
+        (_key_value(row.get("page")), _key_value(row.get("line"))) for row in lines if isinstance(row, dict)
+    }
+    enrichment = record.get("enrichment")
+    blocks = (
+        ("entities", record.get("entities")),
+        ("enrichment.items", enrichment.get("items") if isinstance(enrichment, dict) else None),
+    )
+    problems: List[str] = []
+    for where, rows in blocks:
+        for position, row in enumerate(rows if isinstance(rows, list) else []):
+            if not isinstance(row, dict) or row.get("line") is None:
+                continue
+            if (_key_value(row.get("page")), _key_value(row.get("line"))) not in keys:
+                problems.append(f"{where}[{position}] names page {row.get('page')!r}, line {row.get('line')!r}")
+    return problems
 
 
 # ──────────────────────────────────────────────────────────────────────────────

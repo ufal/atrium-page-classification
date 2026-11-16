@@ -187,7 +187,7 @@ def test_a_pdf_is_classified_page_by_page_on_both_sides(cli, client, tmp_path):
         data={"version": "v4.4", "topn": 1, "document_json_out": "true"},
         files={"file": ("CTX01.pdf", pdf.read_bytes(), "application/pdf")},
     ).json()
-    service_pages = {page["page"]: page["predictions"][0]["label"] for page in body["pages"]}
+    service_pages = {page["page_index"]: page["predictions"][0]["label"] for page in body["pages"]}
     assert cli_pages == service_pages == {1: "DRAW", 2: "TEXT", 3: "DRAW"}
     assert set(table["FILE"]) == {body["document_json"]["doc_id"]} == {"CTX01"}
     cli_record = json.loads(out.read_text(encoding="utf-8"))
@@ -203,7 +203,7 @@ def test_the_page_selection_means_the_same_on_both_sides(cli, client, tmp_path):
         data={"version": "v4.4", "topn": 1, "pages": "2-3"},
         files={"file": ("CTX02.pdf", pdf.read_bytes(), "application/pdf")},
     ).json()
-    assert sorted(int(p) for p in _table(tmp_path)["PAGE"]) == [page["page"] for page in body["pages"]] == [2, 3]
+    assert sorted(int(p) for p in _table(tmp_path)["PAGE"]) == [page["page_index"] for page in body["pages"]] == [2, 3]
 
 
 def test_a_born_digital_baseline_gets_its_own_page_labels_on_both_sides(cli, client, tmp_path):
@@ -363,7 +363,7 @@ def test_the_service_recognises_an_image_or_a_pdf_sent_without_its_media_type(cl
         files={"file": ("scan", _pdf(), "application/octet-stream")},
     )
     assert pdf.status_code == 200, pdf.text
-    assert [p["page"] for p in pdf.json()["pages"]] == [1, 2, 3]
+    assert [p["page_index"] for p in pdf.json()["pages"]] == [1, 2, 3]
     not_an_image = client.post(
         "/predict_image",
         data={"version": "v4.4", "topn": 1},

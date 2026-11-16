@@ -88,15 +88,18 @@ def test_validate_labels_survives_anything(scheme, observed):
 
 
 def test_validate_labels_narrows_by_originator():
-    """`lines[].categ`'s two originators emit disjoint sets, so 'is this label legal'
-    and 'is this label legal FROM THIS TOOL' are different questions."""
+    """'Is this label legal' and 'is this label legal FROM THIS TOOL' are different questions:
+    the decode verdicts are digital-convert's, and line quality is the record builder's."""
     alto = {"originator": "alto-postprocess", "report": False}
+    digital = {"originator": "digital-convert", "report": False}
 
     assert av.validate_labels("line-category", ["Trash", "Clear"], **alto) == []
+    assert av.validate_labels("decode-verdict", ["garbled", "inverted"], **digital) == []
 
-    findings = av.validate_labels("line-category", ["Garbage"], **alto)
+    findings = av.validate_labels("decode-verdict", ["garbled"], **alto)
     assert len(findings) == 1
     assert "belongs to digital-convert" in findings[0].message
+    assert len(av.validate_labels("line-category", ["Garbage"], **alto)) == 1
 
 
 def test_a_successor_program_emits_what_its_predecessor_emitted():
@@ -106,35 +109,32 @@ def test_a_successor_program_emits_what_its_predecessor_emitted():
 
     assert "ocr-postprocess" not in av.LINE_CATEGORY_ORIGINATORS
     assert av.validate_labels("line-category", ["Trash", "Clear"], **ocr) == []
-    findings = av.validate_labels("line-category", ["Garbage"], **ocr)
+    findings = av.validate_labels("decode-verdict", ["garbled"], **ocr)
     assert len(findings) == 1 and "belongs to digital-convert" in findings[0].message
 
 
 # ── the label sets other repos depend on ─────────────────────────────────────
 
 
-def test_line_category_originators_are_disjoint_and_cover_the_scheme():
-    """The defect this registry exists to make visible (V-1 in docs/skos_strategy.md).
-
-    If these sets ever overlap, `validate_labels(..., originator=...)` stops being able
-    to say which tool a label came from.
-    """
-    alto = set(av.LINE_CATEGORY_ORIGINATORS["alto-postprocess"])
-    digital = set(av.LINE_CATEGORY_ORIGINATORS["digital-convert"])
-
-    assert alto & digital == set()
-    assert alto | digital == set(av.labels_for("line-category"))
-    assert {"Garbage", "Inverted"} == digital
-    assert "Trash" in alto and "Trash" not in digital
+def test_line_quality_and_decode_verdicts_are_two_schemes():
+    """The defect this registry made visible (V-1 in docs/skos_strategy.md), closed for good:
+    line quality and the decode verdict are apart (D18 rules 2 and 3, atrium-project#84).
+    `line-category` is the record builder's five values; `decode-verdict` is digital-convert's."""
+    assert set(av.LINE_CATEGORY_ORIGINATORS) == {"alto-postprocess"}
+    assert set(av.labels_for("line-category")) == set(av.RECORD_LINE_CATEGORIES)
+    assert set(av.labels_for("decode-verdict")) == {"garbled", "inverted"}
+    assert set(av.DECODE_VERDICT_ORIGINATORS) == {"digital-convert"}
+    assert not {"Garbage", "Inverted"} & set(av.labels_for("line-category"))
 
 
-def test_record_categories_and_decode_flags_split_the_scheme():
-    """doc-schema-v2 (D18 rule 2): `lines[].categ` holds the five record categories only, and
-    digital-convert's decode verdicts are flags on docproc lines. The untrustworthy set is drawn
-    from the record categories (V-1 stays fixed: `Trash` is in it)."""
-    assert set(av.RECORD_LINE_CATEGORIES) == set(av.LINE_CATEGORY_ORIGINATORS["alto-postprocess"])
-    assert set(av.DECODE_FLAGS) == {"Garbage", "Inverted"}
-    assert set(av.RECORD_LINE_CATEGORIES) | set(av.DECODE_FLAGS) == set(av.labels_for("line-category"))
+def test_record_categories_and_decode_flags():
+    """`lines[].categ` holds the five record categories only; digital-convert's decode verdicts
+    are `decode:`-prefixed flags on docproc lines, and an older docproc's spelling maps onto
+    them. The untrustworthy set is drawn from the record categories (V-1 stays fixed)."""
+    assert set(av.RECORD_LINE_CATEGORIES) == {"Clear", "Empty", "Noisy", "Non-text", "Trash"}
+    assert av.DECODE_FLAGS == ("decode:garbled", "decode:inverted")
+    assert av.LEGACY_DECODE_FLAGS == {"Garbage": "decode:garbled", "Inverted": "decode:inverted"}
+    assert not set(av.DECODE_FLAGS) & set(av.RECORD_LINE_CATEGORIES)
     assert av.UNTRUSTWORTHY_LINE_CATEGORIES == ("Trash",)
     assert set(av.UNTRUSTWORTHY_LINE_CATEGORIES) <= set(av.RECORD_LINE_CATEGORIES)
 
@@ -174,20 +174,16 @@ def test_serialisation_is_byte_stable():
     assert av.to_jsonld() == av.to_jsonld()
 
 
-def test_no_exact_match_is_asserted_between_atrium_labels():
-    """`Trash` and `Garbage` are closeMatch, deliberately.
-
-    One is an OCR judgement over a rendered image, the other a decode-sanity judgement
-    over an embedded text layer. exactMatch is transitive and would license inferences
-    neither tool supports.
-    """
+def test_no_mapping_joins_line_quality_and_the_decode_verdict():
+    """No exactMatch between ATRIUM labels, and, since the two systems are apart (D18 rules 2
+    and 3), no mapping at all between a line category and a decode verdict: the Trash
+    closeMatch Garbage of 1.x is gone."""
     props = {prop for _s, prop, _o in av.MAPPINGS}
     assert "skos:exactMatch" not in props
-    assert (
-        av.concept_uri("line-category", "Trash"),
-        "skos:closeMatch",
-        av.concept_uri("line-category", "Garbage"),
-    ) in av.MAPPINGS
+    decode = {av.concept_uri("decode-verdict", v) for v in av.labels_for("decode-verdict")}
+    line = {av.concept_uri("line-category", v) for v in av.labels_for("line-category")}
+    for subject, _prop, obj in av.MAPPINGS:
+        assert not ({subject, obj} & decode and {subject, obj} & line), (subject, obj)
 
 
 def test_mapping_targets_are_declared_concepts_or_known_external_namespaces():

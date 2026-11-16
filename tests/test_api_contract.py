@@ -376,7 +376,7 @@ def test_a_document_response_conforms(manager, pdfium):
         files={"file": ("CTX01.pdf", b"%PDF-1.4", "application/pdf")},
     )
     body = _conforms(200, response, "/predict_document")
-    assert [page["page"] for page in body["pages"]] == [1, 2]
+    assert [page["page_index"] for page in body["pages"]] == [1, 2]
     assert body["document_json"]["page_categories"] == {"1": "TEXT", "2": "TEXT"}
     # atrium-project#77: per page, the revisions that answered for that page
     assert [page["models_used"] for page in body["pages"]] == [["v1.4", "v2.4", "v3.4", "v4.4", "v5.4"]] * 2
