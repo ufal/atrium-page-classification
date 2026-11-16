@@ -1103,4 +1103,3 @@ Documentation only; no code, test or configuration change.
 * **Written here (not pushed):** `/predict_document` page entries in the record's names (`page_index`, `page`). 882 passed.
 * **Detail:** `plans/doc-schema-v2.plan.md`, "Status — the meeting's follow-ups"; hub: [plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/84.plan.md), "Status — round 8 (implemented)".
 * **Not posted; not pushed.**
-
