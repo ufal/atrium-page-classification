@@ -151,7 +151,8 @@ The documentation follows the ATRIUM
 
 The code is MIT ([LICENSE](LICENSE)). The fine-tuned models, the LINDAT training dataset they were trained on and the
 sample pages in [small_data_samples](small_data_samples) are CC BY-NC 4.0, the optional YOLO backend (Ultralytics)
-is AGPL-3.0, and the service renders PDFs with pypdfium2 (Apache-2.0 or BSD-3-Clause). Each component, with its
+is AGPL-3.0, and the service renders PDFs with pypdfium2 (Apache-2.0 or BSD-3-Clause). The models are therefore
+for non-commercial use only: the code's MIT licence does not extend to them. Each component, with its
 licence and where that is stated: [docs/reference/licences.md](docs/reference/licences.md). The paradata of a run
 lists the components it used; it does not set the rights in what the run produces, which depend first on the
 source document ([Licences and paradata](https://ufal.github.io/atrium-project/ecosystem/licences/)).
