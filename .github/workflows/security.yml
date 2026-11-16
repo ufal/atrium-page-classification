@@ -23,7 +23,7 @@ jobs:
       contents: read
       packages: read
       security-events: write # Required to upload SARIF to the Security tab
-    uses: ufal/atrium-project/.github/workflows/security.reusable.yml@733f464315384490bc628506286a6e456e7af894  # v1
+    uses: ufal/atrium-project/.github/workflows/security.reusable.yml@02cbd0144cfa2d39d981d43eea7f4cd72bed53ba  # v1
     # No `secrets:` block: security.reusable.yml consumes no secrets at all
     # (Trivy/SBOM read a public GHCR image, version-check reads the tree).
     # It previously carried `secrets: inherit` for no reason (#18).
