@@ -1,10 +1,14 @@
 # 📓 atrium-page-classification — agent_dev_logs/DEVLOG.md (timeline index)
 > _Historical page-image classification. Open issue: #58 (decision-model experiments, 2026-10-20; renamed 2026-11-06 "Decision Models (DM) application to incoming documents", a sub-issue of atrium-project#83; parked during the pilot phase since 2026-11-11); #64 (the
-> scheduled-smoke failure of 10-27) closed 2026-11-04; one open Dependabot PR (#65). #61 (the directory-run bug) closed
+> scheduled-smoke failure of 10-27) closed 2026-11-04; no open pull request (11-19). #61 (the directory-run bug) closed
 > 2026-10-22, fixed in **v1.9.6-beta**; #48 closed 2026-09-17. Its pilot work is tracked in hub issues (atrium-project
-> #6, #66, #72, #77, #79, #81). **Starting set of the pilot phase: v1.12.3-beta** (`0a96bce`, 2026-11-04; immutable, with `images.json`;
+> #6, #66, #77, #79, #84; #72 and #81 closed 11-16). **Starting set of the pilot phase: v1.12.3-beta** (`0a96bce`, 2026-11-04; immutable, with `images.json`;
 > atrium-project#77). **v1.9.5-beta** (2026-10-19, the runbook) is the first immutable release (atrium-project#72).
-> Hub workflows pinned to `51aad6c` (`v1`). Latest entry: 2026-11-13._
+> Since: **v1.13.0-beta** (11-06, the Galaxy entry point) · **v1.14.2-beta** (11-08, atrium-project#10's fixes);
+> v1.14.0-beta and v1.14.1-beta were tagged, not released. `test` (`340be2d`) is 17 commits past v1.14.2-beta and
+> declares the unreleased v2.0.0-beta; `master` is `1e80e7a`. Hub workflows pinned to `02cbd01` (`v1`). Latest entry:
+> 2026-11-19 (log round). The "rounds 8 and 9" of 11-14 below are this repository's own count, not atrium-project#84's
+> rounds 8 and 9 of 11-16._
 > _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md` · `plans/doc-schema-v2.plan.md` (this repository's part of atrium-project#84)._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
 
@@ -1001,7 +1005,7 @@ Documentation only; no code, test or configuration change.
 * **Asked (K4TEL):** align the logs with the meeting of 11-11 (ARÚP's output contract) and write this repository's
   slice of the hub's consolidated schema issue
   ([meeting digest](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/digests/project_state_1111.md),
-  [hub plan](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/doc-schema-v2.plan.md)).
+  [hub plan](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/84.plan.md)).
 * **Decided in session:** plans only this round; the schema issue is not opened yet (placeholder name
   `doc-schema-v2`); page classification runs on every PDF and image, bundled with the ATR call, and without ATR when
   no page needs OCR; digital-convert's text-layer verdicts become their own marker set (`decode`), `categ` is
@@ -1030,7 +1034,7 @@ Documentation only; no code, test or configuration change.
 * **Asked (K4TEL):** align the logs with ARÚP's output contract of 12 November (the .docx of that day, replacing the
   meeting document of 10 November) and with David Novák's comments of 11-12 (atrium-project#84 opened, #13, #16,
   #78); `test` fetched first (all seven working branches = `test`).
-  Anchor: [contract digest](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/digests/project_state_1211.md) · [hub plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/doc-schema-v2.plan.md).
+  Anchor: [contract digest](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/digests/project_state_1211.md) · [hub plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/84.plan.md).
 * **Decided in session:** the tool slices are named `plans/84.plan.md`; the translator keeps `amcr-fields.txt` as a
   documented example that nothing loads (no default list, D34); the hub's #84 plan carries a reply draft agreeing on
   points 1 and 2.
@@ -1053,16 +1057,18 @@ Documentation only; no code, test or configuration change.
   no docproc answer from ARÚP; windows as `split`, prompt budgets as `sampled`, every other cut fails (D13).
 * **Done (local branch, delivered as an archive):** page rows by `page_index`; paradata 3.0 (`original`, the record read, the fields written); no licence; docs and spec.
 * **Checked:** the full test suite; ruff; the regenerated spec against its contract test.
-* **Detail and what is deferred:** `plans/doc-schema-v2.plan.md`, "Status — round 2". Hub: [plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/doc-schema-v2.plan.md).
+* **Detail and what is deferred:** `plans/doc-schema-v2.plan.md`, "Status — round 2". Hub: [plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/84.plan.md).
 * **Not posted; not pushed.**
+* **Merged 11-14** as #71 (`bfebf36`).
 
 ## 2026-11-13 — atrium-project#84 round 4: the push checked
 
 * **Asked (K4TEL):** fetch the pushed branches and the comments since 12 November, and bring the logs up to them.
 * **Found:** the push of 11-13 on `doc-schema-v2` lacks the addendum's re-vendored shared files; with them the suite passes (873, offline lane).
 * **Written here (not pushed):** `plans/doc-schema-v2.plan.md` (the round-1 text in place of the 11-11 one, the round-2 status, the push, atrium-digital-convert#9 point 5). This file: the round-2 entry of 11-13 and this one.
-* **Detail:** `plans/doc-schema-v2.plan.md`, "Status — round 2"; hub: [plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/doc-schema-v2.plan.md).
+* **Detail:** `plans/doc-schema-v2.plan.md`, "Status — round 2"; hub: [plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/84.plan.md).
 * **Not posted; not pushed.**
+* **Merged 11-14** as #71 (`bfebf36`).
 
 ## 2026-11-14 — atrium-project#84 round 5: the PR's checks
 
@@ -1070,16 +1076,18 @@ Documentation only; no code, test or configuration change.
 * **Found:** [atrium-page-classification#71](https://github.com/ufal/atrium-page-classification/pull/71) fails drift (the hub pin at `v1`) and api-contract (record major 1.0 → 2.0, no major version yet).
 * **Written here (not pushed):** the re-vendored `atrium_rocrate.py` and `tests/test_atrium_rocrate.py` (`#no-licence-asserted` on the crate root again); `plans/doc-schema-v2.plan.md`, "Status — PR".
 * **Checked:** the full suite (offline lane), 875 passed.
-* **Next:** the pin commit after the hub's PR merges; the major version at the release. Hub: [plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/doc-schema-v2.plan.md), "Status — PRs".
+* **Next:** the pin commit after the hub's PR merges; the major version at the release. Hub: [plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/84.plan.md), "Status — PRs".
 * **Not posted; not pushed.**
+* **Merged 11-14** as #71 (`bfebf36`).
 
 ## 2026-11-14 (afternoon) — atrium-project#84 round 6: the rest of this repository's part
 
 * **Asked (K4TEL):** complete the doc-schema-v2 update in every repository.
 * **Done (local, not pushed):** `atrium_document.py`, its schema and `tests/test_document_originators.py` re-vendored: rows may carry `lines[].unit: "block"` (rule 5, written by ocr-postprocess only), and `quality_summary.lines` counts them as `block_units`. `v2.0.0-beta` as the unreleased version: `setup/para_config.txt`, `CITATION.cff`, `service/openapi.json` (re-exported) and a CONTRIBUTING.md row marked Unreleased; api-contract passes with it.
 * **Checked:** the full suite, 876 (offline lane) passed; the spec export; `compare` against the latest release: compatible at v2.0.0-beta.
-* **Next:** the hub's second PR for #84, then the pins; then this PR. Hub: [plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/doc-schema-v2.plan.md), "Status — round 6".
+* **Next:** the hub's second PR for #84, then the pins; then this PR. Hub: [plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/84.plan.md), "Status — round 6".
 * **Not posted; not pushed.**
+* **Merged 11-14** as #71 (`bfebf36`).
 
 ## 2026-11-14 (evening) — atrium-project#84 round 8: the `api` smoke and the dependabot PRs
 
@@ -1088,6 +1096,7 @@ Documentation only; no code, test or configuration change.
 * **Written here (not pushed):** `service/api.py` (`_exit_now_if_warming()`), `tests/test_service_warmup.py`, the v2.0.0-beta row of CONTRIBUTING.md, `plans/doc-schema-v2.plan.md` (Status — round 8). For #70: `service/requirements.txt` with the same `pypdfium2` floor as `/setup`.
 * **Checked:** the warm-up tests, with the PID-1 case failing when the exit is removed; the full suite (offline lane).
 * **Not posted; not pushed.**
+* **Merged 11-14** as #71 (`bfebf36`).
 
 ## 2026-11-14 (evening) — atrium-project#84 round 9: shared dependencies in one dependabot PR
 
@@ -1096,6 +1105,7 @@ Documentation only; no code, test or configuration change.
 * **Written here (not pushed):** `.github/dependabot.yml` (one pip entry for `/setup` and `/service`, a `shared-deps` group by dependency name for Pillow and pypdfium2), `tests/test_service_runtime_deps.py` (the numpy guard reads `directories`; a new test keeps every shared dependency in that group), `plans/doc-schema-v2.plan.md` (Status — round 9).
 * **Checked:** the full suite (offline lane); the new test fails without pypdfium2 in the group and with the old two-entry config.
 * **Not posted; not pushed.**
+* **On `test` 11-14** as `7c2e97a` (direct push, no PR).
 
 ## 2026-11-16 (night) — atrium-project#84 round 8: the meeting's follow-ups
 
@@ -1103,3 +1113,25 @@ Documentation only; no code, test or configuration change.
 * **Written here (not pushed):** `/predict_document` page entries in the record's names (`page_index`, `page`). 882 passed.
 * **Detail:** `plans/doc-schema-v2.plan.md`, "Status — the meeting's follow-ups"; hub: [plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/84.plan.md), "Status — round 8 (implemented)".
 * **Not posted; not pushed.**
+* **Merged 11-16** as #74 (`e232052`).
+
+## 2026-11-18 — #75: `ultralytics` raised (dependabot)
+
+* **Merged 11-18** as #75 (`340be2d`): `setup/requirements.txt` only, one line.
+
+## 2026-11-19 (round) — the threads since 16 November, Ronald's answers, the pilot dates
+
+* **Asked (K4TEL):** the log round of 11-19: `test` heads, open issues' threads and the ARÚP issues they link.
+* **Fetched:** `test` = `340be2d`; `master` = `1e80e7a`; the hub `a7e440b`, `v1` = `02cbd01`. No new comment on #58
+  (parked with atrium-project#83).
+* **Found:**
+  * Ronald's ask 6 (aiscr-docs-pipeline#17, 11-17): the page categories are not sent to the ATR; motyc agreed. D33
+    is resolved: the output goes only into the record.
+  * `README.md:5` and `CITATION.cff:7` still say the category tells which processing the page needs next (H3, D33):
+    a later docs PR (atrium-project#84). aiscr-docs-pipeline#2 still says "a category for every page": a meeting
+    question.
+  * `scheduled-smoke.yml` runs daily: dropped under the agreement of 11-12 (atrium-project#40).
+* **Written here:** `plans/doc-schema-v2.plan.md` ("Status — 11-19"); the hub links `doc-schema-v2.*` → `84.*`;
+  `Merged` lines on the entries of 11-13 to 11-16; the #75 entry; this header. No pair to remove (#58 is open).
+* **Next:** the docs PR for the two sentences; the release batch (atrium-project#77).
+* Logs only; no code changed. Files delivered as full files.

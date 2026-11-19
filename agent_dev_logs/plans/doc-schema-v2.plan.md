@@ -1,20 +1,27 @@
 # Strategy — [atrium-project#84](https://github.com/ufal/atrium-project/issues/84) (doc-schema-v2): page-classification's part
 
+> _**Refreshed 2026-11-19**: "Status — 11-19": #74 and #75 merged; D33 resolved (no categories to the ATR); the
+> wording that has the classifier route pages._
 > _**Refreshed 2026-11-14 (afternoon)**: "Status — round 6 (11-14)": the hub merged, the pins moved, round 6._
 > _**Refreshed 2026-11-14**: "Status — PR (11-14)": the PR's checks and round 5's fixes._
 > _**Refreshed 2026-11-13**: "Status — round 2" (the code, pushed 11-13 to `doc-schema-v2`) and round 4's notes. The file keeps
 > the name `doc-schema-v2.plan.md` (it was `84.plan.md` on 11-12 and 11-13)._
 > _**Written 2026-11-12** on ARÚP's output contract of 12 November and atrium-project#84 (motyc, 11-12), at this
 > checkout's head `cc35617` (= `test`). The hub carries the whole change:
-> [plan](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/doc-schema-v2.plan.md) ·
-> [digest](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/digests/doc-schema-v2.digest.md) ·
+> [plan](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/84.plan.md) ·
+> [digest](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/digests/84.digest.md) ·
 > [contract digest](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/digests/project_state_1211.md).
 > This file is the repository's slice only. It replaces the 11-11 slice of the same name, which had the classifier
 > on every PDF and image; 12 November changes that._
 
+**Status (2026-11-19)**: 🟢 **This repository's part is on `test` (#71, #74), pinned to `02cbd01`. D33 is resolved:
+the page categories are not sent to the ATR (Ronald, ask 6; motyc agreed); they stay in the record. Left: two
+sentences that still have the classifier decide the processing (a docs PR under atrium-project#84); the release
+(`v2.0.0-beta`) with the batch (atrium-project#77).**
+
 **Status (2026-11-14, afternoon)**: 🟡 **The hub's PR is merged and this repository is pinned to it: drift is green.
 Round 6 completes this repository's part where no answer is pending; see "Status — round 6". The release (v2.0.0-beta)
-is cut at K4TEL's cadence.**
+is cut at K4TEL's cadence.** _(superseded 11-19: the answers in)_
 
 **Status (2026-11-14)**: 🟡 **[atrium-page-classification#71](https://github.com/ufal/atrium-page-classification/pull/71)
 is open (`doc-schema-v2` into `test`); see "Status — PR". Drift clears once the hub's PR merges and the pins move; the
@@ -25,7 +32,8 @@ record-major check clears at this tool's next release, which raises its major ve
 **Status (2026-11-12)**: 📋 **Planned, plans only; small. page-classification runs on the pages that need ATR only,
 beside the ATR (H3): the `needs_atr` pages of a PDF, and every page of an image. Its output is unchanged —
 `page_categories` and each page's `category`/`category_confidence` in the record — and may be offered to the ATR as
-an optional weak signal, never as routing (D33). Code follows the hub's shared modules.**
+an optional weak signal, never as routing (D33). Code follows the hub's shared modules.** _(11-19: not offered at
+all — D33 resolved)_
 
 ## Its fields
 
@@ -82,7 +90,7 @@ Local branch from `test`, on the re-vendored shared modules (record 2.0, paradat
 [atrium-page-classification#71](https://github.com/ufal/atrium-page-classification/pull/71), head `d37a8bb`. Failing
 checks: check-drift (canonical), because the callers read the hub at `v1` (`4435ffb`) while the copies are v2;
 api-contract, because the record schema went from 1.0 to 2.0 without a major version. The causes across all seven PRs:
-[hub plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/doc-schema-v2.plan.md),
+[hub plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/84.plan.md),
 "Status — PRs".
 
 Round 5 (not pushed):
@@ -108,7 +116,7 @@ The hub's PR (atrium-project#86) merged; `v1` moved to it and K4TEL pinned this 
 
 The suite passes: 876 (offline lane). Next: the hub's second PR for #84 (the E2E lanes, rule 5's mark), then `v1` and
 the pins again; then this PR. Hub:
-[plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/doc-schema-v2.plan.md),
+[plan of #84](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/84.plan.md),
 "Status — round 6".
 
 ## Status — round 8 (11-14)
@@ -140,7 +148,23 @@ atrium-project#84 round 8 (comment 3's update): `forms` gone, decode verdicts ap
 - **Checked:** 882 passed.
 - **Next:** the hub's PR first; then this repository's, with the pins moved to it.
 
+## Status — 11-19: D33 resolved
+
+- **On `test`:** #74 (round 8, 11-16) and #75 (dependabot: `ultralytics` in `setup/requirements.txt`, 11-18).
+  `master` is `1e80e7a`, not `test`.
+- **Ronald, ask 6** (11-17, [hub digest](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/digests/84.digest.md#-2026-11-19--ronalds-answers-the-open-atrs-draft-the-storage-contract)): the categories are of no use to the ATR; not sent. motyc agreed.
+  So the classifier's output goes only into the record (`page_categories`, `pages[].category`,
+  `category_confidence`), for description and later analysis; nothing here sent it anywhere else.
+- **Ask 8:** the ATR has no handwriting type; the `_HW` categories remain the only handwriting signal in the record.
+- **Wording to fix (later, one PR under atrium-project#84):** `README.md:5` ("The category tells which processing
+  the page needs next, for example OCR or table extraction") and `CITATION.cff:7` ("tells which processing the page
+  needs next") contradict H3 and D33: digital-convert's verdict decides which pages go to the ATR. The CAA paper has
+  the same point (hub `digests/13.findings.md`, M2).
+- **aiscr-docs-pipeline#2** (this step) still says "a category for every page": a question for the meeting.
+
 ## Depends on
+
+_(11-19: hub tasks done; the pipeline's hand-over of the `needs_atr` pages is aiscr-docs-pipeline#12, due 12-04.)_
 
 - Hub tasks 1 (grants; `page_index`), 3 (`file_entity` with SHA-512), re-vendoring.
 - ocr-postprocess's slice: a page row for every page before this step writes.
