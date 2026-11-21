@@ -88,7 +88,7 @@ Hub; `v4.3` is what `main` serves.
 | `v1.4`   | `timm/tf_efficientnetv2_m.in21k_ft_in1k` | `fold1` | 384        | 211,489,788        | CNN-based, faster inference                                  |
 | `v2.4`   | `google/vit-base-patch16-224`            | `fold5` | 224        | 343,228,460        | standard Transformer baseline                                |
 | `v3.4`   | `google/vit-base-patch16-384`            | `fold2` | 384        | 344,395,820        | higher-resolution Transformer baseline                       |
-| `v4.4`   | `timm/regnety_160.swag_ft_in1k`          | `fold1` | 384        | 322,393,660        | balanced option; the configured single model (`[HF] latest`) |
+| `v4.4`   | `timm/regnety_160.swag_ft_in1k`          | `fold1` | 384        | 322,393,660        | balanced option; the single model the quick start uses       |
 | `v5.4`   | `google/vit-large-patch16-384`           | `fold2` | 384        | 1,214,808,108      | the largest model, slowest inference                         |
 
 The fold is the cross-validation split each model was trained on (`REVISION_BEST_FOLDS`); the rule is

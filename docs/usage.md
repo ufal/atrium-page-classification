@@ -127,7 +127,7 @@ for r in v1.4 v2.4 v3.4 v4.4 v5.4; do python3 run.py --hf -rev "$r"; done
 
 ### Stage the models once, run offline
 
-On a shared server (a Galaxy instance, a cluster) the weights should be downloaded once, not in every job.
+On a shared server, such as a cluster, the weights should be downloaded once, not in every job.
 `--models-dir DIR` puts everything a run reads in one folder: the fine-tuned models in `DIR/model`, the base-model
 cache in `DIR/checkpoint` and the Hugging Face cache of the image processors in `DIR/hf`. With `--hf` the revision is
 downloaded into it. Without `--hf` the run reads only that folder and switches the Hugging Face libraries offline
@@ -268,7 +268,8 @@ The result is printed to the console, one line per category with its score as a 
 > The console output and every result table give **normalised** scores: the model's probabilities renormalised over
 > its best max(N, 2) categories. With `-tn 1` the score is therefore the best category's share of the best two, as in
 > the service's `topn=1`. An image that cannot be read gets no row: it is recorded as skipped in the run's paradata,
-> and every other page keeps its own result.
+> and every other page keeps its own result. The service, which the AMČR pipeline calls, fails such a request
+> instead.
 
 ## Classify a folder
 
@@ -361,8 +362,8 @@ see `python3 supplementary/scripts/averaging.py --help`. The repository ships ex
 [BEST_5_models_TOP-1.csv](../result/tables/20261022-1218_BEST_5_models_TOP-1.csv) and the averaged
 [ARUB_averaged_SHORT.csv](../result/ARUB_averaged_SHORT.csv) and
 [ARUP_averaged_SHORT.csv](../result/ARUP_averaged_SHORT.csv).
-Each comes from the `vX.3` best five models with a Top-3 setting, and holds about one thousandth of its collection's
-results.
+The wide table holds the `vX.4` models' top-1 votes on the 229 sample pages; the two averaged tables come from the
+`vX.3` generation with a Top-3 setting, and each holds about one thousandth of its collection's results.
 
 Two more scripts take result tables apart:
 
@@ -402,7 +403,7 @@ errors. What the tool writes into the record: [reference/outputs.md](reference/o
 ## Run it in Docker
 
 Two images are published to GHCR from the same [Dockerfile](../Dockerfile). `<version>` is the release without its
-leading `v` (for example `1.14.2-beta`), or `latest`; when each tag moves is on the hub's
+leading `v` (for example `2.0.0-beta`), or `latest`; when each tag moves is on the hub's
 [Operations](https://ufal.github.io/atrium-project/operations/) page.
 
 | Image                                                   | Stage  | Entry point                                       | What it is                    |
@@ -415,7 +416,7 @@ The `-api` suffix belongs to the image name. An image built locally with Compose
 
 The batch image passes options to `run.py` (`docker run IMAGE -d /data/input --best`). A first argument that names a
 program runs that program instead (`docker run IMAGE /bin/sh job.sh`, `docker run IMAGE python3 /app/run.py --help`),
-which is how Galaxy starts a tool's container.
+so a job script can run in the image.
 
 ```bash
 # the batch command line, over ./data/input, writing to ./data/output
@@ -505,9 +506,10 @@ The virtual environment's name is set in the script and can be changed to an exi
 ## In the ATRIUM pipeline and from a coding agent
 
 Each pipeline stage runs as its own container, and the document record passed with `--document-json` /
-`--document-json-out` is the hand-off between them. The reference sequence, with page-classification as its first
-stage, is on the hub's [workflow page](https://ufal.github.io/atrium-project/workflows/page-classification/) and its
-[Pipelines](https://ufal.github.io/atrium-project/pipelines/) page. The `agent-skill` branch packages the HTTP service
+`--document-json-out` is the hand-off between them. In the AMČR pipeline page-classification classifies the pages
+that go to the ATR, beside the ATR, and its categories join the page rows of the record ocr-postprocess builds. The
+route is on the hub's [Pipelines](https://ufal.github.io/atrium-project/pipelines/#the-route-through-the-pipeline)
+page and this tool's [workflow page](https://ufal.github.io/atrium-project/workflows/page-classification/). The `agent-skill` branch packages the HTTP service
 as an Agent Skill, so a coding agent can classify a page or a PDF by calling a running service. How to install it, and
 the contract it relies on, are on the hub's [Agent skills](https://ufal.github.io/atrium-project/agent-skills/) page.
 
@@ -519,8 +521,8 @@ selection, and the same record writer (`atrium_document_adapter`). They use the 
 born-digital record's page labels are honoured on both. They average the ensemble alike, and the record's
 `category_confidence` has three decimals from both.
 
-On 2026-10-29 a scratch harness ran 50 combinations through `run.py` and the service. It used the real classifier code
-and a deterministic network in place of the weights, different for each of the five models. The inputs were a PNG, a
+A scratch harness ran 50 combinations through `run.py` and the service. It used the real classifier code and a
+deterministic network in place of the weights, different for each of the five models. The inputs were a PNG, a
 JPEG, a TIFF, a transparent PNG, a truncated JPEG and a three-page PDF. It ran one model and the ensemble, with top 1,
 3 and 11, and the PDF whole and as `2-3`, `3`, `1,3` and the past-the-end `4`. The categories, the scores (to the
 table's three decimals) and the record were the same in every case but the truncated JPEG (see the table).

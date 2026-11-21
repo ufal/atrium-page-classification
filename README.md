@@ -2,8 +2,9 @@
 
 page-classification reads the image of a scanned archival page and says what kind of page it is. It chooses one of
 eleven categories, such as running text, a table or form, a drawing or a photograph, with handwritten, printed or
-typed text. The category tells which processing the page needs next, for example OCR or table extraction. Use it on
-scans of paper documents; the labels it gives born-digital pages have not been checked.
+typed text. The category describes the page for review, search and later analysis; in the AMČR pipeline it is
+recorded with the page, not used to route it. Use it on scans of paper documents; the labels it gives born-digital
+pages have not been checked.
 
 [Releases](https://github.com/ufal/atrium-page-classification/releases) · [MIT licence](LICENSE) ·
 [ATRIUM documentation](https://ufal.github.io/atrium-project/workflows/page-classification/) ·
@@ -23,56 +24,65 @@ same inputs the same way; what differs, and why, is in
 
 The eleven categories and their definitions: [docs/reference/categories.md](docs/reference/categories.md). The
 record follows the hub's [document contract](https://ufal.github.io/atrium-project/ecosystem/document-contract/)
-(record schema 2.0): page-classification adds its categories to the page rows the record builder wrote, keyed by
-`pages[].page_index`; run on its own, it starts a record holding only its own blocks.
+(record schema 2.0): page-classification adds its categories to the page rows that ocr-postprocess, the record
+builder, wrote, keyed by `pages[].page_index`; run on its own, it starts a record holding only its own blocks. The
+run's paradata, what it read and wrote, come with every answer.
 
 ## Quick start
 
-**What you need:** Docker, or Python 3.11 and a checkout of this repository. Network access to `huggingface.co` on the
-first start, to download the models (about 2.44 GB for the five of the ensemble); the tool calls no other host. Memory
-for the models. A GPU is optional: a CPU works, more slowly.
+**What you need:** Python 3.11 and a checkout of this repository, or Docker. Network access to `huggingface.co`, once,
+to download the models (about 0.3 GB for one revision, 2.44 GB for the five of the ensemble); the tool calls no other
+host. A GPU is optional: a CPU works, more slowly.
 
-The service, from the published image, on a sample page of this repository:
+Classify a sample page of this repository with one model, `v4.4`. The run writes into the folder it runs in, so start
+it from a scratch folder:
 
 ```bash
-docker run --rm -p 8000:8000 -v hf-cache:/cache/huggingface \
-  ghcr.io/ufal/atrium-page-classification-api:<version>     # the release without its v, e.g. 1.14.2-beta
-curl -s localhost:8000/ready                                 # fails until the five models are loaded, then 200
+git clone https://github.com/ufal/atrium-page-classification.git && cd atrium-page-classification
+python3.11 -m venv .venv && . .venv/bin/activate
+pip install -r setup/requirements.txt
+mkdir -p out && cd out
+python3 ../run.py --hf -rev v4.4 --models-dir models -f ../small_data_samples/TEXT_T/pages_online_2.png
+```
+
+After the argument list and the download messages it prints (the last digit can differ between machines):
+
+```text
+File ../small_data_samples/TEXT_T/pages_online_2.png predicted:
+	TEXT_T:  90.0%
+	TEXT:  10.0%
+	TEXT_P:  0.1%
+Results for TOP-3 predictions are recorded into result/tables/<date-time>_model_v44_TOP-3.csv
+```
+
+The table and the run's paradata are in `out/result/`, and the model in `out/models/`.
+
+The same page through the service, from the published image. Start it in the background, wait until its five
+models are loaded, call it, and stop it:
+
+```bash
+docker run -d --name atrium-page-classification -p 8000:8000 -v hf-cache:/cache/huggingface \
+  ghcr.io/ufal/atrium-page-classification-api:<version>     # 2.0.0-beta or later, without its v
+until curl -fsS localhost:8000/ready >/dev/null; do sleep 5; done
 curl --fail-with-body -sS -X POST localhost:8000/predict_image \
   -F "file=@small_data_samples/TEXT_T/pages_online_2.png" -F version=v4.4 -F topn=3
+docker rm -f atrium-page-classification
 ```
 
 Expected result (abridged):
 
 ```json
 {"type": "image",
- "predictions": [{"label": "TEXT_T", "score": 0.9}, {"label": "TEXT", "score": 0.099}, {"label": "TEXT_P", "score": 0.001}],
- "models_used": ["v4.4"], "limits_applied": [], "document_json": null,
+ "predictions": [{"label": "TEXT_T", "score": 0.8996}, {"label": "TEXT", "score": 0.0996}, {"label": "TEXT_P", "score": 0.0009}],
+ "models_used": ["v4.4"], "per_model": null, "limits_applied": [], "document_json": null,
  "paradata": {"@type": "CreateAction", "…": "…"}}
 ```
 
-The scores are those `v4.4` gave this page in the stored run
-[result/tables/20261022-1218_v44_TOP-3.csv](result/tables/20261022-1218_v44_TOP-3.csv), rounded. Without `version`
-the service uses the ensemble (`all`), and `models_used` lists the five revisions that answered. The image holds no
-weights. On its first start it downloads the five models from the Hugging Face Hub into the `hf-cache` volume.
-`/health` answers at once; `/ready` returns 200 once the models are loaded. Every endpoint, limit and error:
-[service/README.md](service/README.md).
-
-The same page on the command line, from a checkout with its [setup](docs/usage.md#install) done:
-
-```bash
-python3 run.py --hf -rev v4.4 -f small_data_samples/TEXT_T/pages_online_2.png
-```
-
-After the argument list and the download messages it prints:
-
-```text
-File small_data_samples/TEXT_T/pages_online_2.png predicted:
-	TEXT_T:  90.0%
-	TEXT:  9.9%
-	TEXT_P:  0.1%
-Results for TOP-3 predictions are recorded into ./result/tables/<date-time>_model_v44_TOP-3.csv
-```
+The service answers its scores unrounded; they are shown here to four decimals. Without `version` it uses the
+ensemble (`all`), and `models_used` lists the five revisions that answered. The image holds no weights: on its first
+start it downloads the five models into the `hf-cache` volume. `/health` answers at once, and `/ready` returns 200 once
+the models are loaded. Every endpoint, limit and error: [service/README.md](service/README.md). Releases before
+2.0.0-beta key a PDF's pages by `page` instead of `page_index` and are described by the README at their tag.
 
 ## How it works
 
@@ -90,10 +100,12 @@ score. The command line writes CSV tables and a paradata log; the service answer
 
 ## Where it fits in ATRIUM
 
-In the pipeline of ARÚP's output contract (atrium-project#84, H3), page-classification runs on the pages that need
-the ATR — the `needs_atr` pages digital-convert routes, or every page of an image — beside the ATR, and writes its
-categories into the record. They may be offered to the ATR as a weak signal, never as routing. The whole chain: the
-[hub's workflow page](https://ufal.github.io/atrium-project/workflows/page-classification/).
+In the AMČR pipeline, page-classification classifies the pages that go to the ATR, AIS CR's text-recognition
+service, beside the ATR: the pages digital-convert marked `needsAtr`, or every page of a scanned image. The pipeline
+passes them as a page selection (`pages`), and the categories join the record's page rows after ocr-postprocess
+builds them. They may be offered to the ATR as a weak signal about the content, never as routing. The whole route:
+the hub's [Pipelines](https://ufal.github.io/atrium-project/pipelines/#the-route-through-the-pipeline) page and this
+tool's [workflow page](https://ufal.github.io/atrium-project/workflows/page-classification/).
 
 ## Limits and maturity
 
@@ -117,11 +129,11 @@ categories into the record. They may be offered to the ATR as a weak signal, nev
 - **One service request is limited in size.** It classifies at most `MAX_PDF_PAGES` pages (50 by default; a deployment
   can change it) and takes at most 10 MB (`MAX_UPLOAD_MB`). Send a longer PDF in parts with `pages`. The command line
   has no such limit ([Limits](service/README.md#limits)).
-- **The ensemble can answer with fewer models** when one fails to load, so check that `models_used` lists five
-  ([Partial results](service/README.md#partial-results)).
-- **The service answers nothing while it loads its models.** The first start downloads about 2.44 GB. Until then both
-  `/health` and `/ready` refuse the connection, so wait for `/ready` to return 200
-  ([Known limits](service/README.md#known-limits)).
+- **The ensemble can answer with fewer models** when one fails to load, and still answers 200, so check that
+  `models_used` lists five ([Partial results](service/README.md#partial-results)).
+- **The service classifies nothing while it loads its models.** The first start downloads about 2.44 GB. Until the
+  models are loaded, `/health` answers 200 while `/ready` and the two `/predict_*` endpoints answer 503, so wait for
+  `/ready` to return 200 ([Start](service/README.md#start)).
 
 ## Documentation
 
@@ -141,7 +153,7 @@ categories into the record. They may be offered to the ATR as a weak signal, nev
 |                     | read why it is built this way                                           | [docs/decisions/history.md](docs/decisions/history.md)                                                                                                                                   |
 |                     | turn PDFs into an annotated training set                                | [docs/data-preparation.md](docs/data-preparation.md)                                                                                                                                     |
 |                     | train, retrain on the published folds, evaluate                         | [docs/training.md](docs/training.md)                                                                                                                                                     |
-|                     | run the decision-model experiment `decide_pages.py`; not in the service | [docs/reference/cli.md](docs/reference/cli.md#decision-models-on-page-images-decide_pagespy)                                                                                             |
+|                     | see what is parked during the pilot (`decide_pages.py`)                 | [docs/reference/cli.md](docs/reference/cli.md#decision-models-on-page-images-decide_pagespy)                                                                                             |
 
 Terms used across the tools are explained in the [ATRIUM glossary](https://ufal.github.io/atrium-project/glossary/).
 The documentation follows the ATRIUM
@@ -153,9 +165,9 @@ The code is MIT ([LICENSE](LICENSE)). The fine-tuned models, the LINDAT training
 sample pages in [small_data_samples](small_data_samples) are CC BY-NC 4.0, the optional YOLO backend (Ultralytics)
 is AGPL-3.0, and the service renders PDFs with pypdfium2 (Apache-2.0 or BSD-3-Clause). The models are therefore
 for non-commercial use only: the code's MIT licence does not extend to them. Each component, with its
-licence and where that is stated: [docs/reference/licences.md](docs/reference/licences.md). The paradata of a run
-lists the components it used; it does not set the rights in what the run produces, which depend first on the
-source document ([Licences and paradata](https://ufal.github.io/atrium-project/ecosystem/licences/)).
+licence and where that is stated: [docs/reference/licences.md](docs/reference/licences.md). Each run lists the
+components it used, each with its own licence or terms. No licence of an output is computed: the rights in an output
+follow the source document ([Licences and paradata](https://ufal.github.io/atrium-project/ecosystem/licences/)).
 
 Cite the method with the preprints
 [Page image classifier fine-tuned on century-spanning archives of scanned documents for further content-specific processing](https://arxiv.org/abs/2606.07558)
@@ -167,8 +179,9 @@ and revision, the data with its [LINDAT record](http://hdl.handle.net/20.500.128
 [Historical documents page classifier - ATRIUM](https://marketplace.sshopencloud.eu/tool-or-service/RER7Fw).
 
 Developed by [ÚFAL](https://ufal.mff.cuni.cz/), Charles University, with AMČR (the Archaeological Map of the Czech
-Republic) as the pipeline partner. Funded by [ATRIUM](https://atrium-research.eu/) (GA 101132163), with the support
-of the LINDAT/CLARIAH-CZ research infrastructure and the AIS CR infrastructure (LM2023031). Contact:
-lutsai@ufal.mff.cuni.cz, or the [issue tracker](https://github.com/ufal/atrium-page-classification/issues).
+Republic) as the pipeline partner. Funded by the European Union under Horizon Europe
+([ATRIUM](https://atrium-research.eu/), GA 101132163), with the support of the LINDAT/CLARIAH-CZ (LM2023062) and AIS
+CR (LM2023031) research infrastructures, funded by the Ministry of Education, Youth and Sports of the Czech Republic.
+Contact: lutsai@ufal.mff.cuni.cz, or the [issue tracker](https://github.com/ufal/atrium-page-classification/issues).
 
 © 2026 ÚFAL & ATRIUM

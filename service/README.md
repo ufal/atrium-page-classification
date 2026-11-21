@@ -43,19 +43,25 @@ On this page:
 |---------------------------------------------------------|-----------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `ghcr.io/ufal/atrium-page-classification-api:<version>` | CPU is enough; a CUDA GPU is used when torch finds one (`--gpus all`) | about 2.44 GB of weights for the five ensemble models; `limits.memory: 4Gi` is a floor, not a comfortable fit; use in steady state: not measured | `/cache/huggingface` (the Hub cache) and `/app/model` (the saved weights) | `huggingface.co` only: the model revisions and the base-model configurations, at the first start and when an unlisted revision is first asked for | `/health` at once; `/ready` once all five models are loaded, after the first start downloads about 2.44 GB; a start with the volumes filled: not measured |
 
-The published image first: it is what a deployment runs, and it needs no checkout.
+The published image (2.0.0-beta or later, the release without its leading `v`) is what a deployment runs, and it
+needs no checkout. Start it in the background and wait until the models are loaded:
 
 ```bash
-docker run --rm -p 8000:8000 -v hf-cache:/cache/huggingface \
-  ghcr.io/ufal/atrium-page-classification-api:<version>     # e.g. 1.14.2-beta; add --gpus all on a GPU node
-curl -s http://localhost:8000/ready                         # 200 once the models are loaded
-# from a checkout:
-docker compose --profile api up --build
-# or in a virtual environment (development), from the repository root:
+docker run -d --name atrium-page-classification -p 8000:8000 -v hf-cache:/cache/huggingface \
+  ghcr.io/ufal/atrium-page-classification-api:<version>     # add --gpus all on a GPU node
+until curl -fsS http://localhost:8000/ready >/dev/null; do sleep 5; done
+```
+
+From a checkout, with compose (`docker compose --profile api up -d --build`) or in a virtual environment, for
+development, from the repository root:
+
+```bash
 pip install -r setup/requirements.txt -r service/requirements.txt
 python -m service.api                                       # honours PORT and HOST; default 0.0.0.0:8000
 uvicorn service.api:app --reload                            # hot reload, for development
 ```
+
+Stop the container with `docker rm -f atrium-page-classification`.
 
 The service answers at once and loads all five models in the background; on the first start it downloads them
 first. Until they are loaded, `/health` returns 200, while `/ready` and the two `/predict_*` endpoints return 503.
@@ -120,6 +126,7 @@ Example JSON response (every field is always present; `ImageResponse` in [`opena
     }
   ],
   "models_used": ["v4.4"],
+  "per_model": null,
   "limits_applied": [],
   "document_json": null,
   "document_json_schema_error": null,
@@ -140,7 +147,7 @@ It takes the fields of `/predict_image`, plus:
 |---------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `pages` | all     | Classify only these pages: 1-based positions in the PDF, for example `1,3,5-7`. Empty means every page. A malformed value, or a page past the end of the PDF, is refused with `422`. `MAX_PDF_PAGES` counts the pages classified, not the PDF's. Only these pages are in the response and in the record. digital-convert's `/describe` uses it to ask only about the pages without a usable text layer. |
 
-It answers `{"type": "document", "pages": [{"page": 1, "predictions": [...], "models_used": [...]}, ...],
+It answers `{"type": "document", "pages": [{"page_index": 1, "predictions": [...], "models_used": [...]}, ...],
 "limits_applied": [], "paradata": {...}}` (`DocumentResponse`), with `models_used` per page, and `document_json` (and
 `document_json_schema_error`) only when a record was asked for. A PDF that does not open is refused with `422`. A page
 the model could not classify fails the request with `500`, naming the page.
@@ -173,11 +180,10 @@ The response then carries the updated record under `document_json`:
   then defers to the shared `canonical_doc_id()`). A service upload and a command-line run over the same file
   therefore update the *same* record instead of forking it;
 * **page keys** (`/predict_document`): a PDF's pages are classified by position, 1..N, and each response entry names
-  its page as the record does: `page_index`, and `page` (the label) when the baseline has one (atrium-project#84;
-  `page` and `page_label` before v2.0.0). When the baseline's page rows carry `page_index`, each category is written
-  under the row with that `page_index`. Such a baseline is a born-digital record from digital-convert, whose pages are
-  named by their PDF page labels (`i`, `ii`, `1`, …). A record keyed "1".."N" without `page_index` (ALTO) is keyed by
-  position. A position with no row whose number is another row's label is left out of the record, never written onto
+  its page as the record does: `page_index`, and `page` (the label) when the baseline has one. When the baseline's
+  page rows carry `page_index`, each category is written under the row with that `page_index`. Such a baseline is the
+  record ocr-postprocess builds, whose page rows carry the page's label (`i`, `ii`, `1`, …) in `page`. A record
+  keyed "1".."N" without `page_index`, an older one, is keyed by position. A position with no row whose number is another row's label is left out of the record, never written onto
   the wrong row; its prediction is still in the response;
 * a record page-classification builds that does not validate against `atrium_document.schema.json` is never
   returned: the request fails with `500` instead. A **baseline** that does not validate is still accepted (unknown
@@ -186,7 +192,7 @@ The response then carries the updated record under `document_json`:
 
 ## Errors
 
-Every error has one JSON body (hub `docs/agent_skill_strategy.md` §4.4):
+Every error has one JSON body, the same in every ATRIUM service (`ErrorBody` in [`openapi.json`](openapi.json)):
 `{"status": <int>, "reason": <code or null>, "detail": "<text>"}`, plus `limit`
 (`key`, `env`, `value`, `observed`, `unit`) when `reason` is `limit_exceeded`, and `errors`
 for request-validation problems.
@@ -230,9 +236,11 @@ A 200 can carry less than was asked for. Read these before using the result:
 
 - `limits_applied` is present in every response and empty today: each limit of this service refuses
   instead of shaping the result.
-- With `version=all`, a model that cannot be loaded or fails is left out, and the others are averaged.
-  `models_used` (per page in `/predict_document`) lists the revisions that answered, so fewer than five
-  means a reduced ensemble; the service log names the failing model, once.
+- With `version=all`, a model that cannot be loaded or fails is left out, the others are averaged, and the answer
+  is still a 200. `models_used` (per page in `/predict_document`) lists the revisions that answered, so fewer than
+  five means a reduced ensemble; the service log names the failing model, once. A download that was cut off, for
+  example by a full disk, leaves an empty folder under `model/` that the service neither loads nor replaces: delete
+  it and restart.
 - `/predict_document` classifies the pages asked for (`pages`), not the whole PDF.
 
 ## Known limits
@@ -290,8 +298,8 @@ renderer of the training pages is measured in
 thread-safe, so the service holds one process-wide lock while it opens and renders; the model runs outside the lock,
 and concurrent requests queue only for the rendering.
 
-**Paradata.** Every successful call returns `paradata`, the call's Process Run Crate `CreateAction` (paradata 3.0,
-atrium-project#84), built by `atrium_rocrate.action_from_paradata()` as in the other ATRIUM services. `object` is the
+**Paradata.** Every successful call returns `paradata`, the call's Process Run Crate `CreateAction` (paradata 3.0),
+built by `atrium_rocrate.action_from_paradata()` as in the other ATRIUM services. `object` is the
 original (the upload, distribution `original`) and, when one was sent, the record version read
 (`atrium/document-json`), each by SHA-512. `result` is the record written, when one was asked for, with the blocks
 and fields the call wrote; the predictions are the answer, not a stored output, so they are not in it. The pages
@@ -389,7 +397,7 @@ the input file and `-v` the model version:
 python3 api_client.py -f .../image.png -v v5.4 --top 3
 ```
 
-Expected output:
+Expected output: the client first names the endpoint it calls (`An image: /predict_image`), then prints the answer:
 
 ```json
 {
@@ -409,6 +417,7 @@ Expected output:
     }
   ],
   "models_used": ["v5.4"],
+  "per_model": null,
   "limits_applied": [],
   "document_json": null,
   "document_json_schema_error": null,
@@ -416,7 +425,7 @@ Expected output:
 }
 ```
 
-Or, for `-v all`, the ensemble: each model's own top-`topn`, averaged, as the command line's `--best` does it:
+Or, for `-v all --top 5`, the ensemble: each model's own top-`topn`, averaged, as the command line's `--best` does it:
 
 ```json
 {
@@ -439,6 +448,7 @@ Or, for `-v all`, the ensemble: each model's own top-`topn`, averaged, as the co
     }
   ],
   "models_used": ["v1.4", "v2.4", "v3.4", "v4.4", "v5.4"],
+  "per_model": null,
   "limits_applied": [],
   "document_json": null,
   "document_json_schema_error": null,

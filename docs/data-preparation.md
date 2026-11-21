@@ -216,6 +216,8 @@ prototype with it:
 
 ## Controlled defects for the page-condition experiment
 
+Parked during the AMČR pilot: not part of the pipeline or the service.
+
 [degrade_pages.py](../data_scripts/degrade_pages.py) makes copies of clean pages with one known defect each, for the
 decision-model experiment `decide_pages.py --task b4`
 ([reference/cli.md](reference/cli.md#decision-models-on-page-images-decide_pagespy)). Classifying and training do not

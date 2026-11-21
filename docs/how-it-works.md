@@ -21,10 +21,11 @@ documents with paper sources that were scanned into digital form. The pages hold
 tables, drawings and photos, and the [eleven categories](reference/categories.md) were formed from those documents.
 Examples are in [small_data_samples](../small_data_samples).
 
-The key use case is to classify a page image, taken from a scanned PDF, into one of the categories. Each category
-leads to its own content-specific processing. In other words, when several services for different OCR tasks are at
-your disposal, run this classifier first. It marks each page as machine-typed (old-style fonts), handwritten or
-printed text, plain or in a table, and marks the presence of printed or drawn graphics to be extracted from the page.
+The key use case is to classify a page image, taken from a scanned PDF, into one of the categories. It marks each
+page as machine-typed (old-style fonts), handwritten or printed text, plain or in a table, and marks the presence of
+printed or drawn graphics. A collection can then be reviewed, searched and analysed by kind of page. In the AMČR
+pipeline the category is recorded with the page and does not route it: digital-convert's verdict on the text layer
+decides which pages the ATR, AIS CR's text-recognition service, reads.
 
 It is an image classifier: a fine-tuned vision model looks at the whole page at once and returns a probability for
 each category. No text is read, so the language of the page does not matter.
@@ -183,18 +184,18 @@ The flags that change `--best` (`--parallel`, `--save-intermediates`, `--no-aver
 
 |                         |                                                                                                                                                                                                                                    |
 |-------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **In**                  | a page image (PNG or JPEG), or, through the service, a PDF: up to 50 pages (`MAX_PDF_PAGES`) and 10 MB (`MAX_UPLOAD_MB`) by default                                                                                                |
+| **In**                  | a page image (any format Pillow reads), or a PDF, rendered at 300 dpi; the service takes up to 50 pages (`MAX_PDF_PAGES`) and 10 MB (`MAX_UPLOAD_MB`) by default                                                                   |
 | **Out**                 | a Top-N CSV (`FILE, PAGE, CLASS-1…N, SCORE-1…N`; at `-tn 1` also `CATEGORY`, a copy of `CLASS-1`: [outputs](reference/outputs.md)), optionally a per-category raw CSV, a paradata JSON, and, when asked, an ATRIUM document record |
 | **Owns in the record**  | the whole `page_categories` block, and `pages[].category` and `pages[].category_confidence`                                                                                                                                        |
-| **Reads from upstream** | the pages to classify (in the pipeline, the `needs_atr` pages digital-convert routes to the ATR) and the record's page rows                                                                                                        |
+| **Reads from upstream** | the pages to classify, as a selection the caller passes (in the pipeline, the pages digital-convert marked `needsAtr`), and the record's page rows                                                                                 |
 
-page-classification's categories **inform a routing decision** rather than trigger one: which pages go to OCR,
-which to handwriting recognition, which to table extraction, which to image extraction. A person or a script reading
-the result tables makes that decision. The next stage, ocr-postprocess, works from OCR output and does not read
-`page_categories`.
+page-classification's categories **describe the page; they route nothing**. In the AMČR pipeline they may be offered
+to the ATR as a weak signal about the content, and they are recorded with the page. A person or a script reading the
+result tables can use them to choose pages for later processing, such as handwriting recognition or table
+extraction. ocr-postprocess builds the record's page rows and does not read `page_categories`; the categories join
+those rows.
 
 What travels between the stages is the **record**. Each stage takes `--document-json` in, writes only the block or
 fields it owns, and deep-copies everything else. `BLOCK_OWNERS` in the hub's canonical `atrium_document.py` says which
-program writes a block. Since record schema 2.0 (atrium-project#84) the record carries no run data: which run wrote
-which fields is in that run's paradata. The file flow and the record flow, side by side: the hub's
+program writes a block. The record carries no run data: which run wrote which fields is in that run's paradata. The file flow and the record flow, side by side: the hub's
 [Pipelines](https://ufal.github.io/atrium-project/pipelines/) page.
