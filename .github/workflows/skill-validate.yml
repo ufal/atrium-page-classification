@@ -14,14 +14,12 @@
 name: Skill Branch Validation
 
 on:
-  push:
-    branches: [agent-skill]
+  # Pull requests only (docs/ci_policy.md in atrium-project): no branch-push trigger.
   pull_request:
     branches: [agent-skill]
 
-# Push + pull_request on the same branch means two runs of this workflow for one
-# push to an open PR. Cancel the superseded one — unlike the smoke lanes, nothing
-# here is destructive or long-running, so cancelling costs nothing.
+# A new push to an open pull request supersedes its run. Cancel the superseded one —
+# nothing here is destructive or long-running, so cancelling costs nothing.
 concurrency:
   group: skill-validate-${{ github.ref }}
   cancel-in-progress: true
