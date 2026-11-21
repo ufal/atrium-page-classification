@@ -1,13 +1,14 @@
-name: Scheduled Smoke Tests
+name: Fresh-environment Smoke Tests (manual)
+
+# Run by dispatch only (Actions -> this workflow -> Run workflow), for example before a release: the CI
+# agreement of 11 November 2026 allows no scheduled runs. The file keeps its name so links still work.
 
 on:
-  schedule:
-    - cron: "0 3 * * *"   # daily 03:00 UTC
   workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  # A scheduled run is never redundant with a push run, and a cancelled one
+  # A manual run is never redundant with another trigger, and a cancelled one
   # reports no failure rather than a result. (issue atrium-project#10)
   cancel-in-progress: false
 
@@ -22,7 +23,6 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
-      issues: write
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -80,15 +80,3 @@ jobs:
           PYTHONPATH: .
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: python -m pytest -m slow -v --tb=short
-
-      # One open issue per failing lane, commented on by each later failure; scheduled runs only
-      # (atrium-project#81). It used to open a new issue on every failing run.
-      - name: Open or update the lane's issue on scheduled failure
-        if: failure() && github.event_name == 'schedule'
-        uses: ufal/atrium-project/.github/actions/lane-failure-issue@02cbd0144cfa2d39d981d43eea7f4cd72bed53ba  # v1
-        with:
-          lane: scheduled-smoke
-          title: Scheduled smoke tests failed
-          labels: ci,upstream
-          body: >-
-            The scheduled `slow` test run failed. Likely cause: upstream HF revision moved, LINDAT API change, or a dependency update.
