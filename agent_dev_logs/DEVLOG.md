@@ -1135,3 +1135,22 @@ Documentation only; no code, test or configuration change.
   `Merged` lines on the entries of 11-13 to 11-16; the #75 entry; this header. No pair to remove (#58 is open).
 * **Next:** the docs PR for the two sentences; the release batch (atrium-project#77).
 * Logs only; no code changed. Files delivered as full files.
+
+## 2026-11-22 — atrium-project#79: documentation and CI triggers, merged as #76
+
+* **Merged 11-22** as #76 (`e6a5761`), squash: this repository's documentation round for atrium-project#79 and the CI
+  trigger change of atrium-project#40. Its last commit re-pinned the hub reusables to `fbffe25` (`v1`, the merge of
+  atrium-project#93), so Workflow Policy Lint now refuses a branch push and a schedule outside `codeql` and
+  `security`.
+* **Checked after the merge:** the merged pull request's `docker.yml` run (its `closed` event) passed on the new
+  reusable. `docs_check.py` and `runbook_check.py` pass on `test`.
+* **Not yet in effect:** GitHub reads `schedule:` and `dependabot.yml` from the default branch, `vit`, which still has
+  the old workflows: `scheduled-smoke.yml` keep their schedules there, and Dependabot its version updates, until
+  `test` is merged into it with the 2.0.0-beta release batch (atrium-project#77).
+* **Follow-ups the PR left:** a reduced ensemble answers 200, against the pilot's failure rule; an interrupted model
+  download is never repaired; the command line's paradata name page images by path; `ultralytics` installs `pi-heif`
+  at run time, so the image answers 500 instead of 422 for an unreadable image.
+* **Detail:** hub [plan of #79](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/79.plan.md),
+  "Where it stands — 2026-11-22";
+  [plan of #40](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/40.plan.md).
+* Logs only; not pushed.
