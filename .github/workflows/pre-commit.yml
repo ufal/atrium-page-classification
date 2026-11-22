@@ -8,8 +8,6 @@
 name: pre-commit
 
 on:
-  push:
-    branches: [test, vit, clip, master]
   pull_request:
     branches: [test, vit, clip, master]
 
@@ -22,4 +20,4 @@ permissions:
 
 jobs:
   pre-commit:
-    uses: ufal/atrium-project/.github/workflows/pre-commit.reusable.yml@02cbd0144cfa2d39d981d43eea7f4cd72bed53ba  # v1
+    uses: ufal/atrium-project/.github/workflows/pre-commit.reusable.yml@fbffe25a9d1bcf681274d74f0dd026045d0478de  # v1

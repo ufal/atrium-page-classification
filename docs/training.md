@@ -58,13 +58,12 @@ The defaults, the `TrainingArguments`
 of the training run:
 
 * `eval_strategy` "epoch"
-* `save_strategy` "epoch"
-* `learning_rate` **5e-5**
-* `per_device_train_batch_size` 8
-* `per_device_eval_batch_size` 8
-* `num_train_epochs` **3**
+* `save_strategy` "best"
+* `learning_rate` **5e-5** (`[TRAIN] lr`)
+* `per_device_train_batch_size` and `per_device_eval_batch_size`: the data loaders' batch size, `[SETUP] batch` (16)
+* `num_train_epochs` **3** (`[TRAIN] epochs`)
 * `warmup_ratio` **0.1**
-* `logging_steps` **10**
+* `logging_steps` **100** (`[TRAIN] log_step`)
 * `load_best_model_at_end` True
 * `metric_for_best_model` "accuracy"
 
@@ -141,7 +140,8 @@ atrium-page-classification
 
 The project is adapted to file names that carry date stamps: the files of each category are sorted by name, and a
 randomised periodic selection takes the final evaluation (test) and the training-time evaluation (development)
-subsets, both of `test_size` (10 %); the rest is training data, 80/10/10. The method is described in
+subsets, both 10 % (fixed in `classifier.py`; the `test_size` key is not read); the rest is training data,
+80/10/10. The method is described in
 [evaluation/data.md](evaluation/data.md#how-the-dataset-is-split). This happens on a single `--train` run and on every
 fold of a cross-validation (`--folds N`, or `[TRAIN] cross_runs` above 0).
 

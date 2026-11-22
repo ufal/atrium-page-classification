@@ -20,7 +20,7 @@ is the local model folder name, such as `model_v44`; `{n}` is the number of page
 
 | File                                                                    | Written by                         | Columns or content                                                                                                                                              |
 |-------------------------------------------------------------------------|------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `tables/{stamp}_{model}_TOP-{N}.csv`                                    | a directory run                    | `FILE, PAGE, CLASS-1…N, SCORE-1…N`. At `-tn 1` a `CATEGORY` column repeats `CLASS-1`; `CLASS-1` and `SCORE-1` are kept, because the record needs the confidence |
+| `tables/{stamp}_{model}_TOP-{N}.csv`                                    | a directory run, or `-f`           | `FILE, PAGE, CLASS-1…N, SCORE-1…N`. At `-tn 1` a `CATEGORY` column repeats `CLASS-1`; `CLASS-1` and `SCORE-1` are kept, because the record needs the confidence |
 | `tables/{stamp}_{model}_RAW.csv`                                        | a directory run with `--raw`       | `FILE, PAGE` and the eleven category columns, in the canonical order                                                                                            |
 | `tables/{YYYYMMDD}_{model}_TOP-{N}.csv`, `…_RAW.csv`                    | a directory run with `--chunk`     | the same, one file per day, appended chunk by chunk and sorted at the end                                                                                       |
 | `tables/{stamp}_{n}_{model}_TOP-{N}_EVAL.csv`                           | `--eval`                           | as Top-N, plus `TRUE`, the gold label                                                                                                                           |
@@ -36,8 +36,8 @@ is the local model folder name, such as `model_v44`; `{n}` is the number of page
 | `paradata/YYMMDD-HHmmss_page-classification.json`                       | every run                          | the run's paradata ([paradata.md](paradata.md))                                                                                                                 |
 | `<doc_id>.document.json`                                                | with `--document-json-out(-dir)`   | the ATRIUM document record ([below](#the-document-record))                                                                                                      |
 
-Top-N tables are sorted by `FILE` and `PAGE`, in ascending order. A directory run's `RAW` table is sorted by the
-category columns, highest score first, so its rows come grouped by category.
+Top-N and `RAW` tables are sorted by `FILE` and `PAGE`, in ascending order. Only the evaluation's `RAW` table
+(`--eval --raw`) is sorted by the category columns, highest score first, so its rows come grouped by category.
 
 ## The Top-N table
 
@@ -63,9 +63,9 @@ page keeps its own result (#61). How `FILE` and `PAGE` are split from the file n
 - **\<CATEGORY_LABEL\>**: one column for each of the eleven categories, with its probability.
 - **TRUE**: the actual label of the category (evaluation tables).
 
-The reason to use `--raw` is convenience in reviewing the results: the rows are sorted by the category scores, so
-they come grouped by category, and the most ambiguous pages have several small probabilities where the clear ones
-have zeros.
+The reason to use `--raw` is convenience in reviewing the results: the most ambiguous pages have several small
+probabilities where the clear ones have zeros, and in an evaluation's `RAW` table the rows come grouped by
+category.
 
 ## The ensemble tables
 
@@ -75,8 +75,9 @@ have zeros.
 - **PAGE**: the number of the page.
 - **CLASS-1-vM.4**: the top-1 class predicted by model `vM.4` (`M` = 1…5), one column per model.
 
-**Averaged result**, `{stamp}_BEST_5_models_AVG_TOP-{N}.csv`, the same columns as the example
-[ARUP_averaged_SHORT.csv](../../result/ARUP_averaged_SHORT.csv):
+**Averaged result**, `{stamp}_BEST_5_models_AVG_TOP-{N}.csv`, laid out like the example
+[ARUP_averaged_SHORT.csv](../../result/ARUP_averaged_SHORT.csv), which comes from the `vX.3` generation (its model
+columns are `V1.3`…`V5.3`):
 
 - **FILE**: the name of the file (document).
 - **PAGE**: the number of the page.

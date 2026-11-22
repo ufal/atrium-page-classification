@@ -47,7 +47,7 @@ Instead, a deterministic, periodic sampling with a randomised offset is used. To
 possible, the development and test subsets are selected first. The training subset is all the remaining pages. Per
 category, the development and test sets are selected like this:
 
-1. For a category of size `N`, compute the subset size `k` as a fixed proportion (`test_ratio`, 10 %) of `N`.
+1. For a category of size `N`, compute the subset size `k` as a fixed proportion (10 %) of `N`.
 2. Compute a selection step `S ≈ N/k`, the period of the selection.
 3. Shift each step at random: the `i`-th of the `k` selections is an integer index in the range
    `[S_i − S/4; S_i + S/4]`.
@@ -84,7 +84,7 @@ Training set of the model, by generation:
 
 And the test (evaluation) sets:
 
-- 1,290 pages, taken from the `v2.2` annotations;
+- 1,583–1,586 pages, taken from the `v2.2` annotations;
 - 4,823 pages per fold, for the `vX.3` models;
 - 4,791–4,795 pages per fold, for the `vX.4` models: the fold's test partition in the LINDAT record.
 

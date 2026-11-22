@@ -2,7 +2,6 @@ name: Security Scan
 
 on:
   push:
-    branches: [ "test", "clip", "vit",  "master" ]
     tags: [ "v*" ]
   pull_request:
     branches: [ "test", "clip", "vit", "master" ]
@@ -23,7 +22,7 @@ jobs:
       contents: read
       packages: read
       security-events: write # Required to upload SARIF to the Security tab
-    uses: ufal/atrium-project/.github/workflows/security.reusable.yml@02cbd0144cfa2d39d981d43eea7f4cd72bed53ba  # v1
+    uses: ufal/atrium-project/.github/workflows/security.reusable.yml@fbffe25a9d1bcf681274d74f0dd026045d0478de  # v1
     # No `secrets:` block: security.reusable.yml consumes no secrets at all
     # (Trivy/SBOM read a public GHCR image, version-check reads the tree).
     # It previously carried `secrets: inherit` for no reason (#18).

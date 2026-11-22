@@ -25,12 +25,13 @@ tools, and driven by this repository's [para_config.txt](../../setup/para_config
   rather than a fixed fork URL; outside a container `docker_image` is empty.
 * **Components:** each component the run used, with its own licence, as declared in `para_config.txt`: the models
   always; the LINDAT dataset with `--train` or `--eval`; Ultralytics with `--yolo`; pypdfium2 when a PDF is
-  rendered; the decision model in a run of the `decide_pages.py` experiment. The list is `components`, a list of
+  rendered; the decision model in a run of the parked `decide_pages.py` experiment. The list is `components`, a list of
   facts: no licence is computed from it, and none of these licences is the licence of the output
   ([licences.md](licences.md)).
-* **Inputs and outputs** (paradata 3.0, atrium-project#84): the record version read and the record written, each by
-  its AMČR distribution name (`atrium/document-json`) and SHA-512; the record written names the blocks and fields
-  the run wrote (`record_fields`). No local path is recorded.
+* **Inputs and outputs** (paradata 3.0): the record version read and the record written, each by its AMČR
+  distribution name (`atrium/document-json`) and SHA-512; the record written names the blocks and fields the run
+  wrote (`record_fields`). The page images a command-line run read are not named this way: the run's `config`
+  records the input path and the model path, local paths.
 
 The HTTP service writes no paradata file. Each successful answer carries the call's paradata instead, as
 `paradata`: its Process Run Crate `CreateAction`. `object` is the original (the upload) and, when one was sent, the
@@ -39,7 +40,7 @@ and `pypdfium2` is among the components when `/predict_document` rendered a PDF
 ([service/README.md](../../service/README.md#how-it-works)).
 
 The committed logs under `result/paradata` predate paradata 3.0: they carry the calculated `license` fields that
-3.0 removed.
+3.0 removed, so read them as history, not as the current format.
 
 Example: the paradata of the [small_data_samples](../../small_data_samples) run of the evaluation,
 [261022-101849_page-classification.json](../../result/paradata/261022-101849_page-classification.json).

@@ -34,11 +34,10 @@ The categories were chosen to sort the pages by three criteria:
 - **type of text** (handwritten, printed, typed or mixed);
 - **presence of a tabular layout or a form.**
 
-The reason for the distinction is that different kinds of page go to different processing pipelines after the
-classification: OCR for printed or typed text, handwritten text recognition, table extraction, image extraction.
-Which category suggests which next step is on the hub's
-[workflow page](https://ufal.github.io/atrium-project/workflows/page-classification/); the classifier does not route
-pages itself.
+The distinction follows what a page needs to be read: text recognition for printed or typed text, handwritten text
+recognition, table extraction, image extraction. A person or a script choosing pages for later processing can use
+it. The classifier does not route pages, and the AMČR pipeline records the category with the page without routing on
+it ([workflow page](https://ufal.github.io/atrium-project/workflows/page-classification/)).
 
 ## Reading a label
 

@@ -59,7 +59,7 @@ to use `[HF] revision`), and the early `v1.2` and `v2.0`–`v2.2`. `--yolo` does
 | `--best`               | off     | run the five models of the ensemble; the result is averaged into one Top-N CSV                              |
 | `--parallel`           | off     | the memory-aware grouped engine for `--best`; CUDA only, and it falls back to the sequential path otherwise |
 | `--no-average-best`    | off     | skip the averaging; write only the wide `BEST_5_models_TOP-1.csv` for manual processing                     |
-| `--save-intermediates` | off     | also write each model's own `{date-time}_{revision}_TOP-{N}.csv` before averaging                           |
+| `--save-intermediates` | off     | also write each model's own `{date-time}_{revision without its dot}_TOP-{N}.csv` (`_v44_`) before averaging |
 
 How the engine schedules the models: [../how-it-works.md](../how-it-works.md#the-memory-aware---best-engine).
 
@@ -89,13 +89,15 @@ How the engine schedules the models: [../how-it-works.md](../how-it-works.md#the
 The record is opt-in and a no-op unless an output path or directory is set, on the command line or in the config.
 `-f` with `--document-json-out-dir` writes `<doc_id>.document.json` there (its baseline from `--document-json-dir`);
 `-d` with `--document-json-out` exits 2, as one path cannot hold a folder's records. The pages of a PDF are written
-under a born-digital baseline's own page labels (`pages[].page_index`), as `/predict_document` writes them.
+under the baseline's own page rows (`pages[].page_index`), as `/predict_document` writes them.
 What the record holds: [outputs.md](outputs.md#the-document-record).
 
 ## Decision models on page images: `decide_pages.py`
 
+Parked during the AMČR pilot: not part of the pipeline or the service.
+
 An experiment, not part of the classifier. `decide_pages.py` sends page images to a decision model and writes its
-answers to a table. It is not in the image and not in the service, so it has no API counterpart. The model runs on a
+answers to a table. The images carry the script, but the service never calls it, so it has no API counterpart. The model runs on a
 server that answers `POST /v1/systemone` (Clef, Clef-Flash or Strands Decider 2B), reached through
 [decision_client.py](../../decision_client.py), so this side needs no torch and no GPU. Only the page image is sent,
 never its file name, label or text. Which archive pages may go to which server is still being settled
