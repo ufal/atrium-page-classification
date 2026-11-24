@@ -13,7 +13,8 @@ tools, and driven by this repository's [para_config.txt](../../setup/para_config
 * **One file per run,** named `YYMMDD-HHmmss_page-classification.json`, written at the end of the run into
   `paradata/` under the run's output folder (`[OUTPUT] FOLDER_RESULTS`, so `./result/paradata` by default and
   `./data/output/paradata` under Docker Compose), so that the paradata travels with the data it describes. The
-  committed [result/paradata](../../result/paradata) holds the logs of the 2026-10-22 evaluation runs.
+  logs of the 2026-10-22 evaluation runs are no longer committed: they predate paradata 3.0 and carried a
+  calculated licence (git history up to `v1.14.2-beta` keeps them).
 * **Metrics:** the exact start and end times, the duration in seconds, the speed (files per minute), and the counts
   of files written (CSVs, PNGs) and of inputs skipped. An image that cannot be read is logged as a skip with its
   reason; `--eval` counts the pages it scored and the tables it wrote.
@@ -38,12 +39,6 @@ The HTTP service writes no paradata file. Each successful answer carries the cal
 record version read; `result` is the record written, when one was asked for. The pages classified are a parameter,
 and `pypdfium2` is among the components when `/predict_document` rendered a PDF
 ([service/README.md](../../service/README.md#how-it-works)).
-
-The committed logs under `result/paradata` predate paradata 3.0: they carry the calculated `license` fields that
-3.0 removed, so read them as history, not as the current format.
-
-Example: the paradata of the [small_data_samples](../../small_data_samples) run of the evaluation,
-[261022-101849_page-classification.json](../../result/paradata/261022-101849_page-classification.json).
 
 ## The document record schema
 

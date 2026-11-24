@@ -352,8 +352,9 @@ def run_best_sequential(
         local_name = f"model_{rev.replace('.', '')}"
         local_path = Path(model_dir) / local_name
 
-        # A member that cannot load or run is left out of the average, with a warning, as the
-        # service leaves it out of `models_used` (atrium-project#72); it used to stop the run.
+        # A member that cannot load or run is left out of the average, with a warning
+        # (atrium-project#72); it used to stop the run. The service fails the request instead
+        # (atrium-project#84, fail-fast); the batch tool keeps going for research runs.
         try:
             clf = ImageClassifier(checkpoint=base_model, num_labels=len(categories), store_dir=str(cp_dir))
             clf.load_model(str(local_path))

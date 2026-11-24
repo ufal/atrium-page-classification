@@ -50,7 +50,7 @@ published in the LINDAT record [1-6184](http://hdl.handle.net/20.500.12800/1-618
 | `20261022-*_479[1-5]_model_v?4_conf_mat_TOP-1.png`, `…_TOP-3.png`                    | their confusion matrices                                                                                                                                             |
 | `20261022-*_5449_model_v?4_TOP-1_EVAL.csv`                                           | the 5,449-page set (below); kept for the by-group report, not as an accuracy                                                                                         |
 | `20261022-1218_BEST_5_models_*.csv`, `20261022-1218_v?4_TOP-3.csv`                   | the `--best` ensemble and its five members on [small_data_samples](../small_data_samples), a demonstration of the output format: those pages are not evaluation data |
-| [paradata/](paradata)                                                                | one log per kept run                                                                                                                                                 |
+| `paradata/`                                                                          | one log per kept run; removed before v2.0.0-beta (pre-3.0, with a calculated licence; in git history)                                                                |
 
 The 229 pages of `small_data_samples` were scored too (70–79 % top-1), and those tables were removed. The pages come
 from theses, slides, our own papers and web pages: they are outside the training data, and their folders were never

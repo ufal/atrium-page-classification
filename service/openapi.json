@@ -1607,7 +1607,7 @@
             },
             "type": "array",
             "title": "Models Used",
-            "description": "The model revisions that produced `predictions` (atrium-project#77): the one asked for, or, with `version=all`, every ensemble member that answered. A model that failed is left out of the average and of this list."
+            "description": "The model revisions that produced `predictions` (atrium-project#77): the one asked for, or, with `version=all`, all five ensemble members. A member that fails fails the request (500): the answer is never an average of fewer models."
           },
           "limits_applied": {
             "items": {
@@ -1909,7 +1909,7 @@
             },
             "type": "array",
             "title": "Models Used",
-            "description": "The model revisions that produced this page's `predictions` (atrium-project#77): the one asked for, or every ensemble member that answered for this page."
+            "description": "The model revisions that produced this page's `predictions` (atrium-project#77): the one asked for, or all five ensemble members; a member that fails fails the request (500)."
           },
           "per_model": {
             "anyOf": [

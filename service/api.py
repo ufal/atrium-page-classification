@@ -295,12 +295,19 @@ def _check_version(version: str) -> None:
         )
 
 
+#: What opening an upload raises when its bytes are not an image this service can read. ImportError is
+#: there because ultralytics (the optional YOLO backend, in the image) replaces `PIL.Image.open` for the
+#: whole process once imported: on bytes Pillow cannot identify it tries to install and import `pi-heif`,
+#: and without it that ends in an ImportError, which used to make an unreadable upload a 500.
+_UNREADABLE_IMAGE = (UnidentifiedImageError, OSError, SyntaxError, ImportError)
+
+
 def _open_image(content: bytes) -> Image.Image:
     """Open the uploaded image (its header only), or refuse it: 422 for bytes that are not a
     readable image (atrium-project#32 round 2; the blanket 500 before)."""
     try:
         return Image.open(io.BytesIO(content))
-    except (UnidentifiedImageError, OSError, SyntaxError) as exc:
+    except _UNREADABLE_IMAGE as exc:
         raise HTTPException(status_code=422, detail=f"The upload is not a readable image: {exc}") from exc
 
 
@@ -325,7 +332,7 @@ def _media_type(upload: UploadFile) -> str:
 def _looks_like_image(content: bytes) -> bool:
     try:
         Image.open(io.BytesIO(content))
-    except (UnidentifiedImageError, OSError, SyntaxError):
+    except _UNREADABLE_IMAGE:
         return False
     return True
 
@@ -466,8 +473,8 @@ class ImageResponse(BaseModel):
     models_used: List[str] = Field(
         description=(
             "The model revisions that produced `predictions` (atrium-project#77): the one asked for, or, with "
-            "`version=all`, every ensemble member that answered. A model that failed is left out of the average "
-            "and of this list."
+            "`version=all`, all five ensemble members. A member that fails fails the request (500): the answer is "
+            "never an average of fewer models."
         )
     )
     #: The limits that shaped this result without refusing it (atrium-project#53,
@@ -528,7 +535,7 @@ class PagePredictions(BaseModel):
     models_used: List[str] = Field(
         description=(
             "The model revisions that produced this page's `predictions` (atrium-project#77): the one asked for, "
-            "or every ensemble member that answered for this page."
+            "or all five ensemble members; a member that fails fails the request (500)."
         )
     )
     per_model: Optional[Dict[str, List[PredictionResult]]] = Field(

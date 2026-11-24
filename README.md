@@ -129,8 +129,9 @@ tool's [workflow page](https://ufal.github.io/atrium-project/workflows/page-clas
 - **One service request is limited in size.** It classifies at most `MAX_PDF_PAGES` pages (50 by default; a deployment
   can change it) and takes at most 10 MB (`MAX_UPLOAD_MB`). Send a longer PDF in parts with `pages`. The command line
   has no such limit ([Limits](service/README.md#limits)).
-- **The ensemble can answer with fewer models** when one fails to load, and still answers 200, so check that
-  `models_used` lists five ([Partial results](service/README.md#partial-results)).
+- **The service's ensemble needs all five models.** With `version=all`, a model that fails to load or to answer
+  fails the request (500, naming it) instead of averaging the others ([Errors](service/README.md#errors)). The
+  command line's `--best` still leaves a failing model out, with a warning.
 - **The service classifies nothing while it loads its models.** The first start downloads about 2.44 GB. Until the
   models are loaded, `/health` answers 200 while `/ready` and the two `/predict_*` endpoints answer 503, so wait for
   `/ready` to return 200 ([Start](service/README.md#start)).
