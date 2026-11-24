@@ -145,8 +145,10 @@ python3 run.py --models-dir /srv/atrium-page-models --best -d pages/
 The results still go to `result/` under the working directory. The staged folder can be read-only; a `--best` run on
 a GPU then re-measures its memory profile each time instead of saving it.
 
-After a download the checkout looks like this. `model/`, `result/` and `checkpoint/` are git-ignored runtime folders,
-created when the pipeline first runs; under Docker they are volumes, so data and models persist between runs.
+After a download the checkout looks like this. `model/` and `checkpoint/` are git-ignored runtime folders, created
+when the pipeline first runs; `result/` holds the committed tables and samples, and a local run adds its own files
+beside them ([result/README.md](../result/README.md)). Under Docker they are volumes, so data and models persist
+between runs.
 `model_output/` appears only after training:
 
 ```text

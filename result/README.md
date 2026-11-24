@@ -49,8 +49,9 @@ published in the LINDAT record [1-6184](http://hdl.handle.net/20.500.12800/1-618
 | `20261022-*_479[1-5]_model_v?4_TOP-1_EVAL.csv`, `…_TOP-3_EVAL.csv`, `…_EVAL_RAW.csv` | the per-fold test results above: top-1, top-3 with scores, all 11 scores; `TRUE` is the dataset's category                                                           |
 | `20261022-*_479[1-5]_model_v?4_conf_mat_TOP-1.png`, `…_TOP-3.png`                    | their confusion matrices                                                                                                                                             |
 | `20261022-*_5449_model_v?4_TOP-1_EVAL.csv`                                           | the 5,449-page set (below); kept for the by-group report, not as an accuracy                                                                                         |
-| `20261022-1218_BEST_5_models_*.csv`, `20261022-1218_v?4_TOP-3.csv`                   | the `--best` ensemble and its five members on [small_data_samples](../small_data_samples), a demonstration of the output format: those pages are not evaluation data |
-| `paradata/`                                                                          | one log per kept run; removed before v2.0.0-beta (pre-3.0, with a calculated licence; in git history)                                                                |
+| `*_BEST_5_models_*.csv`, `*_v?4_TOP-3.csv`                                           | the `--best` ensemble and its five members on [small_data_samples](../small_data_samples), a demonstration of the output format: those pages are not evaluation data |
+| `*_model_v44_TOP-3.csv`                                                              | one model (`v4.4`) on the same pages, the same demonstration                                                                                                         |
+| `paradata/`                                                                          | the paradata 3.0 logs of those two demonstration runs; the logs of the 2026-10-22 runs are in git history up to `v1.14.2-beta`                                       |
 
 The 229 pages of `small_data_samples` were scored too (70–79 % top-1), and those tables were removed. The pages come
 from theses, slides, our own papers and web pages: they are outside the training data, and their folders were never
@@ -135,5 +136,6 @@ Still here from before 2026-10-22:
 ## License of these files
 
 Tables with a `TRUE` column carry the dataset's annotation, which is under CC BY-NC 4.0 like the
-[LINDAT record](http://hdl.handle.net/20.500.12800/1-6184); the code that made them is MIT. The paradata of the
-2026-10-22 run says MIT, because `--eval` did not declare the dataset; from `v1.9.9-beta` it does.
+[LINDAT record](http://hdl.handle.net/20.500.12800/1-6184); the code that made them is MIT. The paradata of a
+`--train` or `--eval` run list the dataset (`lindat_dataset`) among their components, with its terms; no licence is
+computed from them.

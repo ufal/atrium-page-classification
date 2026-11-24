@@ -7,8 +7,12 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
+      # The generated samples stay byte for byte as the classifier wrote them: their paradata
+      # describe those files, and a record output is named by its SHA-512.
       - id: trailing-whitespace
+        exclude: ^result/(paradata|tables)/
       - id: end-of-file-fixer
+        exclude: ^result/(paradata|tables)/
       - id: check-yaml
       - id: check-added-large-files
         args: ["--maxkb=15360"]   # keep model weights / data blobs out of git

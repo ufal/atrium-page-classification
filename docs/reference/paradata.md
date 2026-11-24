@@ -13,13 +13,16 @@ tools, and driven by this repository's [para_config.txt](../../setup/para_config
 * **One file per run,** named `YYMMDD-HHmmss_page-classification.json`, written at the end of the run into
   `paradata/` under the run's output folder (`[OUTPUT] FOLDER_RESULTS`, so `./result/paradata` by default and
   `./data/output/paradata` under Docker Compose), so that the paradata travels with the data it describes. The
-  logs of the 2026-10-22 evaluation runs are no longer committed: they predate paradata 3.0 and carried a
-  calculated licence (git history up to `v1.14.2-beta` keeps them).
+  logs of the two sample runs over `small_data_samples/` (one model, and the `--best` ensemble) are committed in
+  `result/paradata/`, beside the tables they wrote ([result/README.md](../../result/README.md)). The logs of the
+  2026-10-22 evaluation runs predate paradata 3.0 and carried a calculated licence; git history up to
+  `v1.14.2-beta` keeps them.
 * **Metrics:** the exact start and end times, the duration in seconds, the speed (files per minute), and the counts
   of files written (CSVs, PNGs) and of inputs skipped. An image that cannot be read is logged as a skip with its
   reason; `--eval` counts the pages it scored and the tables it wrote.
 * **A configuration snapshot:** the model revision, the base model actually used, the batch size, the input path and
-  the command-line flags of the run.
+  the command-line flags of the run. A `--best` run names its five ensemble revisions and their base models.
+* **Parameters:** `revisions`, the model revisions that made the predictions (the five `vX.4` with `--best`).
 * **Tool version and runner:** the `tool_version` (from `para_config.txt`), the `repository` and `runner_ref`, and
   a `docker_image` field. In a published container the repository and runner come from the `ATRIUM_RUNNER_REPO`,
   `ATRIUM_RUNNER_REF` and `ATRIUM_RUNNER_IMAGE` environment variables, so the reference names the actual runner
