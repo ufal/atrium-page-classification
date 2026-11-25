@@ -129,9 +129,9 @@ What each stored table measures, and what it does not, is in [result/README.md](
 [`v5.4`](../../result/tables/20261022-1208_5449_model_v54_TOP-1_EVAL.csv).
 
 **The ensemble on the sample pages** ([small_data_samples](../../small_data_samples), no `TRUE` column), a demonstration
-of the format: the votes [BEST_5_models_TOP-1.csv](../../result/tables/20261125-1102_BEST_5_models_TOP-1.csv) and the
-averaged result [BEST_5_models_AVG_TOP-3.csv](../../result/tables/20261125-1102_BEST_5_models_AVG_TOP-3.csv), with each
-member's own table, such as [v44_TOP-3.csv](../../result/tables/20261125-1102_v44_TOP-3.csv).
+of the format: the votes [BEST_5_models_TOP-1.csv](../../result/tables/20261125-1527_BEST_5_models_TOP-1.csv) and the
+averaged result [BEST_5_models_AVG_TOP-3.csv](../../result/tables/20261125-1527_BEST_5_models_AVG_TOP-3.csv), with each
+member's own table, such as [v44_TOP-3.csv](../../result/tables/20261125-1527_v44_TOP-3.csv).
 
 **Averaged results on two unannotated collections:** [ARUB_averaged_SHORT.csv](../../result/ARUB_averaged_SHORT.csv)
 and [ARUP_averaged_SHORT.csv](../../result/ARUP_averaged_SHORT.csv), each from the `vX.3` best five models with a

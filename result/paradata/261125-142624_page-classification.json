@@ -1,0 +1,60 @@
+{
+  "schema_version": "3.0",
+  "program": "page-classification",
+  "tool_version": "v2.0.0-beta",
+  "repository": "https://github.com/ufal/atrium-page-classification",
+  "runner_ref": "466aeb78402c6df663a46be774ae5565df37ed93",
+  "docker_image": "",
+  "python_version": "3.11.4 (main, Jul 26 2023, 14:53:35) [GCC 11.3.0]",
+  "run_id": "261125-142624",
+  "run_uuid": "urn:uuid:3c36ad44-e4e3-439e-9478-2c343d24191f",
+  "run_agent": "",
+  "action_status": "completed",
+  "start_time": "2026-11-25T14:26:24.663251+00:00",
+  "end_time": "2026-11-25T14:27:08.467028+00:00",
+  "duration_seconds": 43.804,
+  "config": {
+    "model_path": "model/model/model_v44",
+    "revision": "v4.4",
+    "base_model": "timm/regnety_160.swag_ft_in1k",
+    "top_n": 3,
+    "batch_size": "16",
+    "input_path": "small_data_samples",
+    "inner_dirs": "True",
+    "file_format": "png",
+    "mode": "directory",
+    "raw_output": "False",
+    "best_models": "False",
+    "parallel_best": "False",
+    "yolo": "False"
+  },
+  "parameters": {
+    "revisions": [
+      "v4.4"
+    ]
+  },
+  "inputs": [],
+  "outputs": [],
+  "components": [
+    {
+      "name": "vit_models",
+      "license": "CC BY-NC 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc/4.0/"
+    }
+  ],
+  "statistics": {
+    "input_files_total": 229,
+    "successfully_processed": 229,
+    "skipped_files": 0,
+    "output_counts_by_type": {
+      "csv": 229,
+      "png": 0
+    },
+    "performance_per_minute": {
+      "csv": 313.6716,
+      "png": 0.0
+    }
+  },
+  "skipped_files_detail": [],
+  "limits": []
+}
