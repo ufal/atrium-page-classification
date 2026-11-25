@@ -1,5 +1,6 @@
 # Strategy — [atrium-project#84](https://github.com/ufal/atrium-project/issues/84) (doc-schema-v2): page-classification's part
 
+> _**Refreshed 2026-11-25**: Status — 11-25 (the v2.0.0-beta release prep)._
 > _**Refreshed 2026-11-19**: "Status — 11-19": #74 and #75 merged; D33 resolved (no categories to the ATR); the
 > wording that has the classifier route pages._
 > _**Refreshed 2026-11-14 (afternoon)**: "Status — round 6 (11-14)": the hub merged, the pins moved, round 6._
@@ -13,6 +14,8 @@
 > contract digest.
 > This file is the repository's slice only. It replaces the 11-11 slice of the same name, which had the classifier
 > on every PDF and image; 12 November changes that._
+
+**Status (2026-11-25)**: 🟢 **v2.0.0-beta release prep in #78 (`v2-beta-prep` → `test`), CI green; the two demonstration runs are this version's (runner `466aeb7`, checked 11-25). Tag 26 November after the merge.**
 
 **Status (2026-11-19)**: 🟢 **This repository's part is on `test` (#71, #74), pinned to `02cbd01`. D33 is resolved:
 the page categories are not sent to the ATR (Ronald, ask 6; motyc agreed); they stay in the record. Left: two

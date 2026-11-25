@@ -75,8 +75,8 @@ By default one model runs: the revision chosen with `-rev`, or a local checkpoin
   already rounded to three decimals could make a table read `0.48200000000000004`, and a category whose rounded scores
   were all 0 could fall out of a top-11.
 - The command line also records each model's own top-1 vote, so disagreement stays visible. The service returns each
-  model's own top-N with `per_model=true`. A model that fails is left out of the average on both sides. The command
-  line names the models that answered, and the service lists them in `models_used`.
+  model's own top-N with `per_model=true`. A model that fails is left out of the command line's average, with a
+  warning naming it; the service fails the request instead (500), and lists the five in `models_used`.
 
 The averaging is a mean of probabilities, not a majority vote: confident models weigh more than uncertain ones. It
 usually raises overall accuracy, but it can lower it for the most ambiguous pairs, such as `TEXT` and `TEXT_T`, whose

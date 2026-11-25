@@ -135,7 +135,7 @@ Example JSON response (every field is always present; `ImageResponse` in [`opena
 ```
 
 `models_used` lists the model revisions that produced the predictions: the one asked for, or, with `version=all`,
-every member of the ensemble that answered. The command line takes the same inputs the same way: `run.py -f report.pdf
+all five members of the ensemble (a member that fails fails the request). The command line takes the same inputs the same way: `run.py -f report.pdf
 --pages 1-3` renders and classifies a PDF with this service's renderer and writes the same record keys. The table of
 what differs, and why, is in [docs/usage.md](../docs/usage.md#the-command-line-and-the-service).
 
@@ -145,7 +145,7 @@ It takes the fields of `/predict_image`, plus:
 
 | Field   | Default | Notes                                                                                                                                                                                                                                                                                                                                                                                                   |
 |---------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `pages` | all     | Classify only these pages: 1-based positions in the PDF, for example `1,3,5-7`. Empty means every page. A malformed value, or a page past the end of the PDF, is refused with `422`. `MAX_PDF_PAGES` counts the pages classified, not the PDF's. Only these pages are in the response and in the record. digital-convert's `/describe` uses it to ask only about the pages without a usable text layer. |
+| `pages` | all     | Classify only these pages: 1-based positions in the PDF, for example `1,3,5-7`. Empty means every page. A malformed value, or a page past the end of the PDF, is refused with `422`. `MAX_PDF_PAGES` counts the pages classified, not the PDF's. Only these pages are in the response and in the record.                                                                                                |
 
 It answers `{"type": "document", "pages": [{"page_index": 1, "predictions": [...], "models_used": [...]}, ...],
 "limits_applied": [], "paradata": {...}}` (`DocumentResponse`), with `models_used` per page, and `document_json` (and
@@ -203,7 +203,7 @@ for request-validation problems.
 | 415  | `unsupported_media_type` | the file is not an image (`/predict_image`, `accepted: ["image/*"]`) or not a PDF (`/predict_document`, `accepted: ["application/pdf"]`)               | send an image to `/predict_image`, a PDF to `/predict_document`                      |
 | 422  | `invalid_record`         | the `document_json` baseline cannot be opened (not UTF-8 JSON, not an object, a newer `schema_version` major), or its `pages` is not a list of objects | send the record the previous stage wrote; update this service if the record is newer |
 | 422  | `null`                   | request validation (e.g. `topn` outside 1–11), an unknown `version`, or an image or PDF that cannot be read                                            | fix the field `errors` or `detail` names; repair or re-export an unreadable file     |
-| 500  | `null`                   | processing failure (a page the model could not classify included), or a record rejected by its own schema                                              | report it with `detail`; check the log for a model that failed to load               |
+| 500  | `null`                   | processing failure (a page the model could not classify, or an ensemble member that failed, included), or a record rejected by its own schema          | report it with `detail`; check the log for a model that failed to load               |
 | 503  | `null`                   | the models are still loading, or the replica is shutting down                                                                                          | wait for `/ready` 200, or retry on another replica                                   |
 
 ```json
@@ -236,11 +236,10 @@ A 200 can carry less than was asked for. Read these before using the result:
 
 - `limits_applied` is present in every response and empty today: each limit of this service refuses
   instead of shaping the result.
-- With `version=all`, a model that cannot be loaded or fails is left out, the others are averaged, and the answer
-  is still a 200. `models_used` (per page in `/predict_document`) lists the revisions that answered, so fewer than
-  five means a reduced ensemble; the service log names the failing model, once. A download that was cut off, for
-  example by a full disk, leaves an empty folder under `model/` that the service neither loads nor replaces: delete
-  it and restart.
+- With `version=all`, the answer is never an average of fewer models: a model that cannot be loaded or fails
+  fails the request with `500` (`Ensemble incomplete: … failing: v2.4.`), and the service log names it, once. A
+  download that was cut off, for example by a full disk, leaves an empty folder under `model/` that the service
+  neither loads nor replaces: delete it and restart.
 - `/predict_document` classifies the pages asked for (`pages`), not the whole PDF.
 
 ## Known limits

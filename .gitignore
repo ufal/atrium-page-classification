@@ -1,6 +1,6 @@
 /model/
 /model_output/
-/chekcpoint/
+/checkpoint/
 .idea
 __pycache__/
 *.pyc

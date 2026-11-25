@@ -384,10 +384,23 @@ def main(argv=None):
             )
 
     # ── paradata init ─────────────────────────────────────────────────────────
+    # The revisions that make the predictions, as the run uses them: `--best` runs the five
+    # REVISION_BEST_MODELS from the models folder, whatever `-rev` or the config name. Their paradata
+    # used to record the configured revision (`main`) and its folder instead (atrium-project#84: a
+    # model revision is a parameter that shaped the output).
+    _best_run = bool(getattr(args, "best", False)) and not args.yolo
+    if _best_run:
+        _run_revisions = list(revision_best_models)
+        _run_model_path = str(model_dir)
+        _run_base_model = ",".join(revision_best_models[rev] for rev in _run_revisions)
+    else:
+        _run_revisions = [args.revision] if getattr(args, "revision", None) else []
+        _run_model_path = args.model if hasattr(args, "model") else config.get("SETUP", "model", fallback="")
+        _run_base_model = args.yolo_base if args.yolo else args.base
     _paradata_cfg = {
-        "model_path": args.model if hasattr(args, "model") else config.get("SETUP", "model", fallback=""),
-        "revision": args.revision if hasattr(args, "revision") else config.get("HF", "revision", fallback=""),
-        "base_model": args.yolo_base if args.yolo else args.base,
+        "model_path": _run_model_path,
+        "revision": ",".join(_run_revisions) if _run_revisions else config.get("HF", "revision", fallback=""),
+        "base_model": _run_base_model,
         "top_n": args.topn if hasattr(args, "topn") else config.get("SETUP", "top_n", fallback=""),
         "batch_size": config.get("SETUP", "batch", fallback=""),
         "input_path": str(
@@ -410,6 +423,8 @@ def main(argv=None):
         output_types=["csv", "png"],
         config_dir=str(cur / "setup"),
     )
+    if _run_revisions and not args.yolo:
+        _paradata_logger.set_parameter("revisions", _run_revisions)
     # ── end paradata init ─────────────────────────────────────────────────────
 
     print("Arguments:")

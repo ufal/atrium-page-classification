@@ -104,11 +104,12 @@ class ModelManager:
         return result if "error" in result else result["predictions"]
 
     def predict_detailed(self, image: Image.Image, version: str, topn: int = 1) -> dict:
-        """`{"predictions": [...], "models_used": [...]}`, or `{"error": ...}` when no model answered.
+        """`{"predictions": [...], "models_used": [...]}`, or `{"error": ...}` when a model failed.
 
-        `models_used` lists the revisions that actually contributed (atrium-project#77): the one
-        asked for, or every ensemble member that answered. A model that failed to load or to infer
-        is left out of the `all` average, and this is where a caller sees it.
+        `models_used` lists the revisions that produced the answer (atrium-project#77): the one
+        asked for, or every ensemble member. With `all`, a member that fails to load or to infer
+        fails the whole answer: an average of fewer models is not the ensemble asked for, and the
+        AMČR pilot fails a step instead of passing on a partial result (atrium-project#84).
         """
         if version == "all":
             return self._predict_averaged(image, topn)
@@ -139,17 +140,19 @@ class ModelManager:
                 failed.append(v)
                 continue
 
-        if failed and predictions_list:
-            # The answer is still an ensemble's, of fewer models: say so where it shows.
-            level = logging.DEBUG if set(failed) <= self._warned else logging.WARNING
-            logger.log(
-                level,
-                f"Ensemble: {len(predictions_list)} of {len(self.available_versions)} models "
-                f"answered; failing: {', '.join(failed)}",
-            )
-            self._warned |= set(failed)
         if not predictions_list:
             return {"error": "All models failed."}
+        if failed:
+            # Fail-fast (atrium-project#84): no average of fewer models. Logged once per failing set,
+            # as the members' own errors are.
+            level = logging.DEBUG if set(failed) <= self._warned else logging.WARNING
+            message = (
+                f"Ensemble incomplete: {len(predictions_list)} of {len(self.available_versions)} models "
+                f"answered; failing: {', '.join(failed)}"
+            )
+            logger.log(level, message)
+            self._warned |= set(failed)
+            return {"error": f"{message}."}
         # Each member's own top-N beside the average (`per_model=true`, atrium-project#72): what the
         # CLI's `--best --save-intermediates` writes as one CSV per model.
         per_model = {v: results[:topn] for v, results in zip(answered, predictions_list)}

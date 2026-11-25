@@ -90,10 +90,11 @@ def test_predict_averaged_ensemble(mock_single, manager, dummy_image):
     assert res[0]["score"] == 0.70  # (0.8 + 0.6) / 2
 
 
-def test_a_failing_model_is_reported_once_and_the_others_still_answer(manager, dummy_image, caplog):
+def test_a_failing_model_fails_the_ensemble_and_is_reported_once(manager, dummy_image, caplog):
     """atrium-digital-convert#5: 3 of 5 models failed on every page and logged 1,599 identical
-    errors, while the answer said nothing. Now: one ERROR per failing version, one WARNING that
-    the ensemble answered with fewer models, and the average of the models that answered."""
+    errors, while the answer said nothing. Then the others were averaged; since 2.0.0-beta the
+    answer fails instead (atrium-project#84, fail-fast). Still one ERROR per failing version and
+    one WARNING for the incomplete ensemble, however many pages ask."""
     import logging
 
     manager.available_versions = ["v1", "v2", "v3"]
@@ -109,16 +110,30 @@ def test_a_failing_model_is_reported_once_and_the_others_still_answer(manager, d
         caplog.at_level(logging.DEBUG, logger="service.inference"),
     ):
         results = [manager.predict(dummy_image, version="all", topn=1) for _ in range(3)]
-    assert all(r == [{"label": "DRAW", "score": 0.9}] for r in results)
+    assert all(r == {"error": "Ensemble incomplete: 2 of 3 models answered; failing: v2."} for r in results)
     errors = [r.getMessage() for r in caplog.records if r.levelno == logging.ERROR]
     warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
     assert len(errors) == 1 and errors[0].startswith("Inference failed for model v2")
-    assert warnings == ["Ensemble: 2 of 3 models answered; failing: v2"]
+    assert warnings == ["Ensemble incomplete: 2 of 3 models answered; failing: v2"]
 
 
 @patch.object(ModelManager, "_run_single_inference")
-def test_models_used_names_every_ensemble_member_that_answered(mock_single, manager, dummy_image):
+def test_models_used_names_every_ensemble_member(mock_single, manager, dummy_image):
     """atrium-project#77: the response says which revisions contributed, not only the log."""
+    manager.available_versions = ["v1.4", "v2.4", "v3.4"]
+    mock_single.side_effect = [
+        [{"label": "DRAW", "score": 0.8}, {"label": "TEXT", "score": 0.2}],
+        [{"label": "DRAW", "score": 0.7}, {"label": "TEXT", "score": 0.3}],
+        [{"label": "DRAW", "score": 0.6}, {"label": "TEXT", "score": 0.4}],
+    ]
+    res = manager.predict_detailed(dummy_image, version="all", topn=1)
+    assert res["models_used"] == ["v1.4", "v2.4", "v3.4"]
+    assert res["predictions"] == [{"label": "DRAW", "score": pytest.approx(0.70)}]
+
+
+@patch.object(ModelManager, "_run_single_inference")
+def test_an_ensemble_member_that_fails_fails_the_answer(mock_single, manager, dummy_image):
+    """atrium-project#84 (fail-fast): no average of the members that answered, whichever one fails."""
     manager.available_versions = ["v1.4", "v2.4", "v3.4"]
     mock_single.side_effect = [
         [{"label": "DRAW", "score": 0.8}, {"label": "TEXT", "score": 0.2}],
@@ -126,8 +141,7 @@ def test_models_used_names_every_ensemble_member_that_answered(mock_single, mana
         [{"label": "DRAW", "score": 0.6}, {"label": "TEXT", "score": 0.4}],
     ]
     res = manager.predict_detailed(dummy_image, version="all", topn=1)
-    assert res["models_used"] == ["v1.4", "v3.4"]
-    assert res["predictions"] == [{"label": "DRAW", "score": 0.70}]
+    assert res == {"error": "Ensemble incomplete: 2 of 3 models answered; failing: v2.4."}
 
 
 @patch.object(ModelManager, "_run_single_inference")

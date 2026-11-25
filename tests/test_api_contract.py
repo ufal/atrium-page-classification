@@ -432,6 +432,30 @@ def test_an_unreadable_image_is_422_not_500(manager):
     assert body["detail"].startswith("The upload is not a readable image") and manager.calls == 0
 
 
+def test_an_unreadable_image_is_422_when_pillow_is_patched_to_import_a_plugin(manager, monkeypatch):
+    """ultralytics, once imported, replaces `PIL.Image.open`: on bytes Pillow cannot identify it tries
+    to install and import `pi-heif`, and without it that ends in an ImportError (a 500 before)."""
+    from service import api
+
+    def patched_open(fp, *args, **kwargs):
+        raise ModuleNotFoundError("No module named 'pi_heif'")
+
+    monkeypatch.setattr(api.Image, "open", patched_open)
+    body = _conforms(
+        422, client.post("/predict_image", files={"file": ("p.png", b"not an image", "image/png")}), "/predict_image"
+    )
+    assert body["detail"].startswith("The upload is not a readable image") and manager.calls == 0
+
+
+def test_an_incomplete_ensemble_is_a_500_not_an_average_of_fewer_models(manager):
+    """atrium-project#84 (fail-fast): the manager's error for an ensemble member that failed is the answer."""
+    manager.answer = {"error": "Ensemble incomplete: 4 of 5 models answered; failing: v2.4."}
+    body = _conforms(
+        500, client.post("/predict_image", files={"file": ("p.png", _png(), "image/png")}), "/predict_image"
+    )
+    assert body["detail"] == "Ensemble incomplete: 4 of 5 models answered; failing: v2.4."
+
+
 def test_an_unreadable_pdf_is_422_not_500(manager, pdfium):
     def refuse(content):
         raise pdfium.PdfiumError("Failed to load document (PDFium: Data format error).")

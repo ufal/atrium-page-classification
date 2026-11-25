@@ -68,6 +68,34 @@ def test_cli_missing_input(tmp_path, monkeypatch, capsys):
     assert "No valid image files found" in capsys.readouterr().out
 
 
+def _paradata_of_an_empty_run(tmp_path, monkeypatch, *flags):
+    """The paradata record of a run over an empty folder (the early exit writes it)."""
+    import json
+
+    monkeypatch.chdir(tmp_path)
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    assert main(["-d", str(empty), "--no-inner", "--no-train", "--no-eval", *flags]) == 0
+    return json.loads(next((tmp_path / "result" / "paradata").glob("*.json")).read_text(encoding="utf-8"))
+
+
+def test_the_paradata_name_the_revision_a_run_uses(tmp_path, monkeypatch):
+    """A model revision shaped the output: it is in `config` and in `parameters` (atrium-project#84)."""
+    record = _paradata_of_an_empty_run(tmp_path, monkeypatch, "-rev", "v4.4")
+    assert record["config"]["revision"] == "v4.4"
+    assert record["parameters"]["revisions"] == ["v4.4"]
+
+
+def test_the_paradata_of_best_name_the_five_ensemble_revisions(tmp_path, monkeypatch):
+    """`--best` runs the five REVISION_BEST_MODELS; its paradata recorded the configured `main`."""
+    from model_registry import REVISION_BEST_MODELS
+
+    record = _paradata_of_an_empty_run(tmp_path, monkeypatch, "--best")
+    assert record["parameters"]["revisions"] == list(REVISION_BEST_MODELS)
+    assert record["config"]["revision"] == ",".join(REVISION_BEST_MODELS)
+    assert record["config"]["base_model"] == ",".join(REVISION_BEST_MODELS.values())
+
+
 def test_build_parser_defaults_follow_config():
     """build_parser derives its defaults from setup/config.txt."""
     config = _config()

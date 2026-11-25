@@ -145,8 +145,10 @@ python3 run.py --models-dir /srv/atrium-page-models --best -d pages/
 The results still go to `result/` under the working directory. The staged folder can be read-only; a `--best` run on
 a GPU then re-measures its memory profile each time instead of saving it.
 
-After a download the checkout looks like this. `model/`, `result/` and `checkpoint/` are git-ignored runtime folders,
-created when the pipeline first runs; under Docker they are volumes, so data and models persist between runs.
+After a download the checkout looks like this. `model/` and `checkpoint/` are git-ignored runtime folders, created
+when the pipeline first runs; `result/` holds the committed tables and samples, and a local run adds its own files
+beside them ([result/README.md](../result/README.md)). Under Docker they are volumes, so data and models persist
+between runs.
 `model_output/` appears only after training:
 
 ```text
@@ -354,12 +356,12 @@ Reach for it instead of `--best` when:
 # combine saved per-model results into a Top-3 summary
 python3 supplementary/scripts/averaging.py --files "result/tables/*_TOP-3.csv" --top_n 3 --output ensemble_results.csv
 # re-average a wide votes file (a majority vote when it holds no scores)
-python3 supplementary/scripts/averaging.py --files result/tables/20261022-1218_BEST_5_models_TOP-1.csv -n 1
+python3 supplementary/scripts/averaging.py --files result/tables/20261125-1527_BEST_5_models_TOP-1.csv -n 1
 ```
 
 `--keep-zeros` keeps null scores and `--no-normalize` turns off the hyphen-to-underscore normalisation of file names;
 see `python3 supplementary/scripts/averaging.py --help`. The repository ships examples: the wide
-[BEST_5_models_TOP-1.csv](../result/tables/20261022-1218_BEST_5_models_TOP-1.csv) and the averaged
+[BEST_5_models_TOP-1.csv](../result/tables/20261125-1527_BEST_5_models_TOP-1.csv) and the averaged
 [ARUB_averaged_SHORT.csv](../result/ARUB_averaged_SHORT.csv) and
 [ARUP_averaged_SHORT.csv](../result/ARUP_averaged_SHORT.csv).
 The wide table holds the `vX.4` models' top-1 votes on the 229 sample pages; the two averaged tables come from the
@@ -533,7 +535,7 @@ table's three decimals) and the record were the same in every case but the trunc
 | A PDF, a page selection          | `-f report.pdf --pages 1-3`; `-d` with `-ff …,pdf`                        | `POST /predict_document`, `pages=1-3`                  | the same                                                                |
 | A selection past the last page   | exit 2, `--pages: …`                                                      | 422, `pages: …`                                        | the same                                                                |
 | The model                        | `-rev`, else `[HF] revision` (`main`); `-m`, `-b`, `--models-dir`, `--hf` | `version`, else `all`; `main` is refused (422)         | differs: name the model to compare; the CLI also runs local checkpoints |
-| The ensemble                     | `--best`                                                                  | `version=all`                                          | the same average; a failing member left out on both                     |
+| The ensemble                     | `--best`                                                                  | `version=all`                                          | the same average; a failing member: left out (CLI), 500 (service)       |
 | Each model's own top-N           | `--best --save-intermediates` (one CSV per model)                         | `per_model=true`                                       | the same                                                                |
 | All eleven scores                | `--raw` (also with `-f` on one image)                                     | `topn=11`                                              | the same scores                                                         |
 | Scores                           | the tables round to three decimals                                        | unrounded                                              | differs: a table is for reading                                         |

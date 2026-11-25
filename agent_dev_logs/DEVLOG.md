@@ -7,7 +7,7 @@
 > Since: **v1.13.0-beta** (11-06, the Galaxy entry point) · **v1.14.2-beta** (11-08, atrium-project#10's fixes);
 > v1.14.0-beta and v1.14.1-beta were tagged, not released. `test` (`340be2d`) is 17 commits past v1.14.2-beta and
 > declares the unreleased v2.0.0-beta; `master` is `1e80e7a`. Hub workflows pinned to `02cbd01` (`v1`). Latest entry:
-> 2026-11-19 (log round). The "rounds 8 and 9" of 11-14 below are this repository's own count, not atrium-project#84's
+> 2026-11-25 (v2.0.0-beta release prep). The "rounds 8 and 9" of 11-14 below are this repository's own count, not atrium-project#84's
 > rounds 8 and 9 of 11-16._
 > _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md` · `plans/doc-schema-v2.plan.md` (this repository's part of atrium-project#84)._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
@@ -1153,4 +1153,17 @@ Documentation only; no code, test or configuration change.
 * **Detail:** hub [plan of #79](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/79.plan.md),
   "Where it stands — 2026-11-22";
   [plan of #40](https://github.com/ufal/atrium-project/blob/test/agent_dev_logs/plans/40.plan.md).
+* Logs only; not pushed.
+
+## 2026-11-24 → 2026-11-25 — v2.0.0-beta release prep (#78), the samples
+
+* **PR #78** (`v2-beta-prep` → `test`, head `90b4c6f`): the fail-fast ensemble; a 422 for an unreadable image under
+  ultralytics; `--best` paradata name their five revisions; `CITATION.cff` dated 2026-11-26; the pre-3.0 paradata
+  removed.
+* **Samples** (`935ea01`, runner `466aeb7`): two demonstration runs over `small_data_samples/`, one model and
+  `--best`, with their tables and paradata; the earlier demo files removed (`90b4c6f`); the docs link the new tables.
+* **Checked 11-25:** every table has 229 rows, one per image; 2 of 2 paradata `completed`. CI green.
+* **Open (v2.0.1):** `/ready` answers 200 when a model failed to load; an interrupted download is never repaired;
+  the command line's paradata name page images by path (asked on [#84](https://github.com/ufal/atrium-project/issues/84)); `--best` paradata count CSV rows
+  as processed (1,146 for 229 pages); the command line goes on without a `--document-json` record it cannot find.
 * Logs only; not pushed.
