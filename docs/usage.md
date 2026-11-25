@@ -356,12 +356,12 @@ Reach for it instead of `--best` when:
 # combine saved per-model results into a Top-3 summary
 python3 supplementary/scripts/averaging.py --files "result/tables/*_TOP-3.csv" --top_n 3 --output ensemble_results.csv
 # re-average a wide votes file (a majority vote when it holds no scores)
-python3 supplementary/scripts/averaging.py --files result/tables/20261022-1218_BEST_5_models_TOP-1.csv -n 1
+python3 supplementary/scripts/averaging.py --files result/tables/20261125-1102_BEST_5_models_TOP-1.csv -n 1
 ```
 
 `--keep-zeros` keeps null scores and `--no-normalize` turns off the hyphen-to-underscore normalisation of file names;
 see `python3 supplementary/scripts/averaging.py --help`. The repository ships examples: the wide
-[BEST_5_models_TOP-1.csv](../result/tables/20261022-1218_BEST_5_models_TOP-1.csv) and the averaged
+[BEST_5_models_TOP-1.csv](../result/tables/20261125-1102_BEST_5_models_TOP-1.csv) and the averaged
 [ARUB_averaged_SHORT.csv](../result/ARUB_averaged_SHORT.csv) and
 [ARUP_averaged_SHORT.csv](../result/ARUP_averaged_SHORT.csv).
 The wide table holds the `vX.4` models' top-1 votes on the 229 sample pages; the two averaged tables come from the
