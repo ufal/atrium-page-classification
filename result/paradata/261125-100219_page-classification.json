@@ -1,0 +1,64 @@
+{
+  "schema_version": "3.0",
+  "program": "page-classification",
+  "tool_version": "v2.0.0-beta",
+  "repository": "https://github.com/ufal/atrium-page-classification",
+  "runner_ref": "c9524db5577c163e21878b99c68b0a2c05d28678",
+  "docker_image": "",
+  "python_version": "3.11.4 (main, Jul 26 2023, 14:53:35) [GCC 11.3.0]",
+  "run_id": "261125-100219",
+  "run_uuid": "urn:uuid:8fc55b0c-d8bf-408f-bbcb-695fce289bd7",
+  "run_agent": "",
+  "action_status": "completed",
+  "start_time": "2026-11-25T10:02:19.226031+00:00",
+  "end_time": "2026-11-25T10:08:13.526582+00:00",
+  "duration_seconds": 354.301,
+  "config": {
+    "model_path": "model/model",
+    "revision": "v1.4,v2.4,v3.4,v4.4,v5.4",
+    "base_model": "timm/tf_efficientnetv2_m.in21k_ft_in1k,google/vit-base-patch16-224,google/vit-base-patch16-384,timm/regnety_160.swag_ft_in1k,google/vit-large-patch16-384",
+    "top_n": 3,
+    "batch_size": "16",
+    "input_path": "small_data_samples",
+    "inner_dirs": "True",
+    "file_format": "png",
+    "mode": "directory",
+    "raw_output": "False",
+    "best_models": "True",
+    "parallel_best": "False",
+    "yolo": "False"
+  },
+  "parameters": {
+    "revisions": [
+      "v1.4",
+      "v2.4",
+      "v3.4",
+      "v4.4",
+      "v5.4"
+    ]
+  },
+  "inputs": [],
+  "outputs": [],
+  "components": [
+    {
+      "name": "vit_models",
+      "license": "CC BY-NC 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc/4.0/"
+    }
+  ],
+  "statistics": {
+    "input_files_total": 229,
+    "successfully_processed": 1146,
+    "skipped_files": 0,
+    "output_counts_by_type": {
+      "csv": 1146,
+      "png": 0
+    },
+    "performance_per_minute": {
+      "csv": 194.0725,
+      "png": 0.0
+    }
+  },
+  "skipped_files_detail": [],
+  "limits": []
+}
