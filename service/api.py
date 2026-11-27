@@ -49,21 +49,29 @@ except ImportError:
 # the fast lane; see service/document_json.py's docstring for why that matters here.
 try:
     from .document_json import (
+        ORIGINAL_DISTRIBUTION,
+        DistributionMismatch,
+        baseline_media_type,
         baseline_page_labels,
         build_document_record,
         doc_id_for_document,
         doc_id_for_image,
         expand_page_selection,
+        input_distribution,
         parse_page_selection,
         record_page_keys,
     )
 except ImportError:
     from document_json import (
+        ORIGINAL_DISTRIBUTION,
+        DistributionMismatch,
+        baseline_media_type,
         baseline_page_labels,
         build_document_record,
         doc_id_for_document,
         doc_id_for_image,
         expand_page_selection,
+        input_distribution,
         parse_page_selection,
         record_page_keys,
     )
@@ -571,8 +579,8 @@ class DocumentResponse(BaseModel):
         None,
         description=(
             "The call's paradata: its Process Run Crate `CreateAction` (paradata 3.0, atrium-project#84). `object` "
-            "names the original and the record version read by SHA-512; `result` names the record written, with "
-            "the blocks and fields this call wrote."
+            "names the PDF read (the original, or an office document's rendered PDF: `distribution`) and the record "
+            "version read by SHA-512; `result` names the record written, with the blocks and fields this call wrote."
         ),
     )
 
@@ -607,7 +615,16 @@ _DOCUMENT_JSON_DESC = (
 _PAGES_DESC = (
     "Optional: classify only these pages, 1-based physical positions, e.g. `1,3,5-7`. Empty (the default): every "
     "page. A malformed value, or a page past the end of the PDF, is refused (422); MAX_PDF_PAGES counts the pages "
-    "classified. The response lists only these pages, and only they are written into the record."
+    "classified. The response lists only these pages, and only they are written into the record. In the AMČR "
+    "pipeline: the pages digital-convert forces to the ATR and the pages that show graphics (its `graphics_pages`; "
+    "atrium-project#84 decision 4)."
+)
+_DISTRIBUTION_DESC = (
+    "Optional: which AMČR distribution the PDF is, as the call's paradata `object` names it: `original`, or "
+    "`rendered-pdf`, an office document's rendered PDF from digital-convert, whose pages the docproc numbers "
+    "(atrium-project#84 decision 5; a stand-in name until AMČR gives one). Empty (the default): `rendered-pdf` when "
+    "the `document_json` record's `source.media_type` is an office document's (DOCX, DOC, ODT, RTF), else "
+    "`original`. A value that contradicts the record's media type is refused (422, `cause: distribution_mismatch`)."
 )
 _PER_MODEL_DESC = (
     "Also return each model revision's own `topn` categories (`per_model`): with `version=all`, the five ensemble "
@@ -637,16 +654,17 @@ def _open_run(endpoint: str, **config: Any) -> ParadataLogger:
     )
 
 
-#: The AMČR distribution name this call's upload is recorded under: the document's original.
-#: AMČR has not named that distribution yet (atrium-project#84, Q11).
-ORIGINAL_DISTRIBUTION = "original"
+# The AMČR distribution an upload is recorded under (`service/document_json.py`): an image is the
+# document's original; a PDF is the original, or an office document's rendered PDF
+# (`input_distribution`, atrium-project#84 decision 5).
 
 
 def _action(run: ParadataLogger, pages: Optional[str] = None) -> Dict[str, Any]:
     """The call's CreateAction (paradata 3.0, atrium-project#84): what it read and what it wrote.
 
-    `object` is the original (the upload, added when the run opens) by SHA-512 and, when one was
-    sent, the record version read; `result` is the record written, with the blocks and fields
+    `object` is the upload (added when the run opens: an image or a PDF original, or an office
+    document's rendered PDF, `input_distribution`) by SHA-512 and, when one was sent, the record
+    version read; `result` is the record written, with the blocks and fields
     this call wrote (both added by the adapter). The predictions are the response, not a stored output, so they are not in
     `result`. The pages classified are a parameter.
     """
@@ -847,6 +865,7 @@ async def predict_document(
     document_json_out: bool = Form(False, description=_DOCUMENT_JSON_OUT_DESC),
     pages: Optional[str] = Form(None, description=_PAGES_DESC),
     per_model: bool = Form(False, description=_PER_MODEL_DESC),
+    distribution: Optional[str] = Form(None, description=_DISTRIBUTION_DESC),
 ):
     """Extracts pages from a PDF and classifies each page (or the `pages` selection)."""
     _refuse_if_draining()
@@ -876,8 +895,14 @@ async def predict_document(
             accepted=["application/pdf"],
         )
     baseline_bytes = await _read_record_part(document_json)
+    try:
+        source = input_distribution(distribution, baseline_media_type(baseline_bytes))
+    except DistributionMismatch as exc:
+        raise AtriumHTTPError(422, f"distribution: {exc}.", cause="distribution_mismatch") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=f"distribution: {exc}.") from exc
     run = _open_run("/predict_document", version=version, topn=topn, pages=pages)
-    run.add_input(ORIGINAL_DISTRIBUTION, content, media_type=file.content_type)
+    run.add_input(source, content, media_type=file.content_type)
     # The PDF engine renders every page this route classifies (para_config.txt, conditional).
     run.log_component("pypdfium2")
 

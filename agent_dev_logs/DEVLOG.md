@@ -1167,3 +1167,13 @@ Documentation only; no code, test or configuration change.
   the command line's paradata name page images by path (asked on [#84](https://github.com/ufal/atrium-project/issues/84)); `--best` paradata count CSV rows
   as processed (1,146 for 229 pages); the command line goes on without a `--document-json` record it cannot find.
 * Logs only; not pushed.
+
+## 2026-11-27 — atrium-project#84: the non-A options prepared (ARÚP's answers pending)
+
+* **R7:** `service/document_json.py` `baseline_media_type()`, `input_distribution()`; `/predict_document`'s optional `distribution`; a contradicting value is 422 `cause: distribution_mismatch` (no new registered reason code). Tests in `test_api_contract.py` and `test_service_document_json.py`.
+* **1b:** `run.py` records `input_path` by name, `model_path` with `local_only`, and `pages` as the service does. The 11-25 open item (page images named by path) is prepared. `decide_pages.py` untouched (parked).
+* **Checked:** 893 passed (882 at baseline); openapi regenerated.
+* **Shared:** the re-vendored `atrium_paradata.py` (`name_only`, `start --config-name`, `RENDERED_PDF_DISTRIBUTION`), `atrium_document.schema.json` (H3 descriptions: the forced pages and the pages showing graphics) and `atrium_rocrate.py` (a docstring), byte-identical to the hub's; the pin moves to the hub's squash commit before the PR opens.
+* **Not in the PR:** the committed samples, regenerated from the merged code before the tags.
+* The change is `atrium-page-classification.decisions-84.zip`, these logs `atrium-page-classification.agent_dev_logs.zip`.
+* Logs only; not pushed.

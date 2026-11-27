@@ -940,3 +940,35 @@ class TestPredictDocumentPagesAndLabels:
         assert record["page_categories"] == {"1": "TEXT", "2": "TEXT", "3": "TEXT"}
         assert [p["page_index"] for p in record["pages"]] == [1, 2, 3]
         validate_document(record)
+
+
+# ── the distribution the classified PDF is (atrium-project#84 decision 5) ──────────────────────
+
+
+class TestInputDistribution:
+    def test_an_office_original_is_read_from_its_rendered_pdf(self):
+        from service.document_json import baseline_media_type, input_distribution
+
+        seed = json.dumps({"source": {"media_type": "application/vnd.oasis.opendocument.text"}}).encode()
+        assert baseline_media_type(seed) == "application/vnd.oasis.opendocument.text"
+        assert input_distribution(None, baseline_media_type(seed)) == "rendered-pdf"
+
+    def test_a_pdf_original_or_no_record_is_the_original(self):
+        from service.document_json import baseline_media_type, input_distribution
+
+        seed = json.dumps({"source": {"media_type": "application/pdf; charset=binary"}}).encode()
+        assert baseline_media_type(seed) == "application/pdf"
+        assert input_distribution(None, "application/pdf") == "original"
+        assert input_distribution(None, None) == "original"
+        assert input_distribution("", baseline_media_type(b"")) == "original"
+
+    def test_an_explicit_name_must_fit_the_record(self):
+        from service.document_json import DistributionMismatch, input_distribution
+
+        assert input_distribution("rendered-pdf", None) == "rendered-pdf"
+        with pytest.raises(DistributionMismatch):
+            input_distribution("original", "application/msword")
+        with pytest.raises(DistributionMismatch):
+            input_distribution("rendered-pdf", "application/pdf")
+        with pytest.raises(ValueError):
+            input_distribution("scan", None)

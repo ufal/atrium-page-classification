@@ -8,7 +8,7 @@ from pathlib import Path
 from atrium_document_adapter import write_document_record, write_document_records_dir
 
 # from huggingface_hub import create_branch, delete_branch
-from atrium_paradata import ParadataLogger
+from atrium_paradata import ParadataLogger, name_only
 from model_registry import CATEGORIES as def_categ
 
 # [NEW] Import from central model registry
@@ -397,16 +397,20 @@ def main(argv=None):
         _run_revisions = [args.revision] if getattr(args, "revision", None) else []
         _run_model_path = args.model if hasattr(args, "model") else config.get("SETUP", "model", fallback="")
         _run_base_model = args.yolo_base if args.yolo else args.base
+    # Files and folders by name, never their paths (atrium-project#84 decision 1); a model path that is a
+    # Hugging Face id stays as given.
     _paradata_cfg = {
-        "model_path": _run_model_path,
+        "model_path": name_only(_run_model_path, local_only=True),
         "revision": ",".join(_run_revisions) if _run_revisions else config.get("HF", "revision", fallback=""),
         "base_model": _run_base_model,
         "top_n": args.topn if hasattr(args, "topn") else config.get("SETUP", "top_n", fallback=""),
         "batch_size": config.get("SETUP", "batch", fallback=""),
-        "input_path": str(
-            args.file
-            or args.directory
-            or (args.eval_dir if args.eval else config.get("INPUT", "FOLDER_INPUT", fallback=""))
+        "input_path": name_only(
+            str(
+                args.file
+                or args.directory
+                or (args.eval_dir if args.eval else config.get("INPUT", "FOLDER_INPUT", fallback=""))
+            )
         ),
         "inner_dirs": config.get("SETUP", "inner", fallback=""),
         "file_format": args.file_format if hasattr(args, "file_format") else "png",
@@ -425,6 +429,9 @@ def main(argv=None):
     )
     if _run_revisions and not args.yolo:
         _paradata_logger.set_parameter("revisions", _run_revisions)
+    if getattr(args, "pages", None):
+        # The pages classified, as the service records them (atrium-project#84 decision 4).
+        _paradata_logger.set_parameter("pages", args.pages)
     # ── end paradata init ─────────────────────────────────────────────────────
 
     print("Arguments:")

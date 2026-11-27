@@ -14,6 +14,10 @@ A run's paradata describe the run that produced the current version of a distrib
   `DocumentRecord.written()`).
 * **`action_status`** `completed`, or `failed` with `error` when the run raised (D13: what AMČR
   stores is always completed; development and tests use the same frame).
+* **`config`** names files and folders, never their paths (`name_only()`, atrium-project#84
+  decision 1): a path describes the machine that ran the job, not the document. A fingerprint of an
+  input that is not a distribution (a vocabulary, a prompt) is its SHA-512, as for distributions
+  (`sha512_of()`, decision 2).
 * **`parameters`** only what shaped the output (`set_parameter()`); **`limits`** the sampling and
   splitting notes only. A trimmed, skipped or stopped content is not a note: it raises
   `ContentLimitError` and the job fails (D13).
@@ -94,6 +98,11 @@ FAILED = "failed"
 #: The record's distribution: an output with this name may name the record fields written.
 RECORD_DISTRIBUTION = "atrium/document-json"
 
+#: An office document's rendered PDF (digital-convert's LibreOffice rendering, whose pages the
+#: docproc's page numbers and boxes refer to). Stored whenever the ATR or page-classification reads
+#: it (atrium-project#84 decision 5). A stand-in name: AMČR gives the distribution its name.
+RENDERED_PDF_DISTRIBUTION = "rendered-pdf"
+
 _ENV_RUNNER_IMAGE = "ATRIUM_RUNNER_IMAGE"
 _ENV_RUNNER_REPO = "ATRIUM_RUNNER_REPO"
 _ENV_RUNNER_REF = "ATRIUM_RUNNER_REF"
@@ -150,6 +159,31 @@ def sha512_of(data: Any = None, path: Optional[str] = None) -> str:
     else:
         raise ValueError("sha512_of() needs data or a path")
     return digest.hexdigest()
+
+
+def name_only(value: Any, *, local_only: bool = False) -> Any:
+    """A file or folder as a run's paradata ``config`` names it: its name, never its path
+    (atrium-project#84 decision 1). The basename of the normalised absolute path, so
+    ``data_samples/ALTO/`` is ``ALTO`` and ``.`` the working folder's name.
+
+    Kept as given: None, ``""`` (never the working folder's name), a URL (``scheme://…``) and any
+    value that is not a str or path. A list or tuple is mapped element-wise. With `local_only`
+    (a setting that is a local path OR an identifier, such as a model), a value that is not
+    absolute, does not start with ``.`` or ``~`` and names no existing path is kept as given: a
+    Hugging Face id such as ``Qwen/Qwen2.5-0.5B`` is a name already.
+    """
+    if isinstance(value, (list, tuple)):
+        return [name_only(item, local_only=local_only) for item in value]
+    if isinstance(value, os.PathLike):
+        value = os.fspath(value)
+    if not isinstance(value, str) or not value or "://" in value:
+        return value
+    if local_only and not (
+        os.path.isabs(value) or value.startswith((".", "~")) or os.path.exists(value)
+    ):
+        return value
+    full = os.path.normpath(os.path.abspath(os.path.expanduser(value)))
+    return os.path.basename(full) or full
 
 
 def _distribution(
@@ -851,6 +885,12 @@ def _cli() -> None:
     s = sub.add_parser("start")
     s.add_argument("--program", required=True)
     s.add_argument("--config", nargs="*", default=[])
+    s.add_argument(
+        "--config-name",
+        nargs="*",
+        default=[],
+        help="KEY=PATH settings recorded by name only (name_only(): a folder or file, never its path)",
+    )
     s.add_argument("--output-types", nargs="*", default=[])
     s.add_argument("--paradata-dir", default="paradata")
     s.add_argument("--component", nargs="*", default=[])
@@ -919,6 +959,9 @@ def _cli() -> None:
         for kv in args.config or []:
             k, _, v = kv.partition("=")
             cfg[k.strip()] = v.strip()
+        for kv in args.config_name or []:
+            k, _, v = kv.partition("=")
+            cfg[k.strip()] = name_only(v.strip())
         logger = ParadataLogger(
             program=args.program,
             config=cfg,

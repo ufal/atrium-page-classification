@@ -456,7 +456,7 @@
             }
           },
           "page_categories": {
-            "description": "Owner: page-classification. Predicted category per page label, for the pages that needed ATR (H3). Values come from the `page-category` scheme in the hub-canonical atrium_vocab.py -- 11 concepts, `atrium_vocab.labels_for('page-category')` -- and each has a stable URI via `atrium_vocab.concept_uri('page-category', value)`. Deliberately NOT constrained by `enum`: page-classification derives its label list from the filesystem at runtime (utils.py collect_images), so an enum here would turn a naming slip into a hard pipeline failure instead of the advisory NOTE the registry raises. See docs/skos_strategy.md 4.",
+            "description": "Owner: page-classification. Predicted category per page label, for the pages forced to the ATR and the pages showing graphics (H3, atrium-project#84 decision 4). Values come from the `page-category` scheme in the hub-canonical atrium_vocab.py -- 11 concepts, `atrium_vocab.labels_for('page-category')` -- and each has a stable URI via `atrium_vocab.concept_uri('page-category', value)`. Deliberately NOT constrained by `enum`: page-classification derives its label list from the filesystem at runtime (utils.py collect_images), so an enum here would turn a naming slip into a hard pipeline failure instead of the advisory NOTE the registry raises. See docs/skos_strategy.md 4.",
             "type": "object",
             "additionalProperties": {
               "type": "string"
@@ -470,7 +470,7 @@
             ]
           },
           "pages": {
-            "description": "Owner of the rows: the record builder (ocr-postprocess), one row for every page of the original, empty pages included (D29). page-classification adds category fields to the pages that needed ATR; nlp-enrich adds teitok_surface. Field-level ownership — never co-mutated. The page's text-layer verdict and needs_atr live in docproc's routing (D27).",
+            "description": "Owner of the rows: the record builder (ocr-postprocess), one row for every page of the original, empty pages included (D29). page-classification adds category fields to the pages forced to the ATR and the pages showing graphics; nlp-enrich adds teitok_surface. Field-level ownership — never co-mutated. The page's text-layer verdict and needs_atr live in docproc's routing (D27).",
             "type": "array",
             "items": {
               "type": "object",
@@ -514,7 +514,7 @@
                 },
                 "category": {
                   "type": "string",
-                  "description": "page-classification, on the pages that needed ATR (H3)."
+                  "description": "page-classification, on the pages forced to the ATR and the pages showing graphics (H3, atrium-project#84 decision 4)."
                 },
                 "category_confidence": {
                   "type": "number",
@@ -1120,13 +1120,25 @@
               }
             ],
             "title": "Pages",
-            "description": "Optional: classify only these pages, 1-based physical positions, e.g. `1,3,5-7`. Empty (the default): every page. A malformed value, or a page past the end of the PDF, is refused (422); MAX_PDF_PAGES counts the pages classified. The response lists only these pages, and only they are written into the record."
+            "description": "Optional: classify only these pages, 1-based physical positions, e.g. `1,3,5-7`. Empty (the default): every page. A malformed value, or a page past the end of the PDF, is refused (422); MAX_PDF_PAGES counts the pages classified. The response lists only these pages, and only they are written into the record. In the AMČR pipeline: the pages digital-convert forces to the ATR and the pages that show graphics (its `graphics_pages`; atrium-project#84 decision 4)."
           },
           "per_model": {
             "type": "boolean",
             "title": "Per Model",
             "description": "Also return each model revision's own `topn` categories (`per_model`): with `version=all`, the five ensemble members' votes behind the averaged `predictions` — what the CLI's `--best --save-intermediates` writes, one CSV per model. Default false: the response is as before.",
             "default": false
+          },
+          "distribution": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distribution",
+            "description": "Optional: which AMČR distribution the PDF is, as the call's paradata `object` names it: `original`, or `rendered-pdf`, an office document's rendered PDF from digital-convert, whose pages the docproc numbers (atrium-project#84 decision 5; a stand-in name until AMČR gives one). Empty (the default): `rendered-pdf` when the `document_json` record's `source.media_type` is an office document's (DOCX, DOC, ODT, RTF), else `original`. A value that contradicts the record's media type is refused (422, `cause: distribution_mismatch`)."
           }
         },
         "type": "object",
@@ -1435,7 +1447,7 @@
                 "type": "null"
               }
             ],
-            "description": "The call's paradata: its Process Run Crate `CreateAction` (paradata 3.0, atrium-project#84). `object` names the original and the record version read by SHA-512; `result` names the record written, with the blocks and fields this call wrote."
+            "description": "The call's paradata: its Process Run Crate `CreateAction` (paradata 3.0, atrium-project#84). `object` names the PDF read (the original, or an office document's rendered PDF: `distribution`) and the record version read by SHA-512; `result` names the record written, with the blocks and fields this call wrote."
           }
         },
         "additionalProperties": true,
@@ -2215,6 +2227,6 @@
   },
   "x-atrium-record-schema": {
     "schema_version": "2.0",
-    "sha256": "b57c97857b34af1fe3c1585e21662d5b08db04248cac125a720989d8b4c19f36"
+    "sha256": "6b2a89a60df4b8094560f25291653ee3ec184753e5081d43ee1429ef7fa653b8"
   }
 }

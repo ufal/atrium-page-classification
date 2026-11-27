@@ -18,8 +18,9 @@ the exact field grant and (since D4/D8) the Layer D schema gate and the field-su
 assertion. A second copy of that logic in the service is exactly how alto's `/process`
 endpoint ended up writing junk (J1).
 
-Two more helpers serve `/predict_document` when a caller sends a record that already has
-pages (the pipeline sends the `needs_atr` pages, H3):
+More helpers serve `/predict_document` when a caller sends a record that already has pages (the
+pipeline sends the pages forced to the ATR and the pages that show graphics, H3 as atrium-project#84
+decision 4 has it):
 
 * `parse_page_selection()` / `expand_page_selection()` — the optional `pages` form field
   ("1,3,5-7", 1-based physical pages): only those pages are rendered and classified.
@@ -27,6 +28,9 @@ pages (the pipeline sends the `needs_atr` pages, H3):
   physical page (`pages[].page_index`, record schema 2.0) and carry the printed label in
   `pages[].page` (`i`, `ii`, `1`, …). The rows are written by `page_index`; `page_categories`
   is keyed by the label, so a page whose label would be another page's is left out of it.
+* `baseline_media_type()` / `input_distribution()` — which AMČR distribution the uploaded PDF is
+  (atrium-project#84 decision 5): the original, or an office document's rendered PDF, the pages
+  digital-convert's docproc numbers. Named in the call's paradata `object`.
 """
 
 from __future__ import annotations
@@ -108,6 +112,70 @@ def expand_page_selection(ranges: Optional[Sequence[Tuple[int, int]]], page_coun
     if beyond:
         raise ValueError(f"page {max(beyond)} was asked for, but the PDF has {page_count} page(s)")
     return sorted({n for start, end in ranges for n in range(start, end + 1)})
+
+
+#: The original's distribution name: AMČR has not named it yet (atrium-project#84, Q11).
+ORIGINAL_DISTRIBUTION = "original"
+
+try:
+    from atrium_paradata import RENDERED_PDF_DISTRIBUTION
+except ImportError:  # pragma: no cover - the module is vendored beside this one
+    RENDERED_PDF_DISTRIBUTION = "rendered-pdf"
+
+#: The distributions a classified PDF can be: the original (a PDF), or an office document's rendered PDF.
+DISTRIBUTIONS: Tuple[str, ...] = (ORIGINAL_DISTRIBUTION, RENDERED_PDF_DISTRIBUTION)
+
+#: An office document's media types (DOCX, DOC, ODT, RTF): its pages are read from digital-convert's
+#: rendered PDF, whose pages and boxes the docproc's are (atrium-project#84 decisions 4 and 5).
+OFFICE_MEDIA_TYPES = frozenset(
+    {
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/msword",
+        "application/vnd.oasis.opendocument.text",
+        "application/rtf",
+        "text/rtf",
+    }
+)
+
+
+class DistributionMismatch(ValueError):
+    """The `distribution` asked for contradicts the baseline record's `source.media_type`."""
+
+
+def baseline_media_type(baseline_bytes: Optional[bytes]) -> Optional[str]:
+    """The baseline record's `source.media_type` (the original's, as AMČR's seed gives it), lower case
+    and without parameters; None when there is none. Read leniently, as `baseline_page_labels`."""
+    if not baseline_bytes:
+        return None
+    try:
+        record = json.loads(baseline_bytes.decode("utf-8-sig"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return None
+    source = record.get("source") if isinstance(record, dict) else None
+    media_type = source.get("media_type") if isinstance(source, dict) else None
+    if not isinstance(media_type, str) or not media_type.strip():
+        return None
+    return media_type.split(";", 1)[0].strip().lower()
+
+
+def input_distribution(requested: Optional[str], media_type: Optional[str]) -> str:
+    """The distribution the uploaded PDF is named by in the paradata `object` (atrium-project#84
+    decision 5). Not asked for: an office original's (`OFFICE_MEDIA_TYPES`) rendered PDF, else the
+    original; no baseline media type: the original. Asked for: one of `DISTRIBUTIONS`, which must
+    agree with the baseline's media type when there is one (else `DistributionMismatch`)."""
+    expected = None
+    if media_type:
+        expected = RENDERED_PDF_DISTRIBUTION if media_type in OFFICE_MEDIA_TYPES else ORIGINAL_DISTRIBUTION
+    if requested is None or not str(requested).strip():
+        return expected or ORIGINAL_DISTRIBUTION
+    requested = str(requested).strip()
+    if requested not in DISTRIBUTIONS:
+        raise ValueError(f"{requested!r} is not one of {', '.join(DISTRIBUTIONS)}")
+    if expected is not None and requested != expected:
+        raise DistributionMismatch(
+            f"{requested!r} does not fit the record's original ({media_type}): its PDF is the {expected!r} distribution"
+        )
+    return requested
 
 
 def baseline_page_labels(baseline_bytes: Optional[bytes]) -> Dict[int, str]:

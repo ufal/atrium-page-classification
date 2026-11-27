@@ -391,6 +391,56 @@ def test_a_document_response_conforms(manager, pdfium):
     assert "pypdfium2" in json.dumps(action["paradataRecord"])
 
 
+def _seed_of(media_type: str) -> bytes:
+    seed = json.loads(json.dumps(_SEED))
+    seed["source"]["media_type"] = media_type
+    return json.dumps(seed).encode()
+
+
+_DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+
+@pytest.mark.parametrize(
+    "seed_media_type, asked, named",
+    [
+        (None, None, "original"),
+        ("application/pdf", None, "original"),
+        (_DOCX, None, "rendered-pdf"),
+        ("application/rtf", "rendered-pdf", "rendered-pdf"),
+        ("application/pdf", "original", "original"),
+    ],
+)
+def test_the_pdf_is_named_by_the_distribution_it_is(manager, pdfium, seed_media_type, asked, named):
+    """atrium-project#84 decision 5: an office document's pages are read from digital-convert's rendered
+    PDF, a distribution of its own; the record's original media type says which one the upload is."""
+    files = {"file": ("CTX01.pdf", b"%PDF-1.4", "application/pdf")}
+    if seed_media_type:
+        files["document_json"] = ("seed.document.json", _seed_of(seed_media_type), "application/json")
+    data = {"distribution": asked} if asked else {}
+    body = _conforms(200, client.post("/predict_document", data=data, files=files), "/predict_document")
+    assert body["paradata"]["object"][0]["name"] == named
+
+
+@pytest.mark.parametrize(
+    "seed_media_type, asked",
+    [(_DOCX, "original"), ("application/pdf", "rendered-pdf")],
+)
+def test_a_distribution_that_contradicts_the_record_is_refused(manager, pdfium, seed_media_type, asked):
+    files = {
+        "file": ("CTX01.pdf", b"%PDF-1.4", "application/pdf"),
+        "document_json": ("seed.document.json", _seed_of(seed_media_type), "application/json"),
+    }
+    response = client.post("/predict_document", data={"distribution": asked}, files=files)
+    assert response.status_code == 422, response.text
+    assert response.json()["cause"] == "distribution_mismatch"
+
+
+def test_an_unknown_distribution_is_refused(manager, pdfium):
+    files = {"file": ("CTX01.pdf", b"%PDF-1.4", "application/pdf")}
+    response = client.post("/predict_document", data={"distribution": "scan"}, files=files)
+    assert response.status_code == 422 and "distribution" in response.text
+
+
 @pytest.mark.parametrize(
     "path, name, media_type, accepted",
     [
