@@ -1177,3 +1177,19 @@ Documentation only; no code, test or configuration change.
 * **Not in the PR:** the committed samples, regenerated from the merged code before the tags.
 * The change is `atrium-page-classification.decisions-84.zip`, these logs `atrium-page-classification.agent_dev_logs.zip`.
 * Logs only; not pushed.
+
+## 2026-11-27 (evening) — atrium-project#84: ARÚP's answers, #79 adjusted
+
+* **ARÚP (comment 7, motyc 16:25):** 1(c), 2(b), 4(b) with the selection rule in `parameters`, 5(a) named and not
+  stored.
+* **Decision 4:** `/predict_document` takes `page_selection` (a rule of the shared `atrium_page_selection.RULES`:
+  `forced+figures`, `explicit`, `all`) and records `pages`, `page_selection` and the rule's statement, so a page
+  without a category reads as not selected. The pipeline selects; this tool records.
+* **Decision 5:** the PDF read is `rendered-pdf` (`stored: false`) for an office document, `original` otherwise.
+* **Decision 1:** `run.py`'s `config` without `input_path`, `inner_dirs` or paths; the images and PDFs it reads and
+  the tables it writes are entries by name and SHA-512; `--page-selection` beside `--pages`.
+* **Bug:** `atrium_document_adapter._write_one` hashed the baseline after the atomic replace, so an in-place
+  `--document-json` named the new record as the input. It now hashes before writing; a test covers it.
+* **Not done here:** the 229-image sample runs are for the cluster.
+* **Verified:** 905 passed, 19 skipped; the release bundle carries `atrium_page_selection.py`.
+* Not pushed.
