@@ -1,0 +1,1248 @@
+{
+  "schema_version": "3.0",
+  "program": "page-classification",
+  "tool_version": "v2.0.0-beta",
+  "repository": "https://github.com/ufal/atrium-page-classification",
+  "runner_ref": "f45743069b18c5e4c9ff221b85943517c6bf3cec",
+  "docker_image": "",
+  "python_version": "3.11.4 (main, Jul 26 2023, 14:53:35) [GCC 11.3.0]",
+  "run_id": "261128-110424",
+  "run_uuid": "urn:uuid:0d3a8a50-b09f-4c3f-aa45-602061448436",
+  "run_agent": "",
+  "action_status": "completed",
+  "start_time": "2026-11-28T11:04:24.941626+00:00",
+  "end_time": "2026-11-28T11:05:25.891090+00:00",
+  "duration_seconds": 60.949,
+  "config": {
+    "model_path": "model",
+    "revision": "v1.4,v2.4,v3.4,v4.4,v5.4",
+    "base_model": "timm/tf_efficientnetv2_m.in21k_ft_in1k,google/vit-base-patch16-224,google/vit-base-patch16-384,timm/regnety_160.swag_ft_in1k,google/vit-large-patch16-384",
+    "top_n": 3,
+    "batch_size": "16",
+    "file_format": "png",
+    "mode": "directory",
+    "raw_output": "False",
+    "best_models": "True",
+    "parallel_best": "False",
+    "yolo": "False"
+  },
+  "parameters": {
+    "revisions": [
+      "v1.4",
+      "v2.4",
+      "v3.4",
+      "v4.4",
+      "v5.4"
+    ],
+    "page_selection": {
+      "rule": "all",
+      "statement": "every page of the document"
+    }
+  },
+  "inputs": [
+    {
+      "name": "atrium-34.png",
+      "sha512": "292ca79bb0ab5af8bd0411d6bba5fa276c92c67a66377ad00b64bd89ee815735e0a54a7fe24b39e405257d87d8c87f1c8db0273cb16f9e91f897ceade10d41bf",
+      "stored": false
+    },
+    {
+      "name": "atrium-35.png",
+      "sha512": "2d41c7db4de99845c179126318776ef27401a95288defd8263e34e0856f414e668325741882a5368e148113f1622bd288d48e010827d6e739f1870dbdcfc4659",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-02.png",
+      "sha512": "1f2d610326f013099586ec835f5b54b6c4062677d4982e974d983a2d0776f75d1d45b54bc06d77f364155e6559948ce3ff5bf5bbb366e33e71742ef0e60ed97a",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-05.png",
+      "sha512": "0fc2c7e1bebc582b15d5041294c96173b4eb45e7faa7f8264af31f1083acbfa14fcc8651815af2499f89777e399513e2e744c825b42c2b1ce62b51f0f47f98a8",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-09.png",
+      "sha512": "46a81927bf2dae895a0c354e762924f5962a89901e2565d8fea2c64438f92eb4ca771293c8753f2ed50b8f9f9205aa2c77d3b3fe3217969c15f262f7cfc76afb",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-10.png",
+      "sha512": "e9e0fb40a5becc35f4a09c7d46d5f8f7d3a5cdc0a30df7677b752a413fd0bd58fb56b60b37c47583162c6a0bed5d3c4f6d90efd65d0065c9795a13dd7623da07",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-12.png",
+      "sha512": "c27bd4bb8af6ecb668141e1d73e6d87f2da713badc54b89926e16c93dfad1e9aaa4cb00fa3a1b7554abd1eead90a941fc46ebded65f970b981c6a0457a143d20",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-14.png",
+      "sha512": "29a008d64121fbc72d159622e940a9f06eecbf09b6d9a5132ef2bdb60da71e3f29ecefb6956c26c716ef2c6e7bc622dd0f62a19b8a52911d44d540a504613748",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-22.png",
+      "sha512": "de09c0f696b0dac9c2b068af5e523e2ec6aea90c941957857527fdaabbdabfefaf5a69121d7a7ffcb4d742684048c324bebd066a8ae554e27494af9f8d9b3108",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-25.png",
+      "sha512": "b8e8a64c7c7c2402e290bbb86ef190e33eae71ff8fc7c1520282801b46a6894d3a79c1bbfd80819c9b58bab4d3cfc4748a39cf8e8a7f1fbdf3c64677ec795f02",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-26.png",
+      "sha512": "624fb100f41d6aa3a69ac4d96bdf97334d0c66c5f7ee369b65fd09e1ebcf725f4e067bd4b24e46a62e051bdb82ce6e07874162652eafcc89bb99ab7bf88c612e",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-27.png",
+      "sha512": "14204bf152cdf06c4deb2ba71ebdc5c8d2c93b7023e0671f2cf558f14512c9875867b2b64d8e9e619a2be0e0a0941bd764a02eba1bf9083a7a295a031d35fb4f",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-30.png",
+      "sha512": "8a6a662feecff3cb049048a93ae372d11dbe514d4f58a55739fe52d5681bcb9228c17961b771b49ff0b518861ea0c4c0e597e9f94874ffd980ab61baaf7fd4f5",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-31.png",
+      "sha512": "463ea9f353f082b9f3c8a3401b229e7874da961174c8ceaa56fd72d963f82e2c1f19fe931d0d985424812b95c10c68bb61167b7aacaf16fc47aa9a205c2786ce",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-33.png",
+      "sha512": "368ee4867a0860159eb45e80ca7cdb91a1ce447f7274b9dd6ab2d28b7ce2881243246ccea90482b644c1c2b434ab71bbb0621abc714ef8d1e4cecc8e32f325dd",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-40.png",
+      "sha512": "4fd738376792ad74c58dfd8a6b2c4c91de94998241050ec76a2713df3d46b148250d4a547aa093c5c835a904ebe28ed96292a7781b08e3c0acf3866f3f230393",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-42.png",
+      "sha512": "fa8bbf9afa73cea1d545a110c0ec8cebd7ddadd88d5e3146f39c9e935c79eeb5b279bf920215b252c19797ce2a2ab8a188ebae80639ff83690a4e9a0acfd677b",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-44.png",
+      "sha512": "3a5450564affd0324218e439e712729294781069c4296d6944a179e23bde3603e7bd6e7cefaf3e02c8540ac4242d9aa20603bd3107ce3d5f86523e6e6d90beee",
+      "stored": false
+    },
+    {
+      "name": "ijdl-05.png",
+      "sha512": "d8a2896198f1cd4bff707b52967869e4d890ab12b32ab9cf03eb35919858b4dc2cb9d4c5070053b0e71fb4e14c4049b9215e3f53854fcb63f4cb0f26237b0666",
+      "stored": false
+    },
+    {
+      "name": "ijdl-06.png",
+      "sha512": "7f44d6738b85599a100e666032092fee35abd58403a0d659d33220629748ab314d74e1a79e254a91b8d48372b8609977444157131f5845f5de063ac3bff137fd",
+      "stored": false
+    },
+    {
+      "name": "ijdl-08.png",
+      "sha512": "d1a1fa1dad7a10353e80c08ad7712cb0c7253d63edd3d143f9e09d4d5485d17a6998e5b0b99f3ecb5b2291b580621277e12be611f3c36038cc8514c090944d37",
+      "stored": false
+    },
+    {
+      "name": "ijdl-13.png",
+      "sha512": "f59381558b1b7845d51e7860f559f881f59ac52fae43d89524f09be6863aaea1a0e12cf3a028711a5ddb73c702f7c667ff80a92da7d966dbefeb92197c89d36e",
+      "stored": false
+    },
+    {
+      "name": "ijdl-16.png",
+      "sha512": "1c15b991d6f4891b40061174d20cfa2c709d140e5bcf877b234f0a6074b4e3b287961aa03db44f0d9bae9e52e92bdb1f6a6fec706e904c65a11cf17136223611",
+      "stored": false
+    },
+    {
+      "name": "ijdl-17.png",
+      "sha512": "15aefe271ccffaab7bd31396d3e0ce0147c039d61c1b66b28136fc258ac96459206e736a7687138ef276d8ba0f652d281da81b07df46be41ede4486150c1da0a",
+      "stored": false
+    },
+    {
+      "name": "pages_online_13.png",
+      "sha512": "daaeb6f5b2ff5cffcec16369fb1263730a4bd4e2b9e682e603cac43799bb430dcaadbca7d725d3aa34dda95411f8ce43ef243b25e0d0a8c2a36fdb2bbec6252a",
+      "stored": false
+    },
+    {
+      "name": "pages_online_19.png",
+      "sha512": "7edd703057d4ec85938956cb2c347fc0a01fe1b2b7de7aeb4487c17f1a60d15f9bfb965fa7adc8ecfa26d572885205838aeeb77239f3109f2ce04643f60c0380",
+      "stored": false
+    },
+    {
+      "name": "pages_online_28.png",
+      "sha512": "8dff08b0fa9b313ba8c2fe19c51ab033f96aea097b4bf76fb5afd4e0d2d8f1290d027f1202ca2301bc337c881424ecb14c07299d767868426559b41582b57cb9",
+      "stored": false
+    },
+    {
+      "name": "pages_online_31.png",
+      "sha512": "36fffb635f1ae6e7488469f6030ce91c0f578382063f0dd1c152ee6e4268c55031bd733c1feb0e436b0138b938ab4dc065cc3e2065ebf01be6437bdcb7a45fab",
+      "stored": false
+    },
+    {
+      "name": "pages_online_34.png",
+      "sha512": "e7591dc0be3cc96a2f66bca1f0d50c6ffedfaef8ffbb567d325832b93731314f18ea3a983894dd73f7f7c4c88c018065446daef7e32bb4993fb37a7ef4184731",
+      "stored": false
+    },
+    {
+      "name": "pages_online_37.png",
+      "sha512": "ff0acde694179a6848133dbbca775124c3f0154d0e3d00c71d23658be5ea4248b0e00805adb0e923650b2dfa0546023210d96e2c6d019ea3e5c68268f75e9604",
+      "stored": false
+    },
+    {
+      "name": "pages_online_38.png",
+      "sha512": "aa30bf3af444e416df8e340e64a0c9ee4151633e0eff2b5444f274fcc970ff59f36bcef3a656d5895f38c9f3c4bae19af724cf546475d0b19a9ebb4b2154120b",
+      "stored": false
+    },
+    {
+      "name": "pages_online_42.png",
+      "sha512": "dbdcdd61f2515d219c350e8edc9b2237bb2e866f67ee2667e9a4814d4a387851cb3f7390345a2257cfb439a32e0e4bac0f28ce4811cb511c8de9ee4d54b973ff",
+      "stored": false
+    },
+    {
+      "name": "pages_online_48.png",
+      "sha512": "f84440f901960619d0710d6353bc3b24de8d8408b230963d4b88a37af2afafaa0f79c3092a9be994f583c33aa8abaa059e237daaa3e77bba1e8080e4180e7212",
+      "stored": false
+    },
+    {
+      "name": "pages_online_8.png",
+      "sha512": "683429b78a42b777b7f8974163982619506d398c1cd8c8cbd432eb7d57b197f7a02845be290fd75516d7ef5a6da6d65b27796f7ceb287ba1ccf48aa72f5ba7ff",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_01.png",
+      "sha512": "84ff33e4c633f1461855e31ec9369125ead5e5eeb05430442a72b730afaff99a0196bd6e4e57f094ab2790f7f3a9c3930d5da24cff1a1a6deb4e9fd162d1867d",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_04.png",
+      "sha512": "ba6529769b448674a980028024e2529a8bd3700f44c8f95734902085ae556aef0b89aae8e0592117e3860ea0f702413e993185b59b30bedf127865ab2f5dff3d",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_05.png",
+      "sha512": "faa034ab2792cc94d44ebfe6c1626bf75b73f67ac9c5dd4ee8c5334eb2d932eae3bc067818c97944438eda4d2bdc5c593e7da6cca4efba0a3f5d8d423bf93be1",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_07.png",
+      "sha512": "a25b4505edce52ed1f239adf254b93d63422be3b572e6f605bb0705a4c2d7255702f79950ebbf1dadf1c91bfb96cdfc3cd652905d67ec455dfc48a8af508b708",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_09.png",
+      "sha512": "495a5a41d936d3cd36a1a77c736e8191ac0e6ae38a6e4e4c360d38e1f4a08f406e71b2799c7b44557749d5ed2b0d05e4c97e17ed3b6adeb3b7bc5c8e6870e997",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_17.png",
+      "sha512": "06a103e6774874e1acb9e79c78bc8d5ebb84d137c35a3e0013881db72254db2344464d24aafc2979a2a449a050f4688af24eaa6117cc0f19272ac08d22deaf33",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_20.png",
+      "sha512": "d60293f7820bd1c30d03ca266f4b3e00d64da3f443c50d754e19163fdad96d731134b896d6b0b6c9b7516b2014675c392c1011bfe18bd38af53e2c153c59c7b8",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_43.png",
+      "sha512": "9aef29f2912440e11d5234613f2297ff89f82b3d0f52b4f430233cccaa1fe10884f7af736bbb4d7e3f5738536b29c1aff8f9704db9dc6c15d555efbbc3094ae7",
+      "stored": false
+    },
+    {
+      "name": "thesis-008.png",
+      "sha512": "822a15634edeb03b17bebd37533eb5af1b17235bc818e37a1ed23d407e2f407a36a5000eadc13620d82ffc5a14ceeea1a285bd18c9e0eb83827716eff103396b",
+      "stored": false
+    },
+    {
+      "name": "thesis-010.png",
+      "sha512": "0c3408bdb243925da35406278bf200ce6ca9f7b455bed700bbb9c6496f595d4e24ef7e9300fb746fd5e14e99e3d9de6243db4469bc8fa138694a56ce5a1e0492",
+      "stored": false
+    },
+    {
+      "name": "thesis-011.png",
+      "sha512": "04e650515f2bb0fabbb1f46dd44708ebd4a235549fde11d76d22e269e395899b4341fc8f8497f1c0dcbb7087d0b38e6fa6dc1e73ee0d9fb731a3e0b90b565e19",
+      "stored": false
+    },
+    {
+      "name": "thesis-016.png",
+      "sha512": "455119cfc74591a65d0a95403b24a2e1905826d0797f7353aca26db4271b75743d726c2d014d1db587e29f67f257bf37df34ee01898d026a6b68e838f48b4bf9",
+      "stored": false
+    },
+    {
+      "name": "thesis-018.png",
+      "sha512": "322e6aae9b1b15bf2bae1adf59461c555134ea8a8424639b859f3a5791b6bfbc9ea537e6e5bb30eafd0356b81bb2b4cbd0c9f80f3f53c3521309f7641445095c",
+      "stored": false
+    },
+    {
+      "name": "thesis-023.png",
+      "sha512": "c940313e3b1a7104c100604f872056f02332a3347cc04289197502dd674e4efa41ddb1712ca8d026bd9cb2c1bdce03515708637430b640647fec3047e03d27c0",
+      "stored": false
+    },
+    {
+      "name": "thesis-036.png",
+      "sha512": "133b355b7e69e586ba376f9acf38ecf60869b8bcdfae91dd4bf42412b8fe03d9700f34d2da88ca508339bcf3ccbbc9ebc7303b4dac75bf9783a21cf05a6979ac",
+      "stored": false
+    },
+    {
+      "name": "thesis-038.png",
+      "sha512": "ca848b34282e971194224ef1b5666cc29523cd316bc82b140920e1d14036ed02099d9a93bb48e88796a8bf8e01c8df0d000651b04767e1d9e0cd8a0f356e050b",
+      "stored": false
+    },
+    {
+      "name": "thesis-045.png",
+      "sha512": "8d9e8a001bb81347a258de636b0a6bcd13203ed8bc696b16788ddd437a849120b992b20306653e866ea92f40b368e1093d097f386ed10d07db946dee9142ded2",
+      "stored": false
+    },
+    {
+      "name": "thesis-046.png",
+      "sha512": "3fbc67f15346691490efecbcd38d935cad30ec454151396af363105dee414d0b7ce2b3bf4f20de31c059f8af377430b1421027b29c0949c4b2dccfdf3c8c3682",
+      "stored": false
+    },
+    {
+      "name": "thesis-047.png",
+      "sha512": "84c4999d48a6665b4f90d79e07b72125081bf9646fb454c6be2647180ffd75c33271b28d070fdaf97532f2c4a60315043418683fa55b5561001d3a0b3c44d100",
+      "stored": false
+    },
+    {
+      "name": "thesis-051.png",
+      "sha512": "dd833d5b37a64f6dfb10e18fa7e9abe3d6274e4f2a17e89a79ba492859ba2a6880752d188975192473075447c8ff115cabbf0fdb05ce6a1761408fba66e2c480",
+      "stored": false
+    },
+    {
+      "name": "thesis-057.png",
+      "sha512": "5dc45228c2cb0faf4be2bdeb32d4c5d4e64c815c8f243987b956f49afa7f7ebd32e9eb56df81def15490aff0bbd17b59fecbebc787346f835d3ffc63a491c5bd",
+      "stored": false
+    },
+    {
+      "name": "thesis-059.png",
+      "sha512": "8a0159a2688a15be7c08de165eb4aad8c5b5c2c288371835ed9a9ce52933bb67142a704b878c93b569ecea1ce9c51fa23e08fc8aeefd3fccdeb3ff9c1866e66e",
+      "stored": false
+    },
+    {
+      "name": "thesis-082.png",
+      "sha512": "489698c43ee464e10b4066409af6ef332a1d54d382f46bce328b716098a973739ab28794d996c90c09c675371a07cc6fde1b26a1982e66d00d5d16253271786d",
+      "stored": false
+    },
+    {
+      "name": "thesis-083.png",
+      "sha512": "276ef236eab544c5a237fd5e9049501239cb49849a36496cb5caf6b07606824bb03170457bcfdcad0ea54e88805c32f67ddc12a1343da15be306a1c695def42c",
+      "stored": false
+    },
+    {
+      "name": "thesis-084.png",
+      "sha512": "ebcd294e260a0e6b1a33ebfedbf495786fbe4fbe7feafaa1b5fd456533dc9cbaf447ce44f9cb5b76266252b3061fb19c33ec6ce56f14392f340d898f44dd4b01",
+      "stored": false
+    },
+    {
+      "name": "thesis-085.png",
+      "sha512": "21fcdbf5e007c3d136624071d596ba07a08badc959c7ee30c6e6e74033851d93b7e32fd19e30109533d128c27de86d5f39079ff53b4d4999c5d92b3bd29fc403",
+      "stored": false
+    },
+    {
+      "name": "thesis-086.png",
+      "sha512": "cc0a15bf4fa27bea758078571fc7ff49121c0da5ed347c49bb05d9a1760bc09c22b0d9381bbbcad5936a5356bb4bfd63385230aa6bcbca7f6e3bee8bec06a083",
+      "stored": false
+    },
+    {
+      "name": "thesis-087.png",
+      "sha512": "3f059016fe031a3165ef72fc2edbdfe1857d78100547755d9639a26a818b34968081cbcd9bb1b53f7009b29d21b431cd570f603d24f76af2047406f67ceb8762",
+      "stored": false
+    },
+    {
+      "name": "thesis-088.png",
+      "sha512": "249ac1cb97ee9ce05f39d9e4c335880782d03f8fd7912cfa0077b8c5ff4688767c3915994f898a21c3ad1b60f2c76855b05847f471628beca6a3bb16b337cb85",
+      "stored": false
+    },
+    {
+      "name": "thesis-091.png",
+      "sha512": "25354f0479c06c285275bf1a13e814e7452c04da38f278b35ad255a99be638caaeca0307a689b77f6794a17d670eb2b9e243e38c43121e6ca711997471f78eb6",
+      "stored": false
+    },
+    {
+      "name": "thesis-094.png",
+      "sha512": "6951d44120cfa0723cd9b3f8615fa7f4a2ed758bcb8c48f2ded6155416a445f220f7de623739eabd528669b3879d2316e8d4f9fe60a4b4cf370007fd93ef223b",
+      "stored": false
+    },
+    {
+      "name": "thesis-098.png",
+      "sha512": "593bf2674b19a3daa823a8e37ca6a9ec267a028800a685d0949aea0146e402b3b3e521ea2bbfd7a257a8fb9eb5dab845264804c3182f5b211eb1c5da8d1a6ad9",
+      "stored": false
+    },
+    {
+      "name": "thesis-124.png",
+      "sha512": "449122e75d721612e7bff2de283ec75e448f029d5768b599cd9eac4ff61f1ab2ae2101b56bf6463adbcd408b1cf166a8c7d171062ffcf3de7990564984da1fa1",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-17.png",
+      "sha512": "70f06c2f61ff53fd3d7b079af81947941668279b0fbcde161e76bce40062add96bef8946a2ffe5f81240bbd00fc22fab8e2b946e0d456d01ce167ccf78323a79",
+      "stored": false
+    },
+    {
+      "name": "pages_online_39.png",
+      "sha512": "c4a61a39764a3e52ddeb3f02482752e7384e89daec15f648bdbb95fe97345740983d4f359a03f24d19a60ab2e018f1ee5cf76577a9b7da276a0b229b28cc00ea",
+      "stored": false
+    },
+    {
+      "name": "pages_online_55.png",
+      "sha512": "9ecab2e69e9722f97742ac2093b360acd8bbda00524c6f123e3c780d05b5073ba16be1d0002dd820b353ebbed12feb1aa2ed20f9f945b35c02c4e3c1d1a24070",
+      "stored": false
+    },
+    {
+      "name": "thesis-101.png",
+      "sha512": "a6f488cff40c5841e9c3bc7beac3542cf93b4e9e22c9388df37fd2a14a57cf58e1df66e0f6478a7ceebcc41b985c985fec57c44818a860c7b7fed6ccc51dd77d",
+      "stored": false
+    },
+    {
+      "name": "pages_online_23.png",
+      "sha512": "c40d832b0365bc8ba601096069510846669f297e3d91daa3836c2851e9dee9c64ba12cdd0b270baf1ef9309efee4e8dda64f4dd988969e240953e373e9f0802f",
+      "stored": false
+    },
+    {
+      "name": "pages_online_24.png",
+      "sha512": "a8061402f170a93e78e00876fde1cfaf73d672e30b638737025488d8448c0cf19c2d692a11d99e001f2ec5cdbfcfd6fbf81317c23d9efc8ff20f6a624e24898d",
+      "stored": false
+    },
+    {
+      "name": "pages_online_25.png",
+      "sha512": "c24cd51e1963956f4d47e25c5edb1cffd669493c58b4ffe078661fc326a4c68f9e3577c97a95414a434db526b8228cf3d978c68b394b7e44bcaeafa42b010527",
+      "stored": false
+    },
+    {
+      "name": "pages_online_33.png",
+      "sha512": "b14e51b3ce84ecb5a3acef909eb321228d2dc1cb892aa6d8d509e96a63c36a4ba3f3b01b19ff36deae8029b5380a37cb7515d367b22aca35e5ee58f37e092d55",
+      "stored": false
+    },
+    {
+      "name": "pages_online_49.png",
+      "sha512": "6bf45cc4aaa7885450f25564dc601873f1dceb9c4ea2cf815f9ec1e92642147a77ff95e23381a452b6f0b6fa19af8d0a9205f4b59cd6e9151d812b387242a2ac",
+      "stored": false
+    },
+    {
+      "name": "pages_online_58.png",
+      "sha512": "16558f42b5ff8c69aec4c13d11a9ea71f5308798842ff51d5f01c16260c6b7ec2512927949a07238abae94c436d57d20116fbbcf89973c6675ffbc11d83c3439",
+      "stored": false
+    },
+    {
+      "name": "pages_online_6.png",
+      "sha512": "d34665ff23d8bf87328b7098662d874e4f74f3560fbc13f74706f8db3c0ddafc6eb33d0483bcc4c9f1e23d7f7f920940d86db3f95f0298bebf2c04773a2a8c96",
+      "stored": false
+    },
+    {
+      "name": "thesis-099.png",
+      "sha512": "8998d6a4974ca71170f0496e4b04db898273266198db1ea9449dc381503ea67614da9ce26c410b3df5736d1067ce59dc6120c4d2d14e7da46e1c90161d18662f",
+      "stored": false
+    },
+    {
+      "name": "atrium-02.png",
+      "sha512": "1a30662debc7f1b2a0f1f552b21dc0157d41dcea6540a22270e81c991da3cb807bf874237e264df97c51452a6dca186d42927e11e80041d96b2efdf899593652",
+      "stored": false
+    },
+    {
+      "name": "atrium-04.png",
+      "sha512": "39ee4cbe5e31ecaadf1a6f1282cf54b8b5bd55db92f71e57042dc29c0a015f6705d44937128cbd825833cac4648cc8a4496dae3d0b947939f1466e750ddf5adf",
+      "stored": false
+    },
+    {
+      "name": "atrium-09.png",
+      "sha512": "9d183a577e578e5e81ef3f5cac5144b731dc62307db32537b1e0a516eb33fb2fe9c60845dd352eaf95f7bafda246589177f65f641a3489ff992561e240d769fc",
+      "stored": false
+    },
+    {
+      "name": "atrium-10.png",
+      "sha512": "a34e3e6ed6036be47f825182239b858e76b4cc13a4dba9d3fd3ff4d2ad667769e96e0ef547209b10ff9b7f451b2859113f488926559db805dda1b44cfccc3af6",
+      "stored": false
+    },
+    {
+      "name": "atrium-11.png",
+      "sha512": "96b5ae15a7872be2781d23fa2c4425082b3452c807e504eb764ba0f3907c89c5f0d787d3970dbe4b7422cbb014b0eb69cd02919bca9216ba2f5fc0830a6baccc",
+      "stored": false
+    },
+    {
+      "name": "atrium-12.png",
+      "sha512": "2baa5ef2401e22390008590fbd96aee967d8010a25b90fd0c354fc10ab2dbbc623aa59137fc34146726ca3799e6bcb60f637c5d97f843611187033d306e1e2f4",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-32.png",
+      "sha512": "6e227561c387b6782fcf6a920c8b2728c30ebe4bb88abd2a7fb789b07d1ce81d06b06483663300431f3c4edb2e71cb97dad42210036d578f203cbe5499067f3e",
+      "stored": false
+    },
+    {
+      "name": "ijdl-01.png",
+      "sha512": "ac1fd5fb3239ad06dd634ebbfad77c027ddb2c43e3f4dfcc97d1183151eae5fb074025f0397f31d90ea590239fe0b5998e2939f1972d53241372fd5f9d941614",
+      "stored": false
+    },
+    {
+      "name": "ijdl-14.png",
+      "sha512": "0130580ff7fdf45dae61554b782d0131f3bd4452a1d9fa1a4eebfcb40fd08a0b7dd15d444fb1293852bf4f0e1e3da98ada4ff1aac77b9cbdd87bdb5cb324086b",
+      "stored": false
+    },
+    {
+      "name": "ijdl-21.png",
+      "sha512": "5e05e5fd32127eafdad319b0bc88fd2f9beea0a87db95613e09df68d4c2ec1a60472c0b36c05fa2f608b3750d86a4ca06092560da4b6568f280bf8333dbb598d",
+      "stored": false
+    },
+    {
+      "name": "ijdl-28.png",
+      "sha512": "b373325b4ddd59491df50ee2cf5e89ec705093c6a977f029b1fd9c81f703902a3d976f563908ae66999372903f6528061d407f5765ea5597952866b5076585c6",
+      "stored": false
+    },
+    {
+      "name": "ijdl-29.png",
+      "sha512": "a658bd7442a55acf1706a575892cdd2257af7440728376cd72e0a40f043d63b6aa4127b0ce55052294be9c9dbef7dfada882b4d3af340d3a5a387270bedc212d",
+      "stored": false
+    },
+    {
+      "name": "pages_online_43.png",
+      "sha512": "db3749be60fed398fb1c7168ae6b22488d9a4b4f99c2c76a918700e02d1d6261e8c5e6169bf54dbfaa204300f3e0979aca9476fbea903e17ce69017314fa5526",
+      "stored": false
+    },
+    {
+      "name": "pages_online_51.png",
+      "sha512": "f346333210c4a6e3210a53d878617422946dccee084f711d2992a71048fa25b73bc0cf3229e73ac3929cd2ee18a626bba7e955301e3691c35930141a4e989104",
+      "stored": false
+    },
+    {
+      "name": "pages_online_52.png",
+      "sha512": "6055be4438528f4ebf11692c892f6545bba48c4df92ddc3bbb00b0db4d50f52e37c95e1be431d06bb81778d8f1db1835d5e4e9082e28f2fc5bc320685e15fc65",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_14.png",
+      "sha512": "377e2752e755ae4669b45ee37a5e9fc3999a070ef3f3f23a9eb72bb77f2b367d53fae4bb2734e01b8804ba8ef4b0da1368aeb0b2f861fcba3c2e7c7bbd9327ee",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_24.png",
+      "sha512": "e09627a21c120d143cbfbd8779131b3fef65059f457b2086002178678a4d21f590909cd2d757bc719f3f4c3af66247e206434d0657a412be93f4f2534e278b69",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_36.png",
+      "sha512": "153f473afc25c86e080637b803466309123f07c4ee436feb15f5e240c068fcfe81a9db82a23e4e37046066e2c91520b2411048541d6b0a1e9d011b5c8fe0f5b3",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_39.png",
+      "sha512": "335118d6840d79fd4e116f0e49b5513ee0392f1d1e2c89f28085680bfcc3a4ede24d5721221c755c373e1cf34b259104ba39da83bf50b022ab279721a3338af1",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_45.png",
+      "sha512": "4f3e0da71d3aa988ecafbcb1f20ae6a73d73c65ddd1ffb2a4c8e76e9513ecbdb1c7c029f3d2c1938c0e675d73d74f2454ec6cbbf758b28fecf2c52c07ec942b2",
+      "stored": false
+    },
+    {
+      "name": "thesis-020.png",
+      "sha512": "00050c60bdf58edaab0fe403732ef6b075c89084039e56cdf85b30930614dddc3506d5cce350280c200030e09ddaced56cfb37f5ed15ba52d5902c88976ede02",
+      "stored": false
+    },
+    {
+      "name": "thesis-025.png",
+      "sha512": "bd6b007d4fdbe0f9c3ab559f93ec4dd05864aabe7cc66f3fbe28bf92054d78d0b80160ae92a145ccef38fdca58622da46e1c295a696c783aadb1caeb8e7101ed",
+      "stored": false
+    },
+    {
+      "name": "thesis-028.png",
+      "sha512": "09532dcecb1e05b5c9aba95b22e5d633633e652e2a15da14e3636aa9916fa7b88584a1d801cd40a8528f662d390437228dec879265d3a74bfdc47b68da4f9b45",
+      "stored": false
+    },
+    {
+      "name": "thesis-029.png",
+      "sha512": "6d6ae4f77e3f17eb26d7895a046e3a7eec2c36873088ae316a679c8e24f6db4bce13bdc0f4025f0aa6d2151d259c8be4eca2cf5d2d0d948463626cf2eaff45ba",
+      "stored": false
+    },
+    {
+      "name": "thesis-033.png",
+      "sha512": "cb817f9c3d62a48a29a6815b2fbcc0cfb7dd4e0a15ff5543ebd1006d2d0bf93830946428c55662a52e3a63c0243dcd61bdf606bc12b8aaec03bb1d32b1f3adcf",
+      "stored": false
+    },
+    {
+      "name": "thesis-041.png",
+      "sha512": "fd002a31d4ad3f0b76bfdcfbc2c3615545aac11a0592ce88f8d98b0823759c04b88e18aab2997ffdef51334d6507da25972580dc8b8eefcf0d15694f3c857b0d",
+      "stored": false
+    },
+    {
+      "name": "thesis-042.png",
+      "sha512": "b96e835071a7592171b713b7ebc59cb192d19a75138a78fafe7f0273904e414ef21736ae5799bc2f9f99434510d1adf4739e3bf2e8af3cde87d0050d04bbcce0",
+      "stored": false
+    },
+    {
+      "name": "thesis-043.png",
+      "sha512": "6b8ed3c287b2f16c167f7837a261f8b6260b47dbbec3a17c30d3e495e98f5652df7871c99bea994a916c2e2b79e28aa945a07b978b99f0fb03fe170f0e7ab1c7",
+      "stored": false
+    },
+    {
+      "name": "thesis-055.png",
+      "sha512": "70b3531ad8c725b9b812f0dc4b9dc22858b663889b90c3b7e4747ce59294b2a6b3816ad6946bbe3b3043df6b1a2956f1be3f892a4dd4e33f1d76a5622cb4381e",
+      "stored": false
+    },
+    {
+      "name": "thesis-060.png",
+      "sha512": "00beed358b53de8882957e09e8bc87aec916095e80e61fd5223f1e7d5d12865e56fdd81a450acbd7c808da3446c4dbfb8c2e621d6fbd24da22721276e2b48166",
+      "stored": false
+    },
+    {
+      "name": "thesis-061.png",
+      "sha512": "c963d9ecdf8c8d15df7dabf3e96c9d9e19ab12b7b0d0d65fd08eec1256a93ee729c83d7f681593b218e96b9c234c042e174823442046a9f9b1a4061433eb4f52",
+      "stored": false
+    },
+    {
+      "name": "thesis-062.png",
+      "sha512": "dc6da48c3bc37c99f51372d5674f5699d012d0da5e283baf5ca267da281dbe31cf1c878e1f24af72440450147db990db5ade155effe11d1430ee4a8843d43dac",
+      "stored": false
+    },
+    {
+      "name": "thesis-066.png",
+      "sha512": "c28100cde69826855fec5135be0cb5e0346406319573fe99a02707d912451ffc46bad51d122f59a11f05e92b3ed67e42498da917306967091547f98f35b89bec",
+      "stored": false
+    },
+    {
+      "name": "thesis-092.png",
+      "sha512": "2976fd57026faff8c0a6f17c97e4af3134ff737d813349f45ac772f07b6d79a8b947377d356c1431ef9a5c1c1304998624a2b78d505d76b62ea11c7d04ceb307",
+      "stored": false
+    },
+    {
+      "name": "thesis-100.png",
+      "sha512": "3d69e4f0b84a2fd91923c6e964a92518bc28163183c8d947882596c8bb3b3b5c7994ededfba45b657b8413b561da754c3c5d543ec2d39ebabe23025ec1bfc50e",
+      "stored": false
+    },
+    {
+      "name": "thesis-108.png",
+      "sha512": "b1e4a300878b47f20052dd662452d8fa4a63c92e8926a15bdfddc0cad9abfd543282e483caca8fbc9d156fb056f7fcaccb43f49a41f4f50be78f98c34920fe66",
+      "stored": false
+    },
+    {
+      "name": "thesis-109.png",
+      "sha512": "461609ee8bcaa086748cecf2577f52b7dfc6502a3c2ae27b289337efda07eda6ec47eb95307ca551e9911d6622adc588c19a1a6c120dbdf83d5d916954b17fbd",
+      "stored": false
+    },
+    {
+      "name": "thesis-110.png",
+      "sha512": "971fc7b2fc222a0d496371c16e94f6c7c531a553bd7489cc1940f73b69da3b2563cbcf909e3a65e5f0519d1269a4ce8051118370f0f16e49a0a063afc6e9b4b5",
+      "stored": false
+    },
+    {
+      "name": "thesis-111.png",
+      "sha512": "6c130e6995178675fcc9a6f521a1f08ed447e80d0f3be8d03e0c5ccd3dc4234c080ef8d94b44e7a8ebf6f663d220eedeb91ad09a8a80b2fc641c13d450e396d1",
+      "stored": false
+    },
+    {
+      "name": "thesis-123.png",
+      "sha512": "b5f434bcecb7e424e2d6c38c72bb43ed5ab5a398253115f2115b2041b28f13312adccc271ed94bf5964d6d4d4a97e7237de2648b5fb5ec209ac287a07c73f8cb",
+      "stored": false
+    },
+    {
+      "name": "ticket-2.png",
+      "sha512": "dc06514f332d7b25ebc051fd49b3bebfcb2227cc69cbb71ee93e201dd93095f105123b78efdf0bc536d0ceb878c07de55e27b4250b225868c6082cde09e6ce03",
+      "stored": false
+    },
+    {
+      "name": "pages_online_54.png",
+      "sha512": "aa96d15cffef49df1d4f7d0efb798aba589e254c371d7f273cf2765dde956ec8975419e387faa89a72166aefd2403471c6e4a3c6de629008feb9053ba9e53226",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_18.png",
+      "sha512": "bc6ba22bc22c6e7efef4ed02862835f1808711806f9ed8a40d9b90b62e359bd7f23533ec1ada7f361808e007309b78f55b5afadd146adac98c34532cbc4b523d",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_26.png",
+      "sha512": "3b1049e149f74e6eb23c969bdcc928bb008b1dc2d1cb81ec2eb326f082eb9505489699d0723d8f8cf17c7fef057662719be800dcf8a014522bba336d784bfe5b",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_31.png",
+      "sha512": "d00db637c7e64250f2cea257c6f0cc3f043ce51f6d470cfff703181429089ed7d5cc6d672a7f8f16e6be848f07052f84f855300fffa222ebbabc820c1de22260",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_41.png",
+      "sha512": "57e46baaf8855faea509d41cca97a605fed966d5c9dd38e2452e13e4dc392cfbe18b0ad717d78548046e00d0b486e1d77c50a2ec73d790aa1100efd1b056e623",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-01.png",
+      "sha512": "d3db186cc01d3db0ca28d35b2946d955b1af16fefa2226c4750d195567b30a0a7c93e4f611de1befe1e5cb3e5dbeadd7b6f5181121c87d67ed771c818c673040",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-15.png",
+      "sha512": "ba8902dbd1547269722509dd05bb0b1d95aafd50734f57b86fe8bd05d513f76148d13381e0b117a96a9da29b801077fa1b3f076a4abe3529e96f12a0a9f6b087",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-21.png",
+      "sha512": "a28f783f99e5e819b02f5e2f51d22871c67b4dec3e5dd902da70a422b5a1d530b63439788c3f5fca0424e3019cb490e80cc8bb35cd47f72b28b2c81e0d0cb7ae",
+      "stored": false
+    },
+    {
+      "name": "guide_troja-3.png",
+      "sha512": "3c954b9b711fcea664f3da1d5f3d7537746e1dab8b885e6e9c5bc10841d4b6577bf1e32596aec89a04b80f9544f553bfa6bbce7cc334dd42120529b8159d2363",
+      "stored": false
+    },
+    {
+      "name": "pages_online_30.png",
+      "sha512": "5a503963e9577988bf8143bb371ed241b1fac342deaa4aee9cd9a51c0e7637d368c8241516751b572e115ec931f2b99b416792ae67924c766e29640625ccbd7e",
+      "stored": false
+    },
+    {
+      "name": "pages_online_47.png",
+      "sha512": "45ceb7056337a206e98b1cb599b685e2d2f83ca52a721d662d34c4dfaa41174e88b2a7589c71e866c4fb4f4e561bbe6bcf2455e82b97983f71a27f7e28505f20",
+      "stored": false
+    },
+    {
+      "name": "pages_online_50.png",
+      "sha512": "dd9f8b8062cc46f0bbced6b32045c1073b654ceace9c8004c65bfc2e6ab6c56d687c32cffaa1cb2e2b8f87aa431f7e5d43faa1ddbdff487f658a942981ac696a",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_06.png",
+      "sha512": "a5857d5b35ce0201a06c8091895f2995c94ec91f36ad3128817c964e8308efd43cd1dbdd44faa3346d15593f01a9dd3fa6a9b885ffe39d74fdfed6eae1059595",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_11.png",
+      "sha512": "29ddb2c12080bdbac526011da9ea2d2c71a5f60540f48a6c5c792f35c496db73dc34bd6be53e521ab3b121dce2c7777b7e68c6c9e3a536e841b505d372f1d350",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_13.png",
+      "sha512": "7d4aa679bac7cc41be540782079cfc15b75047b2fbba2e12dd0c66b32033aae7c84b2a5fbc954d4fa119b034b5c001e2255867d8696cb0919560665d319bd15e",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_27.png",
+      "sha512": "c358430da96d307c4c4d907bf2237f387ce989947f34d04ce4f32b05328f4defee02c03ef2c217a4a492d49f1d6667dc1a4c6d922cc13daf851682e4a10e1c78",
+      "stored": false
+    },
+    {
+      "name": "thesis-021.png",
+      "sha512": "7c4b64e5649c376ca9147c99dffbcc549ca0a685ea8cf6cf5579cda6db8fa6af47959f181b9c51da3bbb334c580d59a13209c2551841ca6038be6a6beeb02928",
+      "stored": false
+    },
+    {
+      "name": "thesis-090.png",
+      "sha512": "fd7e52f8d7762f62435cf9e3f39ecabb85d1fff7e11741412860d29413732bbefd184c004be3137f3df81b0f77218e0e960a5934605c318f8f01b6376e8b2794",
+      "stored": false
+    },
+    {
+      "name": "thesis-093.png",
+      "sha512": "05557e95553ded8c87ce0d18ff8fa2ca09ded3a0b971d50e75f17600c83add98400106d75f2f4de783513a4849341d47cf41c828def3c12d99d67fefa3320d2a",
+      "stored": false
+    },
+    {
+      "name": "thesis-102.png",
+      "sha512": "4a00fba99f641308b193a8a995656a1ed58d52369775433c75c8b35ec59ce3f1cfbe63feb3362a0dcf8f551765671dd962a606a46506ba959242c8a44d4d76b1",
+      "stored": false
+    },
+    {
+      "name": "thesis-103.png",
+      "sha512": "f264807b079071d12b69a17225a5ebf9ef4774bc3312ba1bb7436d266fc475d33274dc0a3a3ef163e1b1a24504c64c55625bb5c11be0b8e4a618f5b995fe00ce",
+      "stored": false
+    },
+    {
+      "name": "thesis-104.png",
+      "sha512": "7942124e294d7e6265725b8a572c2e264f0f7180616ac57486c724b9cd32318dbf8800883e460110558df39616aa2822d46dca3612b68ef5954845f469be4cd9",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-08.png",
+      "sha512": "534f2dc588663f50db1db5406712a4bc529de5153d3ac0e1506fc5bd141fe0dd1bd567ce1cdd125a8df1f1a23ba3ff052f1057f290d21cbd782fae0a3bc202a2",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-19.png",
+      "sha512": "8ec117e9b224b13e953e90b7ea46888c93d35aca02881edf76da176cf2260ac3b67577956ba14707867b2d5584af00fec20acac68503973fbe49d4de34dbd42f",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-24.png",
+      "sha512": "bfa8ab8e547b23aaf47572383c417f3a2866e7c0727aff24ed41a7aeb94c5a98eb070c0744b4a153774ed77aeb639f5e2483714a27897d67c2845be2c2529999",
+      "stored": false
+    },
+    {
+      "name": "pages_online_56.png",
+      "sha512": "76748713afde4e2a9b70dc81326b30ddc1682ac444a30699a8d128919d4ba4336c27d40c280d8741c02d2eb63fc6f97060f3740af48f4bc28f202cc3b1412751",
+      "stored": false
+    },
+    {
+      "name": "pages_online_59.png",
+      "sha512": "88ee707977a23dceb22599a81f33fed57d5cf2aa0377e5c4edd5c7f33c8384b0d11267371dd9754578b6b193f0fc971cab5c976d6e72423b8696c46dcf9137bf",
+      "stored": false
+    },
+    {
+      "name": "ticket-1.png",
+      "sha512": "203db22c170206a82cdc5f54c8751320eced854dce0675279bfe7889e451c2002fc30d7f26921a1fc3eb2d70b8a5e48e11bed5ef6203bdc07f0cd7938f801f3c",
+      "stored": false
+    },
+    {
+      "name": "atrium-01.png",
+      "sha512": "40f4338b52e7e45fa94cfc7bc45f3acea5c462f93240f093e03db7da31ba80aa9bc96e973a0f3f9919c8f6a44b81a4087fb0fa70f3780a6858d9055369399f1d",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-04.png",
+      "sha512": "4a172dbba3ade00e1367ed605701b57db4b08b7d4bd1c909b67034c5c808ea85a9310328320f62206fb3caad11935037508f22300e766c562be550f00be9837d",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-13.png",
+      "sha512": "3137e3be089a9ad1997d324a54f4c8d1579d86e009ab1f9d571dcb4884efdbb3670d3c9ee9cb33a6c8c317e2d16110aec06b84dc2a2bf111a80e7bf1a83805c6",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-18.png",
+      "sha512": "1e44c52875a938bc7dd5a51224b0951034e7e2d71eaedf0367e7b6b3125719c6a3cecc3e4c910c628282e4b54e066bdfb2e536b5685e4565468d22b68bc305e8",
+      "stored": false
+    },
+    {
+      "name": "defense-1.png",
+      "sha512": "8267ceeff5bb241cfd460e2c647c0695fcdeb857608afa6ac18079545b1f4e4502c4580ff46f981181030a2a30228f3846b296f8be8ac5a8048a2fd57b830dd7",
+      "stored": false
+    },
+    {
+      "name": "guide_troja-1.png",
+      "sha512": "61300037da83982138441b8ab760c7278a470b851105aa0cd8deb4835b17d8ebff908fee94cb5878a6888e1131eac1c7db11fcbeb1e4d0eba1f427009bf91eb9",
+      "stored": false
+    },
+    {
+      "name": "guide_troja-2.png",
+      "sha512": "cb9138851b9ca608d28d3960bd9818fb985c3d3037a79f8ff3f149010f1749001b2090809ecb1dab029bf6fbe74e6780526e648aa9346085dbc2a341389b6792",
+      "stored": false
+    },
+    {
+      "name": "guide_troja-4.png",
+      "sha512": "d9e0773927355b11a4c62ce595e7d5218c2ed62605d00ca468c74d6bfb0862060eea7adae612bffedb349390167b4f49d42d3aa6b89bd881dda1edac1e2c001c",
+      "stored": false
+    },
+    {
+      "name": "guide_troja-5.png",
+      "sha512": "cc2f8ab3bebb0270508edb24f20b4dcbb1f59933cf3a6dd3b9edc18d8ab6db2496a8ec5b6577927be209f6847936cacd6eb7489b1837cfbd29c1a64947695e36",
+      "stored": false
+    },
+    {
+      "name": "guide_troja-6.png",
+      "sha512": "064841ef5eaa78c6e5963dc30d6852e2e0fdfe976b44a7e5536b344f38b8db746df5cbfc1aaa43a0f451fb56ea16aaa3399f49f0e6fba7c2c4e0e22e1b636400",
+      "stored": false
+    },
+    {
+      "name": "pages_online_10.png",
+      "sha512": "ad3ba49c6d342a28d29fff065615273691915b6eba362e7b3f2fa593cd9271c983d6faffdeb19728b752bdae653266fa7784c6fd5437dbe7e90b016dd185a13b",
+      "stored": false
+    },
+    {
+      "name": "pages_online_12.png",
+      "sha512": "d3bb5973ba25b1468fb47189de9e227b564b669f029f2133e8d1be90e12470aa65de0c4756a62a9d0d6a7775958c4eff527036822fb645b4b368b7b84b84ba19",
+      "stored": false
+    },
+    {
+      "name": "pages_online_26.png",
+      "sha512": "7bd2a5733b55b4b581250c4c3428c241a21386339623cbdbdc859bf913ec8a447a743841a32bd5d470c076acacf57faf9c7a4c9db895b02559ccf741cd92e311",
+      "stored": false
+    },
+    {
+      "name": "pages_online_35.png",
+      "sha512": "614c348f5d78acdfd281fed8ce82dcfbb0e09440ad82ebb2e4ff97b8fc68e69bb7ec9e093a28a9316800d02593629ae742d654cd6b4f1f28554bd6e996ce7a2f",
+      "stored": false
+    },
+    {
+      "name": "pages_online_4.png",
+      "sha512": "a36bf8dc17a225d9a5b65d656708ba0611155b67d943154c2e5dd841ee0e2521522f67ed3b9297ff44efb441c07c642b46710f80de5b5fe4d22a93a6d0939da5",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_12.png",
+      "sha512": "9e8f20e982b9ab4c75142a9d995b21e7fc7b2d8ea97edffa3d0b06516e4081dfa0190a5bde04d0682df958520fded666c19d567d8e94420dd08ff97e07280ee6",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_22.png",
+      "sha512": "9c13962d59e210391d8abd4824e87b567423c8f157b2ace4ef6532179bb1e580241e7368370746f9969a9a56286ac65c02809e1c355340c0146efccbc901e1c8",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_30.png",
+      "sha512": "fabee0c8c327c45e45f77c59000cb232efea36094490cc30c7370add246ec07143b5837f0484c2e5daa1be83ce4902775081a181f1868140530a9e0777329209",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_33.png",
+      "sha512": "8fe746f1ec4aa7cea1260c75b29e9b5ccf1003c1a922982c347513a0f67e1a77c88747e5af03f35f0f0f105624b2b66f34df9388f6d96a363301400527f70b69",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_37.png",
+      "sha512": "83d53df32e9d3f41549389d677fe5fbf8f3a809386e96d832e8fbdff0507fbfa35cc0b1b4a5b048559c8e0b98a7be7c73216729d8c2141e5fd1a7ec6a104db83",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_40.png",
+      "sha512": "f9c3bbbf69b16c28d5ff4f783e77d3d8c3bb7b58df53147cace75495a7d1f97b4c8a0e2f967549a53f98434184407885a9db03761b310878111bbf1fd46ffb65",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_42.png",
+      "sha512": "91493d331c85711bf40ed3ec921f7945ee479543698ecd0adf1a49adde718808f451ee4ff6755d5877ca08b7a3893b04b0de452808d30732667e3d0ecd93dafb",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_44.png",
+      "sha512": "820b28fc78d22e71872eb99c056bd67f1798473a1ccf67867bc9b052699fad43dfee8ca5ff002ebc727180b665529ed2a8e9773b3e8ce398778a759e6a5f869c",
+      "stored": false
+    },
+    {
+      "name": "thesis-105.png",
+      "sha512": "1ac3c3bcb6c1902d86ca1d0d49995b625e7636ea79f2838359f74340acfaf00694f7433e5600d50dc55179266cd304790144b76c34ec0d1abe8dc98d8d4476e3",
+      "stored": false
+    },
+    {
+      "name": "pages_online_14.png",
+      "sha512": "b2e1eb17c9705f7080816dc0a16b326c2b48490f876dfd7146a1354c66caa647328e2b42f808f68e5ff29b04879ac348158cfd062028354c112a9e744f3a7aac",
+      "stored": false
+    },
+    {
+      "name": "pages_online_15.png",
+      "sha512": "22ecb6b4406b2ad5a6ce9433e1420bc43aa4f197256bfaab606927d0a424430a079279ac394688dfbaa95aee5ce6c39d8ded7ea1258e0ec48f786c960783c033",
+      "stored": false
+    },
+    {
+      "name": "pages_online_16.png",
+      "sha512": "853848db6bf8f33e4ea871416533613f64bde221ddd0c6a0844cbd32ef791a5968c870085e8b44490ae6d371a75b0f631b1ce0cb5a4862574f04398c887e29d7",
+      "stored": false
+    },
+    {
+      "name": "pages_online_17.png",
+      "sha512": "6ce85275516417ad5fe831d55a07c456c17dd77929173a1821a6ca5c20ebf83e2e16ffa00834799334cc76539aa4550d3c91c7738ba0fa2cb159dcb1b173934b",
+      "stored": false
+    },
+    {
+      "name": "pages_online_18.png",
+      "sha512": "240d0134916981f1e9984d1869c317d57e0d41ed1aa3a33c8591d2b05b587aa6d9470059008fba2387bcc2a78606cf878ebeffe57941e8a74756dc5bf3adebe5",
+      "stored": false
+    },
+    {
+      "name": "pages_online_22.png",
+      "sha512": "70d6ab9075328f89506cd43ed818a6453553cae5906fae52dca29546967de0f5d2efc7c2fedf7da535a195a91495286a5ef955adc5635811d07413446283802a",
+      "stored": false
+    },
+    {
+      "name": "pages_online_27.png",
+      "sha512": "3b4bc4c321c99c76059278f8000ab37bb5924366f21a6de6d5bbe6209105a2ba9eb3919b60e1543e79ba697e0b892c9d6225d0bbbc9d8dbd1a93292c93d80d9b",
+      "stored": false
+    },
+    {
+      "name": "pages_online_29.png",
+      "sha512": "4be6038066333bf6a94db543d8d55207cfa8f2594739204519a55ccc0648b8185e7c7e3db09b2785c61ba6c8708001b889e22ea0e515240908cae78b14b573c3",
+      "stored": false
+    },
+    {
+      "name": "pages_online_32.png",
+      "sha512": "bfda10641fbeb69eb3daa768c81160e49635d2cecc298c8cf429798cdcb54beb46cb1dc67dc1e9ac6c0a110c7364b4776fa275984ba412fe27198c93ef8ef108",
+      "stored": false
+    },
+    {
+      "name": "pages_online_36.png",
+      "sha512": "1682d84cd1af89a16428bf3e1124517658001e468f870bd70db81d806bdfd40462b07395475192106ead768cc03c46025329102384051ae0dd77a1bf0b4d70ab",
+      "stored": false
+    },
+    {
+      "name": "pages_online_5.png",
+      "sha512": "58d6e87cff6ff86f8c819eb85a70d130bfcb7dcd173b55a8b997bd0aa460d82af0779c85f16769d91cfae0608029f7c645e7d758dadfd3a080720eafb0b151f5",
+      "stored": false
+    },
+    {
+      "name": "pages_online_9.png",
+      "sha512": "7b1032fddd7a76c3f19c02145cd43b734c48dd8df467d597ba64da447334a23f31507b3a2c785d282f31c55914f3599b2e17c632510dd518d5cd61a83c8c94ae",
+      "stored": false
+    },
+    {
+      "name": "atrium-03.png",
+      "sha512": "f65f443d1373ef509a034d9a7eb9162803affa3eb96e6ca0e7b6176a7e7d8739ac2e5289ec86e09a6472b98732fecf8f37bc27c91fed918194fb76934cdac972",
+      "stored": false
+    },
+    {
+      "name": "atrium-20.png",
+      "sha512": "29116c2f4c917466ad23cfb3c3fd2b23d684a8c9fd45d136e4102421021f51618db1f04ea16bce90662f802edaa57bc19fa3a1ffffcb5156f6fb2489946a5690",
+      "stored": false
+    },
+    {
+      "name": "atrium-22.png",
+      "sha512": "1a0566067dc4f80e563d51df2342b7ab7f99d46708cb0c2631e9e7d0f4ddfda30d348cd542b09a0522785dc707e3cf52e381bff3a2db25c256da827cffc6933e",
+      "stored": false
+    },
+    {
+      "name": "atrium-23.png",
+      "sha512": "f4db780eedc716203682114792d447a58d0b4f2edc580af091fd50ea5615691706c8eeabd1b5aa65600652c77076a7ba5133fedd1b490f8cfc2a6ed9262b33d4",
+      "stored": false
+    },
+    {
+      "name": "atrium-24.png",
+      "sha512": "2eed385e738d619931e403e54e8fdc2fd8cd42576b689b6b8684d7246b84986e353a888138f3b3759e4e54fd84abc44a0d23c0789de0efd67801c39c91328bb8",
+      "stored": false
+    },
+    {
+      "name": "atrium-25.png",
+      "sha512": "2f7109bec03abb0e149daf188f4f376a1c3b776f1ef08da4bbda6a7d0c5759c2af0a0e27f66b1106cb5c9a1cdec7247013169a4f715cde58eab97aaca7407e1b",
+      "stored": false
+    },
+    {
+      "name": "atrium-26.png",
+      "sha512": "fa6313a821dbd3d6bf0e86aca7a0a4d410072843cc78594f94cb45e33f7cbd7eff1ee2a29800bd26efe2b2056602a9aabb7951999b4210e549d006435e5d61c1",
+      "stored": false
+    },
+    {
+      "name": "atrium-28.png",
+      "sha512": "0c0a13b9094f4658ba105ad98a0ee935608da009e82dfc146f9a946357d7d7cea1a8afc80aed763995074804a9c02cdae6a7eb3d156028be1ab7d5d1e6b46157",
+      "stored": false
+    },
+    {
+      "name": "atrium-31.png",
+      "sha512": "8c566be99501fd1ebd2a85e676559080e1d8226140461f4e32e6545bd10acc5c520155530beaa877c1cb83d1e983e0658d7a4cc454ae4e5d42139661b32d735e",
+      "stored": false
+    },
+    {
+      "name": "atrium-33.png",
+      "sha512": "e45f76876d5458674009f705e76d0c56130912bc2bdb1c30f33b13e8af75e55b0c7cea38d6ac4842211284ab7d3f1463c4341c320a1ca1d9f51d38a8f8a66f8c",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-06.png",
+      "sha512": "4e9575a03a88013c41eadbd5f34c2f83c5694fcfa37a1395ce8fa10220a72dece87b2341cf7d1ad8693fa75b6921e9ef13e4611e1549ce143e5650ff2416e22b",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-07.png",
+      "sha512": "65bf705c01c84ecdda84f82e9fe4cad2078238d4a8ab3d416f3e6053ab3658c6661fbffa363df1f29c5ad7a7cb837df495bc5e1ca8d3c9bd44c838b64f05ce4e",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-11.png",
+      "sha512": "b1d663fd31b9be834d33a07b5d22717e34ee0f51984cfffdf13dd0f84ca745aba62b31f0682d8cf7c443ecf7c9f7716dc5d58b74025b8a1efa546f288e3d9d43",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-29.png",
+      "sha512": "445574149e6b53809ac696a5472869ed3d57d315b8438e677a3022c1442bbb0d62d5942866073b7e2377e3b17dac9a04dbfe142b5c05bfeeef235524c45e4d29",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-34.png",
+      "sha512": "5464fc20652c6b0cc534867ccee1199faeb96ad323ab7d334cceb53ff84dd267029de2834fa5852bab337f2def3e52a8d197c3190f4c705897c8e895ec65a577",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-35.png",
+      "sha512": "b789872cf70e90b5667226bcb29c097e6fa1991352fda66746af4762d505953d7964fd4ac11c2fb97a8c5a72b07e85e8a0f2c98d435237f4e094c4fc84340ce7",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-36.png",
+      "sha512": "f446d99a934bcbc648d5813f345c1ce146008b40c5c5ac83bc486a3b076a1e4261e3c77233859cc966ae4b7e5fda9b2e410f12d418fb894b37522d6066786111",
+      "stored": false
+    },
+    {
+      "name": "caa_conference-43.png",
+      "sha512": "91086c0da222e56bdb8b7a6829fb70a613756559f0bd2aea0566419871f17fb8ea04070f6db7abc2ac023c7d7e0fbc57e31ecf92c4b2e235e47d190718f61502",
+      "stored": false
+    },
+    {
+      "name": "ijdl-03.png",
+      "sha512": "eb9250deb2da0520ccc67186ae8e6ca4aff5bf52a1c76a3644034ba9a04ad46cdddaacbd537b29afb071b450673a1aab797f71a0ae5ddb05fa11669577e38fd8",
+      "stored": false
+    },
+    {
+      "name": "ijdl-04.png",
+      "sha512": "15524b6ba2f3af8c28d5a3db16bd4374ccf84ade4b1d36825f5caad8b1232e5352f21e172fe35df6e1b7909ced9bfabeea31ee63e3c69066a9ad34cba36aef3c",
+      "stored": false
+    },
+    {
+      "name": "ijdl-24.png",
+      "sha512": "a55d686dff23856a4e29b460541d663329199fe7748c7ebc052305ca6345f754a1d4115b143ad9ae22f2ced39b428b20400650b5298ca68e0d16c9dc47042593",
+      "stored": false
+    },
+    {
+      "name": "ijdl-27.png",
+      "sha512": "76e7d0598d7580d3e9d5edb88311fb468f61c8f36b0028c1395050164716be24a078cda17ef0895554cbb3433ae77299d16bd84850038ef72a5a4335f880a231",
+      "stored": false
+    },
+    {
+      "name": "pages_online_21.png",
+      "sha512": "8150c66895ebd1ca5b2e3261e449c815792488a0caa69e890ac32a76f79cd169480dd7aff898b6ee0c589941792de1b763341739d86f134fe64d8458d33af5b5",
+      "stored": false
+    },
+    {
+      "name": "presentation_thesis_47.png",
+      "sha512": "32e6d684df3118e553002d6ab64c728ed7ca31a9df37427278412a7ebd94de09e7a4602b7b39fd7456112e5f98efb51965a0eda5cb8b44255515262edfdd78dd",
+      "stored": false
+    },
+    {
+      "name": "thesis-001.png",
+      "sha512": "9b5bd171b0507c85014e5664c76f97861a656dd2534cc0552f2ac3ad4d78e49d91829991edd442c89004e4d035987409f3a074b6f58c20ca4006e377d3610775",
+      "stored": false
+    },
+    {
+      "name": "thesis-002.png",
+      "sha512": "7ef2f707ca738003ae985a82da6a645b74c2dbf40d2057e95bb49966fc9867ac045554205a268ed11a591c388f154c5e2eacbba6a3f45e588daddf7ef16f743f",
+      "stored": false
+    },
+    {
+      "name": "thesis-003.png",
+      "sha512": "986b2f064168a3a478a90863b6d9e754f03d3fbdfd1c74b0bae02644701497c7341554162599ee159d73d8e29b756e8fc337e07f0f83bb81e11142ce4554c46a",
+      "stored": false
+    },
+    {
+      "name": "thesis-005.png",
+      "sha512": "27c89d873fd5a96c529cb1c735c41af20d43931b7bb26988b2219b9010b92d406f958824317d117766f0ab31d0606e4b32d63f74dd16aaec1365977f6284db00",
+      "stored": false
+    },
+    {
+      "name": "thesis-007.png",
+      "sha512": "3a22e2ff34bd8f4b2d838d09ca753b2db24930a3f223b65bb948622cb926fbd0b5d7b4a97552d64df9caaa596690be14f00d4bcac42ac102bd3dc10941c6e0f1",
+      "stored": false
+    },
+    {
+      "name": "thesis-014.png",
+      "sha512": "67dcb1eff6aa6e8cb775becf47888d079375dde275c33bedef9f20306b970a96953a3b01b682ec1335eaecddcaa2b93f77a1908daa9a1e2d800fa542368995e4",
+      "stored": false
+    },
+    {
+      "name": "thesis-056.png",
+      "sha512": "7384452a6629ca38ab4064a339950aeed618ae2434e90a5f753382ef6754bdeefc4f34bb07c58907a8375714c3b5255d689dd11a10323b4b7fdf6a309f91f809",
+      "stored": false
+    },
+    {
+      "name": "thesis-069.png",
+      "sha512": "7209df4b7411c36df5bd7b8da47165f6fd781fd38d414ae5e62b33374effce55765e028dd88ec1006420bf9589bc6199fcf8a3cfea9e30f12e0ff51096124a01",
+      "stored": false
+    },
+    {
+      "name": "thesis-074.png",
+      "sha512": "20260b3e2a77e15a41875378fdc17bde4bbd754d41bf49b003b5fbf30ac88d08fd5f227ca239724b2495f0cc8996a42ae7170551822f4349a54c29e695954e18",
+      "stored": false
+    },
+    {
+      "name": "thesis-078.png",
+      "sha512": "887b94a791379f28bbe81a6f3c988d89d6535f29aede3ee3d232e48524745b3597566c0292609935815b63bf25efb59a3716f31ca0e7beccac77d6e78fee0c05",
+      "stored": false
+    },
+    {
+      "name": "thesis-080.png",
+      "sha512": "1dd99505f4f52088e08876633c3d38975a11855956922b6fdf554c22b219285ed6d9cc759de1a37a7377942378ca809b55d2a12d4158204bdfbf86d05615cc13",
+      "stored": false
+    },
+    {
+      "name": "thesis-096.png",
+      "sha512": "24f039a9cc18cb9e31f55e5bf954f185e0b9d6a0fc71c2382f0196d6bc784a7e4aa969573a32a848e46a58ee7d5bc71eda18e0e80a49c5854d4eeba59bfb3f12",
+      "stored": false
+    },
+    {
+      "name": "thesis-112.png",
+      "sha512": "f6e2d18e19d196639fe0dba03cc5ca1fc696bd5c9b1c60980cecb8bdb02de0b3a0fdc05b84fddf2de810a2be3f2f261200aa285e5844a33675ff839ae5d4c728",
+      "stored": false
+    },
+    {
+      "name": "thesis-116.png",
+      "sha512": "d09aea49f6943de451a0cdafc6fa951749c51abc48ae50f8ce7622abb4c240c8ad164e605a19a0ddf4a3fd34b695eefd7109b96ece9ab678894a4cbc944e37cc",
+      "stored": false
+    },
+    {
+      "name": "thesis-117.png",
+      "sha512": "e6f7dd8fa48d8e2f279b0bf06f4cb59e33dd54a268f4731fa55a7c7c428ad173ed8087e23a9510a0668a6157237d3cbc9abf980501011b249357ec95ed8d85d3",
+      "stored": false
+    },
+    {
+      "name": "thesis-118.png",
+      "sha512": "ceb9bfd250bd456642955f8b94af53cc6126f1b2509e6e8dec5ffca8268396774d7d6741a01192a9e1ab2872be6f64dc0b6992c3fd5eee91446791a2b2718171",
+      "stored": false
+    },
+    {
+      "name": "thesis-119.png",
+      "sha512": "7deb35a9056c59afc2f2a160620c1205405926e87b34ae6acb2301dca54afc463558bbfdda7a70c717765bbf89a9762147b75e68434b1a20aa4b0780e49aad99",
+      "stored": false
+    },
+    {
+      "name": "pages_online_11.png",
+      "sha512": "3bf02fb183b0f92dd863ae8cebef0886226c70a5ba2113cb9be52b38c4a3243e41fbc5276aa80f5e4c6ace70628e079c674d31210d74ed7012cc7345a6fb01e0",
+      "stored": false
+    },
+    {
+      "name": "pages_online_2.png",
+      "sha512": "4e3a4f78417ca673fed7bc97979d9524a5312de66550bd08c7b12844f9f0e5bc750d1114e6637017cc79690712ffe89673dad9920f7278f40ea8bb8eaa0d5f20",
+      "stored": false
+    },
+    {
+      "name": "pages_online_3.png",
+      "sha512": "a3d3fef847490e3faaa34a9be31750cb39d75b82669a11ce8394ef447ff45e59768974024dbef0971119bf2f9139ceebd4ec980ec9cb179dc76f24d5acf7f7ad",
+      "stored": false
+    },
+    {
+      "name": "pages_online_7.png",
+      "sha512": "2421392a89412343cef3cd90d8ec6d2d20e362f841204ff60d3a9124012ffbd009cc9c326291f1aced5a2f7fa431e35f186dca8bd8db265599c6440e6282190c",
+      "stored": false
+    }
+  ],
+  "outputs": [
+    {
+      "name": "20261128-1204_BEST_5_models_AVG_TOP-3.csv",
+      "sha512": "91987278cc9ad02d347a058edaf1ec5ea3966318c302fa890c083a42b16794a5dc7f374ee16d28475c1c0e5af3122aae64d752db67a157a540d1a38c60807ade",
+      "stored": false
+    },
+    {
+      "name": "20261128-1204_BEST_5_models_TOP-1.csv",
+      "sha512": "d38d07f43b071418510ba5ed89d46b5ad4c5a1ddd56dcf28424574f3049b6c7c637522b0ff5a7f2b1c32df2876da1c292425c3df62e9cb5a6c8d8f953c574117",
+      "stored": false
+    },
+    {
+      "name": "20261128-1204_v14_TOP-3.csv",
+      "sha512": "aff2361ca51743a585ace591bdf45b9b256b5db6b595a7eefc9eb43a331bf15ba0697e6f561feb22cd5115df1e17ccd60a7bb73022879d7eecb0c4772c641488",
+      "stored": false
+    },
+    {
+      "name": "20261128-1204_v24_TOP-3.csv",
+      "sha512": "7835d86a58bf4ff565560c78f1eb7cb99e81c5b48e0a51fd843bf87529df0921357c97ffbbe5ca9b365857ea1bf09b54860c2b2f59ef2352918a2d88dd0a725c",
+      "stored": false
+    },
+    {
+      "name": "20261128-1204_v34_TOP-3.csv",
+      "sha512": "0e23aba79548cf2f2ee755e9cea6f70dc5469f79bb958f05acd8cad3ad0cc325ab1beaf10306370ee967ed8d77219af343fa2d51ec912f0b8d0ea50425cf405a",
+      "stored": false
+    },
+    {
+      "name": "20261128-1204_v44_TOP-3.csv",
+      "sha512": "c7ef67941170a05f5d98a2d9e59cb9a4c4d996c5d401d48a960a55e049e5ac15163ee1cff76400f95e22bc086115789c80c687f55f439707492a622827146329",
+      "stored": false
+    },
+    {
+      "name": "20261128-1204_v54_TOP-3.csv",
+      "sha512": "022b4f46357ae1984f984b4a45327eeae05bba1b09c74a3e3e31dd28b08411970b657445f8514ec29344a217829817223a499eee0ff6a79a1b3767de49eb19ae",
+      "stored": false
+    }
+  ],
+  "components": [
+    {
+      "name": "vit_models",
+      "license": "CC BY-NC 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc/4.0/"
+    }
+  ],
+  "statistics": {
+    "input_files_total": 229,
+    "successfully_processed": 1146,
+    "skipped_files": 0,
+    "output_counts_by_type": {
+      "csv": 1146,
+      "png": 0
+    },
+    "performance_per_minute": {
+      "csv": 1128.1477,
+      "png": 0.0
+    }
+  },
+  "skipped_files_detail": [],
+  "limits": []
+}
