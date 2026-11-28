@@ -1,5 +1,6 @@
 # Strategy — [atrium-project#84](https://github.com/ufal/atrium-project/issues/84) (doc-schema-v2): page-classification's part
 
+> _**Refreshed 2026-11-28**: Status — 11-28 (merged and released as `v2.0.0-beta`; the hub's lanes, the chain sample at the tags and `doc-schema-v2` next)._
 > _**Refreshed 2026-11-27 (evening)**: Status — 11-27 (evening) (ARÚP's answers on atrium-project#84, comment 7; the PR adjusted)._
 > _**Refreshed 2026-11-27**: Status — 11-27 (the non-A options of atrium-project#84 prepared, not pushed)._
 > _**Refreshed 2026-11-25**: Status — 11-25 (the v2.0.0-beta release prep)._
@@ -17,16 +18,18 @@
 > This file is the repository's slice only. It replaces the 11-11 slice of the same name, which had the classifier
 > on every PDF and image; 12 November changes that._
 
-**Status (2026-11-27, evening)**: 🟡 **ARÚP answered atrium-project#84 (comment 7). #79 is adjusted: the caller selects the pages (forced ∪ pages with `figure` blocks, the hub's shared `atrium_page_selection`) and `/predict_document` records `pages` and `page_selection` with the rule's statement (decision 4); the rendered PDF is named `stored: false` (decision 5); `run.py` keeps settings and models in `config` and names the files it reads and writes as entries (decision 1). A bug found on the way: the record adapter hashed an in-place baseline after overwriting it. See the DEVLOG entry of 11-27 (evening).**
+**Status (2026-11-28)**: 🟢 **Released as `v2.0.0-beta` (`9d5f4b8`, 11-28): #79 squash-merged (`a7ccb60`, atrium-project#84's decisions 1, 4, 5) after the re-pin to the hub's `ff0a8ea` (`v1`), with the two demonstration runs from the cluster (runner `f457430`); the release run is green and the images are certified. Next, in the hub: the chain sample re-run at this tag, both E2E lanes on the `2.0.0-beta` images, and `doc-schema-v2`'s tag (motyc is asked on atrium-project#84). See the DEVLOG entry of 11-28.**
 
-**Status (2026-11-27)**: 🟡 **The non-A options of atrium-project#84 prepared (not pushed; ARÚP has not answered): `/predict_document` names its PDF by the distribution it is (`original` or `rendered-pdf`, from the record's media type; decision 5, R7); in the pipeline it reads the forced pages and the pages that show graphics (decision 4); the command line's paradata name files, not paths, and record `pages` (decision 1). One PR, after the hub's. See the DEVLOG entry of 11-27.**
+**Status (2026-11-27, evening)**: 🟡 **ARÚP answered atrium-project#84 (comment 7). #79 is adjusted: the caller selects the pages (forced ∪ pages with `figure` blocks, the hub's shared `atrium_page_selection`) and `/predict_document` records `pages` and `page_selection` with the rule's statement (decision 4); the rendered PDF is named `stored: false` (decision 5); `run.py` keeps settings and models in `config` and names the files it reads and writes as entries (decision 1). A bug found on the way: the record adapter hashed an in-place baseline after overwriting it. See the DEVLOG entry of 11-27 (evening).** _(superseded 11-28: merged and released)_
 
-**Status (2026-11-25)**: 🟢 **v2.0.0-beta release prep in #78 (`v2-beta-prep` → `test`), CI green; the two demonstration runs are this version's (runner `466aeb7`, checked 11-25). Tag 26 November after the merge.**
+**Status (2026-11-27)**: 🟡 **The non-A options of atrium-project#84 prepared (not pushed; ARÚP has not answered): `/predict_document` names its PDF by the distribution it is (`original` or `rendered-pdf`, from the record's media type; decision 5, R7); in the pipeline it reads the forced pages and the pages that show graphics (decision 4); the command line's paradata name files, not paths, and record `pages` (decision 1). One PR, after the hub's. See the DEVLOG entry of 11-27.** _(superseded 11-27 evening: ARÚP answered)_
+
+**Status (2026-11-25)**: 🟢 **v2.0.0-beta release prep in #78 (`v2-beta-prep` → `test`), CI green; the two demonstration runs are this version's (runner `466aeb7`, checked 11-25). Tag 26 November after the merge.** _(superseded 11-28: tagged `v2.0.0-beta` on 11-28, after ARÚP's answers)_
 
 **Status (2026-11-19)**: 🟢 **This repository's part is on `test` (#71, #74), pinned to `02cbd01`. D33 is resolved:
 the page categories are not sent to the ATR (Ronald, ask 6; motyc agreed); they stay in the record. Left: two
 sentences that still have the classifier decide the processing (a docs PR under atrium-project#84); the release
-(`v2.0.0-beta`) with the batch (atrium-project#77).**
+(`v2.0.0-beta`) with the batch (atrium-project#77).** _(superseded 11-25: the release prep)_
 
 **Status (2026-11-14, afternoon)**: 🟡 **The hub's PR is merged and this repository is pinned to it: drift is green.
 Round 6 completes this repository's part where no answer is pending; see "Status — round 6". The release (v2.0.0-beta)
@@ -49,22 +52,24 @@ all — D33 resolved)_
 | Record node                                   | In v2                                                                                       |
 |-----------------------------------------------|---------------------------------------------------------------------------------------------|
 | `page_categories`                             | written                                                                                     |
-| `pages[].category`, `category_confidence`     | written, for the pages that needed ATR; joined on `pages[].page_index` (H2)                 |
+| `pages[].category`, `category_confidence`     | written, for the selected pages (decision 4); joined on `pages[].page_index` (H2)           |
 | `derived_from.classification`                 | stops (D1): `atrium_document_adapter.py:223`                                                |
 | run data, licence detail                      | none (D1, D2), through the re-vendored `atrium_document.py`                                 |
 
 ## Tasks (next rounds)
 
-1. **The `needs_atr` pages only** (H3). `/predict_document` (`service/api.py:795`) already takes a `pages` selection
-   (its `pages` form field; `expand_page_selection()`); the pipeline sends the original and the `needs_atr` page
-   numbers from digital-convert's routing. For an image, the whole image. Nothing in the tool decides which pages.
+1. **The forced and `figure` pages** (H3; decision 4, 11-27; the `needs_atr` pages only until then).
+   `/predict_document` (`service/api.py:795`) already takes a `pages` selection (its `pages` form field;
+   `expand_page_selection()`); the pipeline sends the original and the selected page numbers (forced ∪ `figure` pages,
+   the shared `atrium_page_selection`) from digital-convert's docproc; the tool records `pages` and `page_selection`.
+   For an image, the whole image. Nothing in the tool decides which pages.
 2. **Page keys by `page_index`** (H2). The rows are keyed by the record's page label today
    (`page_inputs.pdf_page_keys()`, `page_inputs.py:129`; `service/document_json.record_page_keys()`,
    `service/document_json.py:138`); with `page_index` on every page row the label mapping and the baseline input are
    not needed. The record builder writes the page rows first (ocr-postprocess), so this step adds fields to existing
    rows.
 3. **`MAX_PDF_PAGES`** (`tool_limits.py:24`, 50; checked on the selection, `service/api.py:337-361`) refuses rather
-   than trims, as D13 wants. A mixed or scanned document with more than 50 `needs_atr` pages would fail the job: the
+   than trims, as D13 wants. A mixed or scanned document with more than 50 selected pages would fail the job: the
    limit is raised for the pipeline, or the pipeline sends the pages in chunks (H1: the cluster side chunks). To
    settle with aiscr-docs-pipeline when the step is assembled.
 4. **Paradata** (#84 §4). One action in `paradata/atrium/document-json`: object = the original by distribution name
@@ -173,16 +178,17 @@ atrium-project#84 round 8 (comment 3's update): `forms` gone, decode verdicts ap
 
 ## Depends on
 
-_(11-19: hub tasks done; the pipeline's hand-over of the `needs_atr` pages is aiscr-docs-pipeline#12, due 12-04.)_
+_(11-19: hub tasks done; the pipeline's hand-over of the selected pages (forced ∪ `figure` pages since
+decision 4) is aiscr-docs-pipeline#12, due 12-04.)_
 
 - Hub tasks 1 (grants; `page_index`), 3 (`file_entity` with SHA-512), re-vendoring.
 - ocr-postprocess's slice: a page row for every page before this step writes.
-- aiscr-docs-pipeline: how the `needs_atr` pages and large documents are passed (task 3).
+- aiscr-docs-pipeline: how the selected pages and large documents are passed (task 3).
 
 ## Superseded in this repository's logs
 
 - The 11-11 slice (not committed): page classification on every PDF and image, bundled with the ATR call →
-  `needs_atr` pages only, beside the ATR (H3).
+  the selected pages beside the ATR (H3; forced ∪ `figure` pages, decision 4).
 - `plans/58.plan.md`, `digests/58.digest.md`: parked (atrium-project#83); their 11-11 link to the slice now points
   here; the TrueOpen.AI note of 11-12.
 

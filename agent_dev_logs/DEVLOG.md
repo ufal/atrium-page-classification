@@ -1,13 +1,13 @@
 # 📓 atrium-page-classification — agent_dev_logs/DEVLOG.md (timeline index)
 > _Historical page-image classification. Open issue: #58 (decision-model experiments, 2026-10-20; renamed 2026-11-06 "Decision Models (DM) application to incoming documents", a sub-issue of atrium-project#83; parked during the pilot phase since 2026-11-11); #64 (the
-> scheduled-smoke failure of 10-27) closed 2026-11-04; no open pull request (11-19). #61 (the directory-run bug) closed
+> scheduled-smoke failure of 10-27) closed 2026-11-04; no open pull request (11-28). #61 (the directory-run bug) closed
 > 2026-10-22, fixed in **v1.9.6-beta**; #48 closed 2026-09-17. Its pilot work is tracked in hub issues (atrium-project
 > #6, #66, #77, #79, #84; #72 and #81 closed 11-16). **Starting set of the pilot phase: v1.12.3-beta** (`0a96bce`, 2026-11-04; immutable, with `images.json`;
 > atrium-project#77). **v1.9.5-beta** (2026-10-19, the runbook) is the first immutable release (atrium-project#72).
-> Since: **v1.13.0-beta** (11-06, the Galaxy entry point) · **v1.14.2-beta** (11-08, atrium-project#10's fixes);
-> v1.14.0-beta and v1.14.1-beta were tagged, not released. `test` (`340be2d`) is 17 commits past v1.14.2-beta and
-> declares the unreleased v2.0.0-beta; `master` is `1e80e7a`. Hub workflows pinned to `02cbd01` (`v1`). Latest entry:
-> 2026-11-25 (v2.0.0-beta release prep). The "rounds 8 and 9" of 11-14 below are this repository's own count, not atrium-project#84's
+> Since: **v1.13.0-beta** (11-06, the Galaxy entry point) · **v1.14.2-beta** (11-08, atrium-project#10's fixes) · **v2.0.0-beta** (2026-11-28, `9d5f4b8`: record 2.0,
+> atrium-project#84's decisions; immutable, with `images.json`); v1.14.0-beta and v1.14.1-beta were tagged,
+> not released. `test` = `vit` (the default branch) = the tag; `master` is `1e80e7a`. Hub workflows pinned to
+> `ff0a8ea` (`v1`). Latest entry: 2026-11-28 (v2.0.0-beta released). The "rounds 8 and 9" of 11-14 below are this repository's own count, not atrium-project#84's
 > rounds 8 and 9 of 11-16._
 > _Per-issue detail: `digests/58.digest.md` · `plans/58.plan.md` · `plans/doc-schema-v2.plan.md` (this repository's part of atrium-project#84)._
 > _Cross-repo/hub history lives in `ufal/atrium-project/agent_dev_logs/DEVLOG.md` (deduplicated out of this file)._
@@ -1193,3 +1193,21 @@ Documentation only; no code, test or configuration change.
 * **Not done here:** the 229-image sample runs are for the cluster.
 * **Verified:** 905 passed, 19 skipped; the release bundle carries `atrium_page_selection.py`.
 * Not pushed.
+
+## 2026-11-28 — atrium-project#84: merged, v2.0.0-beta released
+
+* **Merged:** #78 (release prep, `8e0760d`, 11-25) and #79 (`a7ccb60`, 11-28: ARÚP's answers, decisions 1, 4, 5),
+  squash. Before the merge #79 was re-pinned to the hub's `ff0a8ea` (`v1`, atrium-project#95's merge; 10 references)
+  and got its samples.
+* **Released:** `v2.0.0-beta` on `9d5f4b8` (#79 plus `CITATION.cff` `date-released: 2026-11-28`), published 11:47 UTC,
+  immutable, "Record Schema 2.0 update of `atrium_document`", the curated notes above the generated part. Release run
+  46140784765 green: tests, smoke, build and push with Trivy, the CVE gate and the promotion to the scanned digest,
+  the OpenAPI checks, the assets (`images.json`, `openapi.json`, `service_page_classifier.zip`). `vit` = `test` = the
+  tag; `CITATION.cff`, `service/openapi.json` and `setup/para_config.txt` say 2.0.0-beta.
+* **Samples:** the two demonstration runs (229 pages each) made again on the cluster:
+  `result/paradata/261128-110334_*`, `261128-110424_*` and the eight `result/tables/20261128-*` tables; runner
+  `f457430`, #79's head before the sample commit (the tag differs from it only in two doc links to the new tables).
+* **Not yet, in the hub:** both E2E lanes on the `2.0.0-beta` images; the chain sample (`fixtures/chain/CTX000000003`)
+  re-run at this tag, since its paradata name #84's PR heads; `doc-schema-v2`'s tag, asked of motyc on
+  atrium-project#84.
+* Logs only; not pushed.
