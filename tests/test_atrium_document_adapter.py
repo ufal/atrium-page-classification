@@ -495,3 +495,23 @@ class TestFixtureContract:
     )
     def test_intentionally_invalid_baselines_are_wrong_about_exactly_one_thing(self, record, expected_path):
         assert [path for path, _ in _schema_errors(record)] == [expected_path]
+
+
+def test_an_in_place_run_names_the_record_it_read_not_the_one_it_wrote(tmp_path):
+    """The record version read is hashed before the record is written: with --document-json and
+    --document-json-out the same file, naming it afterwards named the new record as the input."""
+    import hashlib
+
+    from atrium_paradata import ParadataLogger
+
+    path = tmp_path / "CTX01.document.json"
+    path.write_text(json.dumps(_record(pages=[{"page_index": 1, "quality_score": 0.9}])), encoding="utf-8")
+    read_sha = hashlib.sha512(path.read_bytes()).hexdigest()
+    logger = ParadataLogger(program="page-classification", config={}, paradata_dir=None)
+    rdf = _rdf([{"FILE": "CTX01", "PAGE": "1", "CLASS-1": "Text", "SCORE-1": 0.87}])
+    write_document_record(rdf=rdf, document_json=str(path), document_json_out=str(path), paradata_logger=logger)
+    logger.finalize()
+    [read] = logger.record["inputs"]
+    [written] = logger.record["outputs"]
+    assert read["sha512"] == read_sha
+    assert written["sha512"] == hashlib.sha512(path.read_bytes()).hexdigest() != read_sha

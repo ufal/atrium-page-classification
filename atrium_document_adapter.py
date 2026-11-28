@@ -38,6 +38,7 @@ there once, rather than once per caller.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import sys
@@ -263,6 +264,13 @@ def _write_one(
                 f"against {SCHEMA_FILENAME}: {own_error} - refusing to emit it (Layer D)"
             )
 
+    # The record version read, hashed before anything is written: an in-place run
+    # (`--document-json` = `--document-json-out`) replaces the baseline below, and naming it
+    # afterwards named the new record as the input.
+    baseline_sha512 = None
+    if paradata_logger is not None and baseline and os.path.exists(baseline):
+        baseline_sha512 = hashlib.sha512(Path(baseline).read_bytes()).hexdigest()
+
     # Atomic write: build the record ourselves (doc.finalize() also works, but writes
     # in place — a crash mid-write would leave a corrupt record for the next tool to trip
     # over `load_document()` on).
@@ -273,8 +281,8 @@ def _write_one(
         json.dump(record, fh, ensure_ascii=False, indent=2)
     tmp_p.replace(out_p)
     if paradata_logger is not None:
-        if baseline and os.path.exists(baseline):
-            paradata_logger.add_input(RECORD_DISTRIBUTION, path=baseline, media_type="application/json")
+        if baseline_sha512 is not None:
+            paradata_logger.add_input(RECORD_DISTRIBUTION, sha512=baseline_sha512, media_type="application/json")
         paradata_logger.add_output(
             RECORD_DISTRIBUTION, path=str(out_p), media_type="application/json", record_fields=doc.written()
         )

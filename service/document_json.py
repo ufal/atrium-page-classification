@@ -19,8 +19,8 @@ assertion. A second copy of that logic in the service is exactly how alto's `/pr
 endpoint ended up writing junk (J1).
 
 More helpers serve `/predict_document` when a caller sends a record that already has pages (the
-pipeline sends the pages forced to the ATR and the pages that show graphics, H3 as atrium-project#84
-decision 4 has it):
+pipeline sends the pages forced to the ATR and the pages with figure blocks, H3 as atrium-project#84
+decision 4 has it; `atrium_page_selection` selects them):
 
 * `parse_page_selection()` / `expand_page_selection()` — the optional `pages` form field
   ("1,3,5-7", 1-based physical pages): only those pages are rendered and classified.

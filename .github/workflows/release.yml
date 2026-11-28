@@ -173,6 +173,7 @@ jobs:
           # release, because this list did not name it; tests/test_release_bundle.py now runs this
           # step's closure check on every pull request.
           cp atrium_openapi.py \
+             atrium_page_selection.py \
              atrium_paradata.py \
              atrium_rocrate.py \
              atrium_limits.py \

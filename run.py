@@ -8,6 +8,7 @@ from pathlib import Path
 from atrium_document_adapter import write_document_record, write_document_records_dir
 
 # from huggingface_hub import create_branch, delete_branch
+from atrium_page_selection import rule_statement
 from atrium_paradata import ParadataLogger, name_only
 from model_registry import CATEGORIES as def_categ
 
@@ -115,6 +116,15 @@ def build_parser(config):
         type=str,
         default=None,
         help='PDF inputs only: the pages to classify, "1,3,5-7" (1-based), as /predict_document\'s `pages`',
+    )
+    parser.add_argument(
+        "--page-selection",
+        type=str,
+        default=None,
+        choices=["forced+figures", "explicit", "all"],
+        help="the rule --pages were selected by, recorded with its statement in the paradata (atrium-project#84 "
+        "decision 4): forced+figures (the pages forced to the ATR and those with figure blocks), explicit or all; "
+        "default explicit with --pages, else all",
     )
     parser.add_argument("-d", "--directory", type=str, default=None, help="Path to folder with unprocessed pages")
     parser.add_argument(
@@ -330,6 +340,10 @@ def main(argv=None):
             parse_page_selection(args.pages)
         except ValueError as exc:
             parser.error(f"--pages: {exc}")
+    if args.page_selection == "all" and args.pages:
+        parser.error("--page-selection all classifies every page: give no --pages with it")
+    if args.page_selection not in (None, "all") and not args.pages:
+        parser.error(f"--page-selection {args.page_selection} names the pages it selected: give them as --pages")
 
     if args.models_dir:
         # The weights staged once, read by every run (atrium-project#66): fill the folder with
@@ -397,22 +411,15 @@ def main(argv=None):
         _run_revisions = [args.revision] if getattr(args, "revision", None) else []
         _run_model_path = args.model if hasattr(args, "model") else config.get("SETUP", "model", fallback="")
         _run_base_model = args.yolo_base if args.yolo else args.base
-    # Files and folders by name, never their paths (atrium-project#84 decision 1); a model path that is a
-    # Hugging Face id stays as given.
+    # Settings only (atrium-project#84 decision 1): the images and PDFs read and the tables and plots
+    # written are inputs/outputs entries by file name and SHA-512 (`_name_run_files`); a local model is
+    # named by its folder, a Hugging Face id stays as given.
     _paradata_cfg = {
         "model_path": name_only(_run_model_path, local_only=True),
         "revision": ",".join(_run_revisions) if _run_revisions else config.get("HF", "revision", fallback=""),
         "base_model": _run_base_model,
         "top_n": args.topn if hasattr(args, "topn") else config.get("SETUP", "top_n", fallback=""),
         "batch_size": config.get("SETUP", "batch", fallback=""),
-        "input_path": name_only(
-            str(
-                args.file
-                or args.directory
-                or (args.eval_dir if args.eval else config.get("INPUT", "FOLDER_INPUT", fallback=""))
-            )
-        ),
-        "inner_dirs": config.get("SETUP", "inner", fallback=""),
         "file_format": args.file_format if hasattr(args, "file_format") else "png",
         "mode": "file" if (hasattr(args, "file") and args.file) else "directory",
         "raw_output": str(getattr(args, "raw", False)),
@@ -432,6 +439,10 @@ def main(argv=None):
     if getattr(args, "pages", None):
         # The pages classified, as the service records them (atrium-project#84 decision 4).
         _paradata_logger.set_parameter("pages", args.pages)
+    _page_rule = args.page_selection or ("explicit" if getattr(args, "pages", None) else "all")
+    _paradata_logger.set_parameter("page_selection", {"rule": _page_rule, "statement": rule_statement(_page_rule)})
+    _run_started = time.time()
+    _read_inputs: list = []
     # ── end paradata init ─────────────────────────────────────────────────────
 
     print("Arguments:")
@@ -892,6 +903,7 @@ def main(argv=None):
     pdf_pages = {}  # doc_id -> physical page numbers rendered
 
     def _render(pdf_path):
+        _read_inputs.append(pdf_path)
         try:
             doc_id, rendered = render_pdf(pdf_path, Path(_render_root.name) / str(len(pdf_pages)), pages=args.pages)
         except ValueError as exc:
@@ -947,6 +959,7 @@ def main(argv=None):
     try:
         if args.file is not None and not single_pdf:
             _total_inputs += 1
+            _read_inputs.append(args.file)
             if not args.best:
                 pred_scores = classifier.top_n_predictions(args.file, top_N)
 
@@ -1056,6 +1069,7 @@ def main(argv=None):
                         test_images.extend(_render(path))
                     elif Path(path).suffix.lower() != f".{PDF_FORMAT}":
                         test_images.append(path)
+                        _read_inputs.append(path)
 
             _total_inputs = len(test_images)
 
@@ -1189,11 +1203,34 @@ def main(argv=None):
                         _write_records(avg_df, avg_csv_path)
 
     finally:
+        _name_run_files(_paradata_logger, _read_inputs, output_dir, _run_started)
         # An evaluation counts the pages it scored, not the tables and plots it wrote.
         _paradata_logger.finalize(_total_inputs, _eval_processed if args.eval else None)
         _render_root.cleanup()
 
     return 0
+
+
+def _name_run_files(logger, inputs, output_dir, since: float) -> None:
+    """Name the files a run read and wrote, by file name and SHA-512, never by path (atrium-project#84
+    decision 1): the images and PDFs it read (`inputs`), and the files it wrote under the results folder
+    (`output_dir`: tables, statistics, plots) since it started. The paradata folder and the records
+    (`*.document.json`, named by their distribution, `atrium/document-json`) are left out."""
+    logger.add_input_files(*[p for p in dict.fromkeys(inputs) if p and os.path.isfile(p)])
+    root = Path(output_dir)
+    written = []
+    if root.is_dir():
+        for path in sorted(root.rglob("*")):
+            parts = path.relative_to(root).parts
+            if (
+                path.is_file()
+                and "paradata" not in parts
+                and not any(part.startswith(".") for part in parts)
+                and not path.name.endswith(".document.json")
+                and path.stat().st_mtime >= since - 1.0
+            ):
+                written.append(path)
+    logger.add_output_files(*written)
 
 
 if __name__ == "__main__":
