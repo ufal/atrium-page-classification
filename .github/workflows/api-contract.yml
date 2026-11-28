@@ -12,4 +12,4 @@ permissions:
 
 jobs:
   api-contract:
-    uses: ufal/atrium-project/.github/workflows/api-contract.reusable.yml@fbffe25a9d1bcf681274d74f0dd026045d0478de  # v1
+    uses: ufal/atrium-project/.github/workflows/api-contract.reusable.yml@ff0a8eac7eb8580acd576159e7ee12d0623b8f8d  # v1

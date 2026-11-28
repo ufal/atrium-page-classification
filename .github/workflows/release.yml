@@ -98,7 +98,7 @@ jobs:
       contents: read
       packages: write
       security-events: write
-    uses: ufal/atrium-project/.github/workflows/docker-tool.reusable.yml@fbffe25a9d1bcf681274d74f0dd026045d0478de  # v1
+    uses: ufal/atrium-project/.github/workflows/docker-tool.reusable.yml@ff0a8eac7eb8580acd576159e7ee12d0623b8f8d  # v1
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     with:
