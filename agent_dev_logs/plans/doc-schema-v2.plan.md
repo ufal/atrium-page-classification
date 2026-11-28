@@ -1,5 +1,7 @@
 # Strategy — [atrium-project#84](https://github.com/ufal/atrium-project/issues/84) (doc-schema-v2): page-classification's part
 
+> _**Refreshed 2026-11-27 (evening)**: Status — 11-27 (evening) (ARÚP's answers on atrium-project#84, comment 7; the PR adjusted)._
+> _**Refreshed 2026-11-27**: Status — 11-27 (the non-A options of atrium-project#84 prepared, not pushed)._
 > _**Refreshed 2026-11-25**: Status — 11-25 (the v2.0.0-beta release prep)._
 > _**Refreshed 2026-11-19**: "Status — 11-19": #74 and #75 merged; D33 resolved (no categories to the ATR); the
 > wording that has the classifier route pages._
@@ -14,6 +16,10 @@
 > contract digest.
 > This file is the repository's slice only. It replaces the 11-11 slice of the same name, which had the classifier
 > on every PDF and image; 12 November changes that._
+
+**Status (2026-11-27, evening)**: 🟡 **ARÚP answered atrium-project#84 (comment 7). #79 is adjusted: the caller selects the pages (forced ∪ pages with `figure` blocks, the hub's shared `atrium_page_selection`) and `/predict_document` records `pages` and `page_selection` with the rule's statement (decision 4); the rendered PDF is named `stored: false` (decision 5); `run.py` keeps settings and models in `config` and names the files it reads and writes as entries (decision 1). A bug found on the way: the record adapter hashed an in-place baseline after overwriting it. See the DEVLOG entry of 11-27 (evening).**
+
+**Status (2026-11-27)**: 🟡 **The non-A options of atrium-project#84 prepared (not pushed; ARÚP has not answered): `/predict_document` names its PDF by the distribution it is (`original` or `rendered-pdf`, from the record's media type; decision 5, R7); in the pipeline it reads the forced pages and the pages that show graphics (decision 4); the command line's paradata name files, not paths, and record `pages` (decision 1). One PR, after the hub's. See the DEVLOG entry of 11-27.**
 
 **Status (2026-11-25)**: 🟢 **v2.0.0-beta release prep in #78 (`v2-beta-prep` → `test`), CI green; the two demonstration runs are this version's (runner `466aeb7`, checked 11-25). Tag 26 November after the merge.**
 

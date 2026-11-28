@@ -101,9 +101,13 @@ score. The command line writes CSV tables and a paradata log; the service answer
 ## Where it fits in ATRIUM
 
 In the AMČR pipeline, page-classification classifies the pages that go to the ATR, AIS CR's text-recognition
-service, beside the ATR: the pages digital-convert marked `needsAtr`, or every page of a scanned image. The pipeline
-passes them as a page selection (`pages`), and the categories join the record's page rows after ocr-postprocess
-builds them. They may be offered to the ATR as a weak signal about the content, never as routing. The whole route:
+service, beside the ATR, and the pages that show pictures: the pages forced to the ATR and the pages with `figure`
+blocks (pictures, charts, drawings) in the docproc, of a PDF or of an office document, or every page of a scanned
+image (atrium-project#84 decision 4). For an office document it reads digital-convert's rendered PDF, whose pages
+the docproc numbers, and names it in its paradata as that distribution, not stored (`distribution`). The pipeline
+selects the pages (the hub's `atrium_page_selection`) and passes them as `pages` with the rule
+(`page_selection=forced+figures`); the paradata record both, so a page without a category reads as not selected.
+The categories join the record's page rows after ocr-postprocess builds them. They may be offered to the ATR as a weak signal about the content, never as routing. The whole route:
 the hub's [Pipelines](https://ufal.github.io/atrium-project/pipelines/#the-route-through-the-pipeline) page and this
 tool's [workflow page](https://ufal.github.io/atrium-project/workflows/page-classification/).
 

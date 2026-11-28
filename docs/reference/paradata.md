@@ -20,9 +20,13 @@ tools, and driven by this repository's [para_config.txt](../../setup/para_config
 * **Metrics:** the exact start and end times, the duration in seconds, the speed (files per minute), and the counts
   of files written (CSVs, PNGs) and of inputs skipped. An image that cannot be read is logged as a skip with its
   reason; `--eval` counts the pages it scored and the tables it wrote.
-* **A configuration snapshot:** the model revision, the base model actually used, the batch size, the input path and
-  the command-line flags of the run. A `--best` run names its five ensemble revisions and their base models.
-* **Parameters:** `revisions`, the model revisions that made the predictions (the five `vX.4` with `--best`).
+* **A configuration snapshot:** the settings only (atrium-project#84 decision 1): the model revision, the base
+  model actually used, the model folder by its name (a Hugging Face id as given), the batch size and the
+  command-line flags of the run; never a path or the name of a file read or written. A `--best` run names its five
+  ensemble revisions and their base models.
+* **Parameters:** `revisions`, the model revisions that made the predictions (the five `vX.4` with `--best`);
+  `pages`, the page selection of a PDF (`--pages`); and `page_selection`, the rule the pages were selected by with
+  its statement (`--page-selection`: `forced+figures`, `explicit`, `all`; decision 4), as the service records them.
 * **Tool version and runner:** the `tool_version` (from `para_config.txt`), the `repository` and `runner_ref`, and
   a `docker_image` field. In a published container the repository and runner come from the `ATRIUM_RUNNER_REPO`,
   `ATRIUM_RUNNER_REF` and `ATRIUM_RUNNER_IMAGE` environment variables, so the reference names the actual runner
@@ -34,13 +38,14 @@ tools, and driven by this repository's [para_config.txt](../../setup/para_config
   ([licences.md](licences.md)).
 * **Inputs and outputs** (paradata 3.0): the record version read and the record written, each by its AMČR
   distribution name (`atrium/document-json`) and SHA-512; the record written names the blocks and fields the run
-  wrote (`record_fields`). The page images a command-line run read are not named this way: the run's `config`
-  records the input path and the model path, local paths.
+  wrote (`record_fields`). The images and PDFs a command-line run read, and the tables and plots it wrote under the
+  results folder, are entries too, by file name and SHA-512, `stored: false` (decision 1).
 
 The HTTP service writes no paradata file. Each successful answer carries the call's paradata instead, as
-`paradata`: its Process Run Crate `CreateAction`. `object` is the original (the upload) and, when one was sent, the
-record version read; `result` is the record written, when one was asked for. The pages classified are a parameter,
-and `pypdfium2` is among the components when `/predict_document` rendered a PDF
+`paradata`: its Process Run Crate `CreateAction`. `object` is the upload (the original, or an office document's
+rendered PDF, `rendered-pdf`, `stored: false`) and, when one was sent, the record version read; `result` is the record
+written, when one was asked for. The pages classified are a parameter, with their `page_selection`, and `pypdfium2`
+is among the components when `/predict_document` rendered a PDF
 ([service/README.md](../../service/README.md#how-it-works)).
 
 ## The document record schema

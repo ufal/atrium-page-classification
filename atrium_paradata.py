@@ -14,6 +14,14 @@ A run's paradata describe the run that produced the current version of a distrib
   `DocumentRecord.written()`).
 * **`action_status`** `completed`, or `failed` with `error` when the run raised (D13: what AMČR
   stores is always completed; development and tests use the same frame).
+* **`config`** holds only what shaped the output: settings, models (a Hugging Face id as given, a
+  local model by its name, `name_only(..., local_only=True)`) and revisions (atrium-project#84
+  decision 1). Never a path, nor the name of a file the run read or wrote: a path describes the
+  machine that ran the job, not the document.
+* **A command line's files** are entries too: every file a batch run reads or writes that is not a
+  distribution (a page image, a text, a table, a vocabulary, a prompt template) is named by its file
+  name and SHA-512, `stored: false` (`add_input_files()`, `add_output_files()`; the CLI's `input` /
+  `output` without `--name`). SHA-512 everywhere, the file's name next to it (decision 2).
 * **`parameters`** only what shaped the output (`set_parameter()`); **`limits`** the sampling and
   splitting notes only. A trimmed, skipped or stopped content is not a note: it raises
   `ContentLimitError` and the job fails (D13).
@@ -94,6 +102,12 @@ FAILED = "failed"
 #: The record's distribution: an output with this name may name the record fields written.
 RECORD_DISTRIBUTION = "atrium/document-json"
 
+#: An office document's rendered PDF (digital-convert's LibreOffice rendering). Not stored: named by
+#: its SHA-512 with `stored: false` for every office document, because the stored docproc's page
+#: numbers and boxes refer to it, and the ATR and page-classification read it (atrium-project#84
+#: decision 5). A stand-in name until AMČR settles whether, and under which name, it is stored.
+RENDERED_PDF_DISTRIBUTION = "rendered-pdf"
+
 _ENV_RUNNER_IMAGE = "ATRIUM_RUNNER_IMAGE"
 _ENV_RUNNER_REPO = "ATRIUM_RUNNER_REPO"
 _ENV_RUNNER_REF = "ATRIUM_RUNNER_REF"
@@ -152,6 +166,31 @@ def sha512_of(data: Any = None, path: Optional[str] = None) -> str:
     return digest.hexdigest()
 
 
+def name_only(value: Any, *, local_only: bool = False) -> Any:
+    """A file or folder by its name, never its path (atrium-project#84 decision 1): the name of a
+    file entry (`add_input_files()`), or a local model in ``config``. The basename of the
+    normalised absolute path, so ``data_samples/ALTO/`` is ``ALTO`` and ``.`` the working folder's name.
+
+    Kept as given: None, ``""`` (never the working folder's name), a URL (``scheme://…``) and any
+    value that is not a str or path. A list or tuple is mapped element-wise. With `local_only`
+    (a setting that is a local path OR an identifier, such as a model), a value that is not
+    absolute, does not start with ``.`` or ``~`` and names no existing path is kept as given: a
+    Hugging Face id such as ``Qwen/Qwen2.5-0.5B`` is a name already.
+    """
+    if isinstance(value, (list, tuple)):
+        return [name_only(item, local_only=local_only) for item in value]
+    if isinstance(value, os.PathLike):
+        value = os.fspath(value)
+    if not isinstance(value, str) or not value or "://" in value:
+        return value
+    if local_only and not (
+        os.path.isabs(value) or value.startswith((".", "~")) or os.path.exists(value)
+    ):
+        return value
+    full = os.path.normpath(os.path.abspath(os.path.expanduser(value)))
+    return os.path.basename(full) or full
+
+
 def _distribution(
     name: str,
     data: Any,
@@ -172,6 +211,33 @@ def _distribution(
         entry["media_type"] = str(media_type)
     entry["stored"] = bool(stored)
     return entry
+
+
+def _files(paths: Any, skip: Optional[str] = None) -> List[str]:
+    """The files `paths` name, in order: a file as given, a folder every file beneath it, sorted.
+    Hidden files and folders (a run's `.state_*` file) and the folder `skip` (the run's own
+    paradata folder) are left out."""
+    if isinstance(paths, (str, os.PathLike)):
+        paths = [paths]
+    skip_abs = os.path.abspath(skip) if skip else None
+    out: List[str] = []
+    for item in paths:
+        if item is None or item == "":
+            continue
+        path = os.fspath(item)
+        if os.path.isdir(path):
+            for root, dirs, files in os.walk(path):
+                dirs[:] = sorted(
+                    d
+                    for d in dirs
+                    if not d.startswith(".") and d != "__pycache__" and os.path.abspath(os.path.join(root, d)) != skip_abs
+                )
+                out.extend(os.path.join(root, f) for f in sorted(files) if not f.startswith("."))
+        elif os.path.isfile(path):
+            out.append(path)
+        else:
+            raise FileNotFoundError(f"paradata: no file or folder {os.path.basename(path)!r} to name")
+    return out
 
 
 class ParadataLogger:
@@ -261,13 +327,36 @@ class ParadataLogger:
 
         For the record (`atrium/document-json`), `record_fields` names the blocks and fields this
         run wrote — `DocumentRecord.written()` (#84 §4). An output that is not stored but reaches
-        a stored distribution is `stored=False` (D23); an output that reaches none is not recorded.
+        a stored distribution is `stored=False` (D23); an output that reaches none is not recorded,
+        except a command line's files (`add_output_files()`, decision 1).
         """
         entry = _distribution(name, data, path, sha512, media_type, stored)
         if record_fields is not None:
             entry["record_fields"] = {str(k): [str(f) for f in v] for k, v in record_fields.items()}
         self._outputs.append(entry)
         return dict(entry)
+
+    def add_input_files(self, *paths: Any, media_type: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Record the files a command line read (atrium-project#84 decision 1): one entry per file,
+        named by its file name and SHA-512, `stored: false`. A folder adds every file beneath it,
+        sorted; the path is read, never recorded. Two files may share a name: their SHA-512s tell
+        them apart. Every file is named, however many (nothing is dropped)."""
+        entries = [
+            _distribution(name_only(path), None, path, None, media_type, False)
+            for path in _files(paths, self.paradata_dir)
+        ]
+        self._inputs.extend(entries)
+        return [dict(e) for e in entries]
+
+    def add_output_files(self, *paths: Any, media_type: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Record the files a command line wrote, as `add_input_files()` does its inputs. Its own
+        paradata folder is never named."""
+        entries = [
+            _distribution(name_only(path), None, path, None, media_type, False)
+            for path in _files(paths, self.paradata_dir)
+        ]
+        self._outputs.extend(entries)
+        return [dict(e) for e in entries]
 
     def set_parameter(self, key: str, value: Any) -> None:
         """Record a parameter that SHAPED the output (#84 §4): a model revision, a threshold, the
@@ -850,7 +939,7 @@ def _cli() -> None:
 
     s = sub.add_parser("start")
     s.add_argument("--program", required=True)
-    s.add_argument("--config", nargs="*", default=[])
+    s.add_argument("--config", nargs="*", default=[], help="KEY=VALUE settings that shaped the output; never a path")
     s.add_argument("--output-types", nargs="*", default=[])
     s.add_argument("--paradata-dir", default="paradata")
     s.add_argument("--component", nargs="*", default=[])
@@ -881,10 +970,22 @@ def _cli() -> None:
     nl.add_argument("--detail", default="")
 
     for verb in ("input", "output"):
-        io = sub.add_parser(verb, help=f"record an {verb} by AMČR distribution name and SHA-512")
+        io = sub.add_parser(
+            verb,
+            help=f"record an {verb}: a distribution by --name, or a command line's files by file name (no --name)",
+        )
         io.add_argument("--state", required=True)
-        io.add_argument("--name", required=True, help="the distribution name, e.g. atrium/document-json")
-        io.add_argument("--file", default=None, help="the file to hash (its path is not recorded)")
+        io.add_argument(
+            "--name",
+            default=None,
+            help="the distribution name, e.g. atrium/document-json; without it every --file is a file entry",
+        )
+        io.add_argument(
+            "--file",
+            nargs="+",
+            default=None,
+            help="the file(s) or folder(s) to hash (their paths are not recorded); one file with --name",
+        )
         io.add_argument("--sha512", default=None)
         io.add_argument("--media-type", default=None)
         io.add_argument("--not-stored", action="store_true", help="the file is not stored (D23)")
@@ -960,9 +1061,18 @@ def _cli() -> None:
             except ContentLimitError as exc:
                 print(f"[paradata] {exc}", file=sys.stderr)
                 sys.exit(1)
+        elif args.cmd in ("input", "output") and not args.name:
+            if not args.file:
+                print(f"[paradata] {args.cmd}: --file is required without --name", file=sys.stderr)
+                sys.exit(2)
+            adder = logger.add_output_files if args.cmd == "output" else logger.add_input_files
+            adder(*args.file, media_type=args.media_type)
         elif args.cmd in ("input", "output"):
+            if args.file and len(args.file) > 1:
+                print(f"[paradata] {args.cmd} --name names one file", file=sys.stderr)
+                sys.exit(2)
             kwargs: Dict[str, Any] = {
-                "path": args.file,
+                "path": args.file[0] if args.file else None,
                 "sha512": args.sha512,
                 "media_type": args.media_type,
                 "stored": not args.not_stored,

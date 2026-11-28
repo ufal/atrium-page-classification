@@ -200,3 +200,43 @@ def test_an_evaluation_counts_its_pages_and_declares_the_dataset(tmp_path, monke
     # paradata 3.0 (atrium-project#84): each component with its own terms, as facts; no licence
     assert "lindat_dataset" in {component["name"] for component in record["components"]}
     assert "license" not in record and "license_detail" not in record
+
+
+def test_a_run_names_its_files_by_name_and_sha512_never_by_path(tmp_path):
+    """atrium-project#84 decision 1(c): the images and PDFs read are inputs, the tables and plots
+    written under the results folder since the run started are outputs, by file name and SHA-512;
+    the paradata folder, the records and anything older are left out."""
+    import hashlib
+    import os
+    import time
+
+    from atrium_paradata import ParadataLogger
+    from run import _name_run_files
+
+    image = tmp_path / "in" / "CTX01-1.png"
+    image.parent.mkdir()
+    image.write_bytes(b"png")
+    results = tmp_path / "result"
+    (results / "tables").mkdir(parents=True)
+    (results / "paradata").mkdir()
+    old = results / "tables" / "old.csv"
+    old.write_text("old", encoding="utf-8")
+    os.utime(old, (time.time() - 3600, time.time() - 3600))
+    started = time.time()
+    table = results / "tables" / "261127_TOP-3.csv"
+    table.write_text("FILE,PAGE", encoding="utf-8")
+    (results / "paradata" / "x.json").write_text("{}", encoding="utf-8")
+    (results / "CTX01.document.json").write_text("{}", encoding="utf-8")
+    logger = ParadataLogger(program="page-classification", config={}, paradata_dir=None)
+    _name_run_files(logger, [str(image), str(image), str(tmp_path / "gone.png")], results, started)
+    logger.finalize()
+    assert logger.record["inputs"] == [
+        {"name": "CTX01-1.png", "sha512": hashlib.sha512(b"png").hexdigest(), "stored": False}
+    ]
+    assert [o["name"] for o in logger.record["outputs"]] == ["261127_TOP-3.csv"]
+
+
+def test_page_selection_must_fit_the_pages(capsys):
+    with pytest.raises(SystemExit) as excinfo:
+        main(["--page-selection", "forced+figures", "-f", "x.pdf"])
+    assert excinfo.value.code == 2 and "--page-selection" in capsys.readouterr().err

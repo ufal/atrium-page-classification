@@ -49,21 +49,29 @@ except ImportError:
 # the fast lane; see service/document_json.py's docstring for why that matters here.
 try:
     from .document_json import (
+        ORIGINAL_DISTRIBUTION,
+        DistributionMismatch,
+        baseline_media_type,
         baseline_page_labels,
         build_document_record,
         doc_id_for_document,
         doc_id_for_image,
         expand_page_selection,
+        input_distribution,
         parse_page_selection,
         record_page_keys,
     )
 except ImportError:
     from document_json import (
+        ORIGINAL_DISTRIBUTION,
+        DistributionMismatch,
+        baseline_media_type,
         baseline_page_labels,
         build_document_record,
         doc_id_for_document,
         doc_id_for_image,
         expand_page_selection,
+        input_distribution,
         parse_page_selection,
         record_page_keys,
     )
@@ -118,7 +126,8 @@ except ImportError:
 import atrium_rocrate  # noqa: E402
 import tool_limits  # noqa: E402
 from atrium_limits import LimitExceeded  # noqa: E402
-from atrium_paradata import ParadataLogger  # noqa: E402
+from atrium_page_selection import ALL, EXPLICIT, RULES, rule_statement  # noqa: E402
+from atrium_paradata import RENDERED_PDF_DISTRIBUTION, ParadataLogger  # noqa: E402
 from tool_limits import LIMITS, MAX_IMAGE_PIXELS, MAX_PDF_PAGES, MAX_UPLOAD  # noqa: E402
 
 logger = logging.getLogger(__name__)
@@ -571,8 +580,8 @@ class DocumentResponse(BaseModel):
         None,
         description=(
             "The call's paradata: its Process Run Crate `CreateAction` (paradata 3.0, atrium-project#84). `object` "
-            "names the original and the record version read by SHA-512; `result` names the record written, with "
-            "the blocks and fields this call wrote."
+            "names the PDF read (the original, or an office document's rendered PDF: `distribution`) and the record "
+            "version read by SHA-512; `result` names the record written, with the blocks and fields this call wrote."
         ),
     )
 
@@ -607,7 +616,24 @@ _DOCUMENT_JSON_DESC = (
 _PAGES_DESC = (
     "Optional: classify only these pages, 1-based physical positions, e.g. `1,3,5-7`. Empty (the default): every "
     "page. A malformed value, or a page past the end of the PDF, is refused (422); MAX_PDF_PAGES counts the pages "
-    "classified. The response lists only these pages, and only they are written into the record."
+    "classified. The response lists only these pages, and only they are written into the record. In the AMČR "
+    "pipeline: the pages forced to the ATR and the pages with `figure` blocks in the docproc, as the route step "
+    "selects them (`atrium_page_selection.select_pages`; atrium-project#84 decision 4), with "
+    "`page_selection=forced+figures`."
+)
+_PAGE_SELECTION_DESC = (
+    "Optional: the rule the `pages` were selected by, recorded with its statement in the call's paradata "
+    "`parameters.page_selection`, so a page without a category reads as not selected (atrium-project#84 decision "
+    "4): `forced+figures` (the pages forced to the ATR and the pages with figure blocks), `explicit` (the caller's "
+    "own list) or `all`. Empty (the default): `explicit` when `pages` is sent, else `all`. `all` with `pages`, or "
+    "another rule without them, is refused (422)."
+)
+_DISTRIBUTION_DESC = (
+    "Optional: which AMČR distribution the PDF is, as the call's paradata `object` names it: `original`, or "
+    "`rendered-pdf`, an office document's rendered PDF from digital-convert, whose pages the docproc numbers, named "
+    "`stored: false` (atrium-project#84 decision 5; a stand-in name). Empty (the default): `rendered-pdf` when "
+    "the `document_json` record's `source.media_type` is an office document's (DOCX, DOC, ODT, RTF), else "
+    "`original`. A value that contradicts the record's media type is refused (422, `cause: distribution_mismatch`)."
 )
 _PER_MODEL_DESC = (
     "Also return each model revision's own `topn` categories (`per_model`): with `version=all`, the five ensemble "
@@ -637,21 +663,38 @@ def _open_run(endpoint: str, **config: Any) -> ParadataLogger:
     )
 
 
-#: The AMČR distribution name this call's upload is recorded under: the document's original.
-#: AMČR has not named that distribution yet (atrium-project#84, Q11).
-ORIGINAL_DISTRIBUTION = "original"
+# The AMČR distribution an upload is recorded under (`service/document_json.py`): an image is the
+# document's original; a PDF is the original, or an office document's rendered PDF
+# (`input_distribution`, atrium-project#84 decision 5).
 
 
-def _action(run: ParadataLogger, pages: Optional[str] = None) -> Dict[str, Any]:
+def _page_selection(pages: Optional[str], page_selection: Optional[str]) -> str:
+    """The rule the call's pages were selected by (atrium-project#84 decision 4; `_PAGE_SELECTION_DESC`)."""
+    has_pages = bool(pages and str(pages).strip())
+    rule = (page_selection or "").strip() or (EXPLICIT if has_pages else ALL)
+    if rule not in RULES:
+        raise ValueError(f"{rule!r} is not one of {', '.join(sorted(RULES))}")
+    if rule == ALL and has_pages:
+        raise ValueError("`all` classifies every page: send no `pages` with it")
+    if rule != ALL and not has_pages:
+        raise ValueError(f"`{rule}` names the pages it selected: send them as `pages`")
+    return rule
+
+
+def _action(run: ParadataLogger, pages: Optional[str] = None, page_selection: Optional[str] = None) -> Dict[str, Any]:
     """The call's CreateAction (paradata 3.0, atrium-project#84): what it read and what it wrote.
 
-    `object` is the original (the upload, added when the run opens) by SHA-512 and, when one was
-    sent, the record version read; `result` is the record written, with the blocks and fields
+    `object` is the upload (added when the run opens: an image or a PDF original, or an office
+    document's rendered PDF, `input_distribution`) by SHA-512 and, when one was sent, the record
+    version read; `result` is the record written, with the blocks and fields
     this call wrote (both added by the adapter). The predictions are the response, not a stored output, so they are not in
-    `result`. The pages classified are a parameter.
+    `result`. The pages classified are a parameter, with the rule they were selected by and its statement
+    (`page_selection`, atrium-project#84 decision 4).
     """
     if pages:
         run.set_parameter("pages", pages)
+    if page_selection:
+        run.set_parameter("page_selection", {"rule": page_selection, "statement": rule_statement(page_selection)})
     run.log_success("json")
     run.log_document_success()
     run.finalize()
@@ -847,6 +890,8 @@ async def predict_document(
     document_json_out: bool = Form(False, description=_DOCUMENT_JSON_OUT_DESC),
     pages: Optional[str] = Form(None, description=_PAGES_DESC),
     per_model: bool = Form(False, description=_PER_MODEL_DESC),
+    distribution: Optional[str] = Form(None, description=_DISTRIBUTION_DESC),
+    page_selection: Optional[str] = Form(None, description=_PAGE_SELECTION_DESC),
 ):
     """Extracts pages from a PDF and classifies each page (or the `pages` selection)."""
     _refuse_if_draining()
@@ -866,6 +911,10 @@ async def predict_document(
         selection = parse_page_selection(pages)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=f"pages: {exc}.") from exc
+    try:
+        rule = _page_selection(pages, page_selection)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=f"page_selection: {exc}.") from exc
 
     content = await read_upload_bounded(file, MAX_UPLOAD.get(), "File")
     if sniff and b"%PDF-" not in content[:1024]:
@@ -876,8 +925,15 @@ async def predict_document(
             accepted=["application/pdf"],
         )
     baseline_bytes = await _read_record_part(document_json)
+    try:
+        source = input_distribution(distribution, baseline_media_type(baseline_bytes))
+    except DistributionMismatch as exc:
+        raise AtriumHTTPError(422, f"distribution: {exc}.", cause="distribution_mismatch") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=f"distribution: {exc}.") from exc
     run = _open_run("/predict_document", version=version, topn=topn, pages=pages)
-    run.add_input(ORIGINAL_DISTRIBUTION, content, media_type=file.content_type)
+    # An office document's rendered PDF is named, not stored (atrium-project#84 decision 5).
+    run.add_input(source, content, media_type=file.content_type, stored=source != RENDERED_PDF_DISTRIBUTION)
     # The PDF engine renders every page this route classifies (para_config.txt, conditional).
     run.log_component("pypdfium2")
 
@@ -916,7 +972,7 @@ async def predict_document(
             response["document_json"] = record
         if schema_err:
             response["document_json_schema_error"] = schema_err
-        response["paradata"] = _action(run, pages)
+        response["paradata"] = _action(run, pages, rule)
         return response
     except (HTTPException, LimitExceeded):
         raise

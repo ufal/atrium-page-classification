@@ -391,6 +391,56 @@ def test_a_document_response_conforms(manager, pdfium):
     assert "pypdfium2" in json.dumps(action["paradataRecord"])
 
 
+def _seed_of(media_type: str) -> bytes:
+    seed = json.loads(json.dumps(_SEED))
+    seed["source"]["media_type"] = media_type
+    return json.dumps(seed).encode()
+
+
+_DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+
+@pytest.mark.parametrize(
+    "seed_media_type, asked, named",
+    [
+        (None, None, "original"),
+        ("application/pdf", None, "original"),
+        (_DOCX, None, "rendered-pdf"),
+        ("application/rtf", "rendered-pdf", "rendered-pdf"),
+        ("application/pdf", "original", "original"),
+    ],
+)
+def test_the_pdf_is_named_by_the_distribution_it_is(manager, pdfium, seed_media_type, asked, named):
+    """atrium-project#84 decision 5: an office document's pages are read from digital-convert's rendered
+    PDF, a distribution of its own; the record's original media type says which one the upload is."""
+    files = {"file": ("CTX01.pdf", b"%PDF-1.4", "application/pdf")}
+    if seed_media_type:
+        files["document_json"] = ("seed.document.json", _seed_of(seed_media_type), "application/json")
+    data = {"distribution": asked} if asked else {}
+    body = _conforms(200, client.post("/predict_document", data=data, files=files), "/predict_document")
+    assert body["paradata"]["object"][0]["name"] == named
+
+
+@pytest.mark.parametrize(
+    "seed_media_type, asked",
+    [(_DOCX, "original"), ("application/pdf", "rendered-pdf")],
+)
+def test_a_distribution_that_contradicts_the_record_is_refused(manager, pdfium, seed_media_type, asked):
+    files = {
+        "file": ("CTX01.pdf", b"%PDF-1.4", "application/pdf"),
+        "document_json": ("seed.document.json", _seed_of(seed_media_type), "application/json"),
+    }
+    response = client.post("/predict_document", data={"distribution": asked}, files=files)
+    assert response.status_code == 422, response.text
+    assert response.json()["cause"] == "distribution_mismatch"
+
+
+def test_an_unknown_distribution_is_refused(manager, pdfium):
+    files = {"file": ("CTX01.pdf", b"%PDF-1.4", "application/pdf")}
+    response = client.post("/predict_document", data={"distribution": "scan"}, files=files)
+    assert response.status_code == 422 and "distribution" in response.text
+
+
 @pytest.mark.parametrize(
     "path, name, media_type, accepted",
     [
@@ -479,3 +529,44 @@ def test_a_page_the_model_could_not_classify_is_a_500_not_a_200(manager, pdfium)
 
 def test_info_conforms_to_the_published_schema(manager):
     _conforms(200, client.get("/info"), "/info", method="get")
+
+
+def test_the_rendered_pdf_is_named_not_stored_and_an_original_as_stored(manager, pdfium):
+    """atrium-project#84 decision 5: an office document's rendered PDF is named, `stored: false`; an
+    original PDF is a stored distribution (no `stored` in the crate)."""
+    files = {
+        "file": ("CTX01.pdf", b"%PDF-1.4", "application/pdf"),
+        "document_json": ("seed.document.json", _seed_of(_DOCX), "application/json"),
+    }
+    body = _conforms(200, client.post("/predict_document", files=files), "/predict_document")
+    assert body["paradata"]["object"][0]["name"] == "rendered-pdf"
+    assert body["paradata"]["object"][0]["stored"] is False
+    plain = {"file": ("CTX01.pdf", b"%PDF-1.4", "application/pdf")}
+    body = _conforms(200, client.post("/predict_document", files=plain), "/predict_document")
+    assert body["paradata"]["object"][0]["name"] == "original" and "stored" not in body["paradata"]["object"][0]
+
+
+@pytest.mark.parametrize(
+    "data, rule",
+    [({}, "all"), ({"pages": "1"}, "explicit"), ({"pages": "1", "page_selection": "forced+figures"}, "forced+figures")],
+)
+def test_the_selection_rule_is_recorded_with_its_statement(manager, pdfium, data, rule):
+    """Decision 4: the rule the pages were selected by is a parameter with its statement, so a page
+    without a category reads as not selected, not as a gap."""
+    from atrium_page_selection import RULES
+
+    files = {"file": ("CTX01.pdf", b"%PDF-1.4", "application/pdf")}
+    body = _conforms(200, client.post("/predict_document", data=data, files=files), "/predict_document")
+    parameters = body["paradata"]["paradataRecord"]["parameters"]
+    assert parameters["page_selection"] == {"rule": rule, "statement": RULES[rule]}
+    assert parameters.get("pages") == data.get("pages")
+
+
+@pytest.mark.parametrize(
+    "data",
+    [{"page_selection": "forced+figures"}, {"pages": "1", "page_selection": "all"}, {"page_selection": "graphics"}],
+)
+def test_a_selection_rule_that_does_not_fit_its_pages_is_refused(manager, pdfium, data):
+    files = {"file": ("CTX01.pdf", b"%PDF-1.4", "application/pdf")}
+    response = client.post("/predict_document", data=data, files=files)
+    assert response.status_code == 422 and "page_selection" in response.text

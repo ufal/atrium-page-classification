@@ -578,7 +578,9 @@ def file_entity(
     """An input or output of a run, for `create_action(inputs=…, outputs=…)` (#84 §4, §6).
 
     `name` is the AMČR distribution name (`atrium/document-json`, `atr/docproc-json`,
-    `atr/teitok-xml`, `metadata`, `metadata-en`). The file is named by its SHA-512 — computed from
+    `atr/teitok-xml`, `metadata`, `metadata-en`; `rendered-pdf`, an office document's rendered PDF,
+    is a stand-in, not stored), or, for a file a command line read or wrote that is no
+    distribution, its file name (atrium-project#84 decision 1). The file is named by its SHA-512 — computed from
     `data`, or given — never by a local path or a SHA-256 `ni:` URI. The `@id` joins name and
     digest, so the output of one step and the input of the next are one entity. A file that is not
     stored (D23) carries `stored: false` and is still named by its SHA-512. A `CreativeWork`, not a

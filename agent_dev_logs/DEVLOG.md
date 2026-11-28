@@ -1167,3 +1167,29 @@ Documentation only; no code, test or configuration change.
   the command line's paradata name page images by path (asked on [#84](https://github.com/ufal/atrium-project/issues/84)); `--best` paradata count CSV rows
   as processed (1,146 for 229 pages); the command line goes on without a `--document-json` record it cannot find.
 * Logs only; not pushed.
+
+## 2026-11-27 — atrium-project#84: the non-A options prepared (ARÚP's answers pending)
+
+* **R7:** `service/document_json.py` `baseline_media_type()`, `input_distribution()`; `/predict_document`'s optional `distribution`; a contradicting value is 422 `cause: distribution_mismatch` (no new registered reason code). Tests in `test_api_contract.py` and `test_service_document_json.py`.
+* **1b:** `run.py` records `input_path` by name, `model_path` with `local_only`, and `pages` as the service does. The 11-25 open item (page images named by path) is prepared. `decide_pages.py` untouched (parked).
+* **Checked:** 893 passed (882 at baseline); openapi regenerated.
+* **Shared:** the re-vendored `atrium_paradata.py` (`name_only`, `start --config-name`, `RENDERED_PDF_DISTRIBUTION`), `atrium_document.schema.json` (H3 descriptions: the forced pages and the pages showing graphics) and `atrium_rocrate.py` (a docstring), byte-identical to the hub's; the pin moves to the hub's squash commit before the PR opens.
+* **Not in the PR:** the committed samples, regenerated from the merged code before the tags.
+* The change is `atrium-page-classification.decisions-84.zip`, these logs `atrium-page-classification.agent_dev_logs.zip`.
+* Logs only; not pushed.
+
+## 2026-11-27 (evening) — atrium-project#84: ARÚP's answers, #79 adjusted
+
+* **ARÚP (comment 7, motyc 16:25):** 1(c), 2(b), 4(b) with the selection rule in `parameters`, 5(a) named and not
+  stored.
+* **Decision 4:** `/predict_document` takes `page_selection` (a rule of the shared `atrium_page_selection.RULES`:
+  `forced+figures`, `explicit`, `all`) and records `pages`, `page_selection` and the rule's statement, so a page
+  without a category reads as not selected. The pipeline selects; this tool records.
+* **Decision 5:** the PDF read is `rendered-pdf` (`stored: false`) for an office document, `original` otherwise.
+* **Decision 1:** `run.py`'s `config` without `input_path`, `inner_dirs` or paths; the images and PDFs it reads and
+  the tables it writes are entries by name and SHA-512; `--page-selection` beside `--pages`.
+* **Bug:** `atrium_document_adapter._write_one` hashed the baseline after the atomic replace, so an in-place
+  `--document-json` named the new record as the input. It now hashes before writing; a test covers it.
+* **Not done here:** the 229-image sample runs are for the cluster.
+* **Verified:** 905 passed, 19 skipped; the release bundle carries `atrium_page_selection.py`.
+* Not pushed.

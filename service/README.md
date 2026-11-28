@@ -143,9 +143,11 @@ what differs, and why, is in [docs/usage.md](../docs/usage.md#the-command-line-a
 
 It takes the fields of `/predict_image`, plus:
 
-| Field   | Default | Notes                                                                                                                                                                                                                                                                                                                                                                                                   |
-|---------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `pages` | all     | Classify only these pages: 1-based positions in the PDF, for example `1,3,5-7`. Empty means every page. A malformed value, or a page past the end of the PDF, is refused with `422`. `MAX_PDF_PAGES` counts the pages classified, not the PDF's. Only these pages are in the response and in the record.                                                                                                |
+| Field            | Default         | Notes                                                                                                                                                                                                                                                                                                                                                                                                                               |
+|------------------|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `pages`          | all             | Classify only these pages: 1-based positions in the PDF, for example `1,3,5-7`. Empty means every page. A malformed value, or a page past the end of the PDF, is refused with `422`. `MAX_PDF_PAGES` counts the pages classified, not the PDF's. Only these pages are in the response and in the record. In the AMČR pipeline: the pages forced to the ATR and the pages with `figure` blocks, with `page_selection=forced+figures` |
+| `page_selection` | explicit / all  | Which rule the `pages` were selected by, recorded with its statement in the paradata (`page_selection`): `forced+figures`, `explicit` or `all` (atrium-project#84 decision 4). Empty: `explicit` with `pages`, else `all`; `all` with `pages`, or another rule without them, is refused (`422`)                                                                                                                                     |
+| `distribution`   | from the record | Which AMČR distribution the PDF is, as the paradata `object` names it: `original`, or `rendered-pdf`, an office document's rendered PDF from digital-convert, named `stored: false` (a stand-in name). Empty: `rendered-pdf` when the `document_json` record's `source.media_type` is a DOCX, DOC, ODT or RTF, else `original`. A value that contradicts the record is refused with `422` (`cause: distribution_mismatch`).         |
 
 It answers `{"type": "document", "pages": [{"page_index": 1, "predictions": [...], "models_used": [...]}, ...],
 "limits_applied": [], "paradata": {...}}` (`DocumentResponse`), with `models_used` per page, and `document_json` (and
@@ -299,10 +301,12 @@ and concurrent requests queue only for the rendering.
 
 **Paradata.** Every successful call returns `paradata`, the call's Process Run Crate `CreateAction` (paradata 3.0),
 built by `atrium_rocrate.action_from_paradata()` as in the other ATRIUM services. `object` is the
-original (the upload, distribution `original`) and, when one was sent, the record version read
+upload (distribution `original`; for `/predict_document` an office document's rendered PDF is `rendered-pdf`, see
+`distribution`; it is named `stored: false`) and, when one was sent, the record version read
 (`atrium/document-json`), each by SHA-512. `result` is the record written, when one was asked for, with the blocks
 and fields the call wrote; the predictions are the answer, not a stored output, so they are not in it. The pages
-classified are a parameter, and `/predict_document` lists `pypdfium2` among the run's components. The record carries
+classified are a parameter, with the rule they were selected by and its statement (`page_selection`), and
+`/predict_document` lists `pypdfium2` among the run's components. The record carries
 no run data; the service writes no paradata file.
 
 ## Shutdown behaviour
